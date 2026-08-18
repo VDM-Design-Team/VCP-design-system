@@ -17,15 +17,7 @@ jobs:
       - run: npm run lint:tokens
       - run: npm run typecheck
 
-  publish:
-    needs: verify
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions: { contents: read, packages: write }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, registry-url: 'https://npm.pkg.github.com' }
-      - run: npm ci && npm run build
-      - run: npm publish
-        env: { NODE_AUTH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+  # NOTE: npm publishing is intentionally not wired up yet.
+  # GitHub Packages requires the package scope to match the repo owner
+  # (@creativedesignlead/...), and the JS build (tsup) isn't configured.
+  # Both get decided in the dev-onboarding phase — see README "For engineering".
