@@ -37,6 +37,11 @@ const [value, setValue] = useState('overview');
 
 The `WithPanels` story is this pattern, ready to copy.
 
+`aria-controls` is only emitted when you pass `idPrefix`. Without it the tabs
+carry no `aria-controls` at all, which is deliberate: a tab pointing at a panel
+id that isn't on the page is a broken reference, and axe reports it as critical.
+Opting in this way means a bar rendered on its own is merely incomplete, not wrong.
+
 ## Props
 
 | Prop | Type | Default | Notes |
@@ -47,7 +52,7 @@ The `WithPanels` story is this pattern, ready to copy.
 | `onChange` | `(key: string) => void` | — | Fires on click and on arrow-key movement |
 | `size` | `sm \| md` | `md` | `sm` only where a pointer is guaranteed — see Accessibility |
 | `fullWidth` | `boolean` | `false` | Tabs share the container width evenly |
-| `idPrefix` | `string` | generated | Pass it when you render panels, so the ids match |
+| `idPrefix` | `string` | — | Pass it when you render panels; turns on `aria-controls` |
 | `aria-label` | `string` | — | Required unless you pass `aria-labelledby` |
 
 `TabItem` is `{ key, label, count?, countLabel?, disabled? }`.
@@ -83,7 +88,10 @@ No new tokens were added for this component.
 - **Target size.** A `md` tab is 40px tall, meeting the 40px minimum. `sm` is
   32px — pointer contexts only.
 - **The selected state is not colour alone.** A 2px underline anchors the selected
-  tab to its panel, and the label gains weight. Both survive a greyscale check.
+  tab to its panel, and it survives a greyscale check. (The label weight does *not*
+  change between states — `type.label-lg` carries weight 500 as part of the token,
+  and the ramp has no 500/400 pair at 13px or 11px, so a weight shift can't be done
+  consistently across sizes without a new token.)
 - **Contrast, light / dark:** selected label and underline 6.2:1 / 6.3:1,
   unselected label 7.6:1 / 9.9:1, selected count pill 5.3:1 / 5.7:1, unselected
   count pill 6.9:1 / 7.0:1. All clear their thresholds.
@@ -97,6 +105,7 @@ No new tokens were added for this component.
 ## Don't
 
 - Don't ship the bar without panels, or without `aria-label`.
+- Don't pass `idPrefix` unless you are actually rendering panels with those ids.
 - Don't use tabs for navigation between routes — the browser back button will lie.
 - Don't nest a second row of tabs inside a panel. Restructure the page instead.
 - Don't put a count on a tab whose number isn't worth acting on; it's an alarm, not decoration.

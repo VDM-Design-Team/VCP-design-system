@@ -22,7 +22,7 @@ const tabList = cva(['flex items-end gap-1', 'border-b border-stroke-subtle'], {
 
 const tab = cva(
   [
-    'inline-flex items-center justify-center gap-2 -mb-px',
+    'group inline-flex items-center justify-center gap-2 -mb-px',
     'font-sans whitespace-nowrap cursor-pointer',
     'border-b-2 border-transparent',
     'text-text-tertiary transition-colors',
@@ -33,7 +33,6 @@ const tab = cva(
        its panel. The underline is the state indicator; the colour reinforces it. */
     'aria-selected:text-action-secondary-content-default',
     'aria-selected:border-action-secondary-content-default',
-    'aria-selected:font-medium',
   ],
   {
     variants: {
@@ -78,8 +77,10 @@ export interface TabsProps
   defaultValue?: string;
   onChange?: (key: string) => void;
   /**
-   * Prefix for the generated `id` / `aria-controls` pair. Pass the same value to
-   * `tabId()` and `tabPanelId()` when you render the panels. Generated if omitted.
+   * Turns on `aria-controls`. Pass a prefix here and the same one to `tabId()` and
+   * `tabPanelId()` when you render the panels, and each tab will point at its panel.
+   * Omit it and the tabs carry no `aria-controls` — a reference to a panel that
+   * doesn't exist is worse than no reference at all.
    */
   idPrefix?: string;
   /** Labels the tab list for screen readers. Use this or `aria-labelledby`. */
@@ -166,12 +167,12 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
             role="tab"
             id={tabId(prefix, item.key)}
             aria-selected={item.key === selected}
-            aria-controls={tabPanelId(prefix, item.key)}
+            aria-controls={idPrefix ? tabPanelId(idPrefix, item.key) : undefined}
             disabled={item.disabled}
             tabIndex={i === rovingIndex ? 0 : -1}
             onClick={() => select(item.key)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={cn('group', tab({ size, fullWidth }))}
+            className={tab({ size, fullWidth })}
           >
             <span className="truncate">{item.label}</span>
             {item.count !== undefined && (
