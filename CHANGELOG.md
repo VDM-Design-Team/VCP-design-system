@@ -31,7 +31,12 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   subtle fix; 7.58:1).
 - `accent.success.tonal.content.default`: green-800 → green-900 (was exactly
   4.50:1; now 8.24:1).
-- Dark theme audited: already passes, unchanged.
+- Dark theme: `stroke.focused` was left at vcp-blue-500, the same value as light,
+  while every other `stroke.*` token was inverted. That is 2.37:1 against the dark
+  surfaces — below the 3:1 WCAG 1.4.11 asks of a focus indicator, so the focus ring
+  was close to invisible in dark theme on every component, Button included.
+  Now vcp-blue-300 (6.33:1), mirroring how `stroke.brand.strong` flips 600 → 300.
+  This corrects the earlier "dark theme already passes" note.
 - These fixes live in `scripts/import-figma-tokens.mjs`, so re-importing a fresh
   Figma export cannot silently regress them. **Push the same three changes back
   to the Figma variables** so the export catches up with the code.

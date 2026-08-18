@@ -676,7 +676,8 @@
         "$value": "{color.slate.600}"
       },
       "focused": {
-        "$value": "{color.vcp-blue.500}"
+        "$value": "{color.vcp-blue.300}",
+        "$description": "AA fix: was vcp-blue-500 (2.37:1 on dark surfaces, fails 1.4.11). Now 6.33:1"
       },
       "inverse": {
         "$value": "{color.slate.900}"
