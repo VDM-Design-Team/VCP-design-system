@@ -15,6 +15,11 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   TypeScript, flat + nested JSON.
 - Components: `Button` (primary/secondary/tertiary/danger/link × sm/md/lg,
   loading/disabled), mapped to `action.*` and `accent.critical.*` state tokens.
+- Components: `Tabs` (sm/md, fullWidth, counts, disabled tabs) — selected tab takes
+  `action.secondary.content.default` for both label and 2px underline; count pill
+  uses `type.caption-sm` on `surface.brand.faint` / `surface.neutral.subtle`.
+  No new tokens. Exports `tabId()` / `tabPanelId()` so panels can be associated —
+  the bar alone is not an accessible tab set.
 
 ### Not imported from the Figma export (deliberately)
 
