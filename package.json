@@ -1,0 +1,55 @@
+{
+  "name": "@vcp/design-system",
+  "version": "0.1.0",
+  "description": "VCP Design System \u2014 tokens, React components, and docs. Single source of truth for design and engineering.",
+  "type": "module",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "dist",
+    "src",
+    "tokens",
+    "docs"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./theme.css": "./dist/theme.css",
+    "./tokens.css": "./dist/tokens.css",
+    "./tokens": {
+      "types": "./dist/tokens.d.ts",
+      "import": "./dist/tokens.js"
+    },
+    "./tokens.json": "./dist/tokens.flat.json"
+  },
+  "scripts": {
+    "tokens": "style-dictionary build --config style-dictionary.config.mjs",
+    "build": "npm run tokens && tsup",
+    "dev": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "lint:tokens": "node scripts/lint-hardcoded-values.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run lint:tokens && npm run typecheck",
+    "preview": "npm run tokens && tailwindcss -i preview/entry.css -o preview/out.css && echo 'open preview/index.html'",
+    "gallery": "npm run tokens && node scripts/build-gallery.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "tailwindcss": ">=4"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "playwright": "^1.62.1",
+    "tailwind-merge": "^3.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "style-dictionary": "^5.5.1",
+    "tailwindcss": "^4.3.0"
+  }
+}

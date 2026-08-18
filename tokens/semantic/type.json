@@ -1,0 +1,19 @@
+{
+  "type": {
+    "display-xl": { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "64px", "lineHeight": 1.1,  "fontWeight": "{font.weight.bold}",     "letterSpacing": "-0.02em" } },
+    "display-lg": { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "36px", "lineHeight": 1.15, "fontWeight": "{font.weight.bold}",     "letterSpacing": "-0.02em" } },
+    "display-md": { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "28px", "lineHeight": 1.2,  "fontWeight": "{font.weight.bold}",     "letterSpacing": "-0.01em" } },
+    "heading-lg": { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "24px", "lineHeight": 1.25, "fontWeight": "{font.weight.semibold}", "letterSpacing": "-0.01em" } },
+    "heading-md": { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "20px", "lineHeight": 1.3,  "fontWeight": "{font.weight.semibold}" } },
+    "heading-sm": { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "16px", "lineHeight": 1.35, "fontWeight": "{font.weight.semibold}" } },
+    "title-sm":   { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "16px", "lineHeight": "24px", "fontWeight": "{font.weight.semibold}", "letterSpacing": "0.1px" } },
+    "body-lg":    { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "16px", "lineHeight": "24px", "fontWeight": "{font.weight.regular}",  "letterSpacing": "0.5px" } },
+    "body-md":    { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "14px", "lineHeight": "20px", "fontWeight": "{font.weight.regular}",  "letterSpacing": "0.25px", "$description": "Default body size" } },
+    "body-sm":    { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "12px", "lineHeight": "16px", "fontWeight": "{font.weight.regular}",  "letterSpacing": "0.4px" } },
+    "label-lg":   { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "14px", "lineHeight": "20px", "fontWeight": "{font.weight.medium}",   "letterSpacing": "0.1px", "$description": "The workhorse: nav, buttons, table cells, field labels" } },
+    "label-md":   { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "13px", "lineHeight": "18px", "fontWeight": "{font.weight.medium}" } },
+    "label-sm":   { "$type": "typography", "$value": { "fontFamily": "{font.family.sans}", "fontSize": "11px", "lineHeight": "16px", "fontWeight": "{font.weight.medium}",   "letterSpacing": "0.5px" } },
+    "caption-md": { "$type": "typography", "$value": { "fontFamily": "{font.family.numeric}", "fontSize": "12px", "lineHeight": "16px", "fontWeight": "{font.weight.medium}" } },
+    "caption-sm": { "$type": "typography", "$value": { "fontFamily": "{font.family.numeric}", "fontSize": "10px", "lineHeight": "14px", "fontWeight": "{font.weight.semibold}", "letterSpacing": "0.04em" } }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "borderWidth": {
+    "$type": "dimension",
+    "default": {
+      "$value": "1px"
+    },
+    "focused": {
+      "$value": "2px"
+    }
+  }
+}

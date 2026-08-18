@@ -1,0 +1,1464 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>VCP Design System — token gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--shadow-card: 0px 1px 2px 0px #0206230a;--shadow-raised: 0px 2px 6px 0px #02062314;--shadow-menu: 0px 8px 24px 0px #0206232e;--shadow-modal: 0px 24px 64px 0px #02062347;--line:#dcdfe6;--muted:#6b7280}
+*{box-sizing:border-box}
+body{margin:0;padding:44px 40px;font:15px/1.5 "Poppins",system-ui,sans-serif;color:#11151f;background:#fff}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}
+h2{font-size:19px;margin:44px 0 4px;padding-top:20px;border-top:1px solid var(--line)}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 10px}
+.lede{color:var(--muted);margin:0 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(184px,1fr));gap:10px}
+.sw{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:8px}
+.chip{width:40px;height:40px;border-radius:7px;border:1px solid rgba(0,0,0,.08);flex:0 0 auto}
+.chip.rad{background:#eceef2;border:1px solid #b9bec9}
+.chip.shadow{background:#fff;border:1px solid var(--line)}
+.meta{min-width:0;display:flex;flex-direction:column;gap:1px}
+.meta b{font-size:12.5px;font-weight:600}
+.meta span{font-size:11.5px;color:var(--muted)}
+code{font:11.5px/1.4 "JetBrains Mono",ui-monospace,monospace;background:#f7f8fa;border:1px solid var(--line);
+  border-radius:4px;padding:1px 5px;align-self:flex-start;color:#374151}
+.row{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid #f0f1f4}
+.row code{flex:0 0 150px;text-align:left}
+.row .val{flex:0 0 54px;color:var(--muted);font-size:12.5px}
+.bar{height:14px;background:#336afa;border-radius:3px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+td.num{font-variant-numeric:tabular-nums;font-weight:600}
+.prev{display:inline-flex;align-items:center;justify-content:center;width:32px;height:24px;
+  border-radius:5px;border:1px solid var(--line);font-size:12px;font-weight:600;margin-right:8px;vertical-align:middle}
+.badge{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px}
+.badge.pass{background:#eaf7f0;color:#177f45}.badge.warn{background:#fdf4e3;color:#8a5a00}
+.badge.fail{background:#fdefee;color:#c2312a}
+footer{margin-top:40px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:16px}
+</style></head><body><div class="wrap">
+<h1>VCP Design System — token gallery</h1>
+<p class="lede">Generated from <code>dist/tokens.json</code>. Never edited by hand — run <code>npm run gallery</code> to refresh.</p>
+
+<h2>Semantic colours <span style="font-weight:400;color:var(--muted);font-size:14px">— what components actually use</span></h2>
+
+  <h3>Surface → bg-*</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>surface.base</b><span>#ffffff</span><code>bg-surface-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f4f7fd"></div>
+    <div class="meta"><b>surface.brand-base</b><span>#f4f7fd</span><code>bg-surface-brand-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e8eefb"></div>
+    <div class="meta"><b>surface.brand-faint</b><span>#e8eefb</span><code>bg-surface-brand-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>surface.brand-medium</b><span>#8caaed</span><code>bg-surface-brand-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>surface.brand-strong</b><span>#1a56db</span><code>bg-surface-brand-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>surface.brand-stronger</b><span>#0d2b6e</span><code>bg-surface-brand-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c6d5f6"></div>
+    <div class="meta"><b>surface.brand-subtle</b><span>#c6d5f6</span><code>bg-surface-brand-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f8fafc"></div>
+    <div class="meta"><b>surface.canvas</b><span>#f8fafc</span><code>bg-surface-canvas</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>surface.elevated</b><span>#ffffff</span><code>bg-surface-elevated</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>surface.neutral-base</b><span>#ffffff</span><code>bg-surface-neutral-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f8fafc"></div>
+    <div class="meta"><b>surface.neutral-faint</b><span>#f8fafc</span><code>bg-surface-neutral-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#cbd5e1"></div>
+    <div class="meta"><b>surface.neutral-medium</b><span>#cbd5e1</span><code>bg-surface-neutral-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#64748b"></div>
+    <div class="meta"><b>surface.neutral-strong</b><span>#64748b</span><code>bg-surface-neutral-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#334155"></div>
+    <div class="meta"><b>surface.neutral-stronger</b><span>#334155</span><code>bg-surface-neutral-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f1f5f9"></div>
+    <div class="meta"><b>surface.neutral-subtle</b><span>#f1f5f9</span><code>bg-surface-neutral-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e2e8f0bf"></div>
+    <div class="meta"><b>surface.overlay</b><span>#e2e8f0bf</span><code>bg-surface-overlay</code></div>
+  </div>
+  </div>
+
+  <h3>Text → text-*</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>text.brand-faint</b><span>#8caaed</span><code>text-text-brand-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>text.brand-medium</b><span>#1a56db</span><code>text-text-brand-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>text.brand-strong</b><span>#0d2b6e</span><code>text-text-brand-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#030916"></div>
+    <div class="meta"><b>text.brand-stronger</b><span>#030916</span><code>text-text-brand-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#5380e4"></div>
+    <div class="meta"><b>text.brand-subtle</b><span>#5380e4</span><code>text-text-brand-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#cbd5e1"></div>
+    <div class="meta"><b>text.disabled</b><span>#cbd5e1</span><code>text-text-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1e293b"></div>
+    <div class="meta"><b>text.inverted-disabled</b><span>#1e293b</span><code>text-text-inverted-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>text.inverted-primary</b><span>#ffffff</span><code>text-text-inverted-primary</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e2e8f0"></div>
+    <div class="meta"><b>text.inverted-secondary</b><span>#e2e8f0</span><code>text-text-inverted-secondary</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#334155"></div>
+    <div class="meta"><b>text.inverted-subtle</b><span>#334155</span><code>text-text-inverted-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#64748b"></div>
+    <div class="meta"><b>text.inverted-tertiary</b><span>#64748b</span><code>text-text-inverted-tertiary</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#006dd9"></div>
+    <div class="meta"><b>text.link-default</b><span>#006dd9</span><code>text-text-link-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0059b1"></div>
+    <div class="meta"><b>text.link-hover</b><span>#0059b1</span><code>text-text-link-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#004181"></div>
+    <div class="meta"><b>text.link-pressed</b><span>#004181</span><code>text-text-link-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0059b1"></div>
+    <div class="meta"><b>text.link-selected</b><span>#0059b1</span><code>text-text-link-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#020617"></div>
+    <div class="meta"><b>text.primary</b><span>#020617</span><code>text-text-primary</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#334155"></div>
+    <div class="meta"><b>text.secondary</b><span>#334155</span><code>text-text-secondary</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#64748b"></div>
+    <div class="meta"><b>text.subtle</b><span>#64748b</span><code>text-text-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#475569"></div>
+    <div class="meta"><b>text.tertiary</b><span>#475569</span><code>text-text-tertiary</code></div>
+  </div>
+  </div>
+
+  <h3>Stroke → border-*</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#5380e4"></div>
+    <div class="meta"><b>stroke.brand-medium</b><span>#5380e4</span><code>border-stroke-brand-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>stroke.brand-strong</b><span>#1441a4</span><code>border-stroke-brand-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#071637"></div>
+    <div class="meta"><b>stroke.brand-stronger</b><span>#071637</span><code>border-stroke-brand-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c6d5f6"></div>
+    <div class="meta"><b>stroke.brand-subtle</b><span>#c6d5f6</span><code>border-stroke-brand-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#cbd5e1"></div>
+    <div class="meta"><b>stroke.default</b><span>#cbd5e1</span><code>border-stroke-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>stroke.focused</b><span>#1a56db</span><code>border-stroke-focused</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>stroke.inverse</b><span>#ffffff</span><code>border-stroke-inverse</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#94a3b8"></div>
+    <div class="meta"><b>stroke.strong</b><span>#94a3b8</span><code>border-stroke-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#475569"></div>
+    <div class="meta"><b>stroke.stronger</b><span>#475569</span><code>border-stroke-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e2e8f0"></div>
+    <div class="meta"><b>stroke.subtle</b><span>#e2e8f0</span><code>border-stroke-subtle</code></div>
+  </div>
+  </div>
+
+  <h3>Action — buttons and controls</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>action.primary-content-default</b><span>#ffffff</span><code>bg-action-primary-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>action.primary-content-deselected</b><span>#ffffff</span><code>bg-action-primary-content-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>action.primary-content-disabled</b><span>#ffffff</span><code>bg-action-primary-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>action.primary-content-hover</b><span>#ffffff</span><code>bg-action-primary-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>action.primary-content-pressed</b><span>#ffffff</span><code>bg-action-primary-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>action.primary-content-selected</b><span>#ffffff</span><code>bg-action-primary-content-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>action.primary-surface-default</b><span>#1a56db</span><code>bg-action-primary-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.primary-surface-deselected</b><span>#8caaed</span><code>bg-action-primary-surface-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.primary-surface-disabled</b><span>#8caaed</span><code>bg-action-primary-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>action.primary-surface-hover</b><span>#1441a4</span><code>bg-action-primary-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>action.primary-surface-pressed</b><span>#0d2b6e</span><code>bg-action-primary-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>action.primary-surface-selected</b><span>#1441a4</span><code>bg-action-primary-surface-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>action.secondary-border-default</b><span>#1a56db</span><code>bg-action-secondary-border-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.secondary-border-deselected</b><span>#8caaed</span><code>bg-action-secondary-border-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.secondary-border-disabled</b><span>#8caaed</span><code>bg-action-secondary-border-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>action.secondary-border-hover</b><span>#1441a4</span><code>bg-action-secondary-border-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>action.secondary-border-pressed</b><span>#0d2b6e</span><code>bg-action-secondary-border-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>action.secondary-border-selected</b><span>#1441a4</span><code>bg-action-secondary-border-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>action.secondary-content-default</b><span>#1a56db</span><code>bg-action-secondary-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.secondary-content-deselected</b><span>#8caaed</span><code>bg-action-secondary-content-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.secondary-content-disabled</b><span>#8caaed</span><code>bg-action-secondary-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>action.secondary-content-hover</b><span>#1441a4</span><code>bg-action-secondary-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>action.secondary-content-pressed</b><span>#0d2b6e</span><code>bg-action-secondary-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>action.secondary-content-selected</b><span>#1441a4</span><code>bg-action-secondary-content-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.secondary-surface-default</b><span>#ffffff00</span><code>bg-action-secondary-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.secondary-surface-deselected</b><span>#ffffff00</span><code>bg-action-secondary-surface-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.secondary-surface-disabled</b><span>#ffffff00</span><code>bg-action-secondary-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e8eefb"></div>
+    <div class="meta"><b>action.secondary-surface-hover</b><span>#e8eefb</span><code>bg-action-secondary-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c6d5f6"></div>
+    <div class="meta"><b>action.secondary-surface-pressed</b><span>#c6d5f6</span><code>bg-action-secondary-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e8eefb"></div>
+    <div class="meta"><b>action.secondary-surface-selected</b><span>#e8eefb</span><code>bg-action-secondary-surface-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>action.tertiary-content-default</b><span>#1a56db</span><code>bg-action-tertiary-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.tertiary-content-deselected</b><span>#8caaed</span><code>bg-action-tertiary-content-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>action.tertiary-content-disabled</b><span>#8caaed</span><code>bg-action-tertiary-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>action.tertiary-content-hover</b><span>#0d2b6e</span><code>bg-action-tertiary-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#071637"></div>
+    <div class="meta"><b>action.tertiary-content-pressed</b><span>#071637</span><code>bg-action-tertiary-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>action.tertiary-content-selected</b><span>#0d2b6e</span><code>bg-action-tertiary-content-selected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.tertiary-surface-default</b><span>#ffffff00</span><code>bg-action-tertiary-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.tertiary-surface-deselected</b><span>#ffffff00</span><code>bg-action-tertiary-surface-deselected</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.tertiary-surface-disabled</b><span>#ffffff00</span><code>bg-action-tertiary-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.tertiary-surface-hover</b><span>#ffffff00</span><code>bg-action-tertiary-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.tertiary-surface-pressed</b><span>#ffffff00</span><code>bg-action-tertiary-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>action.tertiary-surface-selected</b><span>#ffffff00</span><code>bg-action-tertiary-surface-selected</code></div>
+  </div>
+  </div>
+
+  <h3>Accent — status colours (critical / success / warning / info / …)</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#eff6ff"></div>
+    <div class="meta"><b>accent.blue-base</b><span>#eff6ff</span><code>bg-accent-blue-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dbeafe"></div>
+    <div class="meta"><b>accent.blue-faint</b><span>#dbeafe</span><code>bg-accent-blue-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#51a2ff"></div>
+    <div class="meta"><b>accent.blue-medium</b><span>#51a2ff</span><code>bg-accent-blue-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#193cb8"></div>
+    <div class="meta"><b>accent.blue-strong</b><span>#193cb8</span><code>bg-accent-blue-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1c398e"></div>
+    <div class="meta"><b>accent.blue-stronger</b><span>#1c398e</span><code>bg-accent-blue-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#bedbff"></div>
+    <div class="meta"><b>accent.blue-subtle</b><span>#bedbff</span><code>bg-accent-blue-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.critical-filled-content-default</b><span>#ffffff</span><code>bg-accent-critical-filled-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.critical-filled-content-disabled</b><span>#ffffff</span><code>bg-accent-critical-filled-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.critical-filled-content-hover</b><span>#ffffff</span><code>bg-accent-critical-filled-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.critical-filled-content-pressed</b><span>#ffffff</span><code>bg-accent-critical-filled-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e7000b"></div>
+    <div class="meta"><b>accent.critical-filled-surface-default</b><span>#e7000b</span><code>bg-accent-critical-filled-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffc9c9"></div>
+    <div class="meta"><b>accent.critical-filled-surface-disabled</b><span>#ffc9c9</span><code>bg-accent-critical-filled-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c10007"></div>
+    <div class="meta"><b>accent.critical-filled-surface-hover</b><span>#c10007</span><code>bg-accent-critical-filled-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#9f0712"></div>
+    <div class="meta"><b>accent.critical-filled-surface-pressed</b><span>#9f0712</span><code>bg-accent-critical-filled-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fb2c36"></div>
+    <div class="meta"><b>accent.critical-outline-border-default</b><span>#fb2c36</span><code>bg-accent-critical-outline-border-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffa2a2"></div>
+    <div class="meta"><b>accent.critical-outline-border-disabled</b><span>#ffa2a2</span><code>bg-accent-critical-outline-border-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e7000b"></div>
+    <div class="meta"><b>accent.critical-outline-border-hover</b><span>#e7000b</span><code>bg-accent-critical-outline-border-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c10007"></div>
+    <div class="meta"><b>accent.critical-outline-border-pressed</b><span>#c10007</span><code>bg-accent-critical-outline-border-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e7000b"></div>
+    <div class="meta"><b>accent.critical-outline-content-default</b><span>#e7000b</span><code>bg-accent-critical-outline-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffa2a2"></div>
+    <div class="meta"><b>accent.critical-outline-content-disabled</b><span>#ffa2a2</span><code>bg-accent-critical-outline-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c10007"></div>
+    <div class="meta"><b>accent.critical-outline-content-hover</b><span>#c10007</span><code>bg-accent-critical-outline-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#9f0712"></div>
+    <div class="meta"><b>accent.critical-outline-content-pressed</b><span>#9f0712</span><code>bg-accent-critical-outline-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.critical-outline-surface-default</b><span>#ffffff00</span><code>bg-accent-critical-outline-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.critical-outline-surface-disabled</b><span>#ffffff00</span><code>bg-accent-critical-outline-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef2f2"></div>
+    <div class="meta"><b>accent.critical-outline-surface-hover</b><span>#fef2f2</span><code>bg-accent-critical-outline-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffe2e2"></div>
+    <div class="meta"><b>accent.critical-outline-surface-pressed</b><span>#ffe2e2</span><code>bg-accent-critical-outline-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#9f0712"></div>
+    <div class="meta"><b>accent.critical-tonal-content-default</b><span>#9f0712</span><code>bg-accent-critical-tonal-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ff6467"></div>
+    <div class="meta"><b>accent.critical-tonal-content-disabled</b><span>#ff6467</span><code>bg-accent-critical-tonal-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#82181a"></div>
+    <div class="meta"><b>accent.critical-tonal-content-hover</b><span>#82181a</span><code>bg-accent-critical-tonal-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#460809"></div>
+    <div class="meta"><b>accent.critical-tonal-content-pressed</b><span>#460809</span><code>bg-accent-critical-tonal-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffe2e2"></div>
+    <div class="meta"><b>accent.critical-tonal-surface-default</b><span>#ffe2e2</span><code>bg-accent-critical-tonal-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef2f2"></div>
+    <div class="meta"><b>accent.critical-tonal-surface-disabled</b><span>#fef2f2</span><code>bg-accent-critical-tonal-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffc9c9"></div>
+    <div class="meta"><b>accent.critical-tonal-surface-hover</b><span>#ffc9c9</span><code>bg-accent-critical-tonal-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffa2a2"></div>
+    <div class="meta"><b>accent.critical-tonal-surface-pressed</b><span>#ffa2a2</span><code>bg-accent-critical-tonal-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f0fdf4"></div>
+    <div class="meta"><b>accent.green-base</b><span>#f0fdf4</span><code>bg-accent-green-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dcfce7"></div>
+    <div class="meta"><b>accent.green-faint</b><span>#dcfce7</span><code>bg-accent-green-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#05df72"></div>
+    <div class="meta"><b>accent.green-medium</b><span>#05df72</span><code>bg-accent-green-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>accent.green-strong</b><span>#008236</span><code>bg-accent-green-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d542b"></div>
+    <div class="meta"><b>accent.green-stronger</b><span>#0d542b</span><code>bg-accent-green-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#b9f8cf"></div>
+    <div class="meta"><b>accent.green-subtle</b><span>#b9f8cf</span><code>bg-accent-green-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.info-filled-content-default</b><span>#ffffff</span><code>bg-accent-info-filled-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.info-filled-content-disabled</b><span>#ffffff</span><code>bg-accent-info-filled-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.info-filled-content-hover</b><span>#ffffff</span><code>bg-accent-info-filled-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.info-filled-content-pressed</b><span>#ffffff</span><code>bg-accent-info-filled-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#155dfc"></div>
+    <div class="meta"><b>accent.info-filled-surface-default</b><span>#155dfc</span><code>bg-accent-info-filled-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#bedbff"></div>
+    <div class="meta"><b>accent.info-filled-surface-disabled</b><span>#bedbff</span><code>bg-accent-info-filled-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1447e6"></div>
+    <div class="meta"><b>accent.info-filled-surface-hover</b><span>#1447e6</span><code>bg-accent-info-filled-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#193cb8"></div>
+    <div class="meta"><b>accent.info-filled-surface-pressed</b><span>#193cb8</span><code>bg-accent-info-filled-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#2b7fff"></div>
+    <div class="meta"><b>accent.info-outline-border-default</b><span>#2b7fff</span><code>bg-accent-info-outline-border-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8ec5ff"></div>
+    <div class="meta"><b>accent.info-outline-border-disabled</b><span>#8ec5ff</span><code>bg-accent-info-outline-border-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#155dfc"></div>
+    <div class="meta"><b>accent.info-outline-border-hover</b><span>#155dfc</span><code>bg-accent-info-outline-border-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>accent.info-outline-border-pressed</b><span>#0d2b6e</span><code>bg-accent-info-outline-border-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#155dfc"></div>
+    <div class="meta"><b>accent.info-outline-content-default</b><span>#155dfc</span><code>bg-accent-info-outline-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8ec5ff"></div>
+    <div class="meta"><b>accent.info-outline-content-disabled</b><span>#8ec5ff</span><code>bg-accent-info-outline-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1447e6"></div>
+    <div class="meta"><b>accent.info-outline-content-hover</b><span>#1447e6</span><code>bg-accent-info-outline-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#193cb8"></div>
+    <div class="meta"><b>accent.info-outline-content-pressed</b><span>#193cb8</span><code>bg-accent-info-outline-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.info-outline-surface-default</b><span>#ffffff00</span><code>bg-accent-info-outline-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.info-outline-surface-disabled</b><span>#ffffff00</span><code>bg-accent-info-outline-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#eff6ff"></div>
+    <div class="meta"><b>accent.info-outline-surface-hover</b><span>#eff6ff</span><code>bg-accent-info-outline-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dbeafe"></div>
+    <div class="meta"><b>accent.info-outline-surface-pressed</b><span>#dbeafe</span><code>bg-accent-info-outline-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1447e6"></div>
+    <div class="meta"><b>accent.info-tonal-content-default</b><span>#1447e6</span><code>bg-accent-info-tonal-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8ec5ff"></div>
+    <div class="meta"><b>accent.info-tonal-content-disabled</b><span>#8ec5ff</span><code>bg-accent-info-tonal-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#193cb8"></div>
+    <div class="meta"><b>accent.info-tonal-content-hover</b><span>#193cb8</span><code>bg-accent-info-tonal-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1c398e"></div>
+    <div class="meta"><b>accent.info-tonal-content-pressed</b><span>#1c398e</span><code>bg-accent-info-tonal-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dbeafe"></div>
+    <div class="meta"><b>accent.info-tonal-surface-default</b><span>#dbeafe</span><code>bg-accent-info-tonal-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#eff6ff"></div>
+    <div class="meta"><b>accent.info-tonal-surface-disabled</b><span>#eff6ff</span><code>bg-accent-info-tonal-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#bedbff"></div>
+    <div class="meta"><b>accent.info-tonal-surface-hover</b><span>#bedbff</span><code>bg-accent-info-tonal-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8ec5ff"></div>
+    <div class="meta"><b>accent.info-tonal-surface-pressed</b><span>#8ec5ff</span><code>bg-accent-info-tonal-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef2f2"></div>
+    <div class="meta"><b>accent.red-base</b><span>#fef2f2</span><code>bg-accent-red-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffe2e2"></div>
+    <div class="meta"><b>accent.red-faint</b><span>#ffe2e2</span><code>bg-accent-red-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ff6467"></div>
+    <div class="meta"><b>accent.red-medium</b><span>#ff6467</span><code>bg-accent-red-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#9f0712"></div>
+    <div class="meta"><b>accent.red-strong</b><span>#9f0712</span><code>bg-accent-red-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#82181a"></div>
+    <div class="meta"><b>accent.red-stronger</b><span>#82181a</span><code>bg-accent-red-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffc9c9"></div>
+    <div class="meta"><b>accent.red-subtle</b><span>#ffc9c9</span><code>bg-accent-red-subtle</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.success-filled-content-default</b><span>#ffffff</span><code>bg-accent-success-filled-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.success-filled-content-disabled</b><span>#ffffff</span><code>bg-accent-success-filled-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.success-filled-content-hover</b><span>#ffffff</span><code>bg-accent-success-filled-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.success-filled-content-pressed</b><span>#ffffff</span><code>bg-accent-success-filled-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>accent.success-filled-surface-default</b><span>#008236</span><code>bg-accent-success-filled-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#05df72"></div>
+    <div class="meta"><b>accent.success-filled-surface-disabled</b><span>#05df72</span><code>bg-accent-success-filled-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>accent.success-filled-surface-hover</b><span>#008236</span><code>bg-accent-success-filled-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d542b"></div>
+    <div class="meta"><b>accent.success-filled-surface-pressed</b><span>#0d542b</span><code>bg-accent-success-filled-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#00c950"></div>
+    <div class="meta"><b>accent.success-outline-border-default</b><span>#00c950</span><code>bg-accent-success-outline-border-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#7bf1a8"></div>
+    <div class="meta"><b>accent.success-outline-border-disabled</b><span>#7bf1a8</span><code>bg-accent-success-outline-border-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#00a63e"></div>
+    <div class="meta"><b>accent.success-outline-border-hover</b><span>#00a63e</span><code>bg-accent-success-outline-border-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>accent.success-outline-border-pressed</b><span>#008236</span><code>bg-accent-success-outline-border-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>accent.success-outline-content-default</b><span>#008236</span><code>bg-accent-success-outline-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#05df72"></div>
+    <div class="meta"><b>accent.success-outline-content-disabled</b><span>#05df72</span><code>bg-accent-success-outline-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>accent.success-outline-content-hover</b><span>#008236</span><code>bg-accent-success-outline-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d542b"></div>
+    <div class="meta"><b>accent.success-outline-content-pressed</b><span>#0d542b</span><code>bg-accent-success-outline-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.success-outline-surface-default</b><span>#ffffff00</span><code>bg-accent-success-outline-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.success-outline-surface-disabled</b><span>#ffffff00</span><code>bg-accent-success-outline-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f0fdf4"></div>
+    <div class="meta"><b>accent.success-outline-surface-hover</b><span>#f0fdf4</span><code>bg-accent-success-outline-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dcfce7"></div>
+    <div class="meta"><b>accent.success-outline-surface-pressed</b><span>#dcfce7</span><code>bg-accent-success-outline-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d542b"></div>
+    <div class="meta"><b>accent.success-tonal-content-default</b><span>#0d542b</span><code>bg-accent-success-tonal-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#7bf1a8"></div>
+    <div class="meta"><b>accent.success-tonal-content-disabled</b><span>#7bf1a8</span><code>bg-accent-success-tonal-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d542b"></div>
+    <div class="meta"><b>accent.success-tonal-content-hover</b><span>#0d542b</span><code>bg-accent-success-tonal-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#032e15"></div>
+    <div class="meta"><b>accent.success-tonal-content-pressed</b><span>#032e15</span><code>bg-accent-success-tonal-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dcfce7"></div>
+    <div class="meta"><b>accent.success-tonal-surface-default</b><span>#dcfce7</span><code>bg-accent-success-tonal-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f0fdf4"></div>
+    <div class="meta"><b>accent.success-tonal-surface-disabled</b><span>#f0fdf4</span><code>bg-accent-success-tonal-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#b9f8cf"></div>
+    <div class="meta"><b>accent.success-tonal-surface-hover</b><span>#b9f8cf</span><code>bg-accent-success-tonal-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#7bf1a8"></div>
+    <div class="meta"><b>accent.success-tonal-surface-pressed</b><span>#7bf1a8</span><code>bg-accent-success-tonal-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.warning-filled-content-default</b><span>#ffffff</span><code>bg-accent-warning-filled-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.warning-filled-content-disabled</b><span>#ffffff</span><code>bg-accent-warning-filled-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.warning-filled-content-hover</b><span>#ffffff</span><code>bg-accent-warning-filled-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>accent.warning-filled-content-pressed</b><span>#ffffff</span><code>bg-accent-warning-filled-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a65f00"></div>
+    <div class="meta"><b>accent.warning-filled-surface-default</b><span>#a65f00</span><code>bg-accent-warning-filled-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffdf20"></div>
+    <div class="meta"><b>accent.warning-filled-surface-disabled</b><span>#ffdf20</span><code>bg-accent-warning-filled-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#894b00"></div>
+    <div class="meta"><b>accent.warning-filled-surface-hover</b><span>#894b00</span><code>bg-accent-warning-filled-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#733e0a"></div>
+    <div class="meta"><b>accent.warning-filled-surface-pressed</b><span>#733e0a</span><code>bg-accent-warning-filled-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f0b100"></div>
+    <div class="meta"><b>accent.warning-outline-border-default</b><span>#f0b100</span><code>bg-accent-warning-outline-border-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffdf20"></div>
+    <div class="meta"><b>accent.warning-outline-border-disabled</b><span>#ffdf20</span><code>bg-accent-warning-outline-border-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#d08700"></div>
+    <div class="meta"><b>accent.warning-outline-border-hover</b><span>#d08700</span><code>bg-accent-warning-outline-border-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a65f00"></div>
+    <div class="meta"><b>accent.warning-outline-border-pressed</b><span>#a65f00</span><code>bg-accent-warning-outline-border-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a65f00"></div>
+    <div class="meta"><b>accent.warning-outline-content-default</b><span>#a65f00</span><code>bg-accent-warning-outline-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fdc700"></div>
+    <div class="meta"><b>accent.warning-outline-content-disabled</b><span>#fdc700</span><code>bg-accent-warning-outline-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#894b00"></div>
+    <div class="meta"><b>accent.warning-outline-content-hover</b><span>#894b00</span><code>bg-accent-warning-outline-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#733e0a"></div>
+    <div class="meta"><b>accent.warning-outline-content-pressed</b><span>#733e0a</span><code>bg-accent-warning-outline-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.warning-outline-surface-default</b><span>#ffffff00</span><code>bg-accent-warning-outline-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>accent.warning-outline-surface-disabled</b><span>#ffffff00</span><code>bg-accent-warning-outline-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fefce8"></div>
+    <div class="meta"><b>accent.warning-outline-surface-hover</b><span>#fefce8</span><code>bg-accent-warning-outline-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef9c2"></div>
+    <div class="meta"><b>accent.warning-outline-surface-pressed</b><span>#fef9c2</span><code>bg-accent-warning-outline-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a65f00"></div>
+    <div class="meta"><b>accent.warning-tonal-content-default</b><span>#a65f00</span><code>bg-accent-warning-tonal-content-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffdf20"></div>
+    <div class="meta"><b>accent.warning-tonal-content-disabled</b><span>#ffdf20</span><code>bg-accent-warning-tonal-content-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#894b00"></div>
+    <div class="meta"><b>accent.warning-tonal-content-hover</b><span>#894b00</span><code>bg-accent-warning-tonal-content-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#733e0a"></div>
+    <div class="meta"><b>accent.warning-tonal-content-pressed</b><span>#733e0a</span><code>bg-accent-warning-tonal-content-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef9c2"></div>
+    <div class="meta"><b>accent.warning-tonal-surface-default</b><span>#fef9c2</span><code>bg-accent-warning-tonal-surface-default</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fefce8"></div>
+    <div class="meta"><b>accent.warning-tonal-surface-disabled</b><span>#fefce8</span><code>bg-accent-warning-tonal-surface-disabled</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fff085"></div>
+    <div class="meta"><b>accent.warning-tonal-surface-hover</b><span>#fff085</span><code>bg-accent-warning-tonal-surface-hover</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffdf20"></div>
+    <div class="meta"><b>accent.warning-tonal-surface-pressed</b><span>#ffdf20</span><code>bg-accent-warning-tonal-surface-pressed</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fefce8"></div>
+    <div class="meta"><b>accent.yellow-base</b><span>#fefce8</span><code>bg-accent-yellow-base</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef9c2"></div>
+    <div class="meta"><b>accent.yellow-faint</b><span>#fef9c2</span><code>bg-accent-yellow-faint</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fdc700"></div>
+    <div class="meta"><b>accent.yellow-medium</b><span>#fdc700</span><code>bg-accent-yellow-medium</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#894b00"></div>
+    <div class="meta"><b>accent.yellow-strong</b><span>#894b00</span><code>bg-accent-yellow-strong</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#733e0a"></div>
+    <div class="meta"><b>accent.yellow-stronger</b><span>#733e0a</span><code>bg-accent-yellow-stronger</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fff085"></div>
+    <div class="meta"><b>accent.yellow-subtle</b><span>#fff085</span><code>bg-accent-yellow-subtle</code></div>
+  </div>
+  </div>
+
+<h2>Contrast check</h2>
+<p class="lede">Every semantic pair we ship, measured. WCAG AA needs 4.5:1 for body text.</p>
+<table><thead><tr><th>Used for</th><th>Pair</th><th>Ratio</th><th></th></tr></thead><tbody><tr>
+    <td><span class="prev" style="background:#f8fafc;color:#020617">Aa</span> Body text on the canvas</td>
+    <td><code>text.primary</code> on <code>surface.canvas</code></td>
+    <td class="num">19.28:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#020617">Aa</span> Body text on a card</td>
+    <td><code>text.primary</code> on <code>surface.base</code></td>
+    <td class="num">20.17:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#334155">Aa</span> Secondary text on a card</td>
+    <td><code>text.secondary</code> on <code>surface.base</code></td>
+    <td class="num">10.35:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#475569">Aa</span> Tertiary text on a card</td>
+    <td><code>text.tertiary</code> on <code>surface.base</code></td>
+    <td class="num">7.58:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#64748b">Aa</span> Subtle text on a card</td>
+    <td><code>text.subtle</code> on <code>surface.base</code></td>
+    <td class="num">4.76:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#cbd5e1">Aa</span> Disabled text</td>
+    <td><code>text.disabled</code> on <code>surface.base</code></td>
+    <td class="num">1.48:1</td>
+    <td><span class="badge warn">WCAG-exempt</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#1a56db;color:#ffffff">Aa</span> Primary button label</td>
+    <td><code>action.primary.content.default</code> on <code>action.primary.surface.default</code></td>
+    <td class="num">6.18:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#1a56db">Aa</span> Secondary button label</td>
+    <td><code>action.secondary.content.default</code> on <code>surface.base</code></td>
+    <td class="num">6.18:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffffff;color:#006dd9">Aa</span> Links</td>
+    <td><code>text.link.default</code> on <code>surface.base</code></td>
+    <td class="num">5.01:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#e7000b;color:#ffffff">Aa</span> Destructive button label</td>
+    <td><code>accent.critical.filled.content.default</code> on <code>accent.critical.filled.surface.default</code></td>
+    <td class="num">4.77:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#ffe2e2;color:#9f0712">Aa</span> Critical tonal badge</td>
+    <td><code>accent.critical.tonal.content.default</code> on <code>accent.critical.tonal.surface.default</code></td>
+    <td class="num">6.85:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#dcfce7;color:#0d542b">Aa</span> Success tonal badge</td>
+    <td><code>accent.success.tonal.content.default</code> on <code>accent.success.tonal.surface.default</code></td>
+    <td class="num">8.24:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#fef9c2;color:#a65f00">Aa</span> Warning tonal badge</td>
+    <td><code>accent.warning.tonal.content.default</code> on <code>accent.warning.tonal.surface.default</code></td>
+    <td class="num">4.59:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr><tr>
+    <td><span class="prev" style="background:#dbeafe;color:#1447e6">Aa</span> Info tonal badge</td>
+    <td><code>accent.info.tonal.content.default</code> on <code>accent.info.tonal.surface.default</code></td>
+    <td class="num">5.60:1</td>
+    <td><span class="badge pass">AA</span></td>
+  </tr></tbody></table>
+
+<h2>Core colours <span style="font-weight:400;color:var(--muted);font-size:14px">— raw ramps, referenced by semantic tokens only</span></h2>
+
+  <h3>blue</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#eff6ff"></div>
+    <div class="meta"><b>color.blue.50</b><span>#eff6ff</span><code>bg-blue-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dbeafe"></div>
+    <div class="meta"><b>color.blue.100</b><span>#dbeafe</span><code>bg-blue-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#bedbff"></div>
+    <div class="meta"><b>color.blue.200</b><span>#bedbff</span><code>bg-blue-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8ec5ff"></div>
+    <div class="meta"><b>color.blue.300</b><span>#8ec5ff</span><code>bg-blue-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#51a2ff"></div>
+    <div class="meta"><b>color.blue.400</b><span>#51a2ff</span><code>bg-blue-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#2b7fff"></div>
+    <div class="meta"><b>color.blue.500</b><span>#2b7fff</span><code>bg-blue-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#155dfc"></div>
+    <div class="meta"><b>color.blue.600</b><span>#155dfc</span><code>bg-blue-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1447e6"></div>
+    <div class="meta"><b>color.blue.700</b><span>#1447e6</span><code>bg-blue-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#193cb8"></div>
+    <div class="meta"><b>color.blue.800</b><span>#193cb8</span><code>bg-blue-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1c398e"></div>
+    <div class="meta"><b>color.blue.900</b><span>#1c398e</span><code>bg-blue-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#162456"></div>
+    <div class="meta"><b>color.blue.950</b><span>#162456</span><code>bg-blue-950</code></div>
+  </div>
+  </div>
+  <h3>green</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#f0fdf4"></div>
+    <div class="meta"><b>color.green.50</b><span>#f0fdf4</span><code>bg-green-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dcfce7"></div>
+    <div class="meta"><b>color.green.100</b><span>#dcfce7</span><code>bg-green-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#b9f8cf"></div>
+    <div class="meta"><b>color.green.200</b><span>#b9f8cf</span><code>bg-green-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#7bf1a8"></div>
+    <div class="meta"><b>color.green.300</b><span>#7bf1a8</span><code>bg-green-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#05df72"></div>
+    <div class="meta"><b>color.green.400</b><span>#05df72</span><code>bg-green-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#00c950"></div>
+    <div class="meta"><b>color.green.500</b><span>#00c950</span><code>bg-green-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#00a63e"></div>
+    <div class="meta"><b>color.green.600</b><span>#00a63e</span><code>bg-green-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>color.green.700</b><span>#008236</span><code>bg-green-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#008236"></div>
+    <div class="meta"><b>color.green.800</b><span>#008236</span><code>bg-green-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d542b"></div>
+    <div class="meta"><b>color.green.900</b><span>#0d542b</span><code>bg-green-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#032e15"></div>
+    <div class="meta"><b>color.green.950</b><span>#032e15</span><code>bg-green-950</code></div>
+  </div>
+  </div>
+  <h3>monochrome</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#000000"></div>
+    <div class="meta"><b>color.monochrome.black</b><span>#000000</span><code>bg-monochrome-black</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff00"></div>
+    <div class="meta"><b>color.monochrome.transparent</b><span>#ffffff00</span><code>bg-monochrome-transparent</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffffff"></div>
+    <div class="meta"><b>color.monochrome.white</b><span>#ffffff</span><code>bg-monochrome-white</code></div>
+  </div>
+  </div>
+  <h3>neutral</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#f9f9f9"></div>
+    <div class="meta"><b>color.neutral.50</b><span>#f9f9f9</span><code>bg-neutral-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f2f2f2"></div>
+    <div class="meta"><b>color.neutral.100</b><span>#f2f2f2</span><code>bg-neutral-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#dfdfdf"></div>
+    <div class="meta"><b>color.neutral.200</b><span>#dfdfdf</span><code>bg-neutral-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c0c0c0"></div>
+    <div class="meta"><b>color.neutral.300</b><span>#c0c0c0</span><code>bg-neutral-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a1a1a1"></div>
+    <div class="meta"><b>color.neutral.400</b><span>#a1a1a1</span><code>bg-neutral-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#818181"></div>
+    <div class="meta"><b>color.neutral.500</b><span>#818181</span><code>bg-neutral-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#616161"></div>
+    <div class="meta"><b>color.neutral.600</b><span>#616161</span><code>bg-neutral-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#414141"></div>
+    <div class="meta"><b>color.neutral.700</b><span>#414141</span><code>bg-neutral-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#202020"></div>
+    <div class="meta"><b>color.neutral.800</b><span>#202020</span><code>bg-neutral-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d0d0d"></div>
+    <div class="meta"><b>color.neutral.900</b><span>#0d0d0d</span><code>bg-neutral-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#060606"></div>
+    <div class="meta"><b>color.neutral.950</b><span>#060606</span><code>bg-neutral-950</code></div>
+  </div>
+  </div>
+  <h3>red</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#fef2f2"></div>
+    <div class="meta"><b>color.red.50</b><span>#fef2f2</span><code>bg-red-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffe2e2"></div>
+    <div class="meta"><b>color.red.100</b><span>#ffe2e2</span><code>bg-red-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffc9c9"></div>
+    <div class="meta"><b>color.red.200</b><span>#ffc9c9</span><code>bg-red-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffa2a2"></div>
+    <div class="meta"><b>color.red.300</b><span>#ffa2a2</span><code>bg-red-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ff6467"></div>
+    <div class="meta"><b>color.red.400</b><span>#ff6467</span><code>bg-red-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fb2c36"></div>
+    <div class="meta"><b>color.red.500</b><span>#fb2c36</span><code>bg-red-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e7000b"></div>
+    <div class="meta"><b>color.red.600</b><span>#e7000b</span><code>bg-red-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c10007"></div>
+    <div class="meta"><b>color.red.700</b><span>#c10007</span><code>bg-red-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#9f0712"></div>
+    <div class="meta"><b>color.red.800</b><span>#9f0712</span><code>bg-red-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#82181a"></div>
+    <div class="meta"><b>color.red.900</b><span>#82181a</span><code>bg-red-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#460809"></div>
+    <div class="meta"><b>color.red.950</b><span>#460809</span><code>bg-red-950</code></div>
+  </div>
+  </div>
+  <h3>teal-legacy</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#fafdfd"></div>
+    <div class="meta"><b>color.teal-legacy.50</b><span>#fafdfd</span><code>bg-teal-legacy-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f6fbfb"></div>
+    <div class="meta"><b>color.teal-legacy.100</b><span>#f6fbfb</span><code>bg-teal-legacy-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e8f4f5"></div>
+    <div class="meta"><b>color.teal-legacy.200</b><span>#e8f4f5</span><code>bg-teal-legacy-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#d1e9eb"></div>
+    <div class="meta"><b>color.teal-legacy.300</b><span>#d1e9eb</span><code>bg-teal-legacy-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#badee2"></div>
+    <div class="meta"><b>color.teal-legacy.400</b><span>#badee2</span><code>bg-teal-legacy-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a3d3d8"></div>
+    <div class="meta"><b>color.teal-legacy.500</b><span>#a3d3d8</span><code>bg-teal-legacy-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#7a9ea2"></div>
+    <div class="meta"><b>color.teal-legacy.600</b><span>#7a9ea2</span><code>bg-teal-legacy-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#526a6c"></div>
+    <div class="meta"><b>color.teal-legacy.700</b><span>#526a6c</span><code>bg-teal-legacy-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#293536"></div>
+    <div class="meta"><b>color.teal-legacy.800</b><span>#293536</span><code>bg-teal-legacy-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#101516"></div>
+    <div class="meta"><b>color.teal-legacy.900</b><span>#101516</span><code>bg-teal-legacy-900</code></div>
+  </div>
+  </div>
+  <h3>slate</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#f8fafc"></div>
+    <div class="meta"><b>color.slate.50</b><span>#f8fafc</span><code>bg-slate-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f1f5f9"></div>
+    <div class="meta"><b>color.slate.100</b><span>#f1f5f9</span><code>bg-slate-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e2e8f0"></div>
+    <div class="meta"><b>color.slate.200</b><span>#e2e8f0</span><code>bg-slate-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#cbd5e1"></div>
+    <div class="meta"><b>color.slate.300</b><span>#cbd5e1</span><code>bg-slate-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#94a3b8"></div>
+    <div class="meta"><b>color.slate.400</b><span>#94a3b8</span><code>bg-slate-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#64748b"></div>
+    <div class="meta"><b>color.slate.500</b><span>#64748b</span><code>bg-slate-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#475569"></div>
+    <div class="meta"><b>color.slate.600</b><span>#475569</span><code>bg-slate-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#334155"></div>
+    <div class="meta"><b>color.slate.700</b><span>#334155</span><code>bg-slate-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1e293b"></div>
+    <div class="meta"><b>color.slate.800</b><span>#1e293b</span><code>bg-slate-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0f172a"></div>
+    <div class="meta"><b>color.slate.900</b><span>#0f172a</span><code>bg-slate-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#020617"></div>
+    <div class="meta"><b>color.slate.950</b><span>#020617</span><code>bg-slate-950</code></div>
+  </div>
+  </div>
+  <h3>vcp-blue</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#f4f7fd"></div>
+    <div class="meta"><b>color.vcp-blue.50</b><span>#f4f7fd</span><code>bg-vcp-blue-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#e8eefb"></div>
+    <div class="meta"><b>color.vcp-blue.100</b><span>#e8eefb</span><code>bg-vcp-blue-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#c6d5f6"></div>
+    <div class="meta"><b>color.vcp-blue.200</b><span>#c6d5f6</span><code>bg-vcp-blue-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#8caaed"></div>
+    <div class="meta"><b>color.vcp-blue.300</b><span>#8caaed</span><code>bg-vcp-blue-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#5380e4"></div>
+    <div class="meta"><b>color.vcp-blue.400</b><span>#5380e4</span><code>bg-vcp-blue-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1a56db"></div>
+    <div class="meta"><b>color.vcp-blue.500</b><span>#1a56db</span><code>bg-vcp-blue-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#1441a4"></div>
+    <div class="meta"><b>color.vcp-blue.600</b><span>#1441a4</span><code>bg-vcp-blue-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#0d2b6e"></div>
+    <div class="meta"><b>color.vcp-blue.700</b><span>#0d2b6e</span><code>bg-vcp-blue-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#071637"></div>
+    <div class="meta"><b>color.vcp-blue.800</b><span>#071637</span><code>bg-vcp-blue-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#030916"></div>
+    <div class="meta"><b>color.vcp-blue.900</b><span>#030916</span><code>bg-vcp-blue-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#01040b"></div>
+    <div class="meta"><b>color.vcp-blue.950</b><span>#01040b</span><code>bg-vcp-blue-950</code></div>
+  </div>
+  </div>
+  <h3>yellow</h3><div class="grid">
+  
+  <div class="sw">
+    <div class="chip" style="background:#fefce8"></div>
+    <div class="meta"><b>color.yellow.50</b><span>#fefce8</span><code>bg-yellow-50</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fef9c2"></div>
+    <div class="meta"><b>color.yellow.100</b><span>#fef9c2</span><code>bg-yellow-100</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fff085"></div>
+    <div class="meta"><b>color.yellow.200</b><span>#fff085</span><code>bg-yellow-200</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#ffdf20"></div>
+    <div class="meta"><b>color.yellow.300</b><span>#ffdf20</span><code>bg-yellow-300</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#fdc700"></div>
+    <div class="meta"><b>color.yellow.400</b><span>#fdc700</span><code>bg-yellow-400</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#f0b100"></div>
+    <div class="meta"><b>color.yellow.500</b><span>#f0b100</span><code>bg-yellow-500</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#d08700"></div>
+    <div class="meta"><b>color.yellow.600</b><span>#d08700</span><code>bg-yellow-600</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#a65f00"></div>
+    <div class="meta"><b>color.yellow.700</b><span>#a65f00</span><code>bg-yellow-700</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#894b00"></div>
+    <div class="meta"><b>color.yellow.800</b><span>#894b00</span><code>bg-yellow-800</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#733e0a"></div>
+    <div class="meta"><b>color.yellow.900</b><span>#733e0a</span><code>bg-yellow-900</code></div>
+  </div>
+  <div class="sw">
+    <div class="chip" style="background:#432004"></div>
+    <div class="meta"><b>color.yellow.950</b><span>#432004</span><code>bg-yellow-950</code></div>
+  </div>
+  </div>
+
+<h2>Type</h2><h3>Sizes</h3><div class="row"><code>text-display-xl</code><span class="val">64px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:64px;font-weight:700;line-height:1.1;letter-spacing:-0.02em">The quick brown fox — 0123456789</div></div><div class="row"><code>text-display-lg</code><span class="val">36px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:36px;font-weight:700;line-height:1.15;letter-spacing:-0.02em">The quick brown fox — 0123456789</div></div><div class="row"><code>text-display-md</code><span class="val">28px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:28px;font-weight:700;line-height:1.2;letter-spacing:-0.01em">The quick brown fox — 0123456789</div></div><div class="row"><code>text-heading-lg</code><span class="val">24px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.01em">The quick brown fox — 0123456789</div></div><div class="row"><code>text-heading-md</code><span class="val">20px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:20px;font-weight:600;line-height:1.3">The quick brown fox — 0123456789</div></div><div class="row"><code>text-heading-sm</code><span class="val">16px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:16px;font-weight:600;line-height:1.35">The quick brown fox — 0123456789</div></div><div class="row"><code>text-title-sm</code><span class="val">16px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:16px;font-weight:600;line-height:24px;letter-spacing:0.1px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-body-lg</code><span class="val">16px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:16px;font-weight:400;line-height:24px;letter-spacing:0.5px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-body-md</code><span class="val">14px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:14px;font-weight:400;line-height:20px;letter-spacing:0.25px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-body-sm</code><span class="val">12px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:12px;font-weight:400;line-height:16px;letter-spacing:0.4px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-label-lg</code><span class="val">14px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:14px;font-weight:500;line-height:20px;letter-spacing:0.1px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-label-md</code><span class="val">13px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:13px;font-weight:500;line-height:18px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-label-sm</code><span class="val">11px</span>
+   <div style="font-family:Poppins,system-ui,sans-serif;font-size:11px;font-weight:500;line-height:16px;letter-spacing:0.5px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-caption-md</code><span class="val">12px</span>
+   <div style="font-family:Inter,system-ui,sans-serif;font-size:12px;font-weight:500;line-height:16px">The quick brown fox — 0123456789</div></div><div class="row"><code>text-caption-sm</code><span class="val">10px</span>
+   <div style="font-family:Inter,system-ui,sans-serif;font-size:10px;font-weight:600;line-height:14px;letter-spacing:0.04em">The quick brown fox — 0123456789</div></div><h3>Weights</h3><div class="row"><code>font-weight-regular</code><span class="val">400</span>
+   <div style="font-weight:400;font-size:18px;font-family:Poppins,sans-serif">The quick brown fox</div></div><div class="row"><code>font-weight-medium</code><span class="val">500</span>
+   <div style="font-weight:500;font-size:18px;font-family:Poppins,sans-serif">The quick brown fox</div></div><div class="row"><code>font-weight-semibold</code><span class="val">600</span>
+   <div style="font-weight:600;font-size:18px;font-family:Poppins,sans-serif">The quick brown fox</div></div><div class="row"><code>font-weight-bold</code><span class="val">700</span>
+   <div style="font-weight:700;font-size:18px;font-family:Poppins,sans-serif">The quick brown fox</div></div>
+<h2>Spacing</h2><div class="row"><code>2px → p-0.5 / gap-0.5</code><span class="val">2px</span>
+   <div class="bar" style="width:2px"></div></div><div class="row"><code>4px → p-1 / gap-1</code><span class="val">4px</span>
+   <div class="bar" style="width:4px"></div></div><div class="row"><code>6px → p-1.5 / gap-1.5</code><span class="val">6px</span>
+   <div class="bar" style="width:6px"></div></div><div class="row"><code>8px → p-2 / gap-2</code><span class="val">8px</span>
+   <div class="bar" style="width:8px"></div></div><div class="row"><code>12px → p-3 / gap-3</code><span class="val">12px</span>
+   <div class="bar" style="width:12px"></div></div><div class="row"><code>16px → p-4 / gap-4</code><span class="val">16px</span>
+   <div class="bar" style="width:16px"></div></div><div class="row"><code>20px → p-5 / gap-5</code><span class="val">20px</span>
+   <div class="bar" style="width:20px"></div></div><div class="row"><code>24px → p-6 / gap-6</code><span class="val">24px</span>
+   <div class="bar" style="width:24px"></div></div><div class="row"><code>28px → p-7 / gap-7</code><span class="val">28px</span>
+   <div class="bar" style="width:28px"></div></div><div class="row"><code>32px → p-8 / gap-8</code><span class="val">32px</span>
+   <div class="bar" style="width:32px"></div></div><div class="row"><code>36px → p-9 / gap-9</code><span class="val">36px</span>
+   <div class="bar" style="width:36px"></div></div><div class="row"><code>40px → p-10 / gap-10</code><span class="val">40px</span>
+   <div class="bar" style="width:40px"></div></div><div class="row"><code>48px → p-12 / gap-12</code><span class="val">48px</span>
+   <div class="bar" style="width:48px"></div></div><div class="row"><code>64px → p-16 / gap-16</code><span class="val">64px</span>
+   <div class="bar" style="width:64px"></div></div>
+<h2>Radius</h2><div class="grid"><div class="sw"><div class="chip rad" style="border-radius:6px"></div>
+   <div class="meta"><b>radius.sm</b><span>6px</span><code>rounded-sm</code></div></div><div class="sw"><div class="chip rad" style="border-radius:8px"></div>
+   <div class="meta"><b>radius.md</b><span>8px</span><code>rounded-md</code></div></div><div class="sw"><div class="chip rad" style="border-radius:999px"></div>
+   <div class="meta"><b>radius.pill</b><span>999px</span><code>rounded-pill</code></div></div></div>
+<h2>Elevation</h2><div class="grid"><div class="sw"><div class="chip shadow" style="box-shadow:var(--shadow-card)"></div>
+   <div class="meta"><b>shadow.card</b><code>shadow-card</code></div></div><div class="sw"><div class="chip shadow" style="box-shadow:var(--shadow-raised)"></div>
+   <div class="meta"><b>shadow.raised</b><code>shadow-raised</code></div></div><div class="sw"><div class="chip shadow" style="box-shadow:var(--shadow-menu)"></div>
+   <div class="meta"><b>shadow.menu</b><code>shadow-menu</code></div></div><div class="sw"><div class="chip shadow" style="box-shadow:var(--shadow-modal)"></div>
+   <div class="meta"><b>shadow.modal</b><code>shadow-modal</code></div></div></div>
+<footer>VCP Design System token gallery · every value here is the same value the apps compile against.</footer>
+</div></body></html>

@@ -1,0 +1,15 @@
+{
+  "radius": {
+    "$type": "dimension",
+    "sm": { "$value": "6px", "$description": "Small controls, tags, badges" },
+    "md": { "$value": "8px", "$description": "Default: buttons, inputs, cards" },
+    "pill": { "$value": "999px" }
+  },
+  "shadow": {
+    "$type": "shadow",
+    "card":   { "$value": { "color": "#0206230a", "offsetX": "0px", "offsetY": "1px",  "blur": "2px",  "spread": "0px" } },
+    "raised": { "$value": { "color": "#02062314", "offsetX": "0px", "offsetY": "2px",  "blur": "6px",  "spread": "0px" } },
+    "menu":   { "$value": { "color": "#0206232e", "offsetX": "0px", "offsetY": "8px",  "blur": "24px", "spread": "0px" } },
+    "modal":  { "$value": { "color": "#02062347", "offsetX": "0px", "offsetY": "24px", "blur": "64px", "spread": "0px" } }
+  }
+}
