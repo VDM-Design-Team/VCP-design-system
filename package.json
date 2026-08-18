@@ -1,7 +1,7 @@
 {
   "name": "@vcp/design-system",
   "version": "0.1.0",
-  "description": "VCP Design System \u2014 tokens, React components, and docs. Single source of truth for design and engineering.",
+  "description": "VCP Design System — tokens, React components, and docs. Single source of truth for design and engineering.",
   "type": "module",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -34,7 +34,8 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run lint:tokens && npm run typecheck",
     "preview": "npm run tokens && tailwindcss -i preview/entry.css -o preview/out.css && echo 'open preview/index.html'",
-    "gallery": "npm run tokens && node scripts/build-gallery.mjs"
+    "gallery": "npm run tokens && node scripts/build-gallery.mjs",
+    "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -45,11 +46,25 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "playwright": "^1.62.1",
-    "tailwind-merge": "^3.0.0"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^10.5.9",
+    "@storybook/addon-docs": "^10.5.9",
+    "@storybook/addon-mcp": "^0.7.0",
+    "@storybook/react-vite": "^10.5.9",
     "@tailwindcss/cli": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "chromatic": "^18.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "storybook": "^10.5.9",
     "style-dictionary": "^5.5.1",
-    "tailwindcss": "^4.3.0"
+    "tailwindcss": "^4.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1"
   }
 }

@@ -3,3 +3,4 @@ dist/
 storybook-static/
 .tmp/
 *.log
+storybook-static/
