@@ -49,8 +49,25 @@ export const Colors: StoryObj = {
       <Grid>{group(flat(tokens.text), 'text', 'text-text')}</Grid>
       <h3 className="text-body-sm text-text-secondary mb-1">Stroke → border-*</h3>
       <Grid>{group(flat(tokens.stroke), 'stroke', 'border-stroke')}</Grid>
-      <h3 className="text-body-sm text-text-secondary mb-1">Action</h3>
-      <Grid>{group(flat(tokens.action), 'action', 'bg-action')}</Grid>
+      <h2 className="text-heading-lg font-semibold mb-xs">Action — grouped by prominence</h2>
+      <p className="text-body-sm text-text-secondary mb-2">
+        Primary carries the page's main commitment, secondary the reversible alternative, tertiary
+        the quiet option. Each block below is one control's complete state set — default, hover,
+        pressed, selected, deselected, disabled — so you can read a control top to bottom instead of
+        hunting for its states alphabetically.
+      </p>
+      {(['primary', 'secondary', 'tertiary'] as const).map((prominence) => (
+        <section key={prominence}>
+          <h3 className="text-body-sm text-text-secondary mb-1 capitalize">{prominence}</h3>
+          <Grid>
+            {group(
+              flat(tokens.action[prominence]),
+              `action.${prominence}`,
+              `bg-action-${prominence}`,
+            )}
+          </Grid>
+        </section>
+      ))}
       <h3 className="text-body-sm text-text-secondary mb-1">Accent</h3>
       <Grid>{group(flat(tokens.accent), 'accent', 'bg-accent')}</Grid>
       <h2 className="text-heading-lg font-semibold mb-xs">Core — referenced by semantic tokens only</h2>
