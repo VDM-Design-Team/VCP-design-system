@@ -30,11 +30,10 @@ const segment = cva(
     'hover:text-text-primary',
     'focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-stroke-focused',
     'disabled:cursor-not-allowed disabled:text-text-disabled disabled:hover:text-text-disabled',
-    /* Selected: lifts onto its own surface, and the label darkens and gains weight.
-       The weight and colour shift are deliberate — they carry the selected state
-       for anyone who can't rely on the surface change alone. */
+    /* Selected: lifts onto its own surface and the label darkens. The lift — a
+       raised surface plus a shadow — is the non-colour half of the cue; the
+       label's colour change is the half that carries real contrast. */
     'aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
-    'aria-checked:font-medium',
   ],
   {
     variants: {

@@ -51,14 +51,17 @@ No new tokens were added for this component.
 - **Target size.** A `md` segment is 40px tall, meeting the 40px minimum. A `sm`
   segment is 32px — use it only where a pointer is guaranteed (dense desktop
   toolbars, table headers), never on a touch surface.
-- **The selected segment is carried by more than its background.** The selected
-  label darkens from `text.tertiary` to `text.primary` and gains weight. This is
-  deliberate: the white selected surface sits at only **1.1:1** against the track
-  in light theme and 1.4:1 in dark, so the surface alone would not satisfy WCAG
-  1.4.11. The label change does — 6.9:1 against the track, 20:1 on the selected
-  surface — and the weight shift adds a non-colour cue on top. If you want the
-  selected *surface* itself to clear 3:1, that needs a new token; raise it with
-  the design lead rather than reaching for an arbitrary class.
+- **The selected segment is carried by more than its background.** The white
+  selected surface sits at only **1.1:1** against the track in light theme and
+  1.4:1 in dark, so the surface colour alone would not satisfy WCAG 1.4.11. Two
+  things make up for it: the label darkens from `text.tertiary` to `text.primary`
+  (6.9:1 against the track, 20:1 on the selected surface), and the segment lifts —
+  `shadow.card` gives a shape cue that survives a greyscale check. Label weight
+  does *not* change: `type.label-lg` carries weight 500 as part of the token, and
+  the ramp has no 500/400 pair at 13px, so a weight shift can't be done
+  consistently across both sizes without a new token. If you want the selected
+  *surface* itself to clear 3:1, that also needs a new token — raise it with the
+  design lead rather than reaching for an arbitrary class.
 - **Contrast, light / dark:** selected label 20.2:1 / 14.6:1, unselected label
   6.9:1 / 7.0:1, focus ring 5.6:1 / see note below.
 - **Dark-theme focus ring is currently below 3:1** (`stroke.focused` was not
