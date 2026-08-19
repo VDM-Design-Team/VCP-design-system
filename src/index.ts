@@ -1,4 +1,10 @@
 export * from './components/button';
 export * from './components/segmented-control';
 export * from './components/tabs';
+export * from './components/checkbox';
+export * from './components/field';
+export * from './components/input';
+export * from './components/radio-group';
+export * from './components/textarea';
+export * from './components/toggle';
 export { cn } from './lib/cn';
