@@ -37,7 +37,7 @@ a hint line to explain it, you want a card-style chooser, not this component.
 
 | Part | Token / utility |
 |---|---|
-| Ring, unselected | `border-stroke-stronger` on `bg-surface-elevated` |
+| Ring, unselected | `border-stroke-field` on `bg-surface-elevated` |
 | Ring, hover (unselected) | `border-stroke-brand-strong` |
 | Ring, selected | `border-action-primary-surface-default` (hover: `…-hover`) |
 | Selected dot | `bg-action-primary-surface-default` |
@@ -75,7 +75,7 @@ All colour comes from semantic tokens, so the dark theme (`.dark`) works for fre
 - **Target size.** Each row is a `<label>` with `min-h-10` and `py-2`, so the whole
   row — control, label, and hint — is a 40-unit-tall click/tap target, even though
   the ring itself is 16.
-- **Contrast.** Unselected ring `stroke-stronger` is 7.5:1 on light and 9.9:1 on
+- **Contrast.** Unselected ring `stroke-field` is 4.76:1 on light and 5.71:1 on
   dark (3:1 required). Selected ring/dot `action.primary.surface.default` is 6.1:1
   light / 3.9:1 dark. Label text is `text.primary` (≥15:1) and hint text is
   `text.tertiary` (10.3:1 light, ≥9:1 dark) — both clear of 4.5:1.

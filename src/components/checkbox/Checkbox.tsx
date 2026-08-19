@@ -36,7 +36,7 @@ const checkboxRoot = cva(
 const checkboxBox = cva(
   [
     'flex size-4 shrink-0 items-center justify-center',
-    'rounded-sm border border-stroke-stronger',
+    'rounded-sm border border-stroke-field',
     'bg-surface-base text-action-primary-content-default',
     'transition-colors',
     /* The focus ring lives here because the real input is visually hidden. */

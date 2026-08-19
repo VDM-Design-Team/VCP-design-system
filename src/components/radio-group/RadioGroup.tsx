@@ -48,7 +48,7 @@ const control = cva(
     variants: {
       state: {
         /* 3:1 ring against surface in both themes — see docs/radio-group.md */
-        unchecked: 'border-stroke-stronger bg-surface-elevated group-hover/radio:border-stroke-brand-strong',
+        unchecked: 'border-stroke-field bg-surface-elevated group-hover/radio:border-stroke-brand-strong',
         checked:
           'border-action-primary-surface-default bg-surface-elevated group-hover/radio:border-action-primary-surface-hover',
         disabled: 'border-stroke-subtle bg-surface-neutral-faint',

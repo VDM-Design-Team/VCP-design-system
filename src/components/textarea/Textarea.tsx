@@ -33,7 +33,7 @@ const textarea = cva(
       invalid: {
         /* accent.critical.outline.border — the error boundary, kept while focused. */
         true: 'border-accent-critical-outline-border-default',
-        false: 'border-stroke-stronger enabled:hover:border-stroke-focused',
+        false: 'border-stroke-field enabled:hover:border-stroke-focused',
       },
       fullWidth: { true: 'w-full', false: '' },
     },

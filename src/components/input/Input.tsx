@@ -32,7 +32,7 @@ const field = cva(
       invalid: {
         /* accent.critical.outline — held through focus so the error stays legible. */
         true: 'border-accent-critical-outline-border-default',
-        false: 'border-stroke-stronger focus-within:border-stroke-focused',
+        false: 'border-stroke-field focus-within:border-stroke-focused',
       },
       fullWidth: { true: 'flex w-full', false: '' },
     },

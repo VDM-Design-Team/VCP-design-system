@@ -93,6 +93,15 @@ setPath(semLight, 'text.tertiary', '{color.slate.600}', 'AA fix: was slate-500; 
 setPath(semLight, 'text.subtle',   '{color.slate.500}', 'AA fix: was slate-400 (2.56:1, fails). Now 4.76:1 on white');
 setPath(semLight, 'accent.success.tonal.content.default', '{color.green.900}', 'AA fix: green-800 was exactly 4.50:1; green-900 gives 8.2:1');
 
+/* stroke.field — the resting border of a form control. Figma has no such variable:
+   the export borders fields with stroke.default, which is 1.48:1 against the field
+   and fails the 3:1 that 1.4.11 asks of a control boundary. Neither neighbour in the
+   ramp works — strong is 2.56:1 (still failing) and stronger is 7.58:1, which reads as
+   a focused or error state at rest. This sits between them, in both themes.
+   Added here rather than only in tokens/ so re-importing from Figma cannot drop it. */
+setPath(semLight, 'stroke.field', '{color.slate.500}', 'Form-control resting border: 4.76:1 on base and elevated, 4.55:1 on canvas');
+setPath(semDark,  'stroke.field', '{color.slate.400}', 'Form-control resting border, dark: 5.71:1 on base and elevated, 6.96:1 on canvas');
+
 /* ---- spacing / borders from the base collection ---- */
 const space = { space: { $type: 'dimension' } };
 for (const [name, { kind, value }] of Object.entries(B))

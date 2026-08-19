@@ -51,7 +51,7 @@ a React warning — that is rarely what you want, so pass both.
 | Box fill | checked / mixed, pressed | `action.primary.surface.pressed` |
 | Box fill | disabled, unchecked | `surface.neutral.faint` |
 | Box fill | disabled, checked / mixed | `action.primary.surface.disabled` |
-| Box border | unchecked | `stroke.stronger` |
+| Box border | unchecked | `stroke.field` |
 | Box border | unchecked, hover | `stroke.brand.strong` |
 | Box border | disabled, unchecked | `stroke.subtle` |
 | Glyph | checked / mixed | `action.primary.content.default` |
@@ -82,7 +82,7 @@ Dark theme comes free — the component only uses semantic tokens, and
   unlabelled checkbox looks like it has generous padding; do not strip it to make
   a dense table row. If the row is already ≥40px tall, use `fullWidth` so the
   whole row is the target instead.
-- Contrast: the unchecked border is `stroke.stronger` (7.5:1 on `surface.base`)
+- Contrast: the unchecked border is `stroke.field` (4.76:1 on `surface.base`)
   because it must clear 3:1 as a UI boundary — `stroke.default` and
   `stroke.strong` do not. The label is `text.secondary` (10.3:1), well past 4.5:1.
   Disabled text uses `text.disabled` and relies on the WCAG 1.4.3 exemption for

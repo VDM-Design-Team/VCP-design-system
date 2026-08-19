@@ -675,6 +675,10 @@
     "default": {
       "$value": "{color.slate.300}"
     },
+    "field": {
+      "$value": "{color.slate.500}",
+      "$description": "Form-control resting border: 4.76:1 on base and elevated, 4.55:1 on canvas"
+    },
     "focused": {
       "$value": "{color.vcp-blue.500}"
     },

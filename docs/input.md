@@ -33,7 +33,7 @@ Everything else (`value`, `defaultValue`, `onChange`, `placeholder`, `type`, `id
 |---|---|---|
 | Field background | `surface.elevated` | `bg-surface-elevated` |
 | Field background, disabled | `surface.neutral.subtle` | `has-[:disabled]:bg-surface-neutral-subtle` |
-| Border, resting | `stroke.stronger` | `border-stroke-stronger` |
+| Border, resting | `stroke.field` | `border-stroke-field` |
 | Border, focused | `stroke.focused` | `focus-within:border-stroke-focused` |
 | Border, invalid | `accent.critical.outline.border.default` | `border-accent-critical-outline-border-default` |
 | Border, disabled | `stroke.subtle` | `has-[:disabled]:border-stroke-subtle` |
@@ -60,9 +60,10 @@ The dark theme comes for free — every class above is a semantic token that
   message and point at it with `aria-describedby` — colour alone fails 1.4.1.
 - **Icons are decorative** and rendered `aria-hidden`, so they are skipped by screen
   readers. If an icon carries meaning that isn't in the label, it belongs in the label.
-- **Contrast.** Value text is 4.5:1+ on the field in both themes; the resting border
-  uses `stroke.stronger` because it is the only stroke token clearing 3:1 against
-  `surface.elevated` in light *and* dark.
+- **Contrast.** Value text is 4.5:1+ on the field in both themes. The resting border
+  uses `stroke.field`, the token reserved for form-control boundaries: 4.76:1 on
+  `surface.elevated` in light and 5.71:1 in dark, against the 3:1 that 1.4.11 asks of
+  a control boundary. `stroke.default` is 1.48:1 and does not qualify.
 - `md` is 40 tall and meets the minimum target. `sm` is 32 — pointer contexts only.
 
 ## Don't
