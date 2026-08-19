@@ -126,7 +126,7 @@ const Showcase = () => (
     <Input placeholder="Default" />
     <Input placeholder="With icon" leadingIcon={<SearchIcon />} />
     <Input size="sm" placeholder="Small" trailingIcon={<CalendarIcon />} />
-    <Input invalid defaultValue="Invalid value" />
+    <Input invalid defaultValue="Invalid value" aria-label="Invalid example" />
     <Input disabled placeholder="Disabled" />
   </div>
 );
