@@ -7,4 +7,5 @@ export * from './components/input';
 export * from './components/radio-group';
 export * from './components/textarea';
 export * from './components/toggle';
+export * from './patterns';
 export { cn } from './lib/cn';

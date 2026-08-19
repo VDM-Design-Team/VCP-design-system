@@ -1,0 +1,133 @@
+From 63fec07a6490d113fb3d68518ff52f2d4cd62273 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 12:55:59 +0000
+Subject: [PATCH] Fix cn() silently dropping type classes
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Every Button in the system has been rendering at the browser's inherited
+16px/400 rather than type.label-lg (14px/500). Verified in a built
+Storybook: text-label-lg is absent from the rendered class list on all
+three sizes.
+
+Cause: tailwind-merge files any text-* utility it doesn't recognise under
+the colour group. VCP's type ramp is custom, so text-label-lg and
+text-action-primary-content-default looked to it like the same property,
+and only the last one written survived. In Button's cva the colour comes
+last, so the type token lost.
+
+cn() now declares the ramp as a font-size group, and lint:tokens fails if
+that list drifts from tokens/semantic/type.json, so it cannot rot.
+
+This changes how every existing component renders its text — Button's
+labels get smaller and heavier, which is what the tokens always said they
+should be. Expect Chromatic to flag every Button snapshot.
+---
+ CHANGELOG.md                      |  9 ++++++++
+ scripts/lint-hardcoded-values.mjs | 22 ++++++++++++++++++
+ src/lib/cn.ts                     | 37 ++++++++++++++++++++++++++++++-
+ 3 files changed, 67 insertions(+), 1 deletion(-)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 796f789..9d16954 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -24,6 +24,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
+   design confirmed (2026-08-18) pink is not a brand colour. The pink ramp is
+   removed entirely; `action.*` (vcp-blue) is the button source.
+ 
++### Fixes
++
++- `cn()` was dropping type classes. tailwind-merge files any `text-…` it doesn't
++  recognise as a colour, so `text-label-lg` and `text-action-primary-content-default`
++  collided and only the last one survived. **Every `Button` has been rendering at the
++  browser's inherited 16px/400 instead of `type.label-lg` (14px/500) since 0.1.0.**
++  `cn()` now declares the type ramp as a font-size group, and `npm run lint:tokens`
++  fails if that list drifts from `tokens/semantic/type.json`.
++
+ ### Contrast fixes vs the Figma export (approved by design, 2026-08-18)
+ 
+ - `text.subtle`: slate-400 → slate-500 (was 2.56:1 on white — failed AA).
+diff --git a/scripts/lint-hardcoded-values.mjs b/scripts/lint-hardcoded-values.mjs
+index 41bf223..236d5ee 100644
+--- a/scripts/lint-hardcoded-values.mjs
++++ b/scripts/lint-hardcoded-values.mjs
+@@ -34,6 +34,28 @@ for (const file of walk('src')) {
+   });
+ }
+ 
++/* The type ramp is declared twice: once as tokens, once in src/lib/cn.ts so
++   tailwind-merge files `text-label-lg` as a size and not as a colour. If those
++   two drift, `cn()` silently drops a component's type or its colour — which is
++   exactly the class of bug that shipped in Button. Fail loudly instead. */
++{
++  const tokens = Object.keys(JSON.parse(readFileSync('tokens/semantic/type.json', 'utf8')).type)
++    .filter((k) => !k.startsWith('$'));
++  const declared = [
++    ...readFileSync('src/lib/cn.ts', 'utf8').matchAll(/^\s*'([a-z]+-[a-z]{2})',$/gm),
++  ].map((m) => m[1]);
++  const missing = tokens.filter((t) => !declared.includes(t));
++  const extra = declared.filter((d) => !tokens.includes(d));
++  if (missing.length || extra.length) {
++    console.error(
++      `\nsrc/lib/cn.ts TYPE_RAMP is out of step with tokens/semantic/type.json` +
++        (missing.length ? `\n  missing: ${missing.join(', ')}` : '') +
++        (extra.length ? `\n  stale:   ${extra.join(', ')}` : ''),
++    );
++    failed++;
++  }
++}
++
+ if (failed) {
+   console.error(`\n✖ ${failed} hardcoded value(s). Add tokens in tokens/ and re-run \`npm run tokens\`.`);
+   process.exit(1);
+diff --git a/src/lib/cn.ts b/src/lib/cn.ts
+index 1628007..98dcfa0 100644
+--- a/src/lib/cn.ts
++++ b/src/lib/cn.ts
+@@ -1,5 +1,40 @@
+ import { clsx, type ClassValue } from 'clsx';
+-import { twMerge } from 'tailwind-merge';
++import { extendTailwindMerge } from 'tailwind-merge';
++
++/**
++ * VCP's type ramp. These are `text-*` utilities that set *size* (plus line-height,
++ * weight and tracking, which come as a unit from `type.*`), not colour.
++ *
++ * tailwind-merge cannot tell them apart from colour utilities on its own: out of
++ * the box it files any unrecognised `text-…` under the colour group, so
++ * `text-label-lg` and `text-text-primary` look like the same property and the
++ * earlier one is silently dropped. Declaring the ramp here puts it in the
++ * font-size group where it belongs.
++ *
++ * Keep in step with `tokens/semantic/type.json` — `npm run lint:tokens` fails if
++ * this list and the tokens drift apart.
++ */
++const TYPE_RAMP = [
++  'display-xl',
++  'display-lg',
++  'display-md',
++  'heading-lg',
++  'heading-md',
++  'heading-sm',
++  'title-sm',
++  'body-lg',
++  'body-md',
++  'body-sm',
++  'label-lg',
++  'label-md',
++  'label-sm',
++  'caption-md',
++  'caption-sm',
++] as const;
++
++const twMerge = extendTailwindMerge({
++  extend: { classGroups: { 'font-size': [{ text: [...TYPE_RAMP] }] } },
++});
+ 
+ /** Merge Tailwind classes safely — later classes win on conflict. */
+ export function cn(...inputs: ClassValue[]) {
+-- 
+2.43.0
+
