@@ -1,6 +1,6 @@
 # Icon
 
-A Heroicons v2 outline glyph, stroked with `currentColor`.
+A [Phosphor](https://phosphoricons.com) glyph at `regular` weight, filled with `currentColor`.
 
 ## When to use
 
@@ -15,9 +15,9 @@ A Heroicons v2 outline glyph, stroked with `currentColor`.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `name` | `IconName` | — | One of the 82 glyphs. See the list below, or import `ICON_NAMES`. |
+| `name` | `IconName` | — | See the list below, or import `ICON_NAMES`. |
 | `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | 16 / 20 / 24. Dense cells / inline / nav. |
-| `label` | `string` | — | Give the glyph an accessible name. **Only** when it is the sole carrier of meaning. |
+| `label` | `string` | — | Accessible name. **Only** when the glyph is the sole carrier of meaning. |
 | `className` | `string` | — | Merged via `cn()`. This is where colour goes. |
 
 Everything else passes through to the `<svg>`. Returns `null` for an unknown name.
@@ -28,33 +28,106 @@ Icon uses **no colour token of its own** — that is deliberate.
 
 | Concern | How |
 |---|---|
-| Colour | `currentColor`. Set a text token on the icon or its parent: `text-text-tertiary`, `text-accent-critical-tonal-content-default`. Themes for free. |
+| Colour | `fill="currentColor"`. Set a text token on the icon or its parent: `text-text-tertiary`, `text-accent-critical-tonal-content-default`. Themes for free. |
 | Size | Tailwind's numeric scale: `size-4` / `size-5` / `size-6`. |
-| Stroke | 1.5, matching the Heroicons outline set the Figma library draws from. |
+| Geometry | Phosphor `regular`, 256×256 viewBox, 16-unit stroke, round caps. |
 
-## Accessibility
+## Phosphor, not Heroicons
 
-- **Decorative by default.** With no `label`, the glyph is `aria-hidden="true"` and has no role, so assistive tech skips it. This is right when a visible label sits beside it — otherwise the label gets announced twice.
-- **`label` when the icon stands alone.** It renders `role="img"` with `aria-label`. An icon-only button needs a name on *the button*; if you have already labelled the button, leave the icon decorative rather than naming both.
-- **`focusable="false"`** is set explicitly: without it, IE/Edge legacy put SVGs in the tab order. Harmless elsewhere, and cheap.
-- **Contrast.** The glyph inherits its colour, so contrast is the caller's responsibility. A meaningful icon is a UI component under WCAG 1.4.11 and owes **3:1** against its background; an icon that duplicates adjacent text is decorative and exempt. `text-text-tertiary` (slate-600) is 7.6:1 on `surface.base` and safe; `text-text-subtle` is 4.76:1 and still fine; anything lighter needs checking.
-- **Never rely on the glyph alone** to convey status. Pair it with text, as the accent tokens' `content` pairs assume.
+The VCP Figma library draws from **Phosphor**. This matters mechanically, not just
+cosmetically: **Phosphor glyphs are filled paths**, where Heroicons outline glyphs
+are stroked. A component built to stroke them renders nothing.
+
+Note that the Claude Design export's own `Icon` component claims "Heroicons v2
+outline" — that was its own substitution, and it is wrong. The raw Figma imports in
+the same export are unambiguously Phosphor (`ArrowUUpLeft`, `CheckFat`,
+`SealCheck`, `DotsSixVertical`, `FunnelSimple`), each carrying a `style2`
+weight prop defaulting to `"regular"`, which is Phosphor's weight system. Take icon
+names from the raw imports, not from that component.
 
 ## Why the set is trimmed
 
-Heroicons v2 is ~300 glyphs across three weights. Inlining all of them would put roughly 100KB of path data into every consumer's bundle for the sake of the ~80 the product uses, and tree-shaking does not reliably help when the lookup is dynamic (`ICON_PATHS[name]`) — which is exactly what a `name`-driven API needs.
+Phosphor ships 1,512 glyphs per weight. A `name`-driven API needs a dynamic lookup
+(`ICON_PATHS[name]`), which tree-shaking cannot reduce — so bundling the full set
+would put a large amount of unused path data into every consumer. This ships the
+glyphs VCP actually references.
 
-So `icons.ts` carries the 82 glyphs the VCP Figma library actually references, verbatim from the Claude Design export. **To add a glyph**: copy its 24×24 outline path from heroicons.com into `icons.ts`, keeping the kebab-case Heroicons name. The `IconName` union derives from that object, so TypeScript picks it up with no other change.
+**To add a Phosphor glyph**: copy the inner markup of its `regular` SVG from
+`@phosphor-icons/core/assets/regular/<name>.svg` (or phosphoricons.com) into
+`PHOSPHOR_ICONS` in `icons.ts`, keeping Phosphor's kebab-case name. The
+`IconName` union derives from that object, so TypeScript picks it up with no other
+change.
+
+## In-house glyphs
+
+Where Phosphor has no equivalent, VCP draws its own. They live in `CUSTOM_ICONS`
+in `icons.ts`, are listed by `CUSTOM_ICON_NAMES`, and are otherwise
+indistinguishable to callers — same `name` API, same sizes, same colour inheritance.
+
+Current in-house glyphs:
+
+| Name | Why | Used by |
+|---|---|---|
+| `caret-triple-up` | Phosphor stops at `caret-double-up` | Planning table "raise to top" |
+
+**Adding one — export as SVG, not PNG.** A raster cannot do the two things this
+component depends on:
+
+- **Colour.** The whole set is monochrome and inherits `currentColor`, which is how
+  one glyph serves light theme, dark theme, and every accent colour. A PNG's pixels
+  are fixed — you would need a separate file per colour per theme, and it still
+  could not take an accent.
+- **Scale.** `size` renders the same glyph at 16, 20 and 24, and on a 2× or 3×
+  display those become 32/40/48 real pixels. Vector is exact at every one; a PNG
+  needs an `@1x/@2x/@3x` set per glyph and still blurs at sizes you did not export.
+
+Since the custom glyphs are drawn in Figma, which is already vector, exporting SVG
+is both less work and the only form that themes. **Export SVG** → *Copy as SVG* on
+the frame.
+
+Then, to match the rest of the set:
+
+1. **Normalise to a 256×256 viewBox.** Phosphor's box. A glyph at Figma's own
+   dimensions will not align with its neighbours.
+2. **Outline the strokes** so the result is filled paths, and drop any `stroke`,
+   `fill` or colour attributes — `Icon` supplies `fill="currentColor"`.
+3. **Match Phosphor `regular`**: 16-unit stroke width at 256, round caps and joins.
+   A custom glyph at a different weight reads as a mistake sitting beside the others.
+4. Add it to `CUSTOM_ICONS` and to the table above.
+
+If what you have is genuinely multicolour — a brand mark or an illustration — it is
+not an Icon. Raster or multi-path colour artwork belongs in `Logo` or as an asset,
+because it cannot participate in theming either way.
+
+## Accessibility
+
+- **Decorative by default.** With no `label`, the glyph is `aria-hidden="true"`
+  and has no role, so assistive tech skips it. This is right when a visible label
+  sits beside it — otherwise the label is announced twice.
+- **`label` when the icon stands alone.** Renders `role="img"` with
+  `aria-label`. An icon-only button needs a name on *the button*; if you have
+  already labelled the button, leave the icon decorative rather than naming both.
+- **`focusable="false"`** is set explicitly: without it, legacy Edge put SVGs in the
+  tab order.
+- **Contrast.** The glyph inherits its colour, so contrast is the caller's
+  responsibility. A meaningful icon is a UI component under WCAG 1.4.11 and owes
+  **3:1** against its background; an icon duplicating adjacent text is decorative and
+  exempt. `text-text-tertiary` is 7.6:1 on `surface.base`, `text-text-subtle` is
+  4.76:1 — both safe. Anything lighter needs checking.
+- **Never rely on the glyph alone** to convey status. Pair it with text.
 
 ## Don't
 
-- **Don't hand-draw an `<svg>` in a component.** Add the glyph to `icons.ts`. The export's own guidance says the same: "Never hand-draw SVGs."
-- **Don't set `fill` or `stroke`.** Colour comes from `currentColor` via a text token on the parent.
-- **Don't pass `label` to an icon that sits next to its own visible text** — that produces a double announcement.
-- **Don't use an icon-only control without a name** on the control itself.
-- **Don't size with `width`/`height` or arbitrary classes.** Use `size`; it is on the spacing scale.
-- **Don't rename glyphs.** They match Heroicons, which is how anyone finds them.
+- **Don't hand-draw an `<svg>` in a component.** Add the glyph to `icons.ts`.
+- **Don't add a `stroke`.** Phosphor glyphs are filled; a stroke thickens them unevenly.
+- **Don't set `fill` directly.** Colour comes from `currentColor` via a text token.
+- **Don't add custom glyphs as PNG.** See above — they cannot theme or scale.
+- **Don't pass `label` to an icon beside its own visible text** — double announcement.
+- **Don't size with `width`/`height` or arbitrary classes.** Use `size`.
+- **Don't rename Phosphor glyphs.** The names match Phosphor, which is how anyone finds them.
 
 ## Available names
 
-`adjustments-horizontal` · `archive-box` · `arrow-down-tray` · `arrow-left` · `arrow-path` · `arrow-right` · `arrow-top-right-on-square` · `arrow-up-tray` · `arrow-uturn-left` · `arrows-pointing-out` · `arrows-up-down` · `bars-3` · `bell` · `bell-slash` · `bookmark` · `briefcase` · `building-office` · `calendar` · `chart-bar` · `chat-bubble-left-right` · `check` · `check-circle` · `chevron-down` · `chevron-left` · `chevron-right` · `chevron-up` · `clipboard` · `clipboard-document-list` · `clock` · `cloud-arrow-up` · `cog-6-tooth` · `currency-dollar` · `document` · `document-duplicate` · `ellipsis-horizontal` · `ellipsis-horizontal-circle` · `ellipsis-vertical` · `envelope` · `envelope-open` · `exclamation-circle` · `exclamation-triangle` · `eye` · `fire` · `flag` · `folder` · `funnel` · `hand-thumb-up` · `inbox` · `information-circle` · `key` · `life-buoy` · `link` · `lock-closed` · `magnifying-glass` · `megaphone` · `minus` · `minus-circle` · `no-symbol` · `paper-clip` · `pencil-square` · `photo` · `plus` · `presentation-chart-bar` · `queue-list` · `rectangle-stack` · `shield-check` · `sparkles` · `square-3-stack-3d` · `squares-2x2` · `squares-plus` · `star` · `table-cells` · `tag` · `trash` · `trophy` · `user` · `user-circle` · `user-group` · `user-plus` · `users` · `x-circle` · `x-mark`
+`arrow-down` · `arrow-left` · `arrow-right` · `arrow-u-up-left` · `arrow-up` · `arrows-down-up` · `arrows-split` · `bank` · `bell` · `calendar-blank` · `calendar-dots` · `calendar-x` · `caret-double-down` · `caret-double-left` · `caret-double-right` · `caret-double-up` · `caret-down` · `caret-left` · `caret-right` · `caret-triple-up` · `caret-up` · `caret-up-down` · `chat-centered-text` · `chat-dots` · `chats-circle` · `check` · `check-circle` · `check-fat` · `circle` · `clock` · `cloud-check` · `code` · `database` · `dots-six-vertical` · `dots-three` · `dots-three-vertical` · `eye` · `eye-slash` · `file` · `film-reel` · `flask` · `function` · `funnel-simple` · `git-branch` · `globe` · `globe-simple` · `graph` · `handshake` · `hourglass-low` · `house-line` · `info` · `link` · `list` · `list-bullets` · `magnifying-glass` · `megaphone` · `minus` · `minus-circle` · `note-pencil` · `paint-brush` · `palette` · `paperclip` · `pencil-simple` · `plus` · `plus-circle` · `rocket` · `seal-check` · `sort-ascending` · `sort-descending` · `thumbs-up` · `trash` · `trash-simple` · `user` · `users` · `warning` · `warning-circle` · `x` · `x-circle`
+
+In-house glyphs are marked in the table above and listed by `CUSTOM_ICON_NAMES`.

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Icon, ICON_NAMES } from './Icon';
+import { Icon, ICON_NAMES, CUSTOM_ICON_NAMES } from './Icon';
 
 const meta = {
   title: 'Display/Icon',
@@ -8,8 +8,9 @@ const meta = {
     docs: {
       description: {
         component:
-          'Heroicons v2 outline, trimmed to the glyphs the VCP library references. ' +
-          'The glyph inherits `currentColor`, so set colour on the parent with a text token.',
+          'Phosphor Icons at `regular` weight, trimmed to the glyphs the VCP Figma library ' +
+          'references, plus the in-house glyphs Phosphor has no equivalent for. ' +
+          'Filled paths that inherit `currentColor` — set colour on the parent with a text token.',
       },
     },
   },
@@ -37,16 +38,16 @@ export const Sizes: Story = {
 };
 
 /**
- * The glyph is stroked with `currentColor`. Set the colour on the parent using a
+ * The glyph is filled with `currentColor`. Set the colour on the parent using a
  * text token and it themes for free — never colour the icon directly.
  */
 export const InheritsColour: Story = {
   render: () => (
     <div className="flex items-center gap-4">
       <Icon name="check-circle" className="text-accent-success-tonal-content-default" />
-      <Icon name="exclamation-triangle" className="text-accent-warning-tonal-content-default" />
-      <Icon name="exclamation-circle" className="text-accent-critical-tonal-content-default" />
-      <Icon name="information-circle" className="text-text-link-default" />
+      <Icon name="warning" className="text-accent-warning-tonal-content-default" />
+      <Icon name="warning-circle" className="text-accent-critical-tonal-content-default" />
+      <Icon name="info" className="text-text-link-default" />
       <Icon name="bell" className="text-text-tertiary" />
     </div>
   ),
@@ -66,6 +67,32 @@ export const DecorativeVsLabelled: Story = {
         <span className="text-label-lg">Delete</span>
       </span>
       <Icon name="trash" label="Delete" />
+    </div>
+  ),
+};
+
+/**
+ * Glyphs drawn in-house because Phosphor has none. They use Phosphor's own
+ * geometry and stroke weight, so they sit beside it without looking imported —
+ * compare `caret-triple-up` with Phosphor's `caret-double-up` and `caret-up`.
+ */
+export const CustomGlyphs: Story = {
+  render: () => (
+    <div className="flex items-end gap-6 text-text-primary">
+      {(['caret-up', 'caret-double-up'] as const).map((name) => (
+        <div key={name} className="flex flex-col items-center gap-1">
+          <Icon name={name} size="lg" />
+          <span className="text-caption-sm text-text-tertiary">{name}</span>
+          <span className="text-caption-sm text-text-subtle">Phosphor</span>
+        </div>
+      ))}
+      {CUSTOM_ICON_NAMES.map((name) => (
+        <div key={name} className="flex flex-col items-center gap-1">
+          <Icon name={name} size="lg" />
+          <span className="text-caption-sm text-text-tertiary">{name}</span>
+          <span className="text-caption-sm text-text-link-default">in-house</span>
+        </div>
+      ))}
     </div>
   ),
 };
@@ -94,7 +121,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex items-center gap-4 bg-surface-canvas p-8 text-text-primary">
-            <Icon name="squares-2x2" size="lg" />
+            <Icon name="house-line" size="lg" />
             <Icon name="users" size="lg" className="text-text-tertiary" />
             <Icon name="check-circle" size="lg" className="text-accent-success-tonal-content-default" />
           </div>

@@ -13,13 +13,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 - Shape: radius sm/md/pill, shadows card/raised/menu/modal.
 - Build targets: Tailwind v4 `@theme` CSS + `.dark` overrides, plain CSS vars,
   TypeScript, flat + nested JSON.
-- Components: `Icon` (sm/md/lg = 16/20/24) — a Heroicons v2 outline glyph stroked
-  with `currentColor`, so colour comes from a text token on the parent and dark
-  theme needs no second path. No new tokens. Decorative by default
-  (`aria-hidden`); pass `label` to give it `role="img"` and a name when the glyph
-  is the only carrier of meaning. Ships the 82 glyphs the VCP Figma library
-  references rather than all of Heroicons — a `name`-driven lookup cannot be
-  tree-shaken, so the full set would cost every consumer ~100KB of unused paths.
+- Components: `Icon` (sm/md/lg = 16/20/24) — a Phosphor glyph at `regular` weight,
+  filled with `currentColor`, so colour comes from a text token on the parent and
+  dark theme needs no second path. No new tokens. Decorative by default
+  (`aria-hidden`); pass `label` for `role="img"` and a name when the glyph is the
+  only carrier of meaning. Ships the Phosphor glyphs the VCP Figma library
+  references rather than all 1,512 — a `name`-driven lookup cannot be tree-shaken.
+  Carries VCP's in-house glyphs alongside them (`caret-triple-up`, which Phosphor
+  has no equivalent for); `docs/icon.md` covers how to add either.
+
 - Components: `Button` (primary/secondary/tertiary/danger/link × sm/md/lg,
   loading/disabled), mapped to `action.*` and `accent.critical.*` state tokens.
 - Components: `SegmentedControl` (sm/md, fullWidth, disabled options) — a radio
