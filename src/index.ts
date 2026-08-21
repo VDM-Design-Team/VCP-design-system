@@ -3,6 +3,7 @@ export * from './components/segmented-control';
 export * from './components/tabs';
 export * from './components/checkbox';
 export * from './components/field';
+export * from './components/icon';
 export * from './components/input';
 export * from './components/radio-group';
 export * from './components/textarea';
