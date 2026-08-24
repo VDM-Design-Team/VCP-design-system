@@ -24,6 +24,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   design confirmed (2026-08-18) pink is not a brand colour. The pink ramp is
   removed entirely; `action.*` (vcp-blue) is the button source.
 
+### Fixes
+
+- `cn()` was dropping type classes. tailwind-merge files any `text-…` it doesn't
+  recognise as a colour, so `text-label-lg` and `text-action-primary-content-default`
+  collided and only the last one survived. **Every `Button` has been rendering at the
+  browser's inherited 16px/400 instead of `type.label-lg` (14px/500) since 0.1.0.**
+  `cn()` now declares the type ramp as a font-size group, and `npm run lint:tokens`
+  fails if that list drifts from `tokens/semantic/type.json`.
+
 ### Contrast fixes vs the Figma export (approved by design, 2026-08-18)
 
 - `text.subtle`: slate-400 → slate-500 (was 2.56:1 on white — failed AA).
