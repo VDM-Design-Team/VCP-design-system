@@ -680,7 +680,8 @@
         "$description": "Form-control resting border, dark: 5.71:1 on base and elevated, 6.96:1 on canvas"
       },
       "focused": {
-        "$value": "{color.vcp-blue.500}"
+        "$value": "{color.vcp-blue.300}",
+        "$description": "AA fix: was vcp-blue-500 (2.37:1 on dark surfaces, fails 1.4.11). Now 6.33:1"
       },
       "inverse": {
         "$value": "{color.slate.900}"
