@@ -4,3 +4,10 @@ storybook-static/
 .tmp/
 *.log
 storybook-static/
+
+# Secrets. Storybook 7.0-10.0 could bundle a local .env into the built output,
+# and the published Storybook is public — so a stray .env here is a live leak,
+# not just a bad commit. See chromatic.com/blog/storybook-security-advisory
+.env
+.env.*
+!.env.example

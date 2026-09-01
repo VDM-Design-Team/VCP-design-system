@@ -109,6 +109,17 @@ Tailwind theme — check `dist/theme.css` before touching the component.
 
 ## For designers — seeing the latest
 
+**Just want to look at it? Open the published Storybook:**
+
+### https://main--685158a98c4fedbbec7ac708.chromatic.com
+
+Always the current `main`, updated on every merge. Nothing to install, no account
+needed. This is the right link for most people.
+
+---
+
+Run it locally only if you need to try changes before they land:
+
 ```bash
 npm run latest
 ```
