@@ -56,12 +56,43 @@ docs/tooltip-usage          documentation only
 
 **During the day**
 - Push your branch at least before lunch and at end of day. Pushed work is
-  backed up and visible; unpushed work is neither.
+  backed up and visible; unpushed work is neither. Pushing is one sentence
+  to Claude:
+
+  > "Save my progress — commit what we have with a sensible message and
+  > push the branch."
+
 - Open a **draft PR as soon as the structure exists.** Draft PRs are how
   overlapping work gets discovered while it's still cheap. High-impact token
   or foundation work is announced by its draft PR — open it first, build
   second.
+
+  *What's a pull request?* Your work, packaged for a decision: the changes,
+  the Storybook preview, and your description in one place on GitHub, where
+  the team looks before anything joins `main`. A **draft** PR is the same
+  thing marked "not finished — but look" ; nobody reviews it yet, everyone
+  can see it coming.
+
+  > "Open a draft PR for this branch — fill in the template from what
+  > we've built so far and note what's still missing."
+
+- **When the work is finished**, have Claude run the checks and turn the
+  draft into a real review request:
+
+  > "The subtle Button variant is done. Run the tests, make sure stories
+  > and docs are complete, then finish the PR — fill in the template in
+  > product terms, attach the Chromatic preview, and mark it ready for
+  > review."
+
 - Before starting anything large, review someone else's waiting PR.
+  **Review is everyone's job**, whatever your role: reading the change,
+  clicking through its Storybook preview, asking questions. Who must
+  *approve* which kind of change is the role matrix below — and nobody
+  approves their own PR.
+- **After your change lands, walk the team through it.** A few minutes with
+  the lead and the other designers — what changed, why, and where to see it
+  in Storybook — so everyone hears about the change from you rather than
+  stumbling into it later.
 
 **Before merge**
 - Bring `main` into your branch (`merge`, not `rebase` — no force-pushes),
