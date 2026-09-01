@@ -94,3 +94,22 @@ Rules that follow from the split:
 Work on a branch, open a PR, tag the engineering owner. Describe the change in
 product terms in the PR body ("secondary buttons need a subtle variant for the
 settings page"), not in CSS terms. Never push to `main`.
+
+## Workflow (see docs/workflow.md for the human version)
+
+- One branch per task, named `feat/…`, `fix/…`, `tokens/…`, or `docs/…` —
+  never per person. Branch only from a freshly pulled `origin/main`.
+- Touch only files the task requires. Never rename, move, reformat, or
+  reorganize unrelated files without explicit approval.
+- Before committing, show the changed-file list and confirm it matches the
+  task's scope.
+- Push the branch and open a draft PR early; keep the PR reviewable in
+  15–30 minutes or propose a split.
+- Bring `main` into the branch with merge, not rebase. Never force-push.
+  When resolving a conflict, explain both versions before choosing.
+- Finish every change by reporting: files changed and why, checks run and
+  their results, possible breaking changes, and a draft PR description
+  answering the template's five questions.
+- When a change touches `docs/workflow.md`, also update the team's Notion
+  copy (https://app.notion.com/p/3ce29ad06b0b816d9a86d34e6d09b5b7) to match — the
+  repo is canonical, the Notion page mirrors it.
