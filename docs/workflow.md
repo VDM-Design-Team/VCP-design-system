@@ -164,3 +164,9 @@ a checkbox so it can't be silently forgotten. A Figma file that drifts from
 
 `CLAUDE.md`, in this repo, versioned like everything else. It encodes this
 workflow so every Claude session follows it without being told.
+
+A visual copy of this document lives in Notion for the team:
+[VCP Design System — How We Work](https://app.notion.com/p/3ce29ad06b0b816d9a86d34e6d09b5b7).
+**Any PR that changes this file also updates that Notion page** — same change,
+same day. The repo stays canonical: if the two ever disagree, this file wins
+and the Notion page gets corrected to match.
