@@ -109,14 +109,27 @@ Every PR answers five questions — the template asks them:
 4. Is it breaking?
 5. How does the reviewer test it?
 
-Attach what makes review fast: the Chromatic Storybook preview (posted
-automatically on every PR), before/after screenshots, the Figma link if one
-exists. Describe the change in **product terms** — "secondary buttons need a
-subtle variant for settings" — not CSS terms.
+Every PR gets a **🔍 Visual review** comment automatically (see Reviews,
+below). Attach anything else that makes review fast: before/after screenshots,
+the Figma link if one exists. Describe the change in **product terms** —
+"secondary buttons need a subtle variant for settings" — not CSS terms.
 
 ## Reviews
 
-Review the **running Storybook preview**, not only the diff. The checklist:
+**Review starts from the pictures, not the code.** Every PR carries a
+**🔍 Visual review** comment, posted automatically and updated on every push,
+with the two links a review starts from:
+
+- **Before → after diffs** — Chromatic shows every story the PR changes side
+  by side against `main`, with an Accept/Deny button per change.
+- **The live Storybook for the branch** — the real components, clickable, for
+  trying hover, focus, dark theme, and mobile widths yourself.
+
+Open the diffs first, then click through the branch's Storybook; read the code
+diff last. When a PR touches nothing visual, the comment says so — nothing to
+look at, review the text.
+
+The checklist:
 
 - Matches the intended design?
 - Existing variants still correct?
@@ -182,7 +195,7 @@ What runs on every PR **today**:
 | Token rebuild + stale-`dist/` | Generated files that don't match `tokens/` |
 | `lint:tokens` | Hardcoded colors, px values, arbitrary Tailwind classes |
 | Typecheck | Type errors across components and stories |
-| Chromatic | Storybook builds, per-PR preview URL, visual diffs vs `main` |
+| Chromatic | Storybook builds, visual diffs vs `main`, posts the 🔍 Visual review comment |
 
 Planned next: **automated accessibility tests** (Storybook test runner + axe),
 so CLAUDE.md rule 5 is enforced by CI instead of by memory.
