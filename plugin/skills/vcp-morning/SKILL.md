@@ -60,8 +60,10 @@ Report in this order:
 
 ## 3 — What changed in the design system
 
-Open the published Storybook (URL in `references/project.md`) — it is always the
-current `main`, nothing to install. For each component that merged PRs touched:
+Open the published Storybook (URL in `references/project.md`) **in the app's browser
+preview panel**, so it appears next to the brief without the user going anywhere — it
+is always the current `main`, nothing to install. Leave the panel on the most
+relevant changed component's story. For each component that merged PRs touched:
 
 - Name it, and give its Storybook sidebar location so they can click to it.
 - One sentence on what changed, in product terms.
