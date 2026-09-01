@@ -34,6 +34,28 @@ for (const file of walk('src')) {
   });
 }
 
+/* The type ramp is declared twice: once as tokens, once in src/lib/cn.ts so
+   tailwind-merge files `text-label-lg` as a size and not as a colour. If those
+   two drift, `cn()` silently drops a component's type or its colour — which is
+   exactly the class of bug that shipped in Button. Fail loudly instead. */
+{
+  const tokens = Object.keys(JSON.parse(readFileSync('tokens/semantic/type.json', 'utf8')).type)
+    .filter((k) => !k.startsWith('$'));
+  const declared = [
+    ...readFileSync('src/lib/cn.ts', 'utf8').matchAll(/^\s*'([a-z]+-[a-z]{2})',$/gm),
+  ].map((m) => m[1]);
+  const missing = tokens.filter((t) => !declared.includes(t));
+  const extra = declared.filter((d) => !tokens.includes(d));
+  if (missing.length || extra.length) {
+    console.error(
+      `\nsrc/lib/cn.ts TYPE_RAMP is out of step with tokens/semantic/type.json` +
+        (missing.length ? `\n  missing: ${missing.join(', ')}` : '') +
+        (extra.length ? `\n  stale:   ${extra.join(', ')}` : ''),
+    );
+    failed++;
+  }
+}
+
 if (failed) {
   console.error(`\n✖ ${failed} hardcoded value(s). Add tokens in tokens/ and re-run \`npm run tokens\`.`);
   process.exit(1);
