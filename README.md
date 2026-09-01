@@ -106,3 +106,24 @@ Tailwind theme — check `dist/theme.css` before touching the component.
 > scanned source files, and it skips anything in `.gitignore`. Consuming apps
 > must add `@source "../node_modules/@vcp/design-system/dist";` or the
 > components will ship without their styles.
+
+## For designers — seeing the latest
+
+```bash
+npm run latest
+```
+
+Pulls `main`, installs what's new, rebuilds the tokens, and opens Storybook at
+http://localhost:6006. It refuses to run over uncommitted work rather than
+overwriting it.
+
+First time on a new machine you need [Node 22+](https://nodejs.org) and:
+
+```bash
+git clone https://github.com/VDM-Design-Team/VCP-design-system.git
+cd VCP-design-system
+npm run latest
+```
+
+If you use Claude Code in this repo, `/latest` does the same thing and will also
+summarise what changed since you last pulled.
