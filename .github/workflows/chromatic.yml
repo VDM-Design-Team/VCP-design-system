@@ -45,17 +45,28 @@ jobs:
         with:
           script: |
             const marker = '<!-- visual-review-links -->';
-            const body = [
-              marker,
-              '## 🔍 Visual review',
-              '',
-              '| What | Where |',
-              '|---|---|',
-              `| **Before → after diffs** — every story this PR changes, side by side against \`main\` | ${process.env.BUILD_URL} |`,
-              `| **Live Storybook for this branch** — click through the real components | ${process.env.STORYBOOK_URL} |`,
-              '',
-              '_Updated automatically on every push. Diffs may take a minute to finish after this comment appears._',
-            ].join('\n');
+            // TurboSnap skips the whole build when a PR touches no frontend
+            // files — a skipped build has no URLs, so say that instead of
+            // rendering dead links.
+            const buildUrl = process.env.BUILD_URL;
+            const storybookUrl = process.env.STORYBOOK_URL;
+            const skipped = !buildUrl || buildUrl === 'undefined';
+            const lines = [marker, '## 🔍 Visual review', ''];
+            if (skipped) {
+              lines.push(
+                '_This PR changes no story, component, or token files — there is nothing visual to diff, so Chromatic skipped snapshotting entirely._'
+              );
+            } else {
+              lines.push(
+                '| What | Where |',
+                '|---|---|',
+                `| **Before → after diffs** — every story this PR changes, side by side against \`main\` | [Open in Chromatic](${buildUrl}) |`,
+                `| **Live Storybook for this branch** — click through the real components | [Open Storybook](${storybookUrl}) |`,
+                '',
+                '_Updated automatically on every push. Diffs may take a minute to finish after this comment appears._'
+              );
+            }
+            const body = lines.join('\n');
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
             const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
