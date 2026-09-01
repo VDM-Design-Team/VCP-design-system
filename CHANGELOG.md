@@ -21,6 +21,11 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   Known: the selected segment's surface is 1.1:1 against the track, so the
   selected state is carried by the label's colour and weight — see
   `docs/segmented-control.md`.
+- Components: `Tabs` (sm/md, fullWidth, counts, disabled tabs) — selected tab takes
+  `action.secondary.content.default` for both label and 2px underline; count pill
+  uses `type.caption-sm` on `surface.brand.faint` / `surface.neutral.subtle`.
+  No new tokens. Exports `tabId()` / `tabPanelId()` so panels can be associated —
+  the bar alone is not an accessible tab set.
 
 ### Not imported from the Figma export (deliberately)
 
