@@ -1,0 +1,24 @@
+/* =========================================================
+   VCP Design System — global stylesheet
+   This is the compiler entry point. Token + typography CSS
+   generated from Figma Variables is imported here.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+@import './components/fig-tokens.css';
+@import './components/fig-typography.css';
+
+/* ---- Base reset ---- */
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: light; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--colors-text-primary, #020617);
+  background: var(--colors-surface-canvas, #F8FAFC);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

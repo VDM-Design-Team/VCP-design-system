@@ -1,0 +1,92 @@
+From 48f6e3f508b6a132efeb1eac9ed43c1162e2a430 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 12:49:14 +0000
+Subject: [PATCH] Fix the dark-theme focus ring
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+stroke.focused was the one stroke token the Figma import did not invert
+for dark: it stayed vcp-blue-500, the same blue as light theme. Against
+the dark surfaces that is 2.37:1, below the 3:1 WCAG 1.4.11 asks of a
+focus indicator — so keyboard users in dark theme have had a focus ring
+they can barely see, on every component including Button.
+
+Moves it to vcp-blue-300 (6.33:1 on surface base and elevated, 7.73:1 on
+canvas, 4.48:1 on neutral-subtle), mirroring how stroke.brand.strong
+flips 600 -> 300 for dark.
+
+The fix lives in scripts/import-figma-tokens.mjs alongside the three
+light-theme AA fixes, so re-importing from Figma cannot silently undo it.
+The same change should go back into the Figma variables.
+
+This will move every Chromatic snapshot that captures a dark focus state.
+Light theme is untouched.
+---
+ CHANGELOG.md                    | 7 ++++++-
+ scripts/import-figma-tokens.mjs | 9 ++++++++-
+ tokens/semantic/color.dark.json | 3 ++-
+ 3 files changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 796f789..807d8c7 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -31,7 +31,12 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
+   subtle fix; 7.58:1).
+ - `accent.success.tonal.content.default`: green-800 → green-900 (was exactly
+   4.50:1; now 8.24:1).
+-- Dark theme audited: already passes, unchanged.
++- Dark theme: `stroke.focused` was left at vcp-blue-500, the same value as light,
++  while every other `stroke.*` token was inverted. That is 2.37:1 against the dark
++  surfaces — below the 3:1 WCAG 1.4.11 asks of a focus indicator, so the focus ring
++  was close to invisible in dark theme on every component, Button included.
++  Now vcp-blue-300 (6.33:1), mirroring how `stroke.brand.strong` flips 600 → 300.
++  This corrects the earlier "dark theme already passes" note.
+ - These fixes live in `scripts/import-figma-tokens.mjs`, so re-importing a fresh
+   Figma export cannot silently regress them. **Push the same three changes back
+   to the Figma variables** so the export catches up with the code.
+diff --git a/scripts/import-figma-tokens.mjs b/scripts/import-figma-tokens.mjs
+index 15f793d..ac108a9 100644
+--- a/scripts/import-figma-tokens.mjs
++++ b/scripts/import-figma-tokens.mjs
+@@ -81,7 +81,7 @@ const buildSemantic = (scope) => {
+ const semLight = buildSemantic(L);
+ const semDark  = buildSemantic(D);
+ 
+-/* WCAG AA fixes, light theme only (dark already passes) — approved by design 2026-08-18.
++/* WCAG AA fixes — approved by design 2026-08-18.
+    Applied post-import so re-running the importer never regresses them. */
+ const setPath = (obj, path, value, desc) => {
+   const keys = path.split('.');
+@@ -93,6 +93,13 @@ setPath(semLight, 'text.tertiary', '{color.slate.600}', 'AA fix: was slate-500;
+ setPath(semLight, 'text.subtle',   '{color.slate.500}', 'AA fix: was slate-400 (2.56:1, fails). Now 4.76:1 on white');
+ setPath(semLight, 'accent.success.tonal.content.default', '{color.green.900}', 'AA fix: green-800 was exactly 4.50:1; green-900 gives 8.2:1');
+ 
++/* Dark theme: every other stroke.* token was inverted for dark, but stroke.focused
++   was left at vcp-blue-500 — the same value as light. That is 2.37:1 against the
++   dark surfaces, below the 3:1 that WCAG 1.4.11 asks of a focus indicator, so the
++   focus ring is close to invisible in dark theme on every component.
++   vcp-blue-300 mirrors how stroke.brand.strong flips (600 -> 300) and gives 6.33:1. */
++setPath(semDark, 'stroke.focused', '{color.vcp-blue.300}', 'AA fix: was vcp-blue-500 (2.37:1 on dark surfaces, fails 1.4.11). Now 6.33:1');
++
+ /* ---- spacing / borders from the base collection ---- */
+ const space = { space: { $type: 'dimension' } };
+ for (const [name, { kind, value }] of Object.entries(B))
+diff --git a/tokens/semantic/color.dark.json b/tokens/semantic/color.dark.json
+index c16c78b..60f2242 100644
+--- a/tokens/semantic/color.dark.json
++++ b/tokens/semantic/color.dark.json
+@@ -676,7 +676,8 @@
+         "$value": "{color.slate.600}"
+       },
+       "focused": {
+-        "$value": "{color.vcp-blue.500}"
++        "$value": "{color.vcp-blue.300}",
++        "$description": "AA fix: was vcp-blue-500 (2.37:1 on dark surfaces, fails 1.4.11). Now 6.33:1"
+       },
+       "inverse": {
+         "$value": "{color.slate.900}"
+-- 
+2.43.0
+

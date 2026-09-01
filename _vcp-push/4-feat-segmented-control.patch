@@ -1,0 +1,533 @@
+From 8ffd7bfcceb05306da65f5f2c27eab4d6bd81d7e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 12:46:38 +0000
+Subject: [PATCH 1/3] Add SegmentedControl
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+A radio group styled as a segmented track — for switching how the same
+content is shown (List / Board / Calendar), not for moving between
+different content.
+
+Ported from the Claude Design export and retokenised: the export carried
+raw rgb() values and CSS-variable fallbacks, this version uses semantic
+tokens only, so dark theme works without a second code path. No new
+tokens were needed.
+
+Two changes from the export, both deliberate:
+
+- Sizes are 32 / 40px (sm / md) rather than 28 / 36, matching Button's
+  scale so 'size' means the same thing on every control, and so md meets
+  the 40px minimum target in CLAUDE.md.
+- Keyboard support added. The export was mouse-only: it had the radiogroup
+  roles but no arrow-key movement and no managed tab order. The whole
+  control is now one tab stop with arrow keys moving between segments.
+
+Known softness, documented in docs/segmented-control.md: the selected
+segment's white surface sits at 1.1:1 against the track, so the selected
+state leans on the label's colour and weight change to satisfy WCAG 1.4.11.
+Making the surface itself clear 3:1 would need a new token.
+---
+ docs/segmented-control.md                     |  76 +++++++++
+ .../SegmentedControl.stories.tsx              | 120 ++++++++++++++
+ .../segmented-control/SegmentedControl.tsx    | 156 ++++++++++++++++++
+ src/components/segmented-control/index.ts     |   2 +
+ src/index.ts                                  |   1 +
+ 5 files changed, 355 insertions(+)
+ create mode 100644 docs/segmented-control.md
+ create mode 100644 src/components/segmented-control/SegmentedControl.stories.tsx
+ create mode 100644 src/components/segmented-control/SegmentedControl.tsx
+ create mode 100644 src/components/segmented-control/index.ts
+
+diff --git a/docs/segmented-control.md b/docs/segmented-control.md
+new file mode 100644
+index 0000000..91d920c
+--- /dev/null
++++ b/docs/segmented-control.md
+@@ -0,0 +1,76 @@
++# SegmentedControl
++
++A small set of mutually exclusive options, all visible at once.
++
++## When to use
++
++| Situation | Use | Why |
++|---|---|---|
++| Switching how the same content is shown (List / Board / Calendar) | **SegmentedControl** | The content doesn't change, only its shape |
++| Moving between different content (Overview / Activity / Files) | `Tabs` | Each option owns its own panel |
++| Two states, on or off | `Toggle` | A control with two segments is a switch wearing a costume |
++| More than five options | `Select` | Labels crowd; the control stops being scannable |
++| A filter that can be cleared | `Chip` | A segmented control always has exactly one option chosen |
++
++Two to five options. Every option must be short enough to read at a glance —
++if you need more than about two words per segment, the wrong control is being used.
++
++## Props
++
++| Prop | Type | Default | Notes |
++|---|---|---|---|
++| `options` | `Array<string \| SegmentedControlOption>` | — | A bare string is shorthand for `{ value, label }` |
++| `value` | `string` | — | Controlled selection |
++| `defaultValue` | `string` | first enabled option | Uncontrolled starting selection |
++| `onChange` | `(value: string) => void` | — | Fires on click and on arrow-key movement |
++| `size` | `sm \| md` | `md` | `sm` only where a pointer is guaranteed — see Accessibility |
++| `fullWidth` | `boolean` | `false` | Stretches to the container; segments share the width evenly |
++| `aria-label` | `string` | — | Required unless you pass `aria-labelledby` |
++
++`SegmentedControlOption` is `{ value, label, disabled?, 'aria-label'? }`.
++Set `aria-label` on an option whose `label` isn't plain text.
++
++## Tokens
++
++| Part | Token |
++|---|---|
++| Track | `surface.neutral.subtle`, `radius.md` |
++| Selected segment | `surface.elevated`, `text.primary`, `shadow.card`, `radius.sm` |
++| Unselected label | `text.tertiary` → `text.primary` on hover |
++| Disabled label | `text.disabled` |
++| Focus ring | `stroke.focused` at 2px |
++| Type | `type.label-md` (`sm`) / `type.label-lg` (`md`) |
++
++No new tokens were added for this component.
++
++## Accessibility
++
++- **Roving tab stop.** The whole control is one stop in the tab order. `←`/`↑` and
++  `→`/`↓` move between segments and select as they go; `Home` and `End` jump to the
++  ends. Disabled segments are skipped.
++- **Target size.** A `md` segment is 40px tall, meeting the 40px minimum. A `sm`
++  segment is 32px — use it only where a pointer is guaranteed (dense desktop
++  toolbars, table headers), never on a touch surface.
++- **The selected segment is carried by more than its background.** The selected
++  label darkens from `text.tertiary` to `text.primary` and gains weight. This is
++  deliberate: the white selected surface sits at only **1.1:1** against the track
++  in light theme and 1.4:1 in dark, so the surface alone would not satisfy WCAG
++  1.4.11. The label change does — 6.9:1 against the track, 20:1 on the selected
++  surface — and the weight shift adds a non-colour cue on top. If you want the
++  selected *surface* itself to clear 3:1, that needs a new token; raise it with
++  the design lead rather than reaching for an arbitrary class.
++- **Contrast, light / dark:** selected label 20.2:1 / 14.6:1, unselected label
++  6.9:1 / 7.0:1, focus ring 5.6:1 / see note below.
++- **Dark-theme focus ring is currently below 3:1** (`stroke.focused` was not
++  inverted for dark). This affects every component including Button and is tracked
++  separately — it is not specific to this control.
++- The group is a `radiogroup`; each segment is a `radio` with `aria-checked`.
++  Screen readers announce "2 of 3".
++
++## Don't
++
++- Don't use it as a tab bar. If choosing an option loads different content, that's `Tabs`.
++- Don't ship it without `aria-label` — "radio group" with no name is what a screen reader will say.
++- Don't allow zero selected. There is always exactly one.
++- Don't put more than five segments in it, and don't let a label wrap.
++- Don't hardcode colours or spacing. `className="bg-[#f1f5f9]"` is a bug — add a token instead.
+diff --git a/src/components/segmented-control/SegmentedControl.stories.tsx b/src/components/segmented-control/SegmentedControl.stories.tsx
+new file mode 100644
+index 0000000..882e3d4
+--- /dev/null
++++ b/src/components/segmented-control/SegmentedControl.stories.tsx
+@@ -0,0 +1,120 @@
++import * as React from 'react';
++import type { Meta, StoryObj } from '@storybook/react-vite';
++import { SegmentedControl } from './SegmentedControl';
++
++const meta = {
++  title: 'Actions/SegmentedControl',
++  component: SegmentedControl,
++  parameters: {
++    docs: {
++      description: {
++        component:
++          'A small set of mutually exclusive options, all visible at once. Use it to switch how ' +
++          'the same content is shown — List / Board / Calendar — not to move between different ' +
++          'pages of content. Two to five options; past five, use a Select. It is a radio group, ' +
++          'so arrow keys move between segments and the whole control is a single tab stop.',
++      },
++    },
++  },
++  args: {
++    'aria-label': 'View mode',
++    options: ['List', 'Board', 'Calendar'],
++    defaultValue: 'Board',
++  },
++  argTypes: {
++    size: { control: 'radio', options: ['sm', 'md'] },
++    fullWidth: { control: 'boolean' },
++  },
++} satisfies Meta<typeof SegmentedControl>;
++
++export default meta;
++type Story = StoryObj<typeof meta>;
++
++export const Default: Story = {};
++
++export const Sizes: Story = {
++  render: (args) => (
++    <div className="flex items-center gap-4">
++      <SegmentedControl {...args} size="sm" />
++      <SegmentedControl {...args} size="md" />
++    </div>
++  ),
++};
++
++/** Two options is the floor. Below that, use a Toggle. */
++export const TwoOptions: Story = {
++  args: { options: ['Active', 'Archived'], defaultValue: 'Active' },
++};
++
++/** Five is the ceiling. Past that the labels crowd and a Select reads better. */
++export const FiveOptions: Story = {
++  args: {
++    options: ['Day', 'Week', 'Month', 'Quarter', 'Year'],
++    defaultValue: 'Week',
++    'aria-label': 'Time range',
++  },
++};
++
++/** A disabled segment stays visible and announced, so the option is discoverable but unavailable. */
++export const WithDisabledOption: Story = {
++  args: {
++    options: [
++      { value: 'List', label: 'List' },
++      { value: 'Board', label: 'Board' },
++      { value: 'Calendar', label: 'Calendar', disabled: true },
++    ],
++    defaultValue: 'List',
++  },
++};
++
++/** Stretches to its container — mobile toolbars and modal headers. */
++export const FullWidth: Story = {
++  args: { fullWidth: true },
++  render: (args) => (
++    <div className="w-96">
++      <SegmentedControl {...args} />
++    </div>
++  ),
++};
++
++/** Long labels truncate rather than wrap, so the control keeps one row. */
++export const LongLabels: Story = {
++  args: {
++    options: ['Everything assigned to me', 'My team', 'All'],
++    defaultValue: 'My team',
++    fullWidth: true,
++  },
++  render: (args) => (
++    <div className="w-80">
++      <SegmentedControl {...args} />
++    </div>
++  ),
++};
++
++/** Controlled — the parent owns the value. */
++export const Controlled: Story = {
++  render: (args) => {
++    const [value, setValue] = React.useState('List');
++    return (
++      <div className="flex flex-col gap-2">
++        <SegmentedControl {...args} value={value} onChange={setValue} />
++        <p className="text-body-sm text-text-secondary">Showing: {value}</p>
++      </div>
++    );
++  },
++};
++
++/** Both themes side by side — the selected segment must stay readable in each. */
++export const DarkTheme: Story = {
++  parameters: { layout: 'fullscreen' },
++  render: (args) => (
++    <div className="grid grid-cols-2">
++      <div className="bg-surface-canvas p-8">
++        <SegmentedControl {...args} />
++      </div>
++      <div className="dark bg-surface-canvas p-8">
++        <SegmentedControl {...args} />
++      </div>
++    </div>
++  ),
++};
+diff --git a/src/components/segmented-control/SegmentedControl.tsx b/src/components/segmented-control/SegmentedControl.tsx
+new file mode 100644
+index 0000000..01023ee
+--- /dev/null
++++ b/src/components/segmented-control/SegmentedControl.tsx
+@@ -0,0 +1,156 @@
++import * as React from 'react';
++import { cva, type VariantProps } from 'class-variance-authority';
++import { cn } from '../../lib/cn';
++
++/**
++ * SegmentedControl — a small set of mutually exclusive options, all visible at once.
++ *
++ * Use it to switch a view between two to five known modes (List / Board / Calendar).
++ * It is a radio group, not a tab list: it changes how the same content is shown,
++ * it does not swap one panel of content for another. Reach for Tabs when the
++ * options lead to different content.
++ *
++ * Every class below resolves to a design token from the VCP Figma variables.
++ * If you need a value that isn't here, add the token in `tokens/` first —
++ * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
++ */
++const track = cva(
++  ['inline-flex items-center gap-0.5 p-0.5', 'bg-surface-neutral-subtle rounded-md'],
++  {
++    variants: { fullWidth: { true: 'flex w-full', false: '' } },
++    defaultVariants: { fullWidth: false },
++  },
++);
++
++const segment = cva(
++  [
++    'inline-flex items-center justify-center gap-1.5 min-w-0',
++    'font-sans whitespace-nowrap rounded-sm cursor-pointer',
++    'text-text-tertiary transition-colors',
++    'hover:text-text-primary',
++    'focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-stroke-focused',
++    'disabled:cursor-not-allowed disabled:text-text-disabled disabled:hover:text-text-disabled',
++    /* Selected: lifts onto its own surface, and the label darkens and gains weight.
++       The weight and colour shift are deliberate — they carry the selected state
++       for anyone who can't rely on the surface change alone. */
++    'aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
++    'aria-checked:font-medium',
++  ],
++  {
++    variants: {
++      size: { sm: 'h-8 px-3 text-label-md', md: 'h-10 px-4 text-label-lg' },
++      fullWidth: { true: 'flex-1', false: '' },
++    },
++    defaultVariants: { size: 'md', fullWidth: false },
++  },
++);
++
++export interface SegmentedControlOption {
++  value: string;
++  label: React.ReactNode;
++  /** Screen-reader label. Required when `label` is an icon or otherwise not text. */
++  'aria-label'?: string;
++  disabled?: boolean;
++}
++
++export interface SegmentedControlProps
++  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'>,
++    VariantProps<typeof segment> {
++  options: Array<string | SegmentedControlOption>;
++  /** Controlled selection. */
++  value?: string;
++  /** Uncontrolled starting selection. Defaults to the first enabled option. */
++  defaultValue?: string;
++  onChange?: (value: string) => void;
++  /** Labels the group for screen readers. Use this or `aria-labelledby`. */
++  'aria-label'?: string;
++}
++
++const normalise = (o: string | SegmentedControlOption): SegmentedControlOption =>
++  typeof o === 'string' ? { value: o, label: o } : o;
++
++export const SegmentedControl = React.forwardRef<HTMLDivElement, SegmentedControlProps>(
++  ({ className, options, value, defaultValue, onChange, size, fullWidth, ...props }, ref) => {
++    const items = React.useMemo(() => options.map(normalise), [options]);
++    const firstEnabled = items.find((o) => !o.disabled)?.value;
++
++    const [uncontrolled, setUncontrolled] = React.useState(defaultValue ?? firstEnabled);
++    const selected = value !== undefined ? value : uncontrolled;
++
++    const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
++
++    const select = (next: string) => {
++      if (value === undefined) setUncontrolled(next);
++      onChange?.(next);
++    };
++
++    /* Roving tabindex: the group is one tab stop. Arrow keys move between
++       segments and select as they go, which is the expected radio-group
++       behaviour. Home/End jump to the ends. */
++    const move = (from: number, step: number) => {
++      const n = items.length;
++      for (let i = 1; i <= n; i++) {
++        const next = (from + step * i + n * n) % n;
++        if (!items[next].disabled) {
++          refs.current[next]?.focus();
++          select(items[next].value);
++          return;
++        }
++      }
++    };
++
++    const onKeyDown = (e: React.KeyboardEvent, index: number) => {
++      switch (e.key) {
++        case 'ArrowRight':
++        case 'ArrowDown':
++          e.preventDefault();
++          move(index, 1);
++          break;
++        case 'ArrowLeft':
++        case 'ArrowUp':
++          e.preventDefault();
++          move(index, -1);
++          break;
++        case 'Home':
++          e.preventDefault();
++          move(-1, 1);
++          break;
++        case 'End':
++          e.preventDefault();
++          move(items.length, -1);
++          break;
++        default:
++      }
++    };
++
++    /* Whichever segment is selected owns the tab stop. If nothing is selected,
++       the first enabled one does, so the group is always reachable. */
++    const tabStop = items.findIndex((o) => o.value === selected);
++    const rovingIndex = tabStop >= 0 ? tabStop : items.findIndex((o) => !o.disabled);
++
++    return (
++      <div ref={ref} role="radiogroup" className={cn(track({ fullWidth }), className)} {...props}>
++        {items.map((option, i) => (
++          <button
++            key={option.value}
++            ref={(el) => {
++              refs.current[i] = el;
++            }}
++            type="button"
++            role="radio"
++            aria-checked={option.value === selected}
++            aria-label={option['aria-label']}
++            disabled={option.disabled}
++            tabIndex={i === rovingIndex ? 0 : -1}
++            onClick={() => select(option.value)}
++            onKeyDown={(e) => onKeyDown(e, i)}
++            className={segment({ size, fullWidth })}
++          >
++            <span className="truncate">{option.label}</span>
++          </button>
++        ))}
++      </div>
++    );
++  },
++);
++SegmentedControl.displayName = 'SegmentedControl';
+diff --git a/src/components/segmented-control/index.ts b/src/components/segmented-control/index.ts
+new file mode 100644
+index 0000000..ec1690d
+--- /dev/null
++++ b/src/components/segmented-control/index.ts
+@@ -0,0 +1,2 @@
++export { SegmentedControl } from './SegmentedControl';
++export type { SegmentedControlProps, SegmentedControlOption } from './SegmentedControl';
+diff --git a/src/index.ts b/src/index.ts
+index 72ef673..427d7ca 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,2 +1,3 @@
+ export * from './components/button';
++export * from './components/segmented-control';
+ export { cn } from './lib/cn';
+-- 
+2.43.0
+
+
+From 3a3c9c01d6d1f234359d14facaf52295c7fff395 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 12:49:29 +0000
+Subject: [PATCH 2/3] Note feat/segmented-control in the changelog
+
+---
+ CHANGELOG.md | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index 796f789..a05849e 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -15,6 +15,12 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
+   TypeScript, flat + nested JSON.
+ - Components: `Button` (primary/secondary/tertiary/danger/link × sm/md/lg,
+   loading/disabled), mapped to `action.*` and `accent.critical.*` state tokens.
++- Components: `SegmentedControl` (sm/md, fullWidth, disabled options) — a radio
++  group on a `surface.neutral.subtle` track. No new tokens. Sizes are 32/40px to
++  match Button rather than the export's 28/36, so `md` meets the 40px target rule.
++  Known: the selected segment's surface is 1.1:1 against the track, so the
++  selected state is carried by the label's colour and weight — see
++  `docs/segmented-control.md`.
+ 
+ ### Not imported from the Figma export (deliberately)
+ 
+-- 
+2.43.0
+
+
+From 437e6154dddefc1a71dae8d8fcf762acbea7aaf9 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 12:57:03 +0000
+Subject: [PATCH 3/3] SegmentedControl: drop a weight change that never
+ happened
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+aria-checked:font-medium was a no-op — type.label-lg already carries
+weight 500, so selected and unselected were both 500. The docs claimed
+the selected label gained weight; they now describe what actually
+distinguishes it: the colour change, which carries the contrast, and the
+lift onto its own surface, which is the non-colour cue.
+---
+ docs/segmented-control.md                     | 19 +++++++++++--------
+ .../segmented-control/SegmentedControl.tsx    |  7 +++----
+ 2 files changed, 14 insertions(+), 12 deletions(-)
+
+diff --git a/docs/segmented-control.md b/docs/segmented-control.md
+index 91d920c..6e6ad9e 100644
+--- a/docs/segmented-control.md
++++ b/docs/segmented-control.md
+@@ -51,14 +51,17 @@ No new tokens were added for this component.
+ - **Target size.** A `md` segment is 40px tall, meeting the 40px minimum. A `sm`
+   segment is 32px — use it only where a pointer is guaranteed (dense desktop
+   toolbars, table headers), never on a touch surface.
+-- **The selected segment is carried by more than its background.** The selected
+-  label darkens from `text.tertiary` to `text.primary` and gains weight. This is
+-  deliberate: the white selected surface sits at only **1.1:1** against the track
+-  in light theme and 1.4:1 in dark, so the surface alone would not satisfy WCAG
+-  1.4.11. The label change does — 6.9:1 against the track, 20:1 on the selected
+-  surface — and the weight shift adds a non-colour cue on top. If you want the
+-  selected *surface* itself to clear 3:1, that needs a new token; raise it with
+-  the design lead rather than reaching for an arbitrary class.
++- **The selected segment is carried by more than its background.** The white
++  selected surface sits at only **1.1:1** against the track in light theme and
++  1.4:1 in dark, so the surface colour alone would not satisfy WCAG 1.4.11. Two
++  things make up for it: the label darkens from `text.tertiary` to `text.primary`
++  (6.9:1 against the track, 20:1 on the selected surface), and the segment lifts —
++  `shadow.card` gives a shape cue that survives a greyscale check. Label weight
++  does *not* change: `type.label-lg` carries weight 500 as part of the token, and
++  the ramp has no 500/400 pair at 13px, so a weight shift can't be done
++  consistently across both sizes without a new token. If you want the selected
++  *surface* itself to clear 3:1, that also needs a new token — raise it with the
++  design lead rather than reaching for an arbitrary class.
+ - **Contrast, light / dark:** selected label 20.2:1 / 14.6:1, unselected label
+   6.9:1 / 7.0:1, focus ring 5.6:1 / see note below.
+ - **Dark-theme focus ring is currently below 3:1** (`stroke.focused` was not
+diff --git a/src/components/segmented-control/SegmentedControl.tsx b/src/components/segmented-control/SegmentedControl.tsx
+index 01023ee..ccfcb91 100644
+--- a/src/components/segmented-control/SegmentedControl.tsx
++++ b/src/components/segmented-control/SegmentedControl.tsx
+@@ -30,11 +30,10 @@ const segment = cva(
+     'hover:text-text-primary',
+     'focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-stroke-focused',
+     'disabled:cursor-not-allowed disabled:text-text-disabled disabled:hover:text-text-disabled',
+-    /* Selected: lifts onto its own surface, and the label darkens and gains weight.
+-       The weight and colour shift are deliberate — they carry the selected state
+-       for anyone who can't rely on the surface change alone. */
++    /* Selected: lifts onto its own surface and the label darkens. The lift — a
++       raised surface plus a shadow — is the non-colour half of the cue; the
++       label's colour change is the half that carries real contrast. */
+     'aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
+-    'aria-checked:font-medium',
+   ],
+   {
+     variants: {
+-- 
+2.43.0
+

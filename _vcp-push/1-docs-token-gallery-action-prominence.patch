@@ -1,0 +1,52 @@
+From 21af504bc58608cd9c0c7a163186afd317fa0c28 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 18 Aug 2026 12:44:51 +0000
+Subject: [PATCH] Storybook: group action tokens by prominence
+
+The Action section of the token gallery listed every action token in one
+flat alphabetical grid, so a control's states were scattered across it:
+action.primary.content.default sat next to action.primary.surface.hover
+with secondary and tertiary interleaved.
+
+Split it into primary / secondary / tertiary blocks so each block is one
+control's complete state set, read top to bottom. Adds a short note on
+what each prominence level is for.
+---
+ src/foundations/Foundations.stories.tsx | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/src/foundations/Foundations.stories.tsx b/src/foundations/Foundations.stories.tsx
+index 1aa63d6..a3dfb1b 100644
+--- a/src/foundations/Foundations.stories.tsx
++++ b/src/foundations/Foundations.stories.tsx
+@@ -49,8 +49,25 @@ export const Colors: StoryObj = {
+       <Grid>{group(flat(tokens.text), 'text', 'text-text')}</Grid>
+       <h3 className="text-body-sm text-text-secondary mb-1">Stroke → border-*</h3>
+       <Grid>{group(flat(tokens.stroke), 'stroke', 'border-stroke')}</Grid>
+-      <h3 className="text-body-sm text-text-secondary mb-1">Action</h3>
+-      <Grid>{group(flat(tokens.action), 'action', 'bg-action')}</Grid>
++      <h2 className="text-heading-lg font-semibold mb-xs">Action — grouped by prominence</h2>
++      <p className="text-body-sm text-text-secondary mb-2">
++        Primary carries the page's main commitment, secondary the reversible alternative, tertiary
++        the quiet option. Each block below is one control's complete state set — default, hover,
++        pressed, selected, deselected, disabled — so you can read a control top to bottom instead of
++        hunting for its states alphabetically.
++      </p>
++      {(['primary', 'secondary', 'tertiary'] as const).map((prominence) => (
++        <section key={prominence}>
++          <h3 className="text-body-sm text-text-secondary mb-1 capitalize">{prominence}</h3>
++          <Grid>
++            {group(
++              flat(tokens.action[prominence]),
++              `action.${prominence}`,
++              `bg-action-${prominence}`,
++            )}
++          </Grid>
++        </section>
++      ))}
+       <h3 className="text-body-sm text-text-secondary mb-1">Accent</h3>
+       <Grid>{group(flat(tokens.accent), 'accent', 'bg-accent')}</Grid>
+       <h2 className="text-heading-lg font-semibold mb-xs">Core — referenced by semantic tokens only</h2>
+-- 
+2.43.0
+
