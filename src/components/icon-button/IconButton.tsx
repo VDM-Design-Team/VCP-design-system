@@ -104,6 +104,11 @@ export interface IconButtonProps
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ className, variant, size, icon, label, loading, disabled, ...props }, ref) => {
     const scale = size ?? 'md';
+    /* `title` gives pointer users a hover hint — but a Tooltip wrapping this
+       button already draws one, and it associates itself with aria-describedby.
+       Leaving `title` on would render both: ours, then the browser's native
+       bubble on top of it, which the caller has no way to suppress. */
+    const describedBy = (props as { 'aria-describedby'?: string })['aria-describedby'];
     return (
       <button
         ref={ref}
@@ -111,7 +116,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         /* The name sits here and stays put through the loading state, so the
            control never changes identity mid-announcement. */
         aria-label={label}
-        title={label}
+        title={describedBy ? undefined : label}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         {...props}
