@@ -6,21 +6,25 @@ beyond this plugin — no clone, no terminal, no Node.
 ## What you get
 
 **`/vcp-morning`** — say "catch me up" or run the command each morning. Claude
-reads GitHub through your browser and the published Storybook, and tells you:
-
-- What's waiting on **you** — review requests and unanswered comments on your PRs
-- The state of your own PRs — checks, reviews, conflicts, pending Chromatic diffs
-- What merged since yesterday, in product terms
-- Which components changed, with a click-through to each in Storybook
-- The one to three things to do first
+reads GitHub and the published Storybook and briefs you: what's waiting on you
+first, then your own PRs, what merged, what changed, and what to do next. The
+full behaviour lives in one place — `skills/vcp-morning/SKILL.md`; the
+step-by-step for new team members is `Onboarding/README.md` at the repo root.
 
 It is strictly read-only: it never merges, approves, or comments for you.
 
 ## Requirements
 
-- Logged in to GitHub in your browser as a collaborator on
-  `VDM-Design-Team/VCP-design-system`
-- That's it
+- A collaborator on `VDM-Design-Team/VCP-design-system`. The first run may show
+  a GitHub sign-in in the browser window Claude uses — sign in there once and
+  it sticks.
+
+## Changing this plugin
+
+Edit it like anything else here — PR to `main`. **Bump `version` in
+`.claude-plugin/plugin.json` in the same PR**: installed copies are cached by
+version and silently keep the old one otherwise. Users pick up a release with
+`claude plugin update vcp-design-system@vcp`.
 
 ## When you want to *change* the design system
 

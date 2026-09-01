@@ -1,6 +1,6 @@
 ---
 name: vcp-morning
-description: Morning catch-up on the VCP Design System for designers. Use when the user asks to start their day, catch up, see what changed overnight, check their PRs, or invokes /vcp-morning or /morning. Reads GitHub through the user's browser and the published Storybook — no local clone, no terminal, no setup.
+description: Morning catch-up on the VCP Design System for designers. Use when the user asks to start their day, catch up, see what changed overnight, check their PRs, or invokes /vcp-morning. Reads GitHub through the user's browser and the published Storybook — no local clone, no terminal, no setup.
 ---
 
 # VCP morning catch-up
@@ -9,9 +9,15 @@ The user is a designer on the VCP Design System. Give them, in under a minute of
 reading: what happened on GitHub since they last looked, what is waiting on THEM,
 and what changed in the design system itself. Then say what to do first.
 
-Everything is read through the browser using their logged-in GitHub session, and
-through the published Storybook. Do not ask them to install anything, open a
-terminal, or clone the repo.
+Everything is read through the browser and the published Storybook. Do not ask
+them to install anything, open a terminal, or clone the repo.
+
+**First run:** the browser window Claude drives may not be signed in to GitHub,
+even if their everyday browser is — the `@me` query pages then show a login
+screen instead of results. If that happens, ask them to sign in to GitHub in
+that browser window themselves (never handle their password), then continue; it
+stays signed in for future mornings. The repo is public, so everything except
+the `@me` queries works signed out.
 
 Key locations are in `references/project.md` — read it first.
 
@@ -31,9 +37,8 @@ Key locations are in `references/project.md` — read it first.
 
 ## 1 — Establish "since when"
 
-Ask nothing. Use the last time this skill ran if you can see it in the
-conversation; otherwise default to the last 24 hours (72 on a Monday). Say which
-window you used in one clause, so they can correct you.
+Ask nothing. Default to the last 24 hours — 72 on a Monday. Say which window
+you used in one clause, so they can correct you.
 
 ## 2 — GitHub, via the browser
 

@@ -22,8 +22,8 @@ You've been invited as a collaborator on this repository.
    https://github.com/VDM-Design-Team/VCP-design-system — you should see the
    repository without a 404.
 
-Stay logged in to GitHub in your everyday browser. Your Claude morning routine
-reads GitHub through that logged-in session.
+Keep your GitHub password handy — you'll sign in once more inside Claude's own
+browser window in step 5.
 
 ## Step 2 — Bookmark the two places you'll live
 
@@ -50,6 +50,10 @@ In any Claude conversation, paste this and let Claude run it:
 > `claude plugin marketplace add VDM-Design-Team/VCP-design-system`
 > and then `claude plugin install vcp-design-system@vcp`
 
+If your Mac asks to install "command line developer tools" during this step,
+click **Install** — it's a one-time Apple prompt, expected, and takes a few
+minutes.
+
 **Then start a new conversation.** This matters: plugins load when a
 conversation starts, so the one where you installed it can't see it yet. (If
 `/vcp-morning` ever seems missing, "new conversation" is the fix.)
@@ -61,6 +65,12 @@ Each morning, in a fresh Claude conversation:
 ```
 /vcp-morning
 ```
+
+**The first time**, Claude's browser window may show a GitHub sign-in page —
+Claude's browser is separate from your everyday one, so it doesn't know you
+yet. Sign in there yourself (Claude will never ask you to tell it your
+password — type it into GitHub's page directly), and it stays signed in from
+then on.
 
 You'll get, in about a minute of reading:
 
