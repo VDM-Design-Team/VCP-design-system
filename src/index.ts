@@ -1,6 +1,7 @@
 export * from './components/button';
 export * from './components/checkbox';
 export * from './components/field';
+export * from './components/icon';
 export * from './components/input';
 export * from './components/radio-group';
 export * from './components/segmented-control';
