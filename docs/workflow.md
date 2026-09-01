@@ -85,6 +85,14 @@ docs/tooltip-usage          documentation only
   > review."
 
 - Before starting anything large, review someone else's waiting PR.
+  **Review is everyone's job**, whatever your role: reading the change,
+  clicking through its Storybook preview, asking questions. Who must
+  *approve* which kind of change is the role matrix below — and nobody
+  approves their own PR.
+- **After your change lands, walk the team through it.** A few minutes with
+  the lead and the other designers — what changed, why, and where to see it
+  in Storybook — so everyone hears about the change from you rather than
+  stumbling into it later.
 
 **Before merge**
 - Bring `main` into your branch (`merge`, not `rebase` — no force-pushes),
