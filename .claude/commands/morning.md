@@ -47,15 +47,18 @@ for them.
 
 ## 3 — Storybook on the latest main
 
-Run `npm run latest`. It pulls `main`, installs, rebuilds `dist/` from `tokens/`, and
-starts Storybook on http://localhost:6006.
+Get `main` current first: with a clean tree, run the pull/install/token steps the way
+`npm run latest` does (or run `git pull --ff-only && npm install && npm run tokens`).
+Then start Storybook through the app's browser preview — use the `storybook` entry in
+`.claude/launch.json` — so it opens in a panel right next to the conversation instead
+of asking the person to switch to another browser. Never leave them with just a URL.
 
 - Do not start a second Storybook if 6006 is already serving.
 - It refuses rather than guesses. If it stops: **uncommitted changes** — offer to stash or
   commit, and name the files; **authentication** — `gh auth login`; **diverged history** —
   do not force anything, an engineer looks at it.
-- If they are mid-work on a branch and do not want to move, skip the pull, say you skipped
-  it, and point them at the published Storybook instead:
+- If they are mid-work on a branch and do not want to move, skip the pull, say you
+  skipped it, and open the published Storybook in the app's browser preview instead:
   https://main--685158a98c4fedbbec7ac708.chromatic.com
 
 Once it is up, name the components that are new or changed since their saved sha and give
