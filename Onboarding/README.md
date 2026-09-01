@@ -90,6 +90,8 @@ stay yours, made by you, on GitHub.
 Read these two, in the repository on GitHub — together they're ten minutes:
 
 1. **`README.md`** — what the system is and how the pieces fit.
+1. **`docs/workflow.md`** — how the team works day to day: branches, PRs,
+   reviews, and the daily rhythm.
 2. **`CLAUDE.md`** — the working rules. The short version you should carry
    around in your head:
    - `main` is protected. **Nobody** pushes to it directly — not you, not Ali.
