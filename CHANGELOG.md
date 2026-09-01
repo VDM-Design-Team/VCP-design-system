@@ -13,6 +13,34 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 - Shape: radius sm/md/pill, shadows card/raised/menu/modal.
 - Build targets: Tailwind v4 `@theme` CSS + `.dark` overrides, plain CSS vars,
   TypeScript, flat + nested JSON.
+- Components: `Avatar` / `AvatarGroup` (sm/md/lg = 24/32/40) — initials or photo,
+  tone derived from the name. No new tokens. The export's six pastels with white
+  initials measured 1.83–2.37:1 and failed 1.4.3 across the board, so the hash now
+  maps onto the `accent.{blue,green,red,yellow}` hue families rather than the status
+  families — a person is not an error. AvatarGroup announces itself as one summary
+  ("Ali, Eve and 3 others") rather than a list of images nobody can act on.
+- Components: `Badge` (sm/md, six generic tones) — the pale tonal treatment from the
+  Figma Tags page. No new tokens. **VCP's status vocabulary is deliberately not here**:
+  `accepted`, `for qa`, `confirmed prod` and the rest belong to the `StatusPill`
+  pattern, since they only mean something inside VCP.
+- Components: `Card` (title, header action, footer, padded) — `surface.elevated` with
+  `shadow.card`. No new tokens. Renders a real heading at a caller-chosen level, and
+  deliberately takes no click handler: a whole-card target hides the real action from
+  keyboards and screen readers.
+- Components: `Divider` (horizontal/vertical, optional caption) — decorative by
+  default (`role="presentation"`), opt into `separator` semantics when it genuinely
+  divides sections. No new tokens.
+- Components: `IconButton` (4 variants x sm/md/lg) — Button's variants, sizes and
+  focus ring, in a square. No new tokens. **`label` is a required prop and the other
+  naming routes are removed from the type**, so an unnamed icon-only control is a
+  compile error rather than a review finding.
+- Components: `Skeleton` (block/circle/lines, radius tokens) — `aria-hidden`, with the
+  line boxes derived from the type ramp so a three-line skeleton occupies exactly three
+  lines of body copy. No new tokens. Docs and a story carry the live-region pattern the
+  placeholder needs to not be silent.
+- Components: `Spinner` (sm/md/lg) — `role="status"`, never `progressbar`. No new
+  tokens. Reduced motion swaps the spin for a pulse rather than freezing it, because a
+  motionless spinner reads as a hang.
 - Components: `Icon` (sm/md/lg = 16/20/24) — a Phosphor glyph at `regular` weight,
   filled with `currentColor`, so colour comes from a text token on the parent and
   dark theme needs no second path. No new tokens. Decorative by default
