@@ -99,6 +99,7 @@ setPath(semLight, 'accent.success.tonal.content.default', '{color.green.900}', '
    focus ring is close to invisible in dark theme on every component.
    vcp-blue-300 mirrors how stroke.brand.strong flips (600 -> 300) and gives 6.33:1. */
 setPath(semDark, 'stroke.focused', '{color.vcp-blue.300}', 'AA fix: was vcp-blue-500 (2.37:1 on dark surfaces, fails 1.4.11). Now 6.33:1');
+
 /* stroke.field — the resting border of a form control. Figma has no such variable:
    the export borders fields with stroke.default, which is 1.48:1 against the field
    and fails the 3:1 that 1.4.11 asks of a control boundary. Neither neighbour in the
