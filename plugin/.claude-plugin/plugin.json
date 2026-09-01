@@ -1,0 +1,11 @@
+{
+  "name": "vcp-design-system",
+  "version": "0.1.0",
+  "description": "Daily catch-up on the VCP Design System — what merged, what needs your review, and what changed in Storybook. Built for designers; needs no clone and no terminal.",
+  "author": {
+    "name": "VDM Design Team"
+  },
+  "homepage": "https://github.com/VDM-Design-Team/VCP-design-system",
+  "repository": "https://github.com/VDM-Design-Team/VCP-design-system",
+  "keywords": ["design-system", "storybook", "github", "daily-brief"]
+}

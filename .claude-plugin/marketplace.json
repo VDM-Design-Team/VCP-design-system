@@ -1,0 +1,11 @@
+{
+  "name": "vcp",
+  "owner": { "name": "VDM Design Team" },
+  "plugins": [
+    {
+      "name": "vcp-design-system",
+      "source": "./plugin",
+      "description": "Daily VCP Design System catch-up for designers — /vcp-morning"
+    }
+  ]
+}
