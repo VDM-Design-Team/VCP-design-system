@@ -127,25 +127,45 @@ Review the **running Storybook preview**, not only the diff. The checklist:
 - Keyboard, focus ring, contrast handled?
 - Stories and `docs/<name>.md` updated?
 
-Who must review what — by **role**:
+**Reviewing** (reading, commenting, asking questions) is everyone's job.
+**Approving and merging** belongs to three seats:
 
-| Change | Required review |
+- **Lead** — approves and merges any change.
+- **Design-system owner** — approves and merges everything **except big
+  changes**, which need the lead. The owner's own PRs are approved by the
+  lead.
+- **Designers** — review and comment on any PR, but do not approve or merge.
+  Consistently good reviews are the path to the owner seat.
+
+A **big change** is any of: a new component or pattern, a change to core or
+semantic tokens, or a breaking change (rename/removal). Everything else —
+fixes, docs, adjustments and new variants of existing components — is a
+normal change.
+
+| Change | Who approves the merge |
 |---|---|
-| Documentation only | Any designer |
-| Adjusting an existing component | A designer familiar with it |
-| New component or pattern | Design-system owner |
-| Core or semantic tokens | Design-system owner + affected designers |
-| Breaking change (rename/removal) | Design-system owner + engineering owner |
-| Accessibility-sensitive change | Accessibility owner |
+| Normal change | Design-system owner or lead |
+| New component or pattern | Lead |
+| Core or semantic tokens | Lead |
+| Breaking change (rename/removal) | Lead, plus the engineering owner |
+| Accessibility-sensitive change | As above, plus the accessibility owner |
 
-Nobody approves their own PR. Chromatic visual diffs on a PR are approved by
+Nobody approves their own PR. The two edge cases that creates:
+
+- The **owner's** own PRs are approved by the lead.
+- The **lead's** own big changes get the owner's review on the PR before the
+  lead merges — a documented second pair of eyes, since nobody outranks the
+  lead to formally approve.
+
+Chromatic visual diffs on a PR are approved by
 the PR's **reviewer**, never its author.
 
 ### Current holders
 
 | Role | Held by |
 |---|---|
-| Design-system owner | Ali |
+| Lead | Ali |
+| Design-system owner | Eve |
 | Engineering owner | Ali |
 | Accessibility owner | Ali |
 | Designers | Ali · Eve · Marvin |
