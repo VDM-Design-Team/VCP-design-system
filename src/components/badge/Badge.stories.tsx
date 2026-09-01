@@ -184,3 +184,5 @@ export const LightAndDark: Story = {
     </div>
   ),
 };
+
+// Temporary no-op to exercise the visual-review comment on PR #22 — reverted in the next commit.
