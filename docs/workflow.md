@@ -43,7 +43,16 @@ docs/tooltip-usage          documentation only
   what's waiting on you, the state of your PRs.
 - Answer review comments **before** starting new work — someone is blocked on
   them.
-- Starting a task? Fresh `main`, new branch.
+- Starting a task? Fresh `main`, new branch. You don't run git yourself —
+  you tell Claude what you're starting, in product terms:
+
+  > "I'm starting a new task: secondary buttons need a subtle variant for
+  > the settings page. Update main and create a branch for it, then let's
+  > build it — stories and docs included. Only touch the files this needs."
+
+  Claude pulls the latest `main`, creates `feat/button-subtle-variant`,
+  and keeps the change scoped. Naming the task in product terms up front
+  also becomes your PR description later.
 
 **During the day**
 - Push your branch at least before lunch and at end of day. Pushed work is
