@@ -81,7 +81,7 @@ const buildSemantic = (scope) => {
 const semLight = buildSemantic(L);
 const semDark  = buildSemantic(D);
 
-/* WCAG AA fixes, light theme only (dark already passes) — approved by design 2026-08-18.
+/* WCAG AA fixes — approved by design 2026-08-18.
    Applied post-import so re-running the importer never regresses them. */
 const setPath = (obj, path, value, desc) => {
   const keys = path.split('.');
@@ -92,6 +92,13 @@ const setPath = (obj, path, value, desc) => {
 setPath(semLight, 'text.tertiary', '{color.slate.600}', 'AA fix: was slate-500; darkened so subtle could move up and stay readable');
 setPath(semLight, 'text.subtle',   '{color.slate.500}', 'AA fix: was slate-400 (2.56:1, fails). Now 4.76:1 on white');
 setPath(semLight, 'accent.success.tonal.content.default', '{color.green.900}', 'AA fix: green-800 was exactly 4.50:1; green-900 gives 8.2:1');
+
+/* Dark theme: every other stroke.* token was inverted for dark, but stroke.focused
+   was left at vcp-blue-500 — the same value as light. That is 2.37:1 against the
+   dark surfaces, below the 3:1 that WCAG 1.4.11 asks of a focus indicator, so the
+   focus ring is close to invisible in dark theme on every component.
+   vcp-blue-300 mirrors how stroke.brand.strong flips (600 -> 300) and gives 6.33:1. */
+setPath(semDark, 'stroke.focused', '{color.vcp-blue.300}', 'AA fix: was vcp-blue-500 (2.37:1 on dark surfaces, fails 1.4.11). Now 6.33:1');
 
 /* ---- spacing / borders from the base collection ---- */
 const space = { space: { $type: 'dimension' } };

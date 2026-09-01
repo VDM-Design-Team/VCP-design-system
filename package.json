@@ -35,7 +35,8 @@
     "test": "npm run lint:tokens && npm run typecheck",
     "preview": "npm run tokens && tailwindcss -i preview/entry.css -o preview/out.css && echo 'open preview/index.html'",
     "gallery": "npm run tokens && node scripts/build-gallery.mjs",
-    "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
+    "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN",
+    "latest": "node scripts/latest.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
