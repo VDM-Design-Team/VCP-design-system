@@ -19,3 +19,11 @@ jobs:
           buildScriptName: 'storybook:build'
           onlyChanged: true        # TurboSnap: only snapshot affected stories
           exitOnceUploaded: true
+          # Every build on main becomes the new baseline, with no one in the loop.
+          # Without this, baselines only advance when a human accepts a build — and
+          # if nobody does, each new build diffs against an ever-older snapshot until
+          # the changes pile up into noise and the tool stops being read at all.
+          # The trade is deliberate: a visual regression that lands on main is
+          # accepted silently. PR builds still diff against main, which is the
+          # comparison worth looking at, and they stay non-blocking.
+          autoAcceptChanges: main
