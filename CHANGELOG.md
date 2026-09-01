@@ -13,6 +13,36 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 - Shape: radius sm/md/pill, shadows card/raised/menu/modal.
 - Build targets: Tailwind v4 `@theme` CSS + `.dark` overrides, plain CSS vars,
   TypeScript, flat + nested JSON.
+- Components: `Popover` / `Menu` (Overlays) — Menu is Popover plus a keyboard
+  contract: focus moves into the list on open, arrows wrap, Home/End jump, Escape
+  closes and restores focus to the trigger, dividers and disabled items are stepped
+  over. No new tokens. `MenuItem.icon` is typed to `IconName`, so a glyph the system
+  does not ship is a compile error. Danger items carry three signals, only one of
+  which is colour — a forced glyph and a visually hidden "destructive action" in the
+  accessible name do the rest. Positioning is deliberately simple: no flipping and no
+  collision detection, documented rather than implied.
+- Components: `Modal` (Overlays) — `role="dialog"`, `aria-modal`, focus into the
+  panel, a real focus trap that wraps both ways, Escape restoring focus to whatever
+  opened it, background marked `inert`, and a scroll lock that compensates for the
+  scrollbar so the page does not shift. No new tokens. Escape closes even when
+  `dismissible={false}` — that flag guards the accidental backdrop click, not the
+  deliberate way out.
+- Components: `Tooltip` (Overlays) — opens on keyboard focus, not hover alone, wired
+  with `aria-describedby`, dismissible with Escape and hoverable across the gap
+  (WCAG 1.4.13). No new tokens. Text is 10.35:1 light and 16.36:1 dark.
+- Components: `Toast` / `Banner` (Feedback) — a Toast is an event, a Banner is a
+  state. No new tokens; both reuse the tonal pairs `docs/badge.md` already proved.
+  The live regions live on `ToastViewport` and are rendered empty from first paint,
+  because a role arriving together with its content is not announced — polite for
+  informational tones, assertive for errors. Auto-dismiss pauses on hover, on focus
+  within, and while the tab is hidden, and a toast carrying an action never
+  auto-dismisses at all (WCAG 2.2.1).
+- Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
+  render, ours and the browser's native bubble on top, with no way for a caller to
+  suppress the second.
+- Fixed: `Menu`'s shortcut text moves from `text.subtle` to `text.tertiary`. It was
+  4.76:1 on the panel but only 4.09:1 once the item was highlighted — the state where
+  a keyboard user is actually reading it.
 - Components: `Avatar` / `AvatarGroup` (sm/md/lg = 24/32/40) — initials or photo,
   tone derived from the name. No new tokens. The export's six pastels with white
   initials measured 1.83–2.37:1 and failed 1.4.3 across the board, so the hash now
