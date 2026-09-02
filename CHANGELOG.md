@@ -61,6 +61,30 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   affordance is the system's `IconButton` named `Edit ${label}` / `Confirm ${label}` —
   which is why `label` is typed `string`. Label/value land on `label-md`/`body-md`
   because the export's 13px/400 is a ramp step that deliberately does not exist.
+- Components: `Breadcrumb` (Navigation) — the landmark pattern in full:
+  `<nav aria-label="Breadcrumb">` around a real `<ol>`, the current page as inert
+  text with `aria-current="page"`, separators hidden. No new tokens. Crumbs render
+  as real `<a>`s when given `href` (preferred — middle-click and copy-link work)
+  and as buttons only for genuinely programmatic `onNavigate`.
+- Components: `Pagination` (Navigation) — addressable page numbers with
+  `aria-current="page"` on the active page and a spoken name on every control.
+  No new tokens; the active page sits on `action.primary` at rest. Keeps the
+  export's five-number window, clamped at the ends; deliberately no
+  ellipsis variant until a data set actually needs one. 32-tall controls carry the
+  pointer-dense exemption.
+- Components: `PaginationDots` (Navigation) — position dots for carousels and
+  onboarding. No new tokens. The export's `role="tablist"` is gone — nothing here
+  owns panels; they are a named group of "Go to page N" buttons, or, with no
+  `onChange`, a passive indicator with zero tab stops. Inactive dots moved from
+  slate-300 to `surface.neutral.strong` so an unselected dot clears the 3:1
+  UI-graphic bar (4.55:1 light at worst); the current dot is also 2.5× wider, so
+  state never rides on hue alone.
+- Components: `Accordion` (Navigation) — stacked disclosures wired to the APG
+  pattern the export implied but skipped: heading → `button` with
+  `aria-expanded`/`aria-controls` → labelled `region`. No new tokens. Controlled
+  (`openKeys`/`onToggle`) or uncontrolled (`defaultOpenKeys`, `multiple`); closed
+  panels are unmounted, so form state belongs outside. Native `onToggle` is
+  intentionally shadowed by the accordion's own callback.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.

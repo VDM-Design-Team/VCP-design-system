@@ -29,6 +29,7 @@ built against something that is about to change.
 | component | `Avatar`, `AvatarGroup`, `Badge`, `Card`, `Divider`, `IconButton`, `Skeleton`, `Spinner` | PR #15 |
 | component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
+| component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 
 ## Components — to port
 
@@ -38,13 +39,13 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 |---|---|
 | `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard`, `DataTable` |
 | `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
-| `Navigation/` | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` |
 | `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
 
 Dependency notes:
 
-- `SearchSelect` needs `Select` and `Popover`. `DataTable` needs `Checkbox` and
-  `Pagination`. `TagEditor` composes `Chip`.
+- `SearchSelect` needs `Select` and `Popover`. `TagEditor` composes `Chip`.
+- `DataTable` needs `Checkbox` and `Pagination` — both shipped, so `DataTable`
+  is unblocked.
 - **`Logo` is blocked on assets.** The export's `/assets/vcp-logo-vector.svg`
   and `/assets/logo-valuechainplus.png` were never vendored into `_source/` —
   the image files have to come out of Figma (or the brand kit) before the
