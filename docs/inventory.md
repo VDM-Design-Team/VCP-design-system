@@ -30,7 +30,7 @@ built against something that is about to change.
 | component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
-| component | `DataTable` | PR #42 |
+| component | `DataTable` | PR #43 |
 
 ## Components — to port
 
