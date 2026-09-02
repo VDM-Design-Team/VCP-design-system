@@ -239,6 +239,27 @@ and `/morning` commands only exist inside it), and push at least before
 lunch and end of day — local work is not backed up until it's pushed.
 </details>
 
+## You're set — the checklist
+
+Run through these — if nothing surprises you, you're ready to work.
+
+**Day one (steps 1–6)**
+
+- [ ] Can see the repo on GitHub (invitation accepted)
+- [ ] Claude desktop app installed, VCP plugin working (`/vcp-morning` in a fresh conversation)
+- [ ] Ran `/vcp-morning` once — signed in to GitHub inside Claude's browser window
+- [ ] Opened a PR's 🔍 Visual review and clicked through the Chromatic diffs
+
+**First week (step 7)**
+
+- [ ] Read `README.md`, `docs/workflow.md`, and `CLAUDE.md` in the repo
+- [ ] Know where to find the four rules in `CLAUDE.md`: every change is a PR; product terms not CSS; tokens only; stories and docs ship with every component
+
+**When you propose changes (step 8)**
+
+- [ ] Authorized GitHub at `claude.ai/code` — not Settings → Connectors
+- [ ] Know who approves what (design-system owner vs lead)
+
 ## Who to ask
 
 - **Anything about how the system works or why** — ask Claude first; it has
