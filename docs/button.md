@@ -25,7 +25,7 @@ The primary interactive control.
 ## Accessibility
 
 - Minimum target size is 40×40 (size `md`). `sm` is 32px tall — only use it where a pointer is guaranteed.
-- Focus ring is `outline-line-brand` at 2px with 2px offset. Never remove it.
+- Focus ring is `outline-stroke-focused` at 2px with 2px offset. Never remove it.
 - `loading` sets `aria-busy` and disables the control; put the outcome in the label ("Saving…") if the wait exceeds ~1s.
 - Icon-only buttons **must** have an `aria-label`.
 
