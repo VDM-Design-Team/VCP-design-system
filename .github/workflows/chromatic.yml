@@ -80,7 +80,8 @@ jobs:
                 `| **Before → after diffs** — every story this PR changes, side by side against \`main\` | [Open in Chromatic](${buildUrl}) |`,
                 `| **Live Storybook for this branch** — click through the real components | [Open Storybook](${storybookUrl}) |`,
                 '',
-                '_Updated automatically on every push. Diffs may take a minute to finish after this comment appears._'
+                '_Updated automatically on every push. Diffs may take a minute to finish after this comment appears._',
+                '_The diff link asks you to sign in the first time — use **Connect with GitHub** and your access to this repo carries over. The Storybook link needs no account._'
               );
             }
             const body = lines.join('\n');

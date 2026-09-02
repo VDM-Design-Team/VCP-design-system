@@ -125,6 +125,13 @@ with the two links a review starts from:
 - **The live Storybook for the branch** — the real components, clickable, for
   trying hover, focus, dark theme, and mobile widths yourself.
 
+The two links differ on access. The branch Storybook is public — anyone with
+the link can open it, no account needed. The Chromatic diffs are
+collaborator-only: the first time, Chromatic asks you to sign in — use
+**Connect with GitHub** and your repository access carries over. A **"You
+need access"** page means you're not signed in, or signed in with a GitHub
+account that isn't a collaborator on the repo.
+
 Open the diffs first, then click through the branch's Storybook; read the code
 diff last. When a PR touches nothing visual, the comment says so — nothing to
 look at, review the text.
