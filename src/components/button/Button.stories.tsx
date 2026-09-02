@@ -9,7 +9,7 @@ const meta = {
       description: {
         component:
           'The primary interactive control. Use `primary` for the single most important action ' +
-          'on a screen, `secondary` for supporting actions, `ghost` inside dense toolbars, and ' +
+          'on a screen, `secondary` for supporting actions, `tertiary` inside dense toolbars, and ' +
           '`danger` only for destructive, irreversible actions.',
       },
     },
