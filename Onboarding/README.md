@@ -139,6 +139,10 @@ browser. When `/vcp-morning` (or Ali) points you at a waiting pull request:
 2. Click **Before → after diffs**: every story the change touches, side by
    side against the current system. This is the heart of the review — does
    the *after* look right?
+   **The first time**, Chromatic shows a sign-in page — click **Connect
+   with GitHub** and you're in; your access to the repository carries over,
+   and it stays signed in from then on. If the page says **0 changes**,
+   that's a real answer: nothing visual moved, nothing to inspect.
 3. Click **the live Storybook for the branch** and click through the real
    components: try hover and focus, dark theme, narrow widths.
 4. Say what you see, as a comment on the PR — questions count as review.
