@@ -28,7 +28,7 @@ built against something that is about to change.
 | component | `Icon` | PR #10 |
 | component | `Avatar`, `AvatarGroup`, `Badge`, `Card`, `Divider`, `IconButton`, `Skeleton`, `Spinner` | PR #15 |
 | component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
-| component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | this PR |
+| component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 
 ## Components — to port
 
