@@ -28,7 +28,7 @@
   "scripts": {
     "tokens": "style-dictionary build --config style-dictionary.config.mjs",
     "build": "npm run tokens && tsup",
-    "dev": "storybook dev -p 6006",
+    "dev": "storybook dev -p ${PORT:-6006}",
     "storybook:build": "storybook build",
     "lint:tokens": "node scripts/lint-hardcoded-values.mjs",
     "typecheck": "tsc --noEmit",

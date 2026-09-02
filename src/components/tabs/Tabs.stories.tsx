@@ -12,7 +12,9 @@ const meta = {
           'Moves between sibling panels of content under one heading — Overview / Activity / ' +
           'Files. Each tab owns a panel. If the options only change how the *same* content is ' +
           'shown, use SegmentedControl instead. This component renders the bar; you render the ' +
-          'panels and wire them with `tabId()` and `tabPanelId()`.',
+          'panels and wire them with `tabId()` and `tabPanelId()`.' +
+          '\n\n**From Figma:** Tabs organize and allow navigation between groups of content ' +
+          'that are related and at the same level of hierarchy.',
       },
     },
   },

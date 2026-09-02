@@ -24,7 +24,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Primary: Story = {};
+export const Primary: Story = {
+  args: {
+    loading: false
+  }
+};
 export const Secondary: Story = { args: { variant: 'secondary' } };
 export const Tertiary: Story = { args: { variant: 'tertiary' } };
 export const Danger: Story = { args: { variant: 'danger', children: 'Delete account' } };
@@ -41,11 +45,15 @@ export const Sizes: Story = {
 };
 
 export const States: Story = {
+  args: {
+    loading: false
+  },
+
   render: (args) => (
     <div className="flex items-center gap-sm">
       <Button {...args}>Default</Button>
       <Button {...args} loading>Loading</Button>
       <Button {...args} disabled>Disabled</Button>
     </div>
-  ),
+  )
 };

@@ -11,7 +11,9 @@ const meta = {
         component:
           'A single-line text field. `md` (40 tall) is the default and the only size safe for touch; ' +
           '`sm` is for dense tables and toolbars. Icons are decorative — always ship a real `<label>` ' +
-          'alongside the field, and pair `invalid` with a visible error message.',
+          'alongside the field, and pair `invalid` with a visible error message.' +
+          '\n\n**From Figma:** Use a text field when someone needs to enter text into a UI, ' +
+          'such as filling in contact or payment information.',
       },
     },
   },
