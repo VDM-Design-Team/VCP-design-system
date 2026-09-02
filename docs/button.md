@@ -8,7 +8,7 @@ The primary interactive control.
 |---|---|---|
 | `primary` | The single most important action | 1 |
 | `secondary` | Supporting actions next to a primary | no limit |
-| `ghost` | Dense toolbars, icon-only actions, table rows | no limit |
+| `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
 | `danger` | Destructive, irreversible actions only | 1 |
 | `link` | Inline navigation that reads as text | no limit |
 
@@ -16,7 +16,7 @@ The primary interactive control.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| ghost \| danger \| link` | `primary` | |
+| `variant` | `primary \| secondary \| tertiary \| danger \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Disables the button and swaps the left icon for a spinner |
