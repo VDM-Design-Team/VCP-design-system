@@ -10,6 +10,47 @@ rather than guess, so error text is worth reading.
 
 ---
 
+## What you'll need — the complete list
+
+**For reading, reviewing, and your morning routine** (steps 1–6, day one):
+
+| Tool | Where | Notes |
+|---|---|---|
+| A GitHub account | github.com | With the collaborator invite accepted (step 1) |
+| Claude desktop app | https://claude.com/claude-code | Sign in with your work account |
+| Apple's command line developer tools | macOS prompts you | One click during step 4 — expected, takes a few minutes |
+
+That's genuinely all. No Node, no editor, no design software.
+
+**Only when you start proposing changes** (step 8 — days or weeks away):
+
+| Tool | Where | Notes |
+|---|---|---|
+| Node.js 22 or newer | https://nodejs.org | Claude walks you through it |
+| GitHub CLI (`gh`), signed in | Claude installs and runs `gh auth login` with you | A one-time browser sign-in; this is what lets Claude push branches and open PRs **as you** |
+
+**What you do NOT need** — skip these even if something suggests them:
+
+- **The GitHub connector in Claude's settings (claude.ai → Connectors).**
+  This workflow never uses it. `/vcp-morning` reads GitHub through Claude's
+  own browser window, and the contributor setup uses the GitHub CLI instead.
+  If Claude ever suggests "connecting GitHub" in its settings, decline — it
+  adds a second, differently-configured path to GitHub and the two get
+  confused about who you are.
+- **Figma.** The Figma file mirrors this repo, not the other way round; you
+  can go a long way without ever opening it.
+- A code editor, Docker, or any terminal knowledge on day one.
+
+**The one sign-in trap, worth reading twice:** Claude's browser window is a
+separate browser — it does not share sign-ins with your everyday Chrome or
+Safari. The first time `/vcp-morning` opens GitHub there, it may show you
+logged out even though you're logged in "in your browser". That's normal:
+sign in to GitHub *inside Claude's window*, directly on GitHub's page (Claude
+will never ask you to tell it your password), and it stays signed in from
+then on. Nearly every "GitHub won't connect" report is this.
+
+---
+
 ## Step 1 — Accept the GitHub invitation
 
 You've been invited as a collaborator on this repository.
@@ -85,14 +126,33 @@ You'll get, in about a minute of reading:
 It's read-only. It will never merge, approve, or comment as you — decisions
 stay yours, made by you, on GitHub.
 
-## Step 6 — Understand how change happens here
+## Step 6 — Reviewing a change (your first real contribution)
 
-Read these two, in the repository on GitHub — together they're ten minutes:
+Reviewing is **every designer's job** here, and it needs nothing beyond a
+browser. When `/vcp-morning` (or Ali) points you at a waiting pull request:
+
+1. Open the PR on GitHub and find the **🔍 Visual review** comment — it's
+   posted automatically on every PR.
+2. Click **Before → after diffs**: every story the change touches, side by
+   side against the current system. This is the heart of the review — does
+   the *after* look right?
+3. Click **the live Storybook for the branch** and click through the real
+   components: try hover and focus, dark theme, narrow widths.
+4. Say what you see, as a comment on the PR — questions count as review.
+   "Why did the padding change on small buttons?" is exactly the job.
+
+You review and comment; you don't approve or merge — that's the
+design-system owner (normal changes) or the lead (new components, tokens,
+breaking changes). Consistently good reviews are the path to the owner seat.
+
+## Step 7 — Understand how change happens here
+
+Read these three, in the repository on GitHub — together they're ten minutes:
 
 1. **`README.md`** — what the system is and how the pieces fit.
-1. **`docs/workflow.md`** — how the team works day to day: branches, PRs,
-   reviews, and the daily rhythm.
-2. **`CLAUDE.md`** — the working rules. The short version you should carry
+2. **`docs/workflow.md`** — how the team works day to day: branches, PRs,
+   reviews, roles, and the daily rhythm.
+3. **`CLAUDE.md`** — the working rules. The short version you should carry
    around in your head:
    - `main` is protected. **Nobody** pushes to it directly — not you, not Ali.
      Every change, however small, is a pull request that someone reviews.
@@ -107,10 +167,10 @@ You don't need to memorise the rest — Claude enforces the details when you
 work in the repo. You need to *recognise* when a rule is why something is
 being refused.
 
-## Step 7 — When you want to change the design system
+## Step 8 — When you want to change the design system
 
 This is a milestone, not a day-one task. It can wait days or weeks — reading,
-reviewing, and commenting need nothing beyond steps 1–5.
+reviewing, and commenting need nothing beyond steps 1–6.
 
 The day you first want to *change* something — a new variant, a color that's
 wrong, a component that's missing — you'll need the repository on your own
@@ -135,14 +195,33 @@ Then propose changes by asking for what you want in product terms:
 > "Add a subtle variant to Button — brand text on a light brand background —
 > and update the docs and stories."
 
-Claude edits, tests, and opens the PR. Ali reviews and merges. That's the loop.
+Claude edits, tests, and opens the PR. The design-system owner approves and
+merges it — or the lead, when it's a new component, a token change, or
+anything breaking. That's the loop.
 
 ## Who to ask
 
 - **Anything about how the system works or why** — ask Claude first; it has
   the repo's docs and rules. Genuinely — it answers "what's the difference
   between a component and a pattern" better than interrupting a human.
-- **Decisions** — new tokens, whether something belongs in the system, merge
-  approvals — Ali.
+- **Decisions** — approvals for everyday changes go to the **design-system
+  owner**; new tokens, new components, whether something belongs in the
+  system, and anything breaking go to the **lead**. The "Current holders"
+  table in `docs/workflow.md` says who holds each seat today.
 - **Something broken in this onboarding** — Ali, and say which step. This
-  document is version one; your confusion is how it improves.
+  document is young; your confusion is how it improves.
+
+---
+
+## For the lead — onboarding someone new
+
+The sender's half, so it's written down too:
+
+1. **Invite them on GitHub** — repository → Settings → Collaborators →
+   invite with **write** access.
+2. **Add them to the team table** — a small PR putting them in the
+   "Designers" row of the Current holders table in `docs/workflow.md`
+   (and update the Notion mirror, per the sync rule).
+3. **Send them the link to this page** with one line: "start at step 1."
+4. When their first review or PR lands, walk them through the result — the
+   post-merge walkthrough is how the system stays one conversation.
