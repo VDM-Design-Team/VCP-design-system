@@ -748,6 +748,10 @@
     },
     "overlay": {
       "$value": "#e2e8f0bf"
+    },
+    "track": {
+      "$value": "{color.slate.200}",
+      "$description": "Meter/progress track: quiet against surfaces, ≥3.8:1 under every accent filled surface in both themes"
     }
   },
   "text": {

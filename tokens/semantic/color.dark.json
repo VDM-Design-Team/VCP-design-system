@@ -749,6 +749,10 @@
       },
       "overlay": {
         "$value": "#1e293bbf"
+      },
+      "track": {
+        "$value": "{color.slate.800}",
+        "$description": "Meter/progress track, dark: every accent filled surface clears 3.8:1 on it; the fill, not the track, carries the boundary"
       }
     },
     "text": {

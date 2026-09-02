@@ -37,6 +37,30 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   informational tones, assertive for errors. Auto-dismiss pauses on hover, on focus
   within, and while the tab is hidden, and a toast carrying an action never
   auto-dismisses at all (WCAG 2.2.1).
+- Components: `Chip` (Display) — the interactive pill Badge's docs promised: toggleable
+  filters (`aria-pressed`), removable tags, avatar and count anatomy. No new tokens;
+  brand-tinted from `surface.brand.*`. The export nested a `<button>` inside a clickable
+  `<span>`; rebuilt so every clickable region is a real button and no button ever
+  contains another — with `onRemove` the pill becomes a passive wrapper around two
+  sibling controls. 28 tall carries the same pointer-dense exemption as
+  `IconButton size="sm"`.
+- Components: `ProgressBar` (Feedback) — a determinate meter with real
+  `aria-valuenow/min/max`, `tone` as consumption status (brand/success/warning/danger),
+  `sm`/`md` sizes, optional visible label (wired via `aria-labelledby`) and value.
+  **New token: `surface.track`** (slate-200 light / slate-800 dark) — no existing
+  surface kept every fill ≥3:1 against the track in dark (the closest dropped the
+  danger fill to 1.25:1); on the new token the floor is 3.84:1, measured per tone in
+  docs/progress-bar.md. Minor bump; the token needs pushing into the Figma variables.
+- Components: `EmptyState` (Display) — icon tile (`aria-hidden`), real heading with a
+  movable `headingLevel`, description at a readable measure, one `action` slot. No new
+  tokens. The docs carry the actual contract: name what is empty, why, and the way
+  forward — an empty state without an action is a dead end and should be rare.
+- Components: `DetailRow` (Display) — the 132 label column / value / optional edit
+  affordance row for details panels. No new tokens. The export reached `Icon` and
+  `IconButton` through a window-global registry; now ordinary imports, and the edit
+  affordance is the system's `IconButton` named `Edit ${label}` / `Confirm ${label}` —
+  which is why `label` is typed `string`. Label/value land on `label-md`/`body-md`
+  because the export's 13px/400 is a ramp step that deliberately does not exist.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
