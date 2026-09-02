@@ -14,7 +14,11 @@ const meta = {
           'if you know Button, you know this. `label` is a **required** prop: it becomes the ' +
           "button's accessible name and its tooltip, and there is no way to render one without " +
           'it. Reach for it only when the icon is unambiguous and space is genuinely tight; ' +
-          'otherwise use a `Button` with `iconLeft` and a visible word.',
+          'otherwise use a `Button` with `iconLeft` and a visible word.' +
+          '\n\n**From Figma:** Icon buttons display actions in a compact layout. Icon buttons ' +
+          'can represent opening actions such as opening an overflow menu or search, or ' +
+          'represent binary actions that can be toggled on and off, such as favorite or ' +
+          'bookmark. Icon buttons can be grouped together or they can stand alone.',
       },
     },
   },
