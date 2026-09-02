@@ -85,6 +85,17 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (`openKeys`/`onToggle`) or uncontrolled (`defaultOpenKeys`, `multiple`); closed
   panels are unmounted, so form state belongs outside. Native `onToggle` is
   intentionally shadowed by the accordion's own callback.
+- Components: `DataTable` (Display) — the generic table the four VCP table patterns
+  will specialise. No new tokens. The export drew a CSS grid of divs; rebuilt on a
+  real `<table>` (`scope="col"`, an `sr-only` caption, `aria-sort`) because
+  cell-by-cell navigation is the point of tabular markup. Two API changes from the
+  export, both deliberate: `sort` gained a direction (`{ key, direction }` — the
+  component asks and shows but never sorts `rows` itself), and **`onRowClick` is
+  gone** for Card's reason — a whole-row target is invisible to keyboards; the
+  row's action belongs in a cell as a real link. Selection composes `Checkbox`
+  (named select-all, `indeterminate` while partial, `selectLabel` for per-row
+  names); `width` takes CSS widths for `<col>`, and the container scrolls
+  horizontally so the page never does.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.

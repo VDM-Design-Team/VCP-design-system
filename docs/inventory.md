@@ -30,6 +30,7 @@ built against something that is about to change.
 | component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
+| component | `DataTable` | PR #43 |
 
 ## Components — to port
 
@@ -37,15 +38,13 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 
 | Storybook group | Components |
 |---|---|
-| `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard`, `DataTable` |
+| `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard` |
 | `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
 | `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
 
 Dependency notes:
 
 - `SearchSelect` needs `Select` and `Popover`. `TagEditor` composes `Chip`.
-- `DataTable` needs `Checkbox` and `Pagination` — both shipped, so `DataTable`
-  is unblocked.
 - **`Logo` is blocked on assets.** The export's `/assets/vcp-logo-vector.svg`
   and `/assets/logo-valuechainplus.png` were never vendored into `_source/` —
   the image files have to come out of Figma (or the brand kit) before the
@@ -74,7 +73,8 @@ Dependency notes:
   390px detail column.
 - `TopBar` is blocked on `Logo` only — `Menu`, `Avatar` and `IconButton` have
   shipped. `Logo` in turn waits on its image assets (see above).
-- The four tables are all blocked on `DataTable`; build it once and specialise.
+- The four tables were blocked on `DataTable`, which has shipped — they are
+  unblocked; specialise it rather than copying it.
 
 ## Known gaps carried forward
 
