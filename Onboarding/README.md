@@ -26,17 +26,19 @@ That's genuinely all. No Node, no editor, no design software.
 
 | Tool | Where | Notes |
 |---|---|---|
-| Node.js 22 or newer | https://nodejs.org | Claude walks you through it |
-| GitHub CLI (`gh`), signed in | Claude installs and runs `gh auth login` with you | A one-time browser sign-in; this is what lets Claude push branches and open PRs **as you** |
+| Claude Code on the web | https://claude.ai/code | Nothing to install. A one-time **"authorize GitHub"** click there lets cloud sessions open branches and PRs **as you** |
+
+That's it — changes happen in the cloud. No local copy of the repository, no
+Node, no command line. (A local setup exists for power users; see the end of
+step 8.)
 
 **What you do NOT need** — skip these even if something suggests them:
 
 - **The GitHub connector in Claude's settings (claude.ai → Connectors).**
-  This workflow never uses it. `/vcp-morning` reads GitHub through Claude's
-  own browser window, and the contributor setup uses the GitHub CLI instead.
-  If Claude ever suggests "connecting GitHub" in its settings, decline — it
-  adds a second, differently-configured path to GitHub and the two get
-  confused about who you are.
+  This workflow never uses it. Careful with the similar names: the one thing
+  you *do* authorize is **GitHub at claude.ai/code** (step 8) — that's a
+  different screen. The Connectors-page one adds a second, differently-
+  configured path to GitHub and the two get confused about who you are.
 - **Figma.** The Figma file mirrors this repo, not the other way round; you
   can go a long way without ever opening it.
 - A code editor, Docker, or any terminal knowledge on day one.
@@ -182,31 +184,49 @@ This is a milestone, not a day-one task. It can wait days or weeks — reading,
 reviewing, and commenting need nothing beyond steps 1–6.
 
 The day you first want to *change* something — a new variant, a color that's
-wrong, a component that's missing — you'll need the repository on your own
-machine, because that's where Claude has the credentials to branch, test, and
-open a pull request for you. When that day comes, tell Claude:
+wrong, a component that's missing — you work **in the cloud**, at
+https://claude.ai/code. Nothing gets installed on your machine, and nothing
+you make can exist only on your machine — every change is born on GitHub.
 
-> I'm on the VCP design team and I need to set up a local clone of
-> VDM-Design-Team/VCP-design-system so I can propose changes. Walk me through
-> it — I haven't used a terminal much.
+**One-time setup (two minutes):**
 
-Claude will take you through it (it needs Node 22+, a git clone, and one
-authentication step). Two things worth knowing in advance:
+1. Open https://claude.ai/code, signed in with your work Claude account.
+2. When it asks, click **authorize GitHub** and approve with your own GitHub
+   account. (The team's repository access is already set up org-wide — you're
+   only telling GitHub that cloud sessions may act as *you*.)
+3. Pick `VDM-Design-Team/VCP-design-system` from the repository list.
 
-- **Open Claude Code on the repository folder itself** — the folder called
-  `VCP-design-system` — not on a folder that merely contains it. The repo's own
-  commands (`/latest`, `/morning`) only exist when you're inside it.
-- From inside the repo, `/latest` gets you the newest `main` with Storybook
-  running locally, and `/morning` is the local sibling of `/vcp-morning`.
-
-Then propose changes by asking for what you want in product terms:
+**From then on**, start a session on the repository and ask for what you want
+in product terms:
 
 > "Add a subtle variant to Button — brand text on a light brand background —
-> and update the docs and stories."
+> and update the docs and stories. Open a PR when it's done."
 
-Claude edits, tests, and opens the PR. The design-system owner approves and
-merges it — or the lead, when it's a new component, a token change, or
+Claude edits, runs the checks, and opens the PR in the cloud; a few minutes
+later it's on GitHub with its 🔍 Visual review comment, and the branch
+Storybook link shows your change rendered. The design-system owner approves
+and merges it — or the lead, when it's a new component, a token change, or
 anything breaking. That's the loop.
+
+Cloud branches are named `claude/<change>-<suffix>` automatically — that's
+normal; the PR title in product terms is what the team reads.
+
+<details>
+<summary>Optional: the local setup, for power users</summary>
+
+Working locally gives you a live Storybook while you design (instant feedback
+instead of per-push previews). It needs Node 22+, a git clone, and a one-time
+`gh auth login`. Tell Claude:
+
+> I'm on the VCP design team and I want a local clone of
+> VDM-Design-Team/VCP-design-system so I can propose changes. Walk me
+> through it — I haven't used a terminal much.
+
+Two things worth knowing: open Claude Code **on the repository folder
+itself** (not a folder that merely contains it — the repo's own `/latest`
+and `/morning` commands only exist inside it), and push at least before
+lunch and end of day — local work is not backed up until it's pushed.
+</details>
 
 ## Who to ask
 
@@ -227,7 +247,9 @@ anything breaking. That's the loop.
 The sender's half, so it's written down too:
 
 1. **Invite them on GitHub** — repository → Settings → Collaborators →
-   invite with **write** access.
+   invite with **write** access. (The Claude Code GitHub App is already
+   installed org-wide for cloud sessions — a once-ever setup; if it's ever
+   reinstalled, install it on the **organization**, not a personal account.)
 2. **Add them to the team table** — a small PR putting them in the
    "Designers" row of the Current holders table in `docs/workflow.md`
    (and update the Notion mirror, per the sync rule).
