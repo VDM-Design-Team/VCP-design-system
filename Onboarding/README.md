@@ -147,6 +147,11 @@ browser. When `/vcp-morning` (or Ali) points you at a waiting pull request:
    with GitHub** and you're in; your access to the repository carries over,
    and it stays signed in from then on. If the page says **0 changes**,
    that's a real answer: nothing visual moved, nothing to inspect.
+   If it says **"You need access — check that you're a collaborator"**,
+   you're not signed in, or signed in with the wrong account. The diff
+   pages are collaborator-only (even though the Storybook itself is
+   public), so sign in with the GitHub account that accepted the step 1
+   invitation and the page unlocks.
 3. Click **the live Storybook for the branch** and click through the real
    components: try hover and focus, dark theme, narrow widths.
 4. Say what you see, as a comment on the PR — questions count as review.
