@@ -239,7 +239,7 @@ a checkbox so it can't be silently forgotten. A Figma file that drifts from
 workflow so every Claude session follows it without being told.
 
 A visual copy of this document lives in Notion for the team:
-[VCP Design System — How We Work](https://app.notion.com/p/3ce29ad06b0b816d9a86d34e6d09b5b7).
+[VCP Design System — How We Work](https://wholesale-piccolo-010.notion.site/VCP-Design-System-How-We-Work-e58fbfcc3ae082759885011915b9848a).
 **Any PR that changes this file also updates that Notion page** — same change,
 same day. The repo stays canonical: if the two ever disagree, this file wins
 and the Notion page gets corrected to match.

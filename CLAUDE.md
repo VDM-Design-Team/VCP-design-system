@@ -111,5 +111,5 @@ settings page"), not in CSS terms. Never push to `main`.
   their results, possible breaking changes, and a draft PR description
   answering the template's five questions.
 - When a change touches `docs/workflow.md`, also update the team's Notion
-  copy (https://app.notion.com/p/3ce29ad06b0b816d9a86d34e6d09b5b7) to match — the
+  copy (https://wholesale-piccolo-010.notion.site/VCP-Design-System-How-We-Work-e58fbfcc3ae082759885011915b9848a) to match — the
   repo is canonical, the Notion page mirrors it.
