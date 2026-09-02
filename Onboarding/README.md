@@ -66,13 +66,16 @@ You've been invited as a collaborator on this repository.
 Keep your GitHub password handy — you'll sign in once more inside Claude's own
 browser window in step 5.
 
-## Step 2 — Bookmark the two places you'll live
+## Step 2 — Bookmark the three places you'll live
 
 - **The repository** — where every change is proposed, discussed, and lands:
   https://github.com/VDM-Design-Team/VCP-design-system
 - **The published Storybook** — the design system as it exists right now, every
   component, every variant, interactive. Rebuilt automatically on every merge:
   https://main--685158a98c4fedbbec7ac708.chromatic.com
+- **How We Work** — the team's workflow, visually, on one page. No Notion
+  account needed:
+  https://wholesale-piccolo-010.notion.site/VCP-Design-System-How-We-Work-e58fbfcc3ae082759885011915b9848a
 
 The Storybook link is the answer to "what does X look like today". You never
 need to install anything to see the current system.
@@ -150,8 +153,10 @@ breaking changes). Consistently good reviews are the path to the owner seat.
 Read these three, in the repository on GitHub — together they're ten minutes:
 
 1. **`README.md`** — what the system is and how the pieces fit.
-2. **`docs/workflow.md`** — how the team works day to day: branches, PRs,
-   reviews, roles, and the daily rhythm.
+2. **How the team works day to day** — branches, PRs, reviews, roles, and the
+   daily rhythm. Read the visual version in Notion (bookmarked in step 2), or
+   `docs/workflow.md` in the repo — same rules; the repo file is the canonical
+   one if they ever disagree.
 3. **`CLAUDE.md`** — the working rules. The short version you should carry
    around in your head:
    - `main` is protected. **Nobody** pushes to it directly — not you, not Ali.
