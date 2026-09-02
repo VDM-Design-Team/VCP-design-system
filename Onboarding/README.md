@@ -34,11 +34,13 @@ step 8.)
 
 **What you do NOT need** — skip these even if something suggests them:
 
-- **The GitHub connector in Claude's settings (claude.ai → Connectors).**
-  This workflow never uses it. Careful with the similar names: the one thing
-  you *do* authorize is **GitHub at claude.ai/code** (step 8) — that's a
-  different screen. The Connectors-page one adds a second, differently-
-  configured path to GitHub and the two get confused about who you are.
+- **Two similar-looking "connect GitHub" screens exist — only one is yours.**
+  ✅ **Authorize GitHub at claude.ai/code** — that's step 8, and it's the
+  only GitHub connection this workflow uses.
+  ❌ **The GitHub connector under claude.ai → Settings → Connectors** —
+  never used here; if anything suggests it, decline. It creates a second,
+  differently-configured path to GitHub, and the two get confused about who
+  you are.
 - **Figma.** The Figma file mirrors this repo, not the other way round; you
   can go a long way without ever opening it.
 - A code editor, Docker, or any terminal knowledge on day one.
