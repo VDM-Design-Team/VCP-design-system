@@ -85,7 +85,7 @@ docs/tooltip-usage          documentation only
   > review."
 
 - Before starting anything large, review someone else's waiting PR.
-  **Review is everyone's job**, whatever your role: reading the change,
+  **Review is every designer's job**: reading the change,
   clicking through its Storybook preview, asking questions. Who must
   *approve* which kind of change is the role matrix below — and nobody
   approves their own PR.
@@ -140,15 +140,22 @@ The checklist:
 - Keyboard, focus ring, contrast handled?
 - Stories and `docs/<name>.md` updated?
 
-**Reviewing** (reading, commenting, asking questions) is everyone's job.
-**Approving and merging** belongs to three seats:
+**Reviewing** (reading, commenting, asking questions) is every designer's
+job. **Approving and merging** belongs to the seats:
 
 - **Lead** — approves and merges any change.
 - **Design-system owner** — approves and merges everything **except big
   changes**, which need the lead. The owner's own PRs are approved by the
   lead.
-- **Designers** — review and comment on any PR, but do not approve or merge.
-  Consistently good reviews are the path to the owner seat.
+- **Designers** — review and comment on any PR, but do not merge. A
+  designer's approval greenlights a **contributor's** normal change (the
+  owner or lead then does the merge). Consistently good reviews are the
+  path to the owner seat.
+- **Contributors** — team members who aren't designers. They design with
+  Claude and open pull requests exactly like everyone else — same branches,
+  same template, same checks, same visual review comment — but they never
+  review, approve, or merge. A contributor's PR waits for a designer, the
+  owner, or the lead.
 
 A **big change** is any of: a new component or pattern, a change to core or
 semantic tokens, or a breaking change (rename/removal). Everything else —
@@ -158,6 +165,7 @@ normal change.
 | Change | Who approves the merge |
 |---|---|
 | Normal change | Design-system owner or lead |
+| Normal change **from a contributor** | Any designer (owner or lead merges), or the owner/lead directly |
 | New component or pattern | Lead |
 | Core or semantic tokens | Lead |
 | Breaking change (rename/removal) | Lead, plus the engineering owner |
@@ -182,6 +190,7 @@ the PR's **reviewer**, never its author.
 | Engineering owner | Ali |
 | Accessibility owner | Ali |
 | Designers | Ali · Eve · Marvin |
+| Contributors | — (added here as they join) |
 
 One person may hold several roles; the rule stays the same when they stop
 being the same person. Update this table as the team grows.
