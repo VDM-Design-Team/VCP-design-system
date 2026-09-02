@@ -21,7 +21,9 @@ const meta = {
           'needs on top: focus moves into the list on open, Up/Down move between items, ' +
           'Home/End jump to the ends, a letter jumps to a matching item, Enter/Space activate, ' +
           'and Escape closes and returns focus to the trigger. Disabled items and dividers are ' +
-          'stepped over. See docs/menu.md.',
+          'stepped over. See docs/menu.md.' +
+          '\n\n**From Figma:** Menus display a list of choices on a temporary surface. They ' +
+          'appear when users interact with a button, action, or other control.',
       },
     },
   },

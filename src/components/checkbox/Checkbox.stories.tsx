@@ -12,7 +12,10 @@ const meta = {
           'A real `<input type="checkbox">` with a token-styled box. Use it for independent ' +
           'on/off choices inside a form that is explicitly submitted. The `indeterminate` ' +
           'state is for the parent row of a partially selected group — it is never something ' +
-          'a user can select directly.',
+          'a user can select directly.' +
+          '\n\n**From Figma:** Checkboxes are a selection control which allow users to select ' +
+          'one or more options from a set; present a list containing sub-selections; and turn ' +
+          'an item on or off in a desktop environment.',
       },
     },
   },
