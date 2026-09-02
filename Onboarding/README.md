@@ -52,6 +52,10 @@ logged out even though you're logged in "in your browser". That's normal:
 sign in to GitHub *inside Claude's window*, directly on GitHub's page (Claude
 will never ask you to tell it your password), and it stays signed in from
 then on. Nearly every "GitHub won't connect" report is this.
+The same applies to **Chromatic**: if Claude opens a diff page in its window
+and Chromatic asks for sign-in, click **Connect with GitHub** there — since
+you're already signed into GitHub in that window, it's one click, no
+password. There is no Chromatic connector or setting to configure in Claude.
 
 ---
 
