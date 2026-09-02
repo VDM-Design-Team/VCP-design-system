@@ -25,6 +25,7 @@ built against something that is about to change.
 | component | `Checkbox` | PR #7 |
 | component | `RadioGroup` | PR #7 |
 | component | `Toggle` | PR #7 |
+| component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 
 ## Components — to port
 
@@ -35,7 +36,6 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 | `Display/` | `Icon`, `Logo`, `Avatar`, `AvatarGroup`, `Badge`, `Chip`, `Card`, `Divider`, `Skeleton`, `Spinner`, `ProgressBar`, `EmptyState`, `DetailRow`, `Timeline`, `DonutChart`, `StatCard`, `DataTable` |
 | `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
 | `Actions/` | `IconButton` |
-| `Navigation/` | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` |
 | `Overlays/` | `Popover`, `Menu`, `Modal`, `Tooltip` |
 | `Feedback/` | `Toast`, `Banner` |
 | `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
@@ -47,7 +47,8 @@ anything icon-bearing before it means stubbing and reworking.
 Dependency notes:
 
 - `Menu` needs `Popover`. `SearchSelect` needs `Select` and `Popover`.
-- `AvatarGroup` needs `Avatar`. `DataTable` needs `Checkbox` and `Pagination`.
+- `AvatarGroup` needs `Avatar`. `DataTable` needs `Checkbox` and `Pagination` —
+  both shipped, so `DataTable` is unblocked.
 - `Toast` needs a viewport/host decision (portal + live region) — settle it when
   `Toast` is built, and `Banner` follows the same call.
 
