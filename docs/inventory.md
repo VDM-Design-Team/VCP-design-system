@@ -89,9 +89,6 @@ Dependency notes:
 - **No 400-weight partner** at 13px or 11px in the type ramp, so `label-md` and
   `label-sm` have nothing to pair with. This ruled out a weight shift between
   selected and unselected states.
-- **`docs/button.md` drift** — says `outline-line-brand` where the code says
-  `outline-stroke-focused`. (It also said `ghost` where the code says `tertiary`;
-  that half was fixed by PR #31.)
 - **Dead spacing classes** — `gap-sm`, `mb-xs`, `mb-2xs` appear in
   `Button.stories.tsx` and `Foundations.stories.tsx`. There are no `--spacing-*`
   tokens, so Tailwind emits nothing for them and the layout silently loses its gaps.
