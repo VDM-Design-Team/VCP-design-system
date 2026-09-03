@@ -96,6 +96,25 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+- Components: `Timeline` (Display) — events in order on a real `<ol>`; nodes are a
+  ring + glyph in one tone. **Generic tones only** — the export's `kind` took VCP
+  lifecycle names (`accepted`, `handoff`); that mapping belongs to the future
+  activity pattern, per Badge's precedent, and two of its colours were raw
+  literals with no ramp. Ring and glyph wear the darker `outline.content` step
+  (mid borders measured down to 1.91:1); every tone now clears 3:1 both themes,
+  measured in docs/timeline.md. No new tokens.
+- Components: `DonutChart` (Display) — ProgressBar bent into a ring (or half-ring
+  gauge): same `role="progressbar"`, same four tones on the same tokens, same
+  `surface.track`. The export's built-in 75%/90% auto-escalation and its
+  arbitrary-colour `tone` are gone — thresholds are domain knowledge and colours
+  are tokens. Centre numeral in the numeric face, scaled with the ring. No new
+  tokens.
+- Components: `StatCard` (Display) — one number on a card. `deltaTone` becomes
+  judgment (`positive`/`negative`/`neutral`) instead of the export's direction
+  (`up` painted green — but costs up is bad news); the sign stays in the text so
+  colour never carries direction alone. The label is deliberately not a heading
+  and the tile deliberately does not compose `Card` (which renders one). Value in
+  the numeric face at `heading-lg`. No new tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
