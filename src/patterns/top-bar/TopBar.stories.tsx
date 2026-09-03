@@ -23,7 +23,7 @@ const meta = {
   args: {
     title: 'Added Values',
     notifications: 3,
-    user: { name: 'Eve Kestrel', role: 'Designer' },
+    user: { name: 'Eve Kestrel' },
   },
   argTypes: {
     notifications: { control: 'number' },

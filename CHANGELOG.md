@@ -209,13 +209,13 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   `DomainLabel` awaits). No new tokens.
 - Patterns: `TopBar` — **the first pattern**, and the tier's shape: the page
   header composed entirely from existing pieces (`IconButton`, `Icon`, `Avatar`,
-  `Badge`, with `Breadcrumb`/`StatusPill`/`Button` slotting in through props).
-  A `<header>` carrying the page's single required `<h1>`; the bell folds its
-  unread count into its accessible name and hides the visual pill from AT; the
-  export's cursor-pointer user div is a real named button only when `onUserMenu`
-  is given. `role` renders a brand Badge verbatim — the role → treatment mapping
-  stays reserved for `RoleBadge`. No new tokens. Unblocks `AppShell` down to
-  `Sidebar` only.
+  with `Breadcrumb`/`StatusPill`/`Button` slotting in through props). A
+  `<header>` carrying the page's single required `<h1>`; the bell marks unread
+  with the Figma `Top_NavBar`'s red dot while the count lives in its accessible
+  name; the export's cursor-pointer user div is a real named button only when
+  `onUserMenu` is given. The export's role badge under the user's name is
+  **removed — design review found no design for it** (roles stay `RoleBadge`'s
+  business). No new tokens. Unblocks `AppShell` down to `Sidebar` only.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.

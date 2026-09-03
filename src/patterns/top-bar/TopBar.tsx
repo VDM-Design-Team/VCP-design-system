@@ -3,13 +3,12 @@ import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Avatar } from '../../atoms/avatar';
-import { Badge } from '../../atoms/badge';
 
 /**
  * TopBar — the page header that sits at the top of every VCP screen: back
  * affordance, kicker line, page title, page actions, the notification bell,
  * and the signed-in user. **The first pattern**: an organism composed
- * entirely from existing pieces — `IconButton`, `Icon`, `Avatar`, `Badge` —
+ * entirely from existing pieces — `IconButton`, `Icon`, `Avatar` —
  * plus layout. Nothing here is bespoke except the arrangement.
  *
  * Rebuilt semantics over the export:
@@ -17,14 +16,16 @@ import { Badge } from '../../atoms/badge';
  *   `title` is required and the heading level is not configurable.
  * - Back and the bell are the system's `IconButton`s, not hand-rolled
  *   buttons. The bell's unread count is folded into its accessible name
- *   ("Notifications, 3 unread") and the visual pill is hidden — announced
+ *   ("Notifications, 3 unread") and the visual dot is hidden — announced
  *   once, not twice.
- * - The user chip was a `cursor:pointer` div; it is a real `<button>` when
+ * - The user chip (avatar + name + caret, inline as the Figma `Top_NavBar`
+ *   draws it) was a `cursor:pointer` div; it is a real `<button>` when
  *   `onUserMenu` is given (named "<name>, account menu"), and a plain group
  *   otherwise. The full `UserMenu` pattern will own the menu itself.
  *
- * `role` renders as a brand `Badge` verbatim. The role → treatment mapping
- * belongs to `RoleBadge` (to port) once roles need more than one look.
+ * The export drew a role badge under the user's name; the Figma `Top_NavBar`
+ * has no such thing, so neither does this. Roles are `RoleBadge`'s business
+ * (to port), on the surfaces the design actually puts them.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -34,8 +35,6 @@ export interface TopBarUser {
   name: string;
   /** Avatar photo. */
   src?: string;
-  /** Shown as a small brand Badge under the name — "Admin", "Designer". */
-  role?: string;
 }
 
 export interface TopBarProps
@@ -77,14 +76,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     const userChip = user && (
       <>
         <Avatar name={user.name} src={user.src} size="md" />
-        <span className="flex min-w-0 flex-col items-start gap-0.5">
-          <span className="max-w-40 truncate text-label-lg text-text-primary">{user.name}</span>
-          {user.role && (
-            <Badge tone="brand" size="sm">
-              {user.role}
-            </Badge>
-          )}
-        </span>
+        <span className="max-w-40 truncate text-label-lg text-text-primary">{user.name}</span>
         {onUserMenu && (
           <Icon name="caret-down" size="sm" aria-hidden="true" className="text-text-tertiary" />
         )}
@@ -126,14 +118,12 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 onClick={onNotifications}
               />
               {notifications > 0 && (
-                /* The count is already in the bell's name — the pill is the
-                   visual echo. accent.critical.filled, Badge's own pair. */
+                /* The Figma Top_NavBar marks unread with a dot, not a count —
+                   the number lives in the bell's accessible name instead. */
                 <span
                   aria-hidden="true"
-                  className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent-critical-filled-surface-default px-1 font-numeric text-caption-sm text-accent-critical-filled-content-default"
-                >
-                  {notifications > 99 ? '99+' : notifications}
-                </span>
+                  className="absolute right-1 top-1 size-2 rounded-full bg-accent-critical-filled-surface-default"
+                />
               )}
             </span>
           )}

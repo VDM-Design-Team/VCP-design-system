@@ -9,7 +9,6 @@ The page header on every VCP screen: back affordance, kicker, the page's
 |---|---|---|
 | `IconButton` | atom | The back affordance and the notification bell |
 | `Avatar` | atom | The signed-in user |
-| `Badge` | atom | The role chip under the user's name |
 | `Icon` | atom | The user-menu caret |
 
 Composed through **slots** (the caller passes them in): `Breadcrumb` as the
@@ -42,9 +41,9 @@ that is what `src/patterns/` is for.
 | `breadcrumb` | `ReactNode` | — | Kicker above the title — an AV id, or a real `<Breadcrumb />` |
 | `onBack` | `() => void` | — | Renders the back `IconButton` |
 | `actions` | `ReactNode` | — | Page-level actions, left of the bell |
-| `notifications` | `number` | — | The bell renders whenever this is a number; `> 0` adds the count pill |
+| `notifications` | `number` | — | The bell renders whenever this is a number; `> 0` adds the unread dot (the count lives in the bell's name) |
 | `onNotifications` | `() => void` | — | The bell's click |
-| `user` | `{ name, src?, role? }` | — | `role` renders as a small brand `Badge` |
+| `user` | `{ name, src? }` | — | Avatar + name + caret, inline — as the Figma `Top_NavBar` draws it |
 | `onUserMenu` | `() => void` | — | Makes the user chip a real button — the future `UserMenu`'s trigger |
 | `className` | `string` | — | On the `<header>` |
 | `ref` | `Ref<HTMLElement>` | — | The `<header>` |
@@ -53,17 +52,17 @@ that is what `src/patterns/` is for.
 
 `surface.elevated` bar (84 tall = `h-21`) on `stroke.subtle`; title
 `heading-md` `text.primary` (20.17:1 / 14.63:1); kicker `label-sm` and
-subtitle `body-sm` in `text.tertiary`; the bell's count pill is the
-`accent.critical.filled` pair (4.77:1 / 5.30:1) in the numeric face. No new
-tokens — every visible piece is a composed component wearing its own.
+subtitle `body-sm` in `text.tertiary`; the bell's unread dot is
+`accent.critical.filled.surface`, exactly the Figma `Top_NavBar`'s red dot.
+No new tokens — every visible piece is a composed component wearing its own.
 
 ## Accessibility
 
 - A `<header>` landmark carrying the page's **single `<h1>`** — which is why
   `title` is required and the heading level is not configurable.
-- Back and the bell are `IconButton`s with real names. The bell's unread
-  count lives **in its name** ("Notifications, 3 unread"); the visual pill
-  is `aria-hidden` — announced once, not twice.
+- Back and the bell are `IconButton`s with real names. The design marks
+  unread with a dot; the *count* lives in the bell's name ("Notifications,
+  3 unread"), and the dot is `aria-hidden` — colour never carries it alone.
 - The user chip is a `<button>` named "`name`, account menu" only when
   `onUserMenu` is given; otherwise a plain group — no dead buttons.
 - Long titles truncate; the actions/bell/user side never collapses.
@@ -75,8 +74,8 @@ tokens — every visible piece is a composed component wearing its own.
 - **Don't put the primary page action only in `actions`** on mobile-width
   screens without checking the truncation story — the bar clips title first,
   never actions.
-- **Don't hand-roll the role chip's colours** — `role` renders a brand
-  `Badge` verbatim today; when roles need distinct treatments, that mapping
-  is `RoleBadge`'s to own (to port), not a call site's.
+- **Don't add a role badge to the user chip** — the export drew one; the
+  Figma `Top_NavBar` doesn't. Roles are `RoleBadge`'s business (to port), on
+  the surfaces the design actually puts them.
 - **Don't wire `onUserMenu` to anything but a menu** — the caret promises
   one; `UserMenu` (to port) will be the real thing.
