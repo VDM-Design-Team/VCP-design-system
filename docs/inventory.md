@@ -34,6 +34,7 @@ built against something that is about to change.
 | component | `Select`, `Stepper`, `Dropzone` | PR #46 |
 | component | `Timeline`, `DonutChart`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
+| component | `TagEditor`, `RichTextToolbar` | PR #49 |
 
 ## Components — to port
 
@@ -42,13 +43,12 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 | Storybook group | Components |
 |---|---|
 | `Display/` | `Logo` |
-| `Forms/` | `SearchSelect`, `DatePicker`, `TagEditor`, `RichTextToolbar` |
+| `Forms/` | `SearchSelect`, `DatePicker` |
 
 Dependency notes:
 
 - `SearchSelect` needs `Select` and `Popover` — both shipped, so it is
-  unblocked. `TagEditor` composes `Chip` (shipped). Nothing in `Forms/` is
-  blocked any more.
+  unblocked. Nothing in `Forms/` is blocked any more.
 - **`Logo` is blocked on assets.** The export's `/assets/vcp-logo-vector.svg`
   and `/assets/logo-valuechainplus.png` were never vendored into `_source/` —
   the image files have to come out of Figma (or the brand kit) before the
