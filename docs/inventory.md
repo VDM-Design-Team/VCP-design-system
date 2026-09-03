@@ -32,6 +32,7 @@ built against something that is about to change.
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
 | component | `Select`, `Stepper`, `Dropzone` | PR #46 |
+| component | `Timeline`, `DonutChart`, `StatCard` | PR #47 |
 
 ## Components — to port
 
@@ -39,7 +40,7 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 
 | Storybook group | Components |
 |---|---|
-| `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard` |
+| `Display/` | `Logo` |
 | `Forms/` | `SearchSelect`, `DatePicker`, `TagEditor`, `RichTextToolbar` |
 | `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
 
