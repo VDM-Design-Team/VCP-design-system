@@ -31,6 +31,11 @@ built against something that is about to change.
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
+| component | `Select`, `Stepper`, `Dropzone` | PR #46 |
+| component | `Timeline`, `DonutChart`, `StatCard` | PR #47 |
+| component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
+| component | `TagEditor`, `RichTextToolbar` | PR #49 |
+| component | `DatePicker` | PR #50 |
 | component | `SearchSelect` | PR #51 |
 
 ## Components — to port
@@ -39,14 +44,13 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 
 | Storybook group | Components |
 |---|---|
-| `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard` |
-| `Forms/` | `Select`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
-| `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
+| `Display/` | `Logo` |
 
 Dependency notes:
 
-- `TagEditor` composes `Chip`. (`SearchSelect`'s old "needs Select and
-  Popover" note was wrong — it is a combobox composing `Icon` and `Avatar`.)
+- Nothing left in `Components — to port` is blocked. (`SearchSelect`'s old
+  "needs Select and Popover" note was wrong — it is a combobox composing
+  `Icon` and `Avatar`.)
 - **`Logo` is blocked on assets.** The export's `/assets/vcp-logo-vector.svg`
   and `/assets/logo-valuechainplus.png` were never vendored into `_source/` —
   the image files have to come out of Figma (or the brand kit) before the
