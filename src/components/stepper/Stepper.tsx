@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
+import { Icon } from '../../atoms/icon';
 
 /**
  * Stepper — a small number chosen by nudging: capacity points, a quantity, a

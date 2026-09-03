@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { StatCard } from './StatCard';
-import { Icon } from '../icon';
-import { DonutChart } from '../donut-chart';
+import { Icon } from '../../atoms/icon';
+import { DonutChart } from '../../atoms/donut-chart';
 
 const meta = {
-  title: 'Display/StatCard',
+  title: 'Components/Display/StatCard',
   component: StatCard,
   parameters: {
     docs: {

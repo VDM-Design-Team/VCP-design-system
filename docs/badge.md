@@ -9,12 +9,12 @@ count, a state, a category.
 |---|---|---|---|
 | `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | No — takes no focus, fires no events | Generic tones only |
 | `Chip` | A value the user can act on: a selected filter, a removable tag, a toggleable option | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
-| `StatusPill` *(pattern, not yet built)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | No | VCP's status vocabulary |
+| `StatusPill` *(component)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | No | VCP's status vocabulary |
 
 **For VCP statuses use `StatusPill`, not Badge directly.** The Claude Design export
-mixed VCP status names into Badge's `tone` prop (`tone="for qa"`). That vocabulary
-belongs in `src/patterns/` per the tier rule in `CLAUDE.md`, so it is deliberately
-absent here. `StatusPill` will own the status→tone mapping and render a Badge; if you
+mixed VCP status names into Badge's `tone` prop (`tone="for qa"`). That mapping is
+owned by exactly one piece — `StatusPill` (a component composing Badge) — so it is
+deliberately absent here; if you
 find yourself writing `tone={status === 'rejected' ? 'danger' : …}` at a call site,
 that mapping wants to live in `StatusPill` instead.
 

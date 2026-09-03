@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon, type IconName } from '../icon';
-import { Avatar } from '../avatar';
+import { Icon, type IconName } from '../../atoms/icon';
+import { Avatar } from '../../atoms/avatar';
 
 /**
  * Timeline — a vertical run of events, newest wherever the caller puts it:
@@ -9,9 +9,9 @@ import { Avatar } from '../avatar';
  * order is the meaning.
  *
  * **Generic tones only.** The export's `kind` took VCP lifecycle names —
- * `accepted`, `handoff`, `status` — and that vocabulary belongs to patterns,
- * exactly as Badge ruled: `tone` here is neutral/brand/info/success/warning/
- * danger, and the future activity pattern owns the event-kind → tone mapping.
+ * `accepted`, `handoff`, `status` — and each such mapping is owned by exactly
+ * one piece, as Badge ruled: `tone` here is neutral/brand/info/success/warning/
+ * danger, and the future activity piece owns the event-kind → tone mapping.
  * (The export's `handoff` amber and `status` indigo also had no ramp — the
  * indigo was a raw literal with no token behind it.)
  *
@@ -35,7 +35,7 @@ export interface TimelineItem {
   /** Renders an `Avatar` and the name under the title. */
   actor?: string;
   detail?: React.ReactNode;
-  /** Colours the node. Generic only — event-kind mappings live in patterns. */
+  /** Colours the node. Generic only — the event-kind mapping is owned elsewhere. */
   tone?: TimelineTone;
   /** The node's glyph. Decorative — the title says what happened. */
   icon?: IconName;

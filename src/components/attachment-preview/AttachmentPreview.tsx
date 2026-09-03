@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
-import { IconButton } from '../icon-button';
+import { Icon } from '../../atoms/icon';
+import { IconButton } from '../../atoms/icon-button';
 
 /**
  * AttachmentPreview — the opened attachment: a header naming the file with

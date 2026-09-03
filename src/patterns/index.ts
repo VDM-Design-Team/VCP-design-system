@@ -1,8 +1,8 @@
 /**
- * Patterns — assemblies that carry VCP's domain or page structure.
+ * Patterns — organisms: two or more components composed into a distinct page
+ * section (TopBar, FilterBar, the planning tables, CommentItem).
  *
- * Patterns may import from `src/components/`. Components must never import from
- * here. See the "Components and patterns" section of CLAUDE.md for the test that
- * decides which tier a new thing belongs to.
+ * Imports flow downward only: atoms ← components ← patterns ← templates.
+ * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
 export {};

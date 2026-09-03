@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Menu, type MenuItem } from './Menu';
-import { Button } from '../button';
+import { Button } from '../../atoms/button';
 
 const basic: MenuItem[] = [
   { key: 'edit', label: 'Edit deliverable' },
@@ -10,7 +10,7 @@ const basic: MenuItem[] = [
 ];
 
 const meta = {
-  title: 'Overlays/Menu',
+  title: 'Components/Overlays/Menu',
   component: Menu,
   parameters: {
     layout: 'centered',

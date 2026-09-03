@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { IconButton } from '../icon-button';
+import { IconButton } from '../../atoms/icon-button';
 
 /**
  * DatePicker — the calendar panel: one month of named day buttons, month

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon, type IconName } from '../icon';
-import { IconButton } from '../icon-button';
+import { Icon, type IconName } from '../../atoms/icon';
+import { IconButton } from '../../atoms/icon-button';
 
 /**
  * DetailRow — one label/value line in a details panel: a fixed 132 label

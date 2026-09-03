@@ -4,7 +4,7 @@ import { Dropzone } from './Dropzone';
 import { Field } from '../field';
 
 const meta = {
-  title: 'Forms/Dropzone',
+  title: 'Components/Forms/Dropzone',
   component: Dropzone,
   parameters: {
     docs: {

@@ -9,7 +9,7 @@ optionally carrying an avatar or a count.
 |---|---|---|---|
 | `Chip` | A value the user can act on: toggle a filter, remove a tag, pick an option | Yes — real buttons, real tab stops | Whatever the caller supplies |
 | `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | No | Generic tones only |
-| `StatusPill` *(pattern, not yet built)* | A VCP status: `Accepted`, `For QA`, `Confirmed prod` | No | VCP's status vocabulary |
+| `StatusPill` *(component)* | A VCP status: `Accepted`, `For QA`, `Confirmed prod` | No | VCP's status vocabulary |
 
 **If nothing about it is clickable, it is probably a Badge.** A Chip with neither
 `onClick` nor `onRemove` renders as a plain span; reach for it only when the

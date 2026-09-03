@@ -2,11 +2,11 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DatePicker } from './DatePicker';
 import { Popover } from '../popover';
-import { Input } from '../input';
-import { Icon } from '../icon';
+import { Input } from '../../atoms/input';
+import { Icon } from '../../atoms/icon';
 
 const meta = {
-  title: 'Forms/DatePicker',
+  title: 'Components/Forms/DatePicker',
   component: DatePicker,
   parameters: {
     docs: {

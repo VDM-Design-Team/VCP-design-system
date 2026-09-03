@@ -188,6 +188,25 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   shared `focus-within` ring. The dashed border moves to `stroke.field` (the
   export's `stroke.default` was 2.56:1 against the 3:1 a control boundary needs).
   New glyph `cloud-arrow-up` added to the icon set from Phosphor. No new tokens.
+- **Restructure: the atomic tiers** (decided 3 Sep 2026). The two-tier
+  components/patterns split becomes four tiers — `src/atoms/` (a single
+  self-contained element: Button, Input, Badge, Logo…), `src/components/` (one
+  unit assembled from atoms: Field, Chip, Menu, DataTable…), `src/patterns/`
+  (2+ components forming a page section: TopBar, the planning tables…) and
+  `src/templates/` (page layouts: AppShell). Tier is decided by composition, not
+  domain vocabulary — the old could-another-product-use-it test is retired, and
+  each VCP mapping (status → tone, …) is instead owned by exactly one piece.
+  Nineteen pieces moved to `src/atoms/`; Storybook titles now mirror the tiers
+  (`Atoms/…`, `Components/<group>/…`, `Patterns/…`, `Templates/…`). Import paths
+  changed — a breaking move in principle, free in practice while 0.1.0 is
+  unreleased and the package exports everything from the root.
+- Components: `StatusPill` — an AV's status as a pill: a `Badge` plus the status
+  dot, owning the seven-status vocabulary (`AVStatus` union — a typo is a
+  compile error) and the status → tone mapping docs/badge.md promised would live
+  in exactly one place. The export's clickable-span `interactive` mode is gone —
+  changing a status is the options dropdown's job. "Ready for hand-off" borrows
+  the info blue: the export's indigo has no core ramp (the same decision
+  `DomainLabel` awaits). No new tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.

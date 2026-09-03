@@ -23,45 +23,53 @@ Claude Design project — those mirror this repo, not the other way round.
 6. **Changes are versioned.** Adding a token or variant is a minor bump. Renaming
    or removing one is a major bump and needs a note in `CHANGELOG.md` with the
    migration path.
-7. **Components or patterns — decide before you write.** See the next section.
-   Getting this wrong is expensive to undo once other things import it.
+7. **Pick the tier before you write.** See the next section. Getting this
+   wrong is expensive to undo once other things import it.
 
-## Components and patterns
+## Atoms, components, patterns, templates
 
-The system has two tiers, and everything new belongs to exactly one of them.
+The system is atomic-design shaped: four tiers, and everything new belongs to
+exactly one of them. The test is **composition, not vocabulary** — a piece may
+carry VCP domain language at any tier (decided 3 Sep 2026, replacing the older
+could-another-product-use-it test).
 
-**`src/components/` — components.** Reusable building blocks that know nothing
-about VCP. A Button, an Input, a Modal, a Badge. They take props and render; they
-carry no domain vocabulary and no page structure. A component may compose other
-components — `AvatarGroup` uses `Avatar`, `Menu` uses `Popover` — and that is
-still a component.
+**`src/atoms/` — atoms.** A single self-contained element: something a
+designer would name as *one thing* on a canvas. A Button, an Input, a Badge,
+an Avatar, a Toggle, the Logo. Interactive or not. An atom may use `Icon`
+internally as decoration (icons are sub-atomic); it never composes another
+piece of the system.
 
-**`src/patterns/` — patterns.** Assemblies that carry VCP's domain or its page
-structure. `TopBar` is a pattern: it arranges `Logo`, `Menu`, `Avatar` and the
-notification bell into the thing that sits at the top of every VCP page.
-`StatusPill` is a pattern too, despite being small — it encodes VCP's status
-vocabulary, so it is not reusable anywhere else.
+**`src/components/` — components.** One unit assembled *from* atoms (and
+other components): `IconButton`'s wrapping cousins like `Field`, `Chip`,
+`Menu`, `DataTable`, `StatusPill` (a `Badge` plus the status mapping). However
+rich inside, if it presents as one control or one display unit, it is a
+component — `DataTable` and `DatePicker` are components, not patterns.
 
-**The test — could another product use this unchanged?**
-If yes, it is a component. If it only makes sense inside VCP, it is a pattern.
-Size is not the test, and neither is whether it composes something else:
-`StatusPill` is tiny and composes nothing, and it is still a pattern.
+**`src/patterns/` — patterns.** Organisms: **two or more components composed
+into a distinct page section.** `TopBar` (Logo + Menu + Avatar + bell),
+`FilterBar`, `CommentItem`, the planning tables built on `DataTable`.
+
+**`src/templates/` — templates.** Page-level layouts that arrange patterns
+into whole screens: `AppShell`, `EmailLayout`.
 
 Rules that follow from the split:
 
-- **Patterns may import components. Components must never import patterns.**
-  If a component finds itself needing one, the dependency is pointing the wrong
-  way — lift the domain knowledge out into a prop.
-- **Patterns are where VCP vocabulary lives** — statuses, urgencies, roles,
-  domains, the Added Value lifecycle. Keep it out of `src/components/` entirely.
-- **Both tiers ship the same artefacts**: the `.tsx`, a `.stories.tsx`, and a
-  `docs/<name>.md`. Rule 4 applies to patterns exactly as it does to components.
-- **Storybook titles.** Components are grouped by what they do — `Actions/`,
-  `Forms/`, `Navigation/`, `Feedback/`, `Display/`, `Overlays/`. Patterns all sit
-  under `Patterns/`, so the sidebar shows the two tiers apart at a glance.
-- **A pattern that turns out to be reusable should move down**, not be copied.
-  Strip the VCP specifics into props and relocate it to `src/components/`; that is
-  a major bump because the import path changes.
+- **Imports flow downward only**: atoms ← components ← patterns ← templates.
+  A lower tier never imports a higher one; if it needs to, the dependency is
+  pointing the wrong way — lift the knowledge out into a prop. (Stories are
+  exempt: an atom's story may demo it inside a component.)
+- **Domain mappings live in one place each.** VCP vocabulary (statuses,
+  urgencies, roles, domains) may appear at any tier, but each mapping —
+  status → tone, urgency → colour — is owned by exactly one piece
+  (`StatusPill` owns statuses); call sites never re-derive it.
+- **All four tiers ship the same artefacts**: the `.tsx`, a `.stories.tsx`,
+  and a `docs/<name>.md`. Rule 4 applies everywhere.
+- **Storybook titles mirror the tiers.** Top level is the tier; components
+  keep their function group one level down: `Atoms/Button`,
+  `Components/Forms/Field`, `Components/Overlays/Menu`, `Patterns/TopBar`,
+  `Templates/AppShell`.
+- **A piece that outgrows or shrinks out of its tier moves**, not gets
+  copied. Moving is a major bump because the import path changes.
 
 ## Naming
 

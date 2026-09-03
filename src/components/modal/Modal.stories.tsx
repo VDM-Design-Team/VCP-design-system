@@ -1,12 +1,12 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Modal } from './Modal';
-import { Button } from '../button';
+import { Button } from '../../atoms/button';
 import { Field } from '../field';
-import { Input } from '../input';
+import { Input } from '../../atoms/input';
 
 const meta = {
-  title: 'Overlays/Modal',
+  title: 'Components/Overlays/Modal',
   component: Modal,
   parameters: {
     layout: 'centered',

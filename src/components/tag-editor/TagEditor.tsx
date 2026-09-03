@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
-import { Input } from '../input';
-import { Button } from '../button';
+import { Icon } from '../../atoms/icon';
+import { Input } from '../../atoms/input';
+import { Button } from '../../atoms/button';
 
 /**
  * TagEditor — free-form labels on a thing: a tag list, a tone swatch row, a

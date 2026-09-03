@@ -2,7 +2,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { IconButton } from '../icon-button';
+import { IconButton } from '../../atoms/icon-button';
 
 /**
  * Modal — a centred dialog over a dimmed backdrop.

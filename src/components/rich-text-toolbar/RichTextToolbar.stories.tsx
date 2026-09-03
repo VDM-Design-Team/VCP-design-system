@@ -1,10 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichTextToolbar, type RichTextCommand } from './RichTextToolbar';
-import { Textarea } from '../textarea';
+import { Textarea } from '../../atoms/textarea';
 
 const meta = {
-  title: 'Forms/RichTextToolbar',
+  title: 'Components/Forms/RichTextToolbar',
   component: RichTextToolbar,
   parameters: {
     docs: {

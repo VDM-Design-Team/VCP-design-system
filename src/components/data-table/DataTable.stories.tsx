@@ -1,11 +1,11 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DataTable, type DataTableColumn, type DataTableSort } from './DataTable';
-import { Badge } from '../badge';
-import { Avatar } from '../avatar';
+import { Badge } from '../../atoms/badge';
+import { Avatar } from '../../atoms/avatar';
 import { EmptyState } from '../empty-state';
-import { Button } from '../button';
-import { Icon } from '../icon';
+import { Button } from '../../atoms/button';
+import { Icon } from '../../atoms/icon';
 
 interface Claim {
   id: string;
@@ -75,7 +75,7 @@ function useSorted(initial: DataTableSort | undefined = { key: 'id', direction: 
 }
 
 const meta = {
-  title: 'Display/DataTable',
+  title: 'Components/Display/DataTable',
   component: DataTable,
   parameters: {
     docs: {

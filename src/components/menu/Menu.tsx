@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { Icon, type IconName } from '../icon';
-import { IconButton } from '../icon-button';
-import { Divider } from '../divider';
+import { Icon, type IconName } from '../../atoms/icon';
+import { IconButton } from '../../atoms/icon-button';
+import { Divider } from '../../atoms/divider';
 import { Popover, type PopoverAlign } from '../popover';
 
 /**

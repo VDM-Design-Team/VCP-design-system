@@ -4,7 +4,7 @@ import { Stepper } from './Stepper';
 import { Field } from '../field';
 
 const meta = {
-  title: 'Forms/Stepper',
+  title: 'Components/Forms/Stepper',
   component: Stepper,
   parameters: {
     docs: {
