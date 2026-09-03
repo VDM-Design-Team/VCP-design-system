@@ -41,10 +41,6 @@ built against something that is about to change.
 
 ## Components — to port
 
-Domain-agnostic. Grouped by the Storybook section they belong under.
-
-| Storybook group | Components |
-|---|---|
 *Nothing.* Every component from the export has shipped — the 43-piece
 component tier is complete. `Logo`'s assets, the last blocker, came out of
 Figma directly (the "VCP logo" component set, node 166:1226) as inline SVG.
