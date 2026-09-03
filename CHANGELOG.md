@@ -207,15 +207,17 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   changing a status is the options dropdown's job. "Ready for hand-off" borrows
   the info blue: the export's indigo has no core ramp (the same decision
   `DomainLabel` awaits). No new tokens.
-- Patterns: `TopBar` — **the first pattern**, and the tier's shape: the page
-  header composed entirely from existing pieces (`IconButton`, `Icon`, `Avatar`,
-  with `Breadcrumb`/`StatusPill`/`Button` slotting in through props). A
-  `<header>` carrying the page's single required `<h1>`; the bell marks unread
-  with the Figma `Top_NavBar`'s red dot while the count lives in its accessible
-  name; the export's cursor-pointer user div is a real named button only when
-  `onUserMenu` is given. The export's role badge under the user's name is
-  **removed — design review found no design for it** (roles stay `RoleBadge`'s
-  business). No new tokens. Unblocks `AppShell` down to `Sidebar` only.
+- Patterns: `TopBar` — **the first pattern**, matching the Figma `Top_NavBar`
+  set and its two versions: the "Create Added Value" `Button` in
+  `primaryAction`, or the linked `Logo` when there is none. Right side: the
+  bell (unread = the design's red dot, count in the accessible name), the
+  light/dark mode `Toggle` (controlled — the app owns the theme), and the user
+  chip (avatar + name + caret; a real named button only with `onUserMenu`).
+  Composed entirely from existing atoms — `Logo`, `Toggle`, `IconButton`,
+  `Avatar`, `Icon`. Design review (3 Sep 2026) cut the export's inventions: the
+  role badge under the user's name (no design for it) and the merged page-title
+  anatomy — back/title/status actions are the Figma `AV_Header`, queued as its
+  own `AVHeader` pattern. No new tokens. Unblocks `AppShell` down to `Sidebar`.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.

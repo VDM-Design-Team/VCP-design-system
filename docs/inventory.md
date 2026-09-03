@@ -62,7 +62,7 @@ Organisms: 2+ components forming a page section.
 
 | Area | Patterns |
 |---|---|
-| Page structure | `Sidebar`, `PageFooter`, `SettingsSection` |
+| Page structure | `AVHeader`, `Sidebar`, `PageFooter`, `SettingsSection` |
 | Status & domain | `StatusProgression`, `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
@@ -81,6 +81,9 @@ Dependency notes:
   settle before it is built, not during.
 - `AppShell` is blocked on `Sidebar` only — `TopBar` has shipped; it composes
   the two plus an optional 390px detail column.
+- `AVHeader` (the Figma `AV_Header` set — back, AV id/title, status-move
+  actions) is the page-level header TopBar deliberately does not carry; it is
+  unblocked.
 - The four tables were blocked on `DataTable`, which has shipped — they are
   unblocked; specialise it rather than copying it.
 

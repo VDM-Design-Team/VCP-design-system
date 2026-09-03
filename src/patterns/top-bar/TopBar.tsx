@@ -3,29 +3,29 @@ import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Avatar } from '../../atoms/avatar';
+import { Logo } from '../../atoms/logo';
+import { Toggle } from '../../atoms/toggle';
 
 /**
- * TopBar — the page header that sits at the top of every VCP screen: back
- * affordance, kicker line, page title, page actions, the notification bell,
- * and the signed-in user. **The first pattern**: an organism composed
- * entirely from existing pieces — `IconButton`, `Icon`, `Avatar` —
- * plus layout. Nothing here is bespoke except the arrangement.
+ * TopBar — the app bar, matching the Figma `Top_NavBar` component set and its
+ * two versions:
  *
- * Rebuilt semantics over the export:
- * - It is a `<header>` with the page's `<h1>` — one per page, which is why
- *   `title` is required and the heading level is not configurable.
- * - Back and the bell are the system's `IconButton`s, not hand-rolled
- *   buttons. The bell's unread count is folded into its accessible name
- *   ("Notifications, 3 unread") and the visual dot is hidden — announced
- *   once, not twice.
- * - The user chip (avatar + name + caret, inline as the Figma `Top_NavBar`
- *   draws it) was a `cursor:pointer` div; it is a real `<button>` when
- *   `onUserMenu` is given (named "<name>, account menu"), and a plain group
- *   otherwise. The full `UserMenu` pattern will own the menu itself.
+ * - **with a primary action** — pass the "Create Added Value" `Button` in
+ *   `primaryAction`; the left side is the action.
+ * - **without one** — omit `primaryAction`; the left side is the `Logo`,
+ *   linked home via `homeHref`.
  *
- * The export drew a role badge under the user's name; the Figma `Top_NavBar`
- * has no such thing, so neither does this. Roles are `RoleBadge`'s business
- * (to port), on the surfaces the design actually puts them.
+ * The right side is always: notification bell (unread = the design's red
+ * dot; the count lives in the bell's accessible name), the light/dark mode
+ * `Toggle`, and the signed-in user (avatar + name + caret, inline).
+ *
+ * An organism composed entirely from existing pieces — `Logo`, `Toggle`,
+ * `IconButton`, `Avatar`, `Icon`, with the caller's `Button` slotting into
+ * `primaryAction`. The page-level header (back, title, status actions) is a
+ * different Figma component (`AV_Header`) and will be its own pattern.
+ *
+ * The export drew a role badge under the user's name; design review (3 Sep
+ * 2026) confirmed no design for it — roles are `RoleBadge`'s business.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -37,20 +37,20 @@ export interface TopBarUser {
   src?: string;
 }
 
-export interface TopBarProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
-  /** The page's h1. Required — a page without a title is a lost user. */
-  title: React.ReactNode;
-  subtitle?: React.ReactNode;
-  /** Kicker line above the title — an AV id, or a `<Breadcrumb />`. */
-  breadcrumb?: React.ReactNode;
-  /** Shows the back IconButton. */
-  onBack?: () => void;
-  /** Page-level actions, left of the bell — Buttons, an IconButton row. */
-  actions?: React.ReactNode;
-  /** Unread count on the bell. The bell renders whenever this is a number. */
+export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
+  /**
+   * The bar's one page-level action — the "Create Added Value" `Button`.
+   * When present, it replaces the logo on the left (the Figma variant pair).
+   */
+  primaryAction?: React.ReactNode;
+  /** Where the logo links when there is no `primaryAction`. */
+  homeHref?: string;
+  /** Unread count. The bell renders whenever this is a number; `> 0` shows the dot. */
   notifications?: number;
   onNotifications?: () => void;
+  /** The mode switch from the design. Controlled by the app's theme state. */
+  theme?: 'light' | 'dark';
+  onThemeChange?: (theme: 'light' | 'dark') => void;
   user?: TopBarUser;
   /** Makes the user chip a real button — the future UserMenu's trigger. */
   onUserMenu?: () => void;
@@ -60,13 +60,12 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
   (
     {
       className,
-      title,
-      subtitle,
-      breadcrumb,
-      onBack,
-      actions,
+      primaryAction,
+      homeHref,
       notifications,
       onNotifications,
+      theme,
+      onThemeChange,
       user,
       onUserMenu,
       ...props
@@ -84,27 +83,26 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     );
 
     return (
-      /* h-21 = the Figma bar's 84. */
+      /* h-16 — the Figma bar rows are 64 tall. */
       <header
         ref={ref}
         className={cn(
-          'flex h-21 shrink-0 items-center justify-between gap-4 border-b border-stroke-subtle bg-surface-elevated px-8 font-sans',
+          'flex h-16 shrink-0 items-center justify-between gap-4 border-b border-stroke-subtle bg-surface-elevated px-8 font-sans',
           className,
         )}
         {...props}
       >
-        <div className="flex min-w-0 items-center gap-3.5">
-          {onBack && <IconButton variant="tertiary" icon="arrow-left" label="Back" onClick={onBack} />}
-          <div className="flex min-w-0 flex-col gap-0.5">
-            {breadcrumb && <span className="text-label-sm text-text-tertiary">{breadcrumb}</span>}
-            <h1 className="m-0 truncate text-heading-md text-text-primary">{title}</h1>
-            {subtitle && (
-              <span className="truncate text-body-sm text-text-tertiary">{subtitle}</span>
-            )}
-          </div>
-        </div>
+        {/* The variant pair: the primary action, or the linked logo. */}
+        {primaryAction ?? (
+          <a
+            href={homeHref}
+            aria-label="Value Chain Plus — home"
+            className="inline-flex rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stroke-focused"
+          >
+            <Logo decorative size="md" />
+          </a>
+        )}
         <div className="flex shrink-0 items-center gap-4">
-          {actions}
           {notifications != null && (
             <span className="relative">
               <IconButton
@@ -118,14 +116,22 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 onClick={onNotifications}
               />
               {notifications > 0 && (
-                /* The Figma Top_NavBar marks unread with a dot, not a count —
-                   the number lives in the bell's accessible name instead. */
+                /* The design's red dot — the number is in the bell's name. */
                 <span
                   aria-hidden="true"
                   className="absolute right-1 top-1 size-2 rounded-full bg-accent-critical-filled-surface-default"
                 />
               )}
             </span>
+          )}
+          {theme && (
+            /* The design's mode switch, as the system Toggle. It reports the
+               wish; the app owns the theme (and the `.dark` class). */
+            <Toggle
+              aria-label="Dark mode"
+              checked={theme === 'dark'}
+              onChange={(on) => onThemeChange?.(on ? 'dark' : 'light')}
+            />
           )}
           {user &&
             (onUserMenu ? (
