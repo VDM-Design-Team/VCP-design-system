@@ -31,6 +31,12 @@ built against something that is about to change.
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
+| component | `Select`, `Stepper`, `Dropzone` | PR #46 |
+| component | `Timeline`, `DonutChart`, `StatCard` | PR #47 |
+| component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
+| component | `TagEditor`, `RichTextToolbar` | PR #49 |
+| component | `DatePicker` | PR #50 |
+| component | `SearchSelect` | PR #51 |
 | component | `Logo` | PR #52 |
 
 ## Components — to port
@@ -39,15 +45,9 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 
 | Storybook group | Components |
 |---|---|
-| `Display/` | `Timeline`, `DonutChart`, `StatCard` |
-| `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
-| `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
-
-Dependency notes:
-
-- `SearchSelect` needs `Select` and `Popover`. `TagEditor` composes `Chip`.
-- `Logo`'s assets came out of Figma directly (the "VCP logo" component set,
-  node 166:1226) as inline SVG — the blocker is gone.
+*Nothing.* Every component from the export has shipped — the 43-piece
+component tier is complete. `Logo`'s assets, the last blocker, came out of
+Figma directly (the "VCP logo" component set, node 166:1226) as inline SVG.
 
 ## Patterns — to port
 
