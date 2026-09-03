@@ -38,6 +38,7 @@ built against something that is about to change.
 | component | `DatePicker` | PR #50 |
 | component | `SearchSelect` | PR #51 |
 | component | `Logo` | PR #52 |
+| pattern | `StatusPill` | PR #53 |
 
 ## Components — to port
 
@@ -52,7 +53,7 @@ Carry VCP vocabulary or page structure.
 | Area | Patterns |
 |---|---|
 | Page structure | `AppShell`, `TopBar`, `Sidebar`, `SidebarItem`, `PageFooter`, `SettingsSection` |
-| Domain vocabulary | `StatusPill`, `UrgencyTag`, `RoleBadge`, `DomainLabel`, `AssigneeStatus`, `StatusProgression` |
+| Domain vocabulary | `UrgencyTag`, `RoleBadge`, `DomainLabel`, `AssigneeStatus`, `StatusProgression` |
 | Domain objects | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `DeliverableLink`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |

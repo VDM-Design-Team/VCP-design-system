@@ -5,4 +5,4 @@
  * here. See the "Components and patterns" section of CLAUDE.md for the test that
  * decides which tier a new thing belongs to.
  */
-export {};
+export * from './status-pill';

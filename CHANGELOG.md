@@ -188,6 +188,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   shared `focus-within` ring. The dashed border moves to `stroke.field` (the
   export's `stroke.default` was 2.56:1 against the 3:1 a control boundary needs).
   New glyph `cloud-arrow-up` added to the icon set from Phosphor. No new tokens.
+- Patterns: `StatusPill` — **the first pattern**, and the proof of the tier rule:
+  tiny, composes exactly one component, still a pattern because
+  "Ready for hand-off" means nothing outside VCP. Owns the seven-status
+  vocabulary (`AVStatus` union — a typo is a compile error) and the status → tone
+  mapping docs/badge.md promised; renders a `Badge` with the status dot in its
+  icon slot. The export's clickable-span `interactive` mode is gone — changing a
+  status is the options dropdown's job. "Ready for hand-off" borrows the info
+  blue: the export's indigo has no core ramp (the same decision `DomainLabel`
+  awaits). No new tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
