@@ -71,6 +71,12 @@
         "$value": "#032e15"
       }
     },
+    "brand": {
+      "navy": {
+        "$value": "#0e0a49",
+        "$description": "The logo wordmark navy - brand mark only, deliberately no ramp"
+      }
+    },
     "monochrome": {
       "black": {
         "$value": "#000000"

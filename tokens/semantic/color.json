@@ -793,6 +793,14 @@
         "$value": "{color.slate.500}"
       }
     },
+    "logo": {
+      "$value": "{color.brand.navy}",
+      "$description": "The logo wordmark. Dark theme swaps it to white, exactly as the Figma dark variant does"
+    },
+    "logo-accent": {
+      "$value": "{color.vcp-blue.500}",
+      "$description": "The mark's diamond. Identical in dark - the brand accent does not theme"
+    },
     "link": {
       "default": {
         "$value": "#006dd9"
