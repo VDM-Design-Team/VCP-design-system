@@ -30,6 +30,7 @@ export * from './components/popover';
 export * from './components/progress-bar';
 export * from './components/radio-group';
 export * from './components/rich-text-toolbar';
+export * from './components/search-select';
 export * from './components/segmented-control';
 export * from './components/select';
 export * from './components/skeleton';

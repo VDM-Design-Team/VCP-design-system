@@ -36,6 +36,7 @@ built against something that is about to change.
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
 | component | `TagEditor`, `RichTextToolbar` | PR #49 |
 | component | `DatePicker` | PR #50 |
+| component | `SearchSelect` | PR #51 |
 
 ## Components — to port
 
@@ -44,12 +45,12 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 | Storybook group | Components |
 |---|---|
 | `Display/` | `Logo` |
-| `Forms/` | `SearchSelect` |
 
 Dependency notes:
 
-- `SearchSelect` needs `Select` and `Popover` — both shipped, so it is
-  unblocked. Nothing in `Forms/` is blocked any more.
+- Nothing left in `Components — to port` is blocked. (`SearchSelect`'s old
+  "needs Select and Popover" note was wrong — it is a combobox composing
+  `Icon` and `Avatar`.)
 - **`Logo` is blocked on assets.** The export's `/assets/vcp-logo-vector.svg`
   and `/assets/logo-valuechainplus.png` were never vendored into `_source/` —
   the image files have to come out of Figma (or the brand kit) before the
