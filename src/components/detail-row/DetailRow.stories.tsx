@@ -1,12 +1,12 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DetailRow } from './DetailRow';
-import { Badge } from '../badge';
+import { Badge } from '../../atoms/badge';
 import { AvatarGroup } from '../avatar-group';
-import { Input } from '../input';
+import { Input } from '../../atoms/input';
 
 const meta = {
-  title: 'Display/DetailRow',
+  title: 'Components/Display/DetailRow',
   component: DetailRow,
   parameters: {
     docs: {

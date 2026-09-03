@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
-import { Avatar } from '../avatar';
+import { Icon } from '../../atoms/icon';
+import { Avatar } from '../../atoms/avatar';
 
 /**
  * SearchSelect — a choice found by typing: people pickers, long supplier

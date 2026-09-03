@@ -8,7 +8,7 @@ const IMAGE =
   );
 
 const meta = {
-  title: 'Display/AttachmentPreview',
+  title: 'Components/Display/AttachmentPreview',
   component: AttachmentPreview,
   parameters: {
     docs: {

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { Button } from '../button';
-import { Icon, type IconName } from '../icon';
-import { IconButton } from '../icon-button';
+import { Button } from '../../atoms/button';
+import { Icon, type IconName } from '../../atoms/icon';
+import { IconButton } from '../../atoms/icon-button';
 
 /** The four accent families a Banner can speak in. `danger` is `accent.critical`. */
 export type BannerTone = 'info' | 'success' | 'warning' | 'danger';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
-import { Checkbox } from '../checkbox';
+import { Icon } from '../../atoms/icon';
+import { Checkbox } from '../../atoms/checkbox';
 
 /**
  * DataTable — the generic table: columns, rows, sortable headers, optional

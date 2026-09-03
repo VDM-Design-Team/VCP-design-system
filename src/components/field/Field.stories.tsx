@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Field } from './Field';
-import { Button } from '../button/Button';
+import { Button } from '../../atoms/button';
 
 /**
  * A plain control used only to demonstrate Field. Replace with the real
@@ -54,7 +54,7 @@ function DemoSelect(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
 }
 
 const meta = {
-  title: 'Forms/Field',
+  title: 'Components/Forms/Field',
   component: Field,
   parameters: {
     docs: {

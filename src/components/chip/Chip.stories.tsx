@@ -1,10 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Chip } from './Chip';
-import { Avatar } from '../avatar';
+import { Avatar } from '../../atoms/avatar';
 
 const meta = {
-  title: 'Display/Chip',
+  title: 'Components/Display/Chip',
   component: Chip,
   parameters: {
     docs: {
@@ -12,7 +12,7 @@ const meta = {
         component:
           'An interactive pill: a selected filter, a removable tag, a toggleable option. If it ' +
           'only classifies and is never clicked, use `Badge`; for VCP statuses, `StatusPill` ' +
-          '(pattern, not yet built). The export nested a button inside a clickable span — ' +
+          'The export nested a button inside a clickable span — ' +
           'rebuilt here as real buttons that are never nested, so every control is a tab stop.',
       },
     },

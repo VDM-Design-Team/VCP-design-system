@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AvatarGroup } from './AvatarGroup';
-import { Avatar } from '../avatar';
-import { Badge } from '../badge';
+import { Avatar } from '../../atoms/avatar';
+import { Badge } from '../../atoms/badge';
 
 const photo = (hue: number) =>
   `data:image/svg+xml;utf8,${encodeURIComponent(
@@ -25,7 +25,7 @@ const TEAM = [
 const SIZES = ['sm', 'md', 'lg'] as const;
 
 const meta = {
-  title: 'Display/AvatarGroup',
+  title: 'Components/Display/AvatarGroup',
   component: AvatarGroup,
   parameters: {
     docs: {

@@ -9,7 +9,7 @@ const TAGS: Tag[] = [
 ];
 
 const meta = {
-  title: 'Forms/TagEditor',
+  title: 'Components/Forms/TagEditor',
   component: TagEditor,
   parameters: {
     docs: {

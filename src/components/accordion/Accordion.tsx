@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
+import { Icon } from '../../atoms/icon';
 
 /**
  * Accordion — stacked disclosure panels: FAQ entries, grouped settings, a

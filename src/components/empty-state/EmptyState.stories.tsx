@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { EmptyState } from './EmptyState';
-import { Button } from '../button';
-import { Icon } from '../icon';
+import { Button } from '../../atoms/button';
+import { Icon } from '../../atoms/icon';
 
 const meta = {
-  title: 'Display/EmptyState',
+  title: 'Components/Display/EmptyState',
   component: EmptyState,
   parameters: {
     docs: {

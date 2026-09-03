@@ -1,13 +1,13 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Banner, type BannerTone } from './Banner';
-import { Button } from '../button';
+import { Button } from '../../atoms/button';
 import { Card } from '../card';
 
 const TONES: BannerTone[] = ['info', 'success', 'warning', 'danger'];
 
 const meta = {
-  title: 'Feedback/Banner',
+  title: 'Components/Feedback/Banner',
   component: Banner,
   parameters: {
     docs: {

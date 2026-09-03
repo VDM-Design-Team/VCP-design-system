@@ -4,9 +4,11 @@ The Claude Design export (`VCP Design System.zip`) carries 1,632 files and 660 r
 Figma imports, but the curated system inside it is **83 pieces**. This file is the
 worklist for porting them, and the record of which tier each one lands in.
 
-Tier is decided by the test in CLAUDE.md: *could another product use this
-unchanged?* Yes → `src/components/`. Only makes sense inside VCP →
-`src/patterns/`.
+Tier is decided by the composition test in CLAUDE.md (atomic approach,
+adopted 3 Sep 2026): **atom** = a single self-contained element; **component**
+= one unit assembled from atoms; **pattern** = 2+ components forming a page
+section; **template** = a page-level layout. Domain vocabulary may live at any
+tier — each mapping is owned by exactly one piece.
 
 Nothing here is a promise about order beyond the dependency notes. Anything marked
 **blocked** should not be started until its blocker ships, because it would be
@@ -14,59 +16,70 @@ built against something that is about to change.
 
 ## Done
 
+Tier reflects the atomic re-tier (PR #54); "Shipped in" stays the historical
+record of when each piece landed.
+
 | Tier | Name | Shipped in |
 |---|---|---|
-| component | `Button` | 0.1.0 |
-| component | `SegmentedControl` | PR #4 |
+| atom | `Button` | 0.1.0 |
+| atom | `SegmentedControl` | PR #4 |
 | component | `Tabs` | PR #5 |
 | component | `Field` | PR #7 |
-| component | `Input` | PR #7 |
-| component | `Textarea` | PR #7 |
-| component | `Checkbox` | PR #7 |
-| component | `RadioGroup` | PR #7 |
-| component | `Toggle` | PR #7 |
-| component | `Icon` | PR #10 |
-| component | `Avatar`, `AvatarGroup`, `Badge`, `Card`, `Divider`, `IconButton`, `Skeleton`, `Spinner` | PR #15 |
+| atom | `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `Toggle` | PR #7 |
+| atom | `Icon` | PR #10 |
+| atom | `Avatar`, `Badge`, `Divider`, `IconButton`, `Skeleton`, `Spinner` | PR #15 |
+| component | `AvatarGroup`, `Card` | PR #15 |
 | component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
-| component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
-| component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
+| atom | `ProgressBar` | PR #38 |
+| component | `Chip`, `EmptyState`, `DetailRow` | PR #38 |
+| atom | `PaginationDots` | PR #39 |
+| component | `Breadcrumb`, `Pagination`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
-| component | `Select`, `Stepper`, `Dropzone` | PR #46 |
-| component | `Timeline`, `DonutChart`, `StatCard` | PR #47 |
+| atom | `Select` | PR #46 |
+| component | `Stepper`, `Dropzone` | PR #46 |
+| atom | `DonutChart` | PR #47 |
+| component | `Timeline`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
 | component | `TagEditor`, `RichTextToolbar` | PR #49 |
 | component | `DatePicker` | PR #50 |
 | component | `SearchSelect` | PR #51 |
-| component | `Logo` | PR #52 |
-| pattern | `StatusPill` | PR #53 |
+| atom | `Logo` | PR #52 |
+| component | `StatusPill` | PR #54 |
 
 ## Components — to port
 
-*Nothing.* Every component from the export has shipped — the 43-piece
-component tier is complete. `Logo`'s assets, the last blocker, came out of
-Figma directly (the "VCP logo" component set, node 166:1226) as inline SVG.
+Small vocabulary pieces re-tiered down from the old patterns list: each is
+one unit composing an atom or two.
+
+| Components |
+|---|
+| `UrgencyTag`, `RoleBadge`, `DomainLabel`, `AssigneeStatus`, `DeliverableLink`, `SidebarItem`, `FeatureCard`, `ProblemCard`, `ChangelogCard` |
 
 ## Patterns — to port
 
-Carry VCP vocabulary or page structure.
+Organisms: 2+ components forming a page section.
 
 | Area | Patterns |
 |---|---|
-| Page structure | `AppShell`, `TopBar`, `Sidebar`, `SidebarItem`, `PageFooter`, `SettingsSection` |
-| Domain vocabulary | `UrgencyTag`, `RoleBadge`, `DomainLabel`, `AssigneeStatus`, `StatusProgression` |
-| Domain objects | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `DeliverableLink`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
+| Page structure | `TopBar`, `Sidebar`, `PageFooter`, `SettingsSection` |
+| Status & domain | `StatusProgression`, `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
-| Marketing / email | `MarketingHero`, `FeatureCard`, `ProblemCard`, `ChangelogCard`, `EmailLayout` |
+| Marketing | `MarketingHero` |
+
+## Templates — to port
+
+| Templates |
+|---|
+| `AppShell`, `EmailLayout` |
 
 Dependency notes:
 
-- **`DomainSelector` is blocked** on `DomainLabel` (`Icon` and `Menu` have since
-  shipped). It was deferred once already. `DomainLabel` colours
-  six domains with an indigo and a pink that have **no core ramp** — those ramps are
-  a token decision to settle before it is built, not during.
-- `AppShell` is blocked on `TopBar` and `Sidebar`; it composes them plus an optional
-  390px detail column.
+- **`DomainSelector` is blocked** on `DomainLabel`, whose six domain colours
+  need an indigo and a pink that have **no core ramp** — a token decision to
+  settle before it is built, not during.
+- `AppShell` is blocked on `TopBar` and `Sidebar`; it composes them plus an
+  optional 390px detail column.
 - `TopBar` is unblocked — `Logo`, `Menu`, `Avatar` and `IconButton` have all
   shipped.
 - The four tables were blocked on `DataTable`, which has shipped — they are

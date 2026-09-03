@@ -23,7 +23,7 @@ const SUPPLIERS = [
 ];
 
 const meta = {
-  title: 'Forms/SearchSelect',
+  title: 'Components/Forms/SearchSelect',
   component: SearchSelect,
   parameters: {
     docs: {

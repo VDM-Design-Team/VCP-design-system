@@ -2,12 +2,12 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
-import { Button } from '../button';
+import { Button } from '../../atoms/button';
 
 const TONES: ToastTone[] = ['info', 'success', 'warning', 'danger'];
 
 const meta = {
-  title: 'Feedback/Toast',
+  title: 'Components/Feedback/Toast',
   component: Toast,
   parameters: {
     docs: {

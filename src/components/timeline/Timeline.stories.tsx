@@ -39,7 +39,7 @@ const HISTORY: TimelineItem[] = [
 ];
 
 const meta = {
-  title: 'Display/Timeline',
+  title: 'Components/Display/Timeline',
   component: Timeline,
   parameters: {
     docs: {

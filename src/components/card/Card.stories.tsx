@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Card } from './Card';
-import { Button } from '../button';
-import { Icon } from '../icon';
+import { Button } from '../../atoms/button';
+import { Icon } from '../../atoms/icon';
 import { Field } from '../field';
-import { Input } from '../input';
+import { Input } from '../../atoms/input';
 
 const meta = {
-  title: 'Display/Card',
+  title: 'Components/Display/Card',
   component: Card,
   parameters: {
     docs: {

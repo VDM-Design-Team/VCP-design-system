@@ -2,9 +2,10 @@
 
 Harvested 2026-09-01 from the [VCP Design Library, "AV Page Details Card" page](https://www.figma.com/design/k0XgoZM8Q23EP4489CqwIc/VCP-Design-Library?node-id=2960-9969).
 These are the designer annotation pins attached to components in Figma. The components
-they describe are **VCP patterns** — they carry domain vocabulary (roles, domains, the
-Added Value lifecycle), so when they are built they belong in `src/patterns/`, and each
-note below belongs in that pattern's Storybook description and `docs/<name>.md`.
+they describe carry domain vocabulary (roles, domains, the Added Value lifecycle);
+their tier follows CLAUDE.md's composition test — most are components, the card
+assemblies are patterns — and each note below belongs in that piece's Storybook
+description and `docs/<name>.md`.
 
 Every annotation is quoted verbatim; nothing here is invented.
 

@@ -1,8 +1,8 @@
-# StatusPill *(pattern)*
+# StatusPill
 
-An Added Value's status, worn as a pill. The first pattern in
-`src/patterns/`, and the owner of VCP's status vocabulary — this file and
-its `.tsx` are where the status → tone mapping lives, and nowhere else.
+An Added Value's status, worn as a pill — a component composing `Badge`,
+and the owner of VCP's status vocabulary: this file and its `.tsx` are where
+the status → tone mapping lives, and nowhere else.
 
 ## When to use
 
@@ -10,11 +10,12 @@ its `.tsx` are where the status → tone mapping lives, and nowhere else.
 |---|---|
 | `StatusPill` | Any surface showing an AV's status: tables, cards, detail panels |
 | `Badge` | Generic classification with no VCP vocabulary |
-| The options dropdown *(pattern, to port)* | **Changing** a status — this pill only shows one |
+| The options dropdown *(to port)* | **Changing** a status — this pill only shows one |
 
-**The tier rule, demonstrated.** StatusPill is tiny and composes exactly one
-component — and it is still a pattern, because `'Ready for hand-off'` means
-nothing outside VCP. That is the test from CLAUDE.md, not size.
+**The tier rule, demonstrated.** StatusPill composes one atom (`Badge`) into
+one richer unit — a component, per CLAUDE.md's composition test. The VCP
+vocabulary it carries doesn't change its tier; it changes its *ownership*:
+the status → tone mapping lives here and only here.
 
 ## Props
 
@@ -22,7 +23,7 @@ nothing outside VCP. That is the test from CLAUDE.md, not size.
 |---|---|---|---|
 | `status` | `AVStatus` | required | The seven-value union — a typo is a compile error |
 | `size` | `sm \| md` | `md` | Badge's sizes; `sm` for the AV table's cells |
-| everything else | `BadgeProps` minus `tone`/`icon`/`children` | — | The pill *is* a Badge; the pattern owns what those carried |
+| everything else | `BadgeProps` minus `tone`/`icon`/`children` | — | The pill *is* a Badge; this piece owns what those carried |
 
 `AV_STATUSES` exports the vocabulary in lifecycle order for pickers,
 legends and tests.
@@ -58,7 +59,7 @@ differs, this union is the one place to change.
 - **Not clickable, on purpose.** The export offered `interactive`/`onClick`
   on a span; Badge's rule holds — changing status is the options dropdown's
   job (`AV_Options_Dropdown` in docs/figma-annotations.md), which will be its
-  own pattern with real menu semantics.
+  own component with real menu semantics.
 
 ## Don't
 
@@ -67,6 +68,6 @@ differs, this union is the one place to change.
 - **Don't extend `AVStatus` casually** — it is product vocabulary; a new
   status is a product decision with a lifecycle position, not a variant.
 - **Don't wrap it in an `onClick`** — that control can't be reached by
-  keyboard, which is why the pattern refuses to be one.
+  keyboard, which is why this piece refuses to be one.
 - **Don't use it for anything but AV status** — urgency is `UrgencyTag`,
   roles are `RoleBadge` (both to port).

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { Avatar, type AvatarProps } from '../avatar';
+import { Avatar, type AvatarProps } from '../../atoms/avatar';
 
 /** A person in the stack. A bare string is shorthand for `{ name }`. */
 export type AvatarGroupPerson = Pick<AvatarProps, 'name' | 'initials' | 'src' | 'tone'>;

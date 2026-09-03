@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon, type IconName } from '../icon';
+import { Icon, type IconName } from '../../atoms/icon';
 
 /**
  * FileAttachment — one attached file as a small tile: thumbnail or kind

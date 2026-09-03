@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Pagination } from './Pagination';
 
 const meta = {
-  title: 'Navigation/Pagination',
+  title: 'Components/Navigation/Pagination',
   component: Pagination,
   parameters: {
     docs: {

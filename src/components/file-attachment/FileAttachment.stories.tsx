@@ -10,7 +10,7 @@ const THUMB =
   );
 
 const meta = {
-  title: 'Display/FileAttachment',
+  title: 'Components/Display/FileAttachment',
   component: FileAttachment,
   parameters: {
     docs: {

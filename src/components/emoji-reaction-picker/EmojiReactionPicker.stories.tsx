@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { EmojiReactionPicker, type EmojiReaction } from './EmojiReactionPicker';
 
 const meta = {
-  title: 'Display/EmojiReactionPicker',
+  title: 'Components/Display/EmojiReactionPicker',
   component: EmojiReactionPicker,
   parameters: {
     docs: {

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Accordion } from './Accordion';
-import { Badge } from '../badge';
+import { Badge } from '../../atoms/badge';
 
 const ITEMS = [
   {
@@ -26,7 +26,7 @@ const ITEMS = [
 ];
 
 const meta = {
-  title: 'Navigation/Accordion',
+  title: 'Components/Navigation/Accordion',
   component: Accordion,
   parameters: {
     docs: {
