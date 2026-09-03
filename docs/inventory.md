@@ -35,6 +35,7 @@ built against something that is about to change.
 | component | `Timeline`, `DonutChart`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
 | component | `TagEditor`, `RichTextToolbar` | PR #49 |
+| component | `DatePicker` | PR #50 |
 
 ## Components — to port
 
@@ -43,7 +44,7 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 | Storybook group | Components |
 |---|---|
 | `Display/` | `Logo` |
-| `Forms/` | `SearchSelect`, `DatePicker` |
+| `Forms/` | `SearchSelect` |
 
 Dependency notes:
 
