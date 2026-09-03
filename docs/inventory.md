@@ -31,6 +31,7 @@ built against something that is about to change.
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
+| component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
 
 ## Components — to port
 
@@ -40,7 +41,6 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 |---|---|
 | `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard` |
 | `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
-| `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
 
 Dependency notes:
 

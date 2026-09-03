@@ -96,6 +96,21 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+- Components: `FileAttachment` (Display) — one attached file as a tile: thumbnail
+  or kind glyph, name, size, optional open and remove. The export mounted the ✕
+  only while the pointer hovered — unreachable by keyboard; it is now always in
+  the tab order, *revealed* by hover or focus, and a sibling of the openable
+  button per the Chip never-nest-buttons rule. New glyphs `image` and
+  `download-simple` from Phosphor. No new tokens.
+- Components: `AttachmentPreview` (Display) — the opened attachment: header with
+  name/size and the system's own `IconButton`s ("Download ${name}", "Close
+  preview"), body showing the image or an honest "No inline preview" with
+  download as the real path. An inline panel — `Modal` owns interruption. No new
+  tokens.
+- Components: `EmojiReactionPicker` (Display) — reaction pills + a "+" opening
+  the palette in the system `Popover`. Pills are toggle buttons: `aria-pressed`
+  for "you reacted", names like "3 reactions, 👍, you reacted", counts in the
+  numeric face; state lives with the caller. No new tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
