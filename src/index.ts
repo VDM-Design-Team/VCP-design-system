@@ -9,6 +9,7 @@ export * from './components/card';
 export * from './components/checkbox';
 export * from './components/chip';
 export * from './components/data-table';
+export * from './components/date-picker';
 export * from './components/detail-row';
 export * from './components/divider';
 export * from './components/empty-state';

@@ -96,6 +96,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+- Components: `DatePicker` (Forms) — the calendar panel: named day buttons
+  ("14 September 2026"), `IconButton` month nav with a polite live-region
+  heading, range shading, `min`/`max`. **One tab stop**: the day grid roves,
+  arrows move by day/week and page the view across month edges. The export's
+  VCP `capacity`/`holidays` props became generic `markers` (toned dots — the
+  caller owes a legend) and `flagged` (unavailable-but-selectable tint), per the
+  Badge/Timeline rulings; its `toISOString()` round-trip — which shifted picked
+  dates for anyone east of UTC — is replaced by local-time ISO handling. No new
+  tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
