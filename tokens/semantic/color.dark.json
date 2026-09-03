@@ -794,6 +794,14 @@
           "$value": "{color.slate.500}"
         }
       },
+      "logo": {
+        "$value": "{color.monochrome.white}",
+        "$description": "The Figma dark logo variant's wordmark is plain white"
+      },
+      "logo-accent": {
+        "$value": "{color.vcp-blue.500}",
+        "$description": "Unchanged from light - the brand accent does not theme"
+      },
       "link": {
         "default": {
           "$value": "#6ab5ff"

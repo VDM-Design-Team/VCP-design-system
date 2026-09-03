@@ -16,6 +16,7 @@ export * from './components/field';
 export * from './components/icon';
 export * from './components/icon-button';
 export * from './components/input';
+export * from './components/logo';
 export * from './components/menu';
 export * from './components/modal';
 export * from './components/pagination';

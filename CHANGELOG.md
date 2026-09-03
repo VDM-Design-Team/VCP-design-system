@@ -96,6 +96,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+- Components: `Logo` (Display) — the Value Chain Plus mark, full lockup or the
+  diamond alone (`collapsed`), sm/md/lg on the Figma Small/Medium/Big variants.
+  The export pointed at image files nobody ever had and CSS-inverted a PNG for
+  dark; the vectors now come straight from the Figma "VCP logo" component set as
+  inline SVG, themed by **two new tokens**: `text.logo` (a new core
+  `color.brand.navy` → white in dark, exactly the Figma dark variant) and
+  `text.logo-accent` (the brand blue, identical in both themes). Minor bump;
+  both tokens join the Figma-variables debt with `surface.track`. This was the
+  last component in the porting queue, and it unblocks the `TopBar` pattern.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
