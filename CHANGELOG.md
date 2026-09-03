@@ -96,6 +96,7 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+<<<<<<< HEAD
 - Components: `Timeline` (Display) — events in order on a real `<ol>`; nodes are a
   ring + glyph in one tone. **Generic tones only** — the export's `kind` took VCP
   lifecycle names (`accepted`, `handoff`); that mapping belongs to the future
@@ -115,6 +116,27 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   colour never carries direction alone. The label is deliberately not a heading
   and the tile deliberately does not compose `Card` (which renders one). Value in
   the numeric face at `heading-lg`. No new tokens.
+=======
+- Components: `Select` (Forms) — a choice from a fixed list, on the **native**
+  `<select>`: platform popup, keyboard model and mobile pickers for free. Wears
+  Input's shell class for class (`stroke.field`, focus ring, invalid, disabled);
+  the export's `small`/`large` renamed to `sm`/`md`; its data-URI caret replaced by
+  the system's glyph, pointer-transparent. Placeholder is a disabled, hidden
+  option, so it cannot be re-picked; `children` is the `<optgroup>` escape hatch.
+  No new tokens.
+- Components: `Stepper` (Forms) — nudge-a-number: minus, a typeable value in the
+  numeric face, plus. Typing is draft-based — half-typed states pass through and
+  the value commits clamped on blur/Enter (the export clamped every keystroke,
+  which made "15" untypeable when the minimum was 10). Arrow Up/Down nudge; the
+  buttons are named with the field's `label` folded in and disable at the ends.
+  Minus/plus glyphs instead of the export's chevrons. No new tokens.
+- Components: `Dropzone` (Forms) — click to browse or drag files on; hands over
+  `File[]` and forgets. The export's `display:none` input was unreachable by
+  keyboard; the input is now `sr-only`, so Tab + Enter work and the zone draws the
+  shared `focus-within` ring. The dashed border moves to `stroke.field` (the
+  export's `stroke.default` was 2.56:1 against the 3:1 a control boundary needs).
+  New glyph `cloud-arrow-up` added to the icon set from Phosphor. No new tokens.
+>>>>>>> origin/main
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
