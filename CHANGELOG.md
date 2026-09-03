@@ -207,6 +207,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   changing a status is the options dropdown's job. "Ready for hand-off" borrows
   the info blue: the export's indigo has no core ramp (the same decision
   `DomainLabel` awaits). No new tokens.
+- Patterns: `TopBar` — **the first pattern**, and the tier's shape: the page
+  header composed entirely from existing pieces (`IconButton`, `Icon`, `Avatar`,
+  `Badge`, with `Breadcrumb`/`StatusPill`/`Button` slotting in through props).
+  A `<header>` carrying the page's single required `<h1>`; the bell folds its
+  unread count into its accessible name and hides the visual pill from AT; the
+  export's cursor-pointer user div is a real named button only when `onUserMenu`
+  is given. `role` renders a brand Badge verbatim — the role → treatment mapping
+  stays reserved for `RoleBadge`. No new tokens. Unblocks `AppShell` down to
+  `Sidebar` only.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.

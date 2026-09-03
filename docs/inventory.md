@@ -45,6 +45,7 @@ record of when each piece landed.
 | component | `SearchSelect` | PR #51 |
 | atom | `Logo` | PR #52 |
 | component | `StatusPill` | PR #54 |
+| pattern | `TopBar` | PR #55 |
 
 ## Components — to port
 
@@ -61,7 +62,7 @@ Organisms: 2+ components forming a page section.
 
 | Area | Patterns |
 |---|---|
-| Page structure | `TopBar`, `Sidebar`, `PageFooter`, `SettingsSection` |
+| Page structure | `Sidebar`, `PageFooter`, `SettingsSection` |
 | Status & domain | `StatusProgression`, `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
@@ -78,10 +79,8 @@ Dependency notes:
 - **`DomainSelector` is blocked** on `DomainLabel`, whose six domain colours
   need an indigo and a pink that have **no core ramp** — a token decision to
   settle before it is built, not during.
-- `AppShell` is blocked on `TopBar` and `Sidebar`; it composes them plus an
-  optional 390px detail column.
-- `TopBar` is unblocked — `Logo`, `Menu`, `Avatar` and `IconButton` have all
-  shipped.
+- `AppShell` is blocked on `Sidebar` only — `TopBar` has shipped; it composes
+  the two plus an optional 390px detail column.
 - The four tables were blocked on `DataTable`, which has shipped — they are
   unblocked; specialise it rather than copying it.
 
