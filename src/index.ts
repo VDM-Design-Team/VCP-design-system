@@ -23,6 +23,7 @@ export * from './components/pagination-dots';
 export * from './components/popover';
 export * from './components/progress-bar';
 export * from './components/radio-group';
+export * from './components/search-select';
 export * from './components/segmented-control';
 export * from './components/skeleton';
 export * from './components/spinner';

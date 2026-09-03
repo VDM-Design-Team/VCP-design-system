@@ -96,6 +96,14 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+- Components: `SearchSelect` (Forms) — the combobox Select's docs promised, for
+  lists past the few dozen where the native popup stops scaling. Paid the custom
+  tax in full: `role="combobox"` with `aria-activedescendant` over a real
+  `listbox` (`aria-multiselectable` when `multiple`), arrows/Enter/Escape, focus
+  never leaving the input, options picked on prevented mousedown so a click
+  cannot blur mid-pick — the export was a bare input above a stack of buttons.
+  Positioned inline rather than through `Popover`, which moves focus into its
+  panel and a combobox must not. No new tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
