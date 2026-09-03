@@ -31,6 +31,7 @@ built against something that is about to change.
 | component | `Chip`, `ProgressBar`, `EmptyState`, `DetailRow` | PR #38 |
 | component | `Breadcrumb`, `Pagination`, `PaginationDots`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
+| component | `TagEditor`, `RichTextToolbar` | PR #49 |
 
 ## Components — to port
 
@@ -39,12 +40,12 @@ Domain-agnostic. Grouped by the Storybook section they belong under.
 | Storybook group | Components |
 |---|---|
 | `Display/` | `Logo`, `Timeline`, `DonutChart`, `StatCard` |
-| `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper`, `TagEditor`, `RichTextToolbar` |
+| `Forms/` | `Select`, `SearchSelect`, `DatePicker`, `Dropzone`, `Stepper` |
 | `Display/` | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` |
 
 Dependency notes:
 
-- `SearchSelect` needs `Select` and `Popover`. `TagEditor` composes `Chip`.
+- `SearchSelect` needs `Select` and `Popover`.
 - **`Logo` is blocked on assets.** The export's `/assets/vcp-logo-vector.svg`
   and `/assets/logo-valuechainplus.png` were never vendored into `_source/` —
   the image files have to come out of Figma (or the brand kit) before the

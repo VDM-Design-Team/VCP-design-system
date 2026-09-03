@@ -96,6 +96,19 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   (named select-all, `indeterminate` while partial, `selectLabel` for per-row
   names); `width` takes CSS widths for `<col>`, and the container scrolls
   horizontally so the page never does.
+- Components: `TagEditor` (Forms) — free-form labels: tag list, tone swatches,
+  name field (composed `Input`), add button (composed `Button`). **Tones, not
+  colours** — the export's raw-rgb `TAG_COLOURS` (one of them the ramp-less
+  indigo) became the `accent.{blue,green,red,yellow}` faint/stronger pairs Avatar
+  proved, plus a neutral; the dot rides `currentColor`. Swatches are a named
+  group of `aria-pressed` buttons with the hue in each name. No new tokens.
+- Components: `RichTextToolbar` (Forms) — the formatting strip, wired as a real
+  APG toolbar: one tab stop with a roving tabindex, Arrow keys walk the buttons,
+  Home/End jump. Only stateful commands carry `aria-pressed` (the export pressed
+  undo). Active text moved to `text.brand.strong` — the letter glyphs are real
+  13px text and the export-flavoured medium was 3.51:1 on the tint in dark. It
+  owns no editor state; `CommentComposer` (pattern) will marry it to one. New
+  glyphs `list-numbers` and `arrow-u-up-right` from Phosphor. No new tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
