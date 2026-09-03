@@ -1,7 +1,7 @@
 {
   "name": "@vcp/design-system",
   "version": "0.1.0",
-  "description": "VCP Design System — tokens, React components, and docs. Single source of truth for design and engineering.",
+  "description": "VCP Design System \u2014 tokens, React components, and docs. Single source of truth for design and engineering.",
   "type": "module",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -32,11 +32,12 @@
     "storybook:build": "storybook build",
     "lint:tokens": "node scripts/lint-hardcoded-values.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "npm run lint:tokens && npm run typecheck",
+    "test": "npm run lint:tokens && npm run lint:composition && npm run typecheck",
     "preview": "npm run tokens && tailwindcss -i preview/entry.css -o preview/out.css && echo 'open preview/index.html'",
     "gallery": "npm run tokens && node scripts/build-gallery.mjs",
     "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN",
-    "latest": "node scripts/latest.mjs"
+    "latest": "node scripts/latest.mjs",
+    "lint:composition": "node scripts/lint-composition.mjs"
   },
   "peerDependencies": {
     "react": ">=18",

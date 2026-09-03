@@ -3,6 +3,15 @@
 The reaction row under a comment: existing reactions as toggleable pills, and
 a "+" that opens the palette in a `Popover`.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+| `Popover` | component |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

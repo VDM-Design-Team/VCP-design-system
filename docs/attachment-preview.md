@@ -3,6 +3,15 @@
 The opened attachment: a header naming the file with download/close
 affordances, and a body showing the image — or an honest "No inline preview".
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+| `IconButton` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

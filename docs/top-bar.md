@@ -3,6 +3,22 @@
 The page header on every VCP screen: back affordance, kicker, the page's
 `<h1>`, page actions, the notification bell, the signed-in user.
 
+## Composed of
+
+| Piece | Tier | Role here |
+|---|---|---|
+| `IconButton` | atom | The back affordance and the notification bell |
+| `Avatar` | atom | The signed-in user |
+| `Badge` | atom | The role chip under the user's name |
+| `Icon` | atom | The user-menu caret |
+
+Composed through **slots** (the caller passes them in): `Breadcrumb` as the
+kicker, `Button` / `IconButton` / `StatusPill` in `actions` — the DetailPage
+story shows the full assembly.
+
+The import rows are checked against the real imports — `npm test` fails if
+this list drifts.
+
 ## When to use
 
 | Use | For |

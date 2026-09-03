@@ -4,6 +4,14 @@ The formatting strip above a rich editor: inline styles, lists, inserts,
 history, in divided groups. It owns no editor state — it reports commands and
 paints `active`.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

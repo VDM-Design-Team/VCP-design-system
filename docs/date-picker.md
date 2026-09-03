@@ -5,6 +5,14 @@ optional range shading, marker dots, flagged dates. The panel only — the
 Input-in-a-Popover composition is the caller's (the InAPopover story shows
 it).
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `IconButton` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

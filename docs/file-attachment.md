@@ -3,6 +3,14 @@
 One attached file as a small tile: thumbnail or kind glyph, name, size,
 optional open and remove.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

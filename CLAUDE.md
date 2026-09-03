@@ -16,7 +16,11 @@ Claude Design project — those mirror this repo, not the other way round.
 3. **`dist/` is generated.** Never hand-edit it. It is rebuilt from `tokens/`.
 4. **Every component ships with**: the `.tsx`, a `.stories.tsx` covering all
    variants/sizes/states, and a `docs/<name>.md` with a when-to-use table,
-   props table, accessibility notes, and a "Don't" list.
+   props table, accessibility notes, and a "Don't" list. Components, patterns
+   and templates additionally carry a **"Composed of"** section naming every
+   piece their `.tsx` imports — `npm run lint:composition` (part of `npm test`)
+   checks it against the real import graph, verifies imports flow downward,
+   and fails a pattern that composes fewer than two pieces.
 5. **Accessibility is not optional.** 4.5:1 contrast on text, 3:1 on UI borders,
    visible focus ring, 40px minimum target for touch, `aria-label` on icon-only
    controls.
@@ -95,7 +99,7 @@ Rules that follow from the split:
 |---|---|
 | `npm run tokens` | Rebuild `dist/` from `tokens/` |
 | `npm run dev` | Storybook at :6006 |
-| `npm test` | Token lint + typecheck (what CI runs) |
+| `npm test` | Token lint + composition lint + typecheck (what CI runs) |
 
 ## How design proposes a change
 

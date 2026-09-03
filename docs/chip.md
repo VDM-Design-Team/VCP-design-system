@@ -3,6 +3,14 @@
 An interactive pill: a selected filter, a removable tag, a toggleable option —
 optionally carrying an avatar or a count.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use Chip, Badge, or StatusPill
 
 | Use | For | Interactive? | Vocabulary |

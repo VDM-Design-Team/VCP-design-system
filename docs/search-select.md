@@ -3,6 +3,15 @@
 A choice found by typing: people pickers, long supplier lists. Single or
 multiple; options can lead with an `Avatar`.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Avatar` | atom |
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

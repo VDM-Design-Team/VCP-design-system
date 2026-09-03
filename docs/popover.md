@@ -11,6 +11,12 @@ It is **non-modal**. The page behind it stays reachable and operable, and focus 
 never trapped. If the user must deal with the panel before anything else, that is
 a Modal.
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use which overlay
 
 | Use | When | Focus behaviour | Dismiss |

@@ -3,6 +3,15 @@
 The generic table: columns, rows, sortable headers, optional row selection, an
 empty slot. A real `<table>`, not a div grid.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Checkbox` | atom |
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

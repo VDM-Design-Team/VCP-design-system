@@ -3,6 +3,15 @@
 A vertical run of events: node, title, timestamp, optional actor and detail.
 An `<ol>`, because the order is the meaning.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Avatar` | atom |
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

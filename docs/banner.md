@@ -4,6 +4,16 @@ A persistent inline message that sits in the layout. It takes real space,
 reflows the content around it, and stays until the user dismisses it or the
 condition that raised it clears. Nothing about it is timed.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Button` | atom |
+| `Icon` | atom |
+| `IconButton` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use Banner, Toast, or Modal
 
 The three differ on one axis — **how much of the user's attention you are

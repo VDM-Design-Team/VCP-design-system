@@ -3,6 +3,14 @@
 Where the current page sits in the hierarchy, each ancestor a way back. The
 last crumb is the page itself — text, not a control.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

@@ -6,6 +6,14 @@ An overlapping stack of people, with the tail collapsed into a `+N` chip.
 a pattern: composition is not the test, and nothing in here knows anything about
 VCP.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Avatar` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Situation | Use | Because |

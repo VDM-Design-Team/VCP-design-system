@@ -4,6 +4,12 @@ What a panel says when it has nothing to show: no results, no items yet,
 nothing assigned. Centred title, optional icon tile, optional explanation,
 optional way forward.
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use
 
 | Situation | Use | The action is |

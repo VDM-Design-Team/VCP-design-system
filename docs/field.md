@@ -13,6 +13,12 @@ id, points the label at it, and wires `aria-describedby` / `aria-invalid`.
 </Field>
 ```
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use which variant
 
 | Variant | Use for | Notes |

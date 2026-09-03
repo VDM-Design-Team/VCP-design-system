@@ -4,6 +4,15 @@ One label/value line in a details panel: a fixed 132 label column, the value
 taking the rest, an optional edit affordance on the right. Stack rows and the
 labels align into a scannable column.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+| `IconButton` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |
