@@ -39,10 +39,25 @@ docs/tooltip-usage          documentation only
 ## The daily rhythm
 
 **Morning**
-- Run `/vcp-morning` (anywhere) or `/morning` (inside the repo): what merged,
-  what's waiting on you, the state of your PRs.
-- Answer review comments **before** starting new work — someone is blocked on
-  them.
+- Run `/vcp-morning` (anywhere) or `/morning` (inside the repo). In order, it
+  gives you: **what's waiting on you** (questions asked of you, review
+  requests, unanswered comments on your PRs), **your open PRs** and their
+  state, **what merged**, **which components changed** with Storybook links,
+  and **what to do first**.
+- Answer questions and review comments **before** starting new work — someone
+  is blocked on them.
+
+**Questions between design and engineering are GitHub issues.** When a
+decision can't be made on one side — a status with no name, a colour with no
+token, a variant with no design — it is filed as an issue and **assigned to
+the person who can answer**. That is what puts it at the top of their morning
+brief. Two rules make it work:
+
+- **Assign it, don't just mention it.** An unassigned issue is nobody's.
+- **Nothing chases an issue.** A PR has checks, reviewers and a merge button
+  pushing it along; an issue has none of that, which is why the brief reports
+  every open one regardless of age, and why answering is a morning job rather
+  than a someday job.
 - Starting a task? Fresh `main`, new branch. You don't run git yourself —
   you tell Claude what you're starting, in product terms:
 

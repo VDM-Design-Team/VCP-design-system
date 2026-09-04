@@ -1,6 +1,6 @@
 ---
 name: vcp-morning
-description: Morning catch-up on the VCP Design System for designers. Use when the user asks to start their day, catch up, see what changed overnight, check their PRs, or invokes /vcp-morning. Reads GitHub through the user's browser and the published Storybook — no local clone, no terminal, no setup.
+description: Morning catch-up on the VCP Design System for designers. Use when the user asks to start their day, catch up, see what changed overnight, check their PRs or the questions waiting on them, or invokes /vcp-morning. Reads GitHub through the user's browser and the published Storybook — no local clone, no terminal, no setup.
 ---
 
 # VCP morning catch-up
@@ -27,8 +27,9 @@ Key locations are in `references/project.md` — read it first.
   changes state. If something needs a decision — a merge, a Chromatic baseline
   approval, a review — describe it and let them do it themselves. Never approve
   Chromatic baselines for them.
-- **Read-only means read-only.** Do not post comments either, unless they
-  explicitly dictate one.
+- **Read-only means read-only.** Do not post comments either — on a PR or an
+  issue — unless they explicitly dictate one. Answering a design question on
+  their behalf is exactly the thing not to do: surface it, let them answer.
 - **Product terms, not CSS terms.** "Button labels are now the right size — that
   was a bug fix", not "text-label-lg now survives tailwind-merge". PR bodies in
   this repo are written in product terms; quote their spirit.
@@ -43,20 +44,36 @@ you used in one clause, so they can correct you.
 ## 2 — GitHub, via the browser
 
 Open the repo (URL in `references/project.md`) in the browser and read — use the
-pull request list, the merged filter, and individual PR pages. Efficient queries
-are listed in `references/project.md`.
+pull request list, the **issue** list, the merged filter, and individual PR and
+issue pages. Efficient queries are listed in `references/project.md`.
 
 Report in this order:
 
-1. **Waiting on them.** PRs where their review is requested, and open review
-   threads on their own PRs that they have not answered. An unanswered comment
-   from days ago is the single most important thing in the brief — lead with it.
+1. **Waiting on them.** Three things live here, and they are the point of the
+   brief — lead with whichever has been waiting longest:
+   - **Open issues assigned to them, or that @-mention them.** This is how
+     engineering asks design a question — "which status is this variant?",
+     "these two colours have no token, which do you want?". A question like
+     this blocks work on the other side, and unlike a PR nothing chases it, so
+     **an unanswered issue outranks everything else in the brief.** Say what is
+     being asked, in one sentence, and what a useful answer looks like.
+   - PRs where their review is requested.
+   - Open review threads on their own PRs that they have not answered.
+
+   An unanswered question or comment from days ago is the single most important
+   thing in the brief. Say how old it is.
 2. **Their own PRs.** For each: checks green or red, reviewed or not, merge
    conflict or not, Chromatic visual diffs awaiting approval or not. If Chromatic
    diffs are pending, say whether they look expected given what the PR changes.
 3. **Merged since the window started.** What landed, in product terms. If the PR
    touched components, name them.
-4. **In flight around them.** Every other open PR, one line each.
+4. **In flight around them.** Every other open PR, one line each. Open issues
+   not assigned to them get one line each too, but only if they are about design
+   decisions — skip pure engineering tickets.
+
+**Issues are not bound by the time window.** A PR from last month has moved on;
+a question from last month is still unanswered. Report every open issue waiting
+on them however old it is, and say the age.
 
 ## 3 — What changed in the design system
 
@@ -75,8 +92,9 @@ If nothing merged, say the system is unchanged and skip this section's detail.
 ## 4 — What to do first
 
 Close with an ordered list, at most three items, most blocking first. Something
-waiting on their reply outranks something new to build. If nothing is waiting,
-say the morning is clear and name the most useful open thing to look at.
+waiting on their reply — an issue asking them a question, an unanswered review
+thread — outranks something new to build. If nothing is waiting, say the morning
+is clear and name the most useful open thing to look at.
 
 ## If they want to change something
 
