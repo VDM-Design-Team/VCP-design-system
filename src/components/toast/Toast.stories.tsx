@@ -123,6 +123,11 @@ export const Dismissible: Story = {
  * is the component's real state — the toast also reports it as `data-paused` on
  * the element.
  */
+/**
+ * The timer bar the design draws, running the same countdown the toast
+ * already had. Hover the toast and the bar freezes with the timer; move away
+ * and it spends what was banked, so hovering extends rather than restarts.
+ */
 export const AutoDismissPausesOnHover: Story = {
   parameters: { controls: { disable: true } },
   render: function AutoDismissDemo() {

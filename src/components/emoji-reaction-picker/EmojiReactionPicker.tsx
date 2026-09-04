@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { Popover } from '../popover';
+import { Tooltip } from '../tooltip';
 
 /**
  * EmojiReactionPicker — the reaction row under a comment: existing reactions
@@ -26,6 +27,12 @@ export interface EmojiReaction {
   count: number;
   /** Whether the current user reacted — drives `aria-pressed` and the tint. */
   mine?: boolean;
+  /**
+   * Who reacted, for the hover tooltip the design draws (Figma
+   * `_Comment_Emoji_Reaction`, State=Hover Tooltip). Omit it and the pill
+   * has no tooltip — a count with no names to show has nothing to add.
+   */
+  people?: readonly string[];
 }
 
 export interface EmojiReactionPickerProps
@@ -43,6 +50,14 @@ export interface EmojiReactionPickerProps
 
 const DEFAULT_EMOJI = ['👍', '👎', '🎉', '🎯', '👀', '🔥', '🤔', '✅'] as const;
 
+/** "Eve", "Eve and Marvin", "Eve, Marvin and 3 others" — AvatarGroup's phrasing. */
+function formatReactors(people: readonly string[]): string {
+  if (people.length === 1) return people[0];
+  if (people.length === 2) return `${people[0]} and ${people[1]}`;
+  const rest = people.length - 2;
+  return `${people[0]}, ${people[1]} and ${rest} ${rest === 1 ? 'other' : 'others'}`;
+}
+
 const pillBase = cn(
   'inline-flex h-6 items-center gap-1 rounded-full border px-2 font-sans transition-colors',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
@@ -54,26 +69,37 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
 
     return (
       <div ref={ref} className={cn('flex flex-wrap items-center gap-1.5', className)} {...props}>
-        {reactions.map((r) => (
-          <button
-            key={r.emoji}
-            type="button"
-            aria-pressed={r.mine || undefined}
-            aria-label={`${r.count} ${r.count === 1 ? 'reaction' : 'reactions'}, ${r.emoji}${r.mine ? ', you reacted' : ''}`}
-            onClick={() => onToggle?.(r.emoji)}
-            className={cn(
-              pillBase,
-              r.mine
-                ? 'border-stroke-brand-strong bg-surface-brand-faint text-text-brand-strong'
-                : 'border-stroke-subtle bg-surface-elevated text-text-secondary hover:bg-surface-neutral-faint',
-            )}
-          >
-            <span aria-hidden="true">{r.emoji}</span>
-            <span aria-hidden="true" className="font-numeric text-caption-md">
-              {r.count}
-            </span>
-          </button>
-        ))}
+        {reactions.map((r) => {
+          const pill = (
+            <button
+              type="button"
+              aria-pressed={r.mine || undefined}
+              aria-label={`${r.count} ${r.count === 1 ? 'reaction' : 'reactions'}, ${r.emoji}${r.mine ? ', you reacted' : ''}`}
+              onClick={() => onToggle?.(r.emoji)}
+              className={cn(
+                pillBase,
+                r.mine
+                  ? 'border-stroke-brand-strong bg-surface-brand-faint text-text-brand-strong'
+                  : 'border-stroke-subtle bg-surface-elevated text-text-secondary hover:bg-surface-neutral-faint',
+              )}
+            >
+              <span aria-hidden="true">{r.emoji}</span>
+              <span aria-hidden="true" className="font-numeric text-caption-md">
+                {r.count}
+              </span>
+            </button>
+          );
+          /* The design's Hover Tooltip state — who reacted, on the system
+             `Tooltip` (which also opens on keyboard focus, so the names are
+             not pointer-only). No `people`, no tooltip. */
+          return r.people && r.people.length > 0 ? (
+            <Tooltip key={r.emoji} content={formatReactors(r.people)}>
+              {pill}
+            </Tooltip>
+          ) : (
+            <React.Fragment key={r.emoji}>{pill}</React.Fragment>
+          );
+        })}
         <Popover
           open={open}
           onOpenChange={setOpen}
