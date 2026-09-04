@@ -19,7 +19,7 @@ that browser window themselves (never handle their password), then continue; it
 stays signed in for future mornings. The repo is public, so everything except
 the `@me` queries works signed out.
 
-**This brief is version 0.1.4.** Step 5 compares that with the released
+**This brief is version 0.1.5.** Step 5 compares that with the released
 version; `npm test` in the repo keeps this number equal to the plugin
 manifest, so it cannot quietly drift.
 
