@@ -83,6 +83,8 @@ Rules that follow from the split:
   `accent.{critical|success|warning|info|…}.{filled|outline|tonal}.{surface|content|border}.{state}` (status).
   Tailwind utilities: `bg-surface-canvas`, `text-text-primary`, `border-stroke-default`,
   `bg-action-primary-surface-default`, `bg-accent-critical-tonal-surface-default`.
+  For *which* semantic color token to reach for — not just how to name it —
+  see `docs/color-tokens.md`.
 - Spacing: do NOT override Tailwind's numeric scale — VCP's px values map onto it
   exactly (4px = `p-1`, 8px = `p-2`, 16px = `p-4`, 64px = `p-16`).
 - Type ramp: `text-display-xl` … `text-caption-sm` — size, line-height, weight and

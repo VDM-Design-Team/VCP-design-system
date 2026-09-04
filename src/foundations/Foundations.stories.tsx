@@ -5,6 +5,9 @@ import tokens from '../../dist/tokens.json';
  * The same token gallery, inside Storybook — so design and engineering are
  * looking at one page, not two. Generated from dist/tokens.json; nothing here
  * is maintained by hand.
+ *
+ * Which token to reach for is a separate question from what a token looks
+ * like — see docs/color-tokens.md for role-based selection guidance.
  */
 const meta: Meta = { title: 'Foundations/Tokens', parameters: { layout: 'fullscreen' } };
 export default meta;
