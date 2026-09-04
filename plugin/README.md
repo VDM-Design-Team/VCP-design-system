@@ -15,6 +15,9 @@ reads GitHub and the published Storybook and briefs you, in this order:
 4. **Which components changed**, with Storybook links.
 5. **What to do first** — at most three things.
 
+…and, only when there is one to take, a single line telling you a newer
+version of this plugin is out and the one command that takes it.
+
 PR activity is scoped to the last day (three on Mondays); **open questions are
 reported however old they are**, because an unanswered question doesn't age
 out. The full behaviour lives in one place — `skills/vcp-morning/SKILL.md`;
@@ -32,10 +35,22 @@ never answers a question on your behalf.
 
 ## Changing this plugin
 
-Edit it like anything else here — PR to `main`. **Bump `version` in
-`.claude-plugin/plugin.json` in the same PR**: installed copies are cached by
-version and silently keep the old one otherwise. Users pick up a release with
-`claude plugin update vcp-design-system@vcp`.
+Edit it like anything else here — PR to `main`. **Bump the version in the same
+PR, in both places:**
+
+- `.claude-plugin/plugin.json` — installed copies are cached by version and
+  silently keep the old one otherwise.
+- The "This brief is version X" line near the top of
+  `skills/vcp-morning/SKILL.md` — that is how the brief knows whether it is
+  the current one.
+
+`npm run lint:plugin-version` (part of `npm test`) fails if the two disagree,
+so a half-done bump cannot merge.
+
+Nothing updates installed plugins on their own. Users pick up a release with
+`claude plugin update vcp-design-system@vcp`, then restart. They should not
+have to *know* a release happened: the brief compares its own version against
+`main`'s on every run and tells them, in one line, when there is one to take.
 
 ## When you want to *change* the design system
 

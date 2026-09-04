@@ -32,12 +32,13 @@
     "storybook:build": "storybook build",
     "lint:tokens": "node scripts/lint-hardcoded-values.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "npm run lint:tokens && npm run lint:composition && npm run typecheck",
+    "test": "npm run lint:tokens && npm run lint:composition && npm run lint:plugin-version && npm run typecheck",
     "preview": "npm run tokens && tailwindcss -i preview/entry.css -o preview/out.css && echo 'open preview/index.html'",
     "gallery": "npm run tokens && node scripts/build-gallery.mjs",
     "chromatic": "chromatic --project-token=$CHROMATIC_PROJECT_TOKEN",
     "latest": "node scripts/latest.mjs",
-    "lint:composition": "node scripts/lint-composition.mjs"
+    "lint:composition": "node scripts/lint-composition.mjs",
+    "lint:plugin-version": "node scripts/lint-plugin-version.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
