@@ -218,6 +218,21 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   role badge under the user's name (no design for it) and the merged page-title
   anatomy — back/title/status actions are the Figma `AV_Header`, queued as its
   own `AVHeader` pattern. No new tokens. Unblocks `AppShell` down to `Sidebar`.
+- **`StatusPill` gains six statuses, closing the audit's vocabulary gap
+  (minor).** Batch 3a found the progression buttons moving AVs through six
+  states `Status_Tag_General` has no tag for — an AV parked in `For QA` had
+  nothing to wear. Lead's call (4 Sep 2026): build them. `AVStatus` now has
+  seventeen values — added `For Review`, `Design Review`, `For QA`, `In QA`,
+  `Ready for Deploy`, `Confirmed Prod`. **No new treatment**: each reuses a
+  tone the mapping already uses (gates warning, work info, verified success),
+  and `Review` stays the one filled tag, so the tag set's visual language is
+  unchanged. No new tokens.
+  `StatusProgression`'s `AVProgressionStatus` is now a literal subset of
+  `AVStatus` (`Extract<…>`), so a lifecycle state with no tag is a **compile
+  error** — the two vocabularies cannot drift apart again.
+  ⚠️ **Figma has not caught up**: the six do not exist in
+  `Status_Tag_General`, and the repo is the source of truth, so they need
+  adding to the design file.
 - Components: `StatusProgression` (Actions) — the "move this Added Value
   along" buttons, read off the Figma **Status Progression Buttons** page
   (eight component sets: two workflows × four viewer roles). **It owns

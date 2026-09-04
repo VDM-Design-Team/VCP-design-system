@@ -10,6 +10,7 @@ two workflows × four viewer roles.
 | Piece | Tier | Role here |
 |---|---|---|
 | `Button` | atom | Every transition, at `size="sm"` (36 = the design's 37) |
+| `StatusPill` | component | **Type only** — `AVProgressionStatus` is a subset of its `AVStatus`. Nothing rendered |
 
 One atom, used twice — which is why this is a **component**, not a pattern:
 it presents as one control unit. `AVHeader` is the pattern that places it.
@@ -46,20 +47,28 @@ Every label is the design's own wording, **not** generated from the status
 name — the design says "Move to Handoff" to an assignee and plain "Handoff"
 to an admin, and we say what it says.
 
-## ⚠️ Two status vocabularies exist
+## One vocabulary, two owners
 
-This lifecycle is **not** `StatusPill`'s. `Status_Tag_General` names eleven
-statuses; this page names a different set:
+`StatusPill` owns the **vocabulary and its tones**. This owns the
+**transitions over it**. `AVProgressionStatus` is literally a subset:
 
-| | Statuses |
-|---|---|
-| `StatusPill` (`AVStatus`) | Draft, Initiated, Pending, In Progress, Review, Review No Action, Accepted, Completed, Rejected, Reopened, Backlog |
-| This (`AVProgressionStatus`) | Draft, Pending, Accepted, In Progress, **For Review, For QA, In QA, Ready for Deploy, Confirmed Prod, Design Review**, Completed |
+```ts
+export type AVProgressionStatus = Extract<AVStatus, 'Draft' | 'Pending' | …>;
+```
 
-They overlap on five names and diverge on the rest. That is a design-side
-divergence, recorded in [figma-audit.md](figma-audit.md); it is deliberately
-**not** reconciled in code, because inventing a merged vocabulary would bake
-a decision that belongs to design.
+`Extract` is doing real work — adding a state here that `StatusPill` cannot
+display is a **compile error**.
+
+That was not true when this component shipped. The audit (batch 3a) found the
+two vocabularies disagreeing: six states here — `For Review`, `For QA`,
+`In QA`, `Ready for Deploy`, `Confirmed Prod`, `Design Review` — had no tag to
+wear, so an AV parked in any of them could not be labelled. The lead's call
+(4 Sep 2026) was to build the six into `StatusPill`, and the subset
+relationship above is what keeps them from drifting apart again.
+
+⚠️ **Figma has not caught up.** Those six tags do not exist in
+`Status_Tag_General`; the repo is the source of truth and the design file
+needs the addition. See [figma-audit.md](figma-audit.md).
 
 ## Props
 
@@ -117,7 +126,8 @@ rather than guessed:
 | Design / Design Admin | `Status8` | Reject · Accept |
 
 Consequence: the `initiator` role currently offers moves on `Draft` only.
-Name these in Figma and they can be added in a minor bump.
+The question is with design (Eve) — name these in Figma and they can be added
+in a minor bump.
 
 ## Accessibility
 
@@ -136,8 +146,9 @@ Name these in Figma and they can be added in a minor bump.
 
 - **Don't re-derive the mapping at a call site.** That is the whole point of
   this component. Use `avTransitions()` if you need the list without buttons.
-- **Don't pass `AVStatus` here** — the two vocabularies are different types
-  on purpose, and TypeScript will say so.
+- **Don't pass a non-transitioning `AVStatus` here** (`Backlog`, `Rejected`,
+  `Reopened`, …) — `AVProgressionStatus` is the subset that has moves, and
+  TypeScript will say so.
 - **Don't move the AV yourself on click.** `onTransition` reports the wish;
   the app owns the state and the save.
 - **Don't render it for a terminal status expecting an empty box** — it

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
+import type { AVStatus } from '../status-pill';
 
 /**
  * StatusProgression — the "move this Added Value along" buttons: at most a
@@ -18,12 +19,11 @@ import { Button } from '../../atoms/button';
  * generated from the status name, because the design does not generate them
  * either ("Move to Handoff" for an assignee, plain "Handoff" for an admin).
  *
- * **The vocabulary here is not `StatusPill`'s.** `Status_Tag_General` names
- * eleven statuses; this page names a different lifecycle (For QA, In QA,
- * Ready for Deploy, Confirmed Prod, Design Review) that overlaps it only in
- * part. That is a design-side divergence, flagged in docs/figma-audit.md and
- * deliberately not reconciled here — inventing a merged vocabulary in code
- * would bake a decision that belongs to design.
+ * **`StatusPill` owns the vocabulary; this owns the transitions over it.**
+ * The audit (batch 3a) found the two disagreeing — six states here had no tag
+ * to wear — and the lead's call (4 Sep 2026) was to add them to `StatusPill`.
+ * So `AVProgressionStatus` is now literally a subset of `AVStatus`: adding a
+ * state here without a tag for it is a compile error, which is the point.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -37,8 +37,14 @@ export type AVWorkflow = 'development' | 'design';
  */
 export type AVProgressionRole = 'assignee' | 'initiator' | 'assignee-initiator' | 'admin';
 
-/** The lifecycle this component moves an AV through. See the note above. */
-export type AVProgressionStatus =
+/**
+ * The lifecycle this component moves an AV through — the subset of
+ * `StatusPill`'s vocabulary that has transitions. `Extract` is doing real
+ * work: every state below must be a status `StatusPill` can display, so the
+ * two can never drift apart again the way the audit found them.
+ */
+export type AVProgressionStatus = Extract<
+  AVStatus,
   | 'Draft'
   | 'Pending'
   | 'Accepted'
@@ -49,7 +55,8 @@ export type AVProgressionStatus =
   | 'Ready for Deploy'
   | 'Confirmed Prod'
   | 'Design Review'
-  | 'Completed';
+  | 'Completed'
+>;
 
 /** What a button does, for the caller's switch. */
 export type AVTransitionKind =
