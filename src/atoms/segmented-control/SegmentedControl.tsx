@@ -15,7 +15,7 @@ import { cn } from '../../lib/cn';
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 const track = cva(
-  ['inline-flex items-center gap-0.5 p-0.5', 'bg-surface-neutral-subtle rounded-md'],
+  ['inline-flex items-center gap-0.5 p-0.5', 'bg-surface-neutral-subtle rounded-sm'],
   {
     variants: { fullWidth: { true: 'flex w-full', false: '' } },
     defaultVariants: { fullWidth: false },
@@ -25,7 +25,7 @@ const track = cva(
 const segment = cva(
   [
     'inline-flex items-center justify-center gap-1.5 min-w-0',
-    'font-sans whitespace-nowrap rounded-sm cursor-pointer',
+    'font-sans whitespace-nowrap rounded-xs cursor-pointer',
     'text-text-tertiary transition-colors',
     'hover:text-text-primary',
     'focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-stroke-focused',

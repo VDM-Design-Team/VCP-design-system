@@ -62,7 +62,8 @@ arrows are deliberately faint; disabled controls are exempt from 1.4.3/1.4.11.
 - Every control has a spoken name: "Page 3", "Previous page", "Next page".
 - The trailing "Page 3 of 12" is `aria-hidden` — screen readers already get
   the position from `aria-current`; announcing it twice is noise.
-- 32-tall controls: the pointer-dense exemption (pagination lives under
+- 36-tall controls (the Figma `VCP_Pagination` height): still the
+  pointer-dense exemption (pagination lives under
   tables). A touch-first list should page with full-size buttons or scroll.
 - Focus is not moved on page change — the user is mid-interaction with the
   pager; yanking focus to the table would strand them.

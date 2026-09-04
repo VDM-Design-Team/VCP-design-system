@@ -4,7 +4,7 @@ A square button carrying a single icon and no visible text.
 
 It is `Button` with the label taken away, and it is built from the same parts on
 purpose: the same `variant` names off the same `action.*` families, the same
-`sm` 32 / `md` 40 / `lg` 48 scale, the same `rounded-md` corner, the same focus
+`sm` 36 / `md` 40 / `lg` 48 scale, the same `rounded-sm` corner, the same focus
 ring, the same `loading` contract. If you know Button, you know this.
 
 ## When to use which
@@ -34,7 +34,7 @@ it needs a visible label, not a better icon.
 | `icon` | `IconName` | — | **Required.** A glyph name from the Icon library. Rendered decorative (`aria-hidden`) |
 | `label` | `string` | — | **Required.** The accessible name *and* the pointer tooltip. See below |
 | `variant` | `primary \| secondary \| tertiary \| danger` | `tertiary` | Same names and tokens as Button |
-| `size` | `sm \| md \| lg` | `md` | 32 / 40 / 48 square. `sm` only in dense contexts |
+| `size` | `sm \| md \| lg` | `md` | 36 / 40 / 48 square. `sm` only in dense contexts |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, disables the button, sets `aria-busy` |
 | `disabled` | `boolean` | `false` | Same as Button |
 | `className` | `string` | — | Merged onto the `<button>` via `cn()` |
@@ -76,7 +76,7 @@ class.
 | `tertiary` content | `action.tertiary.content.{default,hover,pressed,disabled}` | `text-action-tertiary-content-*` |
 | `danger` surface | `accent.critical.filled.surface.{default,hover,pressed,disabled}` | `bg-accent-critical-filled-surface-*` |
 | `danger` content | `accent.critical.filled.content.default` | `text-accent-critical-filled-content-default` |
-| Size | Tailwind numeric scale | `size-8` (32) / `size-10` (40) / `size-12` (48) |
+| Size | Tailwind numeric scale | `size-9` (36) / `size-10` (40) / `size-12` (48) |
 
 The dark theme comes for free — every class above is a semantic token that
 `tokens/semantic/color.dark.json` overrides under `.dark`.
@@ -110,7 +110,7 @@ component should paper over locally.
   Naming both the button and the glyph makes the control announce itself twice.
 
 - **40px minimum target.** `md` is 40×40 and is the default — it is the only size
-  that meets the target in CLAUDE.md. `sm` is 32×32 and is for pointer-dense
+  that meets the target in CLAUDE.md. `sm` is 36×36 and is for pointer-dense
   contexts only (toolbars, table rows, desktop-only screens), exactly as
   `Input`'s `sm` is. Never put `sm` on a touch-first screen. If a dense row must
   work on touch, keep `md` and cut the number of actions instead.
@@ -146,7 +146,7 @@ component should paper over locally.
   glyph that reliably means "reconcile", "publish" or "archive"; those need words.
 - Don't rely on the tooltip to explain the button. It is not available to
   keyboard or touch users.
-- Don't use `sm` on a touch-first screen — it is 32, under the 40 minimum.
+- Don't use `sm` on a touch-first screen — it is 36, under the 40 minimum.
 - Don't stack more than about five in one toolbar. Past that, an overflow
   `dots-three` menu is easier to scan than another glyph.
 - Don't use `primary` for every action in a row. One filled control, at most.
