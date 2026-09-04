@@ -15,7 +15,7 @@ const meta = {
           '“Create Added Value” Button in `primaryAction`, or with the linked Logo when ' +
           'there is none. Right side: bell (unread = the design’s red dot, count in the ' +
           'accessible name), the light/dark mode Toggle, and the user chip. The page-level ' +
-          'header (back, title, status actions) is `AVHeader` — a separate pattern, to port.',
+          'header (back, title, status actions) is `AVHeader` — a separate pattern.',
       },
     },
   },

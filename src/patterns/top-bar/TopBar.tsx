@@ -22,7 +22,7 @@ import { Toggle } from '../../atoms/toggle';
  * An organism composed entirely from existing pieces — `Logo`, `Toggle`,
  * `IconButton`, `Avatar`, `Icon`, with the caller's `Button` slotting into
  * `primaryAction`. The page-level header (back, title, status actions) is a
- * different Figma component (`AV_Header`) and will be its own pattern.
+ * different Figma component (`AV_Header`) and is its own pattern, `AVHeader`.
  *
  * The export drew a role badge under the user's name; design review (3 Sep
  * 2026) confirmed no design for it — roles are `RoleBadge`'s business.

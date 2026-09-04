@@ -46,6 +46,8 @@ record of when each piece landed.
 | atom | `Logo` | PR #52 |
 | component | `StatusPill` | PR #54 |
 | pattern | `TopBar` | PR #55 |
+| component | `StatusProgression` | PR #58 |
+| pattern | `AVHeader` | PR #58 |
 
 ## Components — to port
 
@@ -62,8 +64,8 @@ Organisms: 2+ components forming a page section.
 
 | Area | Patterns |
 |---|---|
-| Page structure | `AVHeader`, `Sidebar`, `PageFooter`, `SettingsSection` |
-| Status & domain | `StatusProgression`, `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
+| Page structure | `Sidebar`, `PageFooter`, `SettingsSection` |
+| Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
 | Marketing | `MarketingHero` |
@@ -79,11 +81,15 @@ Dependency notes:
 - **`DomainSelector` is blocked** on `DomainLabel`, whose six domain colours
   need an indigo and a pink that have **no core ramp** — a token decision to
   settle before it is built, not during.
-- `AppShell` is blocked on `Sidebar` only — `TopBar` has shipped; it composes
-  the two plus an optional 390px detail column.
-- `AVHeader` (the Figma `AV_Header` set — back, AV id/title, status-move
-  actions) is the page-level header TopBar deliberately does not carry; it is
-  unblocked.
+- `AppShell` is blocked on `Sidebar` only — `TopBar` and `AVHeader` have
+  shipped; it composes them plus an optional 390px detail column.
+- **`StatusProgression` re-tiered down to component** when it was built
+  (PR #58): it is one `Button` used twice, presenting as one control unit.
+  It owns status → transitions, the way `StatusPill` owns status → tone.
+- **Seven Figma progression variants are unnamed** (`Status4`, `Status8`,
+  `Deploy`, `Review`, `Review (completed 1)`) and are therefore not modelled;
+  the `initiator` role offers moves on `Draft` only until design names them.
+  See docs/status-progression.md, "Not modelled".
 - The four tables were blocked on `DataTable`, which has shipped — they are
   unblocked; specialise it rather than copying it.
 
