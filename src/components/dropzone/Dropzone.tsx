@@ -30,6 +30,13 @@ export interface DropzoneProps
   label?: string;
   /** Accepted-types line under the label — "PDF or PNG, up to 10 MB". */
   hint?: string;
+  /**
+   * The rejection, in words — "That file is 24 MB; the limit is 10 MB". The
+   * design's Error state (Figma `_Attachment_Drop_Container`): critical
+   * border and message, replacing `hint`. The zone stays usable so the user
+   * can immediately try another file.
+   */
+  error?: React.ReactNode;
   /** Forwarded to the input; also the browse dialog's filter. */
   accept?: string;
   multiple?: boolean;
@@ -39,9 +46,10 @@ export interface DropzoneProps
 
 export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
   (
-    { className, onFiles, label = 'Choose files', hint, multiple = true, disabled, ...props },
+    { className, onFiles, label = 'Choose files', hint, error, multiple = true, disabled, ...props },
     ref,
   ) => {
+    const messageId = React.useId();
     const [over, setOver] = React.useState(false);
 
     const take = (list: FileList | null) => {
@@ -68,7 +76,9 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
           over
             ? 'border-stroke-focused bg-surface-brand-base'
-            : 'border-stroke-field bg-surface-elevated',
+            : error
+              ? 'border-accent-critical-outline-border-default bg-accent-critical-tonal-surface-default'
+              : 'border-stroke-field bg-surface-elevated',
           disabled
             ? 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'
             : 'cursor-pointer hover:border-stroke-focused',
@@ -82,6 +92,8 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           className="sr-only"
           multiple={multiple}
           disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error || hint ? messageId : undefined}
           onChange={(e) => {
             take(e.target.files);
             /* Same file twice in a row still fires. */
@@ -90,10 +102,17 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           {...props}
         />
         <Icon
-          name="cloud-arrow-up"
+          name={error ? 'warning-circle' : 'cloud-arrow-up'}
           size="lg"
           aria-hidden="true"
-          className={cn('mb-1', disabled ? 'text-text-disabled' : 'text-text-tertiary')}
+          className={cn(
+            'mb-1',
+            disabled
+              ? 'text-text-disabled'
+              : error
+                ? 'text-accent-critical-tonal-content-default'
+                : 'text-text-tertiary',
+          )}
         />
         <span
           className={cn(
@@ -106,14 +125,19 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           </span>{' '}
           or drag and drop
         </span>
-        {hint && (
+        {(error || hint) && (
           <span
+            id={messageId}
             className={cn(
               'font-sans text-label-sm',
-              disabled ? 'text-text-disabled' : 'text-text-tertiary',
+              error
+                ? 'text-accent-critical-tonal-content-default'
+                : disabled
+                  ? 'text-text-disabled'
+                  : 'text-text-tertiary',
             )}
           >
-            {hint}
+            {error ?? hint}
           </span>
         )}
       </label>

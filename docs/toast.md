@@ -81,6 +81,23 @@ test can assert on the timer without reaching into React.
 `duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to `null` as
 it does on a bare `<Toast>`.
 
+## The timer bar
+
+The Figma toast draws a **4px bar** along the bottom edge running the
+auto-dismiss countdown (design audit, 3 Sep 2026). It appears whenever the
+toast is actually timed — so never on a toast carrying an action, which does
+not auto-dismiss at all.
+
+It is driven by a CSS transition rather than React state, so it stays smooth
+without a render per frame: pausing freezes it at its current width, and
+resuming spends whatever the timer banked. Hovering therefore *extends* the
+toast rather than restarting it, and the bar shows that.
+
+Deliberately **not** `ProgressBar`: that atom is a semantic meter with
+`role="progressbar"` and a value to announce. This is decoration for a
+countdown the toast already communicates, so it is `aria-hidden` and carries
+no value.
+
 ## Accessibility
 
 ### The live region, and why it is not on the Toast

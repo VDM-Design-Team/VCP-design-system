@@ -50,6 +50,28 @@ export const Default: Story = {
   },
 };
 
+/**
+ * The design's Hover Tooltip state: pass `people` and the pill names who
+ * reacted, on the system `Tooltip` — which opens on keyboard focus too, so
+ * the names are not pointer-only. Hover or Tab to a pill to see it.
+ */
+export const WithReactorNames: Story = {
+  args: {
+    reactions: [
+      { emoji: '👍', count: 3, mine: true, people: ['You', 'Marvin Ode', 'Ali Reza'] },
+      { emoji: '🎉', count: 1, people: ['Nora Lindqvist'] },
+    ],
+    onToggle: () => {},
+    onSelect: () => {},
+  },
+  /* Room above: `Tooltip` sits on top and deliberately does not flip. */
+  render: (args) => (
+    <div className="pt-12">
+      <EmojiReactionPicker {...args} />
+    </div>
+  ),
+};
+
 /** Nothing yet — just the way in. */
 export const NoReactions: Story = {
   args: { onSelect: () => {} },

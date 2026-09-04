@@ -15,7 +15,7 @@ a "+" that opens the palette in a `Popover`.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `reactions` | `Array<{ emoji, count, mine? }>` | `[]` | The pills, in order. `mine` drives `aria-pressed` and the tint |
+| `reactions` | `Array<{ emoji, count, mine?, people? }>` | `[]` | The pills, in order. `mine` drives `aria-pressed` and the tint; `people` adds the hover tooltip |
 | `onToggle` | `(emoji) => void` | — | A pill click — add or retract *your* reaction; the caller owns the math |
 | `emoji` | `string[]` | a neutral eight | The palette in the popover |
 | `onSelect` | `(emoji) => void` | — | A palette pick; the popover closes itself |
@@ -25,6 +25,15 @@ a "+" that opens the palette in a `Popover`.
 State lives with the caller: this component renders and reports. The Default
 story shows the usual reducer (toggle flips `mine` and adjusts `count`;
 select adds or joins).
+
+## Who reacted
+
+Pass `people` on a reaction and the pill gets the design's **Hover Tooltip**
+state — the names, on the system `Tooltip`, phrased like `AvatarGroup`'s
+summary ("You, Marvin Ode and 1 other"). Because it is the real `Tooltip`,
+it opens on **keyboard focus** as well as hover, so the names are not
+pointer-only. Omit `people` and there is no tooltip: a count with no names
+to show has nothing to add.
 
 ## Tokens
 

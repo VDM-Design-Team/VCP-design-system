@@ -82,7 +82,9 @@ const toast = cva(
        page underneath; the toast itself puts them back so it can be hovered,
        which is what pauses the timer. */
     'pointer-events-auto',
-    'flex w-full max-w-sm items-start gap-3',
+    /* `relative` + clipping so the timer bar can sit flush on the bottom edge
+       and follow the rounded corner. */
+    'relative flex w-full max-w-sm items-start gap-3 overflow-hidden',
     /* shape.radius.md, borderWidth.default. ds-lint-ignore */
     'rounded-md border px-3.5 py-3',
     /* shape.shadow.menu — the toast floats over the page; the Banner does not.
@@ -312,6 +314,33 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
     };
   }, [timed, paused]);
 
+  /* The timer bar the Figma toast draws (design audit, 3 Sep 2026): the same
+     countdown, made visible. Driven by a CSS transition rather than React
+     state so it stays smooth without a render per frame — pausing freezes it
+     at its current width, resuming spends whatever the timer banked.
+
+     Deliberately NOT `ProgressBar`: that atom is a semantic meter with
+     `role="progressbar"` and a value to announce. This is decoration for a
+     countdown the toast already communicates, so it is `aria-hidden` and has
+     no value at all. */
+  const barRef = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => {
+    const bar = barRef.current;
+    if (!bar || !timed) return;
+    if (paused) {
+      const own = bar.getBoundingClientRect().width;
+      const track = bar.parentElement?.getBoundingClientRect().width || 1;
+      bar.style.transition = 'none';
+      bar.style.transform = `scaleX(${track > 0 ? own / track : 0})`;
+      return;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      bar.style.transition = `transform ${remainingRef.current}ms linear`;
+      bar.style.transform = 'scaleX(0)';
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [timed, paused]);
+
   const resolvedDismissLabel =
     dismissLabel ?? (typeof title === 'string' ? `Dismiss: ${title}` : 'Dismiss notification');
 
@@ -379,6 +408,17 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
           className={cn('-my-1 -mr-1', TONE_CONTROL[tone])}
           onClick={onDismiss}
         />
+      )}
+
+      {timed && (
+        /* 4 tall, flush to the bottom edge, in the tone's own content colour
+           at low opacity so it reads as a track rather than a second border. */
+        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 overflow-hidden">
+          <span
+            ref={barRef}
+            className="block h-full origin-left bg-current opacity-40"
+          />
+        </span>
       )}
     </div>
   );
