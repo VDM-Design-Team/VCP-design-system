@@ -5,8 +5,14 @@ not need a terminal, code knowledge, or anything installed beyond Claude. Do the
 steps in order — each one depends on the one before it.
 
 When something here doesn't work, don't fight it: paste the error to Claude, or
-ask Ali. The tooling in this repo is written to refuse with a clear message
-rather than guess, so error text is worth reading.
+ask **the lead**. The tooling in this repo is written to refuse with a clear
+message rather than guess, so error text is worth reading.
+
+This document talks about **roles**, not people — the lead, the design-system
+owner, the accessibility owner. Duties belong to the seat, so the process
+survives people joining and leaving. **Who holds each seat today** is the one
+"Current holders" table in `docs/workflow.md`; that table is the only place
+names appear.
 
 ---
 
@@ -147,13 +153,20 @@ One difference worth knowing: the brief covers the **last day** of PR
 activity, but **every open question, however old**. A PR from last month has
 moved on; a question from last month is still unanswered.
 
+Occasionally it ends with one extra line: **a newer version of the plugin is
+out**, and the single command that takes it —
+`claude plugin update vcp-design-system@vcp`, then restart Claude. Nothing
+updates plugins on their own, so the brief watches for you; you'll see this a
+few times a year, not daily.
+
 It's read-only. It will never merge, approve, or comment as you — and it will
 never answer a question on your behalf. It surfaces; you decide.
 
 ## Step 6 — Reviewing a change (your first real contribution)
 
 Reviewing is **every designer's job** here, and it needs nothing beyond a
-browser. When `/vcp-morning` (or Ali) points you at a waiting pull request:
+browser. When `/vcp-morning` (or the design-system owner) points you at a
+waiting pull request:
 
 1. Open the PR on GitHub and find the **🔍 Visual review** comment — it's
    posted automatically on every PR.
@@ -189,7 +202,8 @@ Read these three, in the repository on GitHub — together they're ten minutes:
    one if they ever disagree.
 3. **`CLAUDE.md`** — the working rules. The short version you should carry
    around in your head:
-   - `main` is protected. **Nobody** pushes to it directly — not you, not Ali.
+   - `main` is protected. **Nobody** pushes to it directly — not you, not the
+     lead.
      Every change, however small, is a pull request that someone reviews.
    - Describe changes in **product terms** ("secondary buttons need a subtle
      variant for the settings page"), not CSS terms.
@@ -283,7 +297,7 @@ Run through these — if nothing surprises you, you're ready to work.
   owner**; new tokens, new components, whether something belongs in the
   system, and anything breaking go to the **lead**. The "Current holders"
   table in `docs/workflow.md` says who holds each seat today.
-- **Something broken in this onboarding** — Ali, and say which step. This
+- **Something broken in this onboarding** — the lead, and say which step. This
   document is young; your confusion is how it improves.
 
 ---
@@ -302,3 +316,7 @@ The sender's half, so it's written down too:
 3. **Send them the link to this page** with one line: "start at step 1."
 4. When their first review or PR lands, walk them through the result — the
    post-merge walkthrough is how the system stays one conversation.
+
+You do not need to announce plugin releases: the brief compares its own
+version against `main` on every run and tells its reader when there is a
+newer one, with the command to take it.

@@ -19,6 +19,10 @@ that browser window themselves (never handle their password), then continue; it
 stays signed in for future mornings. The repo is public, so everything except
 the `@me` queries works signed out.
 
+**This brief is version 0.1.4.** Step 5 compares that with the released
+version; `npm test` in the repo keeps this number equal to the plugin
+manifest, so it cannot quietly drift.
+
 Key locations are in `references/project.md` — read it first.
 
 ## Ground rules
@@ -95,6 +99,29 @@ Close with an ordered list, at most three items, most blocking first. Something
 waiting on their reply — an issue asking them a question, an unanswered review
 thread — outranks something new to build. If nothing is waiting, say the morning
 is clear and name the most useful open thing to look at.
+
+## 5 — Is this brief itself out of date?
+
+Nothing updates the plugin on its own, and the reader has no way to know a
+newer version exists unless you tell them. So while you are still on GitHub,
+open the plugin manifest on `main` (URL in `references/project.md`) and read
+its `version`.
+
+**If it is higher than the version stated at the top of this file**, close
+with one line — no more than this:
+
+> This brief is v0.1.4; v0.1.5 is out. Run
+> `claude plugin update vcp-design-system@vcp` and restart Claude — it takes
+> effect from your next conversation.
+
+Say what the new version adds only if the manifest's `description` makes it
+plain. Do not guess at it, and do not run the command for them: this brief
+does not use a terminal, and telling them the one command to paste is the
+whole job.
+
+**If the versions match, say nothing at all.** A brief that reports its own
+health every morning is noise; this line should appear two or three times a
+year.
 
 ## If they want to change something
 

@@ -31,6 +31,8 @@ Substitute nothing — these work as-is once the user is logged in:
 - A PR's page shows checks, reviews, conversation and conflicts in one place:
   https://github.com/VDM-Design-Team/VCP-design-system/pull/NUMBER
 - An issue's page: https://github.com/VDM-Design-Team/VCP-design-system/issues/NUMBER
+- The released plugin version (step 5 reads the `version` field):
+  https://github.com/VDM-Design-Team/VCP-design-system/blob/main/plugin/.claude-plugin/plugin.json
 
 Engineering asks design questions as **issues** in this repo — a status that
 needs a name, a colour with no token, a variant with no design. They are
