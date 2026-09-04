@@ -155,9 +155,116 @@ atom, not by styling around it.
 3. Badge's two documented deviations (`success` AA fix, `neutral` slate-100)
    stand.
 
+---
+
+## Batch 2 — Date Picker, Toasts, Edit Text Toolbar, AV Table, Comment Section, AV Attachments
+
+Batch 1 was mostly *values* (a wrong hex, a wrong radius). Batch 2 is mostly
+**missing designed states and variants** — the pieces are the right shape,
+but the design asks for more than we built.
+
+### 🔧 DatePicker — panel width
+
+Figma `Date_Picker_VCP` is **284 wide**; the export drew 300 and we kept it.
+Fixed (`w-71`, on the 4px grid).
+
+### ⚠️ DatePicker — three designed modes we don't have
+
+The Figma set has variants we never modelled:
+
+| Variant | What it is | Status |
+|---|---|---|
+| `Mode=Month` | A month picker, not a day grid | not built |
+| `Button=Yes` | Footer action buttons (apply/cancel) | not built |
+| `Dual View` | Two months side by side | not built |
+| `Mobile Friendly` | A 362×458 touch layout | not built |
+
+None is a bug in what we shipped — the day grid matches. They are scope.
+`Mode=Month` and `Dual View` matter most for the planning surfaces
+(`PeriodSelector`, the Gantt work), so they want building before those.
+
+### ⚠️ Toast — the timer bar is missing
+
+The Figma toast carries a **4px Timer Bar** running its auto-dismiss
+countdown. We implement the *behaviour* (auto-dismiss, paused on hover and
+focus) but draw no bar, so the user cannot see how long they have. A real
+gap — and cheap, because the timing logic already exists.
+
+### ⚠️ RichTextToolbar — ours is one of several designed toolbars
+
+The Figma Edit Text Toolbar page is far larger than our strip: **~90
+commands across nine groups** (Formatting, Paragraph, Content, Files &
+Images, Tables & Cells, Actions & Tools, Arrows, Generic, Misc), assembled
+into named compositions:
+
+- `_Text_Toolbar_Primary`: **Full Featured** and **Inline Editor**
+- `_Text_Toolbar_Secondary`: More Text · More Paragraph · More Rich Content · Misc
+- `_Text_Toolbar_Pop_Up`: Image · Table
+- `_Quick_Insert`: On/Off
+
+Every one of our eleven commands **is** a real Figma command, so nothing we
+built is invented. But we ship a single fixed strip roughly equal to the
+**Inline Editor**, with no overflow toolbars and no context pop-ups. Worth a
+decision: model the two primary variants, or keep one strip and document it
+as the inline editor.
+
+### ⚠️ Toolbar icon size
+
+Figma toolbar icons are **24**; ours are 16 inside 28 buttons. Deliberate on
+our side (a dense strip), but it is a visible difference.
+
+### ✅ EmojiReactionPicker — matches
+
+Figma reaction pills are **24 tall** — ours are too. `Type=Own Reaction`
+maps exactly to our `mine`. ⚠️ One missing state: the design has
+**Hover Tooltip** on a reaction (presumably naming who reacted); we show no
+tooltip. `Tooltip` already exists, so this is composition, not new work.
+
+### ⚠️ FileAttachment — the card is a different size, and off-grid
+
+Figma `_File_Attachment_Card_Base` is **93 × 69, radius 6**; ours is 104
+wide with a 72-tall preview. **93 is not on the 4px grid** the system is
+built on (92 and 96 are), so this is flagged rather than forced — rounding
+to 92 would be closest, but it is design's call whether the card is 92, 96,
+or genuinely 93.
+
+Also unmodelled: a **`Domain Label=Yes`** variant (blocked on `DomainLabel`,
+which is itself blocked on the two missing colour ramps) and a
+**Hover Remove Only** state.
+
+### ⚠️ Dropzone — no error state
+
+Figma `_Attachment_Drop_Container` is **298 × 162, radius 8** (our radius
+matches) with three states: Default, **Drag Over**, and **Error**. We have
+the first two. A dropzone that cannot show a rejected file is a real gap —
+and the tokens for it (`accent.critical.*`) already exist.
+
+### ⚠️ For design — the AV table cells are not using the VCP variables
+
+The Added Value Table page draws its deadline states with **raw colours that
+are not in any VCP ramp**: `#5291f7` (Safe), `#eab308` (Approaching),
+`#ef4444` (Overdue), `#64748b` (Backlog). Our ramps carry `yellow-500
+#f0b100` and `red-500 #fb2c36` — different values. These look like stock
+Tailwind defaults left in the design rather than the library's own
+variables.
+
+Nothing to fix in code (those cells belong to the unbuilt AV-table pattern),
+but **the Figma components should be rebound to the VCP variables** before
+that pattern is built, or the pattern will inherit colours the token layer
+cannot express.
+
+### Batch 2 verdict
+
+No component we shipped is *wrong* in the way StatusPill was. The pattern
+here is **scope**: the design asks for states (Toast timer, Dropzone error,
+reaction tooltip) and variants (DatePicker modes, toolbar compositions) that
+we have not built. Each is listed above so it can be scheduled rather than
+discovered later.
+
 ## Still to audit
 
-Batch 2 (proposed): Date Picker, Notification/Toasts, Comment Section,
-Filters, Edit Text Toolbar, Status Progression Buttons, Added Value Table,
-AV Page cards. These pages carry the pieces most likely to have invented
-props, since the export's versions of them were the most elaborate.
+Batch 3 (proposed): Navigation (Sidebar), Settings Pages, Holiday Registry,
+Planning Page, Assignee Availability, Dashboard Charts, Modals. These are
+mostly **unbuilt** patterns, so batch 3 is less "did we get it wrong" and
+more "what does the design actually ask for" — best run just before each
+pattern is built rather than all at once.

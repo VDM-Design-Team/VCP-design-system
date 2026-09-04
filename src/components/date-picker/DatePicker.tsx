@@ -134,9 +134,10 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     return (
       <div
         ref={ref}
-        /* w-75 = the export's 300 panel, on the spacing scale. */
+        /* w-71 = the Figma Date_Picker_VCP panel, 284 (design audit,
+           3 Sep 2026). The export drew 300. */
         className={cn(
-          'w-75 rounded-md border border-stroke-subtle bg-surface-elevated p-3.5 font-sans shadow-menu',
+          'w-71 rounded-md border border-stroke-subtle bg-surface-elevated p-3.5 font-sans shadow-menu',
           className,
         )}
         {...props}
