@@ -306,8 +306,9 @@ or Handoff — but there is no way to know which status they represent, so they
 are **not modelled**; the `initiator` role consequently offers moves on
 `Draft` only. Name them and they are a minor bump.
 
-**Asked of design (Eve) on 4 Sep 2026** — see the repo issue linked from the
-`initiator` note in docs/status-progression.md. Five of the seven draw
+**Asked of design (Eve) on 4 Sep 2026** —
+[issue #60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60).
+Five of the seven draw
 Reject · Accept, which *suggests* they are all `Pending` seen by different
 roles, but that is a guess and was deliberately not written into a public
 type.

@@ -126,8 +126,9 @@ rather than guessed:
 | Design / Design Admin | `Status8` | Reject · Accept |
 
 Consequence: the `initiator` role currently offers moves on `Draft` only.
-The question is with design (Eve) — name these in Figma and they can be added
-in a minor bump.
+The question is with design (Eve) in
+[issue #60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60) —
+name these in Figma and they can be added in a minor bump.
 
 ## Accessibility
 
