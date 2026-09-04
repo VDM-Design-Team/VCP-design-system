@@ -1,8 +1,9 @@
 {
   "radius": {
     "$type": "dimension",
-    "sm": { "$value": "6px", "$description": "Small controls, tags, badges" },
-    "md": { "$value": "8px", "$description": "Default: buttons, inputs, cards" },
+    "xs": { "$value": "4px", "$description": "Inner cells inside a control: pagination pages, segmented items (Figma audit, 3 Sep 2026)" },
+    "sm": { "$value": "6px", "$description": "Controls: buttons, tags, badges (the Figma corner, measured 3 Sep 2026)" },
+    "md": { "$value": "8px", "$description": "Cards, panels, larger surfaces" },
     "pill": { "$value": "999px" }
   },
   "shadow": {

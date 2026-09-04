@@ -20,8 +20,9 @@ import { Icon } from '../../atoms/icon';
  * reach, five numbers plus the arrows cover it. If a genuine thousand-page set
  * appears, extend this component rather than composing around it.
  *
- * Controls are 32 tall — the same pointer-dense exemption from the 40 target
- * as `IconButton size="sm"`; pagination lives under tables, a pointer surface.
+ * Controls are 36 tall with the `radius.xs` inner-cell corner — the Figma
+ * `VCP_Pagination` geometry (design audit, 3 Sep 2026). Still under the 40
+ * target: the pointer-dense exemption, as pagination lives under tables.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -36,7 +37,7 @@ export interface PaginationProps
 }
 
 const pageButton = cn(
-  'grid h-8 min-w-8 place-items-center rounded-sm px-2 font-sans text-label-md transition-colors',
+  'grid h-9 min-w-9 place-items-center rounded-xs px-2 font-sans text-label-md transition-colors',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
 );
 

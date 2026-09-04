@@ -74,33 +74,43 @@ slate-100 not slate-200 (no semantic surface token carries slate-200; the
 nearest is `stroke.subtle`, which is a border role). Neither is a bug;
 both are worth a design opinion.
 
-### ✅ Button — sizes, fills, states
+### 🔧 Button — `sm` height and corner
 
-Figma Small/Normal/Big = **36 / 40 / 48**; our `sm`/`md`/`lg` = 32/40/48.
-The `md` and `lg` match exactly. Fills match the `action.primary` chain
-hex for hex: default `#1a56db`, hover `#1441a4`, pressed `#0d2b6e`,
-disabled `#8caaed`, white label, radius 6.
+Figma Small/Normal/Big = **36 / 40 / 48**; we shipped 32/40/48. Fills match
+the `action.primary` chain hex for hex (default `#1a56db`, hover `#1441a4`,
+pressed `#0d2b6e`, disabled `#8caaed`, white label).
 
-⚠️ **Our `sm` is 32, the design's Small is 36.** We chose 32 to give the
-scale a genuinely dense step and to line up with `IconButton sm`. Raising it
-touches every dense surface (tables, toolbars, Pagination) — a deliberate
-design call, not a quick fix. Flagged rather than changed.
+Fixed on the lead's "stay loyal to Figma" call: **`sm` 32 → 36**, and the
+corner **8 → 6** (Figma buttons are `radius: 6`, like the tags — we had
+`rounded-md`). `IconButton` follows both, since its docs promise it is
+Button's scale and corner exactly.
 
 ### ✅ Checkbox — box sizes
 
 Figma ships **16 and 20**; ours are 16 (`sm`) and 20 (`md`). Match.
 
-### ⚠️ Pagination — control height
+### 🔧 Pagination — control height and corner
 
-Figma's `VCP_Pagination` controls are **36 tall with `radius: 4`**; ours are
-32 with `radius.sm` (6). Same family as the Button `sm` question — a scale
-decision to make once, across the dense controls, rather than piecemeal.
+Figma's `VCP_Pagination` controls are **36 tall with `radius: 4`**; ours were
+32 with `radius.sm` (6). Both fixed.
 
-### ⚠️ Segmented Control — item height
+### ✅ Segmented Control — my batch-1 flag was wrong
 
-Figma items are **38 tall** (XL 16px text / L 14px); ours are 32/40. Again
-the dense-control scale question; flagged with the two above so design can
-settle all three together.
+I first reported "Figma items are 38 tall, ours are 32/40". That 38 was the
+**inner `_Segmented_Control_Item`**, not the control. Reading the outer
+`Segmented_Control` set gives the real scale: **XL 48 · L 40 · M 36 · S 32 ·
+XS 28**, radius 6, 4px padding.
+
+**Our `sm`/`md` (32/40) are exactly Figma's S and L.** No size change needed.
+Only the corners moved: track `md` → `sm` (6), items `sm` → the new `xs` (4).
+
+### 🔧 New token — `shape.radius.xs` = 4px
+
+Figma has **no radius variables** (the values sit raw on components), but it
+uses a consistent pair: **6** for controls, **4** for the small cells inside
+them (pagination pages, segmented items). We had no 4px token, so per rule 1
+it was added before use. `radius.md` (8) is now described as what it
+actually is — cards, panels, larger surfaces.
 
 ### ✅ Avatar — the sizes we ship
 
@@ -135,6 +145,15 @@ solid fill that `Badge` couldn't give — fixed by adding the variant to the
 atom, not by styling around it.
 
 ---
+
+## Decisions taken (3 Sep 2026, lead)
+
+1. **Stay loyal to Figma** on the dense-control scale → the Button/Pagination
+   fixes above. Where the audit itself proved the design and the code already
+   agreed (SegmentedControl), nothing moved.
+2. **`Review` / `Review No Action`** keep their distinct labels for now.
+3. Badge's two documented deviations (`success` AA fix, `neutral` slate-100)
+   stand.
 
 ## Still to audit
 
