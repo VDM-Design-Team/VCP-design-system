@@ -9,13 +9,14 @@ const meta = {
       description: {
         component:
           'An Added Value’s status as a pill — a component composing `Badge`, and the owner ' +
-          'of VCP’s status vocabulary and its status → tone mapping (docs/badge.md promised ' +
-          'it would live in exactly one place: this one). Not clickable by design: changing ' +
-          'status is the options dropdown’s job.',
+          'of VCP’s status vocabulary and its status → treatment mapping. The eleven statuses ' +
+          'and their fills come from the Figma `Status_Tag_General` set (design audit, ' +
+          '3 Sep 2026), replacing the seven the Claude Design export invented. Not clickable ' +
+          'by design: changing status is the options dropdown’s job.',
       },
     },
   },
-  args: { status: 'In progress' },
+  args: { status: 'In Progress' },
   argTypes: {
     status: { control: 'select', options: AV_STATUSES },
     size: { control: 'radio', options: ['sm', 'md'] },
@@ -27,7 +28,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** The whole vocabulary, in lifecycle order. The mapping lives in ONE place. */
+/** The whole Figma vocabulary, in lifecycle order. The mapping lives in ONE place. */
 export const AllStatuses: Story = {
   render: (args) => (
     <div className="flex flex-wrap gap-2">
@@ -53,7 +54,7 @@ export const Small: Story = {
 export const InATableCell: Story = {
   render: (args) => (
     <div className="flex w-96 flex-col divide-y divide-stroke-subtle rounded-md border border-stroke-subtle bg-surface-elevated font-sans">
-      {(['In progress', 'Ready for review', 'Blocked'] as const).map((status, i) => (
+      {(['In Progress', 'Review', 'Rejected'] as const).map((status, i) => (
         <div key={status} className="flex h-14 items-center justify-between px-4">
           <span className="text-body-md text-text-secondary">AV-20{41 - i}</span>
           <StatusPill {...args} status={status} size="sm" />
