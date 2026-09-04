@@ -8,6 +8,14 @@ A Modal is the most disruptive thing in the system. It stops the task the user
 was doing, it hides the page behind it from assistive tech, and it holds the
 keyboard until it is dismissed. Reach for it last, not first.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `IconButton` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | | Modal | Popover | Toast |

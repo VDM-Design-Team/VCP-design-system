@@ -4,6 +4,16 @@ A transient message that appears, says one thing, and goes away. A Toast
 interrupts nothing: it takes no focus, blocks nothing, and the user is never
 required to deal with it.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Button` | atom |
+| `Icon` | atom |
+| `IconButton` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use Toast, Banner, or Modal
 
 The three differ on one axis — **how much of the user's attention you are

@@ -6,6 +6,12 @@ optional right-aligned header action, a body, and an optional footer.
 A Card is a **container, not a control**. It has no `role`, no `tabIndex` and no
 `onClick`. If the card leads somewhere, put a real link or button inside it.
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use
 
 | Use a Card for | Reach for something else when |

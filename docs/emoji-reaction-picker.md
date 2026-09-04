@@ -3,6 +3,16 @@
 The reaction row under a comment: existing reactions as toggleable pills, and
 a "+" that opens the palette in a `Popover`.
 
+## Composed of
+
+| Piece | Tier | Role here |
+|---|---|---|
+| `Icon` | atom | The "+" trigger's glyph |
+| `Popover` | component | The palette panel |
+| `Tooltip` | component | The design's Hover Tooltip, naming who reacted |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

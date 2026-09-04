@@ -207,6 +207,17 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   changing a status is the options dropdown's job. "Ready for hand-off" borrows
   the info blue: the export's indigo has no core ramp (the same decision
   `DomainLabel` awaits). No new tokens.
+- Patterns: `TopBar` — **the first pattern**, matching the Figma `Top_NavBar`
+  set and its two versions: the "Create Added Value" `Button` in
+  `primaryAction`, or the linked `Logo` when there is none. Right side: the
+  bell (unread = the design's red dot, count in the accessible name), the
+  light/dark mode `Toggle` (controlled — the app owns the theme), and the user
+  chip (avatar + name + caret; a real named button only with `onUserMenu`).
+  Composed entirely from existing atoms — `Logo`, `Toggle`, `IconButton`,
+  `Avatar`, `Icon`. Design review (3 Sep 2026) cut the export's inventions: the
+  role badge under the user's name (no design for it) and the merged page-title
+  anatomy — back/title/status actions are the Figma `AV_Header`, queued as its
+  own `AVHeader` pattern. No new tokens. Unblocks `AppShell` down to `Sidebar`.
 - Components: three designed states the Figma audit found missing (batch 2,
   docs/figma-audit.md). **`Toast`** gains the design's 4px timer bar — the
   countdown it already ran, made visible; CSS-transition driven so it stays

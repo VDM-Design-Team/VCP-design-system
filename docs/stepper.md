@@ -3,6 +3,14 @@
 A small number chosen by nudging: decrement, a typeable value, increment.
 Capacity points, quantities, retry counts.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

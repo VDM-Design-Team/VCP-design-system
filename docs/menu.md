@@ -7,6 +7,17 @@ It is `Popover` with a keyboard contract on top. The floating panel **is** the
 moves into the list the moment it opens. Composing a component out of another
 component is still a component — see the tiering rules in `CLAUDE.md`.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Divider` | atom |
+| `Icon` | atom |
+| `IconButton` | atom |
+| `Popover` | component |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use which overlay
 
 | Use | When | Focus behaviour | Dismiss |

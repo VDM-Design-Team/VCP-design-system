@@ -4,6 +4,14 @@ An Added Value's status, worn as a pill — a component composing `Badge`,
 and the owner of VCP's status vocabulary: this file and its `.tsx` are where
 the status → tone mapping lives, and nowhere else.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Badge` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

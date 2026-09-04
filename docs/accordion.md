@@ -4,6 +4,14 @@ Stacked disclosure panels: FAQ entries, grouped settings, a review checklist.
 Each header is a button inside a real heading; each open panel is a labelled
 region.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

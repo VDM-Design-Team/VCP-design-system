@@ -3,6 +3,12 @@
 One number that matters, on a card: label, value in the numeric face,
 optional unit, delta and footer. Dashboards tile these.
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use
 
 | Use | For |

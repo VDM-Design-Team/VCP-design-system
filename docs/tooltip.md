@@ -11,6 +11,12 @@ A tooltip is the most-misused overlay in any design system, and every misuse is
 the same one: putting something in it that exists nowhere else. Start with the
 "Don't" list.
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use which
 
 | Use | When | Why |

@@ -3,6 +3,14 @@
 Page numbers for a data set with pages worth naming — tables, search results,
 anywhere "page 3 of 12" is something a user might say.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |

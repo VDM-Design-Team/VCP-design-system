@@ -2,6 +2,12 @@
 
 Moves between sibling panels of content that sit under one heading.
 
+## Composed of
+
+Nothing from the system — this piece renders its own markup and takes
+composition through its props/slots. `npm test` fails if that changes
+without this section changing.
+
 ## When to use
 
 | Situation | Use | Why |

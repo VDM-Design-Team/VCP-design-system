@@ -3,6 +3,16 @@
 Free-form labels on a thing: the tag list, a tone swatch row, a name field
 and an add button. `editable={false}` is just the list.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Button` | atom |
+| `Icon` | atom |
+| `Input` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |
