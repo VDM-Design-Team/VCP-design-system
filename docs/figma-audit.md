@@ -183,12 +183,12 @@ None is a bug in what we shipped — the day grid matches. They are scope.
 `Mode=Month` and `Dual View` matter most for the planning surfaces
 (`PeriodSelector`, the Gantt work), so they want building before those.
 
-### ⚠️ Toast — the timer bar is missing
+### 🔧 Toast — the timer bar (built)
 
 The Figma toast carries a **4px Timer Bar** running its auto-dismiss
 countdown. We implement the *behaviour* (auto-dismiss, paused on hover and
-focus) but draw no bar, so the user cannot see how long they have. A real
-gap — and cheap, because the timing logic already exists.
+focus) but drew no bar, so the user could not see how long they had.
+**Built** — CSS-transition driven, freezing and resuming with the timer.
 
 ### ⚠️ RichTextToolbar — ours is one of several designed toolbars
 
@@ -213,12 +213,12 @@ as the inline editor.
 Figma toolbar icons are **24**; ours are 16 inside 28 buttons. Deliberate on
 our side (a dense strip), but it is a visible difference.
 
-### ✅ EmojiReactionPicker — matches
+### ✅ EmojiReactionPicker — matches (tooltip built)
 
 Figma reaction pills are **24 tall** — ours are too. `Type=Own Reaction`
 maps exactly to our `mine`. ⚠️ One missing state: the design has
-**Hover Tooltip** on a reaction (presumably naming who reacted); we show no
-tooltip. `Tooltip` already exists, so this is composition, not new work.
+**Hover Tooltip** on a reaction, naming who reacted. **Built** as
+composition on the existing `Tooltip`, via a new `people` field.
 
 ### ⚠️ FileAttachment — the card is a different size, and off-grid
 
@@ -232,12 +232,13 @@ Also unmodelled: a **`Domain Label=Yes`** variant (blocked on `DomainLabel`,
 which is itself blocked on the two missing colour ramps) and a
 **Hover Remove Only** state.
 
-### ⚠️ Dropzone — no error state
+### 🔧 Dropzone — the error state (built)
 
 Figma `_Attachment_Drop_Container` is **298 × 162, radius 8** (our radius
-matches) with three states: Default, **Drag Over**, and **Error**. We have
-the first two. A dropzone that cannot show a rejected file is a real gap —
-and the tokens for it (`accent.critical.*`) already exist.
+matches) with three states: Default, **Drag Over**, and **Error**. We had
+the first two. **Built** as an `error` prop on the existing
+`accent.critical.*` tokens, announced via `aria-invalid` /
+`aria-describedby`.
 
 ### ⚠️ For design — the AV table cells are not using the VCP variables
 

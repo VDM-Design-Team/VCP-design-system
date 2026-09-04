@@ -70,6 +70,22 @@ export const InAField: Story = {
   ),
 };
 
+/**
+ * The design's Error state: critical border and message, the warning glyph,
+ * and the zone still usable so the next attempt costs nothing. `error`
+ * replaces `hint` and is wired to the input with `aria-describedby`.
+ */
+export const WithError: Story = {
+  args: {
+    error: 'That file is 24 MB — the limit is 10 MB.',
+  },
+  render: (args) => (
+    <div className="w-96">
+      <Dropzone {...args} />
+    </div>
+  ),
+};
+
 export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => (

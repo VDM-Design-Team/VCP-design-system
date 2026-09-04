@@ -30,6 +30,7 @@ moment it hands them over.
 | `onFiles` | `(files: File[]) => void` | — | From browse or drop; never fires empty |
 | `label` | `string` | `'Choose files'` | The linked verb in "… or drag and drop" |
 | `hint` | `string` | — | The contract line: "PDF or PNG, up to 10 MB" |
+| `error` | `ReactNode` | — | The rejection, in words. The design's Error state: critical border, warning glyph, message replacing `hint`. Sets `aria-invalid` and is wired with `aria-describedby` |
 | `accept` | `string` | — | Filters the **browse dialog only** — dropped files arrive unfiltered; validate them |
 | `multiple` | `boolean` | `true` | — |
 | `disabled` | `boolean` | — | Also inert to drops |
@@ -72,6 +73,9 @@ to the icon set from Phosphor, per docs/icon.md.
   `hint` and validate what arrives, because drops bypass the filter.
 - Disabled is visibly quiet *and* inert to drops — not just a greyed label
   over a live target.
+- `error` is announced, not just painted: the input gets `aria-invalid` and
+  `aria-describedby` pointing at the message. The zone **stays usable** in
+  the error state so the next attempt costs nothing.
 - Drag-over state changes border **and** fill — never colour of one element
   alone.
 

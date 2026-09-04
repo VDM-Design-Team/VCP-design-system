@@ -218,6 +218,18 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   role badge under the user's name (no design for it) and the merged page-title
   anatomy — back/title/status actions are the Figma `AV_Header`, queued as its
   own `AVHeader` pattern. No new tokens. Unblocks `AppShell` down to `Sidebar`.
+- Components: three designed states the Figma audit found missing (batch 2,
+  docs/figma-audit.md). **`Toast`** gains the design's 4px timer bar — the
+  countdown it already ran, made visible; CSS-transition driven so it stays
+  smooth without a render per frame, freezing and resuming with the timer, and
+  `aria-hidden` because the toast already communicates the wait (it is
+  deliberately not `ProgressBar`, which is a semantic meter). **`Dropzone`**
+  gains `error`: the design's Error state, with `aria-invalid` and
+  `aria-describedby` so the rejection is announced and not merely painted, and
+  the zone stays usable for the next attempt. **`EmojiReactionPicker`** gains
+  `people` per reaction, rendering the design's Hover Tooltip on the system
+  `Tooltip` — so the names open on keyboard focus too, not just hover. No new
+  tokens.
 - Fixed: `IconButton` no longer sets `title` when a `Tooltip` describes it. Both would
   render, ours and the browser's native bubble on top, with no way for a caller to
   suppress the second.
