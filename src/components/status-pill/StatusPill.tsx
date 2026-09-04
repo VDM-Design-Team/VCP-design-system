@@ -20,6 +20,22 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  *
  * There is no dot: the Figma tag is text on a fill, and text is what
  * distinguishes two statuses that share a colour (Accepted / In Progress).
+ *
+ * **Six statuses were added on 4 Sep 2026 that Figma does not yet draw.**
+ * The audit (batch 3a) found the Status Progression buttons moving AVs through
+ * six states `Status_Tag_General` has no tag for — an AV in `For QA` had
+ * nothing to wear. The lead's call was to build them here; the repo is the
+ * source of truth, so **the Figma tag set now needs to catch up.** Their tones
+ * follow the mapping's existing logic rather than inventing a treatment:
+ *
+ * - **warning** = waiting on a human gate (as `Pending` already is) —
+ *   `For Review`, `For QA`, `Ready for Deploy`, `Design Review`.
+ * - **info** = work actually happening (as `In Progress` already is) — `In QA`.
+ * - **success** = reached and verified (as `Completed` already is) —
+ *   `Confirmed Prod`.
+ *
+ * `Review` stays the one **filled** tag, exactly as the design has it — the
+ * six additions are all tonal, so the tag set's visual language is unchanged.
  */
 export type AVStatus =
   | 'Draft'
@@ -32,17 +48,30 @@ export type AVStatus =
   | 'Completed'
   | 'Rejected'
   | 'Reopened'
-  | 'Backlog';
+  | 'Backlog'
+  /* Added 4 Sep 2026 — the progression lifecycle's states (see above). */
+  | 'For Review'
+  | 'For QA'
+  | 'In QA'
+  | 'Ready for Deploy'
+  | 'Confirmed Prod'
+  | 'Design Review';
 
 /** Every status, in lifecycle order. For pickers, legends, and tests. */
 export const AV_STATUSES: readonly AVStatus[] = [
   'Draft',
   'Initiated',
   'Pending',
+  'Accepted',
   'In Progress',
+  'For Review',
   'Review',
   'Review No Action',
-  'Accepted',
+  'Design Review',
+  'For QA',
+  'In QA',
+  'Ready for Deploy',
+  'Confirmed Prod',
   'Completed',
   'Rejected',
   'Reopened',
@@ -68,6 +97,13 @@ const STATUS_TREATMENT: Record<AVStatus, Treatment> = {
   'Review No Action': { tone: 'info' },
   Completed: { tone: 'success' },
   Rejected: { tone: 'danger' },
+  /* The six added 4 Sep 2026. Gates are warning, work is info, done is success. */
+  'For Review': { tone: 'warning' },
+  'For QA': { tone: 'warning' },
+  'Ready for Deploy': { tone: 'warning' },
+  'Design Review': { tone: 'warning' },
+  'In QA': { tone: 'info' },
+  'Confirmed Prod': { tone: 'success' },
   /* The one solid tag in the design — the review that wants acting on. */
   Review: { tone: 'info', variant: 'filled' },
 };

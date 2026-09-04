@@ -29,7 +29,7 @@ the status → tone mapping lives here and only here.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `status` | `AVStatus` | required | The eleven-value union from Figma — a typo is a compile error |
+| `status` | `AVStatus` | required | The seventeen-value union — a typo is a compile error |
 | `size` | `sm \| md` | `md` | Badge's sizes; `sm` for the AV table's cells |
 | everything else | `BadgeProps` minus `tone`/`variant`/`icon`/`children` | — | The pill *is* a Badge; this piece owns what those carried |
 
@@ -38,23 +38,33 @@ legends and tests.
 
 ## The mapping
 
-Eleven statuses, straight from the Figma `Status_Tag_General` set (design
-audit, 3 Sep 2026 — see docs/figma-audit.md). Every fill below is the
-design's, matched to the token that already carried that exact hex.
+Seventeen statuses. **Eleven come straight from the Figma
+`Status_Tag_General` set** (design audit, 3 Sep 2026) — every fill below is
+the design's, matched to the token that already carried that exact hex.
+**Six were added on 4 Sep 2026** by the lead's call; Figma does not draw them
+yet (see "The six additions" below).
 
 | Status | Treatment | Figma fill / text |
 |---|---|---|
 | Draft | neutral tonal | `#e2e8f0` / `#334155` |
 | Initiated | warning tonal | `#fef9c2` / `#a65f00` |
 | Pending | warning tonal | `#fef9c2` / `#a65f00` |
+| Accepted | info tonal | `#dbeafe` / `#1447e6` |
 | In Progress | info tonal | `#dbeafe` / `#1447e6` |
+| **For Review** ✚ | warning tonal | *not in Figma* |
 | **Review** | **info filled** | `#155dfc` / `#ffffff` |
 | Review No Action | info tonal | `#dbeafe` / `#1447e6` |
-| Accepted | info tonal | `#dbeafe` / `#1447e6` |
+| **Design Review** ✚ | warning tonal | *not in Figma* |
+| **For QA** ✚ | warning tonal | *not in Figma* |
+| **In QA** ✚ | info tonal | *not in Figma* |
+| **Ready for Deploy** ✚ | warning tonal | *not in Figma* |
+| **Confirmed Prod** ✚ | success tonal | *not in Figma* |
 | Completed | success tonal | `#dcfce7` / `#008236` |
 | Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
+
+✚ = added 4 Sep 2026, no Figma tag yet.
 
 `Review` is the design's one **solid** tag — the review that wants acting
 on. It is why `Badge` has a `variant`: the treatment belongs to the atom,
@@ -63,9 +73,35 @@ and this component composes it.
 **What changed at the audit.** This component shipped with the Claude Design
 export's seven statuses — `Ready for review`, `Ready for hand-off`,
 `Blocked` and `Archive` among them. None of those exist in the design. They
-are gone; the eleven above are the vocabulary. The decorative dot is gone
+are gone. The decorative dot is gone
 too: the Figma tag is text on a fill, and the text is what separates two
 statuses that share a colour.
+
+## The six additions ✚
+
+The audit's batch 3a found the `StatusProgression` buttons moving AVs through
+six states this tag set had no tag for — **an AV parked in `For QA` had
+nothing to wear.** The lead's call (4 Sep 2026) was to build them here.
+
+They introduce **no new treatment**: each reuses a tone the mapping already
+uses, following the logic already in it.
+
+| Tone | Means | Already | Added |
+|---|---|---|---|
+| warning tonal | waiting on a human gate | `Pending`, `Initiated` | `For Review`, `Design Review`, `For QA`, `Ready for Deploy` |
+| info tonal | work actually happening | `In Progress`, `Accepted` | `In QA` |
+| success tonal | reached and verified | `Completed` | `Confirmed Prod` |
+
+`Review` stays the **only** filled tag, exactly as the design has it — all
+six additions are tonal, so the tag set's visual language is unchanged.
+
+`StatusProgression`'s `AVProgressionStatus` is now a literal subset of
+`AVStatus` (`Extract<…>`), so a lifecycle state with no tag is a compile
+error. The two cannot drift apart again.
+
+⚠️ **Figma needs to catch up.** The repo is the source of truth
+(CLAUDE.md), so these six now exist here and not in `Status_Tag_General`.
+Adding them to the design file closes the gap.
 
 **Open question for design:** Figma labels both `Review` and
 `Review No Action` with the visible word "Review". We render each status's

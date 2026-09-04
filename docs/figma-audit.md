@@ -267,7 +267,7 @@ discovered later.
 Run just before building `AVHeader`, per the batch-3 plan below. Two findings
 worth design's attention, one of them significant.
 
-### ⚠️ **There are two AV status vocabularies, and they disagree**
+### 🔧 **There were two AV status vocabularies — resolved 4 Sep 2026**
 
 `Status_Tag_General` (Tags page, which `StatusPill` owns) names **eleven**
 statuses. The Status Progression Buttons page drives a **different**
@@ -283,11 +283,20 @@ Action`, `Rejected`, `Reopened`, `Backlog` that the progression never moves
 through; the progression has six QA/deploy states the tag set cannot display.
 **An AV in `For QA` has no tag to wear.**
 
-Nothing is broken in code — they ship as two distinct types
-(`AVStatus`, `AVProgressionStatus`) and TypeScript keeps them apart. But this
-is a product question, not a code one: either the tag set gains the QA/deploy
-states, or the progression is expressed in the tag set's words. Reconciling
-it in code would bake a decision that belongs to design.
+**Decision (lead, 4 Sep 2026): the tag set gains the six states.**
+`StatusPill` now carries seventeen statuses, and `AVProgressionStatus` is a
+literal subset of `AVStatus` (`Extract<…>`), so a lifecycle state with no tag
+is a compile error — the two cannot drift apart again.
+
+The six reuse tones the mapping already uses, so nothing about the tag set's
+visual language changes: gates are warning (as `Pending` already is), work is
+info (as `In Progress` already is), verified is success (as `Completed`
+already is), and `Review` stays the one filled tag.
+
+⚠️ **Figma has not caught up.** `Status_Tag_General` still has eleven; the
+repo is the source of truth, so **the six need adding to the design file**:
+`For Review`, `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`,
+`Design Review`.
 
 ### ⚠️ Seven progression variants have placeholder names
 
@@ -296,6 +305,13 @@ are layer names, not statuses. They draw real buttons — mostly Reject/Accept
 or Handoff — but there is no way to know which status they represent, so they
 are **not modelled**; the `initiator` role consequently offers moves on
 `Draft` only. Name them and they are a minor bump.
+
+**Asked of design (Eve) on 4 Sep 2026** —
+[issue #60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60).
+Five of the seven draw
+Reject · Accept, which *suggests* they are all `Pending` seen by different
+roles, but that is a guess and was deliberately not written into a public
+type.
 
 Two smaller design-file fixes while you are in there: the Design sets spell
 it **"In Progess"** in three places, and Dev/Admin's Ready for Deploy button
