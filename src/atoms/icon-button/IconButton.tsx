@@ -8,7 +8,7 @@ import { Icon, type IconName } from '../icon';
  *
  * This is `Button` with the label taken away, and it is deliberately built from
  * the same parts: the same `variant` names off the same `action.*` families, the
- * same `sm` 32 / `md` 40 / `lg` 48 scale, the same `rounded-md` corner, the same
+ * same `sm` 36 / `md` 40 / `lg` 48 scale, the same `rounded-sm` corner, the same
  * `focus-visible:outline-stroke-focused` ring, and the same `loading` behaviour.
  * If you can use Button, you can use this without reading anything.
  *
@@ -30,7 +30,7 @@ import { Icon, type IconName } from '../icon';
 const iconButton = cva(
   [
     'inline-flex shrink-0 items-center justify-center',
-    'rounded-md transition-colors',
+    'rounded-sm transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     'disabled:pointer-events-none',
   ],
@@ -67,10 +67,10 @@ const iconButton = cva(
           'disabled:bg-accent-critical-filled-surface-disabled',
         ],
       },
-      /* Square, on Button's own height scale: 32 / 40 / 48. `md` is the 40
+      /* Square, on Button's own height scale: 36 / 40 / 48. `md` is the 40
          minimum target; `sm` is pointer-dense contexts only. */
       size: {
-        sm: 'size-8',
+        sm: 'size-9',
         md: 'size-10',
         lg: 'size-12',
       },

@@ -27,11 +27,15 @@ const badge = cva(
   [
     'inline-flex max-w-full items-center justify-center align-middle',
     'font-sans whitespace-nowrap',
-    /* shape.radius.md — the Figma Tag's own corner. ds-lint-ignore (8px) */
-    'overflow-hidden rounded-md',
+    /* shape.radius.sm — the Figma Tag's own corner, measured 3 Sep 2026
+       (docs/figma-audit.md). It was `md` until that audit. ds-lint-ignore */
+    'overflow-hidden rounded-sm',
   ],
   {
     variants: {
+      /* The Figma Tags page draws two treatments: the pale tonal fill most
+         statuses wear, and a solid one (the "Review" tag). ds-lint-ignore */
+      variant: { tonal: '', filled: '' },
       tone: {
         /* surface.neutral + text.* — there is no `accent.neutral` triad. */
         neutral: 'bg-surface-neutral-subtle text-text-secondary',
@@ -52,7 +56,44 @@ const badge = cva(
         md: 'h-7 gap-2 px-2 text-label-lg',
       },
     },
-    defaultVariants: { tone: 'neutral', size: 'md' },
+    /* `filled` swaps each tone's pale pair for its solid one. Written as
+       compound variants so `tone` stays the single axis callers reason about. */
+    compoundVariants: [
+      {
+        variant: 'filled',
+        tone: 'neutral',
+        class: 'bg-surface-neutral-stronger text-text-inverted-primary',
+      },
+      {
+        variant: 'filled',
+        tone: 'brand',
+        class: 'bg-action-primary-surface-default text-action-primary-content-default',
+      },
+      {
+        variant: 'filled',
+        tone: 'info',
+        class: 'bg-accent-info-filled-surface-default text-accent-info-filled-content-default',
+      },
+      {
+        variant: 'filled',
+        tone: 'success',
+        class:
+          'bg-accent-success-filled-surface-default text-accent-success-filled-content-default',
+      },
+      {
+        variant: 'filled',
+        tone: 'warning',
+        class:
+          'bg-accent-warning-filled-surface-default text-accent-warning-filled-content-default',
+      },
+      {
+        variant: 'filled',
+        tone: 'danger',
+        class:
+          'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
+      },
+    ],
+    defaultVariants: { variant: 'tonal', tone: 'neutral', size: 'md' },
   },
 );
 
@@ -70,8 +111,8 @@ export interface BadgeProps
 }
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ className, tone, size, icon, trailingIcon, children, ...props }, ref) => (
-    <span ref={ref} className={cn(badge({ tone, size }), className)} {...props}>
+  ({ className, variant, tone, size, icon, trailingIcon, children, ...props }, ref) => (
+    <span ref={ref} className={cn(badge({ variant, tone, size }), className)} {...props}>
       {icon && <Adornment>{icon}</Adornment>}
       {children != null && children !== false && (
         <span className="min-w-0 truncate">{children}</span>
