@@ -75,8 +75,9 @@ The rest:
 **Token gaps.** The export hashed onto six pastels; this system has four accent
 hue families, so the palette is four tones wide. Adding `accent.purple.*` and
 `accent.teal.*` (the two hues the export had that VCP does not) would restore the
-export's spread — `color.teal-legacy.*` exists but is a legacy ramp with no
-semantic layer, so it is not a substitute. Nothing was invented here.
+export's spread — teal has no core ramp at all since `teal-legacy` was removed
+(2026-09-04, not a brand colour), so there is no substitute to reach for.
+Nothing was invented here.
 
 ## Accessibility
 
