@@ -29,8 +29,8 @@ this list drifts.
 
 Exactly the Figma variant pair — pass `primaryAction` or don't; there is no
 third arrangement. The **page-level** header (back arrow, AV id/title,
-status-move buttons) is a different Figma component, `AV_Header`, and will
-be its own pattern (`AVHeader`, to port) — TopBar deliberately carries no
+status-move buttons) is a different Figma component, `AV_Header`, and is its
+own pattern — [`AVHeader`](av-header.md). TopBar deliberately carries no
 title, no `h1`, no back.
 
 ## Props
@@ -73,7 +73,7 @@ every visible piece is a composed component wearing its own.
 - **Don't put both the action and the logo in** — the design shows one or
   the other; that is what the variant pair means.
 - **Don't stack page-title anatomy into this bar** — back/title/status
-  actions are `AVHeader`'s (to port). Two bars, two patterns, as designed.
+  actions are `AVHeader`'s. Two bars, two patterns, as designed.
 - **Don't own theme state here** — `theme` is controlled; the app flips the
   `.dark` class, and everything (this bar included) re-themes by token.
 - **Don't add a role badge to the user chip** — the export drew one; the

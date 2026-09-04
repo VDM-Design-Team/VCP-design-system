@@ -218,6 +218,38 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   role badge under the user's name (no design for it) and the merged page-title
   anatomy — back/title/status actions are the Figma `AV_Header`, queued as its
   own `AVHeader` pattern. No new tokens. Unblocks `AppShell` down to `Sidebar`.
+- Components: `StatusProgression` (Actions) — the "move this Added Value
+  along" buttons, read off the Figma **Status Progression Buttons** page
+  (eight component sets: two workflows × four viewer roles). **It owns
+  status → transitions**, the way `StatusPill` owns status → tone: call sites
+  pass workflow/role/status and handle `onTransition`, and `avTransitions()`
+  exposes the same list without buttons. Every label is the design's own
+  wording rather than generated from the status name, because the design does
+  not generate them either ("Move to Handoff" to an assignee, plain "Handoff"
+  to an admin). A terminal status renders `null`, matching the design's empty
+  variant. One atom used twice, so it is a component, not a pattern. No new
+  tokens.
+- Patterns: `AVHeader` — the Figma `AV_Header` set: back arrow and title on
+  the left, `StatusProgression` on the right, in both `Type` variants
+  (`default`, titled by AV id; `new`, titled in words and set larger). The
+  design's `Show Move Status Buttons` boolean is `showStatusActions`. **This
+  carries the page's `<h1>`**, which is exactly why `TopBar` carries none.
+  Back is either a real link (`backHref`) or a history button (`onBack`),
+  both at 40px targets against the design's bare 20px glyph. Composed of
+  `IconButton`, `Icon` and `StatusProgression` — it owns no lifecycle
+  knowledge, it only places it. No new tokens.
+- **Audit, batch 3a (docs/figma-audit.md): the design carries two AV status
+  vocabularies that disagree.** `Status_Tag_General` (eleven statuses, what
+  `StatusPill` displays) and the Status Progression lifecycle share five
+  names; the progression adds six QA/deploy states the tag set cannot
+  display, so an AV in `For QA` has no tag to wear. Shipped as two distinct
+  types (`AVStatus`, `AVProgressionStatus`) so TypeScript keeps them apart —
+  **reconciling them is a design decision, not a code one.** Also flagged:
+  seven progression variants carry placeholder layer names (`Status4`,
+  `Status8`, `Deploy`, `Review`, `Review (completed 1)`) and are therefore
+  not modelled, which leaves the `initiator` role offering moves on `Draft`
+  only; and the `AV_Header` title's size falls between two ramp steps, so it
+  takes the larger.
 - Components: three designed states the Figma audit found missing (batch 2,
   docs/figma-audit.md). **`Toast`** gains the design's 4px timer bar — the
   countdown it already ran, made visible; CSS-transition driven so it stays

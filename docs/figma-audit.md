@@ -262,6 +262,64 @@ reaction tooltip) and variants (DatePicker modes, toolbar compositions) that
 we have not built. Each is listed above so it can be scheduled rather than
 discovered later.
 
+## Batch 3a — AV_Header and the Status Progression Buttons (4 Sep 2026)
+
+Run just before building `AVHeader`, per the batch-3 plan below. Two findings
+worth design's attention, one of them significant.
+
+### ⚠️ **There are two AV status vocabularies, and they disagree**
+
+`Status_Tag_General` (Tags page, which `StatusPill` owns) names **eleven**
+statuses. The Status Progression Buttons page drives a **different**
+lifecycle:
+
+| | Statuses |
+|---|---|
+| `Status_Tag_General` | Draft, Initiated, Pending, In Progress, Review, Review No Action, Accepted, Completed, Rejected, Reopened, Backlog |
+| Status Progression | Draft, Pending, Accepted, In Progress, **For Review, For QA, In QA, Ready for Deploy, Confirmed Prod, Design Review**, Completed |
+
+They share five names. The tag set has `Initiated`, `Review`, `Review No
+Action`, `Rejected`, `Reopened`, `Backlog` that the progression never moves
+through; the progression has six QA/deploy states the tag set cannot display.
+**An AV in `For QA` has no tag to wear.**
+
+Nothing is broken in code — they ship as two distinct types
+(`AVStatus`, `AVProgressionStatus`) and TypeScript keeps them apart. But this
+is a product question, not a code one: either the tag set gains the QA/deploy
+states, or the progression is expressed in the tag set's words. Reconciling
+it in code would bake a decision that belongs to design.
+
+### ⚠️ Seven progression variants have placeholder names
+
+`Status4` (×2), `Status8`, `Deploy`, `Review` (×2), `Review (completed 1)`
+are layer names, not statuses. They draw real buttons — mostly Reject/Accept
+or Handoff — but there is no way to know which status they represent, so they
+are **not modelled**; the `initiator` role consequently offers moves on
+`Draft` only. Name them and they are a minor bump.
+
+Two smaller design-file fixes while you are in there: the Design sets spell
+it **"In Progess"** in three places, and Dev/Admin's Ready for Deploy button
+reads **"Return to  In QA"** with a double space.
+
+### ✅ Status progression — buttons, sizes, labels
+
+Every label, order and treatment matches: the step back is outlined, the step
+forward filled, `Reject` on an admin's Pending is the one red button, and
+`Confirmed Prod` really does say "Move to Handoff" to an assignee and plain
+"Handoff" to an admin (their variant widths, 360 vs 301, confirm it). Button
+height 37 → our `sm` 36, the scale decision already taken in batch 1.
+
+### 🔧 AVHeader — the title's size has no ramp step
+
+The `Type=New` title is **18px semibold**, between our `heading-sm` (16) and
+`heading-md` (20). We take the larger step rather than add a ramp size for
+one header. ⚠️ Worth a design opinion: if 18 is the AV page-title size
+generally, it earns a token; if it is incidental, the design should move to
+20.
+
+Everything else matches — 32 above / 16 below and sides, gap 4 between arrow
+and title, space-between, and the `Show Move Status Buttons` boolean.
+
 ## Still to audit
 
 Batch 3 (proposed): Navigation (Sidebar), Settings Pages, Holiday Registry,
