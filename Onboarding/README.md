@@ -126,16 +126,29 @@ then on.
 
 You'll get, in about a minute of reading:
 
-- **What's waiting on you** — review requests, and comments on your own PRs
-  that you haven't answered. This comes first because someone is blocked on it.
+- **What's waiting on you** — this comes first, because someone is blocked on
+  it. Three kinds of thing land here:
+  - **Questions asked of you**, as GitHub issues assigned to you or
+    @-mentioning you. This is how engineering asks design a decision it
+    can't make alone — "which status is this variant?", "these two colours
+    have no token, which do you want?". **These outrank everything else**:
+    work on the other side is stopped until you answer, and unlike a pull
+    request, nothing chases them. The brief tells you what's being asked and
+    how old it is.
+  - **Review requests** on other people's PRs.
+  - **Comments on your own PRs** you haven't answered.
 - **Your open PRs** — checks passing or not, reviewed or not, visual diffs
   pending or not.
 - **What merged since yesterday**, in product terms.
 - **Which components changed**, with a link into Storybook for each.
 - **What to do first** — at most three things.
 
-It's read-only. It will never merge, approve, or comment as you — decisions
-stay yours, made by you, on GitHub.
+One difference worth knowing: the brief covers the **last day** of PR
+activity, but **every open question, however old**. A PR from last month has
+moved on; a question from last month is still unanswered.
+
+It's read-only. It will never merge, approve, or comment as you — and it will
+never answer a question on your behalf. It surfaces; you decide.
 
 ## Step 6 — Reviewing a change (your first real contribution)
 
@@ -248,6 +261,7 @@ Run through these — if nothing surprises you, you're ready to work.
 - [ ] Can see the repo on GitHub (invitation accepted)
 - [ ] Claude desktop app installed, VCP plugin working (`/vcp-morning` in a fresh conversation)
 - [ ] Ran `/vcp-morning` once — signed in to GitHub inside Claude's browser window
+- [ ] Know that questions for you arrive as **GitHub issues**, and that the brief puts them first
 - [ ] Opened a PR's 🔍 Visual review and clicked through the Chromatic diffs
 
 **First week (step 7)**

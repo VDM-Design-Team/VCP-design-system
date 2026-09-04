@@ -6,12 +6,23 @@ beyond this plugin — no clone, no terminal, no Node.
 ## What you get
 
 **`/vcp-morning`** — say "catch me up" or run the command each morning. Claude
-reads GitHub and the published Storybook and briefs you: what's waiting on you
-first, then your own PRs, what merged, what changed, and what to do next. The
-full behaviour lives in one place — `skills/vcp-morning/SKILL.md`; the
-step-by-step for new team members is `Onboarding/README.md` at the repo root.
+reads GitHub and the published Storybook and briefs you, in this order:
 
-It is strictly read-only: it never merges, approves, or comments for you.
+1. **What's waiting on you** — questions asked of you (issues assigned to or
+   mentioning you), review requests, and unanswered comments on your own PRs.
+2. **Your open PRs** — checks, reviews, conflicts, pending visual diffs.
+3. **What merged** since yesterday, in product terms.
+4. **Which components changed**, with Storybook links.
+5. **What to do first** — at most three things.
+
+PR activity is scoped to the last day (three on Mondays); **open questions are
+reported however old they are**, because an unanswered question doesn't age
+out. The full behaviour lives in one place — `skills/vcp-morning/SKILL.md`;
+the step-by-step for new team members is `Onboarding/README.md` at the repo
+root.
+
+It is strictly read-only: it never merges, approves, or comments for you, and
+never answers a question on your behalf.
 
 ## Requirements
 
