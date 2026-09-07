@@ -1,9 +1,8 @@
 export { StatusProgression, avTransitions } from './StatusProgression';
 export type {
   StatusProgressionProps,
-  AVWorkflow,
+  AVChainStep,
   AVProgressionRole,
-  AVProgressionStatus,
   AVTransition,
   AVTransitionKind,
 } from './StatusProgression';

@@ -4,6 +4,12 @@ An Added Value's status, worn as a pill — a component composing `Badge`,
 and the owner of VCP's status vocabulary: this file and its `.tsx` are where
 the status → tone mapping lives, and nowhere else.
 
+**The vocabulary is open.** An AV's flow is a fixed spine wrapped around a
+per-domain middle (issue #68). Ten spine statuses are fixed and shared by
+every domain; the middle is whatever Design, Development, Content, Partners,
+Governance or Product defines, renameable at will. So this component knows
+ten statuses by name and accepts any number it has never heard of.
+
 ## Composed of
 
 | Piece | Tier |
@@ -29,20 +35,29 @@ the status → tone mapping lives here and only here.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `status` | `AVStatus` | required | The seventeen-value union — a typo is a compile error |
-| `size` | `sm \| md` | `md` | Badge's sizes; `sm` for the AV table's cells |
-| everything else | `BadgeProps` minus `tone`/`variant`/`icon`/`children` | — | The pill *is* a Badge; this piece owns what those carried |
+| `status` | `AVStatus` | — | A spine status. Ten values; a typo is a compile error |
+| `custom` | `string` | — | A domain step, by whatever name the domain gives it |
+| `size` | `'sm' \| 'md'` | `'md'` | Inherited from `Badge` |
 
-`AV_STATUSES` exports the vocabulary in lifecycle order for pickers,
-legends and tests.
+**`status` and `custom` are mutually exclusive**, enforced by the type. Exactly
+one is required. That is the whole API: a domain label can never silently take
+a spine treatment, and a misspelled spine status can never silently fall
+through to the custom one.
+
+```tsx
+<StatusPill status="Draft" />          // spine — its own tone
+<StatusPill custom={step.label} />     // domain — the shared tone
+```
+
+`AV_STATUSES` exports the spine vocabulary in lifecycle order for pickers,
+legends and tests. Domain steps are not in it and cannot be — they live in the
+domain's own configuration, which this repo does not own.
 
 ## The mapping
 
-Seventeen statuses. **Eleven come straight from the Figma
-`Status_Tag_General` set** (design audit, 3 Sep 2026) — every fill below is
-the design's, matched to the token that already carried that exact hex.
-**Six were added on 4 Sep 2026** by the lead's call; Figma does not draw them
-yet (see "The six additions" below).
+**Ten spine statuses**, straight from the Figma `Status_Tag_General` set
+(design audit, 3 Sep 2026) — every fill below is the design's, matched to the
+token that already carried that exact hex.
 
 | Status | Treatment | Figma fill / text |
 |---|---|---|
@@ -50,58 +65,51 @@ yet (see "The six additions" below).
 | Initiated | warning tonal | `#fef9c2` / `#a65f00` |
 | Pending | warning tonal | `#fef9c2` / `#a65f00` |
 | Accepted | info tonal | `#dbeafe` / `#1447e6` |
-| In Progress | info tonal | `#dbeafe` / `#1447e6` |
-| **For Review** ✚ | warning tonal | *not in Figma* |
 | **Review** | **info filled** | `#155dfc` / `#ffffff` |
 | Review No Action | info tonal | `#dbeafe` / `#1447e6` |
-| **Design Review** ✚ | warning tonal | *not in Figma* |
-| **For QA** ✚ | warning tonal | *not in Figma* |
-| **In QA** ✚ | info tonal | *not in Figma* |
-| **Ready for Deploy** ✚ | warning tonal | *not in Figma* |
-| **Confirmed Prod** ✚ | success tonal | *not in Figma* |
 | Completed | success tonal | `#dcfce7` / `#008236` |
 | Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
 
-✚ = added 4 Sep 2026, no Figma tag yet.
-
 `Review` is the design's one **solid** tag — the review that wants acting
 on. It is why `Badge` has a `variant`: the treatment belongs to the atom,
 and this component composes it.
 
-**What changed at the audit.** This component shipped with the Claude Design
-export's seven statuses — `Ready for review`, `Ready for hand-off`,
-`Blocked` and `Archive` among them. None of those exist in the design. They
-are gone. The decorative dot is gone
-too: the Figma tag is text on a fill, and the text is what separates two
-statuses that share a colour.
+**Every domain step wears one treatment:** the info tonal, `#dbeafe` on
+`#1447e6`, 5.60:1. Design's call, 7 Sep 2026. The reasoning is that this
+component knows nothing about a step it did not define, so calling one a
+"warning" would assert a meaning it cannot have.
 
-## The six additions ✚
+⚠️ **Three spine statuses share that fill** — `Accepted`, `Review No Action`
+and `Reopened` are also info tonal, so they are not distinguishable from a
+domain step by colour. Their text is, which is why there is no dot and never
+was: the word is the signal. Worth knowing before anyone builds a legend that
+groups by colour.
 
-The audit's batch 3a found the `StatusProgression` buttons moving AVs through
-six states this tag set had no tag for — **an AV parked in `For QA` had
-nothing to wear.** The lead's call (4 Sep 2026) was to build them here.
+## What changed on 7 September
 
-They introduce **no new treatment**: each reuses a tone the mapping already
-uses, following the logic already in it.
+`AVStatus` held seventeen values until this change. Seven of them were domain
+steps — `In Progress`, `For Review`, `For QA`, `In QA`, `Ready for Deploy`,
+`Confirmed Prod`, `Design Review` — added on 4 September when the audit found
+the progression buttons moving AVs through states this tag set could not
+label.
 
-| Tone | Means | Already | Added |
-|---|---|---|---|
-| warning tonal | waiting on a human gate | `Pending`, `Initiated` | `For Review`, `Design Review`, `For QA`, `Ready for Deploy` |
-| info tonal | work actually happening | `In Progress`, `Accepted` | `In QA` |
-| success tonal | reached and verified | `Completed` | `Confirmed Prod` |
+That was correct while the flow had two hardcoded domains. It stopped being
+correct once domains could add and rename their own steps: a `Record<AVStatus,
+Treatment>` keyed by name cannot be indexed by a name that arrives as data,
+and a renamed status breaks it with no compile error.
 
-`Review` stays the **only** filled tag, exactly as the design has it — all
-six additions are tonal, so the tag set's visual language is unchanged.
+The seven are gone from the union. They now render through `custom`, and all
+seven wear the one shared treatment — which changes three of them visually:
+`For QA`, `For Review`, `Ready for Deploy` and `Design Review` were warning,
+`Confirmed Prod` was success. See CHANGELOG.md for the migration.
 
-`StatusProgression`'s `AVProgressionStatus` is now a literal subset of
-`AVStatus` (`Extract<…>`), so a lifecycle state with no tag is a compile
-error. The two cannot drift apart again.
-
-⚠️ **Figma needs to catch up.** The repo is the source of truth
-(CLAUDE.md), so these six now exist here and not in `Status_Tag_General`.
-Adding them to the design file closes the gap.
+**What this costs.** `StatusProgression`'s `AVProgressionStatus` was an
+`Extract<AVStatus, …>`, which made "a lifecycle state with no tag" a compile
+error. Seven of its eleven members were domain steps, so that guarantee does
+not survive — there is nothing left to extract from. It was the right
+guarantee for a closed vocabulary and there is no equivalent for an open one.
 
 **Open question for design:** Figma labels both `Review` and
 `Review No Action` with the visible word "Review". We render each status's
@@ -124,9 +132,12 @@ colour-only distinction.
 
 - **Don't map statuses to tones anywhere else.** `tone={status === 'Blocked'
   ? 'danger' : …}` at a call site means this file failed; add here instead.
-- **Don't extend `AVStatus` casually** — it is the design's vocabulary; a new
-  status is a product decision with a lifecycle position and a Figma tag,
-  not a variant.
+- **Don't add a domain step to `AVStatus`.** The union is the spine — the
+  statuses every domain shares and the application branches on. A step that
+  belongs to one domain goes through `custom`, whatever it is called.
+- **Don't reach for `custom` to dodge a type error.** If a spine status won't
+  compile, the name is wrong; fix the name. `custom="Draft"` renders the
+  wrong colour and silently leaves the spine.
 - **Don't wrap it in an `onClick`** — that control can't be reached by
   keyboard, which is why this piece refuses to be one.
 - **Don't use it for anything but AV status** — urgency is `UrgencyTag`,

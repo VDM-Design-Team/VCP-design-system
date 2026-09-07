@@ -3,10 +3,35 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   StatusProgression,
   avTransitions,
+  type AVChainStep,
   type AVProgressionRole,
-  type AVProgressionStatus,
-  type AVWorkflow,
 } from './StatusProgression';
+import type { AVStatus } from '../status-pill';
+
+/* Two domains' chains, as they stand on the flow board. They are data here
+   for the same reason they are data in the product: a domain owns its own
+   middle, names it, and can change both. */
+const DEVELOPMENT: AVChainStep[] = [
+  { id: 'in-progress', label: 'In progress' },
+  { id: 'for-review', label: 'For review' },
+  { id: 'for-qa', label: 'For QA' },
+  { id: 'in-qa', label: 'In QA' },
+  { id: 'ready-for-deploy', label: 'Ready for deploy' },
+  { id: 'confirmed-prod', label: 'Confirmed prod' },
+];
+
+const DESIGN: AVChainStep[] = [
+  { id: 'in-progress', label: 'In progress' },
+  { id: 'design-review', label: 'Design review' },
+];
+
+/* A domain the repo has never heard of, to show that none of this is wired
+   to Design and Development specifically. */
+const GOVERNANCE: AVChainStep[] = [
+  { id: 'awaiting-legal', label: 'Awaiting legal' },
+  { id: 'risk-review', label: 'Risk review' },
+  { id: 'signed-off', label: 'Signed off' },
+];
 
 const meta = {
   title: 'Components/Actions/StatusProgression',
@@ -16,38 +41,22 @@ const meta = {
       description: {
         component:
           'The "move this Added Value along" buttons, read off the Figma `Status Progression ' +
-          'Buttons` page. It owns the status → transitions mapping the way StatusPill owns ' +
-          'status → tone: pass workflow, role and status, handle `onTransition`, and never ' +
-          'write a `status === …` branch at the call site.',
+          'Buttons` page. **It owns the spine** — the moves out of `Draft`, the admin’s ' +
+          'accept/reject on `Pending`, the terminal silence on `Completed` — because those are ' +
+          'the same in every domain. **It does not own the middle**: the domain passes its ' +
+          'ordered `chain`, and the back/forward moves derive from position in it. Never write ' +
+          'a `status === …` branch at the call site.',
       },
     },
   },
-  args: {
-    workflow: 'development',
-    role: 'assignee',
-    status: 'For Review',
-  },
+  /* A default so individual stories need only `render` — the props are a
+     discriminated union (`status` xor `step`), and without one TypeScript
+     demands `args` on every story. */
+  args: { role: 'assignee', status: 'Draft' },
   argTypes: {
-    workflow: { control: 'inline-radio', options: ['development', 'design'] },
     role: {
       control: 'inline-radio',
       options: ['assignee', 'initiator', 'assignee-initiator', 'admin'],
-    },
-    status: {
-      control: 'select',
-      options: [
-        'Draft',
-        'Pending',
-        'Accepted',
-        'In Progress',
-        'For Review',
-        'For QA',
-        'In QA',
-        'Ready for Deploy',
-        'Confirmed Prod',
-        'Design Review',
-        'Completed',
-      ],
     },
   },
 } satisfies Meta<typeof StatusProgression>;
@@ -55,95 +64,124 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-/** The step back is secondary, the step forward primary — the design's order. */
-export const BackAndForward: Story = {
-  args: { status: 'In QA' },
+/** Mid-chain: a step back and a step forward, both named by the domain. */
+export const Default: Story = {
+  render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="for-qa" />,
 };
 
-/** The first step: nothing to return to, so one button. */
-export const ForwardOnly: Story = {
-  args: { status: 'Accepted' },
+/** The first step has no way back — accepting is the admin's call to undo. */
+export const FirstStep: Story = {
+  render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="in-progress" />,
 };
 
-/** An admin looking at a Pending AV: the one destructive button in the set. */
-export const AdminPending: Story = {
-  args: { role: 'admin', status: 'Pending' },
+/** The last step hands off instead of moving on. Admins get the short label. */
+export const LastStep: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <StatusProgression role="assignee" chain={DEVELOPMENT} step="confirmed-prod" />
+      <StatusProgression role="admin" chain={DEVELOPMENT} step="confirmed-prod" />
+    </div>
+  ),
 };
 
-/** Creating an AV — the only place "Save as Draft"/"Submit" appears. */
-export const Draft: Story = {
-  args: { role: 'assignee-initiator', status: 'Draft' },
+/** The spine. `Draft` and `Pending` never leave this component. */
+export const SpineMoves: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <StatusProgression role="initiator" status="Draft" />
+      <StatusProgression role="admin" status="Pending" />
+      <StatusProgression role="admin" status="Accepted" chain={DEVELOPMENT} />
+    </div>
+  ),
 };
 
-/** A terminal status draws nothing. The design's empty variant, honoured. */
-export const Terminal: Story = {
-  args: { status: 'Completed' },
-  render: (args) => (
-    <div className="text-body-sm text-text-tertiary">
-      <StatusProgression {...args} />
-      (nothing renders — `Completed` has no moves)
+/**
+ * The same component over three domains, including one this repo has never
+ * heard of. Nothing here is wired to Design and Development — that is the
+ * point of the change.
+ */
+export const AnyDomain: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      {(
+        [
+          ['Development', DEVELOPMENT, 'in-qa'],
+          ['Design', DESIGN, 'design-review'],
+          ['Governance', GOVERNANCE, 'risk-review'],
+        ] as const
+      ).map(([name, chain, step]) => (
+        <div key={name} className="flex flex-col gap-2">
+          <p className="text-label-md text-text-tertiary">{name}</p>
+          <StatusProgression role="assignee" chain={chain} step={step} />
+        </div>
+      ))}
     </div>
   ),
 };
 
 /** Mid-save: the committing button spins, the way back stays readable. */
 export const Loading: Story = {
-  args: { status: 'For QA', loading: true },
+  render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="for-qa" loading />,
 };
 
-const WORKFLOWS: AVWorkflow[] = ['development', 'design'];
+/** Every button disabled — mid-save, or the viewer lacks the right. */
+export const Disabled: Story = {
+  render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="for-qa" disabled />,
+};
+
+/** A terminal status draws nothing rather than an empty toolbar. */
+export const Terminal: Story = {
+  render: () => (
+    <div className="flex items-center gap-2 text-body-sm text-text-tertiary">
+      <StatusProgression role="assignee" status="Completed" />
+      (renders nothing)
+    </div>
+  ),
+};
+
 const ROLES: AVProgressionRole[] = ['assignee', 'assignee-initiator', 'initiator', 'admin'];
-const STATUSES: AVProgressionStatus[] = [
-  'Draft',
-  'Pending',
-  'Accepted',
-  'In Progress',
-  'For Review',
-  'For QA',
-  'In QA',
-  'Ready for Deploy',
-  'Confirmed Prod',
-  'Design Review',
-  'Completed',
-];
+const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'Completed'];
 
 /**
- * Every row the design defines, in one place — the eight Figma sets laid out
- * as workflow × role × status. Blank cells are statuses that role never sees.
+ * Every move the component defines, over the Development chain — the spine
+ * rows first, then one row per chain step. Blank rows are positions that role
+ * never drives.
  */
 export const EveryTransition: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
     <div className="flex flex-col gap-8">
-      {WORKFLOWS.map((workflow) => (
-        <section key={workflow} className="flex flex-col gap-4">
-          <h3 className="text-heading-sm capitalize text-text-primary">{workflow}</h3>
-          {ROLES.map((role) => {
-            const rows = STATUSES.filter(
-              (status) => avTransitions(workflow, role, status).length > 0,
-            );
-            return (
-              <div key={role} className="flex flex-col gap-2">
-                <p className="text-label-md text-text-tertiary">{role}</p>
-                {rows.length === 0 ? (
-                  <p className="text-body-sm text-text-tertiary">no moves</p>
-                ) : (
-                  rows.map((status) => (
-                    <div key={status} className="flex items-center gap-4">
-                      <span className="w-40 shrink-0 text-body-sm text-text-secondary">
-                        {status}
-                      </span>
-                      <StatusProgression workflow={workflow} role={role} status={status} />
-                    </div>
-                  ))
-                )}
-              </div>
-            );
-          })}
-        </section>
-      ))}
+      {ROLES.map((role) => {
+        const spine = SPINE.filter(
+          (status) => avTransitions({ role, status, chain: DEVELOPMENT }).length > 0,
+        );
+        const steps = DEVELOPMENT.filter(
+          (s) => avTransitions({ role, step: s.id, chain: DEVELOPMENT }).length > 0,
+        );
+        return (
+          <div key={role} className="flex flex-col gap-2">
+            <p className="text-label-md text-text-tertiary">{role}</p>
+            {spine.length === 0 && steps.length === 0 ? (
+              <p className="text-body-sm text-text-tertiary">no moves</p>
+            ) : (
+              <>
+                {spine.map((status) => (
+                  <div key={status} className="flex items-center gap-4">
+                    <span className="w-40 shrink-0 text-body-sm text-text-secondary">{status}</span>
+                    <StatusProgression role={role} status={status} chain={DEVELOPMENT} />
+                  </div>
+                ))}
+                {steps.map((s) => (
+                  <div key={s.id} className="flex items-center gap-4">
+                    <span className="w-40 shrink-0 text-body-sm text-text-tertiary">{s.label}</span>
+                    <StatusProgression role={role} step={s.id} chain={DEVELOPMENT} />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        );
+      })}
     </div>
   ),
 };
