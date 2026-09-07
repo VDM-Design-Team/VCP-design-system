@@ -29,9 +29,16 @@ this list drifts.
 ## What it owns, and what it doesn't
 
 **It owns the spine.** The moves out of `Draft`, the admin's accept/reject on
-`Pending`, the handover from `Accepted` into the domain's first step, and the
-terminal silence on `Completed`. Those are the same in every domain and the
-application branches on them, so they live here.
+`Pending`, the handover from `Accepted` into the domain's first step, the
+initiator/admin decision on `Review`, and the terminal silence on `Completed`.
+Those are the same in every domain and the application branches on them, so
+they live here.
+
+**One spine status isn't quite universal.** `Completed` is terminal
+everywhere except Development, where it can still owe a `Deploy` action
+first — see `pendingDeploy` below. Named and resolved in issue #60
+(7 Sep 2026); design was explicit this is a known exception, not a pattern to
+extend to other domains.
 
 **It does not own the middle.** Design has two steps, Development has six,
 and Content, Partners, Governance and Product bring their own — renameable
@@ -72,6 +79,7 @@ went would be worse than offering nothing.
 | `status` | `AVStatus` | — | A spine position. Excludes `step` |
 | `step` | `string` | — | A chain step's `id`. Excludes `status`; needs `chain` |
 | `chain` | `readonly AVChainStep[]` | — | The domain's ordered middle. Required with `step`; also needed on `Accepted` |
+| `pendingDeploy` | `boolean` | `false` | Development-only. Only meaningful with `status="Completed"` — see below |
 | `onTransition` | `(t: AVTransition) => void` | — | A button press. The AV does not move until the caller moves it |
 | `disabled` | `boolean` | `false` | Every button |
 | `loading` | `boolean` | `false` | Spins the forward button only |
@@ -88,6 +96,8 @@ Development, all roles that see the middle of the lifecycle:
 | first chain step | — | Move to *next* |
 | any middle step | Return to *previous* | Move to *next* |
 | last chain step | Return to *previous* | Move to Handoff / **Handoff** (admin) |
+| `Review` (spine) ‡ | Reject *(outline)* | Accept |
+| `Completed` (spine), Development only, `pendingDeploy` | — | Deploy *(admin only)* |
 
 Names in italics come from the chain's own labels, so "Return to In QA" is
 built at render time from whatever that step is called today. The wording the
@@ -99,25 +109,33 @@ The first chain step has no way back: the design draws no return to
 `Accepted`, because accepting is the admin's decision and not the assignee's
 to undo.
 
-## Not modelled — the design has no names for these
+`Review` only offers moves to `initiator` and `admin` — the assignee already
+handed the AV off and isn't the one deciding. Its Reject is `variant="secondary"`
+(outline), not the solid `variant="danger"` one `Pending` uses — the design
+draws these two Rejects differently depending on lifecycle stage, not role.
 
-Five Figma variants carry placeholder layer names, so they are left out
-rather than guessed:
+## Resolved: issue #60's seven unnamed Figma variants
 
-| Set | Variant | Buttons it draws |
+All seven placeholder variants the Figma audit found (7 Sep 2026, design: Eve)
+are now named:
+
+| Set | Variant | Resolved as |
 |---|---|---|
-| Development / Initiator Only | `Status4` | Reject · Accept |
-| Development / Initiator Only | `Review` | *(none visible)* |
-| Development / Admin | `Deploy` | Handoff |
-| Development / Admin | `Review` | Handoff |
-| Development / Admin | `Review (completed 1)` | Reject · Accept |
-| Design / Initiator Only | `Status4` | Reject · Accept |
-| Design / Design Admin | `Status8` | Reject · Accept |
+| Development / Initiator Only | `Status4` | `Review` |
+| Development / Initiator Only | `Review` *(empty)* | Removed — was empty by mistake, not a real state |
+| Development / Admin | `Deploy` | Removed — not a status at all, see below |
+| Development / Admin | `Review` *(drew Handoff)* | Doesn't exist separately — `Confirmed Prod` is the only status with a Handoff action |
+| Development / Admin | `Review (completed 1)` | `Review` |
+| Design / Initiator Only | `Status4` | `Review` |
+| Design / Design Admin | `Status8` | `Review` |
 
-Consequence: the `initiator` role currently offers moves on `Draft` only.
-The question is with design (Eve) in
-[issue #60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60) —
-name these in Figma and they can be added in a minor bump.
+**"Deploy" isn't a status — it's the admin's action once `Completed` is
+reached but isn't final yet** (Development only; see `pendingDeploy`). An AV
+gets there via `Confirmed Prod` → Handoff, and moves on from there via Deploy
+→ `Review` → Accept → the real terminal `Completed`. Both `Completed`
+checkpoints render identically on `StatusPill` — same tone, same text — design
+was explicit this is a known, accepted quirk of this one domain, not
+something to design around.
 
 ## Accessibility
 
@@ -136,9 +154,10 @@ name these in Figma and they can be added in a minor bump.
 
 - **Don't re-derive the mapping at a call site.** That is the whole point of
   this component. Use `avTransitions()` if you need the list without buttons.
-- **Don't expect a spine status other than `Draft`, `Pending` or `Accepted`
-  to offer moves.** `Backlog`, `Rejected` and `Reopened` are driven elsewhere;
-  this renders `null` for them rather than an empty toolbar.
+- **Don't expect a spine status other than `Draft`, `Pending`, `Accepted`,
+  `Review`, or Development's `Completed` with `pendingDeploy` to offer
+  moves.** `Backlog`, `Rejected` and `Reopened` are driven elsewhere; this
+  renders `null` for them rather than an empty toolbar.
 - **Don't build a transition label from a step's `id`.** The id is a stable
   key, not prose — `label` is the only field that knows what the step is
   called today.
