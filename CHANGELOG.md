@@ -2,6 +2,52 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — 7 September 2026
+
+**`AVStatus` is now the spine only, and the status vocabulary is open.**
+
+An AV's flow is a fixed spine wrapped around a per-domain middle: the flow
+board's `Custom Statuses` section sits between `Accepted` and `Completed` and
+holds one chain per domain. Design has two steps, Development has six, and
+Content, Partners, Governance and Product bring their own — which a domain can
+add to and rename (issue #68). Those names are data, so they cannot be a
+compile-time union.
+
+- **`AVStatus` drops from seventeen values to ten.** Removed: `In Progress`,
+  `For Review`, `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`,
+  `Design Review`. **Migration:** `<StatusPill status="For QA" />` becomes
+  `<StatusPill custom="For QA" />`, or `custom={step.label}` where the label
+  comes from the domain.
+- **Domain steps all share one treatment** — the info tonal, `#dbeafe` on
+  `#1447e6`, 5.60:1 (design's call, 7 Sep 2026). Four statuses change colour:
+  `For Review`, `For QA`, `Ready for Deploy` and `Design Review` were warning,
+  `Confirmed Prod` was success. Note `Accepted`, `Review No Action` and
+  `Reopened` are also info tonal, so a domain step is not distinguishable from
+  those three by colour — the text is the signal, as it always was.
+- **`StatusPill`'s props are a discriminated union**: `status` (spine, typo is
+  a compile error) xor `custom` (a domain label, any string). Exactly one is
+  required.
+- **`AVProgressionStatus` is gone**, and with it the `Extract<AVStatus, …>`
+  guarantee added on 4 September that a lifecycle state with no tag is a
+  compile error. Seven of its eleven members were domain steps; there is
+  nothing left to extract from. There is no equivalent for an open vocabulary.
+- **`AVWorkflow` is gone.** A workflow is now just a different `chain`, so the
+  eight Figma sets (two workflows × four roles) become four. Six domains would
+  otherwise have meant twenty-four.
+- **`StatusProgression` takes its chain as a prop.** `<StatusProgression
+  workflow="development" role="assignee" status="For QA" />` becomes
+  `<StatusProgression role="assignee" chain={domain.steps} step="for-qa" />`.
+  Spine positions keep `status`. `avTransitions(workflow, role, status)`
+  becomes `avTransitions({ role, status })` or
+  `avTransitions({ role, step, chain })`.
+- **`AVTransition.to` is a `string`** — a spine status or a chain step's `id`,
+  never a label. Ids survive renames; labels are what changes.
+- **`AVHeader`** forwards `status` / `step` / `chain` instead of
+  `workflow` / `status`.
+- Removed the unused `rejectSoft` constant, dead since #58 and flagged in the
+  handoff. Reintroduce it when the outlined-Reject variants in #60 are named.
+
+
 Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 
 - Core: 10 colour ramps (vcp-blue, slate, neutral, blue, green, red, yellow,

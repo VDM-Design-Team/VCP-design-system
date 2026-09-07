@@ -9,16 +9,21 @@ const meta = {
       description: {
         component:
           'An Added Value’s status as a pill — a component composing `Badge`, and the owner ' +
-          'of VCP’s status vocabulary and its status → treatment mapping. The eleven statuses ' +
-          'and their fills come from the Figma `Status_Tag_General` set (design audit, ' +
-          '3 Sep 2026), replacing the seven the Claude Design export invented. Not clickable ' +
-          'by design: changing status is the options dropdown’s job.',
+          'of VCP’s status vocabulary and its status → treatment mapping. **The vocabulary is ' +
+          'open.** The ten spine statuses are fixed and each keeps its own fill, measured off ' +
+          'the Figma `Status_Tag_General` set. Domain steps — anything Design, Development, ' +
+          'Content, Partners, Governance or Product defines in its own chain — are passed as ' +
+          '`custom` and all wear one treatment, because this component knows nothing about a ' +
+          'step it did not define. Not clickable by design: changing status is the options ' +
+          'dropdown’s job.',
       },
     },
   },
-  args: { status: 'In Progress' },
+  /* A default so individual stories need only `render`. The props are a
+     discriminated union (`status` xor `custom`), and without a default that
+     satisfies one branch, TypeScript demands `args` on every story. */
+  args: { status: 'Draft' },
   argTypes: {
-    status: { control: 'select', options: AV_STATUSES },
     size: { control: 'radio', options: ['sm', 'md'] },
   },
 } satisfies Meta<typeof StatusPill>;
@@ -26,55 +31,104 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-/** The whole Figma vocabulary, in lifecycle order. The mapping lives in ONE place. */
-export const AllStatuses: Story = {
-  render: (args) => (
-    <div className="flex flex-wrap gap-2">
+/** The spine: ten fixed statuses, each with the fill the design gives it. */
+export const SpineStatuses: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-2">
       {AV_STATUSES.map((status) => (
-        <StatusPill {...args} key={status} status={status} />
+        <StatusPill key={status} status={status} />
       ))}
     </div>
   ),
 };
 
-/** Badge's `sm` for dense tables — the AV table's cells. */
-export const Small: Story = {
-  render: (args) => (
-    <div className="flex flex-wrap gap-2">
-      {AV_STATUSES.map((status) => (
-        <StatusPill {...args} key={status} status={status} size="sm" />
-      ))}
+/**
+ * Domain steps. Every one of these is `custom`, so every one wears the same
+ * blue tonal — whatever the domain calls it and whatever phase it represents.
+ */
+export const DomainSteps: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="w-28 text-label-md text-text-secondary">Design</span>
+        {['In progress', 'Design review'].map((label) => (
+          <StatusPill key={label} custom={label} />
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="w-28 text-label-md text-text-secondary">Development</span>
+        {['In progress', 'For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'].map(
+          (label) => (
+            <StatusPill key={label} custom={label} />
+          ),
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="w-28 text-label-md text-text-secondary">Governance</span>
+        {['Awaiting legal', 'Risk signed off'].map((label) => (
+          <StatusPill key={label} custom={label} />
+        ))}
+      </div>
     </div>
   ),
 };
 
-/** In its habitat: a DataTable status column (the AV table pattern will own this). */
-export const InATableCell: Story = {
-  render: (args) => (
-    <div className="flex w-96 flex-col divide-y divide-stroke-subtle rounded-md border border-stroke-subtle bg-surface-elevated font-sans">
-      {(['In Progress', 'Review', 'Rejected'] as const).map((status, i) => (
-        <div key={status} className="flex h-14 items-center justify-between px-4">
-          <span className="text-body-md text-text-secondary">AV-20{41 - i}</span>
-          <StatusPill {...args} status={status} size="sm" />
+/**
+ * A whole AV lifecycle in order: spine, then the domain's middle, then spine
+ * again. The colour change is the useful signal — it says which half of the
+ * flow you are looking at.
+ */
+export const OneAVsJourney: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-2">
+      <StatusPill status="Draft" />
+      <StatusPill status="Pending" />
+      <StatusPill status="Accepted" />
+      <StatusPill custom="In progress" />
+      <StatusPill custom="For QA" />
+      <StatusPill custom="Confirmed prod" />
+      <StatusPill status="Completed" />
+    </div>
+  ),
+};
+
+/** Both sizes, on a spine status and a domain step. */
+export const Sizes: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      {(['sm', 'md'] as const).map((size) => (
+        <div key={size} className="flex items-center gap-2">
+          <span className="w-8 text-label-md text-text-secondary">{size}</span>
+          <StatusPill size={size} status="Pending" />
+          <StatusPill size={size} custom="Awaiting legal" />
         </div>
       ))}
     </div>
   ),
 };
 
-/** Badge's tokens, so dark is free — including the borrowed info blue for hand-off. */
+/** `Review` is the one filled tag in the design; everything else is tonal. */
+export const ReviewIsFilled: Story = {
+  render: () => (
+    <div className="flex items-center gap-2">
+      <StatusPill status="Review" />
+      <StatusPill status="Review No Action" />
+    </div>
+  ),
+};
+
+/** Every fill is a token, so dark comes free. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen' },
-  render: (args) => (
+  render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex max-w-80 flex-wrap gap-2 bg-surface-canvas p-8">
+          <div className="flex min-h-48 flex-col gap-2 bg-surface-canvas p-8">
             {AV_STATUSES.map((status) => (
-              <StatusPill {...args} key={status} status={status} />
+              <StatusPill key={status} status={status} className="self-start" />
             ))}
+            <StatusPill custom="Awaiting legal" className="self-start" />
           </div>
         </div>
       ))}

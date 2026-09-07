@@ -12,12 +12,13 @@ above, page identity below.
 | `IconButton` | atom | The back arrow, when back is a history action |
 | `Icon` | atom | The back arrow's glyph, when back is an `href` |
 | `StatusProgression` | component | The lifecycle buttons on the right |
+| `StatusPill` | component | **Type only** — `status` is its `AVStatus`. Nothing rendered |
 
 The import rows are checked against the real imports — `npm test` fails if
 this list drifts.
 
 **This pattern owns no lifecycle knowledge.** It places `StatusProgression`
-and forwards three props; the mapping lives in exactly one place, and that
+and forwards the position props; the mapping lives in exactly one place, and that
 place is not here.
 
 ## The two types
@@ -40,7 +41,7 @@ Exactly the Figma `Type` variant pair. The design's boolean
 | `onBack` | `() => void` | — | Back as a history action. Ignored when `backHref` is set |
 | `backLabel` | `string` | `'Back'` | The back control's accessible name — say where it goes |
 | `showStatusActions` | `boolean` | `true` | The design's boolean |
-| `workflow` / `role` / `status` | see `StatusProgression` | — | Forwarded. The buttons render only when `role` **and** `status` are given |
+| `role` / `status` / `step` / `chain` | see `StatusProgression` | — | Forwarded. The buttons render only when `role` **and** a position (`status`, or `step` with `chain`) are given |
 | `onTransition` | `(t: AVTransition) => void` | — | A status button press |
 | `actions` | `ReactNode` | — | Page actions, placed before the status buttons |
 | `className` | `string` | — | On the `<header>` |

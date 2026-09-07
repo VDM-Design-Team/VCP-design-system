@@ -4,11 +4,11 @@ import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import {
   StatusProgression,
+  type AVChainStep,
   type AVProgressionRole,
-  type AVProgressionStatus,
   type AVTransition,
-  type AVWorkflow,
 } from '../../components/status-progression';
+import type { AVStatus } from '../../components/status-pill';
 
 /**
  * AVHeader — the page-level header the Figma `AV_Header` set draws: a back
@@ -48,9 +48,13 @@ export interface AVHeaderProps extends Omit<React.HTMLAttributes<HTMLElement>, '
   backLabel?: string;
   /** The design's `Show Move Status Buttons`. */
   showStatusActions?: boolean;
-  workflow?: AVWorkflow;
   role?: AVProgressionRole;
-  status?: AVProgressionStatus;
+  /** Where the AV is on the spine. Mutually exclusive with `step`. */
+  status?: AVStatus;
+  /** The `id` of the domain chain step the AV sits on. Needs `chain`. */
+  step?: string;
+  /** The domain's ordered middle, when the AV is in it or entering it. */
+  chain?: readonly AVChainStep[];
   /** A status button press, straight from `StatusProgression`. */
   onTransition?: (transition: AVTransition) => void;
   /** Anything else the page needs on the right, before the status buttons. */
@@ -67,9 +71,10 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
       onBack,
       backLabel = 'Back',
       showStatusActions = true,
-      workflow,
       role,
       status,
+      step,
+      chain,
       onTransition,
       actions,
       ...props
@@ -117,17 +122,26 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
           {title}
         </h1>
       </div>
-      {(actions || (showStatusActions && role && status)) && (
+      {(actions || (showStatusActions && role && (status || step))) && (
         <div className="flex shrink-0 items-center gap-2">
           {actions}
-          {showStatusActions && role && status && (
-            <StatusProgression
-              workflow={workflow}
-              role={role}
-              status={status}
-              onTransition={onTransition}
-            />
-          )}
+          {showStatusActions &&
+            role &&
+            (status ? (
+              <StatusProgression
+                role={role}
+                status={status}
+                chain={chain}
+                onTransition={onTransition}
+              />
+            ) : step && chain ? (
+              <StatusProgression
+                role={role}
+                step={step}
+                chain={chain}
+                onTransition={onTransition}
+              />
+            ) : null)}
         </div>
       )}
     </header>

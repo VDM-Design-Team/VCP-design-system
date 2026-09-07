@@ -4,6 +4,17 @@ import { AVHeader } from './AVHeader';
 import { TopBar } from '../top-bar';
 import { Button } from '../../atoms/button';
 
+/* The Development domain's chain. It is data here for the same reason it is
+   data in the product: the domain owns its middle and can rename it. */
+const DEVELOPMENT = [
+  { id: 'in-progress', label: 'In progress' },
+  { id: 'for-review', label: 'For review' },
+  { id: 'for-qa', label: 'For QA' },
+  { id: 'in-qa', label: 'In QA' },
+  { id: 'ready-for-deploy', label: 'Ready for deploy' },
+  { id: 'confirmed-prod', label: 'Confirmed prod' },
+];
+
 const meta = {
   title: 'Patterns/AVHeader',
   component: AVHeader,
@@ -23,11 +34,11 @@ const meta = {
     onBack: () => {},
     backLabel: 'Back to my Added Values',
     role: 'assignee',
-    status: 'For Review',
+    step: 'for-review',
+    chain: DEVELOPMENT,
   },
   argTypes: {
     type: { control: 'inline-radio', options: ['default', 'new'] },
-    workflow: { control: 'inline-radio', options: ['development', 'design'] },
     role: {
       control: 'inline-radio',
       options: ['assignee', 'initiator', 'assignee-initiator', 'admin'],
@@ -64,7 +75,7 @@ export const NoMovesLeft: Story = {
 /** A page action alongside the lifecycle buttons. */
 export const WithExtraAction: Story = {
   args: {
-    status: 'In QA',
+    step: 'in-qa',
     actions: (
       <Button variant="secondary" size="sm">
         Report a problem
