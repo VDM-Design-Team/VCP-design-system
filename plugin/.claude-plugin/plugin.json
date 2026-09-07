@@ -1,6 +1,6 @@
 {
   "name": "vcp-design-system",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Daily catch-up on the VCP Design System — questions waiting on you, what needs your review, what merged, and what changed in Storybook. Built for designers; needs no clone and no terminal.",
   "author": {
     "name": "VDM Design Team"

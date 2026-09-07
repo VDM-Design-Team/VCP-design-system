@@ -13,9 +13,20 @@ PR list IS the complete history of change. Nothing lands any other way.
 https://main--685158a98c4fedbbec7ac708.chromatic.com
 
 Always the current `main`, rebuilt on every merge. This is the design system as
-it exists right now. Storybook sidebar groups: components under `Actions/`,
-`Forms/`, `Navigation/`, `Feedback/`, `Display/`, `Overlays/`; VCP-specific
-assemblies under `Patterns/`; tokens under `Foundations/`.
+it exists right now.
+
+The sidebar's top level is the **tier**: `Foundations/` for tokens, then
+`Atoms/`, `Components/`, `Patterns/`, and `Templates/` once the first one
+ships. Only components keep a function group one level down —
+`Components/Actions/`, `Components/Forms/`, `Components/Navigation/`,
+`Components/Feedback/`, `Components/Display/`, `Components/Overlays/`.
+Everything else sits directly under its tier: `Atoms/Button`,
+`Patterns/TopBar`.
+
+**Search by name, do not guess the path.** A piece moves tier when it outgrows
+or shrinks out of one — `PaginationDots` was under `Navigation/` and is now
+`Atoms/PaginationDots`. Storybook's sidebar search finds it either way; a
+guessed path sends the reader somewhere that no longer exists.
 
 ## Efficient GitHub URLs
 
@@ -51,8 +62,21 @@ auto-accept, so only PR diffs ever need a decision.
 
 ## Vocabulary
 
-- **Component** — reusable, knows nothing about VCP (Button, Input, Tabs).
-- **Pattern** — carries VCP's domain vocabulary or page structure (TopBar,
-  StatusPill). Same quality bar, different tier.
-- **Token** — a named design decision (color, type, space). Components only use
-  semantic tokens; a PR "adding a token" is usually groundwork for a component.
+Four tiers, and the test is **composition, not vocabulary** — a piece may carry
+VCP words at any tier. (The older "could another product use it?" test was
+retired in September 2026; a brief that still applies it will put pieces in the
+wrong place.)
+
+- **Atom** — one self-contained element, the thing a designer would name as
+  *one thing* on a canvas (Button, Input, Badge, Avatar, PaginationDots). It
+  composes nothing else in the system.
+- **Component** — one unit assembled from atoms and other components. However
+  rich inside, it presents as a single control or display unit (Field, Menu,
+  DataTable, StatusPill).
+- **Pattern** — two or more components composed into a distinct page section
+  (TopBar, AVHeader).
+- **Template** — a page-level layout arranging patterns into a whole screen
+  (AppShell).
+- **Token** — a named design decision (color, type, space). Every tier uses
+  semantic tokens only; a PR "adding a token" is usually groundwork for the
+  piece that will spend it.
