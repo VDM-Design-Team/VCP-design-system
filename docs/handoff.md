@@ -11,13 +11,25 @@ Last updated **7 September 2026**.
 
 ## At a glance
 
+**These four rows link rather than state.** Every one of them changes on the
+next merge — including the merge that lands an edit to this file, which is how
+the previous version managed to be wrong about itself ninety seconds after it
+landed. A link is still true tomorrow; a number is a claim with a shelf life.
+If you are tempted to paste today's values in, don't: the prose below is where
+dated facts belong.
+
 | | |
 |---|---|
-| `main` | `066d4eb` — clean, all checks green |
-| Open PRs | **2** — [#63](https://github.com/VDM-Design-Team/VCP-design-system/pull/63) (this file) and [#64](https://github.com/VDM-Design-Team/VCP-design-system/pull/64), both the engineering owner's |
-| Open issues | **2** — [#68](https://github.com/VDM-Design-Team/VCP-design-system/issues/68) (the big one) and [#60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60) (two variants left) |
-| Plugin released | **0.1.4** — 0.1.5 waiting in #64 |
-| Pieces | 19 atoms · 30 components · 2 patterns · 0 templates |
+| `main` | [latest commit and its checks](https://github.com/VDM-Design-Team/VCP-design-system/commits/main) |
+| Open PRs | [all open](https://github.com/VDM-Design-Team/VCP-design-system/pulls) · [waiting on your review](https://github.com/VDM-Design-Team/VCP-design-system/pulls?q=is%3Apr+is%3Aopen+review-requested%3A%40me) |
+| Open issues | [all open](https://github.com/VDM-Design-Team/VCP-design-system/issues) · [assigned to you](https://github.com/VDM-Design-Team/VCP-design-system/issues?q=is%3Aissue+is%3Aopen+assignee%3A%40me) |
+| Plugin released | [`version` in the manifest on `main`](https://github.com/VDM-Design-Team/VCP-design-system/blob/main/plugin/.claude-plugin/plugin.json) |
+| Published Storybook | [always the current `main`](https://main--685158a98c4fedbbec7ac708.chromatic.com) |
+
+**Pieces, as of 7 September:** 19 atoms · 30 components · 2 patterns ·
+0 templates. This one is a number because it is the shape of the system rather
+than its churn, and it only moves when something ships —
+[inventory.md](inventory.md) has the per-piece detail either way.
 
 `npm test` on `main` runs four checks: token lint, composition lint, plugin
 version consistency, typecheck.
@@ -128,7 +140,11 @@ claude plugin update vcp-design-system@vcp
 ```
 
 Then restart Claude and start a fresh conversation. From 0.1.4 onward the
-brief announces its own releases.
+brief announces its own releases, so this is the last time anyone has to be
+told by hand — but nobody gets that first update automatically, which is why
+it is still sitting here. Whoever runs it now lands on the current release,
+which also carries the corrected Storybook sidebar map (the brief used to hand
+out pre-atomic paths for anything re-tiered to an atom).
 
 **4. From an earlier handoff, never actioned:** onboarding messages for the
 two designers who have not had them. The lead specifically wanted the
