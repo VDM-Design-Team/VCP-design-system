@@ -22,6 +22,20 @@ jobs:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           buildScriptName: 'storybook:build'
           onlyChanged: true        # TurboSnap: only snapshot affected stories
+          # TurboSnap decides what to re-snapshot by tracing changed files
+          # through the Storybook module graph. Token sources are invisible to
+          # that trace: `npm run tokens` compiles `tokens/` into `dist/`, and
+          # `dist/` is gitignored — so the only file git ever sees change is the
+          # source, which no story imports. Storybook consumes the built output
+          # instead (`.storybook/storybook.css` imports `dist/theme.css`, the
+          # gallery imports `dist/tokens.json`), which means a token change
+          # repaints every story while tracing to none. PR #66 deleted a whole
+          # colour ramp and Chromatic skipped the build; it was only verified
+          # after it had already reached main. `externals` disables TurboSnap
+          # when a matching file changes, so a token change snapshots
+          # everything — which is right, because a token change can affect
+          # everything.
+          externals: '{tokens/**,style-dictionary.config.mjs}'
           exitOnceUploaded: true
           # Every build on main becomes the new baseline, with no one in the loop.
           # Without this, baselines only advance when a human accepts a build — and
@@ -47,6 +61,8 @@ jobs:
             const marker = '<!-- visual-review-links -->';
             // TurboSnap skips the whole build when a push touches no frontend
             // files — a skipped build has no URLs, so never render dead links.
+            // Token sources are covered by `externals` above, so a skip here
+            // really does mean nothing visual changed.
             const buildUrl = process.env.BUILD_URL;
             const storybookUrl = process.env.STORYBOOK_URL;
             const skipped = !buildUrl || buildUrl === 'undefined';
