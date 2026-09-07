@@ -37,6 +37,7 @@ the status → tone mapping lives here and only here.
 |---|---|---|---|
 | `status` | `AVStatus` | — | A spine status. Ten values; a typo is a compile error |
 | `custom` | `string` | — | A domain step, by whatever name the domain gives it |
+| `actionable` | `boolean` | `false` | Draw the design's button style. Today only `Review` differs |
 | `size` | `'sm' \| 'md'` | `'md'` | Inherited from `Badge` |
 
 **`status` and `custom` are mutually exclusive**, enforced by the type. Exactly
@@ -56,8 +57,8 @@ domain's own configuration, which this repo does not own.
 ## The mapping
 
 **Ten spine statuses** — the Figma `Status_Tag_General` set, less the
-`Review No Action` variant, which is not a state (confirmed 7 Sep 2026) and is
-being renamed in Figma — every fill below is the design's, matched to the
+`Review No Action` variant, which is not a state but `Review`'s second
+treatment (confirmed 7 Sep 2026) and is being renamed in Figma — every fill below is the design's, matched to the
 token that already carried that exact hex.
 
 | Status | Treatment | Figma fill / text |
@@ -67,15 +68,28 @@ token that already carried that exact hex.
 | Pending | warning tonal | `#fef9c2` / `#a65f00` |
 | Accepted | info tonal | `#dbeafe` / `#1447e6` |
 | In Progress | info tonal | `#dbeafe` / `#1447e6` |
-| **Review** | **info filled** | `#155dfc` / `#ffffff` |
+| Review | info tonal | `#dbeafe` / `#1447e6` |
+| Review *(actionable)* | **info filled** | `#155dfc` / `#ffffff` |
 | Completed | success tonal | `#dcfce7` / `#008236` |
 | Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
 
-`Review` is the design's one **solid** tag — the review that wants acting
-on. It is why `Badge` has a `variant`: the treatment belongs to the atom,
-and this component composes it.
+**`Review` is drawn twice**, and both pills are in the library. Tonal is the
+label style — what a user sees. Filled is the button style, for a viewer who
+can act on it: an admin, or the AV's initiator. Same status; only who is
+looking changes.
+
+```tsx
+<StatusPill status="Review" />              // a user sees a label
+<StatusPill status="Review" actionable />   // an admin sees a call to act
+```
+
+`actionable` on any other status is a no-op. The design draws one treatment
+for each of them, and this component will not invent a filled variant nobody
+has drawn — when design draws another, it gets a row in
+`ACTIONABLE_TREATMENT`. That is also why `Badge` has a `variant`: the
+treatment belongs to the atom, and this component composes it.
 
 **Every domain step wears one treatment:** the info tonal, `#dbeafe` on
 `#1447e6`, 5.60:1. Design's call, 7 Sep 2026. The reasoning is that this
@@ -117,10 +131,15 @@ error. Seven of its eleven members were domain steps, so that guarantee does
 not survive — there is nothing left to extract from. It was the right
 guarantee for a closed vocabulary and there is no equivalent for an open one.
 
-**Answered 7 September:** the library's second Review pill was a
-`Review No Action` variant. There is no such state and no such button, so it is
-gone from `AVStatus` and `Review` keeps the single filled treatment the design
-draws. The Figma variant is being renamed.
+**Answered 7 September.** The library draws two Review pills, and the second
+is named `Review No Action` — which is not a state and never was. It is one
+status with two treatments: a label for a user, the button style for someone
+who can act. So `Review No Action` is gone from `AVStatus` and `actionable`
+carries the difference. The Figma variant is being renamed.
+
+This also settles the colour-alone worry the earlier note raised: the two
+pills are the same status, so nothing is being distinguished by colour that
+the text should be carrying.
 
 ## Accessibility
 

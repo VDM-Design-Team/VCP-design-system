@@ -152,9 +152,10 @@ atom, not by styling around it.
    fixes above. Where the audit itself proved the design and the code already
    agreed (SegmentedControl), nothing moved.
 2. ~~**`Review` / `Review No Action`** keep their distinct labels for now.~~
-   **Resolved 7 Sep 2026:** there is no `Review No Action` state or button.
-   The variant is being renamed in Figma, and the repo carries one `Review`
-   with the filled treatment.
+   **Resolved 7 Sep 2026:** there is no `Review No Action` state. The two
+   pills are one status with two treatments — a label for a user, the button
+   style for a viewer who can act. The repo carries one `Review` and an
+   `actionable` prop; the Figma variant is being renamed.
 3. Badge's two documented deviations (`success` AA fix, `neutral` slate-100)
    stand.
 

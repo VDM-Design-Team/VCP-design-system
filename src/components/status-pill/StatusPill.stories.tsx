@@ -105,13 +105,36 @@ export const Sizes: Story = {
   ),
 };
 
-/** `Review` is the one filled tag in the design; everything else is tonal. */
-export const ReviewIsFilled: Story = {
+/**
+ * `Review` is drawn twice. Tonal is the label style — what a user sees.
+ * Filled is the button style, for a viewer who can act on it: an admin, or
+ * the AV's initiator. Same status, different viewer.
+ */
+export const ReviewHasTwoStyles: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <span className="w-40 text-label-md text-text-secondary">A user sees</span>
+        <StatusPill status="Review" />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="w-40 text-label-md text-text-secondary">An admin sees</span>
+        <StatusPill status="Review" actionable />
+      </div>
+    </div>
+  ),
+};
+
+/**
+ * `actionable` on any other status is a no-op — the design draws one
+ * treatment for each of them, and this component will not invent a second.
+ */
+export const ActionableIsReviewOnlyToday: Story = {
   render: () => (
     <div className="flex items-center gap-2">
-      <StatusPill status="Review" />
-      <StatusPill status="Pending" />
-      <StatusPill custom="For QA" />
+      <StatusPill status="Pending" actionable />
+      <StatusPill status="Rejected" actionable />
+      <StatusPill custom="For QA" actionable />
     </div>
   ),
 };

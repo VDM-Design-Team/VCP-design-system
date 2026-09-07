@@ -18,7 +18,13 @@ compile-time union.
   `Design Review` — exactly the contents of `Status_Tag_Development_Only` and
   `Status_Tag_Design_Only`. Removed outright: **`Review No Action`**, which is
   not a state and never was (confirmed 7 Sep 2026); the Figma variant of that
-  name is being renamed. `Review` keeps the single filled treatment. **Migration:** `<StatusPill status="For QA" />` becomes
+  name is being renamed.
+- **`Review` has two treatments, selected by the new `actionable` prop.** Tonal
+  is the label style a user sees; filled is the button style for an admin or
+  the AV's initiator. **`<StatusPill status="Review" />` is now tonal, not
+  filled** — pass `actionable` for the old rendering. Every other status
+  ignores the prop rather than inventing a filled variant the design has not
+  drawn. **Migration:** `<StatusPill status="For QA" />` becomes
   `<StatusPill custom="For QA" />`, or `custom={step.label}` where the label
   comes from the domain.
 - **Domain steps all share one treatment** — the info tonal, `#dbeafe` on
