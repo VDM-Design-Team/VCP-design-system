@@ -38,8 +38,10 @@ const NOISE = /(^|-)(schemes|state-layers)(-|$)|-[23]$|^(body|title|label|font|p
 
 /* core ramp name -> DTCG path under color.* */
 /* 'primary' (pink) dropped 2026-08-18 — design confirmed it is not a brand color;
-   vcp-blue is the brand. 'secondary' (teal) kept as teal-legacy pending the same call. */
-const RAMPS = { 'vcp-blue': 'vcp-blue', slate: 'slate', neutral: 'neutral', blue: 'blue', green: 'green', red: 'red', yellow: 'yellow', secondary: 'teal-legacy', monochrome: 'monochrome' };
+   vcp-blue is the brand. 'secondary' (teal) dropped 2026-09-04 on the same call —
+   it was kept as teal-legacy pending a decision; design confirmed it is not a
+   brand colour either and nothing referenced it semantically. */
+const RAMPS = { 'vcp-blue': 'vcp-blue', slate: 'slate', neutral: 'neutral', blue: 'blue', green: 'green', red: 'red', yellow: 'yellow', monochrome: 'monochrome' };
 
 const core = { color: { $type: 'color' } };
 const rampRef = {};   // css var name -> {color.x.y} reference
