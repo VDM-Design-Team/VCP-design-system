@@ -5,7 +5,7 @@ up next. **Written in roles, not names** — who holds each seat is the
 "Current holders" table in [workflow.md](workflow.md), the one place a role
 maps to a person.
 
-Last updated **4 September 2026**.
+Last updated **7 September 2026**.
 
 ---
 
@@ -13,14 +13,40 @@ Last updated **4 September 2026**.
 
 | | |
 |---|---|
-| `main` | `81bab88` — clean, all checks green |
-| Open PRs | **0** |
-| Open issues | **1** — [#60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60), waiting on the design-system owner |
-| Plugin released | **0.1.4** |
+| `main` | `066d4eb` — clean, all checks green |
+| Open PRs | **2** — [#63](https://github.com/VDM-Design-Team/VCP-design-system/pull/63) (this file) and [#64](https://github.com/VDM-Design-Team/VCP-design-system/pull/64), both the engineering owner's |
+| Open issues | **2** — [#68](https://github.com/VDM-Design-Team/VCP-design-system/issues/68) (the big one) and [#60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60) (two variants left) |
+| Plugin released | **0.1.4** — 0.1.5 waiting in #64 |
 | Pieces | 19 atoms · 30 components · 2 patterns · 0 templates |
 
 `npm test` on `main` runs four checks: token lint, composition lint, plugin
 version consistency, typecheck.
+
+---
+
+## What shipped on 7 September
+
+Three PRs from the design-system owner, all reviewed and merged together.
+
+**[#65](https://github.com/VDM-Design-Team/VCP-design-system/pull/65) — the token gallery got its missing half.**
+`radius.*` and `shadow.*` were defined in `tokens/semantic/shape.json` and
+surfaced nowhere in Storybook; there is now a `Shape` story. The `Colors`
+groups were reordered to Surface, Text, Action, Stroke, Accent, Core, and a
+custom `docs.page` stops the opening heading rendering twice.
+
+**[#66](https://github.com/VDM-Design-Team/VCP-design-system/pull/66) — `teal-legacy` is gone.**
+Design confirmed teal is not a brand colour, the same call already made for
+pink. The ramp is deleted and the Figma importer no longer maps `secondary`
+onto it, so a fresh export cannot bring it back. No semantic token or component
+referenced it. Verified on the published `main` build after merge: zero
+mentions of teal, all eight remaining ramps intact.
+
+**[#67](https://github.com/VDM-Design-Team/VCP-design-system/pull/67) — `docs/color-tokens.md`.**
+Role-based guidance for choosing a semantic colour token, referenced from both
+`Foundations/Tokens` and `CLAUDE.md` rather than pasted into each. Written
+against the real token tree rather than copied from the supplied draft — the
+"Neutral" section was rewritten, because VCP has no `neutral.*` family shaped
+like `action.*`.
 
 ---
 
@@ -61,17 +87,39 @@ is stated in two places by necessity, so `lint:plugin-version` joins
 
 ## Waiting on a person
 
-**1. The design-system owner has one question open — [issue #60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60).**
-Seven Figma progression variants carry placeholder layer names (`Status4`,
-`Status8`, `Deploy`, `Review`, `Review (completed 1)`). They draw real buttons
-but there is no way to know which status each represents, so they are not
-modelled — which is why the **`initiator` role offers moves on `Draft` only**.
+**1. The status model itself is the open question — [issue #68](https://github.com/VDM-Design-Team/VCP-design-system/issues/68).**
+The flow board shows a section named **Custom Statuses** between `Accepted` and
+`Completed`, holding one chain per domain: Design has two steps, Development
+has six. Content, Partners and Governance exist and Product is coming, and a
+domain can add its own steps with its own names.
 
-Five of the seven draw Reject · Accept, which *suggests* they are all `Pending`
-seen by different roles. That is a guess and was deliberately not written into
-a public type. Confirming it unblocks the role in a minor bump.
+`AVStatus` cannot survive that as a closed union. Ten of its seventeen values
+are spine — fixed, and the application branches on them. The other seven are
+domain chain steps, and they are the ones that get renamed. `In Progress`
+already appears in *both* chains on the board, which under a flat union reads
+as one shared status when it is really two domains picking the same word.
 
-**2. One plugin release still needs announcing by hand.** The self-update
+The consequence lands on this repo: `StatusPill` owns a
+`Record<AVStatus, Treatment>` keyed by status **name**, and a lookup keyed by
+an editable label breaks silently the moment someone edits the label.
+`StatusProgression` has the same problem in its `Steps` type. The proposal is
+to split along fixed-versus-configurable rather than by domain — a closed union
+for the spine, domain steps as data carrying their own tone. **That is a major
+bump to a shipped component**, worth doing before the four table patterns are
+built on top of it.
+
+Two questions in #68 decide the build, and neither is engineering's to answer:
+who configures a custom step and when, and whether a domain picks a colour or
+picks from a fixed set of intents.
+
+**2. Two progression variants still have no name — [issue #60](https://github.com/VDM-Design-Team/VCP-design-system/issues/60).**
+Five of the original seven were answered on 4 September: all map to `Review`,
+and one empty variant is being deleted. Development/Admin `Deploy` and `Review`
+are still open — the design-system owner is checking them with the engineering
+owner. They remain the only thing holding the **`initiator` role to `Draft`
+moves only**.
+
+**3. One plugin release still needs announcing by hand.** The self-update
 notice cannot announce the version that introduces it. Everyone on the team
 needs this once:
 
@@ -82,7 +130,7 @@ claude plugin update vcp-design-system@vcp
 Then restart Claude and start a fresh conversation. From 0.1.4 onward the
 brief announces its own releases.
 
-**3. From an earlier handoff, never actioned:** onboarding messages for the
+**4. From an earlier handoff, never actioned:** onboarding messages for the
 two designers who have not had them. The lead specifically wanted the
 design-system owner to hear about the owner seat directly, not via a tool.
 The plugin-update nudge above is a natural moment to fold that in.
@@ -99,6 +147,19 @@ it and reintroduce it when #60 is answered, or add a one-line comment saying
 what it is waiting for. It is currently neither, which is the worst of the
 three.
 
+**Token changes skip visual review.** Chromatic reported "no story, component,
+or token files" on #66 and never built it — but #66 changed
+`tokens/core/color.json`, which is exactly a token file. TurboSnap does not
+trace token files to the stories that render them, so **no token PR gets a
+visual diff**. It built fine on `main` after merge, which is how the teal
+removal was verified at all. This is a hole in the review net for every future
+token change, not a one-off.
+
+**`preview/out.css` carries 1,701 lines of churn** from #66. The file is
+generated by `npm run preview` and tracked in git; the teal removal should have
+shrunk it. Regenerable, so noise rather than damage, but it is noise in the
+history.
+
 **`docs/inventory.md` is the worklist.** It records tier, shipped-in PR, and
 dependency notes for everything still to port. Read it before picking work.
 
@@ -112,11 +173,11 @@ places the design file has not caught up. Full detail in
 
 | What | Detail |
 |---|---|
-| **Six status tags missing** | `For Review`, `Design Review`, `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod` exist in `StatusPill` and not in `Status_Tag_General` |
-| **Seven unnamed variants** | Issue #60 above |
+| **Where the six lifecycle tags belong** | Superseded by #68 — design wants them split out of `Status_Tag_General`, and the deeper question is whether per-domain tag sets scale to six domains at all |
+| **Two unnamed variants** | Issue #60 above; five of the original seven are answered |
 | **Tokens not in Figma** | `surface.track`, `text.logo`, `text.logo-accent`, `color.brand.navy`, `shape.radius.xs`, and the dark `stroke.focused` fix |
 | **AV table uses raw colours** | The deadline cells draw `#5291f7`, `#eab308`, `#ef4444`, `#64748b` — stock Tailwind values in no VCP ramp. **Rebind these before the AV-table pattern is built**, or the pattern inherits colours the token layer cannot express |
-| **Two typos** | Three Design sets spell it "In Prog**e**ss"; one admin label has a double space |
+| **One typo left** | The board's Development chain reads "F**o** Review". The earlier two — "In Prog**e**ss" and a double-spaced admin label — were fixed in Figma on 4 September; the repo always spelled both correctly |
 | **No radius variables** | Values sit raw on components; the repo inferred 6 for controls, 4 for cells inside them |
 
 ---
@@ -130,7 +191,9 @@ places the design file has not caught up. Full detail in
   piece left: it is the only blocker on the first template.
 - **The four table patterns** — `PlanningTable`, `BudgetTable`, `HolidayTable`,
   `AvailabilityGrid`. `DataTable` shipped; specialise it rather than copying
-  it. ⚠️ Audit the AV-table colours above **before** starting these.
+  it. ⚠️ Audit the AV-table colours above **before** starting these, and if any
+  of them renders a status, wait for #68 — they would inherit a model that is
+  about to change.
 - **`CommentItem` / `CommentComposer`** — every component they need has
   shipped (`EmojiReactionPicker`, `RichTextToolbar`, `AvatarGroup`).
 
@@ -140,7 +203,8 @@ places the design file has not caught up. Full detail in
 |---|---|
 | `AppShell` | `Sidebar` |
 | `DomainSelector` | `DomainLabel`, which needs an indigo and a pink with **no core ramp** — a token decision, not a build task |
-| `initiator` progression moves | Issue #60 |
+| `initiator` progression moves | Issue #60 — the last two variants |
+| Anything extending `AVStatus` or the progression model | Issue #68 — the vocabulary may stop being a closed union |
 
 **Flagged in the audit but never scheduled:** `DatePicker`'s Month, dual-view,
 footer-button and mobile variants; `RichTextToolbar`'s Full-Featured vs
