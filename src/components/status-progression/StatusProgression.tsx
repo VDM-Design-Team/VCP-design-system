@@ -14,8 +14,8 @@ import type { AVStatus } from '../status-pill';
  * terminal silence on `Completed` — because those are the same in every
  * domain and the application branches on them.
  *
- * It does **not** own the middle any more. Design has two steps, Development
- * has six, and Content, Partners, Governance and Product bring their own,
+ * It does **not** own the middle any more. Design has one step, Development
+ * has five, and Content, Partners, Governance and Product bring their own,
  * renameable (issue #68). The domain passes its ordered `chain`; this derives
  * the moves from position in it, exactly as the flow board draws them: one
  * step back, one step forward, and a handoff at the end.
@@ -129,8 +129,14 @@ export function avTransitions(options: {
     /* The spine. Every domain shares these, so they stay here. */
     if (status === 'Draft') return CAN_START.includes(role) ? [saveDraft, submit] : [];
     if (status === 'Pending') return role === 'admin' ? [reject, accept] : [];
-    /* `Accepted` hands over to the domain: the first step of its chain. */
-    if (status === 'Accepted' && role !== 'initiator' && chain.length > 0) {
+    /* `Accepted` starts the work; `In Progress` is the last shared step
+       before the domain's own chain takes over. Both are spine — the Figma
+       `Status_Tag_General` set draws them, and every domain passes through
+       them — so the handover lives here rather than in anyone's chain. */
+    if (status === 'Accepted' && role !== 'initiator') {
+      return [move('In Progress', 'In progress')];
+    }
+    if (status === 'In Progress' && role !== 'initiator' && chain.length > 0) {
       return [move(chain[0].id, chain[0].label)];
     }
     /* Everything else on the spine is terminal or driven elsewhere. The
@@ -149,10 +155,10 @@ export function avTransitions(options: {
   const next = chain[i + 1];
 
   return [
-    /* No way back from the first step: the design does not draw a return to
-       `Accepted`, because accepting is the admin's decision, not the
-       assignee's to undo. */
-    ...(previous ? [back(previous.id, previous.label)] : []),
+    /* The first step returns to `In Progress`, the shared step it came from —
+       not to `Accepted`, because accepting is the admin's decision and not
+       the assignee's to undo. */
+    previous ? back(previous.id, previous.label) : back('In Progress', 'In progress'),
     next ? move(next.id, next.label) : handoff(handoffLabel(role)),
   ];
 }

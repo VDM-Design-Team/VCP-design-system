@@ -13,20 +13,25 @@ Content, Partners, Governance and Product bring their own — which a domain can
 add to and rename (issue #68). Those names are data, so they cannot be a
 compile-time union.
 
-- **`AVStatus` drops from seventeen values to ten.** Removed: `In Progress`,
-  `For Review`, `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`,
-  `Design Review`. **Migration:** `<StatusPill status="For QA" />` becomes
+- **`AVStatus` drops from seventeen values to eleven** — exactly the eleven
+  types in the Figma `Status_Tag_General` set. Removed: `For Review`, `For QA`,
+  `In QA`, `Ready for Deploy`, `Confirmed Prod`, `Design Review`, which are
+  exactly the contents of `Status_Tag_Development_Only` and
+  `Status_Tag_Design_Only`. **Migration:** `<StatusPill status="For QA" />` becomes
   `<StatusPill custom="For QA" />`, or `custom={step.label}` where the label
   comes from the domain.
 - **Domain steps all share one treatment** — the info tonal, `#dbeafe` on
-  `#1447e6`, 5.60:1 (design's call, 7 Sep 2026). Four statuses change colour:
+  `#1447e6`, 5.60:1 (design's call, 7 Sep 2026). Five statuses change colour:
   `For Review`, `For QA`, `Ready for Deploy` and `Design Review` were warning,
-  `Confirmed Prod` was success. Note `Accepted`, `Review No Action` and
-  `Reopened` are also info tonal, so a domain step is not distinguishable from
+  `Confirmed Prod` was success. Note `Accepted`, `In Progress`,
+  `Review No Action` and `Reopened` are also info tonal, so a domain step is not distinguishable from
   those three by colour — the text is the signal, as it always was.
 - **`StatusPill`'s props are a discriminated union**: `status` (spine, typo is
   a compile error) xor `custom` (a domain label, any string). Exactly one is
   required.
+- **`Accepted` → `In Progress` → the domain's chain.** `In Progress` is spine,
+  so the handover out of the shared part of the flow lives in the component,
+  and the first chain step returns to it.
 - **`AVProgressionStatus` is gone**, and with it the `Extract<AVStatus, …>`
   guarantee added on 4 September that a lifecycle state with no tag is a
   compile error. Seven of its eleven members were domain steps; there is

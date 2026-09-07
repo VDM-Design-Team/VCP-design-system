@@ -7,7 +7,6 @@ import { Button } from '../../atoms/button';
 /* The Development domain's chain. It is data here for the same reason it is
    data in the product: the domain owns its middle and can rename it. */
 const DEVELOPMENT = [
-  { id: 'in-progress', label: 'In progress' },
   { id: 'for-review', label: 'For review' },
   { id: 'for-qa', label: 'For QA' },
   { id: 'in-qa', label: 'In QA' },

@@ -51,17 +51,15 @@ export const DomainSteps: Story = {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-28 text-label-md text-text-secondary">Design</span>
-        {['In progress', 'Design review'].map((label) => (
+        {['Design review'].map((label) => (
           <StatusPill key={label} custom={label} />
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-28 text-label-md text-text-secondary">Development</span>
-        {['In progress', 'For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'].map(
-          (label) => (
-            <StatusPill key={label} custom={label} />
-          ),
-        )}
+        {['For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'].map((label) => (
+          <StatusPill key={label} custom={label} />
+        ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-28 text-label-md text-text-secondary">Governance</span>
@@ -84,7 +82,7 @@ export const OneAVsJourney: Story = {
       <StatusPill status="Draft" />
       <StatusPill status="Pending" />
       <StatusPill status="Accepted" />
-      <StatusPill custom="In progress" />
+      <StatusPill status="In Progress" />
       <StatusPill custom="For QA" />
       <StatusPill custom="Confirmed prod" />
       <StatusPill status="Completed" />

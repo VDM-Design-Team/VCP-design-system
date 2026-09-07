@@ -15,7 +15,8 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  *
  * So this component knows two kinds of status:
  *
- * - **Spine statuses** — the ten in `AVStatus`. Fixed, shared by every
+ * - **Spine statuses** — the eleven in `AVStatus`, and exactly the eleven the
+ *   Figma `Status_Tag_General` set draws. Fixed, shared by every
  *   domain, and the application branches on them. Each keeps its own
  *   treatment, measured off the Figma `Status_Tag_General` set, and a typo in
  *   one is still a compile error.
@@ -33,11 +34,15 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  * silently fall through to the custom one.
  *
  * **What this used to be.** Until 7 September `AVStatus` held seventeen
- * values, seven of which were domain steps — `In Progress`, `For Review`,
- * `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`, `Design Review`.
- * They carried three different tones between them (gates warning, work info,
- * verified success). Those seven are gone from the union and all render the
- * one custom treatment now; see CHANGELOG.md for the migration.
+ * values, six of which were domain steps — `For Review`, `For QA`, `In QA`,
+ * `Ready for Deploy`, `Confirmed Prod`, `Design Review`. They carried three
+ * different tones between them (gates warning, work info, verified success).
+ * Those six are gone from the union and all render the one custom treatment
+ * now; see CHANGELOG.md for the migration.
+ *
+ * The three sets in the Figma library are the model, one for one: the eleven
+ * in `Status_Tag_General` are `AVStatus`, and `Status_Tag_Design_Only` and
+ * `Status_Tag_Development_Only` are those domains' chains.
  *
  * There is no dot: the Figma tag is text on a fill, and text is what
  * distinguishes two statuses that share a colour.
@@ -51,6 +56,7 @@ export type AVStatus =
   | 'Initiated'
   | 'Pending'
   | 'Accepted'
+  | 'In Progress'
   | 'Review'
   | 'Review No Action'
   | 'Completed'
@@ -68,6 +74,7 @@ export const AV_STATUSES: readonly AVStatus[] = [
   'Initiated',
   'Pending',
   'Accepted',
+  'In Progress',
   'Review',
   'Review No Action',
   'Completed',
@@ -90,6 +97,7 @@ const STATUS_TREATMENT: Record<AVStatus, Treatment> = {
   Pending: { tone: 'warning' },
   Initiated: { tone: 'warning' },
   Accepted: { tone: 'info' },
+  'In Progress': { tone: 'info' },
   Reopened: { tone: 'info' },
   'Review No Action': { tone: 'info' },
   Completed: { tone: 'success' },
