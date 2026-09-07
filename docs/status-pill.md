@@ -55,8 +55,9 @@ domain's own configuration, which this repo does not own.
 
 ## The mapping
 
-**Eleven spine statuses** — exactly the eleven types in the Figma
-`Status_Tag_General` set — every fill below is the design's, matched to the
+**Ten spine statuses** — the Figma `Status_Tag_General` set, less the
+`Review No Action` variant, which is not a state (confirmed 7 Sep 2026) and is
+being renamed in Figma — every fill below is the design's, matched to the
 token that already carried that exact hex.
 
 | Status | Treatment | Figma fill / text |
@@ -67,7 +68,6 @@ token that already carried that exact hex.
 | Accepted | info tonal | `#dbeafe` / `#1447e6` |
 | In Progress | info tonal | `#dbeafe` / `#1447e6` |
 | **Review** | **info filled** | `#155dfc` / `#ffffff` |
-| Review No Action | info tonal | `#dbeafe` / `#1447e6` |
 | Completed | success tonal | `#dcfce7` / `#008236` |
 | Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
@@ -82,9 +82,9 @@ and this component composes it.
 component knows nothing about a step it did not define, so calling one a
 "warning" would assert a meaning it cannot have.
 
-⚠️ **Four spine statuses share that fill** — `Accepted`, `In Progress`,
-`Review No Action` and `Reopened` are also info tonal, so they are not
-distinguishable from a domain step by colour. Their text is, which is why there is no dot and never
+⚠️ **Three spine statuses share that fill** — `Accepted`, `In Progress` and
+`Reopened` are also info tonal, so they are not distinguishable from a domain
+step by colour. Their text is, which is why there is no dot and never
 was: the word is the signal. Worth knowing before anyone builds a legend that
 groups by colour.
 
@@ -117,11 +117,10 @@ error. Seven of its eleven members were domain steps, so that guarantee does
 not survive — there is nothing left to extract from. It was the right
 guarantee for a closed vocabulary and there is no equivalent for an open one.
 
-**Open question for design:** Figma labels both `Review` and
-`Review No Action` with the visible word "Review". We render each status's
-own name, so the two are distinguishable without relying on colour. If both
-should read "Review", that needs a `label` override and a decision about the
-colour-only distinction.
+**Answered 7 September:** the library's second Review pill was a
+`Review No Action` variant. There is no such state and no such button, so it is
+gone from `AVStatus` and `Review` keeps the single filled treatment the design
+draws. The Figma variant is being renamed.
 
 ## Accessibility
 

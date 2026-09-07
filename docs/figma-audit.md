@@ -151,7 +151,10 @@ atom, not by styling around it.
 1. **Stay loyal to Figma** on the dense-control scale → the Button/Pagination
    fixes above. Where the audit itself proved the design and the code already
    agreed (SegmentedControl), nothing moved.
-2. **`Review` / `Review No Action`** keep their distinct labels for now.
+2. ~~**`Review` / `Review No Action`** keep their distinct labels for now.~~
+   **Resolved 7 Sep 2026:** there is no `Review No Action` state or button.
+   The variant is being renamed in Figma, and the repo carries one `Review`
+   with the filled treatment.
 3. Badge's two documented deviations (`success` AA fix, `neutral` slate-100)
    stand.
 

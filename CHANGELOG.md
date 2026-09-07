@@ -13,18 +13,19 @@ Content, Partners, Governance and Product bring their own — which a domain can
 add to and rename (issue #68). Those names are data, so they cannot be a
 compile-time union.
 
-- **`AVStatus` drops from seventeen values to eleven** — exactly the eleven
-  types in the Figma `Status_Tag_General` set. Removed: `For Review`, `For QA`,
-  `In QA`, `Ready for Deploy`, `Confirmed Prod`, `Design Review`, which are
-  exactly the contents of `Status_Tag_Development_Only` and
-  `Status_Tag_Design_Only`. **Migration:** `<StatusPill status="For QA" />` becomes
+- **`AVStatus` drops from seventeen values to ten.** Removed as domain steps:
+  `For Review`, `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`,
+  `Design Review` — exactly the contents of `Status_Tag_Development_Only` and
+  `Status_Tag_Design_Only`. Removed outright: **`Review No Action`**, which is
+  not a state and never was (confirmed 7 Sep 2026); the Figma variant of that
+  name is being renamed. `Review` keeps the single filled treatment. **Migration:** `<StatusPill status="For QA" />` becomes
   `<StatusPill custom="For QA" />`, or `custom={step.label}` where the label
   comes from the domain.
 - **Domain steps all share one treatment** — the info tonal, `#dbeafe` on
   `#1447e6`, 5.60:1 (design's call, 7 Sep 2026). Five statuses change colour:
   `For Review`, `For QA`, `Ready for Deploy` and `Design Review` were warning,
-  `Confirmed Prod` was success. Note `Accepted`, `In Progress`,
-  `Review No Action` and `Reopened` are also info tonal, so a domain step is not distinguishable from
+  `Confirmed Prod` was success. Note `Accepted`, `In Progress` and
+  `Reopened` are also info tonal, so a domain step is not distinguishable from
   those three by colour — the text is the signal, as it always was.
 - **`StatusPill`'s props are a discriminated union**: `status` (spine, typo is
   a compile error) xor `custom` (a domain label, any string). Exactly one is

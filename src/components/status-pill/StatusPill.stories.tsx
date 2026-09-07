@@ -110,7 +110,8 @@ export const ReviewIsFilled: Story = {
   render: () => (
     <div className="flex items-center gap-2">
       <StatusPill status="Review" />
-      <StatusPill status="Review No Action" />
+      <StatusPill status="Pending" />
+      <StatusPill custom="For QA" />
     </div>
   ),
 };

@@ -15,8 +15,7 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  *
  * So this component knows two kinds of status:
  *
- * - **Spine statuses** — the eleven in `AVStatus`, and exactly the eleven the
- *   Figma `Status_Tag_General` set draws. Fixed, shared by every
+ * - **Spine statuses** — the ten in `AVStatus`. Fixed, shared by every
  *   domain, and the application branches on them. Each keeps its own
  *   treatment, measured off the Figma `Status_Tag_General` set, and a typo in
  *   one is still a compile error.
@@ -40,9 +39,13 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  * Those six are gone from the union and all render the one custom treatment
  * now; see CHANGELOG.md for the migration.
  *
- * The three sets in the Figma library are the model, one for one: the eleven
- * in `Status_Tag_General` are `AVStatus`, and `Status_Tag_Design_Only` and
+ * The three sets in the Figma library are the model, one for one:
+ * `Status_Tag_General` is `AVStatus`, and `Status_Tag_Design_Only` and
  * `Status_Tag_Development_Only` are those domains' chains.
+ *
+ * `Review` has one treatment, the design's filled tag. The library's second
+ * Review pill was a `Review No Action` variant; there is no such state
+ * (confirmed 7 Sep 2026), and that variant is being renamed in Figma.
  *
  * There is no dot: the Figma tag is text on a fill, and text is what
  * distinguishes two statuses that share a colour.
@@ -58,7 +61,6 @@ export type AVStatus =
   | 'Accepted'
   | 'In Progress'
   | 'Review'
-  | 'Review No Action'
   | 'Completed'
   | 'Rejected'
   | 'Reopened'
@@ -76,7 +78,6 @@ export const AV_STATUSES: readonly AVStatus[] = [
   'Accepted',
   'In Progress',
   'Review',
-  'Review No Action',
   'Completed',
   'Rejected',
   'Reopened',
@@ -99,7 +100,6 @@ const STATUS_TREATMENT: Record<AVStatus, Treatment> = {
   Accepted: { tone: 'info' },
   'In Progress': { tone: 'info' },
   Reopened: { tone: 'info' },
-  'Review No Action': { tone: 'info' },
   Completed: { tone: 'success' },
   Rejected: { tone: 'danger' },
   /* The one solid tag in the design — the review that wants acting on. */
