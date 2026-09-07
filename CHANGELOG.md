@@ -341,6 +341,12 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 - `button-*` component variables — they referenced the pink `primary` ramp;
   design confirmed (2026-08-18) pink is not a brand colour. The pink ramp is
   removed entirely; `action.*` (vcp-blue) is the button source.
+- `secondary` (teal) — kept as `teal-legacy` pending the same design call as
+  pink. Design confirmed (2026-09-04) teal is not a brand colour either. The
+  ramp is removed entirely; no semantic token ever referenced it, so nothing
+  else changes. `Avatar`'s `docs/avatar.md` noted it as a possible stand-in
+  for the accent hues the Figma export has that VCP does not — that note is
+  updated; there is no substitute ramp for teal now.
 
 ### Fixes
 

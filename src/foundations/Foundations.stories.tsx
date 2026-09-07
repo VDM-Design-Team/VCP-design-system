@@ -1,12 +1,37 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Title, Subtitle, Description, Primary, Controls, Stories } from '@storybook/addon-docs/blocks';
 import tokens from '../../dist/tokens.json';
 
 /**
  * The same token gallery, inside Storybook — so design and engineering are
  * looking at one page, not two. Generated from dist/tokens.json; nothing here
  * is maintained by hand.
+ *
+ * Which token to reach for is a separate question from what a token looks
+ * like — see docs/color-tokens.md for role-based selection guidance.
  */
-const meta: Meta = { title: 'Foundations/Tokens', parameters: { layout: 'fullscreen' } };
+const meta: Meta = {
+  title: 'Foundations/Tokens',
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      // Custom docs page, needed only for includePrimary={false} below.
+      // The default page's <Stories> renders every story including the
+      // first one, which <Primary> already showed — so the Colors story's
+      // own opening heading rendered twice on this page.
+      page: () => (
+        <>
+          <Title />
+          <Subtitle />
+          <Description />
+          <Primary />
+          <Controls />
+          <Stories includePrimary={false} />
+        </>
+      ),
+    },
+  },
+};
 export default meta;
 
 const Swatch = ({ name, value, util }: { name: string; value: string; util: string }) => (
@@ -74,8 +99,6 @@ export const Colors: StoryObj = {
       <Grid>{group(flat(tokens.surface), 'surface', 'bg-surface')}</Grid>
       <h3 className="text-body-sm text-text-secondary mb-1">Text → text-*</h3>
       <Grid>{group(flat(tokens.text), 'text', 'text-text')}</Grid>
-      <h3 className="text-body-sm text-text-secondary mb-1">Stroke → border-*</h3>
-      <Grid>{group(flat(tokens.stroke), 'stroke', 'border-stroke')}</Grid>
       <h2 className="text-heading-lg font-semibold mb-1">Action — grouped by part</h2>
       <p className="text-body-sm text-text-secondary mb-2">
         A control is built from three parts, and each part maps to a different Tailwind utility.
@@ -104,6 +127,8 @@ export const Colors: StoryObj = {
           ))}
         </section>
       ))}
+      <h3 className="text-body-sm text-text-secondary mb-1">Stroke → border-*</h3>
+      <Grid>{group(flat(tokens.stroke), 'stroke', 'border-stroke')}</Grid>
       <h3 className="text-body-sm text-text-secondary mb-1">Accent</h3>
       <Grid>{group(flat(tokens.accent), 'accent', 'bg-accent')}</Grid>
       <h2 className="text-heading-lg font-semibold mb-xs">Core — referenced by semantic tokens only</h2>
@@ -113,6 +138,44 @@ export const Colors: StoryObj = {
           <Grid>{group(ramp as Record<string, string>, `color.${name}`, `bg-${name}`)}</Grid>
         </div>
       ))}
+    </div>
+  ),
+};
+
+export const Shape: StoryObj = {
+  render: () => (
+    <div className="p-8 bg-surface-canvas">
+      <h2 className="text-heading-lg font-semibold mb-1">Radius → rounded-*</h2>
+      <Grid>
+        {Object.entries(tokens.radius).map(([k, v]) => (
+          <div key={k} className="flex items-center gap-2 border border-stroke-default rounded-md p-1.5">
+            <div className={`size-10 bg-action-primary-surface-default shrink-0 rounded-${k}`} />
+            <div className="min-w-0">
+              <div className="text-sm font-medium break-words">radius.{k}</div>
+              <div className="text-xs text-text-secondary">{v as string}</div>
+              <code className="text-xs text-text-secondary">rounded-{k}</code>
+            </div>
+          </div>
+        ))}
+      </Grid>
+      <h2 className="text-heading-lg font-semibold mb-1">Elevation → shadow-*</h2>
+      <Grid>
+        {Object.entries(tokens.shadow).map(([k, v]) => {
+          const s = v as { color: string; offsetX: string; offsetY: string; blur: string; spread: string };
+          return (
+            <div key={k} className="flex items-center gap-2 border border-stroke-default rounded-md p-1.5">
+              <div className={`size-10 bg-surface-elevated shrink-0 rounded-sm shadow-${k}`} />
+              <div className="min-w-0">
+                <div className="text-sm font-medium break-words">shadow.{k}</div>
+                <div className="text-xs text-text-secondary">
+                  {s.offsetX} {s.offsetY} {s.blur} {s.color}
+                </div>
+                <code className="text-xs text-text-secondary">shadow-{k}</code>
+              </div>
+            </div>
+          );
+        })}
+      </Grid>
     </div>
   ),
 };
