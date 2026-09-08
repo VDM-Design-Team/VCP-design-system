@@ -50,6 +50,8 @@ record of when each piece landed.
 | pattern | `AVHeader` | PR #58 |
 | component | `SidebarItem` | PR #76 |
 | pattern | `Sidebar` | PR #78 |
+| atom | `Footer` | PR #82 |
+| component | `PageTitle` | PR #82 |
 
 ## Components — to port
 
@@ -66,7 +68,7 @@ Organisms: 2+ components forming a page section.
 
 | Area | Patterns |
 |---|---|
-| Page structure | `PageFooter`, `SettingsSection` |
+| Page structure | `SettingsSection` |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
