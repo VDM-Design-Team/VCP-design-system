@@ -42,6 +42,7 @@ export * from './components/popover';
 export * from './components/rich-text-toolbar';
 export * from './components/search-select';
 export * from './components/stat-card';
+export * from './components/sidebar-item';
 export * from './components/status-pill';
 export * from './components/stepper';
 export * from './components/tabs';
