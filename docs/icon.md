@@ -38,6 +38,18 @@ The VCP Figma library draws from **Phosphor**. This matters mechanically, not ju
 cosmetically: **Phosphor glyphs are filled paths**, where Heroicons outline glyphs
 are stroked. A component built to stroke them renders nothing.
 
+**The rule: Phosphor, or our own.** Never Heroicons, and never a second
+family. Where Phosphor has no equivalent, draw the glyph in Phosphor's weight
+and add it to `CUSTOM_ICONS` — 256 viewBox, 16-unit stroke, filled path. That
+is what `rectangle-group` is: the design's Dashboard glyph, which Phosphor has
+nothing like.
+
+⚠️ **The Figma library is mixed.** The Tags and atom pages are Phosphor, but
+the `SideBar` page's icon instances are named `heroicons-outline/light-bulb`
+and `RectangleGroup` (found 8 Sep 2026). Those should be swapped to Phosphor
+in the design file; the repo does not follow them there. Tracked in
+`docs/figma-audit.md`.
+
 Note that the Claude Design export's own `Icon` component claims "Heroicons v2
 outline" — that was its own substitution, and it is wrong. The raw Figma imports in
 the same export are unambiguously Phosphor (`ArrowUUpLeft`, `CheckFat`,

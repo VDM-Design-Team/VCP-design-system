@@ -49,10 +49,11 @@ export interface SidebarNavItem {
   items?: readonly SidebarSubItem[];
 }
 
-/* The twelve presets, less `Status`. Labels and glyphs are the design's own —
-   the icons were chosen by rendering them beside the Figma frame, since the
-   export's Heroicons names describe different drawings (see docs/icon.md). */
-const DASHBOARD: SidebarNavItem = { key: 'dashboard', label: 'Dashboard', icon: 'layout' };
+/* The twelve presets, less `Status`. Labels are the design's own; the glyphs
+   are Phosphor's, chosen by rendering them beside the Figma frame. Dashboard is
+   the one the design draws with a Heroicons glyph Phosphor has no equivalent
+   for, so `rectangle-group` is an in-house redraw — see docs/icon.md. */
+const DASHBOARD: SidebarNavItem = { key: 'dashboard', label: 'Dashboard', icon: 'rectangle-group' };
 const MY_VALUES: SidebarNavItem = { key: 'my-values', label: 'My Values', icon: 'lightbulb' };
 const ASSIGNED: SidebarNavItem = { key: 'assigned', label: 'Assigned', icon: 'user-check' };
 const DRAFTS: SidebarNavItem = { key: 'drafts', label: 'Drafts', icon: 'file' };

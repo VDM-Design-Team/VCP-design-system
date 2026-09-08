@@ -208,6 +208,13 @@ export const PHOSPHOR_ICONS = {
  * extended by one. Used by the planning table's "raise to top" control.
  */
 export const CUSTOM_ICONS = {
+  /**
+   * The design's Dashboard glyph. Figma uses Heroicons `RectangleGroup` there;
+   * Phosphor has no equivalent, so this is a Phosphor-weight redraw of the same
+   * three-panel shape — 256 viewBox, 16-unit stroke, 12-unit corners.
+   */
+  'rectangle-group':
+    '<path fill-rule="evenodd" d="M36,64h64a12,12 0 0 1 12,12v40a12,12 0 0 1 -12,12h-64a12,12 0 0 1 -12,-12v-40a12,12 0 0 1 12,-12ZM44,80h48a4,4 0 0 1 4,4v24a4,4 0 0 1 -4,4h-48a4,4 0 0 1 -4,-4v-24a4,4 0 0 1 4,-4ZM164,80h56a12,12 0 0 1 12,12v88a12,12 0 0 1 -12,12h-56a12,12 0 0 1 -12,-12v-88a12,12 0 0 1 12,-12ZM172,96h40a4,4 0 0 1 4,4v72a4,4 0 0 1 -4,4h-40a4,4 0 0 1 -4,-4v-72a4,4 0 0 1 4,-4ZM52,160h56a12,12 0 0 1 12,12v24a12,12 0 0 1 -12,12h-56a12,12 0 0 1 -12,-12v-24a12,12 0 0 1 12,-12ZM60,176h40a4,4 0 0 1 4,4v8a4,4 0 0 1 -4,4h-40a4,4 0 0 1 -4,-4v-8a4,4 0 0 1 4,-4Z"/>',
   'caret-triple-up':
     '<g transform="translate(0,-58)"><path d="M213.66,165.66a8,8,0,0,1-11.32,0L128,91.31,53.66,165.66a8,8,0,0,1-11.32-11.32l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,213.66,165.66Z"/></g><path d="M213.66,165.66a8,8,0,0,1-11.32,0L128,91.31,53.66,165.66a8,8,0,0,1-11.32-11.32l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,213.66,165.66Z"/><g transform="translate(0,58)"><path d="M213.66,165.66a8,8,0,0,1-11.32,0L128,91.31,53.66,165.66a8,8,0,0,1-11.32-11.32l80-80a8,8,0,0,1,11.32,0l80,80A8,8,0,0,1,213.66,165.66Z"/></g>',
 } as const;
