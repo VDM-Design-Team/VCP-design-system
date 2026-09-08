@@ -46,6 +46,25 @@ that, mirroring the Figma variants exactly:
 Both are Figma-variables debt alongside `surface.track` and the dark
 `stroke.focused` fix. Minor bump.
 
+## The viewBox is the artwork, not the frame
+
+Both viewBoxes are the drawing's own bounds, measured with `getBBox`, not the
+frame Figma exported. The exported frames carried padding — 0.9 below the
+wordmark, and 1 above / 1.9 below / 0.7 right of the mark.
+
+That matters because padding changes the *box* ratio without changing the
+drawing. The mark's box was 0.778 around artwork that is 0.815, so sizing by
+height rendered it ~6% smaller than the design and slightly off-centre. The
+wordmark was 2% out the same way.
+
+Tightened (8 Sep 2026), both match the design exactly — **7.7322** against
+Figma's 7.7321, and **0.8146** against 0.8146. So a height now yields the
+design's width, and a width yields its height, with no correction at the call
+site.
+
+⚠️ **If the paths are ever re-exported from Figma, re-measure.** A fresh export
+will bring the frame padding back with it.
+
 ## Accessibility
 
 - `role="img"` named "Value Chain Plus" by default.
