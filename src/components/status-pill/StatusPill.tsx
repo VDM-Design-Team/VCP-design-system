@@ -15,7 +15,7 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  *
  * So this component knows two kinds of status:
  *
- * - **Spine statuses** — the ten in `AVStatus`. Fixed, shared by every
+ * - **Spine statuses** — the eleven in `AVStatus`. Fixed, shared by every
  *   domain, and the application branches on them. Each keeps its own
  *   treatment, measured off the Figma `Status_Tag_General` set, and a typo in
  *   one is still a compile error.
@@ -43,6 +43,16 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  * `Status_Tag_General` is `AVStatus`, and `Status_Tag_Design_Only` and
  * `Status_Tag_Development_Only` are those domains' chains.
  *
+ * **`Completed` and `Final Completed` are two states, not one.** The first is
+ * the assignee's — the work is done and waiting to be accepted. The second is
+ * what an initiator or admin moves it to after reviewing. The flow board has
+ * always drawn them as separate nodes (`Completed (1) + Adding deliverables`
+ * and `Final Completed`); only the tag set collapsed them, which is why they
+ * briefly reached this repo as one status plus a boolean.
+ *
+ * ⚠️ `Status_Tag_General` has no `Final Completed` tag yet — same gap the
+ * 4 Sep audit found for the six lifecycle states. Figma needs to catch up.
+ *
  * **`Review` has two treatments**, and they are the two Review pills the
  * library draws. Tonal is the label style — what a user sees. Filled is the
  * button style, for a viewer who can act on it: an admin, or the AV's
@@ -67,6 +77,7 @@ export type AVStatus =
   | 'In Progress'
   | 'Review'
   | 'Completed'
+  | 'Final Completed'
   | 'Rejected'
   | 'Reopened'
   | 'Backlog';
@@ -84,6 +95,7 @@ export const AV_STATUSES: readonly AVStatus[] = [
   'In Progress',
   'Review',
   'Completed',
+  'Final Completed',
   'Rejected',
   'Reopened',
   'Backlog',
@@ -105,7 +117,12 @@ const STATUS_TREATMENT: Record<AVStatus, Treatment> = {
   Accepted: { tone: 'info' },
   'In Progress': { tone: 'info' },
   Reopened: { tone: 'info' },
-  Completed: { tone: 'success' },
+  /* Two distinct states, not one with a flag. `Completed` is the assignee's
+     — their work is done and it is waiting on someone to accept it, which is
+     the same shape as `Pending` and `Initiated`, so it takes their tone.
+     `Final Completed` is the one that actually means finished. */
+  Completed: { tone: 'warning' },
+  'Final Completed': { tone: 'success' },
   Rejected: { tone: 'danger' },
   /* Tonal is Review's label style — what a viewer who cannot act on it sees.
      The filled treatment lives in ACTIONABLE_TREATMENT below. */
