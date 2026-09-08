@@ -283,6 +283,26 @@ lifecycle:
 | **Missing: `Final Completed`** | The flow board draws it as a terminal node beside `Rejected` and `Backlog`; the tag set has no tag for it (found 8 Sep 2026) |
 | Status Progression | Draft, Pending, Accepted, In Progress, **For Review, For QA, In QA, Ready for Deploy, Confirmed Prod, Design Review**, Completed |
 
+### Tag-set structure — decided for now, revisit at the third domain
+
+Design split the status tags into three sets: `Status_Tag_General`,
+`Status_Tag_Design_Only` and `Status_Tag_Development_Only`. Issue #68 asked
+whether that scales, on the assumption that Content, Partners, Governance and
+Product were coming. **It was closed on 8 Sep 2026: only Design and Development
+are defined, and at two domains the three sets are fine** — cheap to maintain,
+and a designer inserting an exact tag gets it right.
+
+The code does not depend on the answer either way. Nothing counts domains:
+`chain` is data, and there is no domain enum. A third domain costs no code
+change.
+
+**The trigger to revisit is a third domain**, not a date. At that point the
+question is whether to keep adding a set per domain, or collapse the `_Only`
+sets into one `Status_Tag_Domain` component with editable text — which is what
+the code already models, since every domain step renders the same blue tonal
+with different text. Four or more domains is where hand-drawing a variant per
+step stops paying for itself.
+
 They share five names. The tag set has `Initiated`, `Review`, `Review No
 Action`, `Rejected`, `Reopened`, `Backlog` that the progression never moves
 through; the progression has six QA/deploy states the tag set cannot display.
