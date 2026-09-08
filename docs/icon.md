@@ -53,8 +53,17 @@ would put a large amount of unused path data into every consumer. This ships the
 glyphs VCP actually references.
 
 **To add a Phosphor glyph**: copy the inner markup of its `regular` SVG from
-`@phosphor-icons/core/assets/regular/<name>.svg` (or phosphoricons.com) into
-`PHOSPHOR_ICONS` in `icons.ts`, keeping Phosphor's kebab-case name. The
+`@phosphor-icons/core/assets/regular/<name>.svg` (a devDependency, so the
+source is in the repo) into `PHOSPHOR_ICONS` in `icons.ts`, keeping Phosphor's
+kebab-case name. Drop the `<rect ... fill="none"/>` bounding box the source
+files carry — `Icon` sets its own viewBox.
+
+**Pick the glyph by looking at it, not by its name.** The Claude Design export
+names icons in Heroicons vocabulary, and a same-named Phosphor glyph is often
+a different drawing. Render the candidates beside the Figma frame before
+choosing; the navigation set (8 Sep 2026) needed `layout`, `lightbulb`,
+`user-check`, `list-dashes`, `package`, `archive`, `rows` and `users-three`,
+none of which share a name with what the export asked for. The
 `IconName` union derives from that object, so TypeScript picks it up with no other
 change.
 
