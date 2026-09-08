@@ -47,18 +47,49 @@ export const States: Story = {
     <Rail>
       <SidebarItem label="Dashboard" icon="graph" href="#" />
       <SidebarItem label="My Values" icon="list-bullets" href="#" selected />
-      <SidebarItem label="Assigned" icon="eye" href="#" badge={12} />
+      <SidebarItem label="Assigned" icon="eye" href="#" />
     </Rail>
   ),
 };
 
-/** A count rides the right edge. Filled brand, so it reads on the selected fill too. */
-export const WithBadge: Story = {
+/**
+ * A row with `items` is a disclosure, not a link: it gains the chevron, and
+ * opens its children onto an elevated card. `Archive` and `Planning` are the
+ * two the design draws this way.
+ */
+export const Expandable: Story = {
   render: () => (
     <Rail>
-      <SidebarItem label="Assigned" icon="eye" href="#" badge={12} />
-      <SidebarItem label="Drafts" icon="note-pencil" href="#" badge={3} selected />
-      <SidebarItem label="Archive" icon="database" href="#" badge="99+" />
+      <SidebarItem label="Archive" icon="database" items={[{ label: 'Completed', href: '#' }]} />
+      <SidebarItem
+        label="Planning"
+        icon="list-bullets"
+        defaultOpen
+        items={[
+          { label: 'Planning List', href: '#' },
+          { label: 'Gantt Chart', href: '#' },
+          { label: 'Holiday Registry', href: '#' },
+        ]}
+      />
+    </Rail>
+  ),
+};
+
+/** Open with the parent itself current: the parent tints, children stay white. */
+export const ExpandableSelected: Story = {
+  render: () => (
+    <Rail>
+      <SidebarItem
+        label="Planning"
+        icon="list-bullets"
+        selected
+        defaultOpen
+        items={[
+          { label: 'Planning List', href: '#', selected: true },
+          { label: 'Gantt Chart', href: '#' },
+          { label: 'Holiday Registry', href: '#' },
+        ]}
+      />
     </Rail>
   ),
 };
@@ -106,7 +137,7 @@ export const LongLabel: Story = {
   render: () => (
     <Rail>
       <SidebarItem label="Task Log Trail" icon="list-numbers" href="#" />
-      <SidebarItem label="Assignee Availability and Planning" icon="users" href="#" badge={4} />
+      <SidebarItem label="Assignee Availability and Planning" icon="users" href="#" />
     </Rail>
   ),
 };
@@ -122,7 +153,7 @@ export const LightAndDark: Story = {
             <Rail>
               <SidebarItem label="Dashboard" icon="graph" href="#" />
               <SidebarItem label="My Values" icon="list-bullets" href="#" selected />
-              <SidebarItem label="Assigned" icon="eye" href="#" badge={12} />
+              <SidebarItem label="Assigned" icon="eye" href="#" />
             </Rail>
           </div>
         </div>

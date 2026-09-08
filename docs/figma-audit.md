@@ -363,8 +363,65 @@ and title, space-between, and the `Show Move Status Buttons` boolean.
 
 ## Still to audit
 
-Batch 3 (proposed): Navigation (Sidebar), Settings Pages, Holiday Registry,
+Batch 3 ran for Navigation on 8 Sep 2026 — see below. Still to audit:
+Settings Pages, Holiday Registry,
 Planning Page, Assignee Availability, Dashboard Charts, Modals. These are
 mostly **unbuilt** patterns, so batch 3 is less "did we get it wrong" and
 more "what does the design actually ask for" — best run just before each
 pattern is built rather than all at once.
+
+---
+
+## Batch 3 — Navigation (`SideBar`), 8 Sep 2026
+
+Read from the Figma `SideBar` section (`2349:935`). Run because `SidebarItem`
+was ported from the Claude Design export **before** this audit, which is the
+wrong order and produced a component that did not match.
+
+### 🔧 SidebarItem — the export described a different component
+
+| What | Export (and the first port) | Design |
+|---|---|---|
+| Count badge | a solid blue pill with a number | **does not exist** — no item variant has one |
+| `Right Icon` axis | absent | `On \| Off`; the chevron on expandable rows |
+| `Dropdown Item` axis | absent | `Yes \| No`; sub-rows beneath the parent |
+| Icon slot | 24 | **32** |
+
+Fixed in PR #76 before it merged.
+
+### ⚠️ Four user types, not three
+
+`VCP_SideBar` has eight variants — four user types, each with a minimised
+twin at 76 against 256 expanded:
+
+| Type | Items |
+|---|---|
+| User | Dashboard, My Values, Assigned, Drafts, Task Log Trail, Archive▾ |
+| Admin | Dashboard, My Values, Manage, Assigned, Drafts, Task Log Trail, Archive▾ |
+| **Admin Dev** | Dashboard, My Values, Planning▾, Manage, Assigned, Drafts, Task Log Trail, Archive▾ |
+| Super Admin | Dashboard, Accounts, Domains, Contact List |
+
+▾ = expandable. **The export had three roles and no `Admin Dev`.** All four
+carry "Report a problem" in the footer.
+
+### ⚠️ Things the export has that the design does not
+
+- **A footer CTA** (`footerAction`, e.g. "Create Added Value") — no rail draws one.
+- **A domain selector inside the sidebar** — `_Domain_Selection_Dropdown`
+  exists as its own component but appears in none of the eight rails.
+- **Single-chevron collapse toggle** — the design's floating button uses
+  **double** chevrons (« »), with Default/Hover/Pressed states.
+
+### ⚠️ `Status` is a preset with no home
+
+`_VCP_SideBar_Item_Preset` has twelve types, including `Status` with its own
+dropdown component — but `Status` appears in none of the four rails.
+**Confirmed 8 Sep 2026: it is not a nav item.** The preset is unused.
+
+### ⚠️ Icons the system does not ship
+
+The nav needs a dashboard/grid glyph, an archive box and an envelope. The
+system's Phosphor set covers the rest by name-mapping
+(`exclamation-triangle` → `warning`, `chevron-left` → `caret-left`), but
+those three have no good equivalent and are currently stood in for by
+`graph`, `database` and `chat-dots`. Three icons to add.
