@@ -32,9 +32,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/* The rail is full-height by design; give the stories somewhere to stand. */
+/* The rail is full-height by design — it fills the viewport beside the page
+   content, with "Report a problem" pinned to the bottom. The stories stand it
+   in a screen-height frame so that reads the way it will in the app. */
 const Stage = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex h-[680px] bg-surface-canvas">{children}</div>
+  <div className="flex h-screen bg-surface-canvas">{children}</div>
 );
 
 /** The default rail, as a `user` sees it. */
@@ -56,11 +58,14 @@ export const Default: Story = {
 export const EveryUserType: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
-    <div className="flex h-[680px] gap-6 overflow-x-auto bg-surface-canvas p-6">
+    <div className="flex h-screen gap-6 overflow-x-auto bg-surface-canvas p-6">
       {(['user', 'admin', 'admin-dev', 'super-admin'] as SidebarUserType[]).map((t) => (
-        <div key={t} className="flex flex-col gap-2">
+        /* `min-h-0` + `flex-1` on the rail: without them each column sizes to
+           its own content, the four end up different heights, and the footer
+           row sits under the last nav item instead of at the bottom. */
+        <div key={t} className="flex min-h-0 flex-col gap-2">
           <p className="text-label-md text-text-tertiary">{t}</p>
-          <Sidebar userType={t} active="dashboard" className="rounded-md border" />
+          <Sidebar userType={t} active="dashboard" className="min-h-0 flex-1 rounded-md border" />
         </div>
       ))}
     </div>
@@ -81,7 +86,7 @@ export const Collapsed: Story = {
 export const BothWidths: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
-    <div className="flex h-[680px] gap-6 bg-surface-canvas p-6">
+    <div className="flex h-screen gap-6 bg-surface-canvas p-6">
       <Sidebar userType="admin-dev" active="planning" className="rounded-md border" />
       <Sidebar userType="admin-dev" active="planning" collapsed className="rounded-md border" />
     </div>
@@ -130,7 +135,7 @@ export const LightAndDark: Story = {
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex h-[560px] bg-surface-canvas">
+          <div className="flex h-screen bg-surface-canvas">
             <Sidebar userType="admin" active="my-values" onToggleCollapse={() => {}} />
           </div>
         </div>
