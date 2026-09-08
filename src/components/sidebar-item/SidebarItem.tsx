@@ -118,7 +118,7 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
     const expandable = !!items?.length;
 
     const glyph = icon && (
-      <span className="grid size-8 shrink-0 place-items-center">
+      <span className="grid size-6 shrink-0 place-items-center">
         <Icon name={icon} size="md" />
       </span>
     );

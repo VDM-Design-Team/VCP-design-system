@@ -49,6 +49,7 @@ record of when each piece landed.
 | component | `StatusProgression` | PR #58 |
 | pattern | `AVHeader` | PR #58 |
 | component | `SidebarItem` | PR #76 |
+| pattern | `Sidebar` | PR #78 |
 
 ## Components — to port
 
@@ -65,7 +66,7 @@ Organisms: 2+ components forming a page section.
 
 | Area | Patterns |
 |---|---|
-| Page structure | `Sidebar`, `PageFooter`, `SettingsSection` |
+| Page structure | `PageFooter`, `SettingsSection` |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
@@ -82,7 +83,7 @@ Dependency notes:
 - **`DomainSelector` is blocked** on `DomainLabel`, whose six domain colours
   need an indigo and a pink that have **no core ramp** — a token decision to
   settle before it is built, not during.
-- `AppShell` is blocked on `Sidebar` only — `TopBar` and `AVHeader` have
+- **`AppShell` is unblocked.** `TopBar`, `AVHeader` and `Sidebar` have all
   shipped; it composes them plus an optional 390px detail column.
 - **`StatusProgression` re-tiered down to component** when it was built
   (PR #58): it is one `Button` used twice, presenting as one control unit.

@@ -6,4 +6,5 @@
  * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
 export * from './av-header';
+export * from './sidebar';
 export * from './top-bar';
