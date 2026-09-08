@@ -40,7 +40,7 @@ first — see `pendingDeploy` below. Named and resolved in issue #60
 (7 Sep 2026); design was explicit this is a known exception, not a pattern to
 extend to other domains.
 
-**It does not own the middle.** Design has two steps, Development has six,
+**It does not own the middle.** Design has one step, Development has five,
 and Content, Partners, Governance and Product bring their own — renameable
 (issue #68). The domain passes its ordered `chain`; the moves derive from
 position in it, exactly as the flow board draws them: one step back, one step
@@ -92,8 +92,9 @@ Development, all roles that see the middle of the lifecycle:
 |---|---|---|
 | Draft † | Save as Draft | Submit |
 | Pending ‡ | Reject *(danger)* | Accept |
-| `Accepted` (spine) | — | Move to *first chain step* |
-| first chain step | — | Move to *next* |
+| `Accepted` (spine) | — | Move to In Progress |
+| `In Progress` (spine) | — | Move to *first chain step* |
+| first chain step | Return to In Progress | Move to *next* |
 | any middle step | Return to *previous* | Move to *next* |
 | last chain step | Return to *previous* | Move to Handoff / **Handoff** (admin) |
 | `Review` (spine) ‡ | Reject *(outline)* | Accept |
@@ -105,9 +106,9 @@ design has an opinion about — "Move to Handoff" for an assignee, plain
 "Handoff" for an admin — stays hard-coded, because the design does not
 generate it either.
 
-The first chain step has no way back: the design draws no return to
-`Accepted`, because accepting is the admin's decision and not the assignee's
-to undo.
+The first chain step returns to `In Progress`, the shared step it came from —
+not to `Accepted`, because accepting is the admin's decision and not the
+assignee's to undo.
 
 `Review` only offers moves to `initiator` and `admin` — the assignee already
 handed the AV off and isn't the one deciding. Its Reject is `variant="secondary"`

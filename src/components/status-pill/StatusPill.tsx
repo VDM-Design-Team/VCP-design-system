@@ -33,11 +33,24 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  * silently fall through to the custom one.
  *
  * **What this used to be.** Until 7 September `AVStatus` held seventeen
- * values, seven of which were domain steps — `In Progress`, `For Review`,
- * `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`, `Design Review`.
- * They carried three different tones between them (gates warning, work info,
- * verified success). Those seven are gone from the union and all render the
- * one custom treatment now; see CHANGELOG.md for the migration.
+ * values, six of which were domain steps — `For Review`, `For QA`, `In QA`,
+ * `Ready for Deploy`, `Confirmed Prod`, `Design Review`. They carried three
+ * different tones between them (gates warning, work info, verified success).
+ * Those six are gone from the union and all render the one custom treatment
+ * now; see CHANGELOG.md for the migration.
+ *
+ * The three sets in the Figma library are the model, one for one:
+ * `Status_Tag_General` is `AVStatus`, and `Status_Tag_Design_Only` and
+ * `Status_Tag_Development_Only` are those domains' chains.
+ *
+ * **`Review` has two treatments**, and they are the two Review pills the
+ * library draws. Tonal is the label style — what a user sees. Filled is the
+ * button style, for a viewer who can act on it: an admin, or the AV's
+ * initiator. Pass `actionable` for the second. The status is the same either
+ * way; only who is looking changes.
+ *
+ * (The library names its second Review pill `Review No Action`. There is no
+ * such state — confirmed 7 Sep 2026 — and the variant is being renamed.)
  *
  * There is no dot: the Figma tag is text on a fill, and text is what
  * distinguishes two statuses that share a colour.
@@ -51,8 +64,8 @@ export type AVStatus =
   | 'Initiated'
   | 'Pending'
   | 'Accepted'
+  | 'In Progress'
   | 'Review'
-  | 'Review No Action'
   | 'Completed'
   | 'Rejected'
   | 'Reopened'
@@ -68,8 +81,8 @@ export const AV_STATUSES: readonly AVStatus[] = [
   'Initiated',
   'Pending',
   'Accepted',
+  'In Progress',
   'Review',
-  'Review No Action',
   'Completed',
   'Rejected',
   'Reopened',
@@ -90,11 +103,26 @@ const STATUS_TREATMENT: Record<AVStatus, Treatment> = {
   Pending: { tone: 'warning' },
   Initiated: { tone: 'warning' },
   Accepted: { tone: 'info' },
+  'In Progress': { tone: 'info' },
   Reopened: { tone: 'info' },
-  'Review No Action': { tone: 'info' },
   Completed: { tone: 'success' },
   Rejected: { tone: 'danger' },
-  /* The one solid tag in the design — the review that wants acting on. */
+  /* Tonal is Review's label style — what a viewer who cannot act on it sees.
+     The filled treatment lives in ACTIONABLE_TREATMENT below. */
+  Review: { tone: 'info' },
+};
+
+/**
+ * Some statuses are drawn twice: once as a label, once in the design's solid
+ * "button style" for the viewer who can actually act on them. `Review` is the
+ * one the design draws today — a tag for a user, a call to act for an admin or
+ * the AV's initiator.
+ *
+ * A status with no row here ignores `actionable` and keeps its one treatment,
+ * rather than inventing a filled variant the design has never drawn. When
+ * design draws another, it gets a row.
+ */
+const ACTIONABLE_TREATMENT: Partial<Record<AVStatus, Treatment>> = {
   Review: { tone: 'info', variant: 'filled' },
 };
 
@@ -112,7 +140,14 @@ const CUSTOM_TREATMENT: Treatment = { tone: 'info' };
 type StatusPillBase = Omit<
   BadgeProps,
   'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children' | 'status'
->;
+> & {
+  /**
+   * The viewer can act on this status, so draw the design's button style.
+   * Today only `Review` differs; every other status ignores it rather than
+   * inventing a treatment the design has not drawn.
+   */
+  actionable?: boolean;
+};
 
 export type StatusPillProps = StatusPillBase &
   (
@@ -133,9 +168,11 @@ export type StatusPillProps = StatusPillBase &
   );
 
 export const StatusPill = React.forwardRef<HTMLSpanElement, StatusPillProps>(
-  ({ status, custom, ...props }, ref) => {
+  ({ status, custom, actionable, ...props }, ref) => {
     const label = status ?? custom ?? '';
-    const { tone, variant } = status ? STATUS_TREATMENT[status] : CUSTOM_TREATMENT;
+    const { tone, variant } = status
+      ? ((actionable ? ACTIONABLE_TREATMENT[status] : undefined) ?? STATUS_TREATMENT[status])
+      : CUSTOM_TREATMENT;
     return (
       <Badge ref={ref} tone={tone} variant={variant} {...props}>
         {label}
