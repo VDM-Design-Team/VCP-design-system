@@ -11,8 +11,10 @@ import type { AVStatus } from '../status-pill';
  * **What this owns, and what it no longer does.** An AV's flow is a fixed
  * spine wrapped around a per-domain middle. This component owns the spine —
  * the moves out of `Draft`, the admin's accept/reject on `Pending`, the
- * terminal silence on `Completed` — because those are the same in every
- * domain and the application branches on them.
+ * initiator/admin decision on `Review`, and the terminal silence on
+ * `Completed` — because those are the same in every domain and the
+ * application branches on them. `Completed` has one Development-only
+ * exception: see `pendingDeploy` below, named in issue #60 (7 Sep 2026).
  *
  * It does **not** own the middle any more. Design has one step, Development
  * has five, and Content, Partners, Governance and Product bring their own,
@@ -66,7 +68,8 @@ export type AVTransitionKind =
   | 'submit'
   | 'accept'
   | 'reject'
-  | 'handoff';
+  | 'handoff'
+  | 'deploy';
 
 export interface AVTransition {
   kind: AVTransitionKind;
@@ -96,8 +99,17 @@ const back = (to: string, label: string): AVTransition => ({
 const saveDraft: AVTransition = { kind: 'save-draft', label: 'Save as Draft', variant: 'secondary' };
 const submit: AVTransition = { kind: 'submit', label: 'Submit', variant: 'primary' };
 const accept: AVTransition = { kind: 'accept', label: 'Accept', variant: 'primary' };
+/**
+ * Two different Reject buttons, same `kind`, different `variant` — the
+ * design draws them differently depending on lifecycle stage, not role.
+ * `reject` (solid, danger) is `Pending`: an initiator's first submission.
+ * `rejectSoft` (outline, secondary) is `Review`: a decision made after the
+ * assignee has already handed the AV off. Named in issue #60, 7 Sep 2026.
+ */
 const reject: AVTransition = { kind: 'reject', label: 'Reject', variant: 'danger' };
+const rejectSoft: AVTransition = { kind: 'reject', label: 'Reject', variant: 'secondary' };
 const handoff = (label: string): AVTransition => ({ kind: 'handoff', label, variant: 'primary' });
+const deploy: AVTransition = { kind: 'deploy', label: 'Deploy', variant: 'primary' };
 
 /** Only these roles may start an AV moving; the design gives the rest no `Draft` set. */
 const CAN_START: readonly AVProgressionRole[] = ['initiator', 'assignee-initiator', 'admin'];
@@ -122,8 +134,19 @@ export function avTransitions(options: {
   status?: AVStatus;
   step?: string;
   chain?: readonly AVChainStep[];
+  /**
+   * Development-only exception, named in issue #60 (7 Sep 2026): an admin
+   * hands an AV off (`Confirmed Prod` → Handoff) into a `Completed` that
+   * isn't final yet — it still owes a `Deploy` action before the real,
+   * terminal `Completed`. Both render identically on `StatusPill` (same
+   * tone, same text "Completed"); this flag is the only place the
+   * distinction exists, and only the admin who deploys needs it. Not a
+   * general concept — most domains' `Completed` has no such gate, and this
+   * prop should stay that way rather than growing into one.
+   */
+  pendingDeploy?: boolean;
 }): readonly AVTransition[] {
-  const { role, status, step, chain = [] } = options;
+  const { role, status, step, chain = [], pendingDeploy = false } = options;
 
   if (status) {
     /* The spine. Every domain shares these, so they stay here. */
@@ -138,6 +161,16 @@ export function avTransitions(options: {
     }
     if (status === 'In Progress' && role !== 'initiator' && chain.length > 0) {
       return [move(chain[0].id, chain[0].label)];
+    }
+    /* The decision after handoff — an initiator or admin accepts or sends
+       it back, never the assignee who already handed it off. Outline
+       Reject, not the solid `Pending` one: see `rejectSoft` above. */
+    if (status === 'Review') {
+      return role === 'initiator' || role === 'admin' ? [rejectSoft, accept] : [];
+    }
+    /* The Development-only post-handoff gate — see `pendingDeploy` above. */
+    if (status === 'Completed' && pendingDeploy) {
+      return role === 'admin' ? [deploy] : [];
     }
     /* Everything else on the spine is terminal or driven elsewhere. The
        design draws an empty frame; an empty toolbar is noise. */
@@ -182,6 +215,8 @@ export type StatusProgressionProps = StatusProgressionBase &
         step?: never;
         /** Needed on `Accepted`, to know which step the domain starts with. */
         chain?: readonly AVChainStep[];
+        /** Development-only: see `avTransitions`'s `pendingDeploy` doc. Meaningless outside `status="Completed"`. */
+        pendingDeploy?: boolean;
       }
     | {
         /** The `id` of the chain step the AV sits on. */
@@ -189,12 +224,13 @@ export type StatusProgressionProps = StatusProgressionBase &
         status?: never;
         /** The domain's ordered middle. Required — `step` indexes into it. */
         chain: readonly AVChainStep[];
+        pendingDeploy?: never;
       }
   );
 
 export const StatusProgression = React.forwardRef<HTMLDivElement, StatusProgressionProps>(
-  ({ className, role, status, step, chain, onTransition, disabled, loading, ...props }, ref) => {
-    const transitions = avTransitions({ role, status, step, chain });
+  ({ className, role, status, step, chain, pendingDeploy, onTransition, disabled, loading, ...props }, ref) => {
+    const transitions = avTransitions({ role, status, step, chain, pendingDeploy });
     /* A terminal status has no moves — the design draws an empty frame, and
        an empty toolbar is noise, so we draw nothing. */
     if (transitions.length === 0) return null;

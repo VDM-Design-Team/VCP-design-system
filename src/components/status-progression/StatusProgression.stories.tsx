@@ -137,8 +137,43 @@ export const Terminal: Story = {
   ),
 };
 
+/**
+ * `Review` — the decision after handoff, named in issue #60. Only an
+ * initiator or admin gets it; the assignee already handed the AV off.
+ * Reject is outline here (`rejectSoft`), not the solid `Pending` one.
+ */
+export const ReviewDecision: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <StatusProgression role="initiator" status="Review" />
+      <StatusProgression role="admin" status="Review" />
+      <StatusProgression role="assignee" status="Review" />
+      <p className="text-caption-md text-text-tertiary">
+        (assignee renders nothing — they already handed it off)
+      </p>
+    </div>
+  ),
+};
+
+/**
+ * The Development-only exception, named in issue #60: `Completed` isn't
+ * always final. With `pendingDeploy`, an admin still owes a `Deploy` before
+ * the real terminal `Completed` — same tag, same text, as design specified.
+ */
+export const PendingDeploy: Story = {
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <StatusProgression role="admin" status="Completed" pendingDeploy />
+      <StatusProgression role="assignee" status="Completed" pendingDeploy />
+      <p className="text-caption-md text-text-tertiary">
+        (assignee renders nothing — only the admin deploys)
+      </p>
+    </div>
+  ),
+};
+
 const ROLES: AVProgressionRole[] = ['assignee', 'assignee-initiator', 'initiator', 'admin'];
-const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'In Progress', 'Completed'];
+const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'In Progress', 'Review', 'Completed'];
 
 /**
  * Every move the component defines, over the Development chain — the spine

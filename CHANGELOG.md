@@ -59,6 +59,34 @@ compile-time union.
 - Removed the unused `rejectSoft` constant, dead since #58 and flagged in the
   handoff. Reintroduce it when the outlined-Reject variants in #60 are named.
 
+### `StatusProgression` — issue #60's seven variants named (7 September 2026)
+
+Design (Eve) named all seven placeholder Figma variants the audit found.
+No breaking change — additive only.
+
+- **`Review` is now modelled on the spine.** Initiator and admin get
+  Reject/Accept; the assignee renders nothing (already handed off). Reject
+  is `variant="secondary"` (outline) here, not `Pending`'s solid
+  `variant="danger"` — the design draws these differently by lifecycle
+  stage, not role.
+- **`rejectSoft` reintroduced** (deleted 7 Sep in the spine/chain refactor,
+  pending exactly this naming) — reused verbatim as the `Review` Reject.
+- **New `pendingDeploy` prop, Development-only.** `Confirmed Prod` → Handoff
+  lands on `Completed`, but Development's `Completed` can still owe a
+  `Deploy` action (admin only) before the real terminal `Completed`. Both
+  render identically on `StatusPill` — same tone, same text "Completed" —
+  design was explicit this is a known, accepted exception to the "spine is
+  universal" rule the same-day refactor established, not a pattern to
+  extend to other domains.
+- "Deploy" is not a status — the placeholder Figma variant of that name has
+  been removed; it was always the button label for the above, never a
+  distinct lifecycle position.
+- The Dev/Admin variant that drew a lone "Handoff" under the name `Review`
+  turned out not to be a separate thing — `Confirmed Prod` is the only
+  status with a Handoff action.
+- `docs/status-progression.md` updated: the "Not modelled" table is gone,
+  replaced with how each of the seven resolved.
+
 
 Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 
