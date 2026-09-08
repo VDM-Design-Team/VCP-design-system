@@ -39,10 +39,22 @@ cosmetically: **Phosphor glyphs are filled paths**, where Heroicons outline glyp
 are stroked. A component built to stroke them renders nothing.
 
 **The rule: Phosphor, or our own.** Never Heroicons, and never a second
-family. Where Phosphor has no equivalent, draw the glyph in Phosphor's weight
-and add it to `CUSTOM_ICONS` — 256 viewBox, 16-unit stroke, filled path. That
-is what `rectangle-group` is: the design's Dashboard glyph, which Phosphor has
-nothing like.
+family. Where Phosphor has no equivalent, take the design's own geometry and
+add it to `CUSTOM_ICONS` at Phosphor's weight — 256 viewBox, 16-unit stroke.
+
+Three of the navigation glyphs needed that (8 Sep 2026):
+
+| Glyph | Why |
+|---|---|
+| `rectangle-group` | Dashboard. Phosphor has no three-panel form; redrawn in Phosphor's weight |
+| `assigned-value` | Assigned. A Figma layer of VCP's own — `Assigned Added Value`, not a library icon at all |
+| `rectangle-stack` | Manage. Phosphor's `stack` glyphs are isometric; the design's is face-on |
+
+`assigned-value` and `rectangle-stack` are exported from the SideBar page and
+transformed from their 24 box onto the 256 viewBox, so the shapes are the
+design's exactly rather than an approximation of them. Heroicons' 1.5 stroke
+on a 24 box is exactly Phosphor's 16 units at 256, so a stroked glyph sits in
+the set at the right weight.
 
 ⚠️ **The Figma library is mixed.** The Tags and atom pages are Phosphor, but
 the `SideBar` page's icon instances are named `heroicons-outline/light-bulb`
