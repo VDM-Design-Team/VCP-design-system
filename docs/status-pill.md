@@ -6,7 +6,8 @@ the status → tone mapping lives, and nowhere else.
 
 **The vocabulary is open.** An AV's flow is a fixed spine wrapped around a
 per-domain middle (issue #68). Ten spine statuses are fixed and shared by
-every domain; the middle is whatever Design, Development, Content, Partners,
+every domain; the middle is whatever a domain defines — Design and
+Development are the two defined today, and Content, Partners,
 Governance or Product defines, renameable at will. So this component knows
 ten statuses by name and accepts any number it has never heard of.
 

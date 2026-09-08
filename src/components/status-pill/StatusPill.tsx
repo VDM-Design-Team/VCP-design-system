@@ -8,10 +8,11 @@ import { Badge, type BadgeProps } from '../../atoms/badge';
  *
  * **The vocabulary is open, and deliberately so.** An AV's flow is a fixed
  * spine with a per-domain middle: the flow board's `Custom Statuses` section
- * sits between `Accepted` and `Completed` and holds one chain per domain —
- * Design has two steps, Development has six, and Content, Partners,
- * Governance and Product bring their own. A domain can add steps and rename
- * them, so those names are data and cannot be enumerated here (issue #68).
+ * sits between `Accepted` and `Completed` and holds one chain per domain.
+ * Two domains are defined today — Design has one step, Development has five —
+ * and a domain can add steps and rename them, so those names are data and
+ * cannot be enumerated here (issue #68). More domains may follow; nothing
+ * here counts them.
  *
  * So this component knows two kinds of status:
  *
