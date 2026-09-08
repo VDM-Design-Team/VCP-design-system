@@ -15,9 +15,10 @@ import type { AVStatus } from '../status-pill';
  * `Completed`, and the terminal silence on `Final Completed` — because those
  * are the same in every domain and the application branches on them.
  *
- * It does **not** own the middle any more. Design has one step, Development
- * has five, and Content, Partners, Governance and Product bring their own,
- * renameable (issue #68). The domain passes its ordered `chain`; this derives
+ * It does **not** own the middle any more. Two domains are defined today —
+ * Design has one step, Development has five — and their steps are renameable
+ * (issue #68). Nothing here counts domains, so a third costs no change.
+ * The domain passes its ordered `chain`; this derives
  * the moves from position in it, exactly as the flow board draws them: one
  * step back, one step forward, and a handoff at the end.
  *
@@ -28,8 +29,8 @@ import type { AVStatus } from '../status-pill';
  *
  * Read off the Figma `Status Progression Buttons` page (audit, 4 Sep 2026).
  * The eight component sets there were two workflows times four roles; the
- * workflow half is gone, because a workflow is now just a different `chain`
- * and six domains would have meant twenty-four sets. The role half stays:
+ * workflow half is gone, because a workflow is now just a different `chain`,
+ * so a new domain adds no sets at all. The role half stays:
  * the same status offers different moves depending on who is looking.
  *
  * Button wording is still the design's own where the design has an opinion —

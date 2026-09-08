@@ -11,8 +11,8 @@ const meta = {
           'An Added Value’s status as a pill — a component composing `Badge`, and the owner ' +
           'of VCP’s status vocabulary and its status → treatment mapping. **The vocabulary is ' +
           'open.** The ten spine statuses are fixed and each keeps its own fill, measured off ' +
-          'the Figma `Status_Tag_General` set. Domain steps — anything Design, Development, ' +
-          'Content, Partners, Governance or Product defines in its own chain — are passed as ' +
+          'the Figma `Status_Tag_General` set. Domain steps — anything a domain defines in its ' +
+          'own chain, Design and Development being the two defined today — are passed as ' +
           '`custom` and all wear one treatment, because this component knows nothing about a ' +
           'step it did not define. Not clickable by design: changing status is the options ' +
           'dropdown’s job.',

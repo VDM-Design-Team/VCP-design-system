@@ -40,9 +40,9 @@ first — see `pendingDeploy` below. Named and resolved in issue #60
 (7 Sep 2026); design was explicit this is a known exception, not a pattern to
 extend to other domains.
 
-**It does not own the middle.** Design has one step, Development has five,
-and Content, Partners, Governance and Product bring their own — renameable
-(issue #68). The domain passes its ordered `chain`; the moves derive from
+**It does not own the middle.** Two domains are defined today — Design has one
+step, Development has five — and their steps are renameable (issue #68).
+Nothing here counts domains, so a third costs no code change. The domain passes its ordered `chain`; the moves derive from
 position in it, exactly as the flow board draws them: one step back, one step
 forward, and a handoff at the end.
 
