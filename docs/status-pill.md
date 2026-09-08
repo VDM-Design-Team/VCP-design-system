@@ -56,7 +56,9 @@ domain's own configuration, which this repo does not own.
 
 ## The mapping
 
-**Ten spine statuses** — the Figma `Status_Tag_General` set, less the
+**Eleven spine statuses** — the Figma `Status_Tag_General` set plus
+`Final Completed`, which the flow board draws but the tag set has no tag for,
+and less the
 `Review No Action` variant, which is not a state but `Review`'s second
 treatment (confirmed 7 Sep 2026) and is being renamed in Figma — every fill below is the design's, matched to the
 token that already carried that exact hex.
@@ -70,7 +72,8 @@ token that already carried that exact hex.
 | In Progress | info tonal | `#dbeafe` / `#1447e6` |
 | Review | info tonal | `#dbeafe` / `#1447e6` |
 | Review *(actionable)* | **info filled** | `#155dfc` / `#ffffff` |
-| Completed | success tonal | `#dcfce7` / `#008236` |
+| Completed | warning tonal | `#fef9c2` / `#a65f00` |
+| Final Completed | success tonal | `#dcfce7` / `#008236` |
 | Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
@@ -96,8 +99,28 @@ treatment belongs to the atom, and this component composes it.
 component knows nothing about a step it did not define, so calling one a
 "warning" would assert a meaning it cannot have.
 
-⚠️ **Three spine statuses share that fill** — `Accepted`, `In Progress` and
-`Reopened` are also info tonal, so they are not distinguishable from a domain
+### The two Completed states
+
+`Completed` and `Final Completed` are **two states, not one**. `Completed` is
+the assignee's: their work is done, and it is waiting on someone to accept it.
+`Final Completed` is what an initiator or admin moves it to after reviewing.
+
+The flow board has always drawn them as separate nodes — `Completed (1) +
+Adding deliverables` and `Final Completed`. Only the tag set collapsed them,
+which is why they briefly reached this repo as one status plus a boolean flag,
+rendering identically and telling nobody apart.
+
+The tones follow the mapping's own logic rather than inventing anything:
+`Completed` is waiting on a human gate, exactly as `Pending` and `Initiated`
+are, so it takes their tone. `Final Completed` is reached and verified, so it
+keeps the success green `Completed` used to have.
+
+⚠️ **`Status_Tag_General` has no `Final Completed` tag.** Same gap the 4 Sep
+audit found for the six lifecycle states: the board draws a state the tag set
+cannot label. Figma needs to catch up.
+
+⚠️ **Three spine statuses share the custom fill** — `Accepted`, `In Progress`
+and `Reopened` are also info tonal, so they are not distinguishable from a domain
 step by colour. Their text is, which is why there is no dot and never
 was: the word is the signal. Worth knowing before anyone builds a legend that
 groups by colour.
