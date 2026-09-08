@@ -7,8 +7,21 @@
  * wordmark themes to white in dark exactly as the Figma dark variant does,
  * and the accent diamond stays the brand blue in both themes.
  */
-export const LOGO_FULL_VIEWBOX = '0 0 341 45';
-export const LOGO_MARK_VIEWBOX = '0 0 35 45';
+/*
+ * The viewBoxes are the artwork's own bounds, not the Figma frame's.
+ *
+ * The exported frames carried padding — 0.9 below the wordmark, and 1 above /
+ * 1.9 below / 0.7 right of the mark. A padded box changes the *box* ratio
+ * without changing the drawing, so sizing by height rendered the logo smaller
+ * than the design and slightly off-centre: the mark's box was 0.778 against
+ * artwork that is 0.815.
+ *
+ * Measured with getBBox (8 Sep 2026). Tightened, both ratios match the design
+ * exactly — 7.7322 against Figma's 7.7321, and 0.8146 against 0.8146 — so a
+ * height or a width now yields the design's other dimension.
+ */
+export const LOGO_FULL_VIEWBOX = '0 0 341 44.1';
+export const LOGO_MARK_VIEWBOX = '0 1 34.3 42.11';
 
 export const LOGO_FULL_PATHS =
     '<path d="M47.566 14.5903H53.5363L57.8833 30.2369H58.2279L62.5387 14.5903H68.3911L61.136 35.5872H54.8725L47.566 14.5903Z" fill="var(--color-text-logo)"/>' +
