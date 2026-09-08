@@ -48,6 +48,7 @@ record of when each piece landed.
 | pattern | `TopBar` | PR #55 |
 | component | `StatusProgression` | PR #58 |
 | pattern | `AVHeader` | PR #58 |
+| component | `SidebarItem` | PR #76 |
 
 ## Components — to port
 
@@ -56,7 +57,7 @@ one unit composing an atom or two.
 
 | Components |
 |---|
-| `UrgencyTag`, `RoleBadge`, `DomainLabel`, `AssigneeStatus`, `DeliverableLink`, `SidebarItem`, `FeatureCard`, `ProblemCard`, `ChangelogCard` |
+| `UrgencyTag`, `RoleBadge`, `DomainLabel`, `AssigneeStatus`, `DeliverableLink`, `FeatureCard`, `ProblemCard`, `ChangelogCard` |
 
 ## Patterns — to port
 
