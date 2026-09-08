@@ -1,7 +1,7 @@
 {
   "name": "@vcp/design-system",
   "version": "0.1.0",
-  "description": "VCP Design System \u2014 tokens, React components, and docs. Single source of truth for design and engineering.",
+  "description": "VCP Design System — tokens, React components, and docs. Single source of truth for design and engineering.",
   "type": "module",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -52,6 +52,7 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
+    "@phosphor-icons/core": "^2.1.1",
     "@storybook/addon-a11y": "^10.5.9",
     "@storybook/addon-docs": "^10.5.9",
     "@storybook/addon-mcp": "^0.7.0",
