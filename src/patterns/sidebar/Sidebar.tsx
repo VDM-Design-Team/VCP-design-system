@@ -164,8 +164,16 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         )}
         {...props}
       >
-        <div className={cn('flex items-center', collapsed ? 'justify-center px-3' : 'px-6')}>
-          <Logo collapsed={collapsed} decorative />
+        {/* The design gives the wordmark 200 of the rail's 256, inset 24 from
+            the left. At the atom's default `h-7` it wants 212 and flex squeezes
+            it to fit — a distorted logo — so the width is set and the height
+            follows. Collapsed, the diamond takes the design's 24. */}
+        <div className={cn('flex items-center', collapsed ? 'justify-center px-3' : 'pl-6 pr-8')}>
+          <Logo
+            collapsed={collapsed}
+            decorative
+            className={cn('h-auto shrink-0', collapsed ? 'w-6' : 'w-50')}
+          />
         </div>
 
         <div className="mt-10 flex flex-1 flex-col gap-8 px-3">

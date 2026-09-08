@@ -385,7 +385,7 @@ wrong order and produced a component that did not match.
 | Count badge | a solid blue pill with a number | **does not exist** — no item variant has one |
 | `Right Icon` axis | absent | `On \| Off`; the chevron on expandable rows |
 | `Dropdown Item` axis | absent | `Yes \| No`; sub-rows beneath the parent |
-| Icon slot | 24 | **32** |
+| Icon slot | 24 | 24 — *see correction below* |
 
 Fixed in PR #76 before it merged.
 
@@ -417,6 +417,20 @@ carry "Report a problem" in the footer.
 `_VCP_SideBar_Item_Preset` has twelve types, including `Status` with its own
 dropdown component — but `Status` appears in none of the four rails.
 **Confirmed 8 Sep 2026: it is not a nav item.** The preset is unused.
+
+### 🔧 Correction — the icon slot is 24, and the icons are Heroicons
+
+An earlier pass here read **32** off the standalone `_Left_Icon` component's
+frame. In actual use the slot is **24×24**: `_VCP_SideBar_Item` → `Content`
+(inset 8) → `Left_Icon` 24×24, with the label starting at x=32. Fixed in
+`SidebarItem`.
+
+The same drill-down found something larger. The icon instances inside the
+rail are named **`heroicons-outline/light-bulb`** and **`RectangleGroup`** —
+Heroicons, not Phosphor. `docs/icon.md` states, with evidence from the Tags
+and atom pages, that the library draws from Phosphor and that the export's
+Heroicons claim is wrong. Both appear to be true of different pages: the
+library is mixed. **This needs a decision — see the Sidebar PR.**
 
 ### ⚠️ Icons the system does not ship
 
