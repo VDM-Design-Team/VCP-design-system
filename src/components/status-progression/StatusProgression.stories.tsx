@@ -8,11 +8,11 @@ import {
 } from './StatusProgression';
 import type { AVStatus } from '../status-pill';
 
-/* Two domains' chains, as they stand on the flow board. They are data here
-   for the same reason they are data in the product: a domain owns its own
-   middle, names it, and can change both. */
+/* Two domains' chains, one for one with the Figma `Status_Tag_Design_Only`
+   and `Status_Tag_Development_Only` sets. `In Progress` is not in either —
+   it is spine, drawn in `Status_Tag_General`, and every domain passes through
+   it before its own chain starts. */
 const DEVELOPMENT: AVChainStep[] = [
-  { id: 'in-progress', label: 'In progress' },
   { id: 'for-review', label: 'For review' },
   { id: 'for-qa', label: 'For QA' },
   { id: 'in-qa', label: 'In QA' },
@@ -20,10 +20,7 @@ const DEVELOPMENT: AVChainStep[] = [
   { id: 'confirmed-prod', label: 'Confirmed prod' },
 ];
 
-const DESIGN: AVChainStep[] = [
-  { id: 'in-progress', label: 'In progress' },
-  { id: 'design-review', label: 'Design review' },
-];
+const DESIGN: AVChainStep[] = [{ id: 'design-review', label: 'Design review' }];
 
 /* A domain the repo has never heard of, to show that none of this is wired
    to Design and Development specifically. */
@@ -69,9 +66,9 @@ export const Default: Story = {
   render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="for-qa" />,
 };
 
-/** The first step has no way back — accepting is the admin's call to undo. */
+/** The first step returns to `In Progress`, the shared step it came from. */
 export const FirstStep: Story = {
-  render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="in-progress" />,
+  render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="for-review" />,
 };
 
 /** The last step hands off instead of moving on. Admins get the short label. */
@@ -90,7 +87,8 @@ export const SpineMoves: Story = {
     <div className="flex flex-col gap-3">
       <StatusProgression role="initiator" status="Draft" />
       <StatusProgression role="admin" status="Pending" />
-      <StatusProgression role="admin" status="Accepted" chain={DEVELOPMENT} />
+      <StatusProgression role="admin" status="Accepted" />
+      <StatusProgression role="admin" status="In Progress" chain={DEVELOPMENT} />
     </div>
   ),
 };
@@ -140,7 +138,7 @@ export const Terminal: Story = {
 };
 
 const ROLES: AVProgressionRole[] = ['assignee', 'assignee-initiator', 'initiator', 'admin'];
-const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'Completed'];
+const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'In Progress', 'Completed'];
 
 /**
  * Every move the component defines, over the Development chain — the spine

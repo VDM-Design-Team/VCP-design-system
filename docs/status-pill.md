@@ -37,6 +37,7 @@ the status → tone mapping lives here and only here.
 |---|---|---|---|
 | `status` | `AVStatus` | — | A spine status. Ten values; a typo is a compile error |
 | `custom` | `string` | — | A domain step, by whatever name the domain gives it |
+| `actionable` | `boolean` | `false` | Draw the design's button style. Today only `Review` differs |
 | `size` | `'sm' \| 'md'` | `'md'` | Inherited from `Badge` |
 
 **`status` and `custom` are mutually exclusive**, enforced by the type. Exactly
@@ -55,8 +56,9 @@ domain's own configuration, which this repo does not own.
 
 ## The mapping
 
-**Ten spine statuses**, straight from the Figma `Status_Tag_General` set
-(design audit, 3 Sep 2026) — every fill below is the design's, matched to the
+**Ten spine statuses** — the Figma `Status_Tag_General` set, less the
+`Review No Action` variant, which is not a state but `Review`'s second
+treatment (confirmed 7 Sep 2026) and is being renamed in Figma — every fill below is the design's, matched to the
 token that already carried that exact hex.
 
 | Status | Treatment | Figma fill / text |
@@ -65,44 +67,62 @@ token that already carried that exact hex.
 | Initiated | warning tonal | `#fef9c2` / `#a65f00` |
 | Pending | warning tonal | `#fef9c2` / `#a65f00` |
 | Accepted | info tonal | `#dbeafe` / `#1447e6` |
-| **Review** | **info filled** | `#155dfc` / `#ffffff` |
-| Review No Action | info tonal | `#dbeafe` / `#1447e6` |
+| In Progress | info tonal | `#dbeafe` / `#1447e6` |
+| Review | info tonal | `#dbeafe` / `#1447e6` |
+| Review *(actionable)* | **info filled** | `#155dfc` / `#ffffff` |
 | Completed | success tonal | `#dcfce7` / `#008236` |
 | Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
 
-`Review` is the design's one **solid** tag — the review that wants acting
-on. It is why `Badge` has a `variant`: the treatment belongs to the atom,
-and this component composes it.
+**`Review` is drawn twice**, and both pills are in the library. Tonal is the
+label style — what a user sees. Filled is the button style, for a viewer who
+can act on it: an admin, or the AV's initiator. Same status; only who is
+looking changes.
+
+```tsx
+<StatusPill status="Review" />              // a user sees a label
+<StatusPill status="Review" actionable />   // an admin sees a call to act
+```
+
+`actionable` on any other status is a no-op. The design draws one treatment
+for each of them, and this component will not invent a filled variant nobody
+has drawn — when design draws another, it gets a row in
+`ACTIONABLE_TREATMENT`. That is also why `Badge` has a `variant`: the
+treatment belongs to the atom, and this component composes it.
 
 **Every domain step wears one treatment:** the info tonal, `#dbeafe` on
 `#1447e6`, 5.60:1. Design's call, 7 Sep 2026. The reasoning is that this
 component knows nothing about a step it did not define, so calling one a
 "warning" would assert a meaning it cannot have.
 
-⚠️ **Three spine statuses share that fill** — `Accepted`, `Review No Action`
-and `Reopened` are also info tonal, so they are not distinguishable from a
-domain step by colour. Their text is, which is why there is no dot and never
+⚠️ **Three spine statuses share that fill** — `Accepted`, `In Progress` and
+`Reopened` are also info tonal, so they are not distinguishable from a domain
+step by colour. Their text is, which is why there is no dot and never
 was: the word is the signal. Worth knowing before anyone builds a legend that
 groups by colour.
 
 ## What changed on 7 September
 
-`AVStatus` held seventeen values until this change. Seven of them were domain
-steps — `In Progress`, `For Review`, `For QA`, `In QA`, `Ready for Deploy`,
-`Confirmed Prod`, `Design Review` — added on 4 September when the audit found
-the progression buttons moving AVs through states this tag set could not
-label.
+`AVStatus` held seventeen values until this change. Six of them were domain
+steps — `For Review`, `For QA`, `In QA`, `Ready for Deploy`, `Confirmed Prod`,
+`Design Review` — added on 4 September when the audit found the progression
+buttons moving AVs through states this tag set could not label.
+
+**The Figma library is the model, one for one.** `Status_Tag_General`'s eleven
+types are `AVStatus`; `Status_Tag_Design_Only` and
+`Status_Tag_Development_Only` are those domains' chains. `In Progress` is in
+General, so it is spine — it appears inside every domain's chain on the flow
+board because every domain passes through it, not because any domain owns it.
 
 That was correct while the flow had two hardcoded domains. It stopped being
 correct once domains could add and rename their own steps: a `Record<AVStatus,
 Treatment>` keyed by name cannot be indexed by a name that arrives as data,
 and a renamed status breaks it with no compile error.
 
-The seven are gone from the union. They now render through `custom`, and all
-seven wear the one shared treatment — which changes three of them visually:
-`For QA`, `For Review`, `Ready for Deploy` and `Design Review` were warning,
+The six are gone from the union. They now render through `custom`, and all
+six wear the one shared treatment — which changes five of them visually:
+`For Review`, `For QA`, `Ready for Deploy` and `Design Review` were warning,
 `Confirmed Prod` was success. See CHANGELOG.md for the migration.
 
 **What this costs.** `StatusProgression`'s `AVProgressionStatus` was an
@@ -111,11 +131,15 @@ error. Seven of its eleven members were domain steps, so that guarantee does
 not survive — there is nothing left to extract from. It was the right
 guarantee for a closed vocabulary and there is no equivalent for an open one.
 
-**Open question for design:** Figma labels both `Review` and
-`Review No Action` with the visible word "Review". We render each status's
-own name, so the two are distinguishable without relying on colour. If both
-should read "Review", that needs a `label` override and a decision about the
-colour-only distinction.
+**Answered 7 September.** The library draws two Review pills, and the second
+is named `Review No Action` — which is not a state and never was. It is one
+status with two treatments: a label for a user, the button style for someone
+who can act. So `Review No Action` is gone from `AVStatus` and `actionable`
+carries the difference. The Figma variant is being renamed.
+
+This also settles the colour-alone worry the earlier note raised: the two
+pills are the same status, so nothing is being distinguished by colour that
+the text should be carrying.
 
 ## Accessibility
 
