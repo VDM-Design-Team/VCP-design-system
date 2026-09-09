@@ -280,7 +280,6 @@ lifecycle:
 | | Statuses |
 |---|---|
 | `Status_Tag_General` | Draft, Initiated, Pending, In Progress, Review, Review No Action, Accepted, Completed, Rejected, Reopened, Backlog |
-| **Missing: `Final Completed`** | The flow board draws it as a terminal node beside `Rejected` and `Backlog`; the tag set has no tag for it (found 8 Sep 2026) |
 | Status Progression | Draft, Pending, Accepted, In Progress, **For Review, For QA, In QA, Ready for Deploy, Confirmed Prod, Design Review**, Completed |
 
 ### Tag-set structure — decided for now, revisit at the third domain

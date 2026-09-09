@@ -78,8 +78,7 @@ went would be worse than offering nothing.
 | `role` | `AVProgressionRole` | — | **Required.** Who is looking |
 | `status` | `AVStatus` | — | A spine position. Excludes `step` |
 | `step` | `string` | — | A chain step's `id`. Excludes `status`; needs `chain` |
-| `chain` | `readonly AVChainStep[]` | — | The domain's ordered middle. Required with `step`; also needed on `In Progress` |
-| `hasDeployStep` | `boolean` | `false` | This domain deploys between `Completed` and `Review`. Development does; Design does not |
+| `chain` | `readonly AVChainStep[]` | — | The domain's ordered middle. Required with `step`; also needed on `Accepted` |
 | `pendingDeploy` | `boolean` | `false` | Development-only. Only meaningful with `status="Completed"` — see below |
 | `onTransition` | `(t: AVTransition) => void` | — | A button press. The AV does not move until the caller moves it |
 | `disabled` | `boolean` | `false` | Every button |
@@ -93,8 +92,6 @@ Development, all roles that see the middle of the lifecycle:
 |---|---|---|
 | Draft † | Save as Draft | Submit |
 | Pending ‡ | Reject *(danger)* | Accept |
-| `Completed` (spine) | — | Deploy *(admin, domains with a deploy step)* or Move to Review |
-| `Final Completed` (spine) | — | — terminal |
 | `Accepted` (spine) | — | Move to In Progress |
 | `In Progress` (spine) | — | Move to *first chain step* |
 | first chain step | Return to In Progress | Move to *next* |

@@ -156,49 +156,24 @@ export const ReviewDecision: Story = {
 };
 
 /**
- * The assignee's `Completed` — their work is done, and it is waiting to be
- * accepted. In a domain with a deploy step the admin deploys first; in one
- * without, it goes straight to the initiator or admin for review. Either way
- * the assignee has nothing left to do.
+ * The Development-only exception, named in issue #60: `Completed` isn't
+ * always final. With `pendingDeploy`, an admin still owes a `Deploy` before
+ * the real terminal `Completed` — same tag, same text, as design specified.
  */
-export const CompletedAwaitingAcceptance: Story = {
+export const PendingDeploy: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-4">
-        <span className="w-52 text-body-sm text-text-secondary">admin, domain deploys</span>
-        <StatusProgression role="admin" status="Completed" hasDeployStep />
-      </div>
-      <div className="flex items-center gap-4">
-        <span className="w-52 text-body-sm text-text-secondary">admin, no deploy step</span>
-        <StatusProgression role="admin" status="Completed" />
-      </div>
+      <StatusProgression role="admin" status="Completed" pendingDeploy />
+      <StatusProgression role="assignee" status="Completed" pendingDeploy />
       <p className="text-caption-md text-text-tertiary">
-        (the assignee renders nothing either way — they have handed it on)
+        (assignee renders nothing — only the admin deploys)
       </p>
     </div>
   ),
 };
 
-/** `Final Completed` is the end. Nobody has a move from it. */
-export const FinalCompleted: Story = {
-  render: () => (
-    <div className="flex items-center gap-2 text-body-sm text-text-tertiary">
-      <StatusProgression role="admin" status="Final Completed" />
-      (renders nothing — this is the terminal state)
-    </div>
-  ),
-};
-
 const ROLES: AVProgressionRole[] = ['assignee', 'assignee-initiator', 'initiator', 'admin'];
-const SPINE: AVStatus[] = [
-  'Draft',
-  'Pending',
-  'Accepted',
-  'In Progress',
-  'Review',
-  'Completed',
-  'Final Completed',
-];
+const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'In Progress', 'Review', 'Completed'];
 
 /**
  * Every move the component defines, over the Development chain — the spine
