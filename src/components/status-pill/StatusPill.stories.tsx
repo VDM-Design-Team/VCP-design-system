@@ -86,28 +86,6 @@ export const OneAVsJourney: Story = {
       <StatusPill custom="For QA" />
       <StatusPill custom="Confirmed prod" />
       <StatusPill status="Completed" />
-      <StatusPill status="Final Completed" />
-    </div>
-  ),
-};
-
-/**
- * The two Completed states, side by side. `Completed` is the assignee's — the
- * work is done and waiting to be accepted, which is the same shape as
- * `Pending`, so it wears the same tone. `Final Completed` is the one that
- * means finished.
- */
-export const TwoCompletedStates: Story = {
-  render: () => (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-4">
-        <span className="w-64 text-body-sm text-text-secondary">assignee finished their work</span>
-        <StatusPill status="Completed" />
-      </div>
-      <div className="flex items-center gap-4">
-        <span className="w-64 text-body-sm text-text-secondary">initiator or admin accepted it</span>
-        <StatusPill status="Final Completed" />
-      </div>
     </div>
   ),
 };

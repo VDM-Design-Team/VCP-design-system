@@ -12,8 +12,9 @@ import type { AVStatus } from '../status-pill';
  * spine wrapped around a per-domain middle. This component owns the spine —
  * the moves out of `Draft`, the admin's accept/reject on `Pending`, the
  * initiator/admin decision on `Review`, and the terminal silence on
- * `Completed`, and the terminal silence on `Final Completed` — because those
- * are the same in every domain and the application branches on them.
+ * `Completed` — because those are the same in every domain and the
+ * application branches on them. `Completed` has one Development-only
+ * exception: see `pendingDeploy` below, named in issue #60 (7 Sep 2026).
  *
  * It does **not** own the middle any more. Two domains are defined today —
  * Design has one step, Development has five — and their steps are renameable
@@ -135,17 +136,18 @@ export function avTransitions(options: {
   step?: string;
   chain?: readonly AVChainStep[];
   /**
-   * This domain has a deploy step between `Completed` and `Review` —
-   * Development does, Design does not. It is a property of the domain, not of
-   * the AV, and it will likely move into the domain's configuration alongside
-   * `chain` when #68 is settled.
-   *
-   * It no longer disambiguates a status: `Completed` and `Final Completed`
-   * are separate statuses now, so nothing needs a flag to tell them apart.
+   * Development-only exception, named in issue #60 (7 Sep 2026): an admin
+   * hands an AV off (`Confirmed Prod` → Handoff) into a `Completed` that
+   * isn't final yet — it still owes a `Deploy` action before the real,
+   * terminal `Completed`. Both render identically on `StatusPill` (same
+   * tone, same text "Completed"); this flag is the only place the
+   * distinction exists, and only the admin who deploys needs it. Not a
+   * general concept — most domains' `Completed` has no such gate, and this
+   * prop should stay that way rather than growing into one.
    */
-  hasDeployStep?: boolean;
+  pendingDeploy?: boolean;
 }): readonly AVTransition[] {
-  const { role, status, step, chain = [], hasDeployStep = false } = options;
+  const { role, status, step, chain = [], pendingDeploy = false } = options;
 
   if (status) {
     /* The spine. Every domain shares these, so they stay here. */
@@ -167,12 +169,9 @@ export function avTransitions(options: {
     if (status === 'Review') {
       return role === 'initiator' || role === 'admin' ? [rejectSoft, accept] : [];
     }
-    /* The assignee's `Completed`: the work is done and waiting to be
-       accepted. In a domain with a deploy step the admin deploys first;
-       otherwise it goes straight to the initiator or admin for review. */
-    if (status === 'Completed') {
-      if (hasDeployStep) return role === 'admin' ? [deploy] : [];
-      return role === 'initiator' || role === 'admin' ? [move('Review', 'Review')] : [];
+    /* The Development-only post-handoff gate — see `pendingDeploy` above. */
+    if (status === 'Completed' && pendingDeploy) {
+      return role === 'admin' ? [deploy] : [];
     }
     /* Everything else on the spine is terminal or driven elsewhere. The
        design draws an empty frame; an empty toolbar is noise. */
@@ -217,8 +216,8 @@ export type StatusProgressionProps = StatusProgressionBase &
         step?: never;
         /** Needed on `Accepted`, to know which step the domain starts with. */
         chain?: readonly AVChainStep[];
-        /** This domain deploys — see `avTransitions`. Meaningless outside `status="Completed"`. */
-        hasDeployStep?: boolean;
+        /** Development-only: see `avTransitions`'s `pendingDeploy` doc. Meaningless outside `status="Completed"`. */
+        pendingDeploy?: boolean;
       }
     | {
         /** The `id` of the chain step the AV sits on. */
@@ -226,13 +225,13 @@ export type StatusProgressionProps = StatusProgressionBase &
         status?: never;
         /** The domain's ordered middle. Required — `step` indexes into it. */
         chain: readonly AVChainStep[];
-        hasDeployStep?: never;
+        pendingDeploy?: never;
       }
   );
 
 export const StatusProgression = React.forwardRef<HTMLDivElement, StatusProgressionProps>(
-  ({ className, role, status, step, chain, hasDeployStep, onTransition, disabled, loading, ...props }, ref) => {
-    const transitions = avTransitions({ role, status, step, chain, hasDeployStep });
+  ({ className, role, status, step, chain, pendingDeploy, onTransition, disabled, loading, ...props }, ref) => {
+    const transitions = avTransitions({ role, status, step, chain, pendingDeploy });
     /* A terminal status has no moves — the design draws an empty frame, and
        an empty toolbar is noise, so we draw nothing. */
     if (transitions.length === 0) return null;

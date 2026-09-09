@@ -2,37 +2,28 @@
 
 ## 0.1.0 — unreleased
 
-### Breaking — 8 September 2026
+### Breaking — 9 September 2026
 
-**`Completed` and `Final Completed` are two statuses.**
+**`Final Completed` is gone. `Completed` is green and terminal again.**
 
-They always were two states — the flow board draws `Completed (1) + Adding
-deliverables` and `Final Completed` as separate nodes. Only the Figma tag set
-collapsed them into one tag, which is how they reached this repo (#73) as a
-single status plus a `pendingDeploy` boolean: two checkpoints two actions
-apart, rendering as the same green pill with the same word, distinguishable
-only by a flag the caller had to supply.
+Design ruled on 9 September (issue #80): the tag set has one `Completed`
+tag, drawn success green, and there is no `Final Completed`. The 8 September
+change that split them into two statuses and recoloured `Completed` to
+warning is reverted (PR #74), and the model is the one that shipped on
+7 September.
 
-- **`AVStatus` gains `Final Completed`**, and is eleven again. `Completed` is
-  the assignee's — work done, waiting to be accepted. `Final Completed` is
-  what an initiator or admin moves it to after review.
-- **`Completed` changes tone**, success → warning. It is waiting on a human
-  gate, the same shape as `Pending` and `Initiated`, so it takes their tone.
-  `Final Completed` keeps the success green. Following the mapping's own
-  documented logic rather than inventing a treatment.
-- **`pendingDeploy` is gone, replaced by `hasDeployStep`.** The old prop
-  existed to say *which* `Completed` this was; the status says that now. What
-  is left is a real domain difference — Development deploys between
-  `Completed` and `Review`, Design does not — so the prop says that instead.
-  It will likely move into the domain's configuration alongside `chain` when
-  #68 is settled.
-- **`Completed` now offers moves.** An admin in a deploying domain gets
-  `Deploy`; otherwise an initiator or admin gets `Move to Review`. It was
-  terminal-by-accident before.
-
-⚠️ **Figma:** `Status_Tag_General` has no `Final Completed` tag. Same gap the
-4 September audit found for the six lifecycle states — the board draws a state
-the tag set cannot label.
+- **`AVStatus` loses `Final Completed`** and is ten values again. Pass
+  `Completed` where you passed `Final Completed`.
+- **`Completed` is success tonal**, `#dcfce7` / `#008236`, as the tag set
+  draws it. Nothing else in the mapping moves.
+- **`hasDeployStep` is gone; `pendingDeploy` is back.** Development's
+  post-handoff gate is a property of the AV, not the domain: an admin hands
+  an AV off into a `Completed` that still owes a `Deploy`. Pass
+  `pendingDeploy` on `status="Completed"` for that AV and the admin gets the
+  `Deploy` button; omit it and `Completed` is terminal. Every other domain's
+  `Completed` is terminal.
+- **`Completed` no longer offers "Move to Review."** `Review` is reached
+  from the chain's handoff, and `Accept` on `Review` lands on `Completed`.
 
 ### Breaking — 7 September 2026
 
