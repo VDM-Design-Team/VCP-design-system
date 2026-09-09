@@ -434,8 +434,19 @@ library is mixed.
 **Decided 8 Sep 2026: Phosphor only.** The repo does not follow the design
 into a second family. Where Phosphor has an equivalent it is used; where it
 does not — Dashboard's `RectangleGroup` — the glyph is redrawn in Phosphor's
-weight and added to `CUSTOM_ICONS`. **The `SideBar` page's Heroicons instances
-should be swapped to Phosphor in the design file.**
+weight and added to `CUSTOM_ICONS`.
+
+**Swapped in the design file, 9 Sep 2026.** All twelve preset rows were
+checked; six carried Heroicons. Five are now the Phosphor Regular 24 variants
+from the General Design Library — My Values `Lightbulb`, Drafts `File`,
+Archive `Archive`, Planning `Rows`, Domains `Globe` — in the preset set and
+again at row level in the four minimised rails, whose collapsed twins carried
+their own overrides. "Report a problem" used a Heroicons triangle in three
+rails and Phosphor `Warning` in five; all eight use `Warning` now. Every
+swapped glyph is bound to `colors/text/secondary`, as the rows already on
+Phosphor were. **Manage still carries `heroicons-outline/rectangle-stack`**:
+Phosphor's stack glyphs are isometric and this one is face-on, so it wants a
+VCP-drawn component, the way `Assigned Added Value` is (issue #80).
 
 ### ⚠️ Icons the system does not ship
 
