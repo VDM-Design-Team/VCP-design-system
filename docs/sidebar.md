@@ -124,7 +124,7 @@ placeholder until it is.
   item.
 - **Don't wrap the whole rail in a `<nav>` yourself** — it already is one, and
   nesting landmarks makes both harder to navigate.
-- **Don't render it without `AppShell` once that exists** — the rail assumes a
+- **Don't render it without `AppShell`** — the rail assumes a
   full-height flex parent and a `TopBar` beside it.
 - **Don't rely on the domain selector's styling** until the Figma component is
   ported; it is a placeholder.
