@@ -1,5 +1,6 @@
 node_modules/
 dist/
+preview/out.css
 storybook-static/
 .tmp/
 *.log
