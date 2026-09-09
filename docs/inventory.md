@@ -52,6 +52,7 @@ record of when each piece landed.
 | pattern | `Sidebar` | PR #78 |
 | atom | `Footer` | PR #82 |
 | component | `PageTitle` | PR #82 |
+| template | `AppShell` | PR #85 |
 
 ## Components — to port
 
@@ -78,15 +79,17 @@ Organisms: 2+ components forming a page section.
 
 | Templates |
 |---|
-| `AppShell`, `EmailLayout` |
+| `EmailLayout` |
 
 Dependency notes:
 
 - **`DomainSelector` is blocked** on `DomainLabel`, whose six domain colours
   need an indigo and a pink that have **no core ramp** — a token decision to
   settle before it is built, not during.
-- **`AppShell` is unblocked.** `TopBar`, `AVHeader` and `Sidebar` have all
-  shipped; it composes them plus an optional 390px detail column.
+- **`AppShell` shipped (PR #85)** as a frame with slots: `sidebar`, `topBar`,
+  `header` (`PageTitle` or `AVHeader`), `children`, and a `Footer` it places
+  itself. The export's fixed 390-wide detail column is left out until a page in
+  the pages file draws one; it would be a second slot.
 - **`StatusProgression` re-tiered down to component** when it was built
   (PR #58): it is one `Button` used twice, presenting as one control unit.
   It owns status → transitions, the way `StatusPill` owns status → tone.
