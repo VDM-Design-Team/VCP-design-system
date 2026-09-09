@@ -48,8 +48,9 @@ A long day, all of it on two threads: finishing the status model, and building
 `custom` and share one treatment. `StatusProgression` takes the domain's
 `chain` and derives its moves from position in it, so `AVWorkflow` is gone and
 a new domain costs no code. `Review` gained two treatments — a label for a
-user, the filled button style for someone who can act — and `Completed` /
-`Final Completed` became two statuses rather than one plus a boolean.
+user, the filled button style for someone who can act. (#74 also split
+`Completed` into two statuses; design reversed that on 9 September — there is
+one `Completed` tag, and it is green.)
 
 **#73 came from the design-system owner**, naming the last of issue #60's seven
 variants: `Review` gets Reject/Accept for initiator and admin, and `Deploy` is

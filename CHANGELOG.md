@@ -2,6 +2,29 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — 9 September 2026
+
+**`Final Completed` is gone. `Completed` is green and terminal again.**
+
+Design ruled on 9 September (issue #80): the tag set has one `Completed`
+tag, drawn success green, and there is no `Final Completed`. The 8 September
+change that split them into two statuses and recoloured `Completed` to
+warning is reverted (PR #74), and the model is the one that shipped on
+7 September.
+
+- **`AVStatus` loses `Final Completed`** and is ten values again. Pass
+  `Completed` where you passed `Final Completed`.
+- **`Completed` is success tonal**, `#dcfce7` / `#008236`, as the tag set
+  draws it. Nothing else in the mapping moves.
+- **`hasDeployStep` is gone; `pendingDeploy` is back.** Development's
+  post-handoff gate is a property of the AV, not the domain: an admin hands
+  an AV off into a `Completed` that still owes a `Deploy`. Pass
+  `pendingDeploy` on `status="Completed"` for that AV and the admin gets the
+  `Deploy` button; omit it and `Completed` is terminal. Every other domain's
+  `Completed` is terminal.
+- **`Completed` no longer offers "Move to Review."** `Review` is reached
+  from the chain's handoff, and `Accept` on `Review` lands on `Completed`.
+
 ### Breaking — 7 September 2026
 
 **`AVStatus` is now the spine only, and the status vocabulary is open.**
