@@ -16,6 +16,10 @@ jobs:
         run: git diff --exit-code dist/ || (echo "::error::dist/ is out of date — run 'npm run tokens' and commit." && exit 1)
       - run: npm run lint:tokens
       - run: npm run typecheck
+      - name: Install the browser the story tests run in
+        run: npx playwright install --with-deps chromium
+      - name: Story tests (every story renders; play functions run)
+        run: npm run test:flows
 
   # NOTE: npm publishing is intentionally not wired up yet.
   # GitHub Packages requires the package scope to match the repo owner
