@@ -1,6 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SegmentedControl } from './SegmentedControl';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { SegmentedControl, type SegmentedControlStatus } from './SegmentedControl';
+import { Field } from '../../components/field';
 
 const meta = {
   title: 'Atoms/SegmentedControl',
@@ -24,6 +26,7 @@ const meta = {
   argTypes: {
     size: { control: 'radio', options: ['sm', 'md'] },
     fullWidth: { control: 'boolean' },
+    status: { control: 'inline-radio', options: ['idle', 'pending', 'success', 'error'] },
   },
 } satisfies Meta<typeof SegmentedControl>;
 
@@ -117,4 +120,187 @@ export const DarkTheme: Story = {
       </div>
     </div>
   ),
+};
+
+/* ---------------------------------------------------------------------------
+ * Saving a change. The parent drives `status`; the control only shows it.
+ * ------------------------------------------------------------------------- */
+
+const VIEWS = ['List', 'Board', 'Calendar'];
+
+/** Both themes of one fixed state, side by side. No landmarks, so no a11y exemption needed. */
+const BothThemes = ({ children }: { children: React.ReactNode }) => (
+  <div className="grid grid-cols-2">
+    <div className="bg-surface-canvas p-8">{children}</div>
+    <div className="dark bg-surface-canvas p-8">{children}</div>
+  </div>
+);
+
+/**
+ * A save in flight: the selected label mutes, a spinner rides in the segment,
+ * the group is `aria-busy`, and no other segment can be chosen until it settles.
+ */
+export const Pending: Story = {
+  parameters: { layout: 'fullscreen' },
+  args: { value: 'Board', status: 'pending' },
+  render: (args) => (
+    <BothThemes>
+      <SegmentedControl {...args} />
+    </BothThemes>
+  ),
+};
+
+/** The save landed: a check in the selected segment. The parent returns it to idle after about 1.5 s. */
+export const Success: Story = {
+  parameters: { layout: 'fullscreen' },
+  args: { value: 'Board', status: 'success' },
+  render: (args) => (
+    <BothThemes>
+      <SegmentedControl {...args} />
+    </BothThemes>
+  ),
+};
+
+/**
+ * The save failed. The track takes the critical stroke and `aria-invalid`; the
+ * message belongs to `Field`, which wires it to the group through
+ * `aria-describedby`. The parent has kept the previous `value`.
+ */
+export const ErrorState: Story = {
+  parameters: { layout: 'fullscreen' },
+  args: { value: 'Board', status: 'error' },
+  render: (args) => (
+    <BothThemes>
+      <Field error="Couldn’t save the view. Try again.">
+        {(control) => <SegmentedControl {...args} {...control} />}
+      </Field>
+    </BothThemes>
+  ),
+};
+
+/* ---------------------------------------------------------------------------
+ * Interaction tests. Each `play` runs in the browser under `npm test`.
+ * ------------------------------------------------------------------------- */
+
+/** Clicking a segment selects it and deselects the previous one. */
+export const SelectsOnClick: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('radio', { name: 'Calendar' }));
+    await expect(canvas.getByRole('radio', { name: 'Calendar' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.getByRole('radio', { name: 'Board' })).toHaveAttribute('aria-checked', 'false');
+  },
+};
+
+/**
+ * One tab stop, then arrows. Tab lands on the selected segment; arrows move
+ * and select as they go; Home and End jump to the ends.
+ */
+export const KeyboardNavigation: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const radio = (name: string) => canvas.getByRole('radio', { name });
+    await userEvent.tab();
+    await expect(radio('Board')).toHaveFocus();
+    await userEvent.keyboard('{ArrowRight}');
+    await expect(radio('Calendar')).toHaveFocus();
+    await expect(radio('Calendar')).toHaveAttribute('aria-checked', 'true');
+    await userEvent.keyboard('{Home}');
+    await expect(radio('List')).toHaveFocus();
+    await expect(radio('List')).toHaveAttribute('aria-checked', 'true');
+    await userEvent.keyboard('{End}');
+    await expect(radio('Calendar')).toHaveAttribute('aria-checked', 'true');
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(radio('Board')).toHaveAttribute('aria-checked', 'true');
+  },
+};
+
+/** A stand-in for the request the parent would make. */
+const fakeSave = (outcome: 'resolve' | 'reject', delay: number) =>
+  new Promise<void>((resolve, reject) => {
+    setTimeout(() => (outcome === 'resolve' ? resolve() : reject(new Error('offline'))), delay);
+  });
+
+/**
+ * What a parent does around the control: keep the previous value, start the
+ * save, move `status` along with it, and return to idle after a beat. This is
+ * the whole contract — the control times nothing and reverts nothing.
+ */
+function SavingView({ outcome, delay = 300 }: { outcome: 'resolve' | 'reject'; delay?: number }) {
+  const [value, setValue] = React.useState('List');
+  const [status, setStatus] = React.useState<SegmentedControlStatus>('idle');
+  const [error, setError] = React.useState<string>();
+  const settle = React.useRef<ReturnType<typeof setTimeout>>(undefined);
+  React.useEffect(() => () => clearTimeout(settle.current), []);
+
+  const save = async (next: string) => {
+    const previous = value;
+    setValue(next);
+    setStatus('pending');
+    setError(undefined);
+    try {
+      await fakeSave(outcome, delay);
+      setStatus('success');
+      settle.current = setTimeout(() => setStatus('idle'), 1500);
+    } catch {
+      setValue(previous);
+      setStatus('error');
+      setError('Couldn’t save the view. Try again.');
+    }
+  };
+
+  return (
+    <Field error={error}>
+      {(control) => (
+        <SegmentedControl
+          aria-label="View mode"
+          options={VIEWS}
+          value={value}
+          onChange={save}
+          status={status}
+          {...control}
+        />
+      )}
+    </Field>
+  );
+}
+
+/** Choose, wait, saved: pending → success → idle, each observable. */
+export const SaveSucceeds: Story = {
+  render: () => <SavingView outcome="resolve" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const group = canvas.getByRole('radiogroup');
+    await userEvent.click(canvas.getByRole('radio', { name: 'Calendar' }));
+    await expect(group).toHaveAttribute('aria-busy', 'true');
+    await expect(group).toHaveAttribute('data-status', 'pending');
+    /* While pending, the selection is spoken for. */
+    await userEvent.click(canvas.getByRole('radio', { name: 'List' }));
+    await expect(canvas.getByRole('radio', { name: 'Calendar' })).toHaveAttribute('aria-checked', 'true');
+    await waitFor(() => expect(group).toHaveAttribute('data-status', 'success'));
+    await expect(group).not.toHaveAttribute('aria-busy');
+    await waitFor(() => expect(group).toHaveAttribute('data-status', 'idle'), { timeout: 3000 });
+    await expect(canvas.getByRole('radio', { name: 'Calendar' })).toHaveAttribute('aria-checked', 'true');
+  },
+};
+
+/** Choose, wait, failed: the previous selection comes back and the message is announced. */
+export const SaveFails: Story = {
+  render: () => <SavingView outcome="reject" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const group = canvas.getByRole('radiogroup');
+    await userEvent.click(canvas.getByRole('radio', { name: 'Calendar' }));
+    await expect(group).toHaveAttribute('data-status', 'pending');
+    await waitFor(() => expect(group).toHaveAttribute('data-status', 'error'));
+    await expect(group).toHaveAttribute('aria-invalid', 'true');
+    await expect(canvas.getByRole('radio', { name: 'List' })).toHaveAttribute('aria-checked', 'true');
+    await expect(canvas.getByRole('radio', { name: 'Calendar' })).toHaveAttribute('aria-checked', 'false');
+    const message = canvas.getByRole('alert');
+    await expect(message).toHaveTextContent('Couldn’t save the view');
+    await expect(group).toHaveAttribute('aria-describedby', message.id);
+    /* The next choice clears the error. */
+    await userEvent.click(canvas.getByRole('radio', { name: 'Board' }));
+    await expect(group).toHaveAttribute('data-status', 'pending');
+  },
 };

@@ -11,6 +11,7 @@ A small set of mutually exclusive options, all visible at once.
 | Two states, on or off | `Toggle` | A control with two segments is a switch wearing a costume |
 | More than five options | `Select` | Labels crowd; the control stops being scannable |
 | A filter that can be cleared | `Chip` | A segmented control always has exactly one option chosen |
+| Choosing a segment saves something (a default view, a preference) | **SegmentedControl** with `status` | The parent drives `pending → success \| error`; the control shows it — see "Saving a change" |
 
 Two to five options. Every option must be short enough to read at a glance —
 if you need more than about two words per segment, the wrong control is being used.
@@ -25,6 +26,7 @@ if you need more than about two words per segment, the wrong control is being us
 | `onChange` | `(value: string) => void` | — | Fires on click and on arrow-key movement |
 | `size` | `sm \| md` | `md` | `sm` only where a pointer is guaranteed — see Accessibility |
 | `fullWidth` | `boolean` | `false` | Stretches to the container; segments share the width evenly |
+| `status` | `idle \| pending \| success \| error` | `idle` | Where the save of the current selection stands. Parent-driven; see below |
 | `aria-label` | `string` | — | Required unless you pass `aria-labelledby` |
 
 `SegmentedControlOption` is `{ value, label, disabled?, 'aria-label'? }`.
@@ -40,8 +42,52 @@ Set `aria-label` on an option whose `label` isn't plain text.
 | Disabled label | `text.disabled` |
 | Focus ring | `stroke.focused` at 2px |
 | Type | `type.label-md` (`sm`) / `type.label-lg` (`md`) |
+| Error stroke | `accent.critical.outline.border.default` — the stroke `Input` draws when invalid |
+| Success check | `accent.success.tonal.content.default` |
+| Pending label | `text.tertiary` — the selected label mutes to the unselected colour |
 
-No new tokens were added for this component.
+No new tokens were added for this component. The pending spinner is the
+Phosphor `circle-notch` glyph, added to `Icon`.
+
+## Saving a change
+
+When choosing a segment persists something — a default view, a preference —
+the parent drives `status` and the control shows it:
+
+```mermaid
+stateDiagram-v2
+  [*] --> idle
+  idle --> pending: onChange — the parent starts the save
+  pending --> success: the save resolves
+  pending --> error: the save rejects — the parent keeps the previous value
+  success --> idle: the parent, after about 1.5 s
+  error --> idle: the next choice
+```
+
+| Status | The control | The parent |
+|---|---|---|
+| `pending` | Spinner in the selected segment, label muted, group `aria-busy`, further selection ignored | Has set `value` to the new choice and started the save |
+| `success` | Check in the selected segment | Returns to `idle` after about 1.5 s — the control never times anything |
+| `error` | Critical stroke on the track, `aria-invalid` on the group | Has kept the previous `value` — the control never reverts anything — and passes the message to `Field` |
+
+Three things follow from the parent owning it all:
+
+- **Async use is controlled-only.** A failed save means the parent never
+  committed the new value, so "reverting" is the parent leaving `value`
+  alone. An uncontrolled control has nothing to leave alone.
+- **The message is `Field`'s.** Wrap the control in a `Field` and pass
+  `error`; `Field` renders it as an alert and wires it to the group through
+  `aria-describedby`. The control never renders text of its own, the same
+  split `Input` uses. `Field`'s `label` is a `<label for>`, which does not
+  name a radiogroup — give the control `aria-label` and leave `Field`'s label
+  off.
+- **`loading` is the house convention for a busy control**, and
+  `status="pending"` covers the same ground. `status` wins here because
+  success and error need a home too; one prop for the three is easier to
+  guess than two.
+
+The `SaveSucceeds` and `SaveFails` stories are the whole contract in about
+forty lines of parent code, and they run as tests.
 
 ## Accessibility
 
@@ -69,6 +115,13 @@ No new tokens were added for this component.
   separately — it is not specific to this control.
 - The group is a `radiogroup`; each segment is a `radio` with `aria-checked`.
   Screen readers announce "2 of 3".
+- **Saving states.** `pending` sets `aria-busy` on the group; `error` sets
+  `aria-invalid`, and `Field`'s message is an alert wired through
+  `aria-describedby`. The spinner and the check are decorative: the group's
+  state already says "busy", and success is a moment, not information. The
+  spinner respects `prefers-reduced-motion` (it pulses instead of spinning).
+- **Interaction tests.** `SelectsOnClick`, `KeyboardNavigation`,
+  `SaveSucceeds` and `SaveFails` are `play` stories and run under `npm test`.
 
 ## Don't
 
@@ -77,3 +130,6 @@ No new tokens were added for this component.
 - Don't allow zero selected. There is always exactly one.
 - Don't put more than five segments in it, and don't let a label wrap.
 - Don't hardcode colours or spacing. `className="bg-[#f1f5f9]"` is a bug — add a token instead.
+- Don't use `status` on an uncontrolled control. There is no `value` for the parent to keep on error.
+- Don't time the return from `success` inside anything but the parent, and don't revert `value` anywhere but the parent.
+- Don't render an error message next to the control yourself — that is `Field`'s job, and it is what wires `aria-describedby`.
