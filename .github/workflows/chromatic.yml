@@ -58,6 +58,8 @@ jobs:
           STORYBOOK_URL: ${{ steps.chromatic.outputs.storybookUrl }}
         with:
           script: |
+            const fs = require('fs');
+            const path = require('path');
             const marker = '<!-- visual-review-links -->';
             // TurboSnap skips the whole build when a push touches no frontend
             // files — a skipped build has no URLs, so never render dead links.
@@ -68,6 +70,35 @@ jobs:
             const skipped = !buildUrl || buildUrl === 'undefined';
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
+
+            // A Storybook has no idea what a PR changed, so its link opens at
+            // the root. Work it out from the diff instead: every changed file
+            // under a piece's folder maps to that folder's story file, whose
+            // `title` is what Storybook builds the URL from. The reviewer then
+            // lands on the component the PR is about, not on the front page.
+            const storyIdFromTitle = (title) =>
+              title.toLowerCase()
+                .replace(/[ ’–—―′¿'`~!@#$%^&*()_|+\-=?;:'",.<>{}[\]\\/]/g, '-')
+                .replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+            const storiesTouched = (files) => {
+              const dirs = new Set();
+              for (const f of files) {
+                const m = f.match(/^(src\/(?:atoms|components|patterns|templates)\/[^/]+)\//);
+                if (m) dirs.add(m[1]);
+              }
+              const out = new Map();
+              for (const dir of [...dirs].sort()) {
+                if (!fs.existsSync(dir)) continue; // the PR deleted the piece
+                for (const file of fs.readdirSync(dir).filter((n) => n.endsWith('.stories.tsx'))) {
+                  const src = fs.readFileSync(path.join(dir, file), 'utf8');
+                  // The meta's title, not a story's `args.title` further down.
+                  const title = src.match(/const meta\b[\s\S]*?\btitle:\s*['"`]([^'"`]+)['"`]/)?.[1];
+                  if (title) out.set(storyIdFromTitle(title), title);
+                }
+              }
+              return [...out].map(([id, title]) => ({ id, title }));
+            };
+
             const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
             const existing = comments.data.find(c => c.body.includes(marker));
             // A skipped build says nothing about the PR as a whole — earlier
@@ -90,12 +121,33 @@ jobs:
                 '_This push changes no story, component, or token files — there is nothing visual to diff, so Chromatic skipped snapshotting it._'
               );
             } else {
+              const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: issue_number, per_page: 100 });
+              const stories = storiesTouched(files.map((f) => f.filename));
+              const docsUrl = (id) => `${storybookUrl}?path=/docs/${id}--docs`;
+              // Land on the first touched piece; fall back to the root only
+              // when the PR touches no piece (tokens, tooling, docs).
+              const landing = stories.length ? docsUrl(stories[0].id) : storybookUrl;
+              const landingLabel = stories.length
+                ? `**Live Storybook for this branch** — opens on \`${stories[0].title}\``
+                : '**Live Storybook for this branch** — click through the real components';
               lines.push(
                 '| What | Where |',
                 '|---|---|',
                 `| **Before → after diffs** — every story this PR changes, side by side against \`main\` | [Open in Chromatic](${buildUrl}) |`,
-                `| **Live Storybook for this branch** — click through the real components | [Open Storybook](${storybookUrl}) |`,
-                '',
+                `| ${landingLabel} | [Open Storybook](${landing}) |`,
+                ''
+              );
+              if (stories.length > 1) {
+                lines.push('**Pieces this PR touches**', '');
+                for (const s of stories) lines.push(`- [${s.title}](${docsUrl(s.id)})`);
+                lines.push('');
+              } else if (stories.length === 0) {
+                lines.push(
+                  '_No component folder changed, so there is no single story to land on. A token change repaints everything — the diffs link is the one to read._',
+                  ''
+                );
+              }
+              lines.push(
                 '_Updated automatically on every push. Diffs may take a minute to finish after this comment appears._',
                 '_The diff link asks you to sign in the first time — use **Connect with GitHub** and your access to this repo carries over. The Storybook link needs no account._'
               );
