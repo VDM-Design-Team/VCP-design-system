@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Patterns/TopBar',
@@ -87,6 +88,7 @@ export const ReadOnlyUser: Story = {
 
 /** Both versions, both themes. */
 export const LightAndDark: Story = {
+  parameters: { ...SIDE_BY_SIDE },
   render: (args) => (
     <div className="flex flex-col">
       {[false, true].map((isDark) => (

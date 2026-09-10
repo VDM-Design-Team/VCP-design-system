@@ -25,7 +25,7 @@ this list drifts.
 | Version | Left side | When |
 |---|---|---|
 | With primary action | The `Button` passed in `primaryAction` | Screens where creating an Added Value is the headline act |
-| Without | The `Logo`, linked via `homeHref` | Everywhere else |
+| Without | The `Logo`, linked via `homeHref` — or standing alone, naming itself, when there is no `homeHref` | Everywhere else |
 
 Exactly the Figma variant pair — pass `primaryAction` or don't; there is no
 third arrangement. The **page-level** header (back arrow, AV id/title,
@@ -60,7 +60,9 @@ every visible piece is a composed component wearing its own.
   belongs to `AVHeader`/the page itself.
 - The logo link is named "Value Chain Plus — home" with the `Logo` rendered
   `decorative` — one announcement (the InAHomeLink pattern from
-  docs/logo.md).
+  docs/logo.md). Without `homeHref` there is no link at all: an `<a>` with no
+  `href` is not a link and may not carry a name, so the `Logo` renders alone
+  and names itself. (Found by the story tests, 10 Sep 2026.)
 - The bell is an `IconButton` whose name carries the count ("Notifications,
   3 unread"); the dot is `aria-hidden` — colour never carries it alone.
 - The mode switch is the system `Toggle` named "Dark mode" — a real switch

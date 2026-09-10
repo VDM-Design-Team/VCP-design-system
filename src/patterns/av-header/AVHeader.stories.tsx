@@ -98,7 +98,10 @@ export const UnderTheTopBar: Story = {
         user={{ name: 'Eve Kestrel' }}
         onUserMenu={() => {}}
       />
-      <AVHeader {...args} />
+      {/* As the shell places it: inside <main>, so it is not a second banner. */}
+      <main>
+        <AVHeader {...args} />
+      </main>
     </div>
   ),
 };

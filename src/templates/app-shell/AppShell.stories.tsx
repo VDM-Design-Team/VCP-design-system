@@ -11,6 +11,7 @@ import { EmptyState } from '../../components/empty-state';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Footer } from '../../atoms/footer';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 /* One rail with real state, so navigating and collapsing work in the story. */
 const Rail = ({ userType = 'user', collapsed: initial = false }: { userType?: SidebarUserType; collapsed?: boolean }) => {
@@ -69,7 +70,7 @@ const meta = {
     children: (
       <>
         <Stats />
-        <Card title="Recent activity" padded>
+        <Card title="Recent activity" headingLevel={2} padded>
           <p className="text-body-md text-text-secondary">Nothing yet this cycle.</p>
         </Card>
       </>
@@ -113,7 +114,7 @@ export const WithAVHeader: Story = {
       />
     ),
     children: (
-      <Card title="Description" padded>
+      <Card title="Description" headingLevel={2} padded>
         <p className="text-body-md text-text-secondary">
           Cut the onboarding form from nine fields to four and defer the rest to first use.
         </p>
@@ -139,7 +140,7 @@ export const LongPage: Story = {
     children: (
       <div className="flex flex-col gap-4 py-6">
         {Array.from({ length: 14 }, (_, i) => (
-          <Card key={i} title={`VCP-${1200 + i}`} padded>
+          <Card key={i} title={`VCP-${1200 + i}`} headingLevel={2} padded>
             <p className="text-body-md text-text-secondary">Moved to For Review by Eve Kestrel.</p>
           </Card>
         ))}
@@ -157,6 +158,7 @@ export const EmptyPage: Story = {
     children: (
       <div className="flex flex-1 items-center justify-center py-16">
         <EmptyState
+          headingLevel={2}
           icon={<Icon name="file" size="lg" />}
           title="No drafts"
           description="An Added Value you start and don't submit waits here."
@@ -176,19 +178,7 @@ export const CustomFooter: Story = {
 export const LightAndDark: Story = {
   parameters: {
     controls: { disable: true },
-    /* Two whole pages side by side means two banners, two mains and two
-       footers on one document. That is the story's doing, not the shell's. */
-    a11y: {
-      config: {
-        rules: [
-          { id: 'landmark-no-duplicate-banner', enabled: false },
-          { id: 'landmark-no-duplicate-contentinfo', enabled: false },
-          { id: 'landmark-no-duplicate-main', enabled: false },
-          { id: 'landmark-one-main', enabled: false },
-          { id: 'landmark-unique', enabled: false },
-        ],
-      },
-    },
+    ...SIDE_BY_SIDE,
   },
   render: () => (
     <div className="grid grid-cols-2">

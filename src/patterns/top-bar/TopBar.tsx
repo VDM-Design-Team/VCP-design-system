@@ -92,16 +92,22 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         )}
         {...props}
       >
-        {/* The variant pair: the primary action, or the linked logo. */}
-        {primaryAction ?? (
-          <a
-            href={homeHref}
-            aria-label="Value Chain Plus — home"
-            className="inline-flex rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stroke-focused"
-          >
-            <Logo decorative size="md" />
-          </a>
-        )}
+        {/* The variant pair: the primary action, or the logo — linked when
+            there is somewhere for it to go. An `<a>` without `href` is not a
+            link and may not carry a name, so without `homeHref` the logo
+            stands alone and names itself. */}
+        {primaryAction ??
+          (homeHref ? (
+            <a
+              href={homeHref}
+              aria-label="Value Chain Plus — home"
+              className="inline-flex rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stroke-focused"
+            >
+              <Logo decorative size="md" />
+            </a>
+          ) : (
+            <Logo size="md" />
+          ))}
         <div className="flex shrink-0 items-center gap-4">
           {notifications != null && (
             <span className="relative">

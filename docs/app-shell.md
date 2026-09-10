@@ -111,9 +111,12 @@ file draws one. It can be added when one does, as a second slot.
   `TopBar` deliberately has none.
 - **The title band's `<header>` is not a second banner.** Inside `<main>` it
   is plain sectioning content, which is why the slot lives there.
-- **Scrolling is keyboard-reachable.** The scroll region is a plain block, so
-  Tab into anything in it and the browser scrolls it into view; there is no
-  custom scroll behaviour to get wrong.
+- **Scrolling is keyboard-reachable.** The scroll region is a focusable
+  `group` named "Page", so a page of plain text still scrolls with the arrow
+  keys once it has focus; Tab into anything inside it and the browser scrolls
+  that into view too. It is a group rather than a `region` landmark on
+  purpose: a landmark there would nest `main` and the footer inside it and
+  demote both. (Found by the story tests, 10 Sep 2026.)
 - **Desktop only, as the design is.** There is no mobile frame in
   `Page_Template`. The narrow-width answer today is the collapsed rail; a
   drawer is a design call, not a default to invent.

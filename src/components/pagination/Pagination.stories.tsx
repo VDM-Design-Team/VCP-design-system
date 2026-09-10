@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Pagination } from './Pagination';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Components/Navigation/Pagination',
@@ -56,7 +57,7 @@ export const SinglePage: Story = {
 
 /** Everything is tokens, so dark is free. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', ...SIDE_BY_SIDE },
   render: (args) => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

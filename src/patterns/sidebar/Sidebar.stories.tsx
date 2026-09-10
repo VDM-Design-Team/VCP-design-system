@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Sidebar, NAV_BY_USER_TYPE, type SidebarUserType } from './Sidebar';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Patterns/Sidebar',
@@ -56,7 +57,7 @@ export const Default: Story = {
  * not have — it is the only rail with `Planning`.
  */
 export const EveryUserType: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
   render: () => (
     <div className="flex h-screen gap-6 overflow-x-auto bg-surface-canvas p-6">
       {(['user', 'admin', 'admin-dev', 'super-admin'] as SidebarUserType[]).map((t) => (
@@ -84,7 +85,7 @@ export const Collapsed: Story = {
 
 /** Expanded and collapsed side by side — the glyphs hold their axis. */
 export const BothWidths: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
   render: () => (
     <div className="flex h-screen gap-6 bg-surface-canvas p-6">
       <Sidebar userType="admin-dev" active="planning" className="rounded-md border" />
@@ -130,7 +131,7 @@ export const WithDomainSelector: Story = {
 
 /** Every fill is a token, so dark comes free. */
 export const LightAndDark: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
   render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

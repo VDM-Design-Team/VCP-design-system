@@ -60,7 +60,8 @@ value never depends on either. `danger` in dark is the floor at 3.84:1.
 - `role="progressbar"` with `aria-valuemin/max/now` — real units, not the
   painted percentage.
 - The visible `label` names the meter via `aria-labelledby`. **A bar with no
-  `label` must get `aria-label`** — an unnamed meter announces as "64%… of
+  `label` must get `aria-label`** — it lands on the meter itself, not the
+  wrapper (fixed 10 Sep 2026) — because an unnamed meter announces as "64%… of
   what?".
 - Colour is never the only signal: the value is announced, and `showValue`
   paints it. If tone changes meaning mid-flow (warning → danger), the caller

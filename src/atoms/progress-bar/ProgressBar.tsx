@@ -69,7 +69,21 @@ export interface ProgressBarProps
 }
 
 export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
-  ({ className, value, max = 100, tone, size, label, showValue, ...props }, ref) => {
+  (
+    {
+      className,
+      value,
+      max = 100,
+      tone,
+      size,
+      label,
+      showValue,
+      'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledby,
+      ...props
+    },
+    ref,
+  ) => {
     const labelId = React.useId();
     const clamped = Math.max(0, Math.min(max, value));
     const pct = max > 0 ? (clamped / max) * 100 : 0;
@@ -91,7 +105,10 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
           aria-valuemin={0}
           aria-valuemax={max}
           aria-valuenow={clamped}
-          aria-labelledby={label ? labelId : undefined}
+          /* The name goes on the meter, not the wrapper: a visible `label`
+             by reference, else whatever the caller passed. */
+          aria-labelledby={label ? labelId : ariaLabelledby}
+          aria-label={label ? undefined : ariaLabel}
           className={track({ size })}
         >
           <div className={fill({ tone })} style={{ width: `${pct}%` }} />
