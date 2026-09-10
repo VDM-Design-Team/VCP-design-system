@@ -226,14 +226,17 @@ What runs on every PR **today**:
 | Token rebuild + stale-`dist/` | Generated files that don't match `tokens/` |
 | `lint:tokens` | Hardcoded colors, px values, arbitrary Tailwind classes |
 | Typecheck | Type errors across components and stories |
+| Story tests (`test:flows`) | Every story renders in a real Chromium; a story's `play` function runs as an interaction test; axe checks each story and reports violations |
 | Chromatic | Storybook builds, visual diffs vs `main`, posts the 🔍 Visual review comment |
 
-Planned next: **automated accessibility tests** (Storybook test runner + axe),
-so CLAUDE.md rule 5 is enforced by CI instead of by memory.
+The story tests are the Storybook Vitest addon in browser mode. Run them
+locally with `npm run test:flows`, or from the Storybook sidebar. The axe
+check currently **reports** rather than fails: twenty-two stories had
+violations when the runner landed and are being fixed separately, after which
+it flips to failing.
 
 Deliberately deferred, with the trigger that un-defers them:
 
-- **Unit/interaction tests** — when components carry real logic.
 - **Required PR approvals** in the ruleset — when at least two people can
   independently review most changes.
 - **Merge queue** — when several approved PRs regularly wait simultaneously.
