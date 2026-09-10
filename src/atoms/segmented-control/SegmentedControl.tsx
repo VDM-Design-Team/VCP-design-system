@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { Icon } from '../icon';
 
 /**
  * SegmentedControl — a small set of mutually exclusive options, all visible at once.
@@ -10,15 +11,39 @@ import { cn } from '../../lib/cn';
  * it does not swap one panel of content for another. Reach for Tabs when the
  * options lead to different content.
  *
+ * **Saving a change.** When choosing a segment persists something, the parent
+ * drives `status` through `pending → success | error` and the control shows
+ * it: a spinner in the selected segment while pending (and no further
+ * selection until it settles), a check on success, a critical stroke on
+ * error. The control stays presentational — it never times anything and it
+ * never reverts anything. The parent returns `success` to `idle` after about
+ * 1.5 s, and on `error` the parent simply keeps the previous `value`, which
+ * is why async use is controlled-only. The error *message* belongs to `Field`,
+ * which wires it to the group through `aria-describedby`.
+ *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 const track = cva(
-  ['inline-flex items-center gap-0.5 p-0.5', 'bg-surface-neutral-subtle rounded-sm'],
+  [
+    'inline-flex items-center gap-0.5 p-0.5',
+    'bg-surface-neutral-subtle rounded-sm',
+    /* The border is always there, transparent, so the error stroke shifts nothing. */
+    'border border-transparent transition-colors',
+  ],
   {
-    variants: { fullWidth: { true: 'flex w-full', false: '' } },
-    defaultVariants: { fullWidth: false },
+    variants: {
+      fullWidth: { true: 'flex w-full', false: '' },
+      status: {
+        idle: '',
+        pending: '',
+        success: '',
+        /* The same stroke `Input` draws when invalid — one error, one look. */
+        error: 'border-accent-critical-outline-border-default',
+      },
+    },
+    defaultVariants: { fullWidth: false, status: 'idle' },
   },
 );
 
@@ -39,8 +64,15 @@ const segment = cva(
     variants: {
       size: { sm: 'h-8 px-3 text-label-md', md: 'h-10 px-4 text-label-lg' },
       fullWidth: { true: 'flex-1', false: '' },
+      /* Pending mutes the selected label back to the unselected colour and
+         holds the others where they are — nothing is clickable until the
+         save settles, so nothing should invite a click. */
+      pending: {
+        true: 'aria-checked:text-text-tertiary cursor-progress hover:text-text-tertiary',
+        false: '',
+      },
     },
-    defaultVariants: { size: 'md', fullWidth: false },
+    defaultVariants: { size: 'md', fullWidth: false, pending: false },
   },
 );
 
@@ -52,15 +84,28 @@ export interface SegmentedControlOption {
   disabled?: boolean;
 }
 
+/**
+ * Where a save of the current selection stands. The parent owns it; the
+ * control only shows it. `idle` is the everyday state and the default.
+ */
+export type SegmentedControlStatus = 'idle' | 'pending' | 'success' | 'error';
+
 export interface SegmentedControlProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'>,
-    VariantProps<typeof segment> {
+    Omit<VariantProps<typeof segment>, 'pending'> {
   options: Array<string | SegmentedControlOption>;
-  /** Controlled selection. */
+  /** Controlled selection. Required when `status` is used — see the docs. */
   value?: string;
   /** Uncontrolled starting selection. Defaults to the first enabled option. */
   defaultValue?: string;
   onChange?: (value: string) => void;
+  /**
+   * The save's progress, driven by the parent. `pending` shows a spinner in
+   * the selected segment and ignores further selection; `success` shows a
+   * check; `error` draws the critical stroke and sets `aria-invalid`. The
+   * message for an error comes from the `Field` around it.
+   */
+  status?: SegmentedControlStatus;
   /** Labels the group for screen readers. Use this or `aria-labelledby`. */
   'aria-label'?: string;
 }
@@ -69,16 +114,22 @@ const normalise = (o: string | SegmentedControlOption): SegmentedControlOption =
   typeof o === 'string' ? { value: o, label: o } : o;
 
 export const SegmentedControl = React.forwardRef<HTMLDivElement, SegmentedControlProps>(
-  ({ className, options, value, defaultValue, onChange, size, fullWidth, ...props }, ref) => {
+  (
+    { className, options, value, defaultValue, onChange, size, fullWidth, status = 'idle', ...props },
+    ref,
+  ) => {
     const items = React.useMemo(() => options.map(normalise), [options]);
     const firstEnabled = items.find((o) => !o.disabled)?.value;
 
     const [uncontrolled, setUncontrolled] = React.useState(defaultValue ?? firstEnabled);
     const selected = value !== undefined ? value : uncontrolled;
+    const pending = status === 'pending';
 
     const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
 
     const select = (next: string) => {
+      /* A save is in flight: the selection is spoken for until it settles. */
+      if (pending) return;
       if (value === undefined) setUncontrolled(next);
       onChange?.(next);
     };
@@ -128,26 +179,60 @@ export const SegmentedControl = React.forwardRef<HTMLDivElement, SegmentedContro
     const rovingIndex = tabStop >= 0 ? tabStop : items.findIndex((o) => !o.disabled);
 
     return (
-      <div ref={ref} role="radiogroup" className={cn(track({ fullWidth }), className)} {...props}>
-        {items.map((option, i) => (
-          <button
-            key={option.value}
-            ref={(el) => {
-              refs.current[i] = el;
-            }}
-            type="button"
-            role="radio"
-            aria-checked={option.value === selected}
-            aria-label={option['aria-label']}
-            disabled={option.disabled}
-            tabIndex={i === rovingIndex ? 0 : -1}
-            onClick={() => select(option.value)}
-            onKeyDown={(e) => onKeyDown(e, i)}
-            className={segment({ size, fullWidth })}
-          >
-            <span className="truncate">{option.label}</span>
-          </button>
-        ))}
+      <div
+        ref={ref}
+        role="radiogroup"
+        /* `aria-busy` while the save is in flight; `aria-invalid` when it
+           failed. Both sit before the spread so a `Field` wiring its own
+           `aria-invalid` onto the control wins. `data-status` is for styling
+           hooks and tests — it is not an accessibility signal. */
+        aria-busy={pending || undefined}
+        aria-invalid={status === 'error' || undefined}
+        data-status={status}
+        className={cn(track({ fullWidth, status }), className)}
+        {...props}
+      >
+        {items.map((option, i) => {
+          const isSelected = option.value === selected;
+          return (
+            <button
+              key={option.value}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={option['aria-label']}
+              disabled={option.disabled}
+              tabIndex={i === rovingIndex ? 0 : -1}
+              onClick={() => select(option.value)}
+              onKeyDown={(e) => onKeyDown(e, i)}
+              className={cn(segment({ size, fullWidth, pending }))}
+            >
+              {/* The save's state rides in the selected segment, decorative:
+                  `aria-busy` on the group already says "pending", and success
+                  is a moment, not information to announce. */}
+              {isSelected && pending && (
+                <Icon
+                  name="circle-notch"
+                  size="sm"
+                  aria-hidden="true"
+                  className="shrink-0 animate-spin motion-reduce:animate-pulse"
+                />
+              )}
+              {isSelected && status === 'success' && (
+                <Icon
+                  name="check"
+                  size="sm"
+                  aria-hidden="true"
+                  className="shrink-0 text-accent-success-tonal-content-default"
+                />
+              )}
+              <span className="truncate">{option.label}</span>
+            </button>
+          );
+        })}
       </div>
     );
   },

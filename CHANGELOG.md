@@ -25,6 +25,20 @@ warning is reverted (PR #74), and the model is the one that shipped on
 - **`Completed` no longer offers "Move to Review."** `Review` is reached
   from the chain's handoff, and `Accept` on `Review` lands on `Completed`.
 
+### `SegmentedControl` — saving states (10 September 2026)
+
+A minor addition, no breaking change. When choosing a segment saves something,
+the parent drives a new `status` prop through `pending → success | error` and
+the control shows it: a Phosphor `circle-notch` spinner in the selected
+segment while pending (label muted, group `aria-busy`, further selection
+ignored), a check on success, the `Input` error stroke and `aria-invalid` on
+error. The control stays presentational — the parent times the return to
+idle and keeps the previous value on error, so async use is controlled-only —
+and the error message is `Field`'s, wired through `aria-describedby`. Four
+`play` stories (`SelectsOnClick`, `KeyboardNavigation`, `SaveSucceeds`,
+`SaveFails`) are the first interaction tests in the repo and run under
+`npm test`. `Icon` gains `circle-notch`. No new tokens.
+
 ### Breaking — 7 September 2026
 
 **`AVStatus` is now the spine only, and the status vocabulary is open.**
