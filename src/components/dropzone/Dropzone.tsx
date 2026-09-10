@@ -120,7 +120,14 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
             disabled ? 'text-text-disabled' : 'text-text-secondary',
           )}
         >
-          <span className={cn('text-label-md', !disabled && 'text-text-link-default')}>
+          {/* Link blue is 4.11:1 on the error tint; the critical content
+              colour is what the surface was designed around. */}
+          <span
+            className={cn(
+              'text-label-md',
+              !disabled && (error ? 'text-accent-critical-tonal-content-default' : 'text-text-link-default'),
+            )}
+          >
             {label}
           </span>{' '}
           or drag and drop

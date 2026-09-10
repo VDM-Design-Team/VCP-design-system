@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Accordion } from './Accordion';
 import { Badge } from '../../atoms/badge';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const ITEMS = [
   {
@@ -106,7 +107,7 @@ export const WithMeta: Story = {
 
 /** Header, open tint and content are all tokens, so dark is free. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', ...SIDE_BY_SIDE },
   render: (args) => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

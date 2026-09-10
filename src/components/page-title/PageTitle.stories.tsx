@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PageTitle } from './PageTitle';
 import { Button } from '../../atoms/button';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Components/Navigation/PageTitle',
@@ -114,6 +115,7 @@ export const LongTitle: Story = {
 
 /** Every colour is a token, so dark comes free. */
 export const LightAndDark: Story = {
+  parameters: { ...SIDE_BY_SIDE },
   render: (args) => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

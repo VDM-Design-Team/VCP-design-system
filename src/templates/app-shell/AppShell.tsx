@@ -82,8 +82,20 @@ export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(
         {topBar}
         {/* The scroll region: title band, body and footer move together under
             a bar that does not. `min-h-0` lets it shrink to what the bar
-            leaves, which a flex child will not do on its own. */}
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            leaves, which a flex child will not do on its own. It can take
+            focus, so a page of plain text still scrolls from the keyboard —
+            a scroll region with nothing focusable inside is otherwise
+            unreachable. `group`, not `region`: a landmark here would nest
+            `main` and the footer inside it and demote both. */}
+        <div
+          role="group"
+          aria-label="Page"
+          tabIndex={0}
+          className={cn(
+            'flex min-h-0 flex-1 flex-col overflow-y-auto',
+            'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
+          )}
+        >
           <main className="flex min-w-0 flex-1 flex-col">
             {header}
             {/* The design's body slot: 32 each side. No vertical inset — the

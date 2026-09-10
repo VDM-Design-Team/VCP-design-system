@@ -54,7 +54,9 @@ Resting: dashed `stroke.field` on `surface.elevated` — the form-control
 border, because this is a form control; the export's `stroke.default`
 measured 2.56:1 against the 3:1 a control boundary needs. Drag-over:
 `stroke.focused` over `surface.brand.base`. The browse verb wears
-`text.link.default`; icon and hint `text.tertiary`; hint at `label-sm` (the
+`text.link.default` — except on the error tint, where link blue is 4.11:1 and
+the verb takes the critical content colour instead; icon and hint
+`text.tertiary`; hint at `label-sm` (the
 export's 11px/400 has no ramp partner). New glyph: **`cloud-arrow-up`** added
 to the icon set from Phosphor, per docs/icon.md.
 

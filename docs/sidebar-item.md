@@ -78,7 +78,10 @@ The same split `Breadcrumb` makes, for the same reason.
 
 `selected` does two things, and the second is the one that matters:
 
-- the brand-tinted fill, `surface.brand.subtle`, with `text.brand` over it;
+- the brand-tinted fill, `surface.brand.subtle`, with `text.brand.strong` over
+  it — 8.97:1 in light, 6.14:1 in dark. (Until 10 Sep 2026 the class named a
+  `text.brand` token that does not exist, so the row inherited black: fine on
+  the light tint, 2.32:1 on the dark one. Found by the story tests.);
 - **`aria-current="page"`**, which is what tells a screen reader which row is
   the page you are on.
 

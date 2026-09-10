@@ -459,6 +459,18 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 
 ### Fixes
 
+- **Five findings from the first run of the story tests (10 September 2026).**
+  `SidebarItem`'s selected row named a `text.brand` token that does not exist,
+  so its label inherited black — 2.32:1 on the dark tint; it is `text.brand.strong`
+  now (8.97:1 light, 6.14:1 dark). `ProgressBar` put a passed `aria-label` on its
+  wrapper instead of the meter, leaving the meter unnamed. `Dropzone`'s "Choose
+  files" kept link blue on the error tint at 4.11:1; it takes the critical content
+  colour there. `TopBar` rendered an `<a aria-label>` with no `href` when `homeHref`
+  was omitted; the `Logo` now stands alone and names itself. `AppShell`'s scroll
+  region could not take focus, so a page of plain text was unreachable from the
+  keyboard; it is a focusable group named "Page". The a11y check in `npm test`
+  now fails on any violation.
+
 - `cn()` was dropping type classes. tailwind-merge files any `text-…` it doesn't
   recognise as a colour, so `text-label-lg` and `text-action-primary-content-default`
   collided and only the last one survived. **Every `Button` has been rendering at the

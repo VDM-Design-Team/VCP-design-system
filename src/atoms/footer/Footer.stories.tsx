@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Footer } from './Footer';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Atoms/Footer',
@@ -40,7 +41,7 @@ export const OnThePage: Story = {
 
 /** Both fills are tokens, so dark comes free. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', ...SIDE_BY_SIDE },
   render: (args) => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

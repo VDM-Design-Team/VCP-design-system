@@ -56,7 +56,7 @@ export const CustomLabel: Story = {
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex items-end gap-8">
-      <DonutChart {...args} size={72} thickness={10} caption={undefined} />
+      <DonutChart {...args} size={72} thickness={10} caption={undefined} aria-label="Storage used" />
       <DonutChart {...args} size={140} />
       <DonutChart {...args} size={200} thickness={20} />
     </div>

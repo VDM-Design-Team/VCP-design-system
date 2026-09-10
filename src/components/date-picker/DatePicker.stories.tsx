@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DatePicker } from './DatePicker';
 import { Popover } from '../popover';
-import { Input } from '../../atoms/input';
+import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 
 const meta = {
@@ -89,7 +89,11 @@ export const MarkersAndFlags: Story = {
   },
 };
 
-/** The composition: an Input trigger opening the panel in a Popover. */
+/**
+ * The composition: a trigger opening the panel in a Popover. The trigger is a
+ * real `Button` — wrapping an `Input` in a button nests two controls, which
+ * assistive tech can still reach however the inner one is hidden.
+ */
 export const InAPopover: Story = {
   render: (args) => {
     const [value, setValue] = React.useState(args.value);
@@ -100,18 +104,13 @@ export const InAPopover: Story = {
           open={open}
           onOpenChange={setOpen}
           trigger={
-            <button type="button" aria-label="Choose start date" className="w-64 text-left">
-              <Input
-                aria-hidden="true"
-                tabIndex={-1}
-                readOnly
-                fullWidth
-                value={value ?? ''}
-                placeholder="Pick a date"
-                leadingIcon={<Icon name="calendar-blank" size="sm" />}
-                className="pointer-events-none"
-              />
-            </button>
+            <Button
+              variant="secondary"
+              iconLeft={<Icon name="calendar-blank" size="sm" />}
+              aria-label={value ? `Start date, ${value}` : 'Choose start date'}
+            >
+              {value ?? 'Pick a date'}
+            </Button>
           }
           content={
             <DatePicker

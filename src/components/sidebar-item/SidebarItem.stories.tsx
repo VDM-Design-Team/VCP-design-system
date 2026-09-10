@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SidebarItem } from './SidebarItem';
 import { Tooltip } from '../tooltip';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Components/Navigation/SidebarItem',
@@ -144,7 +145,7 @@ export const LongLabel: Story = {
 
 /** Every fill is a token, so dark comes free. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', ...SIDE_BY_SIDE },
   render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

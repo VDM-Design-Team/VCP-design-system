@@ -81,7 +81,7 @@ const row = (selected: boolean, collapsed: boolean) =>
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     collapsed ? 'justify-center px-2' : 'gap-2 px-2',
     selected
-      ? 'bg-surface-brand-subtle font-medium text-text-brand'
+      ? 'bg-surface-brand-subtle font-medium text-text-brand-strong'
       : 'text-text-secondary hover:bg-surface-brand-faint',
   );
 
@@ -91,7 +91,7 @@ const subRow = (selected: boolean) =>
   cn(
     'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans text-label-md transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    selected ? 'font-medium text-text-brand' : 'text-text-secondary hover:bg-surface-brand-faint',
+    selected ? 'font-medium text-text-brand-strong' : 'text-text-secondary hover:bg-surface-brand-faint',
   );
 
 export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
