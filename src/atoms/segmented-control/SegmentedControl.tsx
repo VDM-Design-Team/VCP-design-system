@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { Icon } from '../icon';
+import type { SavingStatus } from '../../lib/saving';
 
 /**
  * SegmentedControl — a small set of mutually exclusive options, all visible at once.
@@ -84,11 +85,8 @@ export interface SegmentedControlOption {
   disabled?: boolean;
 }
 
-/**
- * Where a save of the current selection stands. The parent owns it; the
- * control only shows it. `idle` is the everyday state and the default.
- */
-export type SegmentedControlStatus = 'idle' | 'pending' | 'success' | 'error';
+/** Where a save of the current selection stands — the shared `SavingStatus`. */
+export type SegmentedControlStatus = SavingStatus;
 
 export interface SegmentedControlProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'>,

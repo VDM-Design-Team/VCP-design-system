@@ -25,6 +25,19 @@ warning is reverted (PR #74), and the model is the one that shipped on
 - **`Completed` no longer offers "Move to Review."** `Review` is reached
   from the chain's handoff, and `Accept` on `Review` lands on `Completed`.
 
+### `Toggle` — saving states, and the contract written down (10 September 2026)
+
+A minor addition. `Toggle` takes the same parent-driven `status` prop
+`SegmentedControl` got earlier today: a spinner in the knob while pending
+(input `aria-busy`, further flips ignored without disabling the input), a
+check on success, the critical ring and `aria-invalid` on error. The contract
+is now one document, `docs/saving-states.md`, and one type, `SavingStatus` in
+`src/lib/saving.ts`; `SegmentedControlStatus` is an alias of it. The parent's
+half — the fake save the flow stories are built around — is one shared hook,
+`useFakeSave` in `src/lib/story-saving.ts`, so `SegmentedControl`'s stories
+shrank and `Toggle`'s four `play` stories (`FlipsOnClick`, `KeyboardSpace`,
+`SaveSucceeds`, `SaveFails`) cost about twenty lines each. No new tokens.
+
 ### `SegmentedControl` — saving states (10 September 2026)
 
 A minor addition, no breaking change. When choosing a segment saves something,

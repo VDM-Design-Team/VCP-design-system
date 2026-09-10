@@ -12,7 +12,8 @@ An on/off switch. Flipping it **is** the action — the change commits immediate
 Rules of thumb:
 
 - If the screen has a **Save** button and the switch's value is part of that save, it is a Checkbox, not a Toggle.
-- If flipping it fires a network request on the spot, it is a Toggle.
+- If flipping it fires a network request on the spot, it is a Toggle — and the parent
+  can show how that request is going through `status`. See [Saving a change](#saving-a-change).
 - A Toggle is always binary and always has a default. If "unset" is a real third state, use a `Select` or a radio group.
 - Never use a Toggle to answer a question ("Do you want a receipt?") — label it as the *state* it controls ("Email receipts"), not as a question.
 
@@ -25,6 +26,7 @@ Rules of thumb:
 | `onChange` | `(checked: boolean) => void` | — | Receives the **next** boolean, not the event. |
 | `disabled` | `boolean` | `false` | |
 | `label` | `ReactNode` | — | Visible label. Clicking it toggles. Without one, `aria-label` is required. |
+| `status` | `idle \| pending \| success \| error` | `idle` | How the save of the current state is going. Parent-driven; see below |
 | `className` | `string` | — | Merged onto the `<label>` wrapper, not the hidden `<input>`. |
 | `style` | `CSSProperties` | — | Applied to the `<label>` wrapper. |
 
@@ -44,12 +46,36 @@ underlying `<input>`. `ref` points at that `<input>`.
 | Label | default | `type.body-md`, `text.secondary` |
 | Label | disabled | `type.body-md`, `text.disabled` |
 | Focus ring | keyboard focus | `stroke.focused`, 2 wide, 2 offset |
+| Track | error | `accent.critical.outline.border.default` as a 2 ring — a ring, not a border, so the knob's inset is untouched |
+| Knob glyph | pending / success | `text.tertiary` spinner / `accent.success.tonal.content.default` check |
 
 The off track is deliberately **not** the light grey the Claude Design export used
 (`surface.neutral.medium`, slate-300). That value sits at 1.48:1 against `surface.base` —
 below the 3:1 that CLAUDE.md requires for UI, which would make "off" indistinguishable
 from the page. `surface.neutral.strong` is the lightest neutral in the system that clears
 it: 4.76:1 on `surface.base` and 4.55:1 on `surface.canvas` in light, 9.85:1 / 12.02:1 in dark.
+
+## Saving a change
+
+A Toggle that saves on flip can say how the save is going. The parent drives
+`status`; the knob shows it — a spinner while pending, a check on success —
+and the track takes the critical ring on error. The rules are the shared ones
+in [saving-states.md](saving-states.md): controlled only, the parent times the
+return to idle and keeps the previous `checked` on error, and the message is
+`Field`'s. `Field`'s `label` associates with the input natively, but the
+Toggle already carries its own `label`, so leave `Field`'s off.
+
+```tsx
+const { value, status, error, save } = useSave(initial);
+<Field error={error}>
+  {(control) => (
+    <Toggle label="Email notifications" checked={value} onChange={save} status={status} {...control} />
+  )}
+</Field>
+```
+
+The `SaveSucceeds` and `SaveFails` stories are that parent, and they run as
+tests.
 
 ## Accessibility
 
@@ -72,7 +98,14 @@ it: 4.76:1 on `surface.base` and 4.55:1 on `surface.canvas` in light, 9.85:1 / 1
 - **Focus ring** is `outline-stroke-focused` at 2 with 2 offset, drawn on the pill via
   `peer-focus-visible` even though focus technically lives on the hidden input. It appears for
   keyboard focus only, not for clicks. Never remove it.
-- Transitions are wrapped in `motion-reduce:transition-none`.
+- Transitions are wrapped in `motion-reduce:transition-none`; the pending spinner pulses
+  instead of spinning under the same preference.
+- **Saving states.** `pending` sets `aria-busy` on the input and ignores further flips
+  without disabling the input, so focus stays put; `error` sets `aria-invalid`, and
+  `Field`'s message is an alert wired through `aria-describedby`. The knob's spinner and
+  check are decorative.
+- **Interaction tests.** `FlipsOnClick`, `KeyboardSpace`, `SaveSucceeds` and `SaveFails`
+  are `play` stories and run under `npm test`.
 - Disabled tracks fall below 3:1 by design. WCAG 1.4.11 exempts inactive controls, and the
   low contrast is the affordance that says "you can't change this".
 
@@ -89,3 +122,6 @@ it: 4.76:1 on `surface.base` and 4.55:1 on `surface.canvas` in light, 9.85:1 / 1
 - Don't strip the wrapper's padding to make the control smaller — that breaks the touch target.
 - Don't use `disabled` to communicate "you lack permission" without saying so somewhere the
   user can read. A dead switch with no explanation is a dead end.
+- Don't use `status` on an uncontrolled Toggle, don't time the return from `success` anywhere
+  but the parent, and don't render the error message yourself — `Field` does, and it wires
+  `aria-describedby`.
