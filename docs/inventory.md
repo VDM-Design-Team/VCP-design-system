@@ -55,6 +55,7 @@ record of when each piece landed.
 | pattern | `AcceptPendingAVModal` | PR #104 |
 | component | `Carousel` | PR #110 |
 | pattern | `ChangeLogModal` | PR #110 |
+| pattern | `HandoffAVModal` | PR #106 |
 | atom | `Footer` | PR #82 |
 | component | `PageTitle` | PR #82 |
 | template | `AppShell` | PR #85 |
@@ -75,7 +76,7 @@ Organisms: 2+ components forming a page section.
 | Area | Patterns |
 |---|---|
 | Page structure | `SettingsSection` |
-| AV modals (audit batch 4) | `RejectPendingAVModal` (#107), `HandoffAVModal` (#106), `ReviewAVModal` (#109) — see [figma-audit.md](figma-audit.md) batch 4 |
+| AV modals (audit batch 4) | `RejectPendingAVModal` (#107) — see [figma-audit.md](figma-audit.md) batch 4 |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
