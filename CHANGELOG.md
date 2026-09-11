@@ -486,6 +486,15 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 
 ### Fixes
 
+- **`Modal`'s close button is neutral, not brand (11 September 2026).** The
+  ghost `IconButton` variant paints its icon `action.tertiary` blue, which put
+  a blue X in the corner of every dialog competing with the footer's primary
+  button for the eye — and dismissing is not an action to invite. It is
+  `text.primary` now, 20.17:1 on the panel in light and white in dark, with a
+  neutral `surface.neutral.faint` hover. Recoloured through `className`, the
+  way `Toast` and `Banner` already tone theirs. `AttachmentPreview`'s close
+  button is still the brand blue and was left alone.
+
 - **`Modal`'s stories all started closed, so nothing was testing the dialog
   (11 September 2026).** Every one of the seven stories rendered a trigger
   button and no dialog, which meant Chromatic had never diffed a single pixel
