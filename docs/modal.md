@@ -47,7 +47,7 @@ Rules of thumb:
 | `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. Required **unless** you pass `aria-label` |
 | `aria-label` | `string` | — | The accessible name when there is no visible `title`. Required **unless** you pass `title` |
 | `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby` |
-| `footer` | `ReactNode` | — | Right-aligned action row in a tinted band. Usually two `Button`s |
+| `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |
@@ -79,7 +79,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
       <p>                       type.body-sm · text.tertiary            → aria-describedby
       IconButton                icon "x" · tertiary · md (40 target) · pulled into the padding
     <div>                       px-6 py-5 · flex-1 · overflow-y-auto · tabindex 0 only while it scrolls
-    <footer>                    surface.canvas · border-t stroke.default · px-6 py-4 · justify-end gap-3
+    <footer>                    px-6 pb-5 · justify-end gap-3 — no surface, no divider
 ```
 
 ## Tokens
@@ -96,13 +96,12 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 | Description colour | `text.tertiary` | `text-text-tertiary` |
 | Body colour | `text.secondary` | `text-text-secondary` |
 | Footer surface | none — the panel's `surface.elevated` carries through | — |
-| Footer divider | `stroke.default` | `border-t border-stroke-default` |
 | Focus ring | `stroke.focused` | `focus-visible:outline-stroke-focused` |
 | Font | `font.family.sans` | `font-sans` |
 
 Spacing rides Tailwind's numeric scale, as the system requires: `p-6` (24) around
 the backdrop, `px-6` (24) through the panel, `pt-5`/`py-5` (20) at the header and
-body, `py-4` (16) in the footer, `gap-3` (12) between footer actions. Never
+body, `pb-5` (20) under the footer, `gap-3` (12) between footer actions. Never
 `gap-sm` or `mb-xs` — those emit nothing here.
 
 Widths are on that same numeric scale — `max-w-96`, `max-w-128`, `max-w-160`,
@@ -126,15 +125,20 @@ themes the page but not the dialog, because the dialog is no longer inside it.
 
 All clear 4.5:1 comfortably.
 
-**The footer has no surface of its own** (changed 11 September 2026 — it was
-`surface.canvas`). The dialog reads as one sheet, and the divider is the only
-thing separating the actions from the content. That divider is still
-decorative in the 1.4.11 sense — it carries no state, identifies no control,
-and the buttons inside it have their own contrast — so its 1.48:1 against the
-panel is allowed, on exactly the reasoning in
-[`docs/card.md`](./card.md#why-strokedefault-is-allowed-here). Note that
-`Card`'s footer still tints; if the two should agree, that is a separate
-decision about `Card`.
+**The footer has no surface and no divider** (changed 11 September 2026 — it
+had both: a `surface.canvas` band above a `stroke.default` rule). The dialog
+is one uninterrupted sheet, and whitespace sets the actions apart from the
+content, exactly as it already did between the header and the body.
+
+Nothing is lost against WCAG 1.4.11 by removing them. Neither the band nor
+the rule was a UI component boundary: they carried no state and identified no
+control, which is why the old note had to argue they were decorative in the
+first place. What the user must be able to perceive is the **buttons**, and
+those carry their own contrast — a filled primary at 6.44:1 and a secondary
+whose border is `stroke.brand` — independently of anything behind them.
+
+Note that `Card`'s footer still has both a tint and a rule. If the two should
+agree, that is a separate decision about `Card`.
 
 ## Accessibility
 
@@ -313,7 +317,7 @@ stories are where the behaviour lives.
 | `zIndex: 100` | `z-50` | There is no z-index token; `z-50` is Tailwind's top default layer |
 | `font: '600 18px/1.3'` on the title | `text-heading-md` | Type ramp only. 18 is not a step; `heading-md` is 20/1.3 semibold |
 | `font: '400 13px/1.5'` on the description | `text-body-sm` | Same. `body-sm` is 12/16 regular |
-| `borderTop: 1px solid stroke.subtle` | `border-t border-stroke-default` | Still decorative, but visible on a poor display — as in `Card` |
+| `borderTop: 1px solid stroke.subtle` on the footer | Dropped entirely | The dialog is one sheet; whitespace separates the actions (11 Sep 2026) |
 | `gap: 10` in the footer | `gap-3` (12) | 10 is not on the scale |
 | Hand-rolled 32px close `<button>` | The real `IconButton`, `md` | 40 is the system's minimum target, and `IconButton` makes the name mandatory |
 | Renders nothing but a `<div role="dialog">` in place | Portal to `document.body` | So no ancestor's `overflow: hidden` clips it and the backdrop covers the viewport |
