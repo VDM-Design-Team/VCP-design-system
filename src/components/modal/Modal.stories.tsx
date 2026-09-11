@@ -515,3 +515,99 @@ export const NotDismissible: Story = {
     await expect(trigger).toHaveFocus();
   },
 };
+
+/**
+ * A dialog that opens a dialog — which is what the review flow draws, and what
+ * this was broken for until 11 September 2026.
+ *
+ * **Only the innermost dialog answers the keyboard.** Escape closes the inner
+ * one and leaves the outer standing; Tab cycles inside the inner one. The outer
+ * dialog's portal goes `inert` like any other background, so it is dimmed by
+ * the inner backdrop and cannot be clicked or tabbed into — which is exactly
+ * how the design draws it.
+ */
+export const NestedDialog: Story = {
+  args: { open: false },
+  render: function NestedDialogStory(args) {
+    const [outer, setOuter] = React.useState(false);
+    const [inner, setInner] = React.useState(false);
+    return (
+      <Background>
+        <Button variant="secondary" onClick={() => setOuter(true)}>
+          Review claim
+        </Button>
+        <Modal
+          {...args}
+          open={outer}
+          onClose={() => setOuter(false)}
+          title="Review claim"
+          footer={
+            <>
+              <Button variant="danger" onClick={() => setInner(true)}>
+                Reject
+              </Button>
+              <Button onClick={() => setOuter(false)}>Accept</Button>
+            </>
+          }
+        >
+          Everything about the claim, and two ways to answer it.
+        </Modal>
+        <Modal
+          open={inner}
+          onClose={() => setInner(false)}
+          title="Rejection reason"
+          size="sm"
+          footer={
+            <Button variant="secondary" onClick={() => setInner(false)}>
+              Cancel
+            </Button>
+          }
+        >
+          Why is it being rejected?
+        </Modal>
+      </Background>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const named = (name: string) =>
+      screen
+        .queryAllByRole('dialog')
+        .find(
+          (d) =>
+            document.getElementById(d.getAttribute('aria-labelledby') ?? '')?.textContent === name,
+        );
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Review claim' }));
+    await waitFor(() => expect(named('Review claim')).toBeTruthy());
+
+    /* Open the inner one. Both are in the document now. */
+    await userEvent.click(screen.getByRole('button', { name: 'Reject' }));
+    await waitFor(() => expect(named('Rejection reason')).toBeTruthy());
+
+    const outer = named('Review claim') as HTMLElement;
+    const inner = named('Rejection reason') as HTMLElement;
+
+    /* The outer dialog is background now: inert, so neither clickable nor
+       tabbable, and dimmed by the inner one's own backdrop. */
+    await expect(outer.parentElement).toHaveAttribute('inert');
+    await expect(inner.parentElement).not.toHaveAttribute('inert');
+
+    /* Tab belongs to the inner dialog. It used to die on the outer trap. */
+    await userEvent.tab();
+    await expect(within(inner).getByRole('button', { name: 'Close' })).toHaveFocus();
+
+    /* Escape closes the inner one, and only that one. It used to close the
+       outer one and leave this orphaned. */
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(named('Rejection reason')).toBeFalsy());
+    await expect(named('Review claim')).toBeTruthy();
+
+    /* And the outer dialog is live again. */
+    await expect((named('Review claim') as HTMLElement).parentElement).not.toHaveAttribute('inert');
+
+    /* A second Escape closes it. */
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  },
+};
