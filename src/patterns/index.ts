@@ -7,8 +7,11 @@
  */
 export * from './accept-pending-av-modal';
 export * from './av-header';
+export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
+export * from './handoff-av-modal';
 export * from './report-problem-modal';
 export * from './reject-pending-av-modal';
+export * from './review-av-modal';
 export * from './sidebar';
 export * from './top-bar';
