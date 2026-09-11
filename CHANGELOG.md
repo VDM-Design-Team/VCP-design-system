@@ -2,6 +2,30 @@
 
 ## 0.1.0 — unreleased
 
+### `HandoffAVModal` — AV modals, 4 of 7 (11 September 2026)
+
+What an assignee fills in to hand an Added Value on: the date, the links that
+show the work, and anything attached. Both of the design's variants.
+
+**`overdueDays` switches the dialog.** Pass it and the overdue variant appears
+— a warning banner naming the delay, a *required* overdue reason, and a notes
+field. The reason is the only validation the design draws, as an error state on
+that one field, so the dialog refuses a late handoff that does not say why. The
+six reasons are `OVERDUE_REASONS`, owned here for the same reason
+`RejectionReason` owns its sets.
+
+**The footer is the domain's.** Design and Governance hand off; Development can
+hand off *and publish*, which is a third button, so the other two step down a
+weight to keep one primary in the dialog. `onHandoff` receives `{ publish }` so
+the caller never has to work out which button was pressed.
+
+Three gaps it hit, all recorded in `docs/figma-audit.md` and none blocking: the
+design's compact **"Attach Files" row** is a control the system lacks, so
+`Dropzone` stands in; a native `<select>` **cannot bold half an option**, so the
+overdue reasons are plain text; and **`DatePicker` inside a `Modal`** is
+unsettled, because its `Popover` portals outside the focus trap — so the date is
+the text field with a calendar glyph that the design actually draws.
+
 ### `AcceptPendingAVModal` — AV modals, 3 of 7 (11 September 2026)
 
 The confirmation an admin answers to accept a pending Added Value, and the one

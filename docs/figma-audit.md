@@ -471,7 +471,7 @@ built, five are specced below.
 | Report a Problem | `7218:77431` | 1 | — | **Built** — `ReportProblemModal` |
 | Accept Pending AV | `5939:149041` | 1 | `_Accept_Modal_Enable_Multipart` (2 states) — and `_Accept_Modal_Fields` (5 types), **used nowhere** | **Built** — `AcceptPendingAVModal` |
 | Reject AV (Pending) | `7847:106048` | 3 — Default / Reason Selected / Dropdown | `Pending_Rejection_Reason` (3 states), `_Selected_Pending_Rejection_Reason` (5 reasons) | To build |
-| Handoff AV | `5342:78539` | 2 — Default / Overdue | `_Handoff_AV_Modal_Fields` (5 types), `…_Overdue_Reason` (3 states), `…_Buttons` (2 domains) | To build |
+| Handoff AV | `5342:78539` | 2 — Default / Overdue | `_Handoff_AV_Modal_Fields` (5 types), `…_Overdue_Reason` (3 states), `…_Buttons` (2 domains) | **Built** — `HandoffAVModal` |
 | Review AV | `6100:15103` | 4 — Domain × Rejection modal | `_Review_Field_Item` (6 types), `_Review_Field_Attachements_Item`, `Handoff_Rejection_Reason` (3), `_Selected_Handoff_Rejection_Reason` (6 reasons), `_Rejection_Reason_Modal` (3), `Review_Already_Reviewed_Popup` | To build |
 | Change Log | `7211:1060` | 1 | `_Changelog_Main_Content` (3 types), `_Changelog_Description`, `Changelog_Description_List_Item`, `_Changelog_Tooltip` (6), `_Changelog_Pagination_Dots` | To build |
 
@@ -576,10 +576,29 @@ brand-outlined button reads as a second call to action, and beside a benign
 Confirm it reads as a peer. Recorded so the remaining modals are read the same
 way rather than normalised to one.
 
+### 🔧 Three gaps the Handoff modal hit, none of them blocking
+
+1. **The compact "Attach Files" row is a control the system does not have.**
+   The design draws a one-line bar with a paperclip; `Dropzone` is a tall
+   dashed area. `HandoffAVModal` uses `Dropzone`, because inventing a second
+   file input inside a pattern is what the repo forbids. A **size variant on
+   `Dropzone`** would close this properly, and `ReportProblemModal` would keep
+   the tall one it already draws.
+2. **A native `<select>` cannot bold half an option.** The overdue reasons are
+   drawn as **`Dependencies:`** *Waiting on others* — bold label, regular
+   description, one line. `Select` is a real `<select>`, so the port is plain
+   text. Fixing it means a listbox rather than a select, which is a bigger
+   decision than one dialog.
+3. **`DatePicker` inside a `Modal` is unsettled.** The handoff date is drawn as
+   a text field with a calendar glyph, and that is what was built. Wiring the
+   real `DatePicker` would portal a `Popover` to `document.body`, *outside*
+   `Modal`'s focus trap, which the trap has no answer for. Worth settling
+   before any dialog needs a real date picker.
+
 ### Suggested order
 
 ~~`Accept Pending`~~ (built) → ~~the shared rejection-reason picker~~ (built,
-#102) → `Handoff` (two variants) → `Reject (Pending)` (three variants, and the
+#102) → ~~`Handoff`~~ (built) → `Reject (Pending)` (three variants, and the
 picker is ready for it) → `Review` (the largest, four variants, and it nests
 the rejection modal) → `Change Log` (unrelated to the AV flow, and it needs a
 carousel nobody has specced).
