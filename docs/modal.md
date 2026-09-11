@@ -77,7 +77,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
     <header>                    px-6 pt-5 — only when there is heading text or a close button
       <h2>                      type.heading-md · text.primary          → aria-labelledby
       <p>                       type.body-sm · text.tertiary            → aria-describedby
-      IconButton                icon "x" · tertiary · md (40 target) · pulled into the padding
+      IconButton                icon "x" · md (40 target) · text.primary · pulled into the padding
     <div>                       px-6 pt-5 · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
     <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
 ```
@@ -96,6 +96,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 | Description colour | `text.tertiary` | `text-text-tertiary` |
 | Body colour | `text.secondary` | `text-text-secondary` |
 | Footer surface | none — the panel's `surface.elevated` carries through | — |
+| Close button | `text.primary`, hover `surface.neutral.faint` | `text-text-primary hover:bg-surface-neutral-faint` |
 | Focus ring | `stroke.focused` | `focus-visible:outline-stroke-focused` |
 | Font | `font.family.sans` | `font-sans` |
 
@@ -276,7 +277,13 @@ stories are where the behaviour lives.
   after mount — so the component can be imported and rendered on a server.
 - **The close button is a real `IconButton`**, whose `label` is a required string,
   so it can never ship unnamed. It is `md` (40×40), not the export's 32, because
-  40 is the system's minimum target and this is the primary escape hatch.
+  40 is the system's minimum target and this is the primary escape hatch. It is
+  **neutral, not brand** (changed 11 September 2026): the ghost variant's
+  `action.tertiary` blue made the X compete with the footer's primary button,
+  and dismissing is not an action to invite. `text.primary` is 20.17:1 on the
+  panel in light and flips to white in dark, so the icon clears 3:1 as a
+  meaningful graphic either way. `Toast` and `Banner` recolour theirs the same
+  way, by `className`, to match their own tone.
 - **Backdrop clicks are click-safe.** The dialog closes only when both the
   pointer-down *and* the click landed on the backdrop, so a text selection that
   starts inside the panel and ends outside it does not throw the dialog away.

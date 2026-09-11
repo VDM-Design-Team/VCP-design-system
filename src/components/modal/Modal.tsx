@@ -479,9 +479,19 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                 icon="x"
                 label={closeLabel}
                 variant="tertiary"
-                /* Pulled back into the header's padding so the 40 target sits
-                   optically level with the title without inflating the header. */
-                className="-mt-2 -mr-2"
+                className={cn(
+                  /* Pulled back into the header's padding so the 40 target sits
+                     optically level with the title without inflating the header. */
+                  '-mt-2 -mr-2',
+                  /* Neutral rather than the ghost variant's brand blue:
+                     dismissing is not an action to invite, and a blue X competed
+                     with the footer's primary button for the eye. `text.primary`
+                     flips to white in dark for free. Recolouring the close
+                     button through `className` is what `Toast` and `Banner`
+                     already do to tone theirs. */
+                  'text-text-primary hover:text-text-primary',
+                  'hover:bg-surface-neutral-faint active:bg-surface-neutral-subtle',
+                )}
                 onClick={onClose}
               />
             )}
