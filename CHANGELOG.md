@@ -2,6 +2,42 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — 11 September 2026
+
+**`Card` is removed.**
+
+Decided by the lead on the grounds that it was doing the same job as `Modal`.
+The pieces count drops to 31 components.
+
+- **`Card`, `CardProps` and `CardHeadingLevel` no longer exist**, and the
+  barrel no longer exports them. `docs/card.md` is deleted.
+- **There is no drop-in replacement, and that is the thing to know before
+  upgrading.** `Modal` is not one: it portals to `document.body` behind a
+  backdrop, traps focus, locks the page scroll and makes everything else
+  inert, so it cannot sit inline in a page or be repeated down a column. A
+  call site that used `Card` as a container now writes the surface itself.
+  The shape `Card` rendered was:
+
+  ```tsx
+  <section className="rounded-md border border-stroke-default bg-surface-elevated">
+    <header className="flex items-start justify-between gap-3 px-4 py-3.5">
+      <h3 className="text-heading-sm text-text-primary">Title</h3>
+    </header>
+    <div className="px-4 pb-4">{children}</div>
+  </section>
+  ```
+
+  `shadow.card` is a token, not the component, and is untouched.
+- **`StatCard` is unaffected.** It never composed `Card`.
+- Four story usages were ported to plain markup (`Banner`'s in-page story, and
+  three in `AppShell`'s). Five docs that used `Card` as their comparison anchor
+  — `accordion`, `stat-card`, `data-table`, `pagination`, `modal` — say what
+  they mean directly instead, and `figma-audit` drops it from its list of
+  pieces that draw raw markup.
+
+Free in practice while 0.1.0 is unreleased and nothing outside this repo
+imports the package, which is why the version is not bumped.
+
 ### Breaking — 9 September 2026
 
 **`Final Completed` is gone. `Completed` is green and terminal again.**

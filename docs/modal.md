@@ -144,8 +144,6 @@ first place. What the user must be able to perceive is the **buttons**, and
 those carry their own contrast — a filled primary at 6.44:1 and a secondary
 whose border is `stroke.brand` — independently of anything behind them.
 
-Note that `Card`'s footer still has both a tint and a rule. If the two should
-agree, that is a separate decision about `Card`.
 
 ## Accessibility
 
@@ -356,7 +354,7 @@ Reported, not invented — nothing new was added to `tokens/` for this component
    (20/1.3) there is nothing at 18. `heading-md` was used unchanged.
 6. **`shadow.modal` has no dark override.** A 28%-black shadow on
    `dark.surface.elevated` does almost nothing; in dark the scrim alone separates
-   the panel from the page. The same gap `Card` reports for `shadow.card`.
+   the panel from the page. `shadow.*` has no dark scale at all.
 7. **`surface.overlay` is a *light* scrim in the light theme** — slate-200 at 75%,
    which over `surface.canvas` lands around `#e8edf3`. It dims the page much less
    than the export's 45%-black did, so the separation between "in the dialog" and

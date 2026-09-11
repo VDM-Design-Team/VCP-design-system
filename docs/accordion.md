@@ -18,7 +18,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | `Accordion` | Sections worth hiding: optional detail, FAQs, long grouped forms |
 | `Tabs` | Peer views where exactly one is visible and comparison isn't needed |
-| `Card` + headings | Content that should simply all be visible — hiding is a cost, not a feature |
+| Headings in a plain section | Content that should simply all be visible — hiding is a cost, not a feature |
 | `Modal` | A task that interrupts, rather than a section that expands |
 
 Hiding content behind a click is a tax on finding it. Reach for an accordion

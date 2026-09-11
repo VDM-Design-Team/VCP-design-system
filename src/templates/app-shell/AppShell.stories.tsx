@@ -5,7 +5,6 @@ import { Sidebar, type SidebarUserType } from '../../patterns/sidebar';
 import { TopBar } from '../../patterns/top-bar';
 import { AVHeader } from '../../patterns/av-header';
 import { PageTitle } from '../../components/page-title';
-import { Card } from '../../components/card';
 import { StatCard } from '../../components/stat-card';
 import { EmptyState } from '../../components/empty-state';
 import { Button } from '../../atoms/button';
@@ -35,6 +34,18 @@ const Bar = () => (
     user={{ name: 'Eve Kestrel' }}
     onUserMenu={() => {}}
   />
+);
+
+/**
+ * Page content, as plain markup. The shell frames whatever it is handed, and
+ * these stories are about the frame — so they carry no component of their own
+ * beyond the pieces being demonstrated.
+ */
+const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section className="rounded-md border border-stroke-default bg-surface-elevated p-4">
+    <h2 className="mb-1 text-heading-sm text-text-primary">{title}</h2>
+    <div className="text-body-md text-text-secondary">{children}</div>
+  </section>
 );
 
 const Stats = () => (
@@ -70,9 +81,7 @@ const meta = {
     children: (
       <>
         <Stats />
-        <Card title="Recent activity" headingLevel={2} padded>
-          <p className="text-body-md text-text-secondary">Nothing yet this cycle.</p>
-        </Card>
+        <Panel title="Recent activity">Nothing yet this cycle.</Panel>
       </>
     ),
   },
@@ -114,11 +123,9 @@ export const WithAVHeader: Story = {
       />
     ),
     children: (
-      <Card title="Description" headingLevel={2} padded>
-        <p className="text-body-md text-text-secondary">
-          Cut the onboarding form from nine fields to four and defer the rest to first use.
-        </p>
-      </Card>
+      <Panel title="Description">
+        Cut the onboarding form from nine fields to four and defer the rest to first use.
+      </Panel>
     ),
   },
 };
@@ -140,9 +147,9 @@ export const LongPage: Story = {
     children: (
       <div className="flex flex-col gap-4 py-6">
         {Array.from({ length: 14 }, (_, i) => (
-          <Card key={i} title={`VCP-${1200 + i}`} headingLevel={2} padded>
-            <p className="text-body-md text-text-secondary">Moved to For Review by Eve Kestrel.</p>
-          </Card>
+          <Panel key={i} title={`VCP-${1200 + i}`}>
+            Moved to For Review by Eve Kestrel.
+          </Panel>
         ))}
       </div>
     ),

@@ -28,7 +28,7 @@ record of when each piece landed.
 | atom | `Input`, `Textarea`, `Checkbox`, `RadioGroup`, `Toggle` | PR #7 |
 | atom | `Icon` | PR #10 |
 | atom | `Avatar`, `Badge`, `Divider`, `IconButton`, `Skeleton`, `Spinner` | PR #15 |
-| component | `AvatarGroup`, `Card` | PR #15 |
+| component | `AvatarGroup` | PR #15 |
 | component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
 | atom | `ProgressBar` | PR #38 |
 | component | `Chip`, `EmptyState`, `DetailRow` | PR #38 |
