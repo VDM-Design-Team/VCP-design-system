@@ -52,7 +52,8 @@ Phosphor `circle-notch` glyph, added to `Icon`.
 ## Saving a change
 
 When choosing a segment persists something — a default view, a preference —
-the parent drives `status` and the control shows it:
+the parent drives `status` and the control shows it. The contract is shared
+with every control that saves on touch: [saving-states.md](saving-states.md).
 
 ```mermaid
 stateDiagram-v2

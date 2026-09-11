@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { Icon } from '../icon';
+import type { SavingStatus } from '../../lib/saving';
 
 /**
  * Toggle — an on/off switch that commits its change immediately.
@@ -10,6 +12,15 @@ import { cn } from '../../lib/cn';
  * Space key, and the disabled semantics for free. The pill and the knob are
  * decoration driven off React state; `peer-focus-visible` moves the ring from
  * the hidden input onto the pill.
+ *
+ * **Saving a change.** Flipping a Toggle usually saves something on the spot,
+ * and the parent can say how that is going through `status`: while pending
+ * the knob carries a spinner and further flips are ignored; on success it
+ * carries a check for the moment the parent leaves it there; on error the
+ * track takes the critical ring and the input `aria-invalid`. The parent
+ * times the return to idle and keeps the previous `checked` on error, so
+ * async use is controlled-only; the message is `Field`'s. The contract is
+ * docs/saving-states.md.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -45,6 +56,9 @@ const track = cva(
     variants: {
       checked: { true: '', false: '' },
       disabled: { true: '', false: '' },
+      /* A ring, not a border: a border would eat into the 4 inset the knob's
+         travel is measured from. The same critical stroke `Input` draws. */
+      error: { true: 'ring-2 ring-accent-critical-outline-border-default', false: '' },
     },
     compoundVariants: [
       /* On — action.primary, the same family as a primary Button. */
@@ -63,14 +77,14 @@ const track = cva(
       { checked: true, disabled: true, class: 'bg-action-primary-surface-disabled' },
       { checked: false, disabled: true, class: 'bg-surface-neutral-medium' },
     ],
-    defaultVariants: { checked: false, disabled: false },
+    defaultVariants: { checked: false, disabled: false, error: false },
   },
 );
 
 /** The knob. Its POSITION is the non-colour cue that carries the state. */
 const knob = cva(
   [
-    'pointer-events-none block size-4 rounded-pill bg-surface-elevated shadow-card',
+    'pointer-events-none flex size-4 items-center justify-center rounded-pill bg-surface-elevated shadow-card',
     'transition-transform motion-reduce:transition-none',
   ],
   {
@@ -107,6 +121,13 @@ export interface ToggleProps
   disabled?: boolean;
   /** Visible label. Without one you **must** pass `aria-label` or `aria-labelledby`. */
   label?: React.ReactNode;
+  /**
+   * How the save of the current state is going, driven by the parent.
+   * `pending` puts a spinner in the knob and ignores further flips; `success`
+   * a check; `error` the critical ring and `aria-invalid`. The message for an
+   * error comes from the `Field` around it. See docs/saving-states.md.
+   */
+  status?: SavingStatus;
   /** Merged onto the `<label>` wrapper, not the hidden `<input>`. */
   className?: string;
   /** Applied to the `<label>` wrapper, matching `className`. */
@@ -115,21 +136,39 @@ export interface ToggleProps
 
 export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
   (
-    { checked, defaultChecked = false, onChange, disabled = false, label, className, style, ...props },
+    {
+      checked,
+      defaultChecked = false,
+      onChange,
+      disabled = false,
+      label,
+      status = 'idle',
+      className,
+      style,
+      ...props
+    },
     ref,
   ) => {
     const [internal, setInternal] = React.useState(defaultChecked);
     const isControlled = checked !== undefined;
     const on = isControlled ? checked : internal;
+    const pending = status === 'pending';
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      /* A save is in flight: the state is spoken for until it settles. The
+         input stays enabled so focus does not fall off it. */
+      if (pending) return;
       const next = event.target.checked;
       if (!isControlled) setInternal(next);
       onChange?.(next);
     };
 
     return (
-      <label className={cn(root({ disabled }), className)} style={style}>
+      <label
+        className={cn(root({ disabled }), pending && 'cursor-progress', className)}
+        style={style}
+        data-status={status}
+      >
         <input
           ref={ref}
           type="checkbox"
@@ -137,11 +176,26 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
           className="peer sr-only"
           checked={on}
           disabled={disabled}
+          /* Before the spread, so a `Field` wiring its own `aria-invalid` wins. */
+          aria-busy={pending || undefined}
+          aria-invalid={status === 'error' || undefined}
           onChange={handleChange}
           {...props}
         />
-        <span className={track({ checked: on, disabled })} aria-hidden="true">
-          <span className={knob({ checked: on })} />
+        <span className={track({ checked: on, disabled, error: status === 'error' })} aria-hidden="true">
+          <span className={knob({ checked: on })}>
+            {/* The save's state rides in the knob, decorative: `aria-busy` on
+                the input already says "pending", and success is a moment. */}
+            {pending && (
+              <Icon
+                name="circle-notch"
+                className="size-3 animate-spin text-text-tertiary motion-reduce:animate-pulse"
+              />
+            )}
+            {status === 'success' && (
+              <Icon name="check" className="size-3 text-accent-success-tonal-content-default" />
+            )}
+          </span>
         </span>
         {label !== undefined && label !== null && (
           <span className={labelText({ disabled })}>{label}</span>

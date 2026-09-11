@@ -1,8 +1,9 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { SegmentedControl, type SegmentedControlStatus } from './SegmentedControl';
+import { SegmentedControl } from './SegmentedControl';
 import { Field } from '../../components/field';
+import { useFakeSave } from '../../lib/story-saving';
 
 const meta = {
   title: 'Atoms/SegmentedControl',
@@ -215,40 +216,13 @@ export const KeyboardNavigation: Story = {
   },
 };
 
-/** A stand-in for the request the parent would make. */
-const fakeSave = (outcome: 'resolve' | 'reject', delay: number) =>
-  new Promise<void>((resolve, reject) => {
-    setTimeout(() => (outcome === 'resolve' ? resolve() : reject(new Error('offline'))), delay);
-  });
-
 /**
- * What a parent does around the control: keep the previous value, start the
- * save, move `status` along with it, and return to idle after a beat. This is
- * the whole contract — the control times nothing and reverts nothing.
+ * The parent's half of the contract, from the shared story helper: keep the
+ * previous value, start the save, move `status` along with it, return to idle
+ * after a beat. The control times nothing and reverts nothing.
  */
-function SavingView({ outcome, delay = 300 }: { outcome: 'resolve' | 'reject'; delay?: number }) {
-  const [value, setValue] = React.useState('List');
-  const [status, setStatus] = React.useState<SegmentedControlStatus>('idle');
-  const [error, setError] = React.useState<string>();
-  const settle = React.useRef<ReturnType<typeof setTimeout>>(undefined);
-  React.useEffect(() => () => clearTimeout(settle.current), []);
-
-  const save = async (next: string) => {
-    const previous = value;
-    setValue(next);
-    setStatus('pending');
-    setError(undefined);
-    try {
-      await fakeSave(outcome, delay);
-      setStatus('success');
-      settle.current = setTimeout(() => setStatus('idle'), 1500);
-    } catch {
-      setValue(previous);
-      setStatus('error');
-      setError('Couldn’t save the view. Try again.');
-    }
-  };
-
+function SavingView({ outcome }: { outcome: 'resolve' | 'reject' }) {
+  const { value, status, error, save } = useFakeSave('List', outcome);
   return (
     <Field error={error}>
       {(control) => (
@@ -297,7 +271,7 @@ export const SaveFails: Story = {
     await expect(canvas.getByRole('radio', { name: 'List' })).toHaveAttribute('aria-checked', 'true');
     await expect(canvas.getByRole('radio', { name: 'Calendar' })).toHaveAttribute('aria-checked', 'false');
     const message = canvas.getByRole('alert');
-    await expect(message).toHaveTextContent('Couldn’t save the view');
+    await expect(message).toHaveTextContent('Couldn’t save');
     await expect(group).toHaveAttribute('aria-describedby', message.id);
     /* The next choice clears the error. */
     await userEvent.click(canvas.getByRole('radio', { name: 'Board' }));
