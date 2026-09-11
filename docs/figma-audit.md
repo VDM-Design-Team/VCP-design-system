@@ -652,3 +652,110 @@ picker is ready for it) → `Review` (the largest, four variants, and it nests
 `Review` (the largest, four variants, and it nests
 the rejection modal) → `Change Log` (unrelated to the AV flow, and it needs a
 carousel nobody has specced).
+
+---
+
+## Batch 5 — the Added Value table (11 September 2026)
+
+Read off the **Added Value Table** page (`2311:582`): `AV_Table` (`6785:35414`),
+`_AV_Table_Header_Item` (nine types), `_AV_Table_Item` (ten types),
+`_AV_Table_Row` (four variants), plus the `Urgency_Tag` (`3330:314`),
+`Type_Tag` (`3491:6845`) and `Due_Date_Tag` (`3429:11064`) sets on the Tags
+page. Shipped as `UrgencyTag`, `TypeTag`, `DueDatePill` and the `AVTable`
+pattern.
+
+### The blocker that had already been cleared
+
+Issue #80 item 6 said the AV table's raw colours blocked this build, and it
+was the only item with a deadline. **It is resolved in Figma.** Every fill and
+stroke on every page was scanned for the four flagged values:
+
+| Colour | On the AV Table page | Anywhere in the file |
+|---|---|---|
+| `#5291f7` | none | none |
+| `#eab308` | none | none |
+| `#ef4444` | none | 6, all on the Notification bell dot |
+| `#64748b` | 114, **all bound to variables** | 32 unbound, on Notification and Component Suggestions |
+
+16,411 nodes scanned. The only unbound colours on the table page are `#ffffff`
+(247) and `#eeeeee` (2). The 38 survivors elsewhere are separate work and do
+not touch this table. **✅ item 6 closed.**
+
+### What matched
+
+| Thing | Verdict |
+|---|---|
+| Column set and order — Task Title, Due Date, Urgency, Type, Status, Members, Last Updated | ✅ |
+| Optional checkbox and actions columns (Figma's four row variants) | ✅ |
+| Sortable columns: Task Title, Due Date, Last Updated — and only those | ✅ |
+| Info glyph on Urgency, Type, Status, Members — and only those | ✅ |
+| Row height 81, cell padding 16, avatar 32 | ✅ measured in the browser |
+| Header `text.secondary`, 14 medium | ✅ |
+| Title `text.primary` 14 medium; reference 14 regular | ✅ |
+| Due date tonal pills: default/warning/critical | ✅ |
+| Status cell is `Status_Tag_Development_Only` — a domain step, so `StatusPill custom` | ✅ |
+
+### 🔧 Fixed here
+
+**`DataTable` headers were 11 uppercase.** That came from the original export
+and matches nothing in the library: all nine `_AV_Table_Header_Item` types are
+drawn `ORIGINAL` case at 14 medium. Now `label-lg`, sentence case.
+
+**A name/value trap, worth writing down.** The repo's type ramp and Figma's
+share token names but not values:
+
+| Name | Figma | This repo |
+|---|---|---|
+| `label-sm` | 14 | 11 |
+| `body-sm` | 14 | 12 |
+| `caption-md` | 12 | 12 |
+
+Read a spec off the canvas **by value, not by token name**. 14 medium here is
+`label-lg`; 14 regular is `body-md`. Three components in this batch were built
+wrong first and corrected after measuring in the browser.
+
+A second, pre-existing divergence in the same spirit: the repo deliberately
+darkened `text.tertiary` from slate-500 to slate-600 for contrast and moved
+slate-500 to `text.subtle`. Figma's `text/tertiary` is slate-500. The AV
+table's reference and Last Updated cells use the repo's `text.tertiary`, which
+is one step darker than the canvas — the accessible direction, and consistent
+with the rest of the repo.
+
+### ⚠️ Flagged for design
+
+**Three token references point at the right value in the wrong family.** Same
+pixels, worse provenance — shipped against the correctly-named token:
+
+| Where | Figma reaches for | What that family is for |
+|---|---|---|
+| Urgent flame | `accent.critical.filled.surface.default` | a background, used here as a foreground |
+| Type 3 caret | `action.secondary.border.default` | a control border, used here as decoration |
+| Tag labels | `neutral.textual.content.default` | correct, but an unmodelled family (#103) |
+
+**The four info tooltips have no copy.** Design drew the glyphs on Urgency,
+Type, Status and Members and wrote no text on any of them. `AVTable.hints` has
+no defaults and the glyph renders only for a hint the product supplies —
+inventing four sentences of product copy is not a design system's job.
+
+**What counts as "due soon"?** `Due_Date_Tag` draws Default, Due Soon and
+Overdue but nothing says where the boundary sits, and it may differ per domain.
+`dueDateTone`'s `soonWithinDays` is therefore required, with no house default.
+
+**Neutral has four families in Figma and one here.** `filled`, `tonal`,
+`outline` and `textual`, 54 variables in total; the repo models `outline`
+only. Nothing in this batch needed a new token — `neutral.textual.content.default`
+*is* slate-600, which is `neutral.outline.content.default` — but the gap is
+real and belongs with the General Design Library work in #103.
+
+**`VCP_Pagination` draws three affordances the repo's `Pagination` does not**:
+First/Last buttons, an items-per-page select, and a "1–50 of 1,250" range.
+`docs/pagination.md` says to extend that component rather than compose around
+it, so this is a follow-up on `Pagination`, not something `AVTable` rebuilds.
+
+### Still unassembled
+
+Following batch 4's pattern of molecules drawn but used nowhere: the
+`Urgency_Tag` tonal and outline styles, and the `Type_Tag` tonal, faint-fill
+and outline styles, are drawn for every value and appear on no screen. Neither
+is built. When a screen needs one it becomes a `variant` on the existing atom,
+not a second component.

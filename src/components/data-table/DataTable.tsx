@@ -23,6 +23,14 @@ import { Checkbox } from '../../atoms/checkbox';
  *   whole-row click target hides the real action from keyboards and screen
  *   readers. Give a column a `render` with the actual link or button.
  *
+ * **Headers are `label-lg`, sentence case.** They were `label-sm` uppercase
+ * until 11 September 2026, which came from the original export and matched
+ * nothing: every header in the VCP Figma library is drawn `ORIGINAL` case at
+ * 14 medium, the AV table's nine included. Measured, not assumed —
+ * docs/figma-audit.md, batch 5. Note that the repo's type ramp and Figma's
+ * share names but not values: Figma's `label-sm` is 14, this repo's is 11.
+ * Match by *value* when reading a spec off the canvas.
+ *
  * `width` takes CSS widths for `<col>` ('120px', '30%'), not the export's ds-lint-ignore
  * grid tracks — '1fr' has no meaning in a table. Unsized columns share the
  * remainder. The container scrolls horizontally when the table cannot fit.
@@ -37,6 +45,13 @@ export interface DataTableColumn<Row> {
   /** CSS width for the `<col>` — '120px', '30%'. Unsized columns share the rest. ds-lint-ignore */
   width?: string;
   sortable?: boolean;
+  /**
+   * Rendered after the label, inside the header cell but **outside** the sort
+   * button — a tooltip trigger, a count, a badge. Outside, because a header
+   * that both sorts and explains would otherwise nest one interactive element
+   * inside another, which is invalid and unreachable by keyboard.
+   */
+  hint?: React.ReactNode;
   align?: 'left' | 'right';
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
@@ -75,6 +90,9 @@ export interface DataTableProps<Row extends { id?: string | number }>
 }
 
 const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-4 last:pr-4';
+
+/* Label and hint side by side. `gap-1.5` is the Figma header's own 6. */
+const headerInner = 'flex items-center gap-1.5';
 
 export function DataTable<Row extends { id?: string | number }>({
   className,
@@ -148,35 +166,33 @@ export function DataTable<Row extends { id?: string | number }>({
                   }
                   className={headerCell}
                 >
-                  {c.sortable ? (
-                    <button
-                      type="button"
-                      onClick={() => requestSort(c.key)}
-                      className={cn(
-                        'inline-flex w-full items-center gap-1.5 rounded-sm uppercase',
-                        'text-label-sm text-text-secondary transition-colors hover:text-text-primary',
-                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                        c.align === 'right' && 'flex-row-reverse',
-                      )}
-                    >
-                      {c.label}
-                      {/* Unsorted: the both-ways glyph, faint. Sorted: the
-                          direction, full strength. aria-sort carries the fact. */}
-                      <Icon
-                        name={sorted ? (sort!.direction === 'asc' ? 'caret-up' : 'caret-down') : 'caret-up-down'}
-                        className={cn('size-3', sorted ? 'text-text-secondary' : 'text-text-subtle')}
-                      />
-                    </button>
-                  ) : (
-                    <span
-                      className={cn(
-                        'block uppercase text-label-sm text-text-secondary',
-                        c.align === 'right' && 'text-right',
-                      )}
-                    >
-                      {c.label}
-                    </span>
-                  )}
+                  <span
+                    className={cn(headerInner, c.align === 'right' && 'flex-row-reverse')}
+                  >
+                    {c.sortable ? (
+                      <button
+                        type="button"
+                        onClick={() => requestSort(c.key)}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-sm',
+                          'text-label-lg text-text-secondary transition-colors hover:text-text-primary',
+                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                          c.align === 'right' && 'flex-row-reverse',
+                        )}
+                      >
+                        {c.label}
+                        {/* Unsorted: the both-ways glyph, faint. Sorted: the
+                            direction, full strength. aria-sort carries the fact. */}
+                        <Icon
+                          name={sorted ? (sort!.direction === 'asc' ? 'caret-up' : 'caret-down') : 'caret-up-down'}
+                          className={cn('size-3', sorted ? 'text-text-secondary' : 'text-text-subtle')}
+                        />
+                      </button>
+                    ) : (
+                      <span className="text-label-lg text-text-secondary">{c.label}</span>
+                    )}
+                    {c.hint}
+                  </span>
                 </th>
               );
             })}

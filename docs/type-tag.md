@@ -53,6 +53,11 @@ Figma paints the Type 3 caret with `action.secondary.border.default`, a control
 token used as a decorative foreground. `text.brand.medium` is the same value
 (the brand navy, `#1a56db`) in the right family and is what ships.
 
+**A trap worth naming:** the repo's type ramp and Figma's share names but not
+values. Figma draws the label at its `label-sm`, which is 14px; this repo's
+`label-sm` is 11px. The label ships as `label-lg` — 14px medium — which is the
+same pixels under a different name. Read a spec off the canvas by value.
+
 ## Accessibility
 
 - **Colour is never the only cue.** One more caret stroke per step, so the

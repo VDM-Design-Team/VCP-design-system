@@ -63,6 +63,11 @@ Two Figma deviations, both zero-pixel and both raised with design on
   neutral families (`filled`, `tonal`, `outline`, `textual`) belongs with the
   General Design Library work, not here.
 
+**A trap worth naming:** the repo's type ramp and Figma's share names but not
+values. Figma draws the label at its `label-sm`, which is 14px; this repo's
+`label-sm` is 11px. The label ships as `label-lg` — 14px medium — which is the
+same pixels under a different name. Read a spec off the canvas by value.
+
 ## Accessibility
 
 - **Colour is never the only cue.** Each urgency has a distinct glyph *shape*
