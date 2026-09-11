@@ -34,6 +34,16 @@ const button = cva(
           'active:bg-action-secondary-surface-pressed active:border-action-secondary-border-pressed',
           'disabled:text-action-secondary-content-disabled disabled:border-action-secondary-border-disabled',
         ],
+        /* neutral.outline — outlined, but grey. The Cancel beside a
+           destructive answer: an outlined *brand* button reads as a second
+           call to action, which is the wrong weight for the way out. */
+        neutral: [
+          'bg-neutral-outline-surface-default text-neutral-outline-content-default',
+          'border border-neutral-outline-border-default',
+          'hover:bg-neutral-outline-surface-hover hover:border-neutral-outline-border-hover hover:text-neutral-outline-content-hover',
+          'active:bg-neutral-outline-surface-pressed active:border-neutral-outline-border-pressed active:text-neutral-outline-content-pressed',
+          'disabled:text-neutral-outline-content-disabled disabled:border-neutral-outline-border-disabled',
+        ],
         /* action.tertiary — ghost */
         tertiary: [
           'bg-action-tertiary-surface-default text-action-tertiary-content-default',

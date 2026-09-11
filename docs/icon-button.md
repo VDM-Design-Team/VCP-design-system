@@ -22,6 +22,7 @@ it needs a visible label, not a better icon.
 
 | Variant | Use for | Notes |
 |---|---|---|
+| `neutral` | A dismiss or close that should not read as an action | Outlined in grey rather than the brand — see `docs/button.md` |
 | `tertiary` | Toolbars, table rows, card affordances | **The default.** `docs/button.md` already assigns icon-only actions to the ghost treatment |
 | `secondary` | A bordered icon action that must read as a control on a busy surface | |
 | `primary` | The one filled icon action on a screen — a compose or add FAB | At most one |
@@ -33,7 +34,7 @@ it needs a visible label, not a better icon.
 |---|---|---|---|
 | `icon` | `IconName` | — | **Required.** A glyph name from the Icon library. Rendered decorative (`aria-hidden`) |
 | `label` | `string` | — | **Required.** The accessible name *and* the pointer tooltip. See below |
-| `variant` | `primary \| secondary \| tertiary \| danger` | `tertiary` | Same names and tokens as Button |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| danger` | `tertiary` | Same names and tokens as Button |
 | `size` | `sm \| md \| lg` | `md` | 36 / 40 / 48 square. `sm` only in dense contexts |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, disables the button, sets `aria-busy` |
 | `disabled` | `boolean` | `false` | Same as Button |

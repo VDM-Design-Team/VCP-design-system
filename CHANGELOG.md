@@ -2,6 +2,40 @@
 
 ## 0.1.0 — unreleased
 
+### A `neutral` button, and the `neutral.*` token family it needed (11 September 2026)
+
+A minor addition, no breaking change. `Button` and `IconButton` gain a
+**`neutral`** variant: outlined, but grey. It is the way *out* — the Cancel
+beside a destructive answer — where `secondary`, outlined in the brand, reads
+as a second call to action.
+
+The interesting part is where the tokens came from. The design file has a
+whole **`colors/neutral/` family** — `filled`, `outline`, `textual` and
+`tonal`, 54 variables — that this repo had never imported;
+`docs/color-tokens.md` stated outright that no such family existed.
+**`neutral.outline.*` is now imported name-for-name**, 12 tokens per theme,
+with the same `surface` / `content` / `border` × `default` / `hover` /
+`pressed` / `disabled` shape as `action.secondary`. The other three treatments
+stay unimported until something needs them.
+
+Two things fell out of doing it, both recorded in `docs/figma-audit.md`:
+
+- **`style-dictionary.config.mjs` had a hard-coded whitelist** of semantic
+  families, so the light tokens generated nothing at all until `neutral` was
+  added to it. The dark overrides have no such filter, so they built fine —
+  which is exactly the kind of silent half-build worth knowing about before
+  the next family is imported.
+- **Figma's dark `neutral/outline/content` loses contrast on hover and press.**
+  It goes `slate/300 → 400 → 500`, which is *darker* on a dark surface: 9.85:1
+  down to 5.71:1, then 3.07:1, below the 4.5:1 text needs. Its own border track
+  goes the other way. The repo mirrors it correctly as `300 → 200 → 100`; the
+  design file needs the same fix.
+
+The light border is 2.56:1 against white, below the 3:1 WCAG 1.4.11 asks of a
+UI boundary, and is accepted on the reasoning `Pagination` already documents:
+the label identifies the control at 7.58:1 and the border is reinforcement.
+`docs/button.md` says so, and says when that reasoning would stop holding.
+
 ### The AV modals — batch 1 of 7 (11 September 2026)
 
 The library has seven modal pages and **none of them was in

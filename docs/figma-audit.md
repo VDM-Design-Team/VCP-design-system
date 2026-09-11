@@ -509,11 +509,26 @@ the two now agree.
 
 ### ⚠️ Three gaps these modals will keep hitting
 
-1. **No neutral outlined button.** `Confirm Delete`'s Cancel is a grey
-   outlined button — `#94a3b8` border, `#475569` text. `Button`'s `secondary`
-   is brand-outlined. Every one of these modals has a Cancel, so this recurs
-   seven times. Either a `Button` variant or a decision that `secondary` is
-   the Cancel.
+1. ✅ **No neutral outlined button — fixed.** `Confirm Delete`'s Cancel is a
+   grey outlined button, `#94a3b8` border and `#475569` text, and `Button`'s
+   `secondary` is brand-outlined. It turned out the design file has a whole
+   **`colors/neutral/` family** — `filled`, `outline`, `textual` and `tonal`,
+   54 variables — that this repo had never imported; `docs/color-tokens.md`
+   even stated no such family existed. `neutral.outline.*` is imported
+   name-for-name as of 11 September 2026 and `Button` and `IconButton` have a
+   `neutral` variant. The other three treatments stay unimported until
+   something needs them.
+
+   **Two things that came out of doing it.** The build config had a hard-coded
+   whitelist of semantic families, so the light tokens silently generated
+   nothing until `neutral` was added to it — worth knowing before the next
+   family is imported. And Figma's **dark** `neutral/outline/content` goes
+   `slate/300 → 400 → 500` across default, hover and pressed, which gets
+   *darker* on a dark surface: hover drops from 9.85:1 to 5.71:1 and pressed to
+   3.07:1, below the 4.5:1 text needs. Its own border track goes the other way
+   (500 → 400 → 300, lighter), so content is the one that is wrong. The repo
+   mirrors it correctly as `300 → 200 → 100`. **The design file needs the same
+   fix.**
 2. **The design tints its form fields** — `surface.neutral.faint` fill with a
    `stroke.default` border at 1.48:1. `Input` uses `stroke.field` at 4.76:1
    because a control's boundary must be perceivable. Ours is the correct one;

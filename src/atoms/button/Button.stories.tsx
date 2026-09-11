@@ -16,7 +16,10 @@ const meta = {
   },
   args: { children: 'Continue' },
   argTypes: {
-    variant: { control: 'select', options: ['primary', 'secondary', 'tertiary', 'danger', 'link'] },
+    variant: {
+      control: 'select',
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger', 'link'],
+    },
     size: { control: 'radio', options: ['sm', 'md', 'lg'] },
   },
 } satisfies Meta<typeof Button>;
@@ -27,6 +30,8 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {};
 export const Secondary: Story = { args: { variant: 'secondary' } };
 export const Tertiary: Story = { args: { variant: 'tertiary' } };
+/** Outlined, but grey — the Cancel beside a destructive answer. */
+export const Neutral: Story = { args: { variant: 'neutral', children: 'Cancel' } };
 export const Danger: Story = { args: { variant: 'danger', children: 'Delete account' } };
 export const Link: Story = { args: { variant: 'link', children: 'Learn more' } };
 

@@ -80,7 +80,8 @@ Rules that follow from the split:
 - Semantic colors follow the VCP Figma variables exactly:
   `surface.*` (backgrounds), `text.*` (text/icons), `stroke.*` (borders),
   `action.{primary|secondary|tertiary}.{surface|content|border}.{state}` (controls),
-  `accent.{critical|success|warning|info|…}.{filled|outline|tonal}.{surface|content|border}.{state}` (status).
+  `accent.{critical|success|warning|info|…}.{filled|outline|tonal}.{surface|content|border}.{state}` (status),
+  `neutral.{outline|…}.{surface|content|border}.{state}` (controls that are deliberately not an action).
   Tailwind utilities: `bg-surface-canvas`, `text-text-primary`, `border-stroke-default`,
   `bg-action-primary-surface-default`, `bg-accent-critical-tonal-surface-default`.
   For *which* semantic color token to reach for — not just how to name it —

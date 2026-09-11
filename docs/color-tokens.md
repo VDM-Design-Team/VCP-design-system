@@ -108,13 +108,24 @@ one of these three.
 
 ## Neutral treatments — components that aren't an Action
 
-VCP has no `neutral.*` token family shaped like `action.*` (no
-`neutral.tonal` / `.outline` / `.textual` / `.filled` tree). "Neutral" styling
-— a tag, a non-primary button-like control, anything needing a generic
-treatment — is composed directly from `surface.neutral.*` plus `text.*` or
-`stroke.*`, per component. `Badge`'s `neutral` tone is the reference example:
-`surface.neutral.subtle` + `text.secondary` (see `docs/badge.md`). Follow that
-pattern rather than inventing a parallel token structure.
+VCP has **`neutral.outline.*`**, and only that one treatment so far — added
+11 September 2026, imported name-for-name from the design file's
+`colors/neutral/outline/*`, which had existed in Figma all along and never been
+ported. It is shaped exactly like `action.secondary`: `surface`, `content` and
+`border`, each with `default` / `hover` / `pressed` / `disabled`.
+
+Use it for a control that is deliberately **not** an action — the Cancel beside
+a destructive answer, a dismiss beside a confirm. `Button variant="neutral"` is
+it; see `docs/button.md` for when to reach for it over `secondary`.
+
+Figma also defines `neutral.filled`, `neutral.tonal` and `neutral.textual`,
+each with the same slots. **They are not imported**, because nothing needs them
+yet. Import the treatment you need, name-for-name, rather than inventing one.
+
+For everything that is not a control — a tag, a generic surface — keep
+composing from `surface.neutral.*` plus `text.*` or `stroke.*`. `Badge`'s
+`neutral` tone is the reference example: `surface.neutral.subtle` +
+`text.secondary` (see `docs/badge.md`).
 
 ---
 

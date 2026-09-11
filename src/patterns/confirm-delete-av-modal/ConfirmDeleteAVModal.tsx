@@ -100,7 +100,7 @@ export function ConfirmDeleteAVModal({
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-end gap-4">
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="neutral" onClick={onClose}>
           {cancelLabel}
         </Button>
         <Button variant="danger" loading={loading} onClick={onConfirm}>
