@@ -509,11 +509,35 @@ the two now agree.
 
 ### ⚠️ Three gaps these modals will keep hitting
 
-1. **No neutral outlined button.** `Confirm Delete`'s Cancel is a grey
-   outlined button — `#94a3b8` border, `#475569` text. `Button`'s `secondary`
-   is brand-outlined. Every one of these modals has a Cancel, so this recurs
-   seven times. Either a `Button` variant or a decision that `secondary` is
-   the Cancel.
+1. ✅ **No neutral outlined button — fixed.** `Confirm Delete`'s Cancel is a
+   grey outlined button, `#94a3b8` border and `#475569` text, and `Button`'s
+   `secondary` is brand-outlined. `neutral.outline.*` is imported
+   name-for-name as of 11 September 2026 and `Button` and `IconButton` have a
+   `neutral` variant. The other three treatments in the family — `filled`,
+   `textual`, `tonal` — stay unimported until something needs them.
+
+   **Where "neutral" actually lives, because it is two different things.** The
+   **ramp** `colors/neutral/50…950` belongs to the *General Design Library*, and
+   this repo already has it byte-identical as `color.neutral.*` — where it sits
+   **completely unused**: all 75 of the repo's grey aliases point at
+   `color.slate.*` instead, including `surface.neutral.*` and `text.secondary`.
+   The **semantic** family `colors/neutral/outline/*` is local to the VCP file's
+   own Semantics collection and is built on slate, which is why the port aliases
+   slate and matches every other VCP grey. The GDL has no semantic neutral
+   family at all; its equivalent is a component layer,
+   `button/outlined/{enabled, hovered, focused, pressed, disabled}`.
+
+   **Two things that came out of doing it.** The build config had a hard-coded
+   whitelist of semantic families, so the light tokens silently generated
+   nothing until `neutral` was added to it — worth knowing before the next
+   family is imported. And Figma's **dark** `neutral/outline/content` goes
+   `slate/300 → 400 → 500` across default, hover and pressed, which gets
+   *darker* on a dark surface: hover drops from 9.85:1 to 5.71:1 and pressed to
+   3.07:1, below the 4.5:1 text needs. Its own border track goes the other way
+   (500 → 400 → 300, lighter), so content is the one that is wrong. The repo
+   mirrors it correctly as `300 → 200 → 100`, and **the VCP file's Dark mode was
+   corrected to match on 11 September 2026** — `content/hover` slate/400 →
+   slate/200, `content/pressed` slate/500 → slate/100.
 2. **The design tints its form fields** — `surface.neutral.faint` fill with a
    `stroke.default` border at 1.48:1. `Input` uses `stroke.field` at 4.76:1
    because a control's boundary must be perceivable. Ours is the correct one;

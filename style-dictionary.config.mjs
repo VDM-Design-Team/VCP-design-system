@@ -17,7 +17,7 @@ import StyleDictionary from 'style-dictionary';
 
 const TW = [
   [/^color\./,   (p) => `color-${p.slice(1).join('-')}`],
-  [/^(surface|text|stroke|action|accent)\./, (p) => `color-${p.join('-')}`],
+  [/^(surface|text|stroke|action|accent|neutral)\./, (p) => `color-${p.join('-')}`],
   [/^radius\./,  (p) => `radius-${p.slice(1).join('-')}`],
   [/^shadow\./,  (p) => `shadow-${p.slice(1).join('-')}`],
   [/^font\.family\./, (p) => `font-${p.slice(2).join('-')}`],
