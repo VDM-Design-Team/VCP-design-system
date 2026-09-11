@@ -2,6 +2,28 @@
 
 ## 0.1.0 — unreleased
 
+### `RejectPendingAVModal` — AV modals, 5 of 7 (11 September 2026)
+
+Rejecting an Added Value that is still `Pending`, before anyone has worked on
+it. One question: why. The reason list, its explanations and the free text for
+`Other` are all `RejectionReason`, built for this dialog and for `Review`'s
+handoff rejection.
+
+**The design draws its validation**: with no reason chosen, Reject is faded —
+disabled. So the dialog refuses by what it lets you press rather than by an
+error after the fact. That differs from `HandoffAVModal`, which validates on
+submit with a message, and deliberately: there the required field sits among
+five others and a disabled button would leave the user hunting.
+
+**Reject is `primary`, not `danger`.** Rejecting a pending value is a decision,
+not a destruction — nothing is lost and the submitter is told why.
+`ConfirmDeleteAVModal` is where the red button lives.
+
+One wrinkle recorded in the audit: the design shows a **visible** label above
+the select, and `RejectionReason` names its select with an `aria-label`. The
+pattern renders the visible text and passes the same string from one constant.
+The tidier fix is for `RejectionReason` to render a real `<label>`.
+
 ### `AcceptPendingAVModal` — AV modals, 3 of 7 (11 September 2026)
 
 The confirmation an admin answers to accept a pending Added Value, and the one
