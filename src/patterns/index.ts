@@ -5,6 +5,7 @@
  * Imports flow downward only: atoms ← components ← patterns ← templates.
  * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
+export * from './accept-pending-av-modal';
 export * from './av-header';
 export * from './confirm-delete-av-modal';
 export * from './report-problem-modal';
