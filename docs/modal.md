@@ -228,6 +228,26 @@ since unmounted, pass `returnFocusRef` to name a replacement.
   any scrollable region without focusable content. When it does not overflow it
   stays out of the tab order rather than adding a stop that does nothing.
 
+### Proved by tests, not by this document
+
+Four `play` stories run in a real browser under `npm test` and assert the
+clauses above rather than describing them:
+
+| Story | What it proves |
+|---|---|
+| `OpensTrapsAndCloses` | `aria-modal`, the name pointing at the visible heading, focus landing on the panel, Tab wrapping off the end, Shift+Tab wrapping off the front, Escape closing, focus returning to the trigger |
+| `BackgroundIsInert` | The page carries `inert` while open and loses it on close; the dialog's own portal never gets it |
+| `BackdropClickCloses` | A click on the backdrop closes it, and a press that starts on the panel and ends on the backdrop does not |
+| `NotDismissible` | `dismissible={false}` survives a backdrop click and puts focus back on the panel, Escape still closes, there is no close button, and the first Tab is Cancel rather than Delete |
+
+**The other stories render already open**, which is the only way the dialog
+reaches a Chromatic snapshot or an axe check. Until 11 September 2026 every
+story started closed, so visual review and the automated accessibility check
+had been looking at a trigger button since the component shipped — none of
+the clauses on this page were verified by anything. In the open stories
+`open` is fixed, so Escape and backdrop clicks do nothing there; the trigger
+stories are where the behaviour lives.
+
 ### The rest
 
 - **Portalled to `document.body`.** No ancestor's `overflow: hidden`,

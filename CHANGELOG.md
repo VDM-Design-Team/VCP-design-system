@@ -473,6 +473,20 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 
 ### Fixes
 
+- **`Modal`'s stories all started closed, so nothing was testing the dialog
+  (11 September 2026).** Every one of the seven stories rendered a trigger
+  button and no dialog, which meant Chromatic had never diffed a single pixel
+  of the panel, backdrop, header or footer, and the axe check in `npm test`
+  had never seen the dialog's markup — so none of the focus-contract or
+  labelling claims in `docs/modal.md` were verified by anything. The visual
+  stories now render open, and the focus contract is covered by four `play`
+  stories: `OpensTrapsAndCloses`, `BackgroundIsInert`, `BackdropClickCloses`
+  and `NotDismissible`. `LightAndDark` becomes `DarkTheme` and sets the theme
+  global, because a portalled dialog cannot be themed by a wrapper `div` and
+  so cannot be shown as a side-by-side pair. `Sizes` is replaced by
+  `ExtraWide`; the four widths are now each covered by an open story. No
+  component code changed — the contract was right, it was simply unproven.
+
 - **Five findings from the first run of the story tests (10 September 2026).**
   `SidebarItem`'s selected row named a `text.brand` token that does not exist,
   so its label inherited black — 2.32:1 on the dark tint; it is `text.brand.strong`
