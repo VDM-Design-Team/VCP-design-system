@@ -8,6 +8,7 @@ The primary interactive control.
 |---|---|---|
 | `primary` | The single most important action | 1 |
 | `secondary` | Supporting actions next to a primary | no limit |
+| `neutral` | The way *out* — Cancel beside a destructive answer, Dismiss beside a confirm | no limit |
 | `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
 | `danger` | Destructive, irreversible actions only | 1 |
 | `link` | Inline navigation that reads as text | no limit |
@@ -16,11 +17,31 @@ The primary interactive control.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| tertiary \| danger \| link` | `primary` | |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| danger \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Disables the button and swaps the left icon for a spinner |
 | `iconLeft` / `iconRight` | `ReactNode` | — | 16px icons only |
+
+### `secondary` or `neutral`?
+
+Both are outlined. `secondary` is outlined in the **brand**, which reads as a
+second call to action — right for "Save draft" beside "Publish", wrong for the
+Cancel beside "Delete". `neutral` is outlined in grey and says *this is the way
+out*, which is what the AV modals draw.
+
+It came from the VCP file's `colors/neutral/outline/*`, imported name-for-name
+on 11 September 2026. Note that "neutral" names two different things: that
+semantic family is VCP's own and is built on the **slate** ramp, like every
+other grey in the system; the `colors/neutral/*` **ramp** is the General Design
+Library's, and sits in `color.neutral.*` unused. See `docs/color-tokens.md`.
+
+**Its border is 2.56:1 against white**, below the 3:1 WCAG 1.4.11 asks of a UI
+boundary. Accepted on the same reasoning `Pagination` documents for its own
+border: the **label** is what identifies this control, at 7.58:1, and the
+border is reinforcement. In dark the border is 3.07:1 and clears the bar
+outright. If a neutral button ever ships with no label, that reasoning stops
+holding and the border needs a stronger token.
 
 ## Accessibility
 

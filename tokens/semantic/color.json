@@ -656,6 +656,53 @@
       }
     }
   },
+  "neutral": {
+    "$type": "color",
+    "outline": {
+      "border": {
+        "default": {
+          "$value": "{color.slate.400}"
+        },
+        "disabled": {
+          "$value": "{color.slate.300}"
+        },
+        "hover": {
+          "$value": "{color.slate.500}"
+        },
+        "pressed": {
+          "$value": "{color.slate.600}"
+        }
+      },
+      "content": {
+        "default": {
+          "$value": "{color.slate.600}"
+        },
+        "disabled": {
+          "$value": "{color.slate.400}"
+        },
+        "hover": {
+          "$value": "{color.slate.700}"
+        },
+        "pressed": {
+          "$value": "{color.slate.800}"
+        }
+      },
+      "surface": {
+        "default": {
+          "$value": "{color.monochrome.transparent}"
+        },
+        "disabled": {
+          "$value": "{color.monochrome.transparent}"
+        },
+        "hover": {
+          "$value": "{color.slate.100}"
+        },
+        "pressed": {
+          "$value": "{color.slate.200}"
+        }
+      }
+    }
+  },
   "stroke": {
     "$type": "color",
     "brand": {

@@ -21,6 +21,57 @@ The explanation is wired to the select with `aria-describedby` rather than left
 as loose text beside it, and the free-text box is named rather than relying on
 its placeholder. No new tokens.
 
+### A `neutral` button, and the `neutral.*` token family it needed (11 September 2026)
+
+A minor addition, no breaking change. `Button` and `IconButton` gain a
+**`neutral`** variant: outlined, but grey. It is the way *out* — the Cancel
+beside a destructive answer — where `secondary`, outlined in the brand, reads
+as a second call to action.
+
+**`neutral.outline.*` is imported name-for-name** from the VCP file's own
+Semantics collection, 12 tokens per theme, with the same `surface` / `content`
+/ `border` × `default` / `hover` / `pressed` / `disabled` shape as
+`action.secondary`, aliasing the **slate** ramp like every other grey here. The
+family's other three treatments — `filled`, `textual`, `tonal` — stay
+unimported until something needs them.
+
+⚠️ **"Neutral" names two different things.** That semantic family is VCP's own.
+The `colors/neutral/*` **ramp** is the *General Design Library*'s, and this
+repo already carries it byte-identical as `color.neutral.*` — where it is
+**unused**, because all 75 grey aliases point at `color.slate.*`. Reaching for
+`color.neutral.*` will not match the greys around it. `docs/color-tokens.md`
+warns about it, and reconciling the two libraries is issue #103.
+
+Two things fell out of doing it, both recorded in `docs/figma-audit.md`:
+
+- **`style-dictionary.config.mjs` had a hard-coded whitelist** of semantic
+  families, so the light tokens generated nothing at all until `neutral` was
+  added to it. The dark overrides have no such filter, so they built fine —
+  which is exactly the kind of silent half-build worth knowing about before
+  the next family is imported.
+- **Figma's dark `neutral/outline/content` lost contrast on hover and press.**
+  It went `slate/300 → 400 → 500`, which is *darker* on a dark surface: 9.85:1
+  down to 5.71:1, then 3.07:1, below the 4.5:1 text needs. Its own border track
+  goes the other way, so content was the one that was wrong. The repo mirrors it
+  correctly as `300 → 200 → 100`, and **the VCP file's Dark mode was corrected to
+  match** on the same day.
+
+The light border is 2.56:1 against white, below the 3:1 WCAG 1.4.11 asks of a
+UI boundary, and is accepted on the reasoning `Pagination` already documents:
+the label identifies the control at 7.58:1 and the border is reinforcement.
+`docs/button.md` says so, and says when that reasoning would stop holding.
+
+### `Modal` can be named by a heading you render (11 September 2026)
+
+A minor addition. Naming a dialog was `title` or `aria-label`; it is now
+`title`, `aria-labelledby` or `aria-label`, and the type still refuses a
+dialog with none of the three. `aria-labelledby` is for the **alert layout** —
+a centred glyph, question and consequence, with no header band — where the
+heading lives in the body and `Modal` has nothing of its own to point at.
+Before this, such a dialog repeated its heading as an `aria-label`, which is
+two copies of one string that can drift. `ConfirmDeleteAVModal` now points at
+its own `<h2>`. No other component changed.
+
 ### The AV modals — batch 1 of 7 (11 September 2026)
 
 The library has seven modal pages and **none of them was in

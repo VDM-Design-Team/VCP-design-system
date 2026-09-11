@@ -24,7 +24,10 @@ const meta = {
   },
   args: { icon: 'pencil-simple', label: 'Edit deliverable' },
   argTypes: {
-    variant: { control: 'select', options: ['primary', 'secondary', 'tertiary', 'danger'] },
+    variant: {
+      control: 'select',
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger'],
+    },
     size: { control: 'radio', options: ['sm', 'md', 'lg'] },
   },
 } satisfies Meta<typeof IconButton>;
@@ -61,7 +64,7 @@ export const Sizes: Story = {
 export const Matrix: Story = {
   render: (args) => (
     <div className="flex flex-col gap-3">
-      {(['primary', 'secondary', 'tertiary', 'danger'] as const).map((variant) => (
+      {(['primary', 'secondary', 'neutral', 'tertiary', 'danger'] as const).map((variant) => (
         <div key={variant} className="flex items-center gap-3">
           <span className="w-20 text-label-sm text-text-subtle">{variant}</span>
           <IconButton {...args} variant={variant} size="sm" />

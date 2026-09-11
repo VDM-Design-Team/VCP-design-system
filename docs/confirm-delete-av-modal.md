@@ -48,12 +48,10 @@ left-aligned title beside a close button, which is a different thing. So
 `title` is omitted on `Modal`, `showClose` is `false`, and the heading lives in
 the body.
 
-One consequence is worth knowing. `Modal` accepts a visible `title` **or** an
-`aria-label`, and deliberately does not accept `aria-labelledby` — so a dialog
-whose heading is in its body cannot point at that heading, and has to repeat
-the string as its name. This pattern passes one variable to both, so the two
-cannot drift, but the tidier wiring would be for `Modal` to take
-`aria-labelledby`. Flagged, not fixed.
+The dialog is named by `aria-labelledby`, pointing at the `<h2>` this pattern
+renders — so the announced name *is* the visible question. `Modal` gained that
+third naming option on 11 September 2026 for exactly this layout; before it,
+an alert-layout dialog had to repeat its heading as an `aria-label`.
 
 ## Accessibility
 
@@ -78,7 +76,7 @@ cannot drift, but the tidier wiring would be for `Modal` to take
 | The design | Ours | Why |
 |---|---|---|
 | ~~The destructive button read **"Complete"**~~ — **fixed in Figma, 11 Sep 2026** | `confirmLabel`, defaulting to **"Delete"** | It was a copy error, almost certainly pasted from another modal, and the file now says "Delete" too. The prop stays so a caller can override the wording |
-| Cancel is a **neutral** outlined button (`#94a3b8` border, `#475569` text) | `Button variant="secondary"`, which is brand-outlined | The system has no neutral outlined button. Adding one is a `Button` variant decision, not something to invent inside a pattern |
+| ~~Cancel is a **neutral** outlined button~~ — **no longer a deviation** | `Button variant="neutral"` | The system had no neutral outlined button; `neutral.outline.*` was imported from Figma on 11 Sep 2026 and `Button` gained the variant. The values match the design exactly |
 | Field border `stroke.default` (1.48:1) | `Input`'s own `stroke.field` (4.76:1) | A form control's boundary has to be perceivable — the same correction `Input` already carries against the export |
 | Dialog width 561 | `size="md"` (512) | Widths ride the spacing scale; 512 is the nearest step, as `Modal` documents |
 

@@ -62,16 +62,16 @@ export function ConfirmDeleteAVModal({
   loading,
 }: ConfirmDeleteAVModalProps) {
   const id = React.useId();
+  const titleId = `${id}-title`;
   const descriptionId = `${id}-description`;
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      /* The same string as the visible heading below, from one variable, so
-         the two cannot drift. `Modal` cannot take `aria-labelledby` — see the
-         doc — which is why the name is passed rather than referenced. */
-      aria-label={title}
+      /* The dialog is named by the heading it renders in its own body, so
+         the announced name *is* the visible question. */
+      aria-labelledby={titleId}
       aria-describedby={descriptionId}
       role="alertdialog"
       size="md"
@@ -85,7 +85,9 @@ export function ConfirmDeleteAVModal({
             aria-hidden="true"
             className="mx-auto size-12 text-accent-critical-outline-content-default"
           />
-          <h2 className="text-heading-md text-text-primary">{title}</h2>
+          <h2 id={titleId} className="text-heading-md text-text-primary">
+            {title}
+          </h2>
           <p id={descriptionId} className="text-body-sm text-text-tertiary">
             {description}
           </p>
@@ -100,7 +102,7 @@ export function ConfirmDeleteAVModal({
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-end gap-4">
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="neutral" onClick={onClose}>
           {cancelLabel}
         </Button>
         <Button variant="danger" loading={loading} onClick={onConfirm}>
