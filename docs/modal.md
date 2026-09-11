@@ -78,8 +78,8 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
       <h2>                      type.heading-md · text.primary          → aria-labelledby
       <p>                       type.body-sm · text.tertiary            → aria-describedby
       IconButton                icon "x" · tertiary · md (40 target) · pulled into the padding
-    <div>                       px-6 py-5 · flex-1 · overflow-y-auto · tabindex 0 only while it scrolls
-    <footer>                    px-6 pb-5 · justify-end gap-3 — no surface, no divider
+    <div>                       px-6 pt-5 · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
+    <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
 ```
 
 ## Tokens
@@ -101,8 +101,15 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 
 Spacing rides Tailwind's numeric scale, as the system requires: `p-6` (24) around
 the backdrop, `px-6` (24) through the panel, `pt-5`/`py-5` (20) at the header and
-body, `pb-5` (20) under the footer, `gap-3` (12) between footer actions. Never
+body, `py-5` (20) in the footer, `gap-3` (12) between footer actions. Never
 `gap-sm` or `mb-xs` — those emit nothing here.
+
+**The footer owns the space above its own buttons**, and the body drops its
+bottom padding whenever there is a footer, so the two never stack. That is not
+only tidiness: a bottom padding inside a scrolling box scrolls away with the
+content, so on a long dialog the last line ended up hard against the buttons
+while a short one had a comfortable gap. Now it is the same 20 above and 20
+below the buttons either way.
 
 Widths are on that same numeric scale — `max-w-96`, `max-w-128`, `max-w-160`,
 `max-w-200` — because the system has no width or size token family. See
