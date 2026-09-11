@@ -493,7 +493,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           /* Only a tab stop while it actually scrolls — see `scrollable`. */
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-5',
+            /* The footer owns the gap above the actions, so the body must not
+               add to it. It cannot be left to the body in any case: a bottom
+               padding inside a scrolling box scrolls away with the content,
+               which put the last line hard against the buttons. */
+            footer ? 'pb-0' : 'pb-5',
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
             bodyClassName,
           )}
@@ -501,8 +506,13 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           {children}
         </div>
 
+        {/* No surface and no divider: the dialog is one uninterrupted sheet,
+            and whitespace is what sets the actions apart from the content —
+            the same way the header is separated from the body. The padding is
+            symmetric, and it is the footer's own, so the gap above the buttons
+            is the same 20 whether the body scrolls or not. */}
         {footer && (
-          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-stroke-default bg-surface-canvas px-6 py-4">
+          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 py-5">
             {footer}
           </footer>
         )}
