@@ -2,6 +2,17 @@
 
 ## 0.1.0 — unreleased
 
+### `Modal` can be named by a heading you render (11 September 2026)
+
+A minor addition. Naming a dialog was `title` or `aria-label`; it is now
+`title`, `aria-labelledby` or `aria-label`, and the type still refuses a
+dialog with none of the three. `aria-labelledby` is for the **alert layout** —
+a centred glyph, question and consequence, with no header band — where the
+heading lives in the body and `Modal` has nothing of its own to point at.
+Before this, such a dialog repeated its heading as an `aria-label`, which is
+two copies of one string that can drift. `ConfirmDeleteAVModal` now points at
+its own `<h2>`. No other component changed.
+
 ### The AV modals — batch 1 of 7 (11 September 2026)
 
 The library has seven modal pages and **none of them was in
