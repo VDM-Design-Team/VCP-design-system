@@ -26,7 +26,7 @@ dated facts belong.
 | Plugin released | [`version` in the manifest on `main`](https://github.com/VDM-Design-Team/VCP-design-system/blob/main/plugin/.claude-plugin/plugin.json) |
 | Published Storybook | [always the current `main`](https://main--685158a98c4fedbbec7ac708.chromatic.com) |
 
-**Pieces, as of 11 September:** 20 atoms · 32 components · 6 patterns ·
+**Pieces, as of 11 September:** 20 atoms · 33 components · 10 patterns ·
 1 template. This one is a number because it is the shape of the system rather
 than its churn, and it only moves when something ships —
 [inventory.md](inventory.md) has the per-piece detail either way.
@@ -64,18 +64,23 @@ The backlog of pieces that still need behaviour tests is
 
 ## What shipped on 11 September
 
-A long day on the AV modals and the three things they needed first.
+A long day on the AV modals and the four things they needed first.
 
-**The seven AV modals were audited, and three are built** —
-[#99](https://github.com/VDM-Design-Team/VCP-design-system/pull/99),
-[#104](https://github.com/VDM-Design-Team/VCP-design-system/pull/104).
-`ConfirmDeleteAVModal`, `ReportProblemModal` and `AcceptPendingAVModal`. The
-survey of all seven is `docs/figma-audit.md` **batch 4**, with specs and a
-build order for the four left. **None of the seven was in the inventory**, and
-none is in the Claude Design export — nothing in this repo knew they existed.
+**All seven AV modals are built.** `ConfirmDeleteAVModal`,
+`ReportProblemModal` and `AcceptPendingAVModal`
+([#99](https://github.com/VDM-Design-Team/VCP-design-system/pull/99),
+[#104](https://github.com/VDM-Design-Team/VCP-design-system/pull/104)), then
+`HandoffAVModal` ([#106](https://github.com/VDM-Design-Team/VCP-design-system/pull/106)),
+`RejectPendingAVModal` ([#107](https://github.com/VDM-Design-Team/VCP-design-system/pull/107)),
+`ReviewAVModal` ([#109](https://github.com/VDM-Design-Team/VCP-design-system/pull/109))
+and `ChangeLogModal` ([#110](https://github.com/VDM-Design-Team/VCP-design-system/pull/110)).
 
-**Three prerequisites, each found by the audit and each fixed before the modals
-that needed them:**
+The survey of all seven is `docs/figma-audit.md` **batch 4**. **None of them
+was in the inventory**, and none is in the Claude Design export — nothing in
+this repo knew they existed until the audit.
+
+**Four prerequisites, each found by the audit and each fixed before the modal
+that needed it:**
 
 - [#100](https://github.com/VDM-Design-Team/VCP-design-system/pull/100) —
   `Modal` accepts `aria-labelledby`, so a dialog that renders its own heading
@@ -84,8 +89,20 @@ that needed them:**
   `neutral` button, grey-outlined, for the Cancel beside a destructive answer.
   It needed the `neutral.outline.*` tokens, which are imported name-for-name.
 - [#102](https://github.com/VDM-Design-Team/VCP-design-system/pull/102) —
-  `RejectionReason`, built **once** for the two unbuilt modals that both need
-  it with different reason sets.
+  `RejectionReason`, built **once** for the two modals that both need it with
+  different reason sets.
+- [#108](https://github.com/VDM-Design-Team/VCP-design-system/pull/108) — **a
+  dialog can open a dialog.** `ReviewAVModal` draws a rejection dialog over
+  itself, and two `Modal`s open at once did not work: Escape closed the *outer*
+  one and left the inner orphaned, and Tab died. Measured before fixing, and
+  the `NestedDialog` story is the regression test.
+
+**`Carousel` is new** — a component, not an atom, because the composition lint
+fails any atom that imports another piece except `Icon`. It does not render its
+own dots: `ChangeLogModal` puts them below its footer buttons, which a
+self-contained carousel could not have drawn, so it is controlled and the
+caller places `PaginationDots`. It wraps at both ends and **never
+auto-advances**. It is in the VCP Figma too, on the Pagination page.
 
 **`Card` is gone** — [#98](https://github.com/VDM-Design-Team/VCP-design-system/pull/98),
 the lead's call, on the grounds that it was doing the same job as `Modal`.
@@ -166,7 +183,12 @@ and was never finished, or they belong to a form elsewhere on the AV page.
 **This is the difference between a dialog with one decision and one with
 six**, so it is not a guess worth making.
 
-**2. Two questions still carried from [#82](https://github.com/VDM-Design-Team/VCP-design-system/pull/82).**
+**2. `Review_Already_Reviewed_Popup` is drawn and used nowhere.** A small
+"Already Reviewed" dialog with one Close button, with **zero instances
+anywhere in the file** — the third such molecule in batch 4. Not ported,
+because guessing what triggers it is guessing at a flow.
+
+**3. Two questions still carried from [#82](https://github.com/VDM-Design-Team/VCP-design-system/pull/82).**
 `AppShell` shipped without answering them, deliberately — it takes no side — so
 they are no longer blocking, but they are still unanswered:
 
@@ -179,7 +201,7 @@ they are no longer blocking, but they are still unanswered:
   file's `Top_NavBar` is 60. The shell adds no height of its own, so whichever
   way this goes, it changes `TopBar` alone.
 
-**3. The AV table's raw colours — the last live item in [issue #80](https://github.com/VDM-Design-Team/VCP-design-system/issues/80).**
+**4. The AV table's raw colours — the last live item in [issue #80](https://github.com/VDM-Design-Team/VCP-design-system/issues/80).**
 The table draws `#5291f7`, `#eab308`, `#ef4444`, `#64748b`: stock Tailwind
 values in no VCP ramp at all. **Rebind before the AV-table pattern is
 built**, or the pattern inherits colours the token layer cannot express, and
@@ -187,7 +209,7 @@ undoing it later means touching every table. The design-system owner kept this o
 
 Most of #80 is now done — see Standing debt below.
 
-**4. The plugin release still needs announcing by hand.** The self-update
+**5. The plugin release still needs announcing by hand.** The self-update
 notice cannot announce the version that introduces it. Everyone needs this
 once:
 
@@ -200,7 +222,7 @@ call on 8 September was to hold until more changes accumulate. **A great deal
 has now accumulated** — story tests, a removed component, a new template — so
 this is overdue rather than pending.
 
-**5. From an earlier handoff, never actioned:** onboarding messages for the two
+**6. From an earlier handoff, never actioned:** onboarding messages for the two
 designers who have not had them. The lead specifically wanted the design-system
 owner to hear about the owner seat directly, not via a tool. The plugin-update
 nudge above is still the natural moment to fold that in.
@@ -266,16 +288,8 @@ nothing stops it drifting. Not urgent, nothing blocked on it.
 
 ## What to build next
 
-**The four remaining AV modals**, in this order — the audit's batch 4 has the
-specs:
-
-1. **`Handoff AV`** (`5342:78539`) — two variants, Default and Overdue.
-2. **`Reject AV (Pending)`** (`7847:106048`) — three variants.
-   `RejectionReason` is already built and waiting for it.
-3. **`Review AV`** (`6100:15103`) — the largest: four variants, six of its own
-   molecules, and it nests the rejection modal.
-4. **`Change Log`** (`7211:1060`) — unrelated to the AV flow, and it needs a
-   carousel nobody has specced.
+**The AV modals are done** — all seven, and the worklist row for them is gone
+from [inventory.md](inventory.md). What is left is everything around them.
 
 **The page contents `AppShell` frames**, none of which exist: `My_AVs_Stats`,
 `Filter_Bar`, `AV_Table`. ⚠️ `AV_Table` needs the raw-colour rebind settled
