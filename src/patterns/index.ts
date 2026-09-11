@@ -10,5 +10,6 @@ export * from './av-header';
 export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
 export * from './report-problem-modal';
+export * from './review-av-modal';
 export * from './sidebar';
 export * from './top-bar';

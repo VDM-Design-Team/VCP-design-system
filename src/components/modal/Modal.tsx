@@ -162,6 +162,24 @@ function hideBackground(portalEl: HTMLElement): () => void {
 }
 
 /* ------------------------------------------------------------------ */
+/* Which dialog owns the keyboard                                      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Every open dialog, innermost last. **Only the last one answers the
+ * keyboard.**
+ *
+ * Both traps bind to `document` in the capture phase, so with two dialogs open
+ * the outer one's listener — registered first — ran first and answered for
+ * both. Escape closed the *outer* dialog and left the inner one orphaned over a
+ * page that was no longer inert; Tab died on the outer trap's `preventDefault`,
+ * because its own panel is inert by then so it found nothing to focus and
+ * blocked the event for everyone. A dialog that opens a dialog is exactly what
+ * the review flow draws, so this is not hypothetical.
+ */
+const openPanels: HTMLElement[] = [];
+
+/* ------------------------------------------------------------------ */
 /* Focus trap                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -365,9 +383,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       latest.current.returnFocusRef?.current ??
       (active instanceof HTMLElement ? active : null);
 
-    /* 2. Everything behind goes inert, and the page stops scrolling. */
+    /* 2. Everything behind goes inert — including an outer dialog's portal,
+       which is what dims and disables it — and the page stops scrolling. */
     const restoreBackground = hideBackground(portalEl);
     lockScroll();
+    openPanels.push(panelEl);
 
     /* 3. Focus moves in. The panel itself by default — see docs/modal.md. */
     (latest.current.initialFocusRef?.current ?? panelEl).focus({ preventScroll: true });
@@ -378,6 +398,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
        supposed to earn its keep. */
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented) return;
+      /* An outer dialog stands down while an inner one is open. */
+      if (openPanels[openPanels.length - 1] !== panelEl) return;
 
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -420,6 +442,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
 
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
+      const index = openPanels.indexOf(panelEl);
+      if (index !== -1) openPanels.splice(index, 1);
       unlockScroll();
       /* Background comes back before focus does, so the trigger is focusable
          again by the time we reach for it. */
