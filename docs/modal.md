@@ -95,7 +95,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 | Description type | `type.body-sm` | `text-body-sm` |
 | Description colour | `text.tertiary` | `text-text-tertiary` |
 | Body colour | `text.secondary` | `text-text-secondary` |
-| Footer surface | `surface.canvas` | `bg-surface-canvas` |
+| Footer surface | none — the panel's `surface.elevated` carries through | — |
 | Footer divider | `stroke.default` | `border-t border-stroke-default` |
 | Focus ring | `stroke.focused` | `focus-visible:outline-stroke-focused` |
 | Font | `font.family.sans` | `font-sans` |
@@ -122,11 +122,19 @@ themes the page but not the dialog, because the dialog is no longer inside it.
 | Title — `text.primary` on the panel | 20.17:1 | 14.63:1 |
 | Body — `text.secondary` on the panel | 10.35:1 | 11.87:1 |
 | Description — `text.tertiary` on the panel | 7.58:1 | 9.85:1 |
-| Footer text on `surface.canvas` | 9.90:1 | 14.48:1 |
+| Footer text on the panel | 10.35:1 | 11.87:1 |
 
-All clear 4.5:1 comfortably. The footer divider is decorative — the tint change
-already separates the band — so 1.4.11 does not apply to it, exactly as in
-[`docs/card.md`](./card.md#why-strokedefault-is-allowed-here).
+All clear 4.5:1 comfortably.
+
+**The footer has no surface of its own** (changed 11 September 2026 — it was
+`surface.canvas`). The dialog reads as one sheet, and the divider is the only
+thing separating the actions from the content. That divider is still
+decorative in the 1.4.11 sense — it carries no state, identifies no control,
+and the buttons inside it have their own contrast — so its 1.48:1 against the
+panel is allowed, on exactly the reasoning in
+[`docs/card.md`](./card.md#why-strokedefault-is-allowed-here). Note that
+`Card`'s footer still tints; if the two should agree, that is a separate
+decision about `Card`.
 
 ## Accessibility
 

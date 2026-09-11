@@ -501,8 +501,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           {children}
         </div>
 
+        {/* The footer has no surface of its own: the panel's `surface.elevated`
+            carries through, so the dialog reads as one sheet and the divider is
+            what separates the actions from the content. */}
         {footer && (
-          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-stroke-default bg-surface-canvas px-6 py-4">
+          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-stroke-default px-6 py-4">
             {footer}
           </footer>
         )}

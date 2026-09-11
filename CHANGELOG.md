@@ -484,8 +484,13 @@ Initial system, seeded from the VCP Figma Variables export (Aug 2026).
   and `NotDismissible`. `LightAndDark` becomes `DarkTheme` and sets the theme
   global, because a portalled dialog cannot be themed by a wrapper `div` and
   so cannot be shown as a side-by-side pair. `Sizes` is replaced by
-  `ExtraWide`; the four widths are now each covered by an open story. No
-  component code changed — the contract was right, it was simply unproven.
+  `ExtraWide`; the four widths are now each covered by an open story.
+
+  The one component change rides along because it is the same sheet: **the
+  footer no longer tints itself.** It was `surface.canvas`; the panel's
+  `surface.elevated` now carries through, so the dialog is one surface and the
+  divider is what separates the actions from the content. Everything else about
+  the focus contract was already right — it was simply unproven.
 
 - **Five findings from the first run of the story tests (10 September 2026).**
   `SidebarItem`'s selected row named a `text.brand` token that does not exist,
