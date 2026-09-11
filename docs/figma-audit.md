@@ -470,7 +470,7 @@ built, five are specced below.
 | Confirm Delete AV | `7829:105404` | 1 | — | **Built** — `ConfirmDeleteAVModal` |
 | Report a Problem | `7218:77431` | 1 | — | **Built** — `ReportProblemModal` |
 | Accept Pending AV | `5939:149041` | 1 | `_Accept_Modal_Enable_Multipart` (2 states) — and `_Accept_Modal_Fields` (5 types), **used nowhere** | **Built** — `AcceptPendingAVModal` |
-| Reject AV (Pending) | `7847:106048` | 3 — Default / Reason Selected / Dropdown | `Pending_Rejection_Reason` (3 states), `_Selected_Pending_Rejection_Reason` (5 reasons) | To build |
+| Reject AV (Pending) | `7847:106048` | 3 — Default / Reason Selected / Dropdown | `Pending_Rejection_Reason` (3 states), `_Selected_Pending_Rejection_Reason` (5 reasons) | **Built** — `RejectPendingAVModal` |
 | Handoff AV | `5342:78539` | 2 — Default / Overdue | `_Handoff_AV_Modal_Fields` (5 types), `…_Overdue_Reason` (3 states), `…_Buttons` (2 domains) | **Built** — `HandoffAVModal` |
 | Review AV | `6100:15103` | 4 — Domain × Rejection modal | `_Review_Field_Item` (6 types), `_Review_Field_Attachements_Item`, `Handoff_Rejection_Reason` (3), `_Selected_Handoff_Rejection_Reason` (6 reasons), `_Rejection_Reason_Modal` (3) — and `Review_Already_Reviewed_Popup`, **used nowhere** | **Built** — `ReviewAVModal` |
 | Change Log | `7211:1060` | 1 | `_Changelog_Main_Content` (3 types), `_Changelog_Description`, `Changelog_Description_List_Item`, `_Changelog_Tooltip` (6), `_Changelog_Pagination_Dots` | **Built** — `ChangeLogModal`, on a new `Carousel` |
@@ -631,10 +631,24 @@ to undo the decision to make it move.
    `Modal`'s focus trap, which the trap has no answer for. Worth settling
    before any dialog needs a real date picker.
 
+### 🔧 `RejectionReason` should render its own visible label
+
+The reject dialog draws a visible "Rejection Reason" label above the select.
+`RejectionReason` names its select through `label`, which is an `aria-label`,
+so `RejectPendingAVModal` renders the visible text itself and passes the same
+string — both from one constant, so they cannot drift.
+
+It works, but the tidier answer is for `RejectionReason` to render a real
+`<label>` wired to its own select. Worth doing when a second dialog needs it,
+and `Review`'s handoff rejection is that second dialog.
+
 ### Suggested order
 
 ~~`Accept Pending`~~ (built) → ~~the shared rejection-reason picker~~ (built,
 #102) → ~~`Handoff`~~ (built) → `Reject (Pending)` (three variants, and the
 picker is ready for it) → `Review` (the largest, four variants, and it nests
+
+#102) → `Handoff` (two variants, #106) → ~~`Reject (Pending)`~~ (built) →
+`Review` (the largest, four variants, and it nests
 the rejection modal) → `Change Log` (unrelated to the AV flow, and it needs a
 carousel nobody has specced).
