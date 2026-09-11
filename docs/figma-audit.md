@@ -497,12 +497,15 @@ where one variable feeds both, as in `ConfirmDeleteAVModal`, but the tidier
 wiring would be for `Modal` to accept `aria-labelledby`. One small change,
 worth making before the other alert-layout modals land.
 
-### ⚠️ The delete confirmation's primary button reads "Complete"
+### 🔧 The delete confirmation's primary button read "Complete" — fixed
 
 On a dialog whose heading is "Are you sure you want to delete?". Almost
-certainly pasted from another modal. Ported as `confirmLabel`, defaulting to
-`Delete`, so the code is not wrong while design decides. **Needs a design fix
-in the file.**
+certainly pasted from another modal. **Changed to "Delete" in the file on
+11 September 2026.** It was a local text override on the `Button_Normal`
+instance inside `Confirm_Delete_AV_Popup`, not text in the shared button
+component, so the edit touched that one dialog and nothing else. The repo
+carries the label as `confirmLabel` either way, defaulting to `Delete`, so
+the two now agree.
 
 ### ⚠️ Three gaps these modals will keep hitting
 

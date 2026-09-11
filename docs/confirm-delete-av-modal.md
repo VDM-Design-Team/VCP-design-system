@@ -77,7 +77,7 @@ cannot drift, but the tidier wiring would be for `Modal` to take
 
 | The design | Ours | Why |
 |---|---|---|
-| The destructive button reads **"Complete"** | `confirmLabel`, defaulting to **"Delete"** | "Complete" on a delete confirmation is a copy error — almost certainly pasted from another modal. Raised with design; the prop means a caller can say whatever is decided |
+| ~~The destructive button read **"Complete"**~~ — **fixed in Figma, 11 Sep 2026** | `confirmLabel`, defaulting to **"Delete"** | It was a copy error, almost certainly pasted from another modal, and the file now says "Delete" too. The prop stays so a caller can override the wording |
 | Cancel is a **neutral** outlined button (`#94a3b8` border, `#475569` text) | `Button variant="secondary"`, which is brand-outlined | The system has no neutral outlined button. Adding one is a `Button` variant decision, not something to invent inside a pattern |
 | Field border `stroke.default` (1.48:1) | `Input`'s own `stroke.field` (4.76:1) | A form control's boundary has to be perceivable — the same correction `Input` already carries against the export |
 | Dialog width 561 | `size="md"` (512) | Widths ride the spacing scale; 512 is the nearest step, as `Modal` documents |

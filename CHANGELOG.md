@@ -25,8 +25,9 @@ design's Cancel is a **neutral outlined button** the system does not have; the
 design **tints its form fields** with a 1.48:1 border where `Input` correctly
 uses 4.76:1; and the **rejection-reason picker is shared** between two of the
 unbuilt modals and should be built once. The delete confirmation's primary
-button reads **"Complete"** in the file, which is a copy error — ported as
-`confirmLabel`, defaulting to `Delete`.
+button read **"Complete"** in the file, which was a copy error; it was
+corrected to "Delete" in Figma on 11 September and the repo carries the label
+as `confirmLabel` either way.
 
 ### Breaking — 11 September 2026
 
