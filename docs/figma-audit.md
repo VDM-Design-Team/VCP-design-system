@@ -469,7 +469,7 @@ built, five are specced below.
 |---|---|---|---|---|
 | Confirm Delete AV | `7829:105404` | 1 | — | **Built** — `ConfirmDeleteAVModal` |
 | Report a Problem | `7218:77431` | 1 | — | **Built** — `ReportProblemModal` |
-| Accept Pending AV | `5939:149041` | 1 | `_Accept_Modal_Fields` (5 types), `_Accept_Modal_Enable_Multipart` (2 states) | To build |
+| Accept Pending AV | `5939:149041` | 1 | `_Accept_Modal_Enable_Multipart` (2 states) — and `_Accept_Modal_Fields` (5 types), **used nowhere** | **Built** — `AcceptPendingAVModal` |
 | Reject AV (Pending) | `7847:106048` | 3 — Default / Reason Selected / Dropdown | `Pending_Rejection_Reason` (3 states), `_Selected_Pending_Rejection_Reason` (5 reasons) | To build |
 | Handoff AV | `5342:78539` | 2 — Default / Overdue | `_Handoff_AV_Modal_Fields` (5 types), `…_Overdue_Reason` (3 states), `…_Buttons` (2 domains) | To build |
 | Review AV | `6100:15103` | 4 — Domain × Rejection modal | `_Review_Field_Item` (6 types), `_Review_Field_Attachements_Item`, `Handoff_Rejection_Reason` (3), `_Selected_Handoff_Rejection_Reason` (6 reasons), `_Rejection_Reason_Modal` (3), `Review_Already_Reviewed_Popup` | To build |
@@ -553,10 +553,33 @@ the two now agree.
    line that appears under the select once a reason is chosen. The two modals
    that need it can now be built without either one owning the vocabulary.
 
+### ⚠️ Five Accept-modal field molecules are assembled into nothing
+
+`_Accept_Modal_Fields` has five types — Due Date, Worked out thoroughly,
+Pre-consultation of domains involved, Impact of the Added Value, Development
+Points. A search of **every page in the file** finds **zero instances** of any
+of them; only `_Accept_Modal_Enable_Multipart` is used, once, in the assembled
+modal. They are drawn and wired to nothing, exactly like the `Status` sidebar
+preset was.
+
+Deliberately not ported. Either the accept dialog is meant to collect those
+five values and was never finished, or they belong to a form elsewhere on the
+AV page. **Needs a design answer**, and it is cheap to get wrong in code —
+`AcceptPendingAVModal` would grow from one decision to six.
+
+### 🔧 Cancel is not the same button in every modal
+
+`Confirm Delete`'s Cancel is the grey `neutral` outlined button; `Accept
+Pending`'s is the brand-outlined `secondary`. That is not an inconsistency in
+the file, it is the right distinction: beside a destructive answer a
+brand-outlined button reads as a second call to action, and beside a benign
+Confirm it reads as a peer. Recorded so the remaining modals are read the same
+way rather than normalised to one.
+
 ### Suggested order
 
-`Accept Pending` (one variant, five fields) → `Handoff` (two variants, reuses
-the field shape) → the shared rejection-reason picker → `Reject (Pending)` →
-`Review` (the largest, four variants, and it nests the rejection modal) →
-`Change Log` (unrelated to the AV flow, and it needs a carousel nobody has
-specced).
+~~`Accept Pending`~~ (built) → ~~the shared rejection-reason picker~~ (built,
+#102) → `Handoff` (two variants) → `Reject (Pending)` (three variants, and the
+picker is ready for it) → `Review` (the largest, four variants, and it nests
+the rejection modal) → `Change Log` (unrelated to the AV flow, and it needs a
+carousel nobody has specced).

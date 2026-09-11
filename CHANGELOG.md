@@ -2,6 +2,31 @@
 
 ## 0.1.0 — unreleased
 
+### `AcceptPendingAVModal` — AV modals, 3 of 7 (11 September 2026)
+
+The confirmation an admin answers to accept a pending Added Value, and the one
+decision that comes with it: whether the value is **multipart**. The Figma node
+carries a designer's note, "Used by Admins to accept a pending AV", so the
+pattern is scoped to admins rather than offered as a general accept dialog.
+
+`onConfirm` is handed `{ multipart }` rather than leaving the caller to read
+the decision back off its own state, so there is no window where the two
+disagree. The multipart checkbox's label is the whole card, making the target
+the block rather than the 20px box, and its announced name is the title alone
+with the explanation wired as `aria-describedby`.
+
+**It is the benign confirmation**, and the design draws that difference from
+the delete one: `Modal`'s own header rather than the alert layout, a
+brand-outlined `secondary` Cancel rather than the grey `neutral`, and a
+backdrop click that closes it. `docs/figma-audit.md` records that as a
+deliberate distinction rather than an inconsistency to normalise.
+
+⚠️ **Five field molecules on the same Figma page are assembled into nothing.**
+`_Accept_Modal_Fields` — Due Date, Worked out thoroughly, Pre-consultation,
+Impact of the Added Value, Development Points — has **zero instances anywhere
+in the file**. Not ported; it needs a design answer, and getting it wrong would
+grow the dialog from one decision to six.
+
 ### `RejectionReason` — built once for the two modals that need it (11 September 2026)
 
 A new component, and the third thing the AV-modal audit flagged. Rejecting an
