@@ -2,6 +2,45 @@
 
 ## 0.1.0 — unreleased
 
+### The AV tag vocabulary — `UrgencyTag`, `TypeTag`, `DueDatePill` (11 September 2026)
+
+The three tags an Added Value wears beside its status, and the three mappings
+they own. Built ahead of `AV_Table`, which needs all three, but none of them is
+table-specific — the AV detail card and the multipart rows draw the same tags.
+
+**Urgency and type are scales, and the glyph is the scale.** Both write their
+word in one neutral and let the glyph carry the temperature: a rising caret
+family for type (one, two, three strokes, heaviest first), a falling/level/
+rising/flame set for urgency. That is the design's own decision and it is a
+good one — four coloured words in a column read as four unrelated statuses,
+whereas same-weight words with a rising glyph read as a ranking. It also means
+colour is never the only cue, so both scales survive greyscale (WCAG 1.4.1).
+
+**`TypeTag`'s vocabulary is closed; `StatusPill`'s is not.** Statuses have a
+per-domain middle this repo does not own. Types do not — the design draws
+exactly three and the numbering is the meaning, so a fourth is a compile error
+at every call site rather than a silent fall-through.
+
+**`DueDatePill` will not guess what "due soon" means.** `dueDateTone` does the
+comparing, but `soonWithinDays` has no default and is not getting one: how many
+days ahead counts as soon is a product rule that differs by domain, and a
+design system that invents one has quietly made a product decision. Every call
+site states its own rule out loud, which is the honest version of not knowing.
+Open question for design, recorded in `docs/due-date-pill.md`.
+
+**Two glyphs added to `Icon`**: `equals` and `fire`, both Phosphor regular.
+
+**No new colour tokens.** Figma's tags reach for `neutral.textual.*` and
+`neutral.tonal.*`, two of the four neutral families this repo does not model
+yet. Both resolve to values already exported — `neutral.textual.content.default`
+*is* slate-600, which is `neutral.outline.content.default`, and the neutral
+due-date fill is one step of slate from `Badge`'s. Three further Figma
+deviations are zero-pixel token-family corrections (a background token used as
+a foreground, a control token used as decoration), listed in each doc. Modelling
+the full neutral families belongs with issue #103, not here.
+
+Minor bump: three additions, no existing API changed.
+
 ### `RejectPendingAVModal` — AV modals, 5 of 7 (11 September 2026)
 
 Rejecting an Added Value that is still `Pending`, before anyone has worked on
