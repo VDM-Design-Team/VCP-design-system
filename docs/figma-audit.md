@@ -455,3 +455,81 @@ system's Phosphor set covers the rest by name-mapping
 (`exclamation-triangle` → `warning`, `chevron-left` → `caret-left`), but
 those three have no good equivalent and are currently stood in for by
 `graph`, `database` and `chat-dots`. Three icons to add.
+
+---
+
+## Batch 4 — the AV modals, 11 September 2026
+
+Seven pages in the library are modals, and **not one of them was in
+`docs/inventory.md`**. They are not in the Claude Design export either, so
+nothing in this repo knew they existed. This batch is the survey; two are
+built, five are specced below.
+
+| Modal | Node | Variants | Its own molecules | State |
+|---|---|---|---|---|
+| Confirm Delete AV | `7829:105404` | 1 | — | **Built** — `ConfirmDeleteAVModal` |
+| Report a Problem | `7218:77431` | 1 | — | **Built** — `ReportProblemModal` |
+| Accept Pending AV | `5939:149041` | 1 | `_Accept_Modal_Fields` (5 types), `_Accept_Modal_Enable_Multipart` (2 states) | To build |
+| Reject AV (Pending) | `7847:106048` | 3 — Default / Reason Selected / Dropdown | `Pending_Rejection_Reason` (3 states), `_Selected_Pending_Rejection_Reason` (5 reasons) | To build |
+| Handoff AV | `5342:78539` | 2 — Default / Overdue | `_Handoff_AV_Modal_Fields` (5 types), `…_Overdue_Reason` (3 states), `…_Buttons` (2 domains) | To build |
+| Review AV | `6100:15103` | 4 — Domain × Rejection modal | `_Review_Field_Item` (6 types), `_Review_Field_Attachements_Item`, `Handoff_Rejection_Reason` (3), `_Selected_Handoff_Rejection_Reason` (6 reasons), `_Rejection_Reason_Modal` (3), `Review_Already_Reviewed_Popup` | To build |
+| Change Log | `7211:1060` | 1 | `_Changelog_Main_Content` (3 types), `_Changelog_Description`, `Changelog_Description_List_Item`, `_Changelog_Tooltip` (6), `_Changelog_Pagination_Dots` | To build |
+
+### They are patterns, and they come in two layouts
+
+Each composes `Modal` with form pieces, which is two or more components in a
+distinct section — a pattern by the CLAUDE.md test. The two layouts matter
+because they decide whether `Modal`'s header is used at all:
+
+- **The dialog layout** — left-aligned title, close button, footer. `Report a
+  Problem` and, from the specs, `Accept Pending`, `Handoff` and `Review` all
+  use it, so they pass `title` to `Modal`.
+- **The alert layout** — a centred glyph, question and consequence, with no
+  header and no close button. `Confirm Delete AV` uses it. `Modal` has no
+  `title` slot for a centred heading, so the heading goes in the body and the
+  name is repeated as `aria-label`.
+
+### 🔧 `Modal` cannot take `aria-labelledby`
+
+Its props deliberately omit it, so an alert-layout dialog cannot point at the
+heading it renders in its own body and has to repeat the string. Harmless
+where one variable feeds both, as in `ConfirmDeleteAVModal`, but the tidier
+wiring would be for `Modal` to accept `aria-labelledby`. One small change,
+worth making before the other alert-layout modals land.
+
+### 🔧 The delete confirmation's primary button read "Complete" — fixed
+
+On a dialog whose heading is "Are you sure you want to delete?". Almost
+certainly pasted from another modal. **Changed to "Delete" in the file on
+11 September 2026.** It was a local text override on the `Button_Normal`
+instance inside `Confirm_Delete_AV_Popup`, not text in the shared button
+component, so the edit touched that one dialog and nothing else. The repo
+carries the label as `confirmLabel` either way, defaulting to `Delete`, so
+the two now agree.
+
+### ⚠️ Three gaps these modals will keep hitting
+
+1. **No neutral outlined button.** `Confirm Delete`'s Cancel is a grey
+   outlined button — `#94a3b8` border, `#475569` text. `Button`'s `secondary`
+   is brand-outlined. Every one of these modals has a Cancel, so this recurs
+   seven times. Either a `Button` variant or a decision that `secondary` is
+   the Cancel.
+2. **The design tints its form fields** — `surface.neutral.faint` fill with a
+   `stroke.default` border at 1.48:1. `Input` uses `stroke.field` at 4.76:1
+   because a control's boundary must be perceivable. Ours is the correct one;
+   the design file should follow, as it already did for the other contrast
+   fixes.
+3. **The rejection-reason machinery is shared and unported.** `Reject
+   (Pending)` and `Review` each have a reason picker with a list of typed
+   reasons and an "Other" free-text state. They are different sets
+   (`Pending_Rejection_Reason` has 5, `Handoff_Rejection_Reason` has 6) but
+   the same shape. Build it once as its own component before either modal, or
+   it gets built twice.
+
+### Suggested order
+
+`Accept Pending` (one variant, five fields) → `Handoff` (two variants, reuses
+the field shape) → the shared rejection-reason picker → `Reject (Pending)` →
+`Review` (the largest, four variants, and it nests the rejection modal) →
+`Change Log` (unrelated to the AV flow, and it needs a carousel nobody has
+specced).
