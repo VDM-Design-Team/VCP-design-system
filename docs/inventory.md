@@ -50,6 +50,7 @@ record of when each piece landed.
 | pattern | `AVHeader` | PR #58 |
 | component | `SidebarItem` | PR #76 |
 | pattern | `Sidebar` | PR #78 |
+| pattern | `ConfirmDeleteAVModal`, `ReportProblemModal` | PR #99 |
 | atom | `Footer` | PR #82 |
 | component | `PageTitle` | PR #82 |
 | template | `AppShell` | PR #85 |
@@ -70,6 +71,7 @@ Organisms: 2+ components forming a page section.
 | Area | Patterns |
 |---|---|
 | Page structure | `SettingsSection` |
+| AV modals (audit batch 4) | `AcceptPendingAVModal`, `RejectPendingAVModal`, `HandoffAVModal`, `ReviewAVModal`, `ChangeLogModal` — see [figma-audit.md](figma-audit.md) batch 4 for specs and order |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
 | Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |

@@ -6,5 +6,7 @@
  * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
 export * from './av-header';
+export * from './confirm-delete-av-modal';
+export * from './report-problem-modal';
 export * from './sidebar';
 export * from './top-bar';
