@@ -2,7 +2,6 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Banner, type BannerTone } from './Banner';
 import { Button } from '../../atoms/button';
-import { Card } from '../card';
 
 const TONES: BannerTone[] = ['info', 'success', 'warning', 'danger'];
 
@@ -178,7 +177,7 @@ export const Dismissible: Story = {
 /**
  * Full width, in a page. A Banner belongs to a region of the page and spans it:
  * under the top bar for something workspace-wide, at the top of a form for
- * something about that form, inside a `Card` for something about that card.
+ * something about that form, inside a panel for something about that panel.
  * It pushes content down rather than covering it — that is the whole difference
  * from a Toast.
  */
@@ -203,16 +202,17 @@ export const InPageContext: Story = {
           They cannot move to Confirmed prod until a source is attached.
         </Banner>
 
-        <Card title="Q3 platform migration">
+        <section className="rounded-md border border-stroke-default bg-surface-elevated p-4">
+          <h3 className="mb-3 text-heading-sm text-text-primary">Q3 platform migration</h3>
           <div className="flex flex-col gap-3">
             <Banner tone="info" title="This deliverable is read-only">
               It was confirmed in production on 12 August and is now locked.
             </Banner>
             <p className="text-body-md text-text-secondary">
-              Card content sits below the banner, pushed down rather than covered.
+              Panel content sits below the banner, pushed down rather than covered.
             </p>
           </div>
-        </Card>
+        </section>
       </div>
     </div>
   ),

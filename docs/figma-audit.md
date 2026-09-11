@@ -138,8 +138,8 @@ each docs page's "Composed of" table matches the real import graph, and no
 piece hand-rolls what an atom already provides.
 
 Result: **no component rebuilds an existing atom.** The pieces that draw
-raw markup do so because nothing in the system covers it (`Card`'s shell,
-`Popover`'s panel, `DataTable`'s `<table>`), and each says so in its docs.
+raw markup do so because nothing in the system covers it (`Popover`'s panel,
+`DataTable`'s `<table>`), and each says so in its docs.
 The one violation found was in this audit: `StatusPill` was about to need a
 solid fill that `Badge` couldn't give — fixed by adding the variant to the
 atom, not by styling around it.

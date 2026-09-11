@@ -26,7 +26,6 @@ export * from './components/attachment-preview';
 export * from './components/avatar-group';
 export * from './components/banner';
 export * from './components/breadcrumb';
-export * from './components/card';
 export * from './components/chip';
 export * from './components/data-table';
 export * from './components/date-picker';

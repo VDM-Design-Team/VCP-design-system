@@ -53,8 +53,8 @@ when the table cannot fit (the page never does).
   way. The component still never sorts rows — the server or the caller does —
   it only *asks* via `onSortChange` and *shows* via `aria-sort` and the caret.
   Unsorted sortable columns show the faint both-ways glyph.
-- **No `onRowClick`.** The same decision `Card` documents, for the same
-  reason: a whole-row click target is invisible to keyboards and screen
+- **No `onRowClick`.** The system does not offer whole-row click targets
+  anywhere, for one reason: such a target is invisible to keyboards and screen
   readers, and it swallows clicks meant for controls inside cells. Put the
   row's action in a cell as a real link (`render` on the reference column is
   the idiom — see the Default story). Row hover paints `surface.brand.base`

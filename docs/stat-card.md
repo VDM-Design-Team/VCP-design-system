@@ -14,7 +14,7 @@ without this section changing.
 | Use | For |
 |---|---|
 | `StatCard` | A headline figure with at most one comparison |
-| `Card` | Anything with real content — headings, body, actions |
+| A plain section with a heading | Anything with real content — headings, body, actions |
 | `DonutChart` in a StatCard | A consumed-of-total figure that wants a gauge (see the WithADonut story) |
 | `DataTable` | The numbers behind the headline |
 
@@ -59,8 +59,8 @@ delta in the numeric face at `caption-md`. No new tokens.
 
 - The label is a `<span>`, not a heading — eight stat tiles must not
   contribute eight `<h3>`s to the outline; the dashboard section's heading
-  owns them. (This is also why it does not compose `Card`, which renders a
-  real heading.)
+  owns them. It renders no heading of its own for that reason, and nothing it
+  composes renders one either.
 - Reading order is label → value → unit → delta → footer, which is the
   sentence: "Open claims, 128, +12%, vs last cycle".
 - The delta's sign is in the text, so the verdict colour is never the only

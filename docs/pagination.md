@@ -51,7 +51,7 @@ not a hover state. Trailing text `text.tertiary`. No new tokens.
 
 The `stroke.subtle` button border is below the 3:1 UI-boundary bar in light —
 accepted: the number *is* the control's boundary for anyone who can read it,
-which is the same reasoning `Card` uses for the same border. The disabled
+so the border is decorative rather than a boundary 1.4.11 governs. The disabled
 arrows are deliberately faint; disabled controls are exempt from 1.4.3/1.4.11.
 
 ## Accessibility
