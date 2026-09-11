@@ -109,10 +109,18 @@ one of these three.
 ## Neutral treatments — components that aren't an Action
 
 VCP has **`neutral.outline.*`**, and only that one treatment so far — added
-11 September 2026, imported name-for-name from the design file's
-`colors/neutral/outline/*`, which had existed in Figma all along and never been
-ported. It is shaped exactly like `action.secondary`: `surface`, `content` and
-`border`, each with `default` / `hover` / `pressed` / `disabled`.
+11 September 2026, imported name-for-name from the VCP file's
+`colors/neutral/outline/*`. It is shaped exactly like `action.secondary`:
+`surface`, `content` and `border`, each with `default` / `hover` / `pressed` /
+`disabled`, and it aliases the **slate** ramp like every other grey here.
+
+> **"Neutral" names two different things, and they are not the same grey.**
+> The semantic family above is VCP's own. The **ramp** `color.neutral.*`
+> (`#f9f9f9` … `#060606`, a warmer grey) comes from the General Design Library
+> and is currently **unused** — every one of the repo's 75 grey aliases points
+> at `color.slate.*` instead. Do not reach for `color.neutral.*` expecting it to
+> match the greys around it; it will not. Reconciling the two is part of the GDL
+> work tracked in issue #103.
 
 Use it for a control that is deliberately **not** an action — the Cancel beside
 a destructive answer, a dismiss beside a confirm. `Button variant="neutral"` is

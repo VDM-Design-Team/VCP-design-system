@@ -30,9 +30,11 @@ second call to action — right for "Save draft" beside "Publish", wrong for the
 Cancel beside "Delete". `neutral` is outlined in grey and says *this is the way
 out*, which is what the AV modals draw.
 
-It came from Figma's `colors/neutral/outline/*`, imported name-for-name on
-11 September 2026 — the family existed in the design file and had simply never
-been ported.
+It came from the VCP file's `colors/neutral/outline/*`, imported name-for-name
+on 11 September 2026. Note that "neutral" names two different things: that
+semantic family is VCP's own and is built on the **slate** ramp, like every
+other grey in the system; the `colors/neutral/*` **ramp** is the General Design
+Library's, and sits in `color.neutral.*` unused. See `docs/color-tokens.md`.
 
 **Its border is 2.56:1 against white**, below the 3:1 WCAG 1.4.11 asks of a UI
 boundary. Accepted on the same reasoning `Pagination` documents for its own

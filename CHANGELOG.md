@@ -9,14 +9,19 @@ A minor addition, no breaking change. `Button` and `IconButton` gain a
 beside a destructive answer — where `secondary`, outlined in the brand, reads
 as a second call to action.
 
-The interesting part is where the tokens came from. The design file has a
-whole **`colors/neutral/` family** — `filled`, `outline`, `textual` and
-`tonal`, 54 variables — that this repo had never imported;
-`docs/color-tokens.md` stated outright that no such family existed.
-**`neutral.outline.*` is now imported name-for-name**, 12 tokens per theme,
-with the same `surface` / `content` / `border` × `default` / `hover` /
-`pressed` / `disabled` shape as `action.secondary`. The other three treatments
-stay unimported until something needs them.
+**`neutral.outline.*` is imported name-for-name** from the VCP file's own
+Semantics collection, 12 tokens per theme, with the same `surface` / `content`
+/ `border` × `default` / `hover` / `pressed` / `disabled` shape as
+`action.secondary`, aliasing the **slate** ramp like every other grey here. The
+family's other three treatments — `filled`, `textual`, `tonal` — stay
+unimported until something needs them.
+
+⚠️ **"Neutral" names two different things.** That semantic family is VCP's own.
+The `colors/neutral/*` **ramp** is the *General Design Library*'s, and this
+repo already carries it byte-identical as `color.neutral.*` — where it is
+**unused**, because all 75 grey aliases point at `color.slate.*`. Reaching for
+`color.neutral.*` will not match the greys around it. `docs/color-tokens.md`
+warns about it, and reconciling the two libraries is issue #103.
 
 Two things fell out of doing it, both recorded in `docs/figma-audit.md`:
 
@@ -25,11 +30,12 @@ Two things fell out of doing it, both recorded in `docs/figma-audit.md`:
   added to it. The dark overrides have no such filter, so they built fine —
   which is exactly the kind of silent half-build worth knowing about before
   the next family is imported.
-- **Figma's dark `neutral/outline/content` loses contrast on hover and press.**
-  It goes `slate/300 → 400 → 500`, which is *darker* on a dark surface: 9.85:1
+- **Figma's dark `neutral/outline/content` lost contrast on hover and press.**
+  It went `slate/300 → 400 → 500`, which is *darker* on a dark surface: 9.85:1
   down to 5.71:1, then 3.07:1, below the 4.5:1 text needs. Its own border track
-  goes the other way. The repo mirrors it correctly as `300 → 200 → 100`; the
-  design file needs the same fix.
+  goes the other way, so content was the one that was wrong. The repo mirrors it
+  correctly as `300 → 200 → 100`, and **the VCP file's Dark mode was corrected to
+  match** on the same day.
 
 The light border is 2.56:1 against white, below the 3:1 WCAG 1.4.11 asks of a
 UI boundary, and is accepted on the reasoning `Pagination` already documents:
