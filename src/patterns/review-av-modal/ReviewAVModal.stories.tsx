@@ -26,6 +26,7 @@ const meta = {
     onAccept: () => {},
     onReject: () => {},
     avName: 'AV Name',
+    estimate: 'April 28, 2026',
     completionDate: 'May 1, 2026',
     links: ['https://test.com'],
     domainOption: true,
@@ -54,7 +55,13 @@ export const DevelopmentDomain: Story = {
  * handoff rather than a missing value.
  */
 export const NothingHandedOff: Story = {
-  args: { completionDate: undefined, links: [], attachments: [], domainOption: false },
+  args: {
+    estimate: undefined,
+    completionDate: undefined,
+    links: [],
+    attachments: [],
+    domainOption: false,
+  },
 };
 
 /** Every colour is a token. The dialog portals to `body`, so the theme global reaches it. */
