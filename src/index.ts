@@ -19,6 +19,8 @@ export * from './atoms/skeleton';
 export * from './atoms/spinner';
 export * from './atoms/textarea';
 export * from './atoms/toggle';
+export * from './atoms/type-tag';
+export * from './atoms/urgency-tag';
 
 /* Components — units assembled from atoms (and other components). */
 export * from './components/accordion';
@@ -32,6 +34,7 @@ export * from './components/data-table';
 export * from './components/date-picker';
 export * from './components/detail-row';
 export * from './components/dropzone';
+export * from './components/due-date-pill';
 export * from './components/emoji-reaction-picker';
 export * from './components/empty-state';
 export * from './components/field';
