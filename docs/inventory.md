@@ -51,6 +51,7 @@ record of when each piece landed.
 | component | `SidebarItem` | PR #76 |
 | pattern | `Sidebar` | PR #78 |
 | pattern | `ConfirmDeleteAVModal`, `ReportProblemModal` | PR #99 |
+| component | `RejectionReason` | PR #102 |
 | atom | `Footer` | PR #82 |
 | component | `PageTitle` | PR #82 |
 | template | `AppShell` | PR #85 |

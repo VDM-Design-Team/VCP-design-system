@@ -2,6 +2,25 @@
 
 ## 0.1.0 — unreleased
 
+### `RejectionReason` — built once for the two modals that need it (11 September 2026)
+
+A new component, and the third thing the AV-modal audit flagged. Rejecting an
+Added Value means picking a named reason, reading what that reason covers, and
+typing something extra when the reason is `Other`. **Two of the unbuilt modals
+need it with different reason sets** — the pending rejection has five reasons,
+the handoff rejection has six — and the shape is identical, so building it
+inside either one would have built it twice.
+
+Both sets are exported constants on the component, the way `Sidebar` owns its
+nav vocabulary: they are drawn in the design file rather than configured per
+domain, so there is one place for them. Each reason carries the design's own
+explanation, which is what appears under the select once a reason is chosen —
+data on the reason, not prose at the call site.
+
+The explanation is wired to the select with `aria-describedby` rather than left
+as loose text beside it, and the free-text box is named rather than relying on
+its placeholder. No new tokens.
+
 ### The AV modals — batch 1 of 7 (11 September 2026)
 
 The library has seven modal pages and **none of them was in
