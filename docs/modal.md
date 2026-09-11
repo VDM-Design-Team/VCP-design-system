@@ -212,6 +212,17 @@ The handler is bound to `document` in the capture phase, not to the panel. A
 listener on the panel never fires once focus has left the panel — which is
 precisely the moment a trap has to work.
 
+**A dialog inside a dialog: only the innermost one answers the keyboard.**
+Every open dialog is on a module-level stack, and a dialog that is not on top
+stands down. Without that, both traps are on `document` in the capture phase
+and the *outer* one — registered first — answered for both: Escape closed the
+outer dialog and left the inner one orphaned over a page that was no longer
+inert, and Tab died on the outer trap's `preventDefault`, because its own panel
+is inert by then so it found nothing to focus and blocked the event for
+everyone. Fixed 11 September 2026, with the `NestedDialog` story as the
+regression test. The review flow is the design that needs it: a review dialog
+that opens a rejection dialog on top of itself.
+
 **Escape always closes it — including when `dismissible={false}`.**
 `dismissible` guards against a *stray click* on the backdrop, which is the
 accidental gesture. Escape is deliberate, it is what WAI-ARIA requires of every
@@ -242,6 +253,8 @@ since unmounted, pass `returnFocusRef` to name a replacement.
   the keyboard in.
   Each dialog records exactly which nodes *it* changed and restores their previous
   values, so a second dialog opening does not un-hide what the first one hid.
+  **An outer dialog's portal is background too**, so a nested dialog makes it
+  inert and its own backdrop dims it — which is how the review flow draws it.
 - **Scroll-locked without a layout shift.** `overflow: hidden` on `<body>`, plus
   the scrollbar's width given straight back as `padding-right`, so nothing on the
   page jumps sideways when the scrollbar disappears. The page's scroll *position*
