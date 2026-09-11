@@ -472,8 +472,8 @@ built, five are specced below.
 | Accept Pending AV | `5939:149041` | 1 | `_Accept_Modal_Enable_Multipart` (2 states) — and `_Accept_Modal_Fields` (5 types), **used nowhere** | **Built** — `AcceptPendingAVModal` |
 | Reject AV (Pending) | `7847:106048` | 3 — Default / Reason Selected / Dropdown | `Pending_Rejection_Reason` (3 states), `_Selected_Pending_Rejection_Reason` (5 reasons) | To build |
 | Handoff AV | `5342:78539` | 2 — Default / Overdue | `_Handoff_AV_Modal_Fields` (5 types), `…_Overdue_Reason` (3 states), `…_Buttons` (2 domains) | **Built** — `HandoffAVModal` |
-| Review AV | `6100:15103` | 4 — Domain × Rejection modal | `_Review_Field_Item` (6 types), `_Review_Field_Attachements_Item`, `Handoff_Rejection_Reason` (3), `_Selected_Handoff_Rejection_Reason` (6 reasons), `_Rejection_Reason_Modal` (3), `Review_Already_Reviewed_Popup` | To build |
-| Change Log | `7211:1060` | 1 | `_Changelog_Main_Content` (3 types), `_Changelog_Description`, `Changelog_Description_List_Item`, `_Changelog_Tooltip` (6), `_Changelog_Pagination_Dots` | To build |
+| Review AV | `6100:15103` | 4 — Domain × Rejection modal | `_Review_Field_Item` (6 types), `_Review_Field_Attachements_Item`, `Handoff_Rejection_Reason` (3), `_Selected_Handoff_Rejection_Reason` (6 reasons), `_Rejection_Reason_Modal` (3) — and `Review_Already_Reviewed_Popup`, **used nowhere** | **Built** — `ReviewAVModal` |
+| Change Log | `7211:1060` | 1 | `_Changelog_Main_Content` (3 types), `_Changelog_Description`, `Changelog_Description_List_Item`, `_Changelog_Tooltip` (6), `_Changelog_Pagination_Dots` | **Built** — `ChangeLogModal`, on a new `Carousel` |
 
 ### They are patterns, and they come in two layouts
 
@@ -575,6 +575,42 @@ the file, it is the right distinction: beside a destructive answer a
 brand-outlined button reads as a second call to action, and beside a benign
 Confirm it reads as a peer. Recorded so the remaining modals are read the same
 way rather than normalised to one.
+
+### ⚠️ `Review_Already_Reviewed_Popup` is assembled into nothing
+
+A small dialog — "Already Reviewed", "This Value has already been reviewed by
+the initiator.", one Close button. **Zero instances anywhere in the file**, the
+same as the five Accept-modal field molecules. The six `_Review_Field_Item`
+types beside it are all used four times each, so this is not a search that
+misses things.
+
+Not ported. It is two lines of content in a `Modal` whenever design says what
+triggers it, and guessing that is guessing at a flow.
+
+### 🔧 Two rejections, two weights — and that is deliberate
+
+`RejectPendingAVModal`'s Reject is `primary`; the rejection dialog inside
+`ReviewAVModal` is `danger`. Rejecting work that was never started is a
+decision; rejecting work that was finished and handed off is heavier, and the
+design draws it red. Recorded so neither gets "corrected" to match the other.
+
+### ✅ The Change Log needed a carousel, and the system now has one
+
+The dialog pages between three announcements with arrows and dots. `Carousel`
+is a **component**, not an atom — the composition lint fails any atom that
+imports another piece except `Icon`, and a carousel needs `IconButton`;
+hand-rolling the dots would have duplicated `PaginationDots`, whose own doc
+already said "Position dots for a carousel".
+
+Two decisions, taken with the lead on 11 September: it **wraps** at both ends
+rather than disabling an arrow, and it **does not render the dots**. The second
+came straight from this dialog, which puts the dots *below its footer buttons*
+— a self-contained carousel could not have drawn it. So `Carousel` is
+controlled and the caller places the dots, and both read one index.
+
+It also **never auto-advances**, and has no prop to. That is not the design's
+call or the lead's; it is that every remedy for a self-moving panel exists only
+to undo the decision to make it move.
 
 ### 🔧 Three gaps the Handoff modal hit, none of them blocking
 

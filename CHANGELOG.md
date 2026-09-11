@@ -26,6 +26,36 @@ overdue reasons are plain text; and **`DatePicker` inside a `Modal`** is
 unsettled, because its `Popover` portals outside the focus trap — so the date is
 the text field with a calendar glyph that the design actually draws.
 
+### `Carousel`, and `ChangeLogModal` — the last of the seven AV modals (11 September 2026)
+
+**`Carousel`** is a new component: one panel at a time, an arrow each side. It
+is a component rather than an atom because the composition lint fails any atom
+that imports another piece except `Icon`, and a carousel needs `IconButton`.
+
+Two decisions worth knowing:
+
+- **It does not render the dots.** `PaginationDots` is a separate atom and the
+  caller places it, because a design does not always put the dots beside the
+  content — the changelog dialog puts them *below its footer buttons*. That is
+  also why `Carousel` is controlled: the arrows and the dots read one index
+  rather than two that can drift.
+- **It never moves on its own**, and there is no prop to make it. Every remedy
+  for a self-advancing panel — pause on hover, pause on focus, a stop button —
+  is machinery that exists only to undo the original decision.
+
+It wraps at both ends rather than disabling an arrow at each.
+
+**`ChangeLogModal`** is what a user sees when the product has something to tell
+them about a release. Three kinds, and the glyph is the difference: a flask, a
+megaphone, a rocket, each in the design's own variable. The kind is also
+screen-reader-only text, because a colour and a shape are not a label. The
+dialog is named by the heading it renders in its own body, using the
+`aria-labelledby` route `Modal` gained earlier the same day — the design puts
+the glyph above the title, so `Modal`'s header carries only the close button.
+
+No new tokens. The design's 32px glyph is a `size-8` override, because `Icon`'s
+ramp stops at 24 and a 32 step is a decision for the ramp, not for one dialog.
+
 ### `AcceptPendingAVModal` — AV modals, 3 of 7 (11 September 2026)
 
 The confirmation an admin answers to accept a pending Added Value, and the one
