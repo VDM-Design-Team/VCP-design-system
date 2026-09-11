@@ -59,7 +59,7 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
       <span
         ref={ref}
         className={cn(
-          'inline-flex h-7 items-center gap-2 px-2 font-sans text-label-sm whitespace-nowrap',
+          'inline-flex h-7 items-center gap-2 px-2 font-sans text-label-lg whitespace-nowrap',
           'text-neutral-outline-content-default',
           className,
         )}
