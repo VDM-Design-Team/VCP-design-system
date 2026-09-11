@@ -489,13 +489,13 @@ because they decide whether `Modal`'s header is used at all:
   `title` slot for a centred heading, so the heading goes in the body and the
   name is repeated as `aria-label`.
 
-### 🔧 `Modal` cannot take `aria-labelledby`
+### ✅ `Modal` could not take `aria-labelledby` — fixed
 
-Its props deliberately omit it, so an alert-layout dialog cannot point at the
-heading it renders in its own body and has to repeat the string. Harmless
-where one variable feeds both, as in `ConfirmDeleteAVModal`, but the tidier
-wiring would be for `Modal` to accept `aria-labelledby`. One small change,
-worth making before the other alert-layout modals land.
+Its props deliberately omitted it, so an alert-layout dialog could not point at
+the heading it renders in its own body and had to repeat the string as an
+`aria-label`. **Added 11 September 2026**, before the other alert-layout modals
+land: naming is now a three-way choice — `title`, `aria-labelledby`, or
+`aria-label` — and `ConfirmDeleteAVModal` points at its own `<h2>`.
 
 ### 🔧 The delete confirmation's primary button read "Complete" — fixed
 

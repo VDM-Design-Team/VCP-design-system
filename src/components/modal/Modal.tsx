@@ -228,8 +228,9 @@ interface ModalBaseProps
   extends Omit<
       React.HTMLAttributes<HTMLDivElement>,
       /* `title` is our rendered heading, not the native tooltip string.
-         `role`, `aria-modal`, `aria-label` and `aria-labelledby` are the
-         dialog's identity and are not the caller's to overwrite by accident. */
+         `role`, `aria-modal` and the two naming attributes are the dialog's
+         identity; the naming pair comes back below as a checked union so it
+         cannot be half-set. */
       'title' | 'role' | 'aria-modal' | 'aria-label' | 'aria-labelledby'
     >,
     VariantProps<typeof panel> {
@@ -266,13 +267,21 @@ interface ModalBaseProps
 
 /**
  * A dialog must have an accessible name, and this is the single most common
- * failure in the category. The type system makes it unskippable: either you pass
- * a visible `title` (which becomes `aria-labelledby`) or you pass `aria-label`.
- * There is no third option and no unnamed Modal.
+ * failure in the category. The type system makes it unskippable — there are
+ * exactly three ways, and no unnamed Modal:
+ *
+ * 1. **`title`** — the usual one. `Modal` renders the heading and points at it.
+ * 2. **`aria-labelledby`** — for a dialog that renders its own heading in the
+ *    body, which is what an alert layout does: a centred glyph, question and
+ *    consequence, with no header band. The name is then literally the visible
+ *    heading, so the two cannot drift.
+ * 3. **`aria-label`** — last resort, for a dialog with no visible heading at
+ *    all, like an image preview.
  */
 type ModalNameProps =
-  | { title: React.ReactNode; 'aria-label'?: string }
-  | { title?: undefined; 'aria-label': string };
+  | { title: React.ReactNode; 'aria-label'?: string; 'aria-labelledby'?: string }
+  | { title?: undefined; 'aria-label': string; 'aria-labelledby'?: string }
+  | { title?: undefined; 'aria-label'?: string; 'aria-labelledby': string };
 
 export type ModalProps = ModalBaseProps & ModalNameProps;
 
@@ -293,6 +302,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     initialFocusRef,
     returnFocusRef,
     'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
     'aria-describedby': describedBy,
     children,
     ...props
@@ -449,8 +459,10 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
         }}
         role={role}
         aria-modal="true"
-        aria-labelledby={hasTitle ? titleId : undefined}
-        aria-label={hasTitle ? undefined : ariaLabel}
+        /* The rendered heading wins; then a heading the caller rendered;
+           then the last-resort string. Exactly one is ever set. */
+        aria-labelledby={hasTitle ? titleId : ariaLabelledby}
+        aria-label={hasTitle || ariaLabelledby ? undefined : ariaLabel}
         aria-describedby={
           [hasDescription ? descriptionId : null, describedBy].filter(Boolean).join(' ') ||
           undefined
