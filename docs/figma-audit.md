@@ -543,12 +543,15 @@ the two now agree.
    because a control's boundary must be perceivable. Ours is the correct one;
    the design file should follow, as it already did for the other contrast
    fixes.
-3. **The rejection-reason machinery is shared and unported.** `Reject
-   (Pending)` and `Review` each have a reason picker with a list of typed
-   reasons and an "Other" free-text state. They are different sets
-   (`Pending_Rejection_Reason` has 5, `Handoff_Rejection_Reason` has 6) but
-   the same shape. Build it once as its own component before either modal, or
-   it gets built twice.
+3. ✅ **The rejection-reason machinery is shared — built once, 11 September
+   2026.** `Reject (Pending)` and `Review` each have a reason picker with a
+   list of typed reasons and an "Other" free-text state. They are different
+   sets (`Pending_Rejection_Reason` has 5, `Handoff_Rejection_Reason` has 6)
+   but the same shape, so it is now the `RejectionReason` **component**, with
+   both sets exported from it as constants — the way `Sidebar` owns its nav
+   vocabulary. Each reason carries the design's own explanation, which is the
+   line that appears under the select once a reason is chosen. The two modals
+   that need it can now be built without either one owning the vocabulary.
 
 ### Suggested order
 
