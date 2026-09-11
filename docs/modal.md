@@ -44,8 +44,9 @@ Rules of thumb:
 |---|---|---|---|
 | `open` | `boolean` | — | **Required.** Nothing is portalled while `false`. You own this state; the dialog never closes itself |
 | `onClose` | `() => void` | — | **Required.** Fires on Escape, on the close button, and on a backdrop click when `dismissible` |
-| `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. Required **unless** you pass `aria-label` |
-| `aria-label` | `string` | — | The accessible name when there is no visible `title`. Required **unless** you pass `title` |
+| `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. One of the three naming props |
+| `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
+| `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
 | `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby` |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
@@ -157,12 +158,20 @@ can no longer see. Every clause below is implemented, not aspirational.
 - **`role="dialog"` and `aria-modal="true"`** on the panel. `aria-modal` is what
   tells a screen reader that everything outside is off limits, which is why the
   DOM-level inertness below has to agree with it.
-- **It always has an accessible name.** With a `title`, the `<h2>` gets an id and
-  the panel points at it with `aria-labelledby`, so the visible heading and the
-  announced name are literally the same string and cannot drift. Without one, you
-  must pass `aria-label`. The type system enforces the choice — a dialog with no
-  name is the single most common failure in this category, and it is not possible
-  to ship one from this component.
+- **It always has an accessible name**, and there are three ways to give it:
+  a **`title`**, which `Modal` renders as the `<h2>` and points at with
+  `aria-labelledby`; **`aria-labelledby`** of your own, for a dialog that
+  renders its own heading in the body; or **`aria-label`**, for a dialog with
+  no visible heading at all. The type system enforces the choice — a dialog
+  with no name is the single most common failure in this category, and it is
+  not possible to ship one from this component.
+
+  The middle one exists for the **alert layout**: a centred glyph, question and
+  consequence, with no header band, which is what `ConfirmDeleteAVModal` draws.
+  Before 11 September 2026 such a dialog had to repeat its heading as an
+  `aria-label`, because `Modal` refused `aria-labelledby` outright. Pointing at
+  the real heading is better: the announced name *is* the visible question, so
+  the two cannot drift at all.
 - **`description` becomes `aria-describedby`.** For `role="alertdialog"` this is
   what makes the consequence part of the initial announcement, so a destructive
   confirmation should always have one.
