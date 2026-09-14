@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
 import { ChangeLogModal, type ChangeLogEntry } from './ChangeLogModal';
 import { Button } from '../../atoms/button';
@@ -42,6 +43,8 @@ const meta = {
   parameters: {
     layout: 'centered',
     docs: {
+      /* Each story in its own frame, or the Docs page stacks every open dialog. */
+      story: OVERLAY_DOCS_STORY,
       description: {
         component:
           'What a user sees when the product has something to tell them about a release: one ' +
