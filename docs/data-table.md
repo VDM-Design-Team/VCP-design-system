@@ -30,7 +30,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, align?, render? }` |
+| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, hint?, align?, render? }` |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a caret |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
@@ -41,6 +41,22 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `dense` | `boolean` | — | 44 rows instead of 56 |
 | `caption` | `string` | — | Visually hidden `<caption>` naming the table. Strongly encouraged |
 | `className` | `string` | — | On the scrolling container |
+
+`DataTableColumn.hint` renders after the label — a tooltip trigger, a count, a
+badge. It sits **outside** the sort button, because a header that both sorts
+and explains would otherwise nest one interactive element inside another:
+invalid HTML, and the inner one unreachable by keyboard. `AVTable` uses it for
+the four info tooltips its design draws.
+
+**Headers are 14px medium, sentence case.** They were 11px uppercase until
+11 September 2026, which came from the original export and matched nothing:
+every header in the VCP Figma library is drawn `ORIGINAL` case at 14 medium,
+the AV table's nine included. Measured, not assumed — `docs/figma-audit.md`,
+batch 5.
+
+A trap worth naming: **the repo's type ramp and Figma's share names but not
+values.** Figma's `label-sm` is 14px; this repo's is 11px. Read a spec off the
+canvas by *value*, not by token name — 14px medium here is `label-lg`.
 
 `DataTableColumn.width` takes CSS widths (`'120px'`, `'30%'`) applied to
 `<col>` — **not** the export's grid tracks; `'1fr'` has no meaning in a table.
@@ -63,7 +79,7 @@ when the table cannot fit (the page never does).
 ## Tokens
 
 Container `surface.elevated` on `stroke.subtle`, `radius.md`. Header row
-`surface.canvas`, labels `label-sm` uppercase in `text.secondary`. Cells
+`surface.canvas`, labels `label-lg` sentence case in `text.secondary`. Cells
 `body-md` in `text.secondary`. Hover and selected rows `surface.brand.base`.
 No new tokens.
 

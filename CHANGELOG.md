@@ -2,6 +2,55 @@
 
 ## 0.1.0 — unreleased
 
+### `AVTable` — the Added Value table (11 September 2026)
+
+The list every VCP workspace is built around. `DataTable` specialised, exactly
+as the generic table's own doc says the VCP tables should be: the `<table>`
+semantics, the sorting contract and the selection contract stay where they are,
+and this adds the nine columns and nothing else.
+
+**It owns no mapping.** Every cell with a vocabulary defers to the piece that
+owns it — `StatusPill`, `UrgencyTag`, `TypeTag`, `DueDatePill`. This pattern
+decides which columns exist and in what order, and that is all, which is the
+difference between a pattern and a second copy of the system.
+
+**Three of the nine columns are optional**, and they are the design's own four
+row variants: `selectable` adds the leading checkbox, `actions` the trailing
+menu. Two booleans rather than a `variant` prop, because that is what Figma's
+four variants actually are.
+
+**The blocker was already cleared.** Issue #80 item 6 — the AV table's raw
+colours — was the last item with a deadline. Scanning all 16,411 nodes in the
+file found none of the four flagged values on the table page: the one that
+appears is bound to a variable, and the 38 unbound survivors are on the
+Notification and Component Suggestions pages, which are separate work.
+
+#### `DataTable` — two changes
+
+**Headers are `label-lg` sentence case**, not `label-sm` uppercase. The
+uppercasing came from the original export and matched nothing: all nine
+`_AV_Table_Header_Item` types are drawn `ORIGINAL` case at 14 medium. Visual
+change to a shipped component; no consumers yet beyond stories.
+
+**`DataTableColumn.hint`** renders after the label — a tooltip trigger, a
+count, a badge. It sits *outside* the sort button, because a header that both
+sorts and explains would otherwise nest one interactive element inside another:
+invalid, and the inner one unreachable by keyboard.
+
+#### A name/value trap, now written down
+
+The repo's type ramp and Figma's share token names but not values: Figma's
+`label-sm` is 14, this repo's is 11. Read a spec off the canvas **by value, not
+by name**. Three components in this batch were built wrong first and corrected
+after measuring in the browser. Recorded in `docs/figma-audit.md` batch 5 and
+in `docs/data-table.md`.
+
+Row height, cell padding and avatar size were measured against the canvas
+rather than assumed: 81, 16 and 32, all exact.
+
+Minor bump: one pattern added, one component gains an optional prop and a
+visual correction.
+
 ### The AV tag vocabulary — `UrgencyTag`, `TypeTag`, `DueDatePill` (11 September 2026)
 
 The three tags an Added Value wears beside its status, and the three mappings
