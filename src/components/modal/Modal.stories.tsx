@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Modal } from './Modal';
 import { Button } from '../../atoms/button';
@@ -12,6 +13,8 @@ const meta = {
   parameters: {
     layout: 'centered',
     docs: {
+      /* Each story in its own frame, or the Docs page stacks every open dialog. */
+      story: OVERLAY_DOCS_STORY,
       description: {
         component:
           'A centred dialog over a dimmed backdrop, portalled to `document.body`. ' +

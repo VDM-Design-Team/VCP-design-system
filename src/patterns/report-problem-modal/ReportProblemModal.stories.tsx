@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
 import { ReportProblemModal, type ProblemReport } from './ReportProblemModal';
 import { Button } from '../../atoms/button';
@@ -10,6 +11,8 @@ const meta = {
   parameters: {
     layout: 'centered',
     docs: {
+      /* Each story in its own frame, or the Docs page stacks every open dialog. */
+      story: OVERLAY_DOCS_STORY,
       description: {
         component:
           'The form behind “Report a problem”, the row pinned to the bottom of every `Sidebar`. ' +
