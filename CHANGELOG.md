@@ -2,6 +2,13 @@
 
 ## 0.1.0 — unreleased
 
+### `Checkbox` — corner corrected to `radius.xs` (21 September 2026)
+
+The box shipped `rounded-sm` (6px); Figma's variable is `radius-2`, which is
+`shape.radius.xs` (4px) in this repo's own scale. One class, applies in every
+state — checked and mixed included, since there was never a separate radius
+rule for them. Visual correction, no API change.
+
 ### `AVTable` — the Added Value table (11 September 2026)
 
 The list every VCP workspace is built around. `DataTable` specialised, exactly
