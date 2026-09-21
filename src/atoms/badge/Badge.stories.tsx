@@ -11,16 +11,17 @@ const meta = {
     docs: {
       description: {
         component:
-          'A small, non-interactive label that classifies the thing beside it. Every coloured ' +
-          'tone is an `accent.<name>.tonal` surface/content pair; `neutral` is the same shape ' +
-          'built from `surface.neutral.*` + `text.*`. ' +
+          'A small, non-interactive label that classifies the thing beside it. Fully rounded ' +
+          '(`shape.radius.pill`) — a different shape from `Tag`\'s rounded-rectangle, even though ' +
+          'they share the same four styles and six tones (`../../lib/classification-tones`). ' +
           '**Badge carries no VCP vocabulary** — for statuses like "For QA" or "Confirmed prod" ' +
           'use the `StatusPill` pattern, which maps VCP statuses onto these tones.',
       },
     },
   },
-  args: { children: 'Label', tone: 'neutral', size: 'md' },
+  args: { children: 'Label', variant: 'tonal', tone: 'neutral', size: 'md' },
   argTypes: {
+    variant: { control: 'radio', options: ['textual', 'outline', 'tonal', 'filled'] },
     tone: { control: 'select', options: TONES },
     size: { control: 'radio', options: ['sm', 'md'] },
     icon: { control: false },
@@ -32,6 +33,23 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+/**
+ * `tonal` is the default and by far the most common. `textual` and `outline`
+ * exist so a Badge can borrow one of `Tag`'s other styles for the rare case
+ * that needs it — most screens should never reach for them.
+ */
+export const Variants: Story = {
+  render: (args) => (
+    <div className="flex flex-wrap items-center gap-2">
+      {(['textual', 'outline', 'tonal', 'filled'] as const).map((variant) => (
+        <Badge {...args} key={variant} variant={variant} tone="info">
+          {variant}
+        </Badge>
+      ))}
+    </div>
+  ),
+};
 
 /** Six generic tones. None of them names a VCP status — that is `StatusPill`'s job. */
 export const Tones: Story = {

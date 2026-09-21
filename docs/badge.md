@@ -3,13 +3,18 @@
 A small, non-interactive label that classifies the thing beside it — a version, a
 count, a state, a category.
 
-## When to use Badge, Chip, or StatusPill
+## When to use Badge, Tag, Chip, or StatusPill
 
-| Use | For | Interactive? | Vocabulary |
-|---|---|---|---|
-| `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | No — takes no focus, fires no events | Generic tones only |
-| `Chip` | A value the user can act on: a selected filter, a removable tag, a toggleable option | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
-| `StatusPill` *(component)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | No | VCP's status vocabulary |
+| Use | For | Shape | Interactive? | Vocabulary |
+|---|---|---|---|---|
+| `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | Pill (`shape.radius.pill`) | No — takes no focus, fires no events | Generic tones only |
+| `Tag` | The same job as Badge, when the rounded-rectangle shape or one of `textual`/`outline` is what's wanted | Rounded-rectangle (`shape.radius.sm`) | No | Generic tones only |
+| `Chip` | A value the user can act on: a selected filter, a removable tag, a toggleable option | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
+| `StatusPill` *(component)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | Badge's pill | No | VCP's status vocabulary |
+
+**`Badge` and `Tag` are separate Figma components with separate shapes** —
+General Design Library's `Badge` (pill) and `Tag` (rounded-rectangle) — not
+one component with a configurable radius. See `docs/tag.md`.
 
 **For VCP statuses use `StatusPill`, not Badge directly.** The Claude Design export
 mixed VCP status names into Badge's `tone` prop (`tone="for qa"`). That mapping is
@@ -26,6 +31,7 @@ that mapping wants to live in `StatusPill` instead.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
+| `variant` | `textual \| outline \| tonal \| filled` | `tonal` | Shared with `Tag` — see `docs/tag.md`. `tonal` is the common case |
 | `tone` | `neutral \| brand \| info \| success \| warning \| danger` | `neutral` | Generic tones only. No VCP status names — see above |
 | `size` | `sm \| md` | `md` | 24 / 28 tall. `sm` for dense tables and inline-with-body-text |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the badge's |
@@ -37,9 +43,12 @@ Everything else (`id`, `title`, `data-*`, …) is forwarded to the `<span>`.
 
 ## Tokens
 
-Each coloured tone is one `accent.<name>.tonal` pair — `…tonal.surface.default` for
-the fill and `…tonal.content.default` for the label. `neutral` and `brand` have no
-accent triad, so they are composed from `surface.*` + `text.*` (see *Token gaps*).
+The full style × tone matrix (`textual`/`outline`/`tonal`/`filled` × six tones)
+lives in one place — `src/lib/classification-tones.ts` — shared with `Tag`.
+`tonal`, the default, is one `accent.<name>.tonal` pair —
+`…tonal.surface.default` for the fill and `…tonal.content.default` for the
+label. `neutral` and `brand` have no accent triad, so they are composed from
+`surface.*` + `text.*` (see *Token gaps*).
 
 Contrast is the label on its **own fill**, measured, in both themes. WCAG AA asks 4.5:1.
 
@@ -65,7 +74,7 @@ Everything else:
 
 | Part | Token | Utility |
 |---|---|---|
-| Radius | `shape.radius.md` | `rounded-md` |
+| Radius | `shape.radius.pill` | `rounded-pill` |
 | Type ramp, `md` | `type.label.lg` — Poppins 500, 14/20 | `text-label-lg` |
 | Type ramp, `sm` | `type.label.md` — Poppins 500, 13/18 | `text-label-md` |
 | Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
@@ -92,9 +101,12 @@ The dark theme comes for free — every colour class above is a semantic token t
   either side of it, and `caption-md` (500, 12/16) which is *Inter*, the numeric face.
   `sm` uses `label-md` — right family and weight, one pixel large — rather than change
   typeface for one size.
-- **`shape.radius.sm` is described as "small controls, tags, badges"** but is 6px,
-  where the Figma Tag is 8px. Badge follows the Figma geometry and uses `radius.md`.
-  The token description and the component disagree; one of them should move.
+- **Resolved:** this component's corner was measured against Figma's `Tag`
+  node by mistake (3 Sep 2026) — `Badge` and `Tag` are separate Figma
+  components with separate shapes, and Badge now correctly uses
+  `shape.radius.pill`. `Tag` (a separate atom, `docs/tag.md`) is what
+  actually uses `shape.radius.sm` (6px), which is VCP's own measured value
+  regardless of what GDL's `Tag` primitive states in theory.
 
 ## Accessibility
 
@@ -132,3 +144,5 @@ The dark theme comes for free — every colour class above is a semantic token t
   unit from the ramp — use `size`.
 - Don't stack more than a handful in a row. Past four or five they stop classifying
   anything and become texture.
+- Don't reach for `Badge` expecting `Tag`'s rounded-rectangle, or vice versa —
+  they are separate Figma components with separate shapes.

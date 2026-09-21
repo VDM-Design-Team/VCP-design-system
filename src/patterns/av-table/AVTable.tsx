@@ -10,8 +10,8 @@ import { DueDatePill, type DueDateProximity } from '../../components/due-date-pi
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../components/pagination';
 import { Tooltip } from '../../components/tooltip';
-import { UrgencyTag, type AVUrgency } from '../../atoms/urgency-tag';
-import { TypeTag, type AVType } from '../../atoms/type-tag';
+import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
+import { TypeTag, type AVType } from '../../components/type-tag';
 import { Badge } from '../../atoms/badge';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
