@@ -2,6 +2,48 @@
 
 ## 0.1.0 — unreleased
 
+### `Tag`, and Badge's corner corrected to match GDL's actual shape (21 September 2026)
+
+**A structural fix, not just a new atom.** `Badge` and `Tag` were conflated
+from the start: this repo's `Badge` was built and measured against Figma's
+`Tag` component by mistake (`docs/figma-audit.md`, 3 Sep 2026), so it shipped
+`rounded-sm` — Tag's shape, not Badge's. They're separate components in the
+General Design Library with separate shapes: `Badge` is fully rounded
+(`shape.radius.pill`), `Tag` is a rounded-rectangle (`shape.radius.sm`). No
+new radius tokens were needed — both values already existed, just applied to
+the wrong component.
+
+**New `Tag` atom** (`src/atoms/tag/`), the rounded-rectangle counterpart to
+`Badge`. Same four styles as Badge now share — `textual`, `outline`, `tonal`,
+`filled` — all VCP's own semantics; GDL's Tag primitive doesn't dictate them.
+The style × tone colour matrix moved into `src/lib/classification-tones.ts`,
+shared by both components rather than duplicated.
+
+**`Badge` gains `textual` and `outline`** alongside its existing `tonal`
+(default) and `filled`, for the rare case a badge needs one of Tag's other
+styles.
+
+**`TypeTag` and `UrgencyTag` now compose `Tag`** instead of each hand-rolling
+an identical shell — they were byte-for-byte duplicated between the two files
+before this. **Breaking, for anyone importing by path rather than through the
+package root:** both move from `src/atoms/` to `src/components/`, since
+composing another piece of the system is what the atom-composition rule
+tracks, not the vocabulary they carry. `import { TypeTag } from
+'@vcp/design-system'` is unaffected — the flat package export doesn't change
+— but a deep import from `@vcp/design-system/atoms/type-tag` (or
+`/urgency-tag`) needs to become `/components/type-tag` (or `/urgency-tag`).
+Their Storybook location moves from `Atoms/` to `Components/Display/` to
+match.
+
+**`TagEditor`'s own `Tag`/`TagTone` types renamed** to `TagEditorTag`/
+`TagEditorTagTone` to resolve the export collision with the new `Tag`
+component — those were always TagEditor-local data shapes, not the shared
+system piece, so the generic names were only safe while no real `Tag`
+existed.
+
+Minor bump for the new atom and the two additive variants; the tier move
+above is the one part of this that can break an existing deep import.
+
 ### `AVTable` — the Added Value table (11 September 2026)
 
 The list every VCP workspace is built around. `DataTable` specialised, exactly

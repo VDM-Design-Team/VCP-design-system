@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon, type IconName } from '../icon';
+import { Icon, type IconName } from '../../atoms/icon';
+import { Tag } from '../../atoms/tag';
 
 /**
  * UrgencyTag — how urgent an Added Value is, as a glyph and a word. The owner
@@ -21,11 +22,13 @@ import { Icon, type IconName } from '../icon';
  * distinct glyph shape as well as a distinct hue, so the scale survives
  * greyscale and every kind of colour blindness (WCAG 1.4.1).
  *
- * **Three styles exist in Figma; this renders the textual one** — no fill, no
- * border. It is the style the AV table uses, and the only one any VCP screen
- * currently draws. The tonal and outline styles are drawn but assembled
- * nowhere; when a screen needs one, add a `variant` here rather than a second
- * component.
+ * **A `Tag` (`textual`, `neutral`), not a hand-rolled shell.** The label stays
+ * neutral for every urgency — only the glyph carries the scale, set directly
+ * on the `Icon` rather than through `Tag`'s own `tone`, since `tone` would
+ * colour the label too. This is why the piece lives in `src/components/`, not
+ * `src/atoms/`: it composes `Tag`, so the atom-composition rule moves it down
+ * a tier — the vocabulary it carries doesn't change that, only the import
+ * does (see CLAUDE.md).
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -59,20 +62,18 @@ export const UrgencyTag = React.forwardRef<HTMLSpanElement, UrgencyTagProps>(
   ({ className, urgency, ...props }, ref) => {
     const { icon, className: tone } = URGENCY[urgency];
     return (
-      <span
+      <Tag
         ref={ref}
-        className={cn(
-          'inline-flex h-7 items-center gap-2 px-2 font-sans text-label-lg whitespace-nowrap',
-          'text-neutral-outline-content-default',
-          className,
-        )}
+        variant="textual"
+        tone="neutral"
+        /* Decorative: the word beside it already says which urgency this is,
+           so naming the glyph too would make every cell announce twice. */
+        icon={<Icon name={icon} size="lg" className={cn('shrink-0', tone)} />}
+        className={className}
         {...props}
       >
-        {/* Decorative: the word beside it already says which urgency this is,
-            so naming the glyph too would make every cell announce twice. */}
-        <Icon name={icon} size="lg" className={cn('shrink-0', tone)} />
         {urgency}
-      </span>
+      </Tag>
     );
   },
 );

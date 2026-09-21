@@ -1,2 +1,2 @@
 export { TagEditor, TAG_TONES } from './TagEditor';
-export type { TagEditorProps, Tag, TagTone } from './TagEditor';
+export type { TagEditorProps, TagEditorTag, TagEditorTagTone } from './TagEditor';

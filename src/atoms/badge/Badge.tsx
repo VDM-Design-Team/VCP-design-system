@@ -1,14 +1,28 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import {
+  CLASSIFICATION_STYLE,
+  type ClassificationTone,
+  type ClassificationVariant,
+} from '../../lib/classification-tones';
 
 /**
  * Badge — a small, non-interactive label that classifies the thing beside it.
  *
- * Ported from the Figma `Tag` component. The export's pale fill with near-black
- * text is the `tonal` treatment in VCP's token vocabulary, so every coloured tone
- * is one `accent.<name>.tonal` surface/content pair; neutral is the same shape
- * built from `surface.neutral.*` + `text.*`, which has no accent triad.
+ * Ported from the Figma `Badge` component (General Design Library) — fully
+ * rounded, and a different shape from `Tag`'s rounded-rectangle. The two were
+ * previously conflated: this component's corner was measured against Figma's
+ * `Tag` node by mistake (docs/figma-audit.md, 3 Sep 2026) and shipped as
+ * `rounded-sm`. Corrected here to `shape.radius.pill`, Badge's own shape.
+ * `Tag` (a separate atom) keeps `rounded-sm` — that was always the right
+ * value, just for the wrong component.
+ *
+ * The four styles and six tones (`../../lib/classification-tones`) are shared
+ * with `Tag` — one owned colour mapping, not two. The export's pale fill with
+ * near-black text is the `tonal` treatment here; `textual` and `outline`
+ * exist alongside it for the rare case a badge needs one of Tag's other
+ * styles.
  *
  * **Generic tones only.** The export's `tone` also accepted VCP status names
  * (`accepted`, `for qa`, `confirmed prod`, …). VCP vocabulary belongs in
@@ -27,79 +41,33 @@ const badge = cva(
   [
     'inline-flex max-w-full items-center justify-center align-middle',
     'font-sans whitespace-nowrap',
-    /* shape.radius.sm — the Figma Tag's own corner, measured 3 Sep 2026
-       (docs/figma-audit.md). It was `md` until that audit. ds-lint-ignore */
-    'overflow-hidden rounded-sm',
+    /* shape.radius.pill — Badge's own shape, distinct from Tag's rounded-sm.
+       See the note above. ds-lint-ignore */
+    'overflow-hidden rounded-pill',
   ],
   {
     variants: {
-      /* The Figma Tags page draws two treatments: the pale tonal fill most
-         statuses wear, and a solid one (the "Review" tag). ds-lint-ignore */
-      variant: { tonal: '', filled: '' },
-      tone: {
-        /* surface.neutral + text.* — there is no `accent.neutral` triad. */
-        neutral: 'bg-surface-neutral-subtle text-text-secondary',
-        /* surface.brand + text.brand — there is no `accent.brand` triad either. */
-        brand: 'bg-surface-brand-faint text-text-brand-strong',
-        info: 'bg-accent-info-tonal-surface-default text-accent-info-tonal-content-default',
-        success:
-          'bg-accent-success-tonal-surface-default text-accent-success-tonal-content-default',
-        warning:
-          'bg-accent-warning-tonal-surface-default text-accent-warning-tonal-content-default',
-        danger:
-          'bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default',
-      },
       size: {
         /* 24 tall — dense tables, inline beside body text. ds-lint-ignore */
         sm: 'h-6 gap-1 px-2 text-label-md',
-        /* 28 tall — the default, and what the Figma Tag ships at. ds-lint-ignore */
+        /* 28 tall — the default, and what the Figma Badge ships at. ds-lint-ignore */
         md: 'h-7 gap-2 px-2 text-label-lg',
       },
     },
-    /* `filled` swaps each tone's pale pair for its solid one. Written as
-       compound variants so `tone` stays the single axis callers reason about. */
-    compoundVariants: [
-      {
-        variant: 'filled',
-        tone: 'neutral',
-        class: 'bg-surface-neutral-stronger text-text-inverted-primary',
-      },
-      {
-        variant: 'filled',
-        tone: 'brand',
-        class: 'bg-action-primary-surface-default text-action-primary-content-default',
-      },
-      {
-        variant: 'filled',
-        tone: 'info',
-        class: 'bg-accent-info-filled-surface-default text-accent-info-filled-content-default',
-      },
-      {
-        variant: 'filled',
-        tone: 'success',
-        class:
-          'bg-accent-success-filled-surface-default text-accent-success-filled-content-default',
-      },
-      {
-        variant: 'filled',
-        tone: 'warning',
-        class:
-          'bg-accent-warning-filled-surface-default text-accent-warning-filled-content-default',
-      },
-      {
-        variant: 'filled',
-        tone: 'danger',
-        class:
-          'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
-      },
-    ],
-    defaultVariants: { variant: 'tonal', tone: 'neutral', size: 'md' },
+    defaultVariants: { size: 'md' },
   },
 );
+
+export type BadgeVariant = ClassificationVariant;
+export type BadgeTone = ClassificationTone;
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badge> {
+  /** Which of the four Figma-drawn styles to render. */
+  variant?: BadgeVariant;
+  /** Which of the six generic tones to render. */
+  tone?: BadgeTone;
   /**
    * Decorative glyph before the label. Pass an `Icon` at `size="sm"` next to a
    * `sm` badge and `size="md"` next to an `md` one. Rendered `aria-hidden` —
@@ -111,8 +79,15 @@ export interface BadgeProps
 }
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ className, variant, tone, size, icon, trailingIcon, children, ...props }, ref) => (
-    <span ref={ref} className={cn(badge({ variant, tone, size }), className)} {...props}>
+  (
+    { className, variant = 'tonal', tone = 'neutral', size, icon, trailingIcon, children, ...props },
+    ref,
+  ) => (
+    <span
+      ref={ref}
+      className={cn(badge({ size }), CLASSIFICATION_STYLE[variant][tone], className)}
+      {...props}
+    >
       {icon && <Adornment>{icon}</Adornment>}
       {children != null && children !== false && (
         <span className="min-w-0 truncate">{children}</span>
