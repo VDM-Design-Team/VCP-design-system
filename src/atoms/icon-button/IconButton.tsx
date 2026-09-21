@@ -4,13 +4,22 @@ import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../icon';
 
 /**
- * IconButton — a square button carrying a single icon and no visible text.
+ * IconButton — a button carrying a single icon and no visible text.
  *
- * This is `Button` with the label taken away, and it is deliberately built from
- * the same parts: the same `variant` names off the same `action.*` families, the
- * same `sm` 36 / `md` 40 / `lg` 48 scale, the same `rounded-sm` corner, the same
- * `focus-visible:outline-stroke-focused` ring, and the same `loading` behaviour.
- * If you can use Button, you can use this without reading anything.
+ * This is `Button` with the label taken away, and it shares the same parts on
+ * purpose: the same `variant` names off the same `action.*` families, the
+ * same `sm` 36 / `md` 40 / `lg` 48 scale, the same `focus-visible:outline-stroke-focused`
+ * ring, and the same `loading` behaviour. If you can use Button, you can use
+ * this without reading anything.
+ *
+ * **Shape defaults to `round` (`rounded-pill`).** That is how the great
+ * majority of icon-only controls actually appear across VCP — a compose FAB,
+ * a toolbar action, a dismiss — and matching that means callers don't have to
+ * think about shape at all in the common case. `shape="square"` (`rounded-sm`,
+ * matching `Button`'s own corner) is the explicit exception for a control that
+ * has to read as part of a square-cornered row rather than stand alone — e.g.
+ * `DetailRow`'s inline edit affordance, which sits flush against a
+ * rectangular row rather than floating over the surface.
  *
  * **The label is required, in the type system.** An icon-only control with no
  * accessible name is an unlabelled button to every screen reader — the single
@@ -30,12 +39,19 @@ import { Icon, type IconName } from '../icon';
 const iconButton = cva(
   [
     'inline-flex shrink-0 items-center justify-center',
-    'rounded-sm transition-colors',
+    'transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     'disabled:pointer-events-none',
   ],
   {
     variants: {
+      /* round matches how most icon-only controls appear across VCP; square
+         is the explicit exception for a control that has to sit flush in a
+         square-cornered row (see DetailRow's edit affordance). */
+      shape: {
+        round: 'rounded-pill',
+        square: 'rounded-sm',
+      },
       /* Identical to Button's, class for class — same tokens, same states. */
       variant: {
         /* action.primary — filled */
@@ -77,15 +93,15 @@ const iconButton = cva(
           'disabled:bg-accent-critical-filled-surface-disabled',
         ],
       },
-      /* Square, on Button's own height scale: 36 / 40 / 48. `md` is the 40
-         minimum target; `sm` is pointer-dense contexts only. */
+      /* Equal width and height, on Button's own height scale: 36 / 40 / 48.
+         `md` is the 40 minimum target; `sm` is pointer-dense contexts only. */
       size: {
         sm: 'size-9',
         md: 'size-10',
         lg: 'size-12',
       },
     },
-    defaultVariants: { variant: 'tertiary', size: 'md' },
+    defaultVariants: { variant: 'tertiary', size: 'md', shape: 'round' },
   },
 );
 
@@ -112,7 +128,7 @@ export interface IconButtonProps
 }
 
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ className, variant, size, icon, label, loading, disabled, ...props }, ref) => {
+  ({ className, variant, size, shape, icon, label, loading, disabled, ...props }, ref) => {
     const scale = size ?? 'md';
     /* `title` gives pointer users a hover hint — but a Tooltip wrapping this
        button already draws one, and it associates itself with aria-describedby.
@@ -122,7 +138,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     return (
       <button
         ref={ref}
-        className={cn(iconButton({ variant, size }), className)}
+        className={cn(iconButton({ variant, size, shape }), className)}
         /* The name sits here and stays put through the loading state, so the
            control never changes identity mid-announcement. */
         aria-label={label}

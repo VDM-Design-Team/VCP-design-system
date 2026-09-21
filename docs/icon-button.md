@@ -1,11 +1,18 @@
 # IconButton
 
-A square button carrying a single icon and no visible text.
+A button carrying a single icon and no visible text.
 
 It is `Button` with the label taken away, and it is built from the same parts on
 purpose: the same `variant` names off the same `action.*` families, the same
-`sm` 36 / `md` 40 / `lg` 48 scale, the same `rounded-sm` corner, the same focus
-ring, the same `loading` contract. If you know Button, you know this.
+`sm` 36 / `md` 40 / `lg` 48 scale, the same focus ring, the same `loading`
+contract. If you know Button, you know this.
+
+**Shape defaults to `round`** (`rounded-pill`) — that is how the great majority
+of icon-only controls actually appear across VCP: a compose FAB, a toolbar
+action, a dismiss. `shape="square"` (`rounded-sm`, matching `Button`'s own
+corner) is the explicit exception for a control that has to sit flush inside a
+square-cornered row rather than stand alone — see `DetailRow`'s inline edit
+affordance.
 
 ## When to use which
 
@@ -35,7 +42,8 @@ it needs a visible label, not a better icon.
 | `icon` | `IconName` | — | **Required.** A glyph name from the Icon library. Rendered decorative (`aria-hidden`) |
 | `label` | `string` | — | **Required.** The accessible name *and* the pointer tooltip. See below |
 | `variant` | `primary \| secondary \| neutral \| tertiary \| danger` | `tertiary` | Same names and tokens as Button |
-| `size` | `sm \| md \| lg` | `md` | 36 / 40 / 48 square. `sm` only in dense contexts |
+| `size` | `sm \| md \| lg` | `md` | 36 / 40 / 48. `sm` only in dense contexts |
+| `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, disables the button, sets `aria-busy` |
 | `disabled` | `boolean` | `false` | Same as Button |
 | `className` | `string` | — | Merged onto the `<button>` via `cn()` |
@@ -53,20 +61,22 @@ See the accessibility notes — that is not an oversight.
 |---|---|---|---|
 | `variant="link"` | yes | **no** | A link variant is underlined text. With no text there is nothing to underline, and the result is indistinguishable from `tertiary`. Use `tertiary`, or a real `Button variant="link"` with a word |
 | default `variant` | `primary` | `tertiary` | An icon-only control is nearly always a toolbar or row affordance. Defaulting to `primary` would fill dense UIs with blue squares. `docs/button.md` already routes "icon-only actions" to the ghost treatment |
-| `fullWidth` | yes | **no** | The control is square by definition |
+| `fullWidth` | yes | **no** | The control has equal width and height by definition |
 | `iconLeft` / `iconRight` | yes | **no** | There is one icon and it is `icon` |
 | icon size | fixed 16 | tracks `size` (16 / 20 / 24) | A 16 glyph in a 48 box is a dot in a field. Matches `Icon`'s own `sm`/`md`/`lg` |
+| `shape` | — (always `rounded-sm`) | `round \| square`, default `round` | Button is never a floating control, so it has no reason to offer a fully-rounded shape |
 | `label` | optional `aria-label` | **required prop** | The whole point of the component — see below |
 
-Everything else — variant names, colour tokens, size scale, radius, transition,
-focus ring, `loading` semantics, `disabled` behaviour — is identical, class for
+Everything else — variant names, colour tokens, size scale, transition, focus
+ring, `loading` semantics, `disabled` behaviour — is identical, class for
 class.
 
 ## Tokens
 
 | Part | Token | Utility |
 |---|---|---|
-| Radius | `shape.radius.md` | `rounded-md` |
+| Radius, `round` (default) | `shape.radius.pill` | `rounded-pill` |
+| Radius, `square` | `shape.radius.sm` | `rounded-sm` |
 | Focus ring | `stroke.focused` | `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused` |
 | `primary` surface | `action.primary.surface.{default,hover,pressed,disabled}` | `bg-action-primary-surface-*` |
 | `primary` content | `action.primary.content.{default,disabled}` | `text-action-primary-content-*` |
@@ -151,5 +161,8 @@ component should paper over locally.
 - Don't stack more than about five in one toolbar. Past that, an overflow
   `dots-three` menu is easier to scan than another glyph.
 - Don't use `primary` for every action in a row. One filled control, at most.
+- Don't reach for `shape="square"` by default. It exists for a control flush
+  inside a square-cornered row (like `DetailRow`'s edit affordance) — most
+  icon-only controls should stay `round`.
 - Don't remove the focus ring to "clean up" a toolbar.
 - Don't change `label` while `loading` is true.
