@@ -58,7 +58,7 @@ a React warning — that is rarely what you want, so pass both.
 | Label | default | `text.secondary` |
 | Label | disabled | `text.disabled` |
 | Focus ring | focus-visible | `stroke.focused`, 2px outline at 2px offset |
-| Radius | — | `radius.sm` |
+| Radius | — | `radius.xs` |
 | Type | label | `body-md` |
 
 Dark theme comes free — the component only uses semantic tokens, and
