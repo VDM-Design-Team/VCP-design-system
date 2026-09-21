@@ -2,6 +2,25 @@
 
 ## 0.1.0 — unreleased
 
+### `IconButton` defaults to round, not square (21 September 2026)
+
+Visual change to a shipped component. `IconButton` now defaults to
+`shape="round"` (`rounded-pill`) across all five variants — a compose FAB, a
+toolbar action, a dismiss are round the great majority of the time across VCP,
+and the component previously defaulted to matching `Button`'s square corner
+unconditionally, which meant every common-case caller had to fight the
+default rather than the rare exception opting out of it.
+
+**`shape="square"`** (`rounded-sm`, `Button`'s own corner) is the new explicit
+exception, for a control that has to sit flush inside a square-cornered row
+rather than stand alone. `DetailRow`'s inline edit affordance is the one
+identified case and now opts into it explicitly.
+
+No new tokens — both shapes reuse the existing `shape.radius.pill` and
+`shape.radius.sm`. Minor bump: additive prop, but flagged for review because
+it silently changes the rendered shape of every existing `IconButton` call
+site that doesn't pass `shape="square"`, with no compile-time signal.
+
 ### `AVTable` — the Added Value table (11 September 2026)
 
 The list every VCP workspace is built around. `DataTable` specialised, exactly
