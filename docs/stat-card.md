@@ -5,9 +5,12 @@ optional unit, delta and footer. Dashboards tile these.
 
 ## Composed of
 
-Nothing from the system — this piece renders its own markup and takes
-composition through its props/slots. `npm test` fails if that changes
-without this section changing.
+| Piece | Tier | Role here |
+|---|---|---|
+| `Icon` | atom | The `hint` info glyph |
+| `Tooltip` | component | The `hint` explanation |
+
+`npm test` checks this list against the real imports.
 
 ## When to use
 
@@ -27,7 +30,9 @@ without this section changing.
 | `unit` | `ReactNode` | — | Beside the value — "pts", "of 40" |
 | `delta` | `ReactNode` | — | The change, **sign included** — "+12%", "−0.3" |
 | `deltaTone` | `positive \| negative \| neutral` | `neutral` | **Judgment, not direction** — see below |
-| `icon` | `ReactNode` | — | Corner glyph, decorative |
+| `icon` | `ReactNode` | — | Glyph before the label, decorative |
+| `accent` | `neutral \| info \| success \| critical \| warning` | `neutral` | The card's left edge |
+| `hint` | `string` | — | Explanation behind an info glyph after the label. Omit it and there's no glyph |
 | `footer` | `ReactNode` | — | Context — "vs last cycle" |
 | `className` | `string` | — | Merged via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | The card |
@@ -48,6 +53,14 @@ Card's own dress. Label/unit/footer `body-sm` `text.tertiary`; value in
 step; 24/semibold Inter is the nearest honest fit for the export's 28/600);
 delta in the numeric face at `caption-md`. No new tokens.
 
+`accent`'s five edges are `neutral.outline.border.default` and
+`accent.{info,success,critical,warning}.outline.border.default` — the same
+family `Input`'s `invalid` border and `IconButton`'s `neutral` variant
+already reference individually, applied here as a `bg-*` fill on a 4px
+decorative bar rather than as a `border-l`, so the edge colour can never
+lose a CSS cascade fight with the card's own all-round
+`border-stroke-subtle`. This is the first place all five sit side by side.
+
 | Pair | Light | Dark |
 |---|---|---|
 | Value on the card | **20.17:1** | **14.63:1** |
@@ -61,11 +74,18 @@ delta in the numeric face at `caption-md`. No new tokens.
   contribute eight `<h3>`s to the outline; the dashboard section's heading
   owns them. It renders no heading of its own for that reason, and nothing it
   composes renders one either.
-- Reading order is label → value → unit → delta → footer, which is the
-  sentence: "Open claims, 128, +12%, vs last cycle".
+- Reading order is icon → label → hint → value → unit → delta → footer,
+  which is the sentence: "Open claims, 128, +12%, vs last cycle" plus the
+  hint button wherever it sits.
 - The delta's sign is in the text, so the verdict colour is never the only
   signal.
-- The corner icon is decorative and hidden.
+- The icon and the accent edge are both decorative and hidden
+  (`aria-hidden`) — the label text and the icon's own shape already carry
+  which category a card belongs to, the same reasoning `Badge`'s tone
+  colours lean on. Colour is confirmation, not the only signal.
+- `hint` renders a real, focusable `button` (named "About &lt;label&gt;")
+  wrapping the system `Tooltip`, not a `title` attribute — reachable by
+  keyboard, not just hover.
 
 ## Don't
 
