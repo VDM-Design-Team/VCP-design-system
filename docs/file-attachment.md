@@ -28,6 +28,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `size` | `string` | — | Human-readable — '1.2 MB'. Formatting is the caller's |
 | `kind` | `image \| pdf \| doc \| csv \| video` | `doc` | Picks the glyph when there is no `thumb` |
 | `thumb` | `string` | — | Image src for a real thumbnail |
+| `domainLabel` | `string` | — | A short domain/workspace code as a corner badge on the thumbnail — "DS". Omit it and there's no badge |
 | `onClick` | `() => void` | — | Makes the tile a real button — usually "open the preview" |
 | `onRemove` | `() => void` | — | The ✕ — its own sibling button, never nested |
 | `className` | `string` | — | On the wrapper |
@@ -52,6 +53,27 @@ kind glyph `text.tertiary`; name `label-sm` `text.secondary`; size
 **`image`** and (for the preview panel) **`download-simple`** added from
 Phosphor per docs/icon.md.
 
+**Three states corrected against Figma** (design audit, 24 Sep 2026), all
+on the thumbnail well specifically — the only bordered/filled element the
+export's own design has, so the tint lives there rather than on a new
+border around the whole tile:
+
+| State | Border | Fill |
+|---|---|---|
+| Hover (pointer or keyboard focus) | `stroke.focused` | unchanged |
+| Pressed | `stroke.focused` | `surface.brand.faint` |
+
+The ✕ button gets its own, separate hover fill (`surface.neutral.subtle`) —
+Figma's "Hover Remove Only" state, distinct from the tile's own hover above.
+Only the border-colour case is independently confirmed against Figma; the
+pressed fill and the ✕'s own hover fill are the best reading of the
+reference frames, not separately measured.
+
+`domainLabel` is a small corner badge — the existing `link` icon plus text,
+`surface.elevated` on `stroke.subtle`. It's `aria-hidden`, paired with
+visually-hidden text ("DS domain.") so the classification isn't silent for
+a screen reader.
+
 | Pair | Light | Dark |
 |---|---|---|
 | Name under the tile | **9.90:1** | **14.48:1** |
@@ -65,6 +87,11 @@ Phosphor per docs/icon.md.
   filename twice is noise.
 - The ✕ overlaps the tile corner at 24 — pointer-dense exemption; the tile
   itself is the big target.
+- `domainLabel`'s badge is `aria-hidden`; its text is repeated as
+  visually-hidden text in the tile instead of being silently dropped.
+- The hover border tint applies on keyboard focus too (`group-focus-visible`),
+  not pointer-only — a keyboard user tabbing to the tile sees the same
+  feedback a mouse hover gives.
 
 ## Don't
 
