@@ -23,6 +23,14 @@ import { Icon, type IconName } from '../../atoms/icon';
  * contract `Accordion` uses, because a control that reveals something is not
  * a control that goes somewhere.
  *
+ * **Collapsed, the disclosure marker is a corner mark, not a second icon.**
+ * There is no room in a 76-wide rail for the glyph and a full-size caret side
+ * by side — the design audit found the caret drawn small, on the glyph's own
+ * corner, not as a sibling (24 Sep 2026). This component only fixes that
+ * visual; whether the rail should open a flyout instead of the inline list
+ * below (which still renders when a collapsed disclosure opens) is still
+ * unconfirmed against Figma — flagged, not decided here.
+ *
  * **The current page carries `aria-current="page"`.** The tinted fill is the
  * sighted half of a fact the markup states anyway, never the only signal.
  *
@@ -154,16 +162,26 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
             {...shared}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >
-            {glyph}
-            {text}
-            {/* The `Right Icon` axis. Collapsed, it shrinks to a marker beside
-                the glyph — the design draws the caret but no open state for
-                the rail, so this does not expand inline at 76 wide. */}
-            <Icon
-              name={isOpen ? 'caret-up' : 'caret-down'}
-              size={collapsed ? 'sm' : 'md'}
-              className="shrink-0"
-            />
+            {/* The `Right Icon` axis. Collapsed, there's no room for a second,
+                full-size icon beside the glyph (the design audit shows this
+                as a small corner mark on the glyph itself, not a sibling
+                icon — 24 Sep 2026), so the two axes share the one 24 square
+                instead of sitting side by side. */}
+            {collapsed ? (
+              <span className="relative grid size-6 shrink-0 place-items-center">
+                {icon && <Icon name={icon} size="md" />}
+                <Icon
+                  name={isOpen ? 'caret-up' : 'caret-down'}
+                  className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-surface-elevated"
+                />
+              </span>
+            ) : (
+              <>
+                {glyph}
+                {text}
+                <Icon name={isOpen ? 'caret-up' : 'caret-down'} size="md" className="shrink-0" />
+              </>
+            )}
           </button>
           <ul id={listId} hidden={!isOpen} className="flex flex-col pb-2">
             {items.map((sub) => (
