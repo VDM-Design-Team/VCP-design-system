@@ -37,7 +37,6 @@ Everything else (`value`, `defaultValue`, `onChange`, `placeholder`, `type`, `id
 | Border, focused | `stroke.focused` | `focus-within:border-stroke-focused` |
 | Border, invalid | `accent.critical.outline.border.default` | `border-accent-critical-outline-border-default` |
 | Border, disabled | `stroke.subtle` | `has-[:disabled]:border-stroke-subtle` |
-| Focus ring | `stroke.focused` | `focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused` |
 | Value text | `text.primary` | `text-text-primary` |
 | Placeholder | `text.subtle` | `placeholder:text-text-subtle` |
 | Text, disabled | `text.disabled` | `disabled:text-text-disabled` |
@@ -53,9 +52,10 @@ The dark theme comes for free — every class above is a semantic token that
 - **Always ship a `<label>`.** The component renders no label of its own. Use
   `<label htmlFor>` with the input's `id`, or an `aria-label` when the design has
   no visible label. A placeholder is not a label — it disappears on first keystroke.
-- **Focus is real.** The `<input>` is what receives focus; the ring is drawn on the
-  wrapper with `focus-within`. It is a 2px outline at 2px offset, so the indicator is
-  a shape change rather than colour alone. Never remove it.
+- **Focus is real.** The `<input>` is what receives focus; the wrapper reacts via
+  `focus-within`, swapping its border to `stroke.focused` — the border itself
+  is the indicator (the export's separate offset outline is gone, matching
+  Figma). Never remove it.
 - **`invalid` sets `aria-invalid`** and is never the only signal. Render an error
   message and point at it with `aria-describedby` — colour alone fails 1.4.1.
 - **Icons are decorative** and rendered `aria-hidden`, so they are skipped by screen

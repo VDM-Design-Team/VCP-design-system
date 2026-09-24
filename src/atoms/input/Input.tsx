@@ -17,8 +17,6 @@ const field = cva(
   [
     'inline-flex items-center gap-2',
     'rounded-md border bg-surface-elevated transition-colors',
-    /* The ring is an offset outline — a shape change, not colour alone. */
-    'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
     'has-[:disabled]:cursor-not-allowed has-[:disabled]:bg-surface-neutral-subtle has-[:disabled]:border-stroke-subtle',
   ],
   {
