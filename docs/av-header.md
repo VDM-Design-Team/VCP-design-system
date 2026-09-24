@@ -51,9 +51,12 @@ Exactly the Figma `Type` variant pair. The design's boolean
 
 No new tokens. The frame is the design's 32 above / 16 below and sides
 (`pt-8 pb-4 px-4`), which puts the 36-tall buttons in an 84-tall header
-against the design's 85. The back link wears `action.tertiary.content`, the
-same family `IconButton`'s ghost variant uses, so the two back affordances
-are indistinguishable.
+against the design's 85. The back arrow rests at `text.primary` — the same
+colour as the title beside it (design audit, 24 Sep 2026) — and only shifts
+to `action.tertiary.content.hover` on hover. Both back affordances (the link
+and the `IconButton`) get this resting colour explicitly, since
+`IconButton`'s shared `tertiary` variant defaults to `action.tertiary.content`
+for every other use of it.
 
 ⚠️ The design's `new` title is **18px**, between our ramp's 16 (`heading-sm`)
 and 20 (`heading-md`). We take the larger step rather than add an 18px token
