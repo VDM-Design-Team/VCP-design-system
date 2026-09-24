@@ -100,7 +100,10 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
             aria-label={backLabel}
             className={cn(
               'inline-flex size-10 shrink-0 items-center justify-center rounded-sm',
-              'text-action-tertiary-content-default transition-colors',
+              /* text.primary at rest — the same colour as the title beside it,
+                 per Figma (AV_Header, design audit 24 Sep 2026). Only hover
+                 breaks from it. */
+              'text-text-primary transition-colors',
               'hover:text-action-tertiary-content-hover',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
@@ -109,7 +112,14 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
           </a>
         ) : (
           onBack && (
-            <IconButton icon="arrow-left" label={backLabel} variant="tertiary" onClick={onBack} />
+            <IconButton
+              icon="arrow-left"
+              label={backLabel}
+              variant="tertiary"
+              onClick={onBack}
+              /* Match the link path's resting colour — see the comment there. */
+              className="text-text-primary"
+            />
           )
         )}
         {/* The page's one h1 — TopBar has none precisely so this can. */}
