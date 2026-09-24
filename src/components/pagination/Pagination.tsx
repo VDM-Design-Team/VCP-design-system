@@ -37,7 +37,7 @@ export interface PaginationProps
 }
 
 const pageButton = cn(
-  'grid h-9 min-w-9 place-items-center rounded-xs px-2 font-sans text-label-md transition-colors',
+  'grid h-9 min-w-9 place-items-center rounded-xs px-2 font-sans text-label-sm-medium transition-colors',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
 );
 
@@ -100,7 +100,7 @@ export const Pagination = React.forwardRef<HTMLElement, PaginationProps>(
         </button>
         {/* Restates position in words; hidden from screen readers, which get
             the same fact from aria-current. */}
-        <span aria-hidden="true" className="ml-2 text-body-sm text-text-tertiary">
+        <span aria-hidden="true" className="ml-2 text-caption-md-regular text-text-tertiary">
           Page {page} of {pageCount}
         </span>
       </nav>

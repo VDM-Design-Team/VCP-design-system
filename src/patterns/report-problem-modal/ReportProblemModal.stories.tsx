@@ -59,7 +59,7 @@ export const FillingItIn: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Report a problem
         </Button>
-        <p className="text-body-sm text-text-tertiary">
+        <p className="text-caption-md-regular text-text-tertiary">
           Sent: {sent ? `${sent.problem} / ${sent.description}` : 'nothing yet'}
         </p>
         <ReportProblemModal

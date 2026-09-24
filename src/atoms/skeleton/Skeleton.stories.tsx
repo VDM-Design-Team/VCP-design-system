@@ -80,7 +80,7 @@ export const Lines: Story = {
     <div className="flex w-96 flex-col gap-6">
       {(['body-lg', 'body-md', 'body-sm', 'caption-sm'] as const).map((step) => (
         <div key={step}>
-          <p className="mb-2 text-label-sm text-text-subtle">{step}</p>
+          <p className="mb-2 text-caption-md-medium text-text-subtle">{step}</p>
           <Skeleton {...args} lines={3} textStyle={step} />
         </div>
       ))}
@@ -96,7 +96,7 @@ export const MatchesTheTypeRamp: Story = {
       <div className="w-72">
         <Skeleton {...args} lines={3} textStyle="body-md" />
       </div>
-      <p className="w-72 text-body-md text-text-primary">
+      <p className="w-72 text-body-sm-regular text-text-primary">
         The rows are one line box tall each, so the placeholder and the copy occupy the same
         vertical space. Swapping one for the other moves nothing on the page, which is the
         whole reason to use a skeleton rather than a spinner.
@@ -161,8 +161,8 @@ export const AnnouncingTheLoad: Story = {
             </>
           ) : (
             <>
-              <h3 className="text-title-sm text-text-primary">Recent activity</h3>
-              <p className="mt-2 text-body-md text-text-secondary">
+              <h3 className="text-title-sm-semibold text-text-primary">Recent activity</h3>
+              <p className="mt-2 text-body-sm-regular text-text-secondary">
                 Priya moved two deliverables into review, and the November forecast was
                 approved. Nothing else has changed since your last visit.
               </p>
@@ -183,7 +183,7 @@ export const ReducedMotion: Story = {
   name: 'Reduced motion',
   render: (args) => (
     <div className="flex w-96 flex-col gap-2">
-      <p className="text-body-sm text-text-secondary">
+      <p className="text-caption-md-regular text-text-secondary">
         With “reduce motion” on, this block holds a flat `surface.neutral.medium` fill instead
         of pulsing.
       </p>

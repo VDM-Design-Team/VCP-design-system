@@ -29,7 +29,7 @@ import { Popover, type PopoverAlign } from '../popover';
 const menuItem = cva(
   [
     'flex w-full min-h-10 items-center gap-2 rounded-sm px-3 py-2',
-    'text-left font-sans text-label-lg',
+    'text-left font-sans text-label-sm-medium',
     /* A transparent resting fill, same token the ghost Button rests on. */
     'bg-action-tertiary-surface-default transition-colors cursor-pointer',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
@@ -326,7 +326,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
                 highlighted with surface.brand.faint — the shortcut has to clear AA in
                 the focused state too, so it takes the next step darker. */}
             {item.shortcut && (
-              <span className="shrink-0 font-sans text-caption-md text-text-tertiary">
+              <span className="shrink-0 font-sans text-caption-md-medium text-text-tertiary">
                 {item.shortcut}
               </span>
             )}

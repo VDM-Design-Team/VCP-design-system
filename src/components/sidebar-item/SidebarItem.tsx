@@ -77,7 +77,7 @@ export interface SidebarItemProps
    exactly, which is why there is no `size` prop. */
 const row = (selected: boolean, collapsed: boolean) =>
   cn(
-    'flex h-10 w-full items-center rounded-md font-sans text-label-lg transition-colors',
+    'flex h-10 w-full items-center rounded-md font-sans text-label-sm-medium transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     collapsed ? 'justify-center px-2' : 'gap-2 px-2',
     selected
@@ -89,7 +89,7 @@ const row = (selected: boolean, collapsed: boolean) =>
    what says they belong to the row above. */
 const subRow = (selected: boolean) =>
   cn(
-    'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans text-label-md transition-colors',
+    'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans text-label-sm-medium transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     selected ? 'font-medium text-text-brand-strong' : 'text-text-secondary hover:bg-surface-brand-faint',
   );

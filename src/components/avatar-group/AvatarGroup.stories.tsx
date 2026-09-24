@@ -72,7 +72,7 @@ export const Overflow: Story = {
       {[2, 3, 4].map((max) => (
         <div key={max} className="flex items-center gap-3">
           <AvatarGroup {...args} people={TEAM} max={max} />
-          <span className="text-caption-sm text-text-tertiary">
+          <span className="text-caption-sm-semibold text-text-tertiary">
             max={max} — announces “{TEAM.slice(0, max).join(', ')} and {TEAM.length - max} others”
           </span>
         </div>
@@ -87,7 +87,7 @@ export const Sizes: Story = {
     <div className="flex flex-col gap-4">
       {SIZES.map((size) => (
         <div key={size} className="flex items-center gap-3">
-          <span className="w-6 text-caption-sm text-text-tertiary">{size}</span>
+          <span className="w-6 text-caption-sm-semibold text-text-tertiary">{size}</span>
           <AvatarGroup {...args} people={TEAM} size={size} />
         </div>
       ))}
@@ -127,7 +127,7 @@ export const AssigneesRow: Story = {
           key={row.task}
           className={`flex items-center gap-4 px-4 py-3 ${i > 0 ? 'border-t border-stroke-subtle' : ''}`}
         >
-          <span className="min-w-0 flex-1 truncate text-label-lg text-text-primary">{row.task}</span>
+          <span className="min-w-0 flex-1 truncate text-label-sm-medium text-text-primary">{row.task}</span>
           <Badge tone="neutral" size="sm">
             {row.status}
           </Badge>
@@ -149,7 +149,7 @@ export const WhenNotToStack: Story = {
       {TEAM.slice(0, 3).map((name) => (
         <li key={name} className="flex items-center gap-2">
           <Avatar name={name} size="sm" />
-          <a className="text-label-lg text-text-link-default underline underline-offset-4" href="#">
+          <a className="text-label-sm-medium text-text-link-default underline underline-offset-4" href="#">
             {name}
           </a>
         </li>

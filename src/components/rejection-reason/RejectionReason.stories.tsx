@@ -66,7 +66,7 @@ export const EveryReason: Story = {
         ] as const
       ).map(([name, reasons]) => (
         <div key={name} className="flex flex-col gap-4">
-          <p className="text-label-md text-text-tertiary">{name}</p>
+          <p className="text-label-sm-medium text-text-tertiary">{name}</p>
           {reasons.map((reason) => (
             <RejectionReason
               key={reason.value}

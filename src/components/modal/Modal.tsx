@@ -499,12 +499,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             {hasHeaderText && (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {hasTitle && (
-                  <h2 id={titleId} className="text-heading-md text-text-primary">
+                  <h2 id={titleId} className="text-title-md-semibold text-text-primary">
                     {title}
                   </h2>
                 )}
                 {hasDescription && (
-                  <p id={descriptionId} className="text-body-sm text-text-tertiary">
+                  <p id={descriptionId} className="text-caption-md-regular text-text-tertiary">
                     {description}
                   </p>
                 )}

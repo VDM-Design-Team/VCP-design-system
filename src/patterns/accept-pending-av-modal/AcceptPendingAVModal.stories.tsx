@@ -71,7 +71,7 @@ export const AcceptingIt: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Accept AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Result: {result}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Result: {result}</p>
         <AcceptPendingAVModal
           {...args}
           open={open}

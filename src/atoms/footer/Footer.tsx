@@ -33,7 +33,7 @@ export const Footer = React.forwardRef<HTMLElement, FooterProps>(
     <footer
       ref={ref}
       className={cn(
-        'flex h-18 shrink-0 items-center gap-1 px-6 font-sans text-body-md text-text-tertiary',
+        'flex h-18 shrink-0 items-center gap-1 px-6 font-sans text-body-sm-regular text-text-tertiary',
         className,
       )}
       {...props}

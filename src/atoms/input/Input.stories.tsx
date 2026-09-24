@@ -72,11 +72,11 @@ export const WithTrailingIcon: Story = {
 export const Invalid: Story = {
   render: (args) => (
     <div className="flex flex-col gap-1">
-      <label className="text-label-md text-text-primary" htmlFor="invalid-demo">
+      <label className="text-label-sm-medium text-text-primary" htmlFor="invalid-demo">
         Reference
       </label>
       <Input {...args} id="invalid-demo" invalid defaultValue="Invalid value" aria-describedby="invalid-demo-error" />
-      <p id="invalid-demo-error" className="text-body-sm text-accent-critical-outline-content-default">
+      <p id="invalid-demo-error" className="text-caption-md-regular text-accent-critical-outline-content-default">
         Enter a reference in the format ABC-1234.
       </p>
     </div>
@@ -106,7 +106,7 @@ export const Controlled: Story = {
     const [value, setValue] = React.useState('Added Value');
     return (
       <div className="flex flex-col gap-1">
-        <label className="text-label-md text-text-primary" htmlFor="controlled-demo">
+        <label className="text-label-sm-medium text-text-primary" htmlFor="controlled-demo">
           Project name
         </label>
         <Input
@@ -116,7 +116,7 @@ export const Controlled: Story = {
           onChange={(e) => setValue(e.target.value)}
           leadingIcon={<SearchIcon />}
         />
-        <p className="text-body-sm text-text-secondary">Current value: {value || '—'}</p>
+        <p className="text-caption-md-regular text-text-secondary">Current value: {value || '—'}</p>
       </div>
     );
   },

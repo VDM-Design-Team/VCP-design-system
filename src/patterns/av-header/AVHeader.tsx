@@ -116,7 +116,7 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
         <h1
           className={cn(
             'min-w-0 truncate',
-            type === 'new' ? 'text-heading-md text-text-primary' : 'text-body-md text-text-primary',
+            type === 'new' ? 'text-title-md-semibold text-text-primary' : 'text-body-sm-regular text-text-primary',
           )}
         >
           {title}

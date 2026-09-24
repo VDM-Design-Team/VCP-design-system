@@ -223,7 +223,7 @@ export const OpeningAnAV: Story = {
     return (
       <div className="bg-surface-canvas p-6">
         <AVTable {...args} onOpen={(row) => setOpened(row.ref)} />
-        <p className="mt-4 font-sans text-body-md text-text-secondary">
+        <p className="mt-4 font-sans text-body-sm-regular text-text-secondary">
           {opened ? `Opened ${opened}` : 'Nothing opened yet'}
         </p>
       </div>

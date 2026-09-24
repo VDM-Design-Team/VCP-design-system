@@ -50,19 +50,19 @@ export const DomainSteps: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="w-28 text-label-md text-text-secondary">Design</span>
+        <span className="w-28 text-label-sm-medium text-text-secondary">Design</span>
         {['Design review'].map((label) => (
           <StatusPill key={label} custom={label} />
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="w-28 text-label-md text-text-secondary">Development</span>
+        <span className="w-28 text-label-sm-medium text-text-secondary">Development</span>
         {['For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'].map((label) => (
           <StatusPill key={label} custom={label} />
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="w-28 text-label-md text-text-secondary">Governance</span>
+        <span className="w-28 text-label-sm-medium text-text-secondary">Governance</span>
         {['Awaiting legal', 'Risk signed off'].map((label) => (
           <StatusPill key={label} custom={label} />
         ))}
@@ -96,7 +96,7 @@ export const Sizes: Story = {
     <div className="flex flex-col gap-3">
       {(['sm', 'md'] as const).map((size) => (
         <div key={size} className="flex items-center gap-2">
-          <span className="w-8 text-label-md text-text-secondary">{size}</span>
+          <span className="w-8 text-label-sm-medium text-text-secondary">{size}</span>
           <StatusPill size={size} status="Pending" />
           <StatusPill size={size} custom="Awaiting legal" />
         </div>
@@ -114,11 +114,11 @@ export const ReviewHasTwoStyles: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
-        <span className="w-40 text-label-md text-text-secondary">A user sees</span>
+        <span className="w-40 text-label-sm-medium text-text-secondary">A user sees</span>
         <StatusPill status="Review" />
       </div>
       <div className="flex items-center gap-3">
-        <span className="w-40 text-label-md text-text-secondary">An admin sees</span>
+        <span className="w-40 text-label-sm-medium text-text-secondary">An admin sees</span>
         <StatusPill status="Review" actionable />
       </div>
     </div>

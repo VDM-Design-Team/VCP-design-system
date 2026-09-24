@@ -34,9 +34,9 @@ const fieldLabel = cva(
     variants: {
       variant: { stacked: '', inline: 'w-40 shrink-0' },
       size: {
-        sm: 'text-label-sm',
-        md: 'text-label-md',
-        lg: 'text-label-lg',
+        sm: 'text-caption-md-medium',
+        md: 'text-label-sm-medium',
+        lg: 'text-label-sm-medium',
       },
     },
     compoundVariants: [
@@ -59,9 +59,9 @@ const fieldControl = cva('flex flex-col gap-1.5', {
 const fieldMessage = cva('', {
   variants: {
     size: {
-      sm: 'text-caption-sm',
-      md: 'text-caption-md',
-      lg: 'text-body-md',
+      sm: 'text-caption-sm-semibold',
+      md: 'text-caption-md-medium',
+      lg: 'text-body-sm-regular',
     },
     invalid: {
       true: 'text-accent-critical-tonal-content-default',

@@ -66,7 +66,7 @@ function Background({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col items-start gap-4">
       {children}
-      <p className="max-w-96 text-body-md text-text-tertiary">
+      <p className="max-w-96 text-body-sm-regular text-text-tertiary">
         While the dialog is open this text is inert: it cannot be clicked, it is not in the tab
         order, and screen readers skip it.{' '}
         <a href="#background-link" className="text-text-link-default underline">
@@ -243,14 +243,14 @@ export const LongContent: Story = {
     >
       <div className="flex flex-col gap-4">
         {Array.from({ length: 14 }, (_, i) => (
-          <p key={i} className="text-body-md">
+          <p key={i} className="text-body-sm-regular">
             <span className="text-text-primary">Clause {i + 1}. </span>
             Added Value contributions are reconciled monthly against the agreed baseline. Where a
             contribution cannot be evidenced within the reporting window it is carried forward
             once, and once only, to the following period.
           </p>
         ))}
-        <a href="#terms-end" className="text-body-md text-text-link-default underline">
+        <a href="#terms-end" className="text-body-sm-regular text-text-link-default underline">
           A link at the very bottom, to check the trap still wraps from here
         </a>
       </div>
@@ -283,7 +283,7 @@ export const WithoutTitle: Story = {
   args: { title: undefined, 'aria-label': 'Preview attachment', children: undefined },
   render: (args) => (
     <Modal {...args} aria-label="Preview attachment">
-      <div className="grid h-64 place-items-center rounded-md bg-surface-neutral-subtle text-body-md text-text-tertiary">
+      <div className="grid h-64 place-items-center rounded-md bg-surface-neutral-subtle text-body-sm-regular text-text-tertiary">
         invoice-4471.pdf
       </div>
     </Modal>

@@ -66,7 +66,7 @@ export const Matrix: Story = {
     <div className="flex flex-col gap-3">
       {(['primary', 'secondary', 'neutral', 'tertiary', 'danger'] as const).map((variant) => (
         <div key={variant} className="flex items-center gap-3">
-          <span className="w-20 text-label-sm text-text-subtle">{variant}</span>
+          <span className="w-20 text-caption-md-medium text-text-subtle">{variant}</span>
           <IconButton {...args} variant={variant} size="sm" />
           <IconButton {...args} variant={variant} size="md" />
           <IconButton {...args} variant={variant} size="lg" />
@@ -128,7 +128,7 @@ export const NextToButton: Story = {
           </Button>
           <IconButton {...args} size={size} variant="secondary" icon="x" label="Discard changes" />
           <IconButton {...args} size={size} variant="tertiary" icon="dots-three" label="More actions" />
-          <span className="text-label-sm text-text-subtle">size “{size}”</span>
+          <span className="text-caption-md-medium text-text-subtle">size “{size}”</span>
         </div>
       ))}
     </div>

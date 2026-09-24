@@ -133,7 +133,7 @@ function HeaderHint({ text, column }: { text?: string; column: string }) {
 function Count({ icon, value, noun }: { icon: 'paperclip' | 'chat-centered-text'; value: number; noun: string }) {
   if (!value) return null;
   return (
-    <span className="flex items-center gap-0.5 text-caption-md text-text-tertiary">
+    <span className="flex items-center gap-0.5 text-caption-md-medium text-text-tertiary">
       <Icon name={icon} size="sm" className="shrink-0" />
       {value}
       <span className="sr-only">{value === 1 ? noun : `${noun}s`}</span>
@@ -182,7 +182,7 @@ export function AVTable({
                 type="button"
                 onClick={() => onOpen(row)}
                 className={cn(
-                  'shrink-0 rounded-sm text-body-md text-text-tertiary transition-colors',
+                  'shrink-0 rounded-sm text-body-sm-regular text-text-tertiary transition-colors',
                   'hover:text-text-brand-medium hover:underline',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                 )}
@@ -191,12 +191,12 @@ export function AVTable({
                 <span className="sr-only">: {row.title}</span>
               </button>
             ) : (
-              <span className="shrink-0 text-body-md text-text-tertiary">{row.ref}</span>
+              <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
             )}
             <Divider orientation="vertical" className="h-4 shrink-0" />
             {/* One line, ellipsed. The full title is the `title` attribute so a
                 truncated row is still readable on hover. */}
-            <span className="truncate text-label-lg text-text-primary" title={row.title}>
+            <span className="truncate text-label-sm-medium text-text-primary" title={row.title}>
               {row.title}
             </span>
           </div>
@@ -257,7 +257,7 @@ export function AVTable({
       key: 'lastUpdated',
       label: 'Last Updated',
       sortable: true,
-      render: (row) => <span className="text-label-lg text-text-tertiary">{row.lastUpdated}</span>,
+      render: (row) => <span className="text-label-sm-medium text-text-tertiary">{row.lastUpdated}</span>,
     },
   ];
 

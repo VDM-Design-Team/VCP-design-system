@@ -63,7 +63,7 @@ const segment = cva(
   ],
   {
     variants: {
-      size: { sm: 'h-8 px-3 text-label-md', md: 'h-10 px-4 text-label-lg' },
+      size: { sm: 'h-8 px-3 text-label-sm-medium', md: 'h-10 px-4 text-label-sm-medium' },
       fullWidth: { true: 'flex-1', false: '' },
       /* Pending mutes the selected label back to the unselected colour and
          holds the others where they are — nothing is clickable until the

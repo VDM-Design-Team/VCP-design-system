@@ -76,7 +76,7 @@ Opting in this way means a bar rendered on its own is merely incomplete, not wro
 | Disabled label | `text.disabled` |
 | Count pill, unselected | `surface.neutral.subtle` + `text.tertiary` |
 | Count pill, selected | `surface.brand.faint` + `action.secondary.content.default` |
-| Count type | `type.caption-sm` (Inter — dense numerics) |
+| Count type | `type.caption-sm-semibold` (Inter — dense numerics) |
 | Focus ring | `stroke.focused` at 2px, 2px offset |
 
 No new tokens were added for this component.
@@ -95,7 +95,7 @@ No new tokens were added for this component.
   32px — pointer contexts only.
 - **The selected state is not colour alone.** A 2px underline anchors the selected
   tab to its panel, and it survives a greyscale check. (The label weight does *not*
-  change between states — `type.label-lg` carries weight 500 as part of the token,
+  change between states — `type.label-sm-medium` carries weight 500 as part of the token,
   and the ramp has no 500/400 pair at 13px or 11px, so a weight shift can't be done
   consistently across sizes without a new token.)
 - **Contrast, light / dark:** selected label and underline 6.2:1 / 6.3:1,

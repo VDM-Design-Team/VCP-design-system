@@ -146,7 +146,7 @@ export function ChangeLogModal({
           <span className="sr-only">{kind.what}</span>
 
           <div className="flex flex-wrap items-center gap-2">
-            <h2 id={titleId} className="text-heading-md text-text-primary">
+            <h2 id={titleId} className="text-title-md-semibold text-text-primary">
               {entry.title}
             </h2>
             {entry.hint && (
@@ -163,19 +163,19 @@ export function ChangeLogModal({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-heading-sm text-text-secondary">{entry.date}</span>
+            <span className="text-title-sm-semibold text-text-secondary">{entry.date}</span>
             <Badge tone="info" size="sm">
               {entry.version}
             </Badge>
           </div>
 
           {entry.heading && (
-            <h3 className="text-heading-sm text-text-primary">{entry.heading}</h3>
+            <h3 className="text-title-sm-semibold text-text-primary">{entry.heading}</h3>
           )}
 
           <ul className="flex list-disc flex-col gap-1 pl-5">
             {entry.items.map((item) => (
-              <li key={item} className="text-body-md text-text-secondary">
+              <li key={item} className="text-body-sm-regular text-text-secondary">
                 {item}
               </li>
             ))}

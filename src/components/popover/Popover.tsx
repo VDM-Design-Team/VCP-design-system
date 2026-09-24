@@ -31,7 +31,7 @@ const popoverPanel = cva(
     /* The floating surface: elevated fill, a defined edge, and the shadow the
        token set reserves for exactly this — `shadow.menu`. */
     'rounded-md border border-stroke-default bg-surface-elevated shadow-menu',
-    'p-4 font-sans text-body-md text-text-secondary',
+    'p-4 font-sans text-body-sm-regular text-text-secondary',
     /* Focusable as a container only so a click on dead space inside the panel
        does not drop focus to the body. Never in the tab order. */
     'focus:outline-none',

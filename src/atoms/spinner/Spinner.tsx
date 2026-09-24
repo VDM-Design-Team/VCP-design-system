@@ -107,7 +107,7 @@ export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
             invisible spinner. So the text is always in the DOM, and `showLabel`
             only decides whether it is painted. */}
         {showLabel ? (
-          <span className="font-sans text-label-md">{label}</span>
+          <span className="font-sans text-label-sm-medium">{label}</span>
         ) : decorative ? null : (
           <span className="sr-only">{label}</span>
         )}

@@ -48,7 +48,7 @@ export const Controlled: Story = {
     return (
       <div className="flex w-72 flex-col gap-3">
         <Select {...args} aria-label="Domain" value={value} onChange={setValue} />
-        <span className="font-sans text-body-sm text-text-tertiary">Chosen: {value}</span>
+        <span className="font-sans text-caption-md-regular text-text-tertiary">Chosen: {value}</span>
       </div>
     );
   },

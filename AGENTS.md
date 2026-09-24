@@ -34,9 +34,13 @@ Claude Design project — those mirror this repo, not the other way round.
   `bg-action-primary-surface-default`, `bg-accent-critical-tonal-surface-default`.
 - Spacing: do NOT override Tailwind's numeric scale — VCP's px values map onto it
   exactly (4px = `p-1`, 8px = `p-2`, 16px = `p-4`, 64px = `p-16`).
-- Type ramp: `text-display-xl` … `text-caption-sm` — size, line-height, weight and
-  tracking come as a unit from `type.*`. Poppins for UI (`font-sans`), Inter for
-  dense numerics (`font-numeric`).
+- Type ramp: `text-{tier}-{size}-{weight}`, e.g. `text-body-md-semibold` —
+  `display|heading|title|body|label|caption` × a tier-specific size × a weight
+  (`bold|semibold|medium|regular`, only the weights each size actually ships).
+  Size, line-height, weight and tracking come as a unit from `type.*`
+  (`tokens/semantic/type.json`); see `docs/type-tokens.md` for the full ramp
+  and the pre-24 September names it replaced. Poppins for UI (`font-sans`);
+  `font-numeric` (Inter) still layers on for dense numerics/tabular figures.
 - Dark theme exists: `tokens/semantic/color.dark.json` builds to `dist/tokens.dark.css`
   (`.dark` overrides). Components must only use semantic tokens so dark works for free.
 - Component props: `variant`, `size`, `fullWidth`, `loading`. Keep these names

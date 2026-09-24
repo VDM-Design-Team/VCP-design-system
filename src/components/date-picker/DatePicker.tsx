@@ -151,7 +151,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
             onClick={() => setView(new Date(year, monthIndex - 1, 1))}
           />
           {/* Announces month changes without stealing focus from the grid. */}
-          <span aria-live="polite" className="text-label-lg text-text-primary">
+          <span aria-live="polite" className="text-label-sm-medium text-text-primary">
             {monthName} {year}
           </span>
           <IconButton
@@ -164,7 +164,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
         </div>
         <div aria-hidden="true" className="mb-1 grid grid-cols-7 gap-0.5">
           {WEEKDAYS.map((d) => (
-            <span key={d} className="py-1 text-center text-label-sm text-text-subtle">
+            <span key={d} className="py-1 text-center text-caption-md-medium text-text-subtle">
               {d}
             </span>
           ))}
@@ -201,7 +201,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
                 onClick={() => onChange?.(isoDate)}
                 onFocus={() => setFocusIso(isoDate)}
                 className={cn(
-                  'relative grid h-9 place-items-center rounded-md font-numeric text-caption-md transition-colors',
+                  'relative grid h-9 place-items-center rounded-md font-numeric text-caption-md-medium transition-colors',
                   selected
                     ? 'bg-action-primary-surface-default text-action-primary-content-default'
                     : inRange(isoDate)

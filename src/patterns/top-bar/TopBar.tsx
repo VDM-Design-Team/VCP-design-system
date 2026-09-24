@@ -75,7 +75,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     const userChip = user && (
       <>
         <Avatar name={user.name} src={user.src} size="md" />
-        <span className="max-w-40 truncate text-label-lg text-text-primary">{user.name}</span>
+        <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
         {onUserMenu && (
           <Icon name="caret-down" size="sm" aria-hidden="true" className="text-text-tertiary" />
         )}
