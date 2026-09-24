@@ -38,18 +38,19 @@ const meta = {
     docs: {
       description: {
         component:
-          'A person, as a photo or as their initials. The tone is hashed from the name onto the ' +
-          "four hue-named `accent.*` families, so a person keeps their colour everywhere. " +
-          '**An avatar is decorative by default** — beside a visible name it is `aria-hidden`, ' +
-          'because repeating the name is noise. Set `standalone` when the avatar is the only ' +
-          'identification of the person on screen.',
+          'A person, as a photo or as their initials. Neutral by default — pass ' +
+          '`tone={toneForName(name)}` to opt into hashing the name onto one of four ' +
+          'hue-named `accent.*` families, for contexts that need to tell many people ' +
+          'apart at a glance. **An avatar is decorative by default** — beside a visible ' +
+          'name it is `aria-hidden`, because repeating the name is noise. Set `standalone` ' +
+          'when the avatar is the only identification of the person on screen.',
       },
     },
   },
   args: { name: 'Ali Rahman', size: 'md' },
   argTypes: {
     size: { control: 'radio', options: SIZES },
-    tone: { control: 'select', options: [undefined, ...AVATAR_TONES] },
+    tone: { control: 'select', options: ['neutral', ...AVATAR_TONES] },
     src: { control: 'text' },
   },
 } satisfies Meta<typeof Avatar>;
@@ -88,7 +89,7 @@ export const WithImage: Story = {
   ),
 };
 
-/** No `src` — initials, on the tone hashed from the name. */
+/** No `src` — initials on the neutral default. */
 export const InitialsFallback: Story = {
   render: (args) => (
     <div className="flex items-center gap-3">
@@ -148,9 +149,10 @@ export const Ring: Story = {
 };
 
 /**
- * Ten names across the four tones. Each pairs an `accent.<hue>.faint` surface
- * with `accent.<hue>.stronger` initials: 8.07:1 – 8.50:1 in light, 4.50:1 – 7.23:1
- * in dark. The export's six pastels with white initials measured 1.83:1 – 2.37:1.
+ * Ten names across the four tones, opted into with `toneForName`. Each pairs
+ * an `accent.<hue>.faint` surface with `accent.<hue>.stronger` initials:
+ * 8.07:1 – 8.50:1 in light, 4.50:1 – 7.23:1 in dark. The export's six pastels
+ * with white initials measured 1.83:1 – 2.37:1.
  */
 export const ToneRange: Story = {
   render: (args) => (
@@ -158,7 +160,7 @@ export const ToneRange: Story = {
       <div className="flex flex-wrap items-center gap-3">
         {NAMES.map((name) => (
           <div key={name} className="flex items-center gap-2">
-            <Avatar {...args} name={name} />
+            <Avatar {...args} name={name} tone={toneForName(name)} />
             <span className="text-label-md text-text-secondary">{name}</span>
           </div>
         ))}

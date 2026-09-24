@@ -1,6 +1,6 @@
 # Avatar
 
-A person, as a photo or as their initials, on a tone hashed from their name.
+A person, as a photo or as their initials, on the neutral tone by default.
 
 ## When to use which size
 
@@ -23,11 +23,11 @@ Reach for something else when:
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `name` | `string` | `''` | Drives both the initials and the tone. Not rendered as text |
+| `name` | `string` | `''` | Drives the initials. Not rendered as text |
 | `initials` | `string` | — | Overrides the derived initials — mononyms, team codes |
 | `src` | `string` | — | Photo URL. On a load failure the initials are drawn instead |
 | `size` | `sm \| md \| lg` | `md` | 24 / 32 / 40. **Not a number** — see "Deviations" |
-| `tone` | `blue \| green \| red \| yellow` | hashed from `name` | Pin the tone. Rarely needed |
+| `tone` | `neutral \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing |
 | `ring` | `boolean` | `false` | `surface.elevated` ring, for overlapping stacks. `AvatarGroup` sets it |
 | `standalone` | `boolean` | `false` | The avatar is the only identification of this person — give it a real accessible name |
 | `label` | `string` | — | Overrides what is announced, and implies `standalone` |
@@ -41,9 +41,14 @@ reached: `toneForName(name)` and `initialsForName(name)`.
 
 ## Tokens
 
-Each tone is one hue-named `accent.*` family: a `faint` surface with `stronger`
-content. Both halves flip under `.dark`, so the pairing — and its ratio — survives
-the theme change.
+`neutral` — the default — is `surface.neutral.subtle` + `text.secondary`, the
+same pairing `Badge`'s own `neutral` tone uses: **9.45:1** in light, **8.40:1**
+in dark (measured in `docs/badge.md`, same tokens).
+
+Each of the other four tones is one hue-named `accent.*` family: a `faint`
+surface with `stronger` content. Both halves flip under `.dark`, so the
+pairing — and its ratio — survives the theme change. These are opt-in only,
+via `tone={toneForName(name)}` — see "Deviations" in `Avatar.tsx`.
 
 | Tone | Surface token | Content token | Contrast, light | Contrast, dark |
 |---|---|---|---|---|
@@ -108,9 +113,11 @@ Nothing was invented here.
 
 - Don't hardcode the circle. `className="size-[36px] bg-[#8bb7f7]"` is a bug — use
   a `size` step and a `tone`.
-- Don't use the tone to mean something. It is a hash of the name; `red` is not
-  "blocked" and `green` is not "approved". That is `Badge`, or the `StatusPill`
-  pattern.
+- Don't use a hashed tone to mean something. It is a hash of the name; `red` is
+  not "blocked" and `green` is not "approved". That is `Badge`, or the
+  `StatusPill` pattern.
+- Don't hash by default. Leave `tone` unset unless the context genuinely needs
+  to tell many people apart at a glance — most avatars should stay `neutral`.
 - Don't set `standalone` on an avatar that already sits beside the person's name —
   a screen reader then reads the name twice.
 - Don't write `alt`-style text into `label` ("photo of Ali"). `label` is the
