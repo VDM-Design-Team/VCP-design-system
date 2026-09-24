@@ -12,8 +12,9 @@ const meta = {
         component:
           'One number that matters, on a card. `deltaTone` is judgment, not direction — the ' +
           'caller says positive/negative/neutral and the colour follows the meaning; the sign ' +
-          'lives in the delta text. The label is not a heading: the dashboard section owns ' +
-          'the outline.',
+          'lives in the delta text. `accent` sets a coloured left edge; `hint` adds a ' +
+          'focusable info glyph after the label. The label is not a heading: the dashboard ' +
+          'section owns the outline.',
       },
     },
   },
@@ -60,6 +61,46 @@ export const WithUnit: Story = {
   render: (args) => (
     <div className="w-64">
       <StatCard {...args} />
+    </div>
+  ),
+};
+
+/**
+ * `accent` is a coloured left edge; `hint` adds a focusable info glyph after
+ * the label. Matches Figma's `SuperAdmin_Dashboard_Metrics` row.
+ */
+export const AccentAndHint: Story = {
+  render: () => (
+    <div className="grid w-200 grid-cols-4 gap-4">
+      <StatCard
+        label="Values Created"
+        value="25"
+        accent="info"
+        hint="Added Values created in the selected cycle."
+        icon={<Icon name="pencil-simple" size="sm" />}
+      />
+      <StatCard
+        label="Values Completed"
+        value="31"
+        accent="success"
+        hint="Added Values moved to Completed."
+        icon={<Icon name="check-circle" size="sm" />}
+      />
+      <StatCard
+        label="Overdue Value Rate"
+        value="26"
+        unit="%"
+        accent="critical"
+        hint="Share of active Added Values past their due date."
+        icon={<Icon name="warning" size="sm" />}
+      />
+      <StatCard
+        label="Active / Total Users"
+        value="12"
+        unit="/ 15"
+        accent="neutral"
+        icon={<Icon name="users" size="sm" />}
+      />
     </div>
   ),
 };
