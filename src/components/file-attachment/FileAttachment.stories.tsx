@@ -58,6 +58,21 @@ export const OpenAndRemove: Story = {
   },
 };
 
+/**
+ * `domainLabel` adds a small corner badge on the thumbnail — a domain or
+ * workspace code, when a file's origin isn't otherwise obvious. Hover or
+ * tab to the second tile to see the corrected hover/pressed treatment on
+ * the thumbnail well itself.
+ */
+export const WithDomainLabel: Story = {
+  render: (args) => (
+    <div className="flex flex-wrap gap-3">
+      <FileAttachment {...args} domainLabel="DS" onClick={() => {}} />
+      <FileAttachment {...args} name="capacity-export.csv" kind="csv" onClick={() => {}} />
+    </div>
+  ),
+};
+
 /** A gallery row — the natural habitat, under a comment or in an evidence panel. */
 export const GalleryRow: Story = {
   render: () => (
