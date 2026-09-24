@@ -73,8 +73,8 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
         )}
         <div className="min-w-0">
           {/* The page's one h1 — TopBar deliberately has none so this can. */}
-          <h1 className="min-w-0 truncate text-heading-md text-text-primary">{title}</h1>
-          {subtitle && <p className="mt-1 truncate text-body-md text-text-secondary">{subtitle}</p>}
+          <h1 className="min-w-0 truncate text-title-md-semibold text-text-primary">{title}</h1>
+          {subtitle && <p className="mt-1 truncate text-body-sm-regular text-text-secondary">{subtitle}</p>}
         </div>
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

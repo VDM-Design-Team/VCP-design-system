@@ -91,12 +91,12 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     return (
       <div ref={ref} className={cn('flex w-full flex-col gap-1.5', className)} {...props}>
         {(label || showValue) && (
-          <div className="flex items-baseline justify-between gap-2 font-sans text-body-sm text-text-tertiary">
+          <div className="flex items-baseline justify-between gap-2 font-sans text-caption-md-regular text-text-tertiary">
             {/* The span renders (empty) even without a label so a lone
                 percentage still right-aligns. */}
             <span id={label ? labelId : undefined}>{label}</span>
             {showValue && (
-              <span className="font-numeric text-caption-md">{Math.round(pct)}%</span>
+              <span className="font-numeric text-caption-md-medium">{Math.round(pct)}%</span>
             )}
           </div>
         )}

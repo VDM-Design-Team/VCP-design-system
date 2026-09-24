@@ -74,12 +74,12 @@ const avatar = cva(
     variants: {
       size: {
         /* 24 — dense table rows and inline beside body text. */
-        sm: 'size-6 text-label-sm',
+        sm: 'size-6 text-caption-md-medium',
         /* 32 — the default, and the export's own default. */
-        md: 'size-8 text-label-md',
+        md: 'size-8 text-label-sm-medium',
         /* 40 — meets the minimum target size, so this is the only size that may
            carry a control (a menu trigger, a link to a profile). */
-        lg: 'size-10 text-label-lg',
+        lg: 'size-10 text-label-sm-medium',
       },
       tone: {
         blue: 'bg-accent-blue-faint text-accent-blue-stronger',

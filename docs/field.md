@@ -66,9 +66,9 @@ Never show both. `error` wins whenever it is set.
 
 | Part | Token |
 |---|---|
-| Label text | `text-text-primary` + `text-label-sm` / `-md` / `-lg` |
+| Label text | `text-text-primary` + `text-caption-md-medium` / `-md` / `-lg` |
 | Required marker | `text-accent-critical-tonal-content-default` |
-| Helper text | `text-text-tertiary` + `text-caption-sm` / `-md` / `text-body-md` |
+| Helper text | `text-text-tertiary` + `text-caption-sm-semibold` / `-md` / `text-body-sm-regular` |
 | Error text | `text-accent-critical-tonal-content-default` |
 | "+" affordance surface | `bg-action-primary-surface-default`, `-hover`, `-pressed`, `-disabled` |
 | "+" affordance glyph | `text-action-primary-content-default`, `-disabled` |

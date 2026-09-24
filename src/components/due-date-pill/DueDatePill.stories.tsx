@@ -67,7 +67,7 @@ export const FromADate: Story = {
       ['Due in a month', new Date(2026, 9, 11)],
     ];
     return (
-      <div className="flex flex-col items-start gap-3 font-sans text-body-md text-text-secondary">
+      <div className="flex flex-col items-start gap-3 font-sans text-body-sm-regular text-text-secondary">
         {rows.map(([what, due]) => (
           <div key={what} className="flex items-center gap-3">
             <span className="w-44">{what}</span>

@@ -61,10 +61,10 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
             {icon}
           </div>
         )}
-        <Heading className="m-0 font-sans text-heading-sm text-text-primary">{title}</Heading>
+        <Heading className="m-0 font-sans text-title-sm-semibold text-text-primary">{title}</Heading>
         {description && (
           /* max-w-96 (384) — the export's 380 measure, on the spacing scale. */
-          <p className="m-0 max-w-96 font-sans text-body-md text-text-tertiary">{description}</p>
+          <p className="m-0 max-w-96 font-sans text-body-sm-regular text-text-tertiary">{description}</p>
         )}
         {action && <div className="mt-1.5">{action}</div>}
       </div>

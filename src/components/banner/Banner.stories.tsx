@@ -186,7 +186,7 @@ export const InPageContext: Story = {
   render: () => (
     <div className="min-h-96 bg-surface-canvas">
       <div className="flex items-center justify-between border-b border-stroke-subtle bg-surface-elevated px-6 py-4">
-        <span className="text-heading-sm text-text-primary">Added Value</span>
+        <span className="text-title-sm-semibold text-text-primary">Added Value</span>
         <Button size="sm">New deliverable</Button>
       </div>
 
@@ -203,12 +203,12 @@ export const InPageContext: Story = {
         </Banner>
 
         <section className="rounded-md border border-stroke-default bg-surface-elevated p-4">
-          <h3 className="mb-3 text-heading-sm text-text-primary">Q3 platform migration</h3>
+          <h3 className="mb-3 text-title-sm-semibold text-text-primary">Q3 platform migration</h3>
           <div className="flex flex-col gap-3">
             <Banner tone="info" title="This deliverable is read-only">
               It was confirmed in production on 12 August and is now locked.
             </Banner>
-            <p className="text-body-md text-text-secondary">
+            <p className="text-body-sm-regular text-text-secondary">
               Panel content sits below the banner, pushed down rather than covered.
             </p>
           </div>

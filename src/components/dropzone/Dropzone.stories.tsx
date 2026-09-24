@@ -38,7 +38,7 @@ export const Default: Story = {
       <div className="flex w-96 flex-col gap-3">
         <Dropzone {...args} onFiles={(files) => setNames((n) => [...n, ...files.map((f) => f.name)])} />
         {names.length > 0 && (
-          <ul className="m-0 list-none p-0 font-sans text-body-sm text-text-secondary">
+          <ul className="m-0 list-none p-0 font-sans text-caption-md-regular text-text-secondary">
             {names.map((n, i) => (
               <li key={`${n}-${i}`}>{n}</li>
             ))}

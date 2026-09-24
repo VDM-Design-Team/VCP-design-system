@@ -88,7 +88,7 @@ export const Accepting: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Review AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Result: {result}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Result: {result}</p>
         <ReviewAVModal
           {...args}
           open={open}
@@ -137,7 +137,7 @@ export const RejectingOpensASecondDialog: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Review AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Result: {result}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Result: {result}</p>
         <ReviewAVModal
           {...args}
           open={open}

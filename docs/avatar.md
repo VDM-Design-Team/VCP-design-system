@@ -67,9 +67,9 @@ The rest:
 |---|---|---|
 | Ring, in a stack | `surface.elevated` | `ring-2 ring-surface-elevated` |
 | Radius | `shape.radius.pill` | `rounded-pill` |
-| Initials, `sm` | `type.label-sm` | `text-label-sm` |
-| Initials, `md` | `type.label-md` | `text-label-md` |
-| Initials, `lg` | `type.label-lg` | `text-label-lg` |
+| Initials, `sm` | `type.caption-md-medium` | `text-caption-md-medium` |
+| Initials, `md` | `type.label-sm-medium` | `text-label-sm-medium` |
+| Initials, `lg` | `type.label-sm-medium` | `text-label-sm-medium` |
 | Placeholder glyph | inherits the tone's content token | `Icon name="user"` on `currentColor` |
 
 **Token gaps.** The export hashed onto six pastels; this system has four accent

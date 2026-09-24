@@ -89,7 +89,7 @@ positioning engine and a system-level decision, not a local fix.
 |---|---|---|
 | Bubble surface | `surface.neutral.stronger` | `bg-surface-neutral-stronger` |
 | Bubble text | `text.inverted.primary` | `text-text-inverted-primary` |
-| Type | `type.body-sm` (12/16, 400, Poppins) | `text-body-sm` |
+| Type | `type.caption-md-regular` (12/16, 400, Poppins) | `text-caption-md-regular` |
 | Radius | `shape.radius.sm` (6) | `rounded-sm` |
 | Padding | Tailwind numeric scale | `px-2.5 py-1.5` |
 | Offset from trigger | Tailwind numeric scale | `pb-2` / `pt-2` / `pr-2` / `pl-2` |

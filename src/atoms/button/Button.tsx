@@ -12,7 +12,7 @@ import { cn } from '../../lib/cn';
 const button = cva(
   [
     'inline-flex items-center justify-center gap-1.5',
-    'font-sans text-label-lg whitespace-nowrap',
+    'font-sans text-label-sm-medium whitespace-nowrap',
     'rounded-sm transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     'disabled:pointer-events-none',

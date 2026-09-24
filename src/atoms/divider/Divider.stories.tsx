@@ -41,11 +41,11 @@ export const Vertical: Story = {
   args: { orientation: 'vertical' },
   render: (args) => (
     <div className="flex h-10 items-center gap-4 text-text-secondary">
-      <span className="text-label-lg">Draft</span>
+      <span className="text-label-sm-medium">Draft</span>
       <Divider {...args} />
-      <span className="text-label-lg">Edited 3h ago</span>
+      <span className="text-label-sm-medium">Edited 3h ago</span>
       <Divider {...args} />
-      <span className="text-label-lg">2 reviewers</span>
+      <span className="text-label-sm-medium">2 reviewers</span>
     </div>
   ),
 };
@@ -70,21 +70,21 @@ export const DecorativeVsSemantic: Story = {
   render: () => (
     <div className="grid w-full grid-cols-2 gap-8">
       <div className="flex flex-col gap-3">
-        <span className="text-caption-sm uppercase text-text-subtle">decorative (default)</span>
+        <span className="text-caption-sm-semibold uppercase text-text-subtle">decorative (default)</span>
         <div className="rounded-md border border-stroke-subtle bg-surface-elevated p-4">
-          <p className="text-body-md text-text-secondary">Company profile</p>
+          <p className="text-body-sm-regular text-text-secondary">Company profile</p>
           <Divider className="my-3" />
-          <p className="text-heading-sm text-text-primary">Billing</p>
-          <p className="text-body-md text-text-secondary">Invoices and payment methods.</p>
+          <p className="text-title-sm-semibold text-text-primary">Billing</p>
+          <p className="text-body-sm-regular text-text-secondary">Invoices and payment methods.</p>
         </div>
       </div>
       <div className="flex flex-col gap-3">
-        <span className="text-caption-sm uppercase text-text-subtle">semantic</span>
+        <span className="text-caption-sm-semibold uppercase text-text-subtle">semantic</span>
         <div className="rounded-md border border-stroke-subtle bg-surface-elevated p-1">
-          <p className="px-3 py-2 text-body-md text-text-secondary">Duplicate</p>
-          <p className="px-3 py-2 text-body-md text-text-secondary">Move to…</p>
+          <p className="px-3 py-2 text-body-sm-regular text-text-secondary">Duplicate</p>
+          <p className="px-3 py-2 text-body-sm-regular text-text-secondary">Move to…</p>
           <Divider decorative={false} className="my-1" />
-          <p className="px-3 py-2 text-body-md text-accent-critical-tonal-content-default">Delete</p>
+          <p className="px-3 py-2 text-body-sm-regular text-accent-critical-tonal-content-default">Delete</p>
         </div>
       </div>
     </div>
@@ -95,18 +95,18 @@ export const DecorativeVsSemantic: Story = {
 export const BetweenContent: Story = {
   render: () => (
     <div className="w-112 rounded-md border border-stroke-subtle bg-surface-elevated p-6">
-      <h3 className="text-heading-sm text-text-primary">Added Value</h3>
-      <p className="mt-1 text-body-md text-text-secondary">
+      <h3 className="text-title-sm-semibold text-text-primary">Added Value</h3>
+      <p className="mt-1 text-body-sm-regular text-text-secondary">
         Everything the supplier committed to beyond the contract price.
       </p>
       <Divider className="my-5" />
-      <h3 className="text-heading-sm text-text-primary">Commitments</h3>
-      <p className="mt-1 text-body-md text-text-secondary">
+      <h3 className="text-title-sm-semibold text-text-primary">Commitments</h3>
+      <p className="mt-1 text-body-sm-regular text-text-secondary">
         Twelve open, three overdue. Owned by the category lead.
       </p>
       <Divider label="then" className="my-5" />
-      <h3 className="text-heading-sm text-text-primary">Reporting</h3>
-      <p className="mt-1 text-body-md text-text-secondary">
+      <h3 className="text-title-sm-semibold text-text-primary">Reporting</h3>
+      <p className="mt-1 text-body-sm-regular text-text-secondary">
         Quarterly, exported to the supplier scorecard.
       </p>
     </div>
@@ -124,9 +124,9 @@ export const LightAndDark: Story = {
             <Divider />
             <Divider label="or" />
             <div className="flex h-8 items-center gap-4 text-text-secondary">
-              <span className="text-label-lg">One</span>
+              <span className="text-label-sm-medium">One</span>
               <Divider orientation="vertical" />
-              <span className="text-label-lg">Two</span>
+              <span className="text-label-sm-medium">Two</span>
             </div>
           </div>
         </div>

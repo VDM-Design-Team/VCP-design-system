@@ -156,7 +156,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               if (e.key === 'Escape') show(false);
             }}
             className={cn(
-              'min-w-0 flex-1 border-0 bg-transparent text-body-md text-text-primary outline-none',
+              'min-w-0 flex-1 border-0 bg-transparent text-body-sm-regular text-text-primary outline-none',
               'placeholder:text-text-subtle',
               'disabled:cursor-not-allowed disabled:text-text-disabled',
             )}
@@ -165,7 +165,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             /* How many are chosen while the field shows the query instead. */
             <span
               aria-label={`${selected.length} selected`}
-              className="shrink-0 font-numeric text-caption-md text-text-brand-medium"
+              className="shrink-0 font-numeric text-caption-md-medium text-text-brand-medium"
             >
               {selected.length}
             </span>
@@ -182,7 +182,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
           )}
         >
           {list.length === 0 ? (
-            <div className="px-2.5 py-3 text-center text-body-sm text-text-subtle">
+            <div className="px-2.5 py-3 text-center text-caption-md-regular text-text-subtle">
               {emptyText}
             </div>
           ) : (
@@ -202,7 +202,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   }}
                   onMouseMove={() => setActive(i)}
                   className={cn(
-                    'flex cursor-pointer items-center gap-2 rounded-sm px-2.5 py-2 text-body-sm',
+                    'flex cursor-pointer items-center gap-2 rounded-sm px-2.5 py-2 text-caption-md-regular',
                     isSelected
                       ? 'bg-surface-brand-faint text-text-brand-strong'
                       : 'text-text-secondary',

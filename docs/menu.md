@@ -88,14 +88,14 @@ carry a label and an action cannot accidentally be a rule.
 | Panel shadow | `shadow.menu` | `shadow-menu` |
 | Panel radius | `radius.md` | `rounded-md` |
 | Item radius | `radius.sm` | `rounded-sm` |
-| Item type | `type.label-lg` | `text-label-lg` |
+| Item type | `type.label-sm-medium` | `text-label-sm-medium` |
 | Item resting fill | `action.tertiary.surface.default` (transparent) | `bg-action-tertiary-surface-default` |
 | Item content | `text.secondary` → `text.primary` on hover/focus | `text-text-secondary`, `hover:text-text-primary`, `focus:text-text-primary` |
 | Item highlight | `surface.brand.faint` | `hover:bg-surface-brand-faint`, `focus:bg-surface-brand-faint` |
 | Danger content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
 | Danger highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover` |
 | Disabled content | `text.disabled` | `disabled:text-text-disabled` |
-| Shortcut | `type.caption-md` + `text.subtle` | `text-caption-md text-text-subtle` |
+| Shortcut | `type.caption-md-medium` + `text.subtle` | `text-caption-md-medium text-text-subtle` |
 | Separator | `stroke.default`, via `Divider` | `Divider decorative={false}` |
 | Focus ring | `stroke.focused` | `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused` |
 | Sizing | Tailwind numeric scale | `min-h-10`, `min-w-48`, `px-3 py-2`, `p-1`, `gap-2` |

@@ -53,7 +53,7 @@ export const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
       <span
         className={cn(
           /* w-33 = the export's 132 label column, on the spacing scale. */
-          'flex w-33 shrink-0 items-center gap-1.5 font-sans text-label-md text-text-tertiary',
+          'flex w-33 shrink-0 items-center gap-1.5 font-sans text-label-sm-medium text-text-tertiary',
           /* Optically level with the value's first line when top-aligned. */
           align === 'top' && 'pt-1',
         )}
@@ -61,7 +61,7 @@ export const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
         {icon && <Icon name={icon} size="sm" className="shrink-0 text-text-subtle" />}
         <span className="min-w-0 truncate">{label}</span>
       </span>
-      <div className="min-w-0 flex-1 font-sans text-body-md text-text-primary">{children}</div>
+      <div className="min-w-0 flex-1 font-sans text-body-sm-regular text-text-primary">{children}</div>
       {onEdit && (
         <IconButton
           variant="tertiary"

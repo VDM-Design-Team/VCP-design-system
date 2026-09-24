@@ -50,7 +50,7 @@ export const OpenAndRemove: Story = {
     const [gone, setGone] = React.useState(false);
     if (gone)
       return (
-        <span className="font-sans text-body-sm text-text-subtle">
+        <span className="font-sans text-caption-md-regular text-text-subtle">
           Removed — reload the story.
         </span>
       );

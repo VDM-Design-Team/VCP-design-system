@@ -42,7 +42,7 @@ const overflow = cva(
   ],
   {
     variants: {
-      size: { sm: 'size-6 text-label-sm', md: 'size-8 text-label-md', lg: 'size-10 text-label-lg' },
+      size: { sm: 'size-6 text-caption-md-medium', md: 'size-8 text-label-sm-medium', lg: 'size-10 text-label-sm-medium' },
     },
     defaultVariants: { size: 'md' },
   },

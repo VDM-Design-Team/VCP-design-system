@@ -79,10 +79,10 @@ export const SettingsRow: Story = {
         {rows.map((row) => (
           <div key={row.id} className="flex items-center justify-between gap-4 px-4 py-3">
             <span className="flex flex-col gap-1">
-              <span id={row.id} className="font-sans text-label-lg text-text-primary">
+              <span id={row.id} className="font-sans text-label-sm-medium text-text-primary">
                 {row.title}
               </span>
-              <span className="font-sans text-body-sm text-text-tertiary">{row.description}</span>
+              <span className="font-sans text-caption-md-regular text-text-tertiary">{row.description}</span>
             </span>
             <Toggle
               className="-mr-2"
@@ -102,7 +102,7 @@ function ControlledDemo() {
   return (
     <div className="flex flex-col items-start gap-2">
       <Toggle checked={on} onChange={setOn} label="Maintenance mode" />
-      <p className="font-sans text-body-sm text-text-tertiary">
+      <p className="font-sans text-caption-md-regular text-text-tertiary">
         Maintenance mode is <strong className="text-text-primary">{on ? 'on' : 'off'}</strong>.
       </p>
     </div>

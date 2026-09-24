@@ -89,7 +89,7 @@ export const HandingOff: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Handoff AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Sent: {sent}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Sent: {sent}</p>
         <HandoffAVModal
           {...args}
           open={open}
@@ -141,7 +141,7 @@ export const OverdueNeedsAReason: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Handoff late AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Sent: {sent}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Sent: {sent}</p>
         <HandoffAVModal
           {...args}
           open={open}

@@ -138,7 +138,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             {label ?? `${Math.round(pct * 100)}%`}
           </span>
           {caption && (
-            <span className="mt-1 font-sans text-label-sm text-text-tertiary">{caption}</span>
+            <span className="mt-1 font-sans text-caption-md-medium text-text-tertiary">{caption}</span>
           )}
         </div>
       </div>

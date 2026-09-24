@@ -111,7 +111,7 @@ function RegionGroup() {
 
   return (
     <fieldset className="border-0 p-0">
-      <legend className="px-3 font-sans text-label-md text-text-primary">Regions</legend>
+      <legend className="px-3 font-sans text-label-sm-medium text-text-primary">Regions</legend>
       <Checkbox
         label="All regions"
         checked={allChecked}

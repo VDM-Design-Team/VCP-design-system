@@ -51,8 +51,8 @@ const control = cva(
   {
     variants: {
       size: {
-        sm: 'text-body-sm',
-        md: 'text-body-md',
+        sm: 'text-caption-md-regular',
+        md: 'text-body-sm-regular',
       },
     },
     defaultVariants: { size: 'md' },

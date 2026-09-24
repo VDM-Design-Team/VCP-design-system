@@ -37,7 +37,7 @@ export interface BreadcrumbProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const crumbLink = cn(
-  'rounded-sm font-sans text-body-sm text-text-link-default transition-colors',
+  'rounded-sm font-sans text-caption-md-regular text-text-link-default transition-colors',
   'hover:text-text-link-hover hover:underline',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
 );
@@ -55,7 +55,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(
               {last ? (
                 /* The current page: text, not a control — a link to where you
                    already are is a tab stop that does nothing. */
-                <span aria-current="page" className="text-body-sm text-text-secondary">
+                <span aria-current="page" className="text-caption-md-regular text-text-secondary">
                   {item.label}
                 </span>
               ) : item.href ? (

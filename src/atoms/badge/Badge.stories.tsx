@@ -55,7 +55,7 @@ export const Sizes: Story = {
     <div className="flex flex-col gap-4">
       {(['sm', 'md'] as const).map((size) => (
         <div key={size} className="flex flex-wrap items-center gap-2">
-          <span className="w-8 text-caption-sm text-text-tertiary">{size}</span>
+          <span className="w-8 text-caption-sm-semibold text-text-tertiary">{size}</span>
           {TONES.map((tone) => (
             <Badge {...args} key={tone} tone={tone} size={size}>
               {tone}

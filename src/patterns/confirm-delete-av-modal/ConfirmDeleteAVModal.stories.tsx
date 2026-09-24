@@ -66,7 +66,7 @@ export const AnsweringIt: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Delete claim
         </Button>
-        <p className="text-body-sm text-text-tertiary">Answered: {answered}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Answered: {answered}</p>
         <ConfirmDeleteAVModal
           {...args}
           open={open}

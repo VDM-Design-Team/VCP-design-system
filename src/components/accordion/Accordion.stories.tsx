@@ -82,7 +82,7 @@ export const Controlled: Story = {
             setOpen((cur) => (cur.includes(k) ? cur.filter((x) => x !== k) : [...cur, k]))
           }
         />
-        <span className="text-body-sm text-text-tertiary">
+        <span className="text-caption-md-regular text-text-tertiary">
           Open: {open.length ? open.join(', ') : 'none'}
         </span>
       </div>

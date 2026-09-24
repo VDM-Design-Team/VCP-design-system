@@ -43,8 +43,8 @@ const Bar = () => (
  */
 const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="rounded-md border border-stroke-default bg-surface-elevated p-4">
-    <h2 className="mb-1 text-heading-sm text-text-primary">{title}</h2>
-    <div className="text-body-md text-text-secondary">{children}</div>
+    <h2 className="mb-1 text-title-sm-semibold text-text-primary">{title}</h2>
+    <div className="text-body-sm-regular text-text-secondary">{children}</div>
   </section>
 );
 

@@ -283,8 +283,8 @@ focus indicator needs.
 | Radius | `shape.radius.md` | `rounded-md` |
 | Border width | `borderWidth.default` | `border` |
 | Elevation | `shape.shadow.menu` | `shadow-menu` — the visual difference from a Banner |
-| Title | `type.label.lg` — Poppins 500, 14/20 | `text-label-lg` |
-| Body | `type.body.md` — Poppins 400, 14/20 | `text-body-md` |
+| Title | `type.label.lg` — Poppins 500, 14/20 | `text-label-sm-medium` |
+| Body | `type.body.md` — Poppins 400, 14/20 | `text-body-sm-regular` |
 | Padding | Tailwind numeric scale | `px-3.5 py-3` (14 / 12) |
 | Gap, glyph to text | Tailwind numeric scale | `gap-3` (12) |
 | Gap, title to body | Tailwind numeric scale | `gap-1` (4) |
