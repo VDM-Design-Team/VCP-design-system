@@ -701,6 +701,23 @@
           "$value": "{color.slate.200}"
         }
       }
+    },
+    "textual": {
+      "content": {
+        "default": {
+          "$value": "{color.slate.600}",
+          "$description": "Confirmed against Figma (EmojiReactionPicker audit, 24 Sep 2026) — no fill or border, same shape as TypeTag/UrgencyTag's textual style. hover/pressed/disabled mirror neutral.outline.content's own slate steps and are unconfirmed."
+        },
+        "disabled": {
+          "$value": "{color.slate.400}"
+        },
+        "hover": {
+          "$value": "{color.slate.700}"
+        },
+        "pressed": {
+          "$value": "{color.slate.800}"
+        }
+      }
     }
   },
   "stroke": {

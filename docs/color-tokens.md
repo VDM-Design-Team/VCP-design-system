@@ -108,11 +108,19 @@ one of these three.
 
 ## Neutral treatments — components that aren't an Action
 
-VCP has **`neutral.outline.*`**, and only that one treatment so far — added
-11 September 2026, imported name-for-name from the VCP file's
-`colors/neutral/outline/*`. It is shaped exactly like `action.secondary`:
-`surface`, `content` and `border`, each with `default` / `hover` / `pressed` /
-`disabled`, and it aliases the **slate** ramp like every other grey here.
+VCP has **`neutral.outline.*`**, added 11 September 2026, imported
+name-for-name from the VCP file's `colors/neutral/outline/*`. It is shaped
+exactly like `action.secondary`: `surface`, `content` and `border`, each with
+`default` / `hover` / `pressed` / `disabled`, and it aliases the **slate**
+ramp like every other grey here.
+
+`neutral.textual.content` followed on 24 Sep 2026, for `EmojiReactionPicker`'s
+thumbs-up quick-react and add-reaction trigger — neither is a reaction
+itself, so neither wears the bordered pill treatment the real reactions do.
+Unlike `outline`, `textual` has no `surface` or `border` slot: no fill, no
+edge, content only. Only `.default` is confirmed directly against Figma;
+`hover` / `pressed` / `disabled` mirror `neutral.outline.content`'s own
+slate steps rather than a separately measured value.
 
 > **"Neutral" names two different things, and they are not the same grey.**
 > The semantic family above is VCP's own. The **ramp** `color.neutral.*`
@@ -126,9 +134,10 @@ Use it for a control that is deliberately **not** an action — the Cancel besid
 a destructive answer, a dismiss beside a confirm. `Button variant="neutral"` is
 it; see `docs/button.md` for when to reach for it over `secondary`.
 
-Figma also defines `neutral.filled`, `neutral.tonal` and `neutral.textual`,
-each with the same slots. **They are not imported**, because nothing needs them
-yet. Import the treatment you need, name-for-name, rather than inventing one.
+Figma also defines `neutral.filled` and `neutral.tonal`, with the same
+`surface`/`content`/`border` slots. **They are still not imported**, because
+nothing needs them yet. Import the treatment you need, name-for-name, rather
+than inventing one.
 
 For everything that is not a control — a tag, a generic surface — keep
 composing from `surface.neutral.*` plus `text.*` or `stroke.*`. `Badge`'s
