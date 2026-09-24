@@ -99,6 +99,12 @@ collapsed rows** rather than this component wrapping itself: a tooltip on
 every row of an expanded sidebar would be noise, and the expanded rail already
 shows its labels.
 
+**A collapsed disclosure's caret is a small corner mark on the glyph**, not a
+second full-size icon beside it — there's no room for both in 76px (design
+audit, 24 Sep 2026). Whether opening it should show a flyout instead of the
+inline list this component still renders is unconfirmed against Figma and
+not addressed here.
+
 ## What the export invented
 
 This shipped first as a port of the Claude Design export, which turned out to
