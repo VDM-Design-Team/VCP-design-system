@@ -24,7 +24,7 @@ dated facts belong.
 | Open PRs | [all open](https://github.com/VDM-Design-Team/VCP-design-system/pulls) · [waiting on your review](https://github.com/VDM-Design-Team/VCP-design-system/pulls?q=is%3Apr+is%3Aopen+review-requested%3A%40me) |
 | Open issues | [all open](https://github.com/VDM-Design-Team/VCP-design-system/issues) · [assigned to you](https://github.com/VDM-Design-Team/VCP-design-system/issues?q=is%3Aissue+is%3Aopen+assignee%3A%40me) |
 | Plugin released | [`version` in the manifest on `main`](https://github.com/VDM-Design-Team/VCP-design-system/blob/main/plugin/.claude-plugin/plugin.json) |
-| Published Storybook | [always the current `main`](https://main--685158a98c4fedbbec7ac708.chromatic.com) |
+| Published Storybook | [always the current `main`](https://main--6aba746352fe3d50eea0cdab.chromatic.com) |
 
 **Pieces, as of 11 September:** 20 atoms · 33 components · 10 patterns ·
 1 template. This one is a number because it is the shape of the system rather
