@@ -59,7 +59,7 @@ of asking the person to switch to another browser. Never leave them with just a 
   do not force anything, an engineer looks at it.
 - If they are mid-work on a branch and do not want to move, skip the pull, say you
   skipped it, and open the published Storybook in the app's browser preview instead:
-  https://main--685158a98c4fedbbec7ac708.chromatic.com
+  https://main--6aba746352fe3d50eea0cdab.chromatic.com
 
 Once it is up, name the components that are new or changed since their saved sha and give
 the Storybook path to each, so they can click straight to it. Point at `docs/<name>.md`
