@@ -10,7 +10,7 @@ PR list IS the complete history of change. Nothing lands any other way.
 
 ## The published Storybook
 
-https://main--685158a98c4fedbbec7ac708.chromatic.com
+https://main--6aba746352fe3d50eea0cdab.chromatic.com
 
 Always the current `main`, rebuilt on every merge. This is the design system as
 it exists right now.

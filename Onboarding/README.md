@@ -86,7 +86,7 @@ browser window in step 5.
   https://github.com/VDM-Design-Team/VCP-design-system
 - **The published Storybook** — the design system as it exists right now, every
   component, every variant, interactive. Rebuilt automatically on every merge:
-  https://main--685158a98c4fedbbec7ac708.chromatic.com
+  https://main--6aba746352fe3d50eea0cdab.chromatic.com
 - **How We Work** — the team's workflow, visually, on one page. No Notion
   account needed:
   https://wholesale-piccolo-010.notion.site/VCP-Design-System-How-We-Work-e58fbfcc3ae082759885011915b9848a
