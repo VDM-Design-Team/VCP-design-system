@@ -111,7 +111,7 @@ Tailwind theme — check `dist/theme.css` before touching the component.
 
 **Just want to look at it? Open the published Storybook:**
 
-### https://main--685158a98c4fedbbec7ac708.chromatic.com
+### https://main--6aba746352fe3d50eea0cdab.chromatic.com
 
 Always the current `main`, updated on every merge. Nothing to install, no account
 needed. This is the right link for most people.
