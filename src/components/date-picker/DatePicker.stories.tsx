@@ -73,7 +73,7 @@ export const MarkersAndFlags: Story = {
     return (
       <div className="flex flex-col gap-3">
         <DatePicker {...args} value={value} onChange={setValue} />
-        <div className="flex gap-4 font-sans text-label-sm text-text-tertiary">
+        <div className="flex gap-4 font-sans text-caption-md-medium text-text-tertiary">
           <span className="flex items-center gap-1.5">
             <span className="size-1.5 rounded-full bg-accent-success-filled-surface-default" /> free
           </span>

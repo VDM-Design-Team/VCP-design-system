@@ -175,7 +175,7 @@ export function DataTable<Row extends { id?: string | number }>({
                         onClick={() => requestSort(c.key)}
                         className={cn(
                           'inline-flex items-center gap-1.5 rounded-sm',
-                          'text-label-lg text-text-secondary transition-colors hover:text-text-primary',
+                          'text-label-sm-medium text-text-secondary transition-colors hover:text-text-primary',
                           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                           c.align === 'right' && 'flex-row-reverse',
                         )}
@@ -189,7 +189,7 @@ export function DataTable<Row extends { id?: string | number }>({
                         />
                       </button>
                     ) : (
-                      <span className="text-label-lg text-text-secondary">{c.label}</span>
+                      <span className="text-label-sm-medium text-text-secondary">{c.label}</span>
                     )}
                     {c.hint}
                   </span>
@@ -203,7 +203,7 @@ export function DataTable<Row extends { id?: string | number }>({
             <tr>
               <td
                 colSpan={columns.length + (selectable ? 1 : 0)}
-                className="px-4 py-12 text-center text-body-md text-text-tertiary"
+                className="px-4 py-12 text-center text-body-sm-regular text-text-tertiary"
               >
                 {empty ?? 'Nothing here yet.'}
               </td>
@@ -253,6 +253,6 @@ export function DataTable<Row extends { id?: string | number }>({
    a tall cell can grow. */
 const cell = (dense?: boolean) =>
   cn(
-    'px-2 align-middle text-body-md text-text-secondary first:pl-4 last:pr-4',
+    'px-2 align-middle text-body-sm-regular text-text-secondary first:pl-4 last:pr-4',
     dense ? 'h-11' : 'h-14',
   );

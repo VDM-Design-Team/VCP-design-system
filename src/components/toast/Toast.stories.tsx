@@ -153,7 +153,7 @@ export const AutoDismissPausesOnHover: Story = {
 
     return (
       <div className="flex w-full max-w-sm flex-col gap-4">
-        <div className="flex items-center gap-3 text-label-md text-text-secondary">
+        <div className="flex items-center gap-3 text-label-sm-medium text-text-secondary">
           <span data-testid="toast-timer-readout">
             {visible ? `${(remaining / 1000).toFixed(1)}s left` : 'dismissed'}
           </span>
@@ -245,7 +245,7 @@ export const WithProvider: Story = {
   render: () => (
     <ToastProvider position="bottom-right">
       <div className="flex min-h-96 flex-col gap-4 bg-surface-canvas p-8">
-        <p className="text-body-md text-text-secondary">
+        <p className="text-body-sm-regular text-text-secondary">
           The polite and assertive regions are already in the DOM, empty, below this
           content.
         </p>
