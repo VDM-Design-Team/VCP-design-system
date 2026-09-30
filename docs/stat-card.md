@@ -48,10 +48,10 @@ threshold, the threshold is domain knowledge — same ruling as ProgressBar.
 ## Tokens
 
 Card: `surface.elevated` on `stroke.subtle`, `radius.md`, `shadow.card` —
-Card's own dress. Label/unit/footer `body-sm` `text.tertiary`; value in
-`font.family.numeric` at `heading-lg` (the ramp has no display-size numeric
+Card's own dress. Label/unit/footer `caption-md-regular` `text.tertiary`; value in
+`font.family.numeric` at `heading-lg-semibold` (the ramp has no display-size numeric
 step; 24/semibold Inter is the nearest honest fit for the export's 28/600);
-delta in the numeric face at `caption-md`. No new tokens.
+delta in the numeric face at `caption-md-medium`. No new tokens.
 
 `accent`'s five edges are `neutral.outline.border.default` and
 `accent.{info,success,critical,warning}.outline.border.default` — the same

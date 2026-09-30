@@ -109,7 +109,7 @@ export const AnyDomain: Story = {
         ] as const
       ).map(([name, chain, step]) => (
         <div key={name} className="flex flex-col gap-2">
-          <p className="text-label-md text-text-tertiary">{name}</p>
+          <p className="text-label-sm-medium text-text-tertiary">{name}</p>
           <StatusProgression role="assignee" chain={chain} step={step} />
         </div>
       ))}
@@ -130,7 +130,7 @@ export const Disabled: Story = {
 /** A terminal status draws nothing rather than an empty toolbar. */
 export const Terminal: Story = {
   render: () => (
-    <div className="flex items-center gap-2 text-body-sm text-text-tertiary">
+    <div className="flex items-center gap-2 text-caption-md-regular text-text-tertiary">
       <StatusProgression role="assignee" status="Completed" />
       (renders nothing)
     </div>
@@ -148,7 +148,7 @@ export const ReviewDecision: Story = {
       <StatusProgression role="initiator" status="Review" />
       <StatusProgression role="admin" status="Review" />
       <StatusProgression role="assignee" status="Review" />
-      <p className="text-caption-md text-text-tertiary">
+      <p className="text-caption-md-medium text-text-tertiary">
         (assignee renders nothing — they already handed it off)
       </p>
     </div>
@@ -165,7 +165,7 @@ export const PendingDeploy: Story = {
     <div className="flex flex-col gap-3">
       <StatusProgression role="admin" status="Completed" pendingDeploy />
       <StatusProgression role="assignee" status="Completed" pendingDeploy />
-      <p className="text-caption-md text-text-tertiary">
+      <p className="text-caption-md-medium text-text-tertiary">
         (assignee renders nothing — only the admin deploys)
       </p>
     </div>
@@ -193,20 +193,20 @@ export const EveryTransition: Story = {
         );
         return (
           <div key={role} className="flex flex-col gap-2">
-            <p className="text-label-md text-text-tertiary">{role}</p>
+            <p className="text-label-sm-medium text-text-tertiary">{role}</p>
             {spine.length === 0 && steps.length === 0 ? (
-              <p className="text-body-sm text-text-tertiary">no moves</p>
+              <p className="text-caption-md-regular text-text-tertiary">no moves</p>
             ) : (
               <>
                 {spine.map((status) => (
                   <div key={status} className="flex items-center gap-4">
-                    <span className="w-40 shrink-0 text-body-sm text-text-secondary">{status}</span>
+                    <span className="w-40 shrink-0 text-caption-md-regular text-text-secondary">{status}</span>
                     <StatusProgression role={role} status={status} chain={DEVELOPMENT} />
                   </div>
                 ))}
                 {steps.map((s) => (
                   <div key={s.id} className="flex items-center gap-4">
-                    <span className="w-40 shrink-0 text-body-sm text-text-tertiary">{s.label}</span>
+                    <span className="w-40 shrink-0 text-caption-md-regular text-text-tertiary">{s.label}</span>
                     <StatusProgression role={role} step={s.id} chain={DEVELOPMENT} />
                   </div>
                 ))}

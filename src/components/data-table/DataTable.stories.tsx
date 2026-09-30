@@ -37,7 +37,7 @@ const COLUMNS: DataTableColumn<Claim>[] = [
     render: (r) => (
       <a
         href={`#${r.id}`}
-        className="rounded-sm text-label-lg text-text-link-default hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+        className="rounded-sm text-label-sm-medium text-text-link-default hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
       >
         {r.id}
       </a>
@@ -57,7 +57,7 @@ const COLUMNS: DataTableColumn<Claim>[] = [
     width: '90px',
     align: 'right',
     sortable: true,
-    render: (r) => <span className="font-numeric text-caption-md text-text-primary">{r.points}</span>,
+    render: (r) => <span className="font-numeric text-caption-md-medium text-text-primary">{r.points}</span>,
   },
   { key: 'updated', label: 'Updated', width: '130px' },
 ];
@@ -123,7 +123,7 @@ export const Selectable: Story = {
           onSelectedChange={setSelected}
           selectLabel={(r) => `Select ${(r as Claim).id}`}
         />
-        <span className="font-sans text-body-sm text-text-tertiary">
+        <span className="font-sans text-caption-md-regular text-text-tertiary">
           {selected.length} selected
         </span>
       </div>

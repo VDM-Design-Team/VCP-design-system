@@ -52,7 +52,7 @@ The group adds only these:
 | Overflow chip text | `text.secondary` | `text-text-secondary` | **9.45:1** light, **8.40:1** dark |
 | Ring on every avatar and the chip | `surface.elevated` | `ring-2 ring-surface-elevated` | — |
 | Chip radius | `shape.radius.pill` | `rounded-pill` | — |
-| Chip type, `sm` / `md` / `lg` | `type.label-sm` / `-md` / `-lg` | `text-label-sm` … | — |
+| Chip type, `sm` / `md` / `lg` | `type.caption-md-medium` / `-md` / `-lg` | `text-caption-md-medium` … | — |
 | Overlap, `sm` / `md` / `lg` | Tailwind numeric scale | `-ml-1.5` / `-ml-2` / `-ml-2.5` | — |
 
 The chip is deliberately neutral rather than a fifth tone: it is a count, not a

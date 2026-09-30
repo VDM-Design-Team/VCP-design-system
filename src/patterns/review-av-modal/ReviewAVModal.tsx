@@ -67,14 +67,14 @@ export interface ReviewAVModalProps {
 function ReviewField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-label-sm text-text-secondary">{label}</span>
+      <span className="text-caption-md-medium text-text-secondary">{label}</span>
       {children}
     </div>
   );
 }
 
 /** What a field with nothing in it shows. */
-const EMPTY = <span className="text-body-md text-text-primary">–</span>;
+const EMPTY = <span className="text-body-sm-regular text-text-primary">–</span>;
 
 export function ReviewAVModal({
   open,
@@ -127,12 +127,12 @@ export function ReviewAVModal({
       >
         <div className="flex flex-col gap-5">
           <ReviewField label="Original Added Value Estimate">
-            {estimate ? <span className="text-body-md text-text-primary">{estimate}</span> : EMPTY}
+            {estimate ? <span className="text-body-sm-regular text-text-primary">{estimate}</span> : EMPTY}
           </ReviewField>
 
           <ReviewField label="Completion Date">
             {completionDate ? (
-              <span className="text-body-md text-text-primary">{completionDate}</span>
+              <span className="text-body-sm-regular text-text-primary">{completionDate}</span>
             ) : (
               EMPTY
             )}
@@ -148,7 +148,7 @@ export function ReviewAVModal({
                       href={link}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-body-md text-text-link-default underline underline-offset-4 hover:text-text-link-hover"
+                      className="text-body-sm-regular text-text-link-default underline underline-offset-4 hover:text-text-link-hover"
                     >
                       {link}
                     </a>
@@ -176,7 +176,7 @@ export function ReviewAVModal({
             ) : (
               /* The design's own wording, not an em dash: an empty attachment
                  list is a fact about the handoff, not a missing value. */
-              <span className="text-body-md text-text-tertiary">No attachments yet.</span>
+              <span className="text-body-sm-regular text-text-tertiary">No attachments yet.</span>
             )}
           </ReviewField>
 

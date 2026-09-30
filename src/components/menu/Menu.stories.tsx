@@ -138,7 +138,7 @@ export const Controlled: Story = {
           <Button size="sm" variant="tertiary" onClick={() => setOpen((o) => !o)}>
             Toggle from outside
           </Button>
-          <span className="font-sans text-label-md text-text-subtle">
+          <span className="font-sans text-label-sm-medium text-text-subtle">
             open: {String(open)} · last: {last ?? '—'}
           </span>
         </div>

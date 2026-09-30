@@ -19,9 +19,9 @@ import { Tooltip } from '../tooltip';
  * owns the heading. Not built on `Card` for the same reason: Card renders a
  * real heading, which is exactly what this must not do.
  *
- * The value is set in `font.family.numeric` at `heading-lg` — the ramp has no
- * display-size numeric step, and 24/semibold in Inter is the nearest honest
- * fit for the export's 28/600.
+ * The value is set in `font.family.numeric` at `heading-lg-semibold` — the ramp
+ * has no display-size numeric step, and 24/semibold in Inter is the nearest
+ * honest fit for the export's 28/600.
  *
  * **`accent` is a coloured left edge**, and **the header row and value row
  * are centred** — both corrected against Figma's `SuperAdmin_Dashboard_Metrics`
@@ -107,7 +107,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
             {icon}
           </span>
         )}
-        <span className="text-body-sm text-text-tertiary">{label}</span>
+        <span className="text-caption-md-regular text-text-tertiary">{label}</span>
         {hint && (
           <Tooltip content={hint}>
             <button
@@ -125,13 +125,13 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
         )}
       </div>
       <div className="flex flex-wrap items-baseline justify-center gap-1.5">
-        <span className="font-numeric text-heading-lg text-text-primary">{value}</span>
-        {unit && <span className="text-body-sm text-text-tertiary">{unit}</span>}
+        <span className="font-numeric text-heading-lg-semibold text-text-primary">{value}</span>
+        {unit && <span className="text-caption-md-regular text-text-tertiary">{unit}</span>}
         {delta != null && (
-          <span className={cn('font-numeric text-caption-md', DELTA[deltaTone])}>{delta}</span>
+          <span className={cn('font-numeric text-caption-md-medium', DELTA[deltaTone])}>{delta}</span>
         )}
       </div>
-      {footer && <span className="text-center text-body-sm text-text-tertiary">{footer}</span>}
+      {footer && <span className="text-center text-caption-md-regular text-text-tertiary">{footer}</span>}
     </div>
   ),
 );

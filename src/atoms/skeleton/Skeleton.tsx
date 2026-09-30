@@ -57,29 +57,37 @@ export type SkeletonTextStyle =
  * three `body-md` lines occupy precisely the height of three lines of body-md
  * text and nothing shifts when the copy arrives. Nothing here is a number.
  */
+/*
+ * Each key below picks one weight variant of the new, weight-per-size ramp
+ * (`tokens/semantic/type.json`) purely to source a font-size/line-height pair —
+ * every weight at a given size shares the same two values, so the choice of
+ * weight here is arbitrary. Chosen to match the pixel value this step held
+ * before the ramp gained weight variants, so existing `textStyle` callers see
+ * no layout change.
+ */
 const ROW_HEIGHT: Record<SkeletonTextStyle, string> = {
-  'title-sm': 'h-(--text-title-sm--line-height)',
-  'body-lg': 'h-(--text-body-lg--line-height)',
-  'body-md': 'h-(--text-body-md--line-height)',
-  'body-sm': 'h-(--text-body-sm--line-height)',
-  'label-lg': 'h-(--text-label-lg--line-height)',
-  'label-md': 'h-(--text-label-md--line-height)',
-  'label-sm': 'h-(--text-label-sm--line-height)',
-  'caption-md': 'h-(--text-caption-md--line-height)',
-  'caption-sm': 'h-(--text-caption-sm--line-height)',
+  'title-sm': 'h-(--text-title-sm-semibold--line-height)',
+  'body-lg': 'h-(--text-body-md-regular--line-height)',
+  'body-md': 'h-(--text-body-sm-regular--line-height)',
+  'body-sm': 'h-(--text-caption-md-regular--line-height)',
+  'label-lg': 'h-(--text-label-sm-medium--line-height)',
+  'label-md': 'h-(--text-label-sm-medium--line-height)',
+  'label-sm': 'h-(--text-caption-md-medium--line-height)',
+  'caption-md': 'h-(--text-caption-md-medium--line-height)',
+  'caption-sm': 'h-(--text-caption-sm-semibold--line-height)',
 };
 
 /** The bar inside the row — the ramp's font-size, i.e. where the glyphs sit. */
 const BAR_HEIGHT: Record<SkeletonTextStyle, string> = {
-  'title-sm': 'h-(--text-title-sm)',
-  'body-lg': 'h-(--text-body-lg)',
-  'body-md': 'h-(--text-body-md)',
-  'body-sm': 'h-(--text-body-sm)',
-  'label-lg': 'h-(--text-label-lg)',
-  'label-md': 'h-(--text-label-md)',
-  'label-sm': 'h-(--text-label-sm)',
-  'caption-md': 'h-(--text-caption-md)',
-  'caption-sm': 'h-(--text-caption-sm)',
+  'title-sm': 'h-(--text-title-sm-semibold)',
+  'body-lg': 'h-(--text-body-md-regular)',
+  'body-md': 'h-(--text-body-sm-regular)',
+  'body-sm': 'h-(--text-caption-md-regular)',
+  'label-lg': 'h-(--text-label-sm-medium)',
+  'label-md': 'h-(--text-label-sm-medium)',
+  'label-sm': 'h-(--text-caption-md-medium)',
+  'caption-md': 'h-(--text-caption-md-medium)',
+  'caption-sm': 'h-(--text-caption-sm-semibold)',
 };
 
 const skeleton = cva(
