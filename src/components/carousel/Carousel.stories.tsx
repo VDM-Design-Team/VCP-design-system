@@ -42,8 +42,8 @@ type Story = StoryObj<typeof meta>;
 
 const Panel = ({ index }: { index: number }) => (
   <div className="flex flex-col gap-1 py-4 text-center">
-    <span className="text-heading-sm text-text-primary">{PANELS[index].title}</span>
-    <span className="text-body-md text-text-secondary">{PANELS[index].body}</span>
+    <span className="text-title-sm-semibold text-text-primary">{PANELS[index].title}</span>
+    <span className="text-body-sm-regular text-text-secondary">{PANELS[index].body}</span>
   </div>
 );
 

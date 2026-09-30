@@ -180,15 +180,16 @@ const pillMine = cn(
 );
 
 /* No fill, no border — a way to add a reaction, not a reaction itself.
-   Same shape TypeTag/UrgencyTag use for their own textual style. */
+   Same shape TypeTag/UrgencyTag use for their own textual style. A small glyph
+   (`Icon` size sm) inside `p-1` (space.4) padding makes the space.24 button. */
 const textualIconButton = cn(
-  'inline-flex size-6 shrink-0 items-center justify-center rounded-full transition-colors',
+  'inline-flex shrink-0 items-center justify-center rounded-full p-1 transition-colors',
   'text-neutral-textual-content-default hover:text-text-brand-medium',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
 );
 
 const emojiCell = cn(
-  'grid size-9 place-items-center text-heading-md leading-none transition-colors',
+  'grid size-9 place-items-center rounded-xs text-title-md-semibold leading-none transition-colors',
   'hover:bg-surface-neutral-faint active:bg-surface-neutral-medium',
   'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
 );
@@ -238,7 +239,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
           onClick={() => onToggle?.('👍')}
           className={cn(textualIconButton, mineThumbsUp && 'text-text-brand-medium')}
         >
-          <Icon name="thumbs-up" size="lg" aria-hidden="true" />
+          <Icon name="thumbs-up" size="sm" aria-hidden="true" />
         </button>
         {/*
           Tooltip wraps the whole Popover, not just its trigger button.
@@ -259,7 +260,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
             trigger={
               <button type="button" aria-label="Add reaction" className={textualIconButton}>
                 {/* The design's SmileyPlus — the plus is part of the glyph. */}
-                <Icon name="smiley-plus" size="lg" aria-hidden="true" />
+                <Icon name="smiley-plus" size="sm" aria-hidden="true" />
               </button>
             }
             content={
@@ -278,7 +279,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
                     >
                       <span
                         id={`${idBase}-cat-${i}`}
-                        className="font-sans text-body-sm text-text-tertiary"
+                        className="font-sans text-caption-md-medium text-text-tertiary"
                       >
                         {c.name}
                       </span>
@@ -304,10 +305,10 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
                   unsized, so it rendered at the ambient body size next to a
                   much smaller number. Emoji render in their native colours,
                   so the pill's text colour only reaches the count. */}
-              <span aria-hidden="true" className="text-caption-md leading-none">
+              <span aria-hidden="true" className="text-caption-md-regular leading-none">
                 {r.emoji}
               </span>
-              <span aria-hidden="true" className="font-numeric text-caption-md">
+              <span aria-hidden="true" className="font-numeric text-caption-md-regular">
                 {r.count}
               </span>
             </button>

@@ -78,13 +78,13 @@ export const TagEditor = React.forwardRef<HTMLDivElement, TagEditorProps>(
       <div ref={ref} className={cn('flex flex-col gap-3 font-sans', className)} {...props}>
         <div className="flex flex-wrap items-center gap-2">
           {tags.length === 0 && (
-            <span className="text-body-sm text-text-subtle">No tags yet.</span>
+            <span className="text-caption-md-regular text-text-subtle">No tags yet.</span>
           )}
           {tags.map((tag) => (
             <span
               key={tag.label}
               className={cn(
-                'inline-flex h-6 items-center gap-1.5 rounded-sm px-2 text-label-md',
+                'inline-flex h-6 items-center gap-1.5 rounded-sm px-2 text-label-sm-medium',
                 PILL[tag.tone ?? 'blue'],
               )}
             >

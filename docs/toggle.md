@@ -43,8 +43,8 @@ underlying `<input>`. `ref` points at that `<input>`.
 | Track | off + disabled | `surface.neutral.medium` |
 | Knob | all | `surface.elevated` + `shadow.card` |
 | Radius | track + knob | `radius.pill` |
-| Label | default | `type.body-md`, `text.secondary` |
-| Label | disabled | `type.body-md`, `text.disabled` |
+| Label | default | `type.body-sm-regular`, `text.secondary` |
+| Label | disabled | `type.body-sm-regular`, `text.disabled` |
 | Focus ring | keyboard focus | `stroke.focused`, 2 wide, 2 offset |
 | Track | error | `accent.critical.outline.border.default` as a 2 ring — a ring, not a border, so the knob's inset is untouched |
 | Knob glyph | pending / success | `text.tertiary` spinner / `accent.success.tonal.content.default` check |

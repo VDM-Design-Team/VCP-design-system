@@ -17,9 +17,9 @@ import { cn } from '../../lib/cn';
  * owns the heading. Not built on `Card` for the same reason: Card renders a
  * real heading, which is exactly what this must not do.
  *
- * The value is set in `font.family.numeric` at `heading-lg` — the ramp has no
- * display-size numeric step, and 24/semibold in Inter is the nearest honest
- * fit for the export's 28/600.
+ * The value is set in `font.family.numeric` at `heading-lg-semibold` — the ramp
+ * has no display-size numeric step, and 24/semibold in Inter is the nearest
+ * honest fit for the export's 28/600.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -58,7 +58,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
       {...props}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-body-sm text-text-tertiary">{label}</span>
+        <span className="text-caption-md-regular text-text-tertiary">{label}</span>
         {icon && (
           <span aria-hidden="true" className="grid shrink-0 place-items-center text-text-subtle">
             {icon}
@@ -66,13 +66,13 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
         )}
       </div>
       <div className="flex flex-wrap items-baseline gap-1.5">
-        <span className="font-numeric text-heading-lg text-text-primary">{value}</span>
-        {unit && <span className="text-body-sm text-text-tertiary">{unit}</span>}
+        <span className="font-numeric text-heading-lg-semibold text-text-primary">{value}</span>
+        {unit && <span className="text-caption-md-regular text-text-tertiary">{unit}</span>}
         {delta != null && (
-          <span className={cn('font-numeric text-caption-md', DELTA[deltaTone])}>{delta}</span>
+          <span className={cn('font-numeric text-caption-md-medium', DELTA[deltaTone])}>{delta}</span>
         )}
       </div>
-      {footer && <span className="text-body-sm text-text-tertiary">{footer}</span>}
+      {footer && <span className="text-caption-md-regular text-text-tertiary">{footer}</span>}
     </div>
   ),
 );

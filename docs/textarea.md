@@ -60,7 +60,7 @@ over-limit state onto `invalid`. See the "Controlled with character count" story
 | Disabled text | `text.disabled` | `disabled:text-text-disabled` |
 | Disabled border | `stroke.subtle` | `disabled:border-stroke-subtle` |
 | Radius | `radius.md` | `rounded-md` |
-| Type | `type.body-md` | `text-body-md` |
+| Type | `type.body-sm-regular` | `text-body-sm-regular` |
 | Padding | Tailwind numeric scale | `px-3 py-2.5` |
 
 ## Accessibility

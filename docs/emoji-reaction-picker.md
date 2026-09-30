@@ -55,7 +55,8 @@ to show has nothing to add.
 
 ## Tokens
 
-**Icon buttons** (thumbs-up, add reaction): 24 × 24 (`size-6`, `space.24`),
+**Icon buttons** (thumbs-up, add reaction): a 16px glyph (`Icon` size `sm`) with
+`space.4` padding all round, so 24 × 24 (`space.24`),
 `neutral.textual.content.default` at rest and **`text.brand.medium`** on hover.
 A thumbs-up you've already given stays the focused blue (`text.brand.medium`),
 approved as is. The add-reaction glyph is the in-house `smiley-plus` icon
@@ -64,7 +65,7 @@ approved as is. The add-reaction glyph is the in-house `smiley-plus` icon
 **Pills** are the *outline* style, for other people's reactions and your own
 alike: transparent at rest (`neutral.outline.surface.default`), filling with
 `neutral.outline.surface.hover` / `.pressed`. Counts are in the numeric face
-(`caption-md`); the emoji glyph carries no colour class — emoji render in their
+(`caption-md-regular`); the emoji glyph carries no colour class — emoji render in their
 own native colours and ignore `currentColor`.
 
 | | Border | Content | On hover |
@@ -79,9 +80,9 @@ and `surface.elevated` are no longer on the pill. The non-interactive "+N"
 overflow chip uses the same outline border and content, with no fill and no hover.
 
 **Palette:** container `shape.radius.md` (the `Popover` panel); categories
-12px (`body-sm`) in `text.tertiary`, 12px apart (`space.12`); emoji cells
-36 × 36 (`size-9`, `space.36`) with **no gap** between them, emoji at 20px
-(`heading-md`) centred; hover `surface.neutral.faint`, **pressed
+12px (`caption-md-medium`) in `text.tertiary`, 12px apart (`space.12`); emoji cells
+36 × 36 (`size-9`, `space.36`), `shape.radius.xs` (4px) corners, with **no gap** between them, emoji at 20px
+(`title-md-semibold`) centred; hover `surface.neutral.faint`, **pressed
 `surface.neutral.medium`**. Everything focus-rings with `stroke.focused`. All of
 the spacing above is on the existing `space.*` scale — no new tokens.
 

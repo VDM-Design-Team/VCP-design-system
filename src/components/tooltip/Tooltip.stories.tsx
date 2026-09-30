@@ -112,7 +112,7 @@ export const OnAnIconButton: Story = {
       <Tooltip {...args} content="Edit deliverable">
         <IconButton icon="pencil-simple" label="Edit deliverable" variant="secondary" />
       </Tooltip>
-      <span className="text-body-sm text-text-subtle">
+      <span className="text-caption-md-regular text-text-subtle">
         ← the third one duplicates its own accessible name. Don’t.
       </span>
     </div>
@@ -155,9 +155,9 @@ export const KeyboardFocus: Story = {
   name: 'Keyboard focus',
   render: (args) => (
     <div className="flex flex-col gap-6 px-24 py-12">
-      <p className="max-w-96 text-body-md text-text-secondary">
-        Start here, then press <kbd className="text-label-md">Tab</kbd> four times. Then press{' '}
-        <kbd className="text-label-md">Esc</kbd>.
+      <p className="max-w-96 text-body-sm-regular text-text-secondary">
+        Start here, then press <kbd className="text-label-sm-medium">Tab</kbd> four times. Then press{' '}
+        <kbd className="text-label-sm-medium">Esc</kbd>.
       </p>
       <div className="flex items-center gap-4">
         <Tooltip {...args} placement="bottom" content="Focus me with Tab — no delay">

@@ -30,7 +30,7 @@ export const Sizes: Story = {
       {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex flex-col items-center gap-1">
           <Icon name="bell" size={size} />
-          <span className="text-caption-sm text-text-tertiary">{size}</span>
+          <span className="text-caption-sm-semibold text-text-tertiary">{size}</span>
         </div>
       ))}
     </div>
@@ -64,7 +64,7 @@ export const DecorativeVsLabelled: Story = {
     <div className="flex items-center gap-6 text-text-primary">
       <span className="inline-flex items-center gap-1.5">
         <Icon name="trash" size="sm" />
-        <span className="text-label-lg">Delete</span>
+        <span className="text-label-sm-medium">Delete</span>
       </span>
       <Icon name="trash" label="Delete" />
     </div>
@@ -82,15 +82,15 @@ export const CustomGlyphs: Story = {
       {(['caret-up', 'caret-double-up'] as const).map((name) => (
         <div key={name} className="flex flex-col items-center gap-1">
           <Icon name={name} size="lg" />
-          <span className="text-caption-sm text-text-tertiary">{name}</span>
-          <span className="text-caption-sm text-text-subtle">Phosphor</span>
+          <span className="text-caption-sm-semibold text-text-tertiary">{name}</span>
+          <span className="text-caption-sm-semibold text-text-subtle">Phosphor</span>
         </div>
       ))}
       {CUSTOM_ICON_NAMES.map((name) => (
         <div key={name} className="flex flex-col items-center gap-1">
           <Icon name={name} size="lg" />
-          <span className="text-caption-sm text-text-tertiary">{name}</span>
-          <span className="text-caption-sm text-text-link-default">in-house</span>
+          <span className="text-caption-sm-semibold text-text-tertiary">{name}</span>
+          <span className="text-caption-sm-semibold text-text-link-default">in-house</span>
         </div>
       ))}
     </div>
@@ -107,7 +107,7 @@ export const AllGlyphs: Story = {
           className="flex flex-col items-center gap-2 rounded-md border border-stroke-subtle p-3 text-text-secondary"
         >
           <Icon name={name} size="lg" />
-          <span className="text-caption-sm text-text-tertiary text-center break-all">{name}</span>
+          <span className="text-caption-sm-semibold text-text-tertiary text-center break-all">{name}</span>
         </div>
       ))}
     </div>

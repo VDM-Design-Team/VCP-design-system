@@ -8,7 +8,7 @@ import StyleDictionary from 'style-dictionary';
  * Utility vocabulary (matches Figma variable names):
  *   bg-surface-canvas      text-text-primary      border-stroke-default
  *   bg-action-primary-surface-default   text-accent-critical-outline-content-default
- *   text-label-lg (type ramp)           rounded-md   shadow-menu
+ *   text-label-sm-medium (type ramp)    rounded-md   shadow-menu
  *
  * Spacing: VCP's px scale (2..64) equals Tailwind's default numeric
  * scale (p-1 = 4px ... p-16 = 64px), so we do NOT override spacing —
