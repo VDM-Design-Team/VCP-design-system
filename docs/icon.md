@@ -102,6 +102,7 @@ Current in-house glyphs:
 | Name | Why | Used by |
 |---|---|---|
 | `caret-triple-up` | Phosphor stops at `caret-double-up` | Planning table "raise to top" |
+| `smiley-plus` | Phosphor's `smiley` has no plus mark; the design's glyph (General Design Library `SmileyPlus`, Regular) carries it in the top-right corner | `EmojiReactionPicker`'s add-reaction button |
 
 **Adding one — export as SVG, not PNG.** A raster cannot do the two things this
 component depends on:

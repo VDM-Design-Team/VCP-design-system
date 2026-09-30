@@ -1,14 +1,15 @@
 # EmojiReactionPicker
 
-The reaction row under a comment: a standalone thumbs-up quick-react,
-existing reactions as toggleable pills, and an "add reaction" trigger (a
-smiley with a small plus mark) that opens the full palette in a `Popover`.
+The reaction row under a comment, left to right: a standalone thumbs-up
+quick-react, an "add reaction" trigger (the `smiley-plus` glyph) that opens the
+full palette in a `Popover`, then the existing reactions as toggleable pills.
+Everything sits on an 8px gap (`space.8`).
 
 ## Composed of
 
 | Piece | Tier | Role here |
 |---|---|---|
-| `Icon` | atom | The thumbs-up quick-react, and the smiley + plus that opens the palette |
+| `Icon` | atom | The thumbs-up quick-react, and `smiley-plus` (the add-reaction trigger) |
 | `Popover` | component | The palette panel |
 | `Tooltip` | component | The design's Hover Tooltip, naming who reacted |
 
@@ -26,10 +27,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `reactions` | `Array<{ emoji, count, mine?, people? }>` | `[]` | The pills, in order. `mine` drives `aria-pressed` and the tint; `people` adds the hover tooltip |
+| `reactions` | `Array<{ emoji, count, mine?, people?, name? }>` | `[]` | The pills, in order. `mine` drives `aria-pressed` and the border/text colour; `people` adds the hover tooltip; `name` overrides the tooltip's `:emojiname:` |
 | `onToggle` | `(emoji) => void` | — | A pill click, **or the standalone thumbs-up button** — add or retract *your* reaction; the caller owns the math |
 | `maxVisible` | `number` | `5` | Reaction pills shown before the rest collapse into a trailing "+N" chip. Figma draws an overflow state but doesn't fix a specific cutoff — pick what fits |
-| `emoji` | `string[]` | a neutral eight | The palette in the popover |
+| `categories` | `Array<{ name, emoji }>` | `DEFAULT_EMOJI_CATEGORIES` — Hand Gestures, Smileys & People, Symbols | The palette in the popover, grouped under category names |
+| `emoji` | `string[]` | — | A flat, ungrouped palette. Wins over `categories` when given |
 | `onSelect` | `(emoji) => void` | — | A palette pick; the popover closes itself |
 | `className` | `string` | — | On the row |
 | `ref` | `Ref<HTMLDivElement>` | — | The row |
@@ -41,37 +43,72 @@ select adds or joins).
 ## Who reacted
 
 Pass `people` on a reaction and the pill gets the design's **Hover Tooltip**
-state — the names, on the system `Tooltip`, phrased like `AvatarGroup`'s
-summary ("You, Marvin Ode and 1 other"). Because it is the real `Tooltip`,
+state — **Names** in bold, then "reacted with :emojiname:" — on the system
+`Tooltip`. The names are phrased like `AvatarGroup`'s summary: "**You**
+reacted with :thumbsup:", "**Eve and Marvin** reacted with :tada:", "**You,
+Marvin Ode and 1 other** reacted with :thumbsup:". The short name comes from a
+built-in map of the default palette; pass `name` for an emoji outside it (with
+no name at all the tooltip shows the glyph). Because it is the real `Tooltip`,
 it opens on **keyboard focus** as well as hover, so the names are not
 pointer-only. Omit `people` and there is no tooltip: a count with no names
 to show has nothing to add.
 
 ## Tokens
 
-Pills: `surface.elevated` on `stroke.subtle`, counts in the numeric face
-(`caption-md`); *mine* swaps to `surface.brand.faint` on **`stroke.focused`**
-with the count set to **`text.brand.medium`** — corrected from
-`stroke.brand.strong` / `text.brand.strong` against a design audit (24 Sep
-2026). The emoji glyph itself carries no colour class — emoji render in
-their own native colours and ignore `currentColor` either way. The emoji
-span is now sized to match the count (`caption-md`), where the export left
-it unsized. Palette buttons hover `surface.neutral.faint`; everything
-focus-rings with `stroke.focused`.
+**Icon buttons** (thumbs-up, add reaction): 24 × 24 (`size-6`, `space.24`),
+`neutral.textual.content.default` at rest and **`text.brand.medium`** on hover.
+A thumbs-up you've already given stays the focused blue (`text.brand.medium`),
+approved as is. The add-reaction glyph is the in-house `smiley-plus` icon
+(General Design Library `SmileyPlus`, Regular).
 
-**One new token:** `neutral.textual.content` (`default`/`hover`/`pressed`/
-`disabled`), for the thumbs-up quick-react and the add-reaction trigger —
-neither is a reaction itself, so neither gets the bordered pill treatment.
-Figma's own `neutral.textual` family was previously unimported (see
-`docs/color-tokens.md`'s "Neutral treatments" section); only `.default` is
-confirmed against Figma directly, the other three states mirror
-`neutral.outline.content`'s own slate steps.
+**Pills** are the *outline* style, for other people's reactions and your own
+alike: transparent at rest (`neutral.outline.surface.default`), filling with
+`neutral.outline.surface.hover` / `.pressed`. Counts are in the numeric face
+(`caption-md`); the emoji glyph carries no colour class — emoji render in their
+own native colours and ignore `currentColor`.
 
-| Pair | Light | Dark |
+| | Border | Content | On hover |
+|---|---|---|---|
+| Other people's | `neutral.outline.border.default` | `neutral.outline.content.default` | `…border.hover` + `…content.hover` — both darken |
+| Your own (`mine`) | **`stroke.focused`** | **`text.brand.medium`** | `stroke.brand.strong` + `text.brand.strong` |
+
+"Your own reaction" keeps the **24 Sep 2026 audit's default** —
+`stroke.focused` / `text.brand.medium`, corrected from `stroke.brand.strong` /
+`text.brand.strong` — and only uses the strong pair on hover. `surface.brand.faint`
+and `surface.elevated` are no longer on the pill. The non-interactive "+N"
+overflow chip uses the same outline border and content, with no fill and no hover.
+
+**Palette:** container `shape.radius.md` (the `Popover` panel); categories
+12px (`body-sm`) in `text.tertiary`, 12px apart (`space.12`); emoji cells
+36 × 36 (`size-9`, `space.36`) with **no gap** between them, emoji at 20px
+(`heading-md`) centred; hover `surface.neutral.faint`, **pressed
+`surface.neutral.medium`**. Everything focus-rings with `stroke.focused`. All of
+the spacing above is on the existing `space.*` scale — no new tokens.
+
+**Palette contents:** Hand Gestures 👍👎🙌👋👌👏🫶🤝🤘🙏💪 · Smileys & People
+👀😄🤔😅😂😮😊🤩 · Symbols 🔥💯🎉✅❤️⚠️🚀💥. ❤️ and ⚠️ are the **basic emoji with
+the variation selector** (U+2764 U+FE0F, U+26A0 U+FE0F), written as escapes in
+the source so an edit can't drop the selector — without it they render as flat
+text glyphs.
+
+**One token added earlier:** `neutral.textual.content` (`default`/`hover`/`pressed`/
+`disabled`), for the two icon buttons. Only `.default` is confirmed against
+Figma directly; the other three mirror `neutral.outline.content`'s slate steps.
+Hover on these buttons uses `text.brand.medium` rather than
+`neutral.textual.content.hover`.
+
+| Pair (on `surface.canvas`) | Light | Dark |
 |---|---|---|
-| Count on a plain pill | **10.35:1** | **11.87:1** |
-| Count on a *mine* pill (`text.brand.medium` on `surface.brand.faint`) | **5.31:1** | **5.31:1** — no dark override on either token |
-| *Mine* border on the page (`stroke.focused` on `surface.brand.faint`) | **5.31:1** | **5.31:1** |
+| Count on another person's pill (`neutral.outline.content.default`) | **7.24:1** | **12.02:1** |
+| Count on a *mine* pill (`text.brand.medium`) | **5.91:1** | **4.74:1** |
+| *Mine* border (`stroke.focused`) | **5.91:1** | **7.73:1** |
+| Another person's border (`neutral.outline.border.default`) | **2.45:1** — under the 3:1 UI-border bar | **3.75:1** |
+
+The light-theme border of another person's pill is the one pair below 3:1. It is
+the system-wide `neutral.outline.border.default` value (the same border `Button`'s
+neutral outline uses), chosen by the design, so it is flagged here rather than
+changed in this component. The emoji and count inside carry the meaning; the
+border only outlines the control.
 
 ## Accessibility
 
@@ -91,11 +128,11 @@ confirmed against Figma directly, the other three states mirror
   repeats the button's own `aria-label`, nothing is lost for a screen
   reader by `aria-describedby` landing on `Popover`'s wrapper instead of
   the button.
-- The palette is a named `group` of "React with X" buttons inside the
-  system `Popover`, which owns open/close, Escape and focus-return.
+- The palette is a named `group`, containing one labelled `group` per category,
+  of "React with X" buttons inside the system `Popover`, which owns open/close, Escape and focus-return.
 - Pills are 24 tall — the pointer-dense exemption; reactions are a
   comment-thread affordance, not a primary action.
-- The tint on *mine* is never alone: `aria-pressed`, the border step and the
+- The brand colour on *mine* is never alone: `aria-pressed`, the border and the
   label all say it too.
 - **The "+N" overflow chip is not interactive** — it's a count, not a
   control, so it carries `aria-label` rather than being a button with
