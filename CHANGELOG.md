@@ -2,6 +2,38 @@
 
 ## 0.1.0 — unreleased
 
+### `StatCard` — two looks, a group form and an alignment option (October 2026)
+
+Rebuilt against Figma's `Value_Card`, `_SuperAdmin_Metric_Card_Coloured_Base` and
+`_Grouped_Base`. **New:** `StatCardGroup` (two or more values under one title,
+split by `Divider`s); an `align` prop (`start` | `center`); a `variant` prop
+(`default` = the Value_Card on normal and admin dashboards, `superadmin` = the
+larger fixed-height card); and a `brand` tone for `accent` (the brand blue
+Value_Card uses for In Review / In Progress).
+
+**Behaviour changes to `StatCard`**, all deliberate, all visual:
+
+- **Left-aligned by default.** The 24 Sep audit centred it; pass `align="center"`
+  where that is wanted.
+- **Full container width**, and a new default look (`variant="default"`, the
+  Value_Card): 20/16 padding, a bold value, a height that hugs its
+  content. The previous size-and-spacing is `variant="superadmin"` (fixed 150 high).
+- The stripe is 8 wide (was 4) and sits inside a 1px `stroke.default` outline
+  (was `stroke.subtle`); the card has no shadow.
+- The icon is 24 and takes the `accent` tone, matching the stripe. Pass
+  `<Icon size="lg" />`; the old `size="sm"` glyphs now sit small in the box.
+- The label is `label-sm-medium` in `text.secondary` (was caption, tertiary);
+  the tooltip glyph is 20 (was 16).
+- The value is 36 bold (`default`) or semibold (`superadmin`) and `unit` is 24
+  medium, both `text.primary` in Poppins (the value was 24 in Inter). Both are written out as type-ramp
+  exceptions — the ramp has no 36 step and no `heading-lg-medium`.
+- **Removed: `delta`, `deltaTone` and `footer`.** Figma's cards have neither a
+  change figure nor a line under the value, so they are not introduced.
+
+Migration: callers that relied on centring add `align="center"`; callers
+passing small icons switch to `size="lg"`; drop `delta`, `deltaTone` and
+`footer`.
+
 ### Breaking — 24 September 2026
 
 **The type ramp gains a weight per size.** `tokens/semantic/type.json` goes
