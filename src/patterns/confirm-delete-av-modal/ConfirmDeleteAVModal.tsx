@@ -85,10 +85,10 @@ export function ConfirmDeleteAVModal({
             aria-hidden="true"
             className="mx-auto size-12 text-accent-critical-outline-content-default"
           />
-          <h2 id={titleId} className="text-heading-md text-text-primary">
+          <h2 id={titleId} className="text-title-md-semibold text-text-primary">
             {title}
           </h2>
-          <p id={descriptionId} className="text-body-sm text-text-tertiary">
+          <p id={descriptionId} className="text-caption-md-regular text-text-tertiary">
             {description}
           </p>
         </div>

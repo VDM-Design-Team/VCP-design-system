@@ -116,11 +116,11 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                       on && 'rotate-90',
                     )}
                   />
-                  <span className="min-w-0 flex-1 text-label-lg text-text-primary">
+                  <span className="min-w-0 flex-1 text-label-sm-medium text-text-primary">
                     {item.title}
                   </span>
                   {item.meta && (
-                    <span className="shrink-0 text-body-sm text-text-tertiary">{item.meta}</span>
+                    <span className="shrink-0 text-caption-md-regular text-text-tertiary">{item.meta}</span>
                   )}
                 </button>
               </Heading>
@@ -130,7 +130,7 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                   id={panelId}
                   aria-labelledby={headerId}
                   /* Left edge aligns the content under the title, past the caret. */
-                  className="px-3.5 pb-3.5 pl-10 text-body-md text-text-secondary"
+                  className="px-3.5 pb-3.5 pl-10 text-body-sm-regular text-text-secondary"
                 >
                   {item.content}
                 </div>

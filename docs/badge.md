@@ -66,8 +66,8 @@ Everything else:
 | Part | Token | Utility |
 |---|---|---|
 | Radius | `shape.radius.md` | `rounded-md` |
-| Type ramp, `md` | `type.label.lg` — Poppins 500, 14/20 | `text-label-lg` |
-| Type ramp, `sm` | `type.label.md` — Poppins 500, 13/18 | `text-label-md` |
+| Type ramp, `md` | `type.label.lg` — Poppins 500, 14/20 | `text-label-sm-medium` |
+| Type ramp, `sm` | `type.label.md` — Poppins 500, 13/18 | `text-label-sm-medium` |
 | Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
 | Padding | Tailwind numeric scale | `px-2` (8), both sizes |
 | Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |

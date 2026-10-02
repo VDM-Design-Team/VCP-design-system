@@ -46,7 +46,7 @@ const Field = ({
   children: React.ReactNode;
 }) => (
   <div className="flex flex-col gap-1.5 w-96 max-w-full">
-    <label htmlFor={id} className="font-sans text-label-lg text-text-primary">
+    <label htmlFor={id} className="font-sans text-label-sm-medium text-text-primary">
       {label}
     </label>
     {children}
@@ -54,7 +54,7 @@ const Field = ({
       <span
         id={`${id}-hint`}
         className={
-          'font-sans text-body-sm ' +
+          'font-sans text-caption-md-regular ' +
           (critical ? 'text-accent-critical-outline-content-default' : 'text-text-tertiary')
         }
       >
@@ -147,7 +147,7 @@ const WithCount = () => {
         id="comment-count"
         aria-live="polite"
         className={
-          'self-end font-numeric text-caption-md ' +
+          'self-end font-numeric text-caption-md-medium ' +
           (over ? 'text-accent-critical-outline-content-default' : 'text-text-tertiary')
         }
       >
@@ -167,13 +167,13 @@ export const FullWidth: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fw-on" className="font-sans text-label-lg text-text-primary">
+        <label htmlFor="fw-on" className="font-sans text-label-sm-medium text-text-primary">
           fullWidth (default) — fills the form column
         </label>
         <Textarea {...args} id="fw-on" />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fw-off" className="font-sans text-label-lg text-text-primary">
+        <label htmlFor="fw-off" className="font-sans text-label-sm-medium text-text-primary">
           {'fullWidth={false}'} — intrinsic width from cols
         </label>
         <Textarea {...args} id="fw-off" fullWidth={false} cols={30} />
@@ -184,7 +184,7 @@ export const FullWidth: Story = {
 
 const Panel = ({ scheme, className }: { scheme: string; className: string }) => (
   <div className={'flex flex-col gap-4 rounded-md p-4 bg-surface-canvas ' + className}>
-    <span className="font-sans text-label-lg text-text-secondary">{scheme}</span>
+    <span className="font-sans text-label-sm-medium text-text-secondary">{scheme}</span>
     <Field id={`${scheme}-note`} label="Note">
       <Textarea id={`${scheme}-note`} placeholder="Add a note…" />
     </Field>

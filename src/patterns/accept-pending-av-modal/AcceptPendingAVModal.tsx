@@ -101,8 +101,8 @@ export function AcceptPendingAVModal({
           )}
           label={
             <span className="flex flex-col gap-1">
-              <span className="text-label-sm text-text-primary">Multipart Value</span>
-              <span id={descriptionId} className="text-label-sm text-text-tertiary">
+              <span className="text-caption-md-medium text-text-primary">Multipart Value</span>
+              <span id={descriptionId} className="text-caption-md-medium text-text-tertiary">
                 Split this value into parts based on its sets, while keeping the original as the
                 parent for overall progress tracking.
               </span>

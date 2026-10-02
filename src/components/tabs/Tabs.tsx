@@ -36,7 +36,7 @@ const tab = cva(
   ],
   {
     variants: {
-      size: { sm: 'h-8 px-3 text-label-md', md: 'h-10 px-4 text-label-lg' },
+      size: { sm: 'h-8 px-3 text-label-sm-medium', md: 'h-10 px-4 text-label-sm-medium' },
       fullWidth: { true: 'flex-1', false: '' },
     },
     defaultVariants: { size: 'md', fullWidth: false },
@@ -47,7 +47,7 @@ const badge = cva(
   [
     'inline-flex items-center justify-center shrink-0',
     'h-4 px-1.5 rounded-pill',
-    'font-numeric text-caption-sm',
+    'font-numeric text-caption-sm-semibold',
     'bg-surface-neutral-subtle text-text-tertiary transition-colors',
     'group-aria-selected:bg-surface-brand-faint',
     'group-aria-selected:text-action-secondary-content-default',

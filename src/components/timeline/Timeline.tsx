@@ -81,18 +81,18 @@ export const Timeline = React.forwardRef<HTMLOListElement, TimelineProps>(
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1 pt-1">
               <div className="flex flex-wrap items-baseline gap-2">
-                <span className="text-label-md text-text-primary">{item.title}</span>
+                <span className="text-label-sm-medium text-text-primary">{item.title}</span>
                 {item.timestamp && (
-                  <span className="text-label-sm text-text-subtle">{item.timestamp}</span>
+                  <span className="text-caption-md-medium text-text-subtle">{item.timestamp}</span>
                 )}
               </div>
               {item.actor && (
                 <span className="flex items-center gap-1.5">
                   <Avatar size="sm" name={item.actor} />
-                  <span className="text-body-sm text-text-tertiary">{item.actor}</span>
+                  <span className="text-caption-md-regular text-text-tertiary">{item.actor}</span>
                 </span>
               )}
-              {item.detail && <span className="text-body-sm text-text-tertiary">{item.detail}</span>}
+              {item.detail && <span className="text-caption-md-regular text-text-tertiary">{item.detail}</span>}
             </div>
           </li>
         );

@@ -15,7 +15,7 @@ import { cn } from '../../lib/cn';
  */
 const textarea = cva(
   [
-    'block font-sans text-body-md',
+    'block font-sans text-body-sm-regular',
     'px-3 py-2.5 rounded-md border',
     'bg-surface-elevated text-text-primary',
     'placeholder:text-text-subtle',

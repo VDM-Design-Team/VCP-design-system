@@ -62,7 +62,7 @@ export const Removable: Story = {
           <Chip key={t} {...args} label={t} onRemove={() => setTags((x) => x.filter((y) => y !== t))} />
         ))}
         {tags.length === 0 && (
-          <span className="text-body-sm text-text-subtle">All removed — reload the story.</span>
+          <span className="text-caption-md-regular text-text-subtle">All removed — reload the story.</span>
         )}
       </div>
     );

@@ -63,7 +63,7 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onCl
    text.primary stays the label colour on both — measured in docs/chip.md. */
 const pill = (interactive: boolean, selected: boolean) =>
   cn(
-    'inline-flex h-7 max-w-full items-center rounded-full font-sans text-label-md text-text-primary transition-colors',
+    'inline-flex h-7 max-w-full items-center rounded-full font-sans text-label-sm-medium text-text-primary transition-colors',
     selected ? 'bg-surface-brand-subtle' : 'bg-surface-brand-faint',
     interactive && !selected && 'hover:bg-surface-brand-subtle',
   );
@@ -86,7 +86,7 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
                 on its own. stroke.brand.medium survives both fills. */}
             <span aria-hidden="true" className="my-1 w-px self-stretch bg-stroke-brand-medium" />
             {/* font.family.numeric via caption-md — counts are dense numerics. */}
-            <span className="shrink-0 font-numeric text-caption-md">{count}</span>
+            <span className="shrink-0 font-numeric text-caption-md-medium">{count}</span>
           </>
         )}
       </>

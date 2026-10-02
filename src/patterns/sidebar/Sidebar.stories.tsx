@@ -65,7 +65,7 @@ export const EveryUserType: Story = {
            its own content, the four end up different heights, and the footer
            row sits under the last nav item instead of at the bottom. */
         <div key={t} className="flex min-h-0 flex-col gap-2">
-          <p className="text-label-md text-text-tertiary">{t}</p>
+          <p className="text-label-sm-medium text-text-tertiary">{t}</p>
           <Sidebar userType={t} active="dashboard" className="min-h-0 flex-1 rounded-md border" />
         </div>
       ))}

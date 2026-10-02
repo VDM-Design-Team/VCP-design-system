@@ -41,7 +41,7 @@ export const Default: Story = {
               setActive((a) => ({ ...a, [c]: !a[c] }));
           }}
         />
-        <span className="font-sans text-body-sm text-text-tertiary">
+        <span className="font-sans text-caption-md-regular text-text-tertiary">
           Last command: {last ?? '—'}
         </span>
       </div>
