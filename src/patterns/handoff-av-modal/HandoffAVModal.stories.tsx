@@ -44,7 +44,7 @@ export const Default: Story = {};
 /** With files already on the value, shown as tiles above the picker. */
 export const WithAttachments: Story = {
   args: {
-    attachments: [{ name: 'image.png', size: '284 KB' }],
+    attachments: [{ name: 'image.png' }],
   },
 };
 
