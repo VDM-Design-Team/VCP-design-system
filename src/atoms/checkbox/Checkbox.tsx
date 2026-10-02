@@ -21,7 +21,7 @@ const checkboxRoot = cva(
     'group inline-flex items-start gap-2',
     /* p-3 (12) around a 16 box gives the 40 minimum touch target from CLAUDE.md */
     'p-3',
-    'font-sans text-body-md',
+    'font-sans text-body-sm-regular',
     'cursor-pointer select-none',
     'has-disabled:cursor-not-allowed',
   ],

@@ -84,7 +84,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
               )}
             >
               <span aria-hidden="true">{r.emoji}</span>
-              <span aria-hidden="true" className="font-numeric text-caption-md">
+              <span aria-hidden="true" className="font-numeric text-caption-md-medium">
                 {r.count}
               </span>
             </button>
@@ -127,7 +127,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
                     setOpen(false);
                   }}
                   className={cn(
-                    'grid size-9 place-items-center rounded-sm text-heading-md leading-none transition-colors',
+                    'grid size-9 place-items-center rounded-sm text-title-md-semibold leading-none transition-colors',
                     'hover:bg-surface-neutral-faint',
                     'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
                   )}

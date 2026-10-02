@@ -63,7 +63,7 @@ person rejecting whether they have picked the right one.
 ## Tokens
 
 No new tokens. The select and the input are `Select` and `Input` unchanged;
-the explanation is `type.body-sm` on `text.tertiary`, the same pairing `Field`
+the explanation is `type.caption-md-regular` on `text.tertiary`, the same pairing `Field`
 uses for helper text.
 
 ## Accessibility

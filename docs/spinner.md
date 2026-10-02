@@ -45,7 +45,7 @@ says what is happening.
 | Size `sm` / `md` / `lg` | Tailwind numeric scale | `size-4` / `size-5` / `size-6` |
 | Ring thickness | — (viewBox units) | Derived as `48 / renderedSize` → `3` / `2.4` / `2`, so the ring keeps the same optical weight at every size |
 | Gap to the label | Tailwind numeric scale | `gap-2` (8) |
-| Label type | `type.label.md` | `text-label-md` |
+| Label type | `type.label.md` | `text-label-sm-medium` |
 | Label colour | — (`currentColor`) | Inherited, so the ring and its caption always match |
 | Spin | Tailwind default keyframes | `animate-spin`, `motion-reduce:animate-pulse` |
 

@@ -26,7 +26,7 @@ const group = cva('flex', {
 
 /** The clickable row. `min-h-10` + `py-2` guarantees the 40 unit minimum target. */
 const optionRow = cva(
-  ['group/radio flex min-h-10 items-start gap-2.5 py-2', 'font-sans text-body-md'],
+  ['group/radio flex min-h-10 items-start gap-2.5 py-2', 'font-sans text-body-sm-regular'],
   {
     variants: {
       disabled: {
@@ -139,7 +139,7 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
         {...props}
       >
         {label ? (
-          <legend className={cn('mb-2 p-0 font-sans text-label-md text-text-primary', hideLabel && 'sr-only')}>
+          <legend className={cn('mb-2 p-0 font-sans text-label-sm-medium text-text-primary', hideLabel && 'sr-only')}>
             {label}
           </legend>
         ) : null}
@@ -178,12 +178,12 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
                 </span>
 
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-body-md">{optionLabel}</span>
+                  <span className="text-body-sm-regular">{optionLabel}</span>
                   {hint ? (
                     <span
                       id={hintId}
                       className={cn(
-                        'text-caption-md',
+                        'text-caption-md-medium',
                         isDisabled ? 'text-text-disabled' : 'text-text-tertiary',
                       )}
                     >

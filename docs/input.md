@@ -42,7 +42,7 @@ Everything else (`value`, `defaultValue`, `onChange`, `placeholder`, `type`, `id
 | Placeholder | `text.subtle` | `placeholder:text-text-subtle` |
 | Text, disabled | `text.disabled` | `disabled:text-text-disabled` |
 | Icons | `text.subtle` | `text-text-subtle` |
-| Type ramp | `type.body.sm` / `type.body.md` | `text-body-sm` (`sm`) / `text-body-md` (`md`) |
+| Type ramp | `type.body.sm` / `type.body.md` | `text-caption-md-regular` (`sm`) / `text-body-sm-regular` (`md`) |
 | Radius | `shape.radius.md` | `rounded-md` |
 
 The dark theme comes for free — every class above is a semantic token that
