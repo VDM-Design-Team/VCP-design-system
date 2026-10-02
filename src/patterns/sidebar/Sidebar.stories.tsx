@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useArgs } from 'storybook/preview-api';
 import { Sidebar, NAV_BY_USER_TYPE, type SidebarUserType } from './Sidebar';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
@@ -40,13 +41,22 @@ const Stage = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-screen bg-surface-canvas">{children}</div>
 );
 
+/* The floating double-chevron really collapses and expands the rail. It
+   writes back to the `collapsed` arg, so the Controls panel stays in step
+   with the button and either one can drive the other. */
+const useCollapseToggle = () => {
+  const [{ collapsed }, updateArgs] = useArgs<{ collapsed?: boolean }>();
+  return () => updateArgs({ collapsed: !collapsed });
+};
+
 /** The default rail, as a `user` sees it. */
 export const Default: Story = {
   render: (args) => {
     const [active, setActive] = React.useState('dashboard');
+    const toggle = useCollapseToggle();
     return (
       <Stage>
-        <Sidebar {...args} active={active} onNavigate={setActive} onToggleCollapse={() => {}} />
+        <Sidebar {...args} active={active} onNavigate={setActive} onToggleCollapse={toggle} />
       </Stage>
     );
   },
@@ -76,11 +86,14 @@ export const EveryUserType: Story = {
 /** The 76-wide rail. Every row keeps its name in a tooltip and in `aria-label`. */
 export const Collapsed: Story = {
   args: { collapsed: true },
-  render: (args) => (
-    <Stage>
-      <Sidebar {...args} onToggleCollapse={() => {}} />
-    </Stage>
-  ),
+  render: function Render(args) {
+    const toggle = useCollapseToggle();
+    return (
+      <Stage>
+        <Sidebar {...args} onToggleCollapse={toggle} />
+      </Stage>
+    );
+  },
 };
 
 /** Expanded and collapsed side by side — the glyphs hold their axis. */
@@ -102,15 +115,16 @@ export const BothWidths: Story = {
  */
 export const FullyExpanded: Story = {
   args: { userType: 'admin-dev' },
-  argTypes: { collapsed: { control: false }, showDomainSelector: { control: false } },
-  render: (args) => {
+  argTypes: { showDomainSelector: { control: false } },
+  render: function Render(args) {
+    const toggle = useCollapseToggle();
     const userType = args.userType ?? 'user';
     const open = NAV_BY_USER_TYPE[userType].filter((i) => i.items?.length).map((i) => i.key);
     return (
       <Stage>
         {/* Keyed by user type: `defaultOpen` is a starting state, so switching
             rails in the controls remounts with that rail's sections open. */}
-        <Sidebar key={userType} {...args} defaultOpen={open} onToggleCollapse={() => {}} />
+        <Sidebar key={userType} {...args} defaultOpen={open} onToggleCollapse={toggle} />
       </Stage>
     );
   },
@@ -126,11 +140,28 @@ export const WithDomainSelector: Story = {
     domain: 'Design',
     domains: ['Design', 'Development'],
   },
-  render: (args) => (
-    <Stage>
-      <Sidebar {...args} onToggleCollapse={() => {}} />
-    </Stage>
-  ),
+  render: function Render(args) {
+    const toggle = useCollapseToggle();
+    return (
+      <Stage>
+        <Sidebar {...args} onToggleCollapse={toggle} />
+      </Stage>
+    );
+  },
+};
+
+/* Controls are off in the side-by-side story, so each rail keeps its own
+   collapsed state and the two toggle independently. */
+const ToggleableRail = () => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  return (
+    <Sidebar
+      userType="admin"
+      active="my-values"
+      collapsed={collapsed}
+      onToggleCollapse={() => setCollapsed((c) => !c)}
+    />
+  );
 };
 
 /** Every fill is a token, so dark comes free. */
@@ -141,7 +172,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex h-screen bg-surface-canvas">
-            <Sidebar userType="admin" active="my-values" onToggleCollapse={() => {}} />
+            <ToggleableRail />
           </div>
         </div>
       ))}
