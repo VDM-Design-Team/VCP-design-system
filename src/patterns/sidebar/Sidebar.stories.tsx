@@ -95,18 +95,22 @@ export const BothWidths: Story = {
 };
 
 /**
- * `Archive` and `Planning` are the two rows with sub-items. Open, the group
- * lifts onto an elevated card — `SidebarItem` does that, not this.
+ * Every rail fully expanded — each section with sub-items open — for the
+ * user type picked in the controls. `Archive` is in every rail but Super
+ * Admin's, `Planning` only in Admin Dev's. Open, a group lifts onto an
+ * elevated card — `SidebarItem` does that, not this.
  */
-export const ExpandedSection: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => {
-    const nav = NAV_BY_USER_TYPE['admin-dev'].map((i) =>
-      i.key === 'planning' ? { ...i, items: i.items } : i,
-    );
+export const FullyExpanded: Story = {
+  args: { userType: 'admin-dev' },
+  argTypes: { collapsed: { control: false }, showDomainSelector: { control: false } },
+  render: (args) => {
+    const userType = args.userType ?? 'user';
+    const open = NAV_BY_USER_TYPE[userType].filter((i) => i.items?.length).map((i) => i.key);
     return (
       <Stage>
-        <Sidebar userType="admin-dev" items={nav} active="planning" />
+        {/* Keyed by user type: `defaultOpen` is a starting state, so switching
+            rails in the controls remounts with that rail's sections open. */}
+        <Sidebar key={userType} {...args} defaultOpen={open} onToggleCollapse={() => {}} />
       </Stage>
     );
   },

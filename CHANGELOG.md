@@ -2,6 +2,18 @@
 
 ## 0.1.0 — unreleased
 
+### `SidebarItem` and `Sidebar` — the collapsed caret, and every rail open (2 October 2026)
+
+**Collapsed, a disclosure's caret now sits beside its glyph, not on it.** Figma's
+`_Sidebar_Item` (`Collapsed`) draws a 12 caret straight after the 24 glyph.
+Collapsed rows also stop centring their glyph and start it at the same 8 inset
+as Figma's rail, so every glyph shares one axis. Expanded rows are unchanged:
+the caret stays at the far right.
+
+**New: `Sidebar`'s `defaultOpen`** (minor) — the keys of the rows with sub-items
+that start open. The Storybook "Fully Expanded" story uses it to show any user
+type's rail with every section open.
+
 ### Breaking — `FileAttachment` rebuilt to Figma's card (2 October 2026)
 
 **The tile now matches Figma's `_File_Attachment_Card` and its states.** Before,

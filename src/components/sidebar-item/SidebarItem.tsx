@@ -23,13 +23,14 @@ import { Icon, type IconName } from '../../atoms/icon';
  * contract `Accordion` uses, because a control that reveals something is not
  * a control that goes somewhere.
  *
- * **Collapsed, the disclosure marker is a corner mark, not a second icon.**
- * There is no room in a 76-wide rail for the glyph and a full-size caret side
- * by side — the design audit found the caret drawn small, on the glyph's own
- * corner, not as a sibling (24 Sep 2026). This component only fixes that
- * visual; whether the rail should open a flyout instead of the inline list
- * below (which still renders when a collapsed disclosure opens) is still
- * unconfirmed against Figma — flagged, not decided here.
+ * **Collapsed, the caret shrinks and sits beside the glyph.** Figma's
+ * `_Sidebar_Item` (`Collapsed`, `5322:55417`) draws a 12 caret directly after
+ * the 24 glyph, inside the same 8 padding — not on the glyph, and not the
+ * expanded row's 20 caret. Every collapsed row starts its glyph at the same
+ * 8 inset, so the rail's glyphs share one axis and the caret only adds width
+ * to the right. Expanded, the caret stays at the row's far right, as Figma
+ * draws it. Whether a collapsed disclosure should open a flyout instead of
+ * the inline list below is still unconfirmed against Figma.
  *
  * **The current page carries `aria-current="page"`.** The tinted fill is the
  * sighted half of a fact the markup states anyway, never the only signal.
@@ -87,7 +88,10 @@ const row = (selected: boolean, collapsed: boolean) =>
   cn(
     'flex h-10 w-full items-center rounded-md font-sans text-label-sm-medium transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    collapsed ? 'justify-center px-2' : 'gap-2 px-2',
+    /* Collapsed rows start at the same 8 inset as expanded ones, not centred:
+       Figma's rail keeps every glyph on one axis, and a disclosure's caret
+       only adds width to the right of its glyph. */
+    collapsed ? 'px-2' : 'gap-2 px-2',
     selected
       ? 'bg-surface-brand-subtle font-medium text-text-brand-strong'
       : 'text-text-secondary hover:bg-surface-brand-faint',
@@ -162,19 +166,13 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
             {...shared}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >
-            {/* The `Right Icon` axis. Collapsed, there's no room for a second,
-                full-size icon beside the glyph (the design audit shows this
-                as a small corner mark on the glyph itself, not a sibling
-                icon — 24 Sep 2026), so the two axes share the one 24 square
-                instead of sitting side by side. */}
+            {/* The `Right Icon` axis. Collapsed, Figma shrinks the caret to 12
+                and sets it straight after the glyph, with no gap. */}
             {collapsed ? (
-              <span className="relative grid size-6 shrink-0 place-items-center">
-                {icon && <Icon name={icon} size="md" />}
-                <Icon
-                  name={isOpen ? 'caret-up' : 'caret-down'}
-                  className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-surface-elevated"
-                />
-              </span>
+              <>
+                {glyph}
+                <Icon name={isOpen ? 'caret-up' : 'caret-down'} className="size-3 shrink-0" />
+              </>
             ) : (
               <>
                 {glyph}
