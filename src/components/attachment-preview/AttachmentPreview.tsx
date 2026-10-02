@@ -49,10 +49,10 @@ export const AttachmentPreview = React.forwardRef<HTMLDivElement, AttachmentPrev
           aria-hidden="true"
           className="shrink-0 text-text-tertiary"
         />
-        <span className="min-w-0 flex-1 truncate text-label-md text-text-primary" title={name}>
+        <span className="min-w-0 flex-1 truncate text-label-sm-medium text-text-primary" title={name}>
           {name}
         </span>
-        {size && <span className="shrink-0 text-label-sm text-text-subtle">{size}</span>}
+        {size && <span className="shrink-0 text-caption-md-medium text-text-subtle">{size}</span>}
         {onDownload && (
           <IconButton
             variant="tertiary"
@@ -78,7 +78,7 @@ export const AttachmentPreview = React.forwardRef<HTMLDivElement, AttachmentPrev
         ) : (
           <div className="flex flex-col items-center gap-2 text-text-tertiary">
             <Icon name="file" size="lg" aria-hidden="true" />
-            <span className="text-body-sm">No inline preview</span>
+            <span className="text-caption-md-regular">No inline preview</span>
           </div>
         )}
       </div>

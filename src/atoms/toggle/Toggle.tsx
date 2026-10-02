@@ -95,7 +95,7 @@ const knob = cva(
   },
 );
 
-const labelText = cva(['select-none text-body-md'], {
+const labelText = cva(['select-none text-body-sm-regular'], {
   variants: {
     disabled: {
       true: 'text-text-disabled',

@@ -96,7 +96,7 @@ export const WithPanels: Story = {
             aria-labelledby={tabId(prefix, key)}
             hidden={key !== value}
             tabIndex={0}
-            className="p-4 text-body-md text-text-secondary"
+            className="p-4 text-body-sm-regular text-text-secondary"
           >
             The {key.toLowerCase()} panel.
           </div>

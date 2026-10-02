@@ -96,7 +96,7 @@ export interface HandoffAVModalProps {
    */
   overdueDays?: number;
   /** Files already attached to the value. */
-  attachments?: Array<{ name: string; size?: string; thumb?: string }>;
+  attachments?: Array<{ name: string; thumb?: string }>;
   /** Prefills the date field. The caller owns what "today" means. */
   defaultDate?: string;
   loading?: boolean;
@@ -291,7 +291,6 @@ export function HandoffAVModal({
                   <FileAttachment
                     key={file.name}
                     name={file.name}
-                    size={file.size}
                     thumb={file.thumb}
                     kind="image"
                   />

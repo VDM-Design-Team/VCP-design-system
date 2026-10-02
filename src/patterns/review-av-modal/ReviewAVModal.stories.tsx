@@ -44,12 +44,12 @@ type Story = StoryObj<typeof meta>;
 
 /** Design reviewing. The one domain choice is "Copy to Dev". */
 export const Default: Story = {
-  args: { attachments: [{ name: 'image.png', size: '284 KB' }] },
+  args: { attachments: [{ name: 'image.png' }] },
 };
 
 /** Development reviewing. The same dialog, asking a different question. */
 export const DevelopmentDomain: Story = {
-  args: { domain: 'development', attachments: [{ name: 'image.png', size: '284 KB' }] },
+  args: { domain: 'development', attachments: [{ name: 'image.png' }] },
 };
 
 /**
@@ -70,7 +70,7 @@ export const NothingHandedOff: Story = {
 /** Every colour is a token. The dialog portals to `body`, so the theme global reaches it. */
 export const DarkTheme: Story = {
   globals: { theme: 'dark' },
-  args: { attachments: [{ name: 'image.png', size: '284 KB' }] },
+  args: { attachments: [{ name: 'image.png' }] },
 };
 
 /**
@@ -88,7 +88,7 @@ export const Accepting: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Review AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Result: {result}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Result: {result}</p>
         <ReviewAVModal
           {...args}
           open={open}
@@ -137,7 +137,7 @@ export const RejectingOpensASecondDialog: Story = {
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Review AV
         </Button>
-        <p className="text-body-sm text-text-tertiary">Result: {result}</p>
+        <p className="text-caption-md-regular text-text-tertiary">Result: {result}</p>
         <ReviewAVModal
           {...args}
           open={open}

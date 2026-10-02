@@ -119,7 +119,7 @@ export const Controlled: Story = {
           <Button size="sm" variant="tertiary" onClick={() => setOpen((o) => !o)}>
             Toggle from outside
           </Button>
-          <span className="font-sans text-label-md text-text-subtle">
+          <span className="font-sans text-label-sm-medium text-text-subtle">
             open: {String(open)}
           </span>
         </div>
@@ -134,8 +134,8 @@ export const Wide: Story = {
     width: 'lg',
     content: (
       <div className="flex flex-col gap-2">
-        <p className="text-label-lg text-text-primary">Review policy</p>
-        <p className="text-body-md text-text-secondary">
+        <p className="text-label-sm-medium text-text-primary">Review policy</p>
+        <p className="text-body-sm-regular text-text-secondary">
           Every deliverable needs two sign-offs before it can leave In review. The second reviewer
           cannot be the person who submitted it, and neither sign-off survives a change to the
           scope — editing the brief sends the deliverable back to Draft.

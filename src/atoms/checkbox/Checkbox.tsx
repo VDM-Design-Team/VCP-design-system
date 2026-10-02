@@ -21,7 +21,7 @@ const checkboxRoot = cva(
     'group inline-flex items-start gap-2',
     /* p-3 (12) around a 16 box gives the 40 minimum touch target from CLAUDE.md */
     'p-3',
-    'font-sans text-body-md',
+    'font-sans text-body-sm-regular',
     'cursor-pointer select-none',
     'has-disabled:cursor-not-allowed',
   ],
@@ -36,7 +36,9 @@ const checkboxRoot = cva(
 const checkboxBox = cva(
   [
     'flex size-4 shrink-0 items-center justify-center',
-    'rounded-sm border border-stroke-field',
+    /* shape.radius.xs — GDL's `radius-2` variable. Applies in every state,
+       checked included: there's no separate checked-state radius rule. */
+    'rounded-xs border border-stroke-field',
     'bg-surface-base text-action-primary-content-default',
     'transition-colors',
     /* The focus ring lives here because the real input is visually hidden. */

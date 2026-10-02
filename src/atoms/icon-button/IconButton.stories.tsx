@@ -9,12 +9,15 @@ const meta = {
     docs: {
       description: {
         component:
-          'A square button carrying a single icon and no visible text. Same `variant` names, ' +
+          'A button carrying a single icon and no visible text. Same `variant` names, ' +
           'same `sm`/`md`/`lg` scale, same focus ring and same `loading` behaviour as `Button` — ' +
           'if you know Button, you know this. `label` is a **required** prop: it becomes the ' +
           "button's accessible name and its tooltip, and there is no way to render one without " +
           'it. Reach for it only when the icon is unambiguous and space is genuinely tight; ' +
           'otherwise use a `Button` with `iconLeft` and a visible word.' +
+          '\n\n`shape` defaults to `round`, matching how most icon-only controls appear across ' +
+          'VCP. `shape="square"` is the explicit exception for a control that has to sit flush ' +
+          "in a square-cornered row, like DetailRow's inline edit affordance." +
           '\n\n**From Figma:** Icon buttons display actions in a compact layout. Icon buttons ' +
           'can represent opening actions such as opening an overflow menu or search, or ' +
           'represent binary actions that can be toggled on and off, such as favorite or ' +
@@ -29,6 +32,7 @@ const meta = {
       options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger'],
     },
     size: { control: 'radio', options: ['sm', 'md', 'lg'] },
+    shape: { control: 'radio', options: ['round', 'square'] },
   },
 } satisfies Meta<typeof IconButton>;
 
@@ -60,13 +64,27 @@ export const Sizes: Story = {
   ),
 };
 
+/**
+ * `round` is the default — how most icon-only controls appear across VCP.
+ * `square` is the explicit exception for a control flush inside a
+ * square-cornered row, like DetailRow's inline edit affordance.
+ */
+export const Shape: Story = {
+  render: (args) => (
+    <div className="flex items-center gap-3">
+      <IconButton {...args} shape="round" variant="secondary" icon="plus" label="Add deliverable" />
+      <IconButton {...args} shape="square" variant="secondary" icon="plus" label="Add deliverable" />
+    </div>
+  ),
+};
+
 /** Every variant at every size, so the whole matrix is visible in one place. */
 export const Matrix: Story = {
   render: (args) => (
     <div className="flex flex-col gap-3">
       {(['primary', 'secondary', 'neutral', 'tertiary', 'danger'] as const).map((variant) => (
         <div key={variant} className="flex items-center gap-3">
-          <span className="w-20 text-label-sm text-text-subtle">{variant}</span>
+          <span className="w-20 text-caption-md-medium text-text-subtle">{variant}</span>
           <IconButton {...args} variant={variant} size="sm" />
           <IconButton {...args} variant={variant} size="md" />
           <IconButton {...args} variant={variant} size="lg" />
@@ -128,7 +146,7 @@ export const NextToButton: Story = {
           </Button>
           <IconButton {...args} size={size} variant="secondary" icon="x" label="Discard changes" />
           <IconButton {...args} size={size} variant="tertiary" icon="dots-three" label="More actions" />
-          <span className="text-label-sm text-text-subtle">size “{size}”</span>
+          <span className="text-caption-md-medium text-text-subtle">size “{size}”</span>
         </div>
       ))}
     </div>

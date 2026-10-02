@@ -247,9 +247,9 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
       <Icon name={TONE_ICON[tone]} size="md" label={toneLabel ?? TONE_LABEL[tone]} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {title != null && <p className="text-label-lg">{title}</p>}
+        {title != null && <p className="text-label-sm-medium">{title}</p>}
         {children != null && children !== false && (
-          <div className="text-body-md">{children}</div>
+          <div className="text-body-sm-regular">{children}</div>
         )}
       </div>
 

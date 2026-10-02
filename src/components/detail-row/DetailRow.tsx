@@ -15,6 +15,10 @@ import { IconButton } from '../../atoms/icon-button';
  * while `editing`. The button's name is `Edit ${label}` — which is why `label`
  * is a `string`, not a node: the row's identity has to be speakable.
  *
+ * `shape="square"` overrides `IconButton`'s round default here on purpose:
+ * this affordance sits flush inside a rectangular row rather than floating
+ * over the surface, so it should read as square-cornered like the row itself.
+ *
  * This renders a `<div>` row, not `<dt>/<dd>` — a details panel mixes rows
  * with editors and dividers, where a definition list's strict content model
  * fights the markup. The label/value relationship is carried visually and by
@@ -53,7 +57,7 @@ export const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
       <span
         className={cn(
           /* w-33 = the export's 132 label column, on the spacing scale. */
-          'flex w-33 shrink-0 items-center gap-1.5 font-sans text-label-md text-text-tertiary',
+          'flex w-33 shrink-0 items-center gap-1.5 font-sans text-label-sm-medium text-text-tertiary',
           /* Optically level with the value's first line when top-aligned. */
           align === 'top' && 'pt-1',
         )}
@@ -61,11 +65,12 @@ export const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
         {icon && <Icon name={icon} size="sm" className="shrink-0 text-text-subtle" />}
         <span className="min-w-0 truncate">{label}</span>
       </span>
-      <div className="min-w-0 flex-1 font-sans text-body-md text-text-primary">{children}</div>
+      <div className="min-w-0 flex-1 font-sans text-body-sm-regular text-text-primary">{children}</div>
       {onEdit && (
         <IconButton
           variant="tertiary"
           size="sm"
+          shape="square"
           icon={editing ? 'check' : 'pencil-simple'}
           label={`${editing ? 'Confirm' : 'Edit'} ${label}`}
           onClick={onEdit}

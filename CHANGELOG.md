@@ -2,6 +2,131 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — `FileAttachment` rebuilt to Figma's card (2 October 2026)
+
+**The tile now matches Figma's `_File_Attachment_Card` and its states.** Before,
+the code drew a thumbnail well with a smaller name and a file size underneath;
+Figma draws one bordered card with the glyph over the name, and nothing else.
+
+- **One card**, glyph (32) centred over the name, name inside the border.
+- **Name** in `body-sm-regular` (was `caption-md-medium`). A long name keeps
+  its extension and shortens the stem instead: "2)-Curr… .pdf".
+- **No file size**, and the `size` prop is gone.
+- **Hover** fills the card `surface.brand.faint`; **pressed** fills it
+  `surface.brand.subtle` and hides the ✕. These replace the border tints this
+  PR first shipped, which were a best guess before Figma's states frame was read.
+- **Remove** is Figma's red-tonal round button in the card's corner.
+- **Domain badge** is Figma's neutral-tonal pill with a pen-nib glyph, and a
+  new `domainIcon` prop for other domains' glyphs.
+
+New tokens (minor): `neutral.tonal.surface.default` and
+`neutral.tonal.content.default`, Figma's own variables for the badge. New
+glyph: Phosphor `pen-nib`.
+
+`HandoffAVModal` and `ReviewAVModal` pass their `attachments` straight into
+FileAttachment, so their attachment items lose `size` too: the field would
+otherwise be accepted and silently never shown.
+
+Migration: delete `size="…"` from any `<FileAttachment>`, and `size` from
+the items in either modal's `attachments`. Nothing else changes. 0.1.0 is
+unreleased, so the version isn't bumped, per the convention above.
+
+### Breaking — 24 September 2026
+
+**The type ramp gains a weight per size.** `tokens/semantic/type.json` goes
+from 15 tokens (one weight each) to 47, named `{tier}-{size}-{weight}`
+(`display-xl-bold`, `body-md-semibold`, …) instead of `{tier}-{size}`. See
+`docs/type-tokens.md` for the full ramp and the old→new class table.
+
+Every one of the ~115 files that referenced an old class (components,
+stories, docs) was migrated to the new token carrying the **same rendered
+size and weight** — this is a rename, not a restyle. Two exceptions, both
+sub-pixel and disclosed in `docs/type-tokens.md`: `label-md` (13px) and
+`label-sm` (11px) had no equivalent in the new ramp and round to the nearest
+step (14px and 12px). `display-lg`/`display-md` had no consumers to migrate.
+
+`src/lib/cn.ts`'s `TYPE_RAMP` (the list that keeps `tailwind-merge` from
+filing these as colour utilities) and `scripts/lint-hardcoded-values.mjs`'s
+drift check both updated to match — the check's own pattern for parsing that
+list needed widening, since it assumed every old class name ended in exactly
+two letters (`xl`, `lg`, `md`, `sm`), which no longer holds once class names
+end in a weight (`bold`, `semibold`, `medium`, `regular`).
+
+`Skeleton`'s `textStyle` prop is unaffected — its public keys
+(`'body-md'`, `'label-lg'`, …) are unchanged; only its internal CSS-variable
+lookup was repointed at the new matching token.
+
+Free in practice while 0.1.0 is unreleased and nothing outside this repo
+imports the package, which is why the version is not bumped.
+
+### `IconButton` defaults to round, not square (21 September 2026)
+
+Visual change to a shipped component. `IconButton` now defaults to
+`shape="round"` (`rounded-pill`) across all five variants — a compose FAB, a
+toolbar action, a dismiss are round the great majority of the time across VCP,
+and the component previously defaulted to matching `Button`'s square corner
+unconditionally, which meant every common-case caller had to fight the
+default rather than the rare exception opting out of it.
+
+**`shape="square"`** (`rounded-sm`, `Button`'s own corner) is the new explicit
+exception, for a control that has to sit flush inside a square-cornered row
+rather than stand alone. `DetailRow`'s inline edit affordance is the one
+identified case and now opts into it explicitly.
+
+No new tokens — both shapes reuse the existing `shape.radius.pill` and
+`shape.radius.sm`. Minor bump: additive prop, but flagged for review because
+it silently changes the rendered shape of every existing `IconButton` call
+site that doesn't pass `shape="square"`, with no compile-time signal.
+
+### `Tag`, and Badge's corner corrected to match GDL's actual shape (21 September 2026)
+
+**A structural fix, not just a new atom.** `Badge` and `Tag` were conflated
+from the start: this repo's `Badge` was built and measured against Figma's
+`Tag` component by mistake (`docs/figma-audit.md`, 3 Sep 2026), so it shipped
+`rounded-sm` — Tag's shape, not Badge's. They're separate components in the
+General Design Library with separate shapes: `Badge` is fully rounded
+(`shape.radius.pill`), `Tag` is a rounded-rectangle (`shape.radius.sm`). No
+new radius tokens were needed — both values already existed, just applied to
+the wrong component.
+
+**New `Tag` atom** (`src/atoms/tag/`), the rounded-rectangle counterpart to
+`Badge`. Same four styles as Badge now share — `textual`, `outline`, `tonal`,
+`filled` — all VCP's own semantics; GDL's Tag primitive doesn't dictate them.
+The style × tone colour matrix moved into `src/lib/classification-tones.ts`,
+shared by both components rather than duplicated.
+
+**`Badge` gains `textual` and `outline`** alongside its existing `tonal`
+(default) and `filled`, for the rare case a badge needs one of Tag's other
+styles.
+
+**`TypeTag` and `UrgencyTag` now compose `Tag`** instead of each hand-rolling
+an identical shell — they were byte-for-byte duplicated between the two files
+before this. **Breaking, for anyone importing by path rather than through the
+package root:** both move from `src/atoms/` to `src/components/`, since
+composing another piece of the system is what the atom-composition rule
+tracks, not the vocabulary they carry. `import { TypeTag } from
+'@vcp/design-system'` is unaffected — the flat package export doesn't change
+— but a deep import from `@vcp/design-system/atoms/type-tag` (or
+`/urgency-tag`) needs to become `/components/type-tag` (or `/urgency-tag`).
+Their Storybook location moves from `Atoms/` to `Components/Display/` to
+match.
+
+**`TagEditor`'s own `Tag`/`TagTone` types renamed** to `TagEditorTag`/
+`TagEditorTagTone` to resolve the export collision with the new `Tag`
+component — those were always TagEditor-local data shapes, not the shared
+system piece, so the generic names were only safe while no real `Tag`
+existed.
+
+Minor bump for the new atom and the two additive variants; the tier move
+above is the one part of this that can break an existing deep import.
+
+### `Checkbox` — corner corrected to `radius.xs` (21 September 2026)
+
+The box shipped `rounded-sm` (6px); Figma's variable is `radius-2`, which is
+`shape.radius.xs` (4px) in this repo's own scale. One class, applies in every
+state — checked and mixed included, since there was never a separate radius
+rule for them. Visual correction, no API change.
+
 ### `AVTable` — the Added Value table (11 September 2026)
 
 The list every VCP workspace is built around. `DataTable` specialised, exactly

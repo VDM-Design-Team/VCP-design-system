@@ -43,7 +43,7 @@ There is no `style` prop — pass token utilities through `className` instead.
 | Rule colour | `stroke.default` | `bg-stroke-default` |
 | Rule thickness | — (Tailwind `px`) | `h-px` (horizontal) / `w-px` (vertical) |
 | Caption text colour | `text.subtle` | `text-text-subtle` |
-| Caption type | `type.label.sm` | `text-label-sm` (plus `uppercase`) |
+| Caption type | `type.label.sm` | `text-caption-md-medium` (plus `uppercase`) |
 | Caption gap | Tailwind numeric scale | `gap-3` (12) |
 | Vertical minimum length | Tailwind numeric scale | `min-h-4` (16) |
 

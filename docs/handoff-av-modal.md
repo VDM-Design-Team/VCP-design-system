@@ -64,7 +64,7 @@ was pressed.
 | `onHandoff` | `(draft, { publish }) => void` | required | The draft, once |
 | `domain` | `design-governance \| development` | `design-governance` | Which footer |
 | `overdueDays` | `number` | — | Switches to the overdue variant |
-| `attachments` | `{ name, size?, thumb? }[]` | `[]` | Files already on the value |
+| `attachments` | `{ name, thumb? }[]` | `[]` | Files already on the value |
 | `defaultDate` | `string` | `''` | Prefills the date. The caller owns what "today" is |
 | `loading` | `boolean` | `false` | Spins whichever button was pressed |
 
