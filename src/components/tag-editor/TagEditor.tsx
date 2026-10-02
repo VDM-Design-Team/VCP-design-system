@@ -24,28 +24,28 @@ import { Button } from '../../atoms/button';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type TagTone = 'blue' | 'green' | 'red' | 'yellow' | 'neutral';
+export type TagEditorTagTone = 'blue' | 'green' | 'red' | 'yellow' | 'neutral';
 
-export interface Tag {
+export interface TagEditorTag {
   label: string;
-  tone?: TagTone;
+  tone?: TagEditorTagTone;
 }
 
 export interface TagEditorProps extends React.HTMLAttributes<HTMLDivElement> {
-  tags?: readonly Tag[];
+  tags?: readonly TagEditorTag[];
   /** A new tag, with the currently selected tone. The caller owns the list. */
-  onAdd?: (tag: Tag) => void;
-  onRemove?: (tag: Tag) => void;
+  onAdd?: (tag: TagEditorTag) => void;
+  onRemove?: (tag: TagEditorTag) => void;
   /** The swatch selection changed — for callers that persist a preference. */
-  onToneChange?: (tone: TagTone) => void;
+  onToneChange?: (tone: TagEditorTagTone) => void;
   /** `false` renders the read-only list alone. */
   editable?: boolean;
 }
 
-export const TAG_TONES: readonly TagTone[] = ['blue', 'green', 'red', 'yellow', 'neutral'];
+export const TAG_TONES: readonly TagEditorTagTone[] = ['blue', 'green', 'red', 'yellow', 'neutral'];
 
 /* Avatar's proven faint/stronger pairs, plus the neutral composition. */
-const PILL: Record<TagTone, string> = {
+const PILL: Record<TagEditorTagTone, string> = {
   blue: 'bg-accent-blue-faint text-accent-blue-stronger',
   green: 'bg-accent-green-faint text-accent-green-stronger',
   red: 'bg-accent-red-faint text-accent-red-stronger',
@@ -54,7 +54,7 @@ const PILL: Record<TagTone, string> = {
 };
 
 /* Swatch fills — the mid step, solid enough to read as the hue. */
-const SWATCH: Record<TagTone, string> = {
+const SWATCH: Record<TagEditorTagTone, string> = {
   blue: 'bg-accent-blue-medium',
   green: 'bg-accent-green-medium',
   red: 'bg-accent-red-medium',
@@ -65,7 +65,7 @@ const SWATCH: Record<TagTone, string> = {
 export const TagEditor = React.forwardRef<HTMLDivElement, TagEditorProps>(
   ({ className, tags = [], onAdd, onRemove, onToneChange, editable = true, ...props }, ref) => {
     const [draft, setDraft] = React.useState('');
-    const [tone, setTone] = React.useState<TagTone>('blue');
+    const [tone, setTone] = React.useState<TagEditorTagTone>('blue');
 
     const submit = () => {
       const label = draft.trim();

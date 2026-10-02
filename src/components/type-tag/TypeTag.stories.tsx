@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { TypeTag, AV_TYPES } from './TypeTag';
 
 const meta = {
-  title: 'Atoms/TypeTag',
+  title: 'Components/Display/TypeTag',
   component: TypeTag,
   parameters: {
     docs: {

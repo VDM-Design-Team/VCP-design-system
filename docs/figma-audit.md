@@ -60,6 +60,15 @@ Figma tags are **`radius: 6`** (`shape.radius.sm`); we shipped `rounded-md`
 (8px) with a code comment claiming it was "the Figma Tag's own corner". It
 wasn't. Fixed to `rounded-sm`.
 
+**Corrected again, 21 September 2026: this whole entry measured the wrong
+component.** `Badge` and `Tag` are separate Figma components with separate
+shapes — GDL's `Badge` is fully rounded (`shape.radius.pill`), GDL's `Tag` is
+the rounded-rectangle measured above. `radius: 6` was always the right value
+for *Tag*; it was never the right value for *Badge*, which this repo had
+conflated with Tag from the start. `Badge` now ships `rounded-pill`; the new
+`Tag` atom (`src/atoms/tag/`) carries `rounded-sm`, which is what this section
+actually measured.
+
 ### ✅ Badge — tonal colour pairs
 
 Every tonal pair matches the design **exactly**, hex for hex:
