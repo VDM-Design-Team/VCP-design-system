@@ -2,6 +2,35 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — `FileAttachment` rebuilt to Figma's card (2 October 2026)
+
+**The tile now matches Figma's `_File_Attachment_Card` and its states.** Before,
+the code drew a thumbnail well with a smaller name and a file size underneath;
+Figma draws one bordered card with the glyph over the name, and nothing else.
+
+- **One card**, glyph (32) centred over the name, name inside the border.
+- **Name** in `body-sm-regular` (was `caption-md-medium`). A long name keeps
+  its extension and shortens the stem instead: "2)-Curr… .pdf".
+- **No file size**, and the `size` prop is gone.
+- **Hover** fills the card `surface.brand.faint`; **pressed** fills it
+  `surface.brand.subtle` and hides the ✕. These replace the border tints this
+  PR first shipped, which were a best guess before Figma's states frame was read.
+- **Remove** is Figma's red-tonal round button in the card's corner.
+- **Domain badge** is Figma's neutral-tonal pill with a pen-nib glyph, and a
+  new `domainIcon` prop for other domains' glyphs.
+
+New tokens (minor): `neutral.tonal.surface.default` and
+`neutral.tonal.content.default`, Figma's own variables for the badge. New
+glyph: Phosphor `pen-nib`.
+
+`HandoffAVModal` and `ReviewAVModal` pass their `attachments` straight into
+FileAttachment, so their attachment items lose `size` too: the field would
+otherwise be accepted and silently never shown.
+
+Migration: delete `size="…"` from any `<FileAttachment>`, and `size` from
+the items in either modal's `attachments`. Nothing else changes. 0.1.0 is
+unreleased, so the version isn't bumped, per the convention above.
+
 ### Breaking — 24 September 2026
 
 **The type ramp gains a weight per size.** `tokens/semantic/type.json` goes
@@ -29,6 +58,25 @@ lookup was repointed at the new matching token.
 
 Free in practice while 0.1.0 is unreleased and nothing outside this repo
 imports the package, which is why the version is not bumped.
+
+### `IconButton` defaults to round, not square (21 September 2026)
+
+Visual change to a shipped component. `IconButton` now defaults to
+`shape="round"` (`rounded-pill`) across all five variants — a compose FAB, a
+toolbar action, a dismiss are round the great majority of the time across VCP,
+and the component previously defaulted to matching `Button`'s square corner
+unconditionally, which meant every common-case caller had to fight the
+default rather than the rare exception opting out of it.
+
+**`shape="square"`** (`rounded-sm`, `Button`'s own corner) is the new explicit
+exception, for a control that has to sit flush inside a square-cornered row
+rather than stand alone. `DetailRow`'s inline edit affordance is the one
+identified case and now opts into it explicitly.
+
+No new tokens — both shapes reuse the existing `shape.radius.pill` and
+`shape.radius.sm`. Minor bump: additive prop, but flagged for review because
+it silently changes the rendered shape of every existing `IconButton` call
+site that doesn't pass `shape="square"`, with no compile-time signal.
 
 ### `Checkbox` — corner corrected to `radius.xs` (21 September 2026)
 
