@@ -41,22 +41,38 @@ const Stage = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-screen bg-surface-canvas">{children}</div>
 );
 
-/* The floating double-chevron really collapses and expands the rail. It
-   writes back to the `collapsed` arg, so the Controls panel stays in step
-   with the button and either one can drive the other. */
-const useCollapseToggle = () => {
-  const [{ collapsed }, updateArgs] = useArgs<{ collapsed?: boolean }>();
-  return () => updateArgs({ collapsed: !collapsed });
+/* The floating double-chevron really collapses and expands the rail. The
+   story keeps its own state, because on a Docs page Storybook re-renders only
+   the primary story when an arg changes — a toggle that only wrote the arg
+   did nothing on every other story there. It still writes the arg back, and
+   follows it, so the Controls panel and the button stay in step on a story's
+   own page. */
+const useCollapseToggle = (fromArgs?: boolean) => {
+  const [, updateArgs] = useArgs<{ collapsed?: boolean }>();
+  const [collapsed, setCollapsed] = React.useState(!!fromArgs);
+  React.useEffect(() => setCollapsed(!!fromArgs), [fromArgs]);
+  const toggle = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    updateArgs({ collapsed: next });
+  };
+  return [collapsed, toggle] as const;
 };
 
 /** The default rail, as a `user` sees it. */
 export const Default: Story = {
   render: (args) => {
     const [active, setActive] = React.useState('dashboard');
-    const toggle = useCollapseToggle();
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
     return (
       <Stage>
-        <Sidebar {...args} active={active} onNavigate={setActive} onToggleCollapse={toggle} />
+        <Sidebar
+          {...args}
+          collapsed={collapsed}
+          active={active}
+          onNavigate={setActive}
+          onToggleCollapse={toggle}
+        />
       </Stage>
     );
   },
@@ -87,10 +103,10 @@ export const EveryUserType: Story = {
 export const Collapsed: Story = {
   args: { collapsed: true },
   render: function Render(args) {
-    const toggle = useCollapseToggle();
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
     return (
       <Stage>
-        <Sidebar {...args} onToggleCollapse={toggle} />
+        <Sidebar {...args} collapsed={collapsed} onToggleCollapse={toggle} />
       </Stage>
     );
   },
@@ -117,14 +133,20 @@ export const FullyExpanded: Story = {
   args: { userType: 'admin-dev' },
   argTypes: { showDomainSelector: { control: false } },
   render: function Render(args) {
-    const toggle = useCollapseToggle();
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
     const userType = args.userType ?? 'user';
     const open = NAV_BY_USER_TYPE[userType].filter((i) => i.items?.length).map((i) => i.key);
     return (
       <Stage>
         {/* Keyed by user type: `defaultOpen` is a starting state, so switching
             rails in the controls remounts with that rail's sections open. */}
-        <Sidebar key={userType} {...args} defaultOpen={open} onToggleCollapse={toggle} />
+        <Sidebar
+          key={userType}
+          {...args}
+          collapsed={collapsed}
+          defaultOpen={open}
+          onToggleCollapse={toggle}
+        />
       </Stage>
     );
   },
@@ -141,10 +163,10 @@ export const WithDomainSelector: Story = {
     domains: ['Design', 'Development'],
   },
   render: function Render(args) {
-    const toggle = useCollapseToggle();
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
     return (
       <Stage>
-        <Sidebar {...args} onToggleCollapse={toggle} />
+        <Sidebar {...args} collapsed={collapsed} onToggleCollapse={toggle} />
       </Stage>
     );
   },
