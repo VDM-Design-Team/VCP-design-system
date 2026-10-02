@@ -1,7 +1,8 @@
 # FileAttachment
 
-One attached file as a small tile: thumbnail or kind glyph and name,
-optional open and remove. No file size: Figma's card doesn't show one.
+One attached file as a small card: kind glyph and name, optional open and
+remove. Built to Figma's `_File_Attachment_Card` and its states frame. No
+file size: Figma's card doesn't show one.
 
 ## Composed of
 
@@ -24,11 +25,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `name` | `string` | required | Truncates with a `title` tooltip; also names the ✕ ("Remove ${name}") |
+| `name` | `string` | required | A long name shortens its stem and keeps the extension ("2)-Curr… .pdf"), with the full name in a `title` tooltip; also names the ✕ ("Remove ${name}") |
 | `kind` | `image \| pdf \| doc \| csv \| video` | `doc` | Picks the glyph when there is no `thumb` |
-| `thumb` | `string` | — | Image src for a real thumbnail |
-| `domainLabel` | `string` | — | A short domain/workspace code as a corner badge on the thumbnail — "DS". Omit it and there's no badge |
-| `onClick` | `() => void` | — | Makes the tile a real button — usually "open the preview" |
+| `thumb` | `string` | — | Image src, shown in the glyph's place at the glyph's 32 size — the card keeps its shape |
+| `domainLabel` | `string` | — | A short domain/workspace code as a corner badge — "DS". Omit it and there's no badge |
+| `domainIcon` | `IconName` | `pen-nib` | The badge's glyph. Figma draws DS with a pen nib; pass the domain's own glyph for others |
+| `onClick` | `() => void` | — | Makes the card a real button — usually "open the preview". Only an openable card has hover and pressed fills |
 | `onRemove` | `() => void` | — | The ✕ — its own sibling button, never nested |
 | `className` | `string` | — | On the wrapper |
 | `ref` | `Ref<HTMLDivElement>` | — | The wrapper |
@@ -46,49 +48,55 @@ sibling — a button never contains a button.
 
 ## Tokens
 
-Preview well `surface.canvas` on a `stroke.subtle` border (`radius.md`);
-kind glyph `text.tertiary`; name `label-sm` `text.secondary`; hover lifts with `shadow.raised`. New glyphs
-**`image`** and (for the preview panel) **`download-simple`** added from
-Phosphor per docs/icon.md.
+One bordered card — `stroke.subtle` border, `radius.sm`, 8 padding — with the
+kind glyph (32, `neutral.outline.content.default`) centred over the name
+(`body-sm-regular`, `text.secondary`). Matches Figma's
+`_File_Attachment_Card` (aligned 2 Oct 2026); before that the code had a
+separate thumbnail well with a smaller name underneath it.
 
-**Three states corrected against Figma** (design audit, 24 Sep 2026), all
-on the thumbnail well specifically — the only bordered/filled element the
-export's own design has, so the tint lives there rather than on a new
-border around the whole tile:
-
-| State | Border | Fill |
+| State | What changes | Token |
 |---|---|---|
-| Hover (pointer or keyboard focus) | `stroke.focused` | unchanged |
-| Pressed | `stroke.focused` | `surface.brand.faint` |
+| Hover | The card fills | `surface.brand.faint` |
+| Pressed | The card fills deeper, and the ✕ hides — the press is "open", nothing else | `surface.brand.subtle` |
+| Hover on the ✕ only | The ✕ darkens; the card does **not** fill | `accent.critical.tonal.surface.hover` |
+| ✕ pressed | | `accent.critical.tonal.surface.pressed` |
 
-The ✕ button gets its own, separate hover fill (`surface.neutral.subtle`) —
-Figma's "Hover Remove Only" state, distinct from the tile's own hover above.
-Only the border-colour case is independently confirmed against Figma; the
-pressed fill and the ✕'s own hover fill are the best reading of the
-reference frames, not separately measured.
+The fill sits on the 8-radius button around the 6-radius card, as Figma's
+states frame draws it. A card without `onClick` has no hover or pressed state
+— Figma notes the hover state isn't available in view mode.
 
-`domainLabel` is a small corner badge — the existing `link` icon plus text,
-`surface.elevated` on `stroke.subtle`. It's `aria-hidden`, paired with
-visually-hidden text ("DS domain.") so the classification isn't silent for
-a screen reader.
+The ✕ is Figma's `_File_Attachment_Remove_Button`: a 28 box, 24 circle,
+`accent.critical.tonal.surface` behind an `x` in
+`accent.critical.outline.content`, in the card's top-right corner.
 
-| Pair | Light | Dark |
-|---|---|---|
-| Name under the tile | **9.90:1** | **14.48:1** |
+`domainLabel` is Figma's `_Domain_Label`: a pill in
+`neutral.tonal.surface.default` / `neutral.tonal.content.default` with a
+`stroke.inverse` border, `caption-sm-medium` text and a 12 glyph, inset 4
+from the card's top-left corner. Both `neutral.tonal` tokens were added for
+it. Figma draws the glyph as a Heroicons pen nib; per docs/icon.md this
+system uses Phosphor's `pen-nib` instead.
+
+| Pair | Light | Dark | Needs |
+|---|---|---|---|
+| Name on the page | **9.90:1** | **14.48:1** | 4.5:1 |
+| Name, hovered card | **8.90:1** | **10.73:1** | 4.5:1 |
+| Name, pressed card | **7.03:1** | **7.34:1** | 4.5:1 |
+| Kind glyph on the page | **7.24:1** | **12.02:1** | 3:1 |
+| Domain badge text | **8.40:1** | **8.40:1** | 4.5:1 |
+| Remove ✕ glyph | **3.91:1** | **3.47:1** | 3:1 |
 
 ## Accessibility
 
 - Openable tile = real button whose name is the visible file name; ✕ =
   "Remove ${name}" — ten tiles, ten distinct names.
-- The thumbnail is `alt=""` — the name below is the caption; announcing the
-  filename twice is noise.
-- The ✕ overlaps the tile corner at 24 — pointer-dense exemption; the tile
+- A `thumb` image is `alt=""` — the name below is the caption; announcing
+  the filename twice is noise.
+- The ✕ is 28 in the card's corner — pointer-dense exemption; the card
   itself is the big target.
 - `domainLabel`'s badge is `aria-hidden`; its text is repeated as
-  visually-hidden text in the tile instead of being silently dropped.
-- The hover border tint applies on keyboard focus too (`group-focus-visible`),
-  not pointer-only — a keyboard user tabbing to the tile sees the same
-  feedback a mouse hover gives.
+  visually-hidden text in the card instead of being silently dropped.
+- Keyboard focus gets the standard `stroke.focused` ring on the card and on
+  the ✕. Figma draws no focus state; the ring is the system's rule 5.
 
 ## Don't
 

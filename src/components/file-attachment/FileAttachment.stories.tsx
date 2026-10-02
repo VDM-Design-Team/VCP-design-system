@@ -16,7 +16,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'One attached file as a tile: thumbnail or kind glyph, name, optional open ' +
+          'One attached file as a card: kind glyph and name, optional open ' +
           'and remove. The openable area is a real button and the ✕ is its own sibling tab ' +
           'stop, revealed by hover *or focus* — the export mounted it on hover only, which no ' +
           'keyboard can do. `Dropzone` is how files arrive; `AttachmentPreview` is where ' +
@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>;
 /** No handlers: a passive tile in a read-only list. */
 export const Default: Story = {};
 
-/** `thumb` shows the image itself; the name below stays the caption. */
+/** `thumb` shows the image in the glyph's place, at the glyph's size. */
 export const WithThumbnail: Story = {
   args: { name: 'dock-photo.png', kind: 'image', thumb: THUMB },
 };
@@ -59,10 +59,9 @@ export const OpenAndRemove: Story = {
 };
 
 /**
- * `domainLabel` adds a small corner badge on the thumbnail — a domain or
- * workspace code, when a file's origin isn't otherwise obvious. Hover or
- * tab to the second tile to see the corrected hover/pressed treatment on
- * the thumbnail well itself.
+ * `domainLabel` adds a small corner badge — a domain or workspace code, when
+ * a file's origin isn't otherwise obvious. Hover a card to see it fill; press
+ * and hold to see the deeper fill.
  */
 export const WithDomainLabel: Story = {
   render: (args) => (
@@ -85,7 +84,10 @@ export const GalleryRow: Story = {
   ),
 };
 
-/** A long name truncates; the full name stays in the tooltip and the ✕'s label. */
+/**
+ * A long name shortens its stem and keeps the extension. The full name stays
+ * in the tooltip and the ✕'s label.
+ */
 export const LongName: Story = {
   args: { name: 'supplier-consolidation-proposal-final-v3-revised.pdf' },
   render: (args) => <FileAttachment {...args} onRemove={() => {}} />,
