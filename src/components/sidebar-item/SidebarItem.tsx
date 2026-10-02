@@ -86,12 +86,14 @@ export interface SidebarItemProps
    exactly, which is why there is no `size` prop. */
 const row = (selected: boolean, collapsed: boolean) =>
   cn(
-    'flex h-10 w-full items-center rounded-md font-sans text-label-sm-medium transition-colors',
+    'flex h-10 items-center rounded-md font-sans text-label-sm-medium transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    /* Collapsed rows start at the same 8 inset as expanded ones, not centred:
-       Figma's rail keeps every glyph on one axis, and a disclosure's caret
-       only adds width to the right of its glyph. */
-    collapsed ? 'px-2' : 'gap-2 px-2',
+    /* Collapsed rows hug their content with 8 either side — 40 for a glyph,
+       52 with a disclosure's caret — so the fill and focus ring are even on
+       both sides. They start at the rail's same inset rather than centring,
+       so every glyph stays on one axis and a caret only adds width to the
+       right. Expanded rows fill the rail. */
+    collapsed ? 'w-fit px-2' : 'w-full gap-2 px-2',
     selected
       ? 'bg-surface-brand-subtle font-medium text-text-brand-strong'
       : 'text-text-secondary hover:bg-surface-brand-faint',
