@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 /* Storybook's own hooks, not React's: a story function can't mix the two,
    and `useArgs` is a Storybook hook. */
-import { useArgs, useEffect, useState } from 'storybook/preview-api';
+import { useArgs, useEffect, useState, useStoryContext } from 'storybook/preview-api';
 import { Sidebar, NAV_BY_USER_TYPE, type SidebarUserType } from './Sidebar';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
@@ -43,20 +43,21 @@ const Stage = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-screen bg-surface-canvas">{children}</div>
 );
 
-/* The floating double-chevron really collapses and expands the rail. The
-   story keeps its own state, because on a Docs page Storybook re-renders only
-   the primary story when an arg changes — a toggle that only wrote the arg
-   did nothing on every other story there. It still writes the arg back, and
-   follows it, so the Controls panel and the button stay in step on a story's
-   own page. */
+/* The floating double-chevron really collapses and expands the rail. Each
+   story keeps its own state. On a story's own page it also writes the
+   `collapsed` arg and follows it, so the Controls panel and the button stay
+   in step. On a Docs page it doesn't write the arg: there Storybook
+   re-renders only the primary story on an arg change, and Default appears
+   twice sharing one set of args, so writing it made the toggles fight. */
 const useCollapseToggle = (fromArgs?: boolean) => {
   const [, updateArgs] = useArgs<{ collapsed?: boolean }>();
+  const { viewMode } = useStoryContext();
   const [collapsed, setCollapsed] = useState(!!fromArgs);
   useEffect(() => setCollapsed(!!fromArgs), [fromArgs]);
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
-    updateArgs({ collapsed: next });
+    if (viewMode !== 'docs') updateArgs({ collapsed: next });
   };
   return [collapsed, toggle] as const;
 };
