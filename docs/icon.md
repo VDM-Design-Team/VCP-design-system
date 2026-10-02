@@ -91,6 +91,14 @@ none of which share a name with what the export asked for. The
 `IconName` union derives from that object, so TypeScript picks it up with no other
 change.
 
+**Filled glyphs.** `Icon` is `regular` weight, but a few places in the design use
+Phosphor's `fill` style (Figma's `Style=Fill`) — for now, the title icon on
+`StatCard`. Those ship alongside their regular sibling under Phosphor's own
+`-fill` suffix (`note-pencil-fill`, `check-circle-fill`, `warning-fill`,
+`users-fill`, `clock-fill`, `chats-circle-fill`, `graph-fill`, `file-fill`),
+copied from `@phosphor-icons/core/assets/fill/` the same way. Add another by the
+same route; don't mix the two weights inside one row.
+
 ## In-house glyphs
 
 Where Phosphor has no equivalent, VCP draws its own. They live in `CUSTOM_ICONS`
