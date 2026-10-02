@@ -41,7 +41,7 @@ Set `aria-label` on an option whose `label` isn't plain text.
 | Unselected label | `text.tertiary` → `text.primary` on hover |
 | Disabled label | `text.disabled` |
 | Focus ring | `stroke.focused` at 2px |
-| Type | `type.label-md` (`sm`) / `type.label-lg` (`md`) |
+| Type | `type.label-sm-medium` (`sm`) / `type.label-sm-medium` (`md`) |
 | Error stroke | `accent.critical.outline.border.default` — the stroke `Input` draws when invalid |
 | Success check | `accent.success.tonal.content.default` |
 | Pending label | `text.tertiary` — the selected label mutes to the unselected colour |
@@ -104,7 +104,7 @@ forty lines of parent code, and they run as tests.
   things make up for it: the label darkens from `text.tertiary` to `text.primary`
   (6.9:1 against the track, 20:1 on the selected surface), and the segment lifts —
   `shadow.card` gives a shape cue that survives a greyscale check. Label weight
-  does *not* change: `type.label-lg` carries weight 500 as part of the token, and
+  does *not* change: `type.label-sm-medium` carries weight 500 as part of the token, and
   the ramp has no 500/400 pair at 13px, so a weight shift can't be done
   consistently across both sizes without a new token. If you want the selected
   *surface* itself to clear 3:1, that also needs a new token — raise it with the

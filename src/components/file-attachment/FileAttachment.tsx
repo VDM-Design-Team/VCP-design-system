@@ -60,10 +60,10 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
             <Icon name={KIND_ICON[kind]} size="lg" aria-hidden="true" />
           )}
         </span>
-        <span className="w-full truncate text-left text-label-sm text-text-secondary" title={name}>
+        <span className="w-full truncate text-left text-caption-md-medium text-text-secondary" title={name}>
           {name}
         </span>
-        {size && <span className="w-full text-left text-label-sm text-text-subtle">{size}</span>}
+        {size && <span className="w-full text-left text-caption-md-medium text-text-subtle">{size}</span>}
       </>
     );
 

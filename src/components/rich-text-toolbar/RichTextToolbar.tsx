@@ -149,7 +149,7 @@ export const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarP
                   {'icon' in spec ? (
                     <Icon name={spec.icon} size="sm" aria-hidden="true" />
                   ) : (
-                    <span aria-hidden="true" className={cn('text-label-md', spec.letterClass)}>
+                    <span aria-hidden="true" className={cn('text-label-sm-medium', spec.letterClass)}>
                       {spec.letter}
                     </span>
                   )}

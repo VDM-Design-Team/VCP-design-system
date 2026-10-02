@@ -44,9 +44,9 @@ a hint line to explain it, you want a card-style chooser, not this component.
 | Selected dot, disabled | `bg-action-primary-surface-disabled` |
 | Ring, disabled | `border-stroke-subtle` on `bg-surface-neutral-faint` |
 | Focus ring | `outline-stroke-focused`, 2px, 2px offset |
-| Legend | `text-label-md` / `text-text-primary` |
-| Option label | `text-body-md` / `text-text-primary` |
-| Hint | `text-caption-md` / `text-text-tertiary` |
+| Legend | `text-label-sm-medium` / `text-text-primary` |
+| Option label | `text-body-sm-regular` / `text-text-primary` |
+| Hint | `text-caption-md-medium` / `text-text-tertiary` |
 | Label / hint, disabled | `text-text-disabled` |
 | Radius | `rounded-pill` (control), `rounded-md` (nothing else) |
 

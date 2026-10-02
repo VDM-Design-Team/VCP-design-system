@@ -76,8 +76,8 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 <div>                           backdrop — fixed inset-0 · z-50 · surface.overlay · p-6 · grid place-items-center
   <div role="dialog">           surface.elevated · shadow.modal · radius.md · max-h-full · size max-width
     <header>                    px-6 pt-5 — only when there is heading text or a close button
-      <h2>                      type.heading-md · text.primary          → aria-labelledby
-      <p>                       type.body-sm · text.tertiary            → aria-describedby
+      <h2>                      type.title-md-semibold · text.primary          → aria-labelledby
+      <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
       IconButton                icon "x" · md (40 target) · text.primary · pulled into the padding
     <div>                       px-6 pt-5 · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
     <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
@@ -91,9 +91,9 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 | Panel surface | `surface.elevated` | `bg-surface-elevated` |
 | Elevation | `shadow.modal` | `shadow-modal` |
 | Radius | `radius.md` | `rounded-md` |
-| Title type | `type.heading-md` | `text-heading-md` |
+| Title type | `type.title-md-semibold` | `text-title-md-semibold` |
 | Title colour | `text.primary` | `text-text-primary` |
-| Description type | `type.body-sm` | `text-body-sm` |
+| Description type | `type.caption-md-regular` | `text-caption-md-regular` |
 | Description colour | `text.tertiary` | `text-text-tertiary` |
 | Body colour | `text.secondary` | `text-text-secondary` |
 | Footer surface | none — the panel's `surface.elevated` carries through | — |
@@ -349,8 +349,8 @@ stories are where the behaviour lives.
 | `boxShadow: 0 24px 64px rgba(2,6,23,.28)` | `shadow-modal` | `shadow.modal` is that shadow, to the offset and blur |
 | `borderRadius: 12` | `rounded-md` (8) | The radius scale stops at `md`. Reported, not invented |
 | `zIndex: 100` | `z-50` | There is no z-index token; `z-50` is Tailwind's top default layer |
-| `font: '600 18px/1.3'` on the title | `text-heading-md` | Type ramp only. 18 is not a step; `heading-md` is 20/1.3 semibold |
-| `font: '400 13px/1.5'` on the description | `text-body-sm` | Same. `body-sm` is 12/16 regular |
+| `font: '600 18px/1.3'` on the title | `text-title-md-semibold` | Type ramp only. 18 is not a step; `title-md-semibold` is 20/28 semibold |
+| `font: '400 13px/1.5'` on the description | `text-caption-md-regular` | Same. `caption-md-regular` is 12/16 regular |
 | `borderTop: 1px solid stroke.subtle` on the footer | Dropped entirely | The dialog is one sheet; whitespace separates the actions (11 Sep 2026) |
 | `gap: 10` in the footer | `gap-3` (12) | 10 is not on the scale |
 | Hand-rolled 32px close `<button>` | The real `IconButton`, `md` | 40 is the system's minimum target, and `IconButton` makes the name mandatory |
@@ -379,8 +379,9 @@ Reported, not invented — nothing new was added to `tokens/` for this component
    system does not encode, so `size` sits on Tailwind's numeric spacing scale.
    A `size.dialog.{sm,md,lg,xl}` set would make these values reviewable in Figma
    instead of buried in a `cva`.
-5. **No 18/1.3 semibold step.** Between `heading-sm` (16/1.35) and `heading-md`
-   (20/1.3) there is nothing at 18. `heading-md` was used unchanged.
+5. **No 18/1.3 semibold step.** Between `title-sm-semibold` (16px, 24px line-height)
+   and `title-md-semibold` (20px, 28px line-height) there is nothing at 18.
+   `title-md-semibold` was used unchanged.
 6. **`shadow.modal` has no dark override.** A 28%-black shadow on
    `dark.surface.elevated` does almost nothing; in dark the scrim alone separates
    the panel from the page. `shadow.*` has no dark scale at all.

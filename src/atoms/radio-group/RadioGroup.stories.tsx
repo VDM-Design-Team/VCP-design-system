@@ -90,7 +90,7 @@ export const Controlled: Story = {
     return (
       <div className="flex flex-col gap-4">
         <RadioGroup {...args} value={value} onChange={setValue} defaultValue={undefined} />
-        <p className="font-sans text-body-sm text-text-secondary">
+        <p className="font-sans text-caption-md-regular text-text-secondary">
           Selected: <code>{value}</code>
         </p>
       </div>
