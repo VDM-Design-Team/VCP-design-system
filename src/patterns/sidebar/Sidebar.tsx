@@ -92,6 +92,11 @@ export interface SidebarProps extends Omit<React.HTMLAttributes<HTMLElement>, 'o
   items?: readonly SidebarNavItem[];
   /** The `key` of the current row. */
   active?: string;
+  /**
+   * Keys of the rows with sub-items that start open — `'archive'`,
+   * `'planning'`. Each still opens and closes on its own after that.
+   */
+  defaultOpen?: readonly string[];
   onNavigate?: (key: string) => void;
   /** The 76-wide rail: glyphs only, labels in tooltips. */
   collapsed?: boolean;
@@ -116,6 +121,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
       userType = 'user',
       items,
       active,
+      defaultOpen,
       onNavigate,
       collapsed,
       onToggleCollapse,
@@ -140,6 +146,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           selected={active === item.key}
           collapsed={collapsed}
           items={item.items}
+          defaultOpen={defaultOpen?.includes(item.key)}
         />
       );
       /* The label is hidden in the rail, so the tooltip is the only way a

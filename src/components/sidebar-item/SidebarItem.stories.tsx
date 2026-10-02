@@ -99,7 +99,8 @@ export const ExpandableSelected: Story = {
  * The 76px rail. The label is hidden but survives as the accessible name, so
  * a screen reader still reads "Dashboard". Sighted users get it back from a
  * `Tooltip` — which `Sidebar` adds, not this component, because a tooltip on
- * every row of an expanded sidebar would be noise.
+ * every row of an expanded sidebar would be noise. `Archive` has sub-items:
+ * its caret shrinks to 12 and sits right after the glyph.
  */
 export const Collapsed: Story = {
   render: () => (
@@ -115,6 +116,14 @@ export const Collapsed: Story = {
           <SidebarItem label={label} icon={icon} href="#" collapsed selected={selected} />
         </Tooltip>
       ))}
+      <Tooltip content="Archive" placement="right">
+        <SidebarItem
+          label="Archive"
+          icon="archive"
+          collapsed
+          items={[{ label: 'Completed' }, { label: 'Rejected' }, { label: 'Backlogs' }]}
+        />
+      </Tooltip>
     </Rail>
   ),
 };

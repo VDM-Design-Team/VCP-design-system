@@ -1,5 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+/* Storybook's own hooks, not React's: a story function can't mix the two,
+   and `useArgs` is a Storybook hook. */
+import { useArgs, useEffect, useState, useStoryContext } from 'storybook/preview-api';
 import { Sidebar, NAV_BY_USER_TYPE, type SidebarUserType } from './Sidebar';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
@@ -40,13 +43,39 @@ const Stage = ({ children }: { children: React.ReactNode }) => (
   <div className="flex h-screen bg-surface-canvas">{children}</div>
 );
 
+/* The floating double-chevron really collapses and expands the rail. Each
+   story keeps its own state. On a story's own page it also writes the
+   `collapsed` arg and follows it, so the Controls panel and the button stay
+   in step. On a Docs page it doesn't write the arg: there Storybook
+   re-renders only the primary story on an arg change, and Default appears
+   twice sharing one set of args, so writing it made the toggles fight. */
+const useCollapseToggle = (fromArgs?: boolean) => {
+  const [, updateArgs] = useArgs<{ collapsed?: boolean }>();
+  const { viewMode } = useStoryContext();
+  const [collapsed, setCollapsed] = useState(!!fromArgs);
+  useEffect(() => setCollapsed(!!fromArgs), [fromArgs]);
+  const toggle = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    if (viewMode !== 'docs') updateArgs({ collapsed: next });
+  };
+  return [collapsed, toggle] as const;
+};
+
 /** The default rail, as a `user` sees it. */
 export const Default: Story = {
   render: (args) => {
-    const [active, setActive] = React.useState('dashboard');
+    const [active, setActive] = useState('dashboard');
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
     return (
       <Stage>
-        <Sidebar {...args} active={active} onNavigate={setActive} onToggleCollapse={() => {}} />
+        <Sidebar
+          {...args}
+          collapsed={collapsed}
+          active={active}
+          onNavigate={setActive}
+          onToggleCollapse={toggle}
+        />
       </Stage>
     );
   },
@@ -76,11 +105,14 @@ export const EveryUserType: Story = {
 /** The 76-wide rail. Every row keeps its name in a tooltip and in `aria-label`. */
 export const Collapsed: Story = {
   args: { collapsed: true },
-  render: (args) => (
-    <Stage>
-      <Sidebar {...args} onToggleCollapse={() => {}} />
-    </Stage>
-  ),
+  render: function Render(args) {
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
+    return (
+      <Stage>
+        <Sidebar {...args} collapsed={collapsed} onToggleCollapse={toggle} />
+      </Stage>
+    );
+  },
 };
 
 /** Expanded and collapsed side by side — the glyphs hold their axis. */
@@ -95,18 +127,29 @@ export const BothWidths: Story = {
 };
 
 /**
- * `Archive` and `Planning` are the two rows with sub-items. Open, the group
- * lifts onto an elevated card — `SidebarItem` does that, not this.
+ * Every rail fully expanded — each section with sub-items open — for the
+ * user type picked in the controls. `Archive` is in every rail but Super
+ * Admin's, `Planning` only in Admin Dev's. Open, a group lifts onto an
+ * elevated card — `SidebarItem` does that, not this.
  */
-export const ExpandedSection: Story = {
-  parameters: { controls: { disable: true } },
-  render: () => {
-    const nav = NAV_BY_USER_TYPE['admin-dev'].map((i) =>
-      i.key === 'planning' ? { ...i, items: i.items } : i,
-    );
+export const FullyExpanded: Story = {
+  args: { userType: 'admin-dev' },
+  argTypes: { showDomainSelector: { control: false } },
+  render: function Render(args) {
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
+    const userType = args.userType ?? 'user';
+    const open = NAV_BY_USER_TYPE[userType].filter((i) => i.items?.length).map((i) => i.key);
     return (
       <Stage>
-        <Sidebar userType="admin-dev" items={nav} active="planning" />
+        {/* Keyed by user type: `defaultOpen` is a starting state, so switching
+            rails in the controls remounts with that rail's sections open. */}
+        <Sidebar
+          key={userType}
+          {...args}
+          collapsed={collapsed}
+          defaultOpen={open}
+          onToggleCollapse={toggle}
+        />
       </Stage>
     );
   },
@@ -122,11 +165,28 @@ export const WithDomainSelector: Story = {
     domain: 'Design',
     domains: ['Design', 'Development'],
   },
-  render: (args) => (
-    <Stage>
-      <Sidebar {...args} onToggleCollapse={() => {}} />
-    </Stage>
-  ),
+  render: function Render(args) {
+    const [collapsed, toggle] = useCollapseToggle(args.collapsed);
+    return (
+      <Stage>
+        <Sidebar {...args} collapsed={collapsed} onToggleCollapse={toggle} />
+      </Stage>
+    );
+  },
+};
+
+/* Controls are off in the side-by-side story, so each rail keeps its own
+   collapsed state and the two toggle independently. */
+const ToggleableRail = () => {
+  const [collapsed, setCollapsed] = React.useState(false);
+  return (
+    <Sidebar
+      userType="admin"
+      active="my-values"
+      collapsed={collapsed}
+      onToggleCollapse={() => setCollapsed((c) => !c)}
+    />
+  );
 };
 
 /** Every fill is a token, so dark comes free. */
@@ -137,7 +197,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex h-screen bg-surface-canvas">
-            <Sidebar userType="admin" active="my-values" onToggleCollapse={() => {}} />
+            <ToggleableRail />
           </div>
         </div>
       ))}
