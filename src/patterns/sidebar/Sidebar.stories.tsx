@@ -1,6 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useArgs } from 'storybook/preview-api';
+/* Storybook's own hooks, not React's: a story function can't mix the two,
+   and `useArgs` is a Storybook hook. */
+import { useArgs, useEffect, useState } from 'storybook/preview-api';
 import { Sidebar, NAV_BY_USER_TYPE, type SidebarUserType } from './Sidebar';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
@@ -49,8 +51,8 @@ const Stage = ({ children }: { children: React.ReactNode }) => (
    own page. */
 const useCollapseToggle = (fromArgs?: boolean) => {
   const [, updateArgs] = useArgs<{ collapsed?: boolean }>();
-  const [collapsed, setCollapsed] = React.useState(!!fromArgs);
-  React.useEffect(() => setCollapsed(!!fromArgs), [fromArgs]);
+  const [collapsed, setCollapsed] = useState(!!fromArgs);
+  useEffect(() => setCollapsed(!!fromArgs), [fromArgs]);
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
@@ -62,7 +64,7 @@ const useCollapseToggle = (fromArgs?: boolean) => {
 /** The default rail, as a `user` sees it. */
 export const Default: Story = {
   render: (args) => {
-    const [active, setActive] = React.useState('dashboard');
+    const [active, setActive] = useState('dashboard');
     const [collapsed, toggle] = useCollapseToggle(args.collapsed);
     return (
       <Stage>
