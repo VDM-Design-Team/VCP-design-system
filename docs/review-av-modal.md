@@ -77,7 +77,7 @@ what `RejectionReason` was built for.
 | `avName` | `string` | `'AV Name'` | In the title |
 | `estimate` / `completionDate` | `string` | — | Em dash when absent |
 | `links` | `string[]` | `[]` | Rendered as real links |
-| `attachments` | `{ name, size?, thumb? }[]` | `[]` | Tiles, or the empty sentence |
+| `attachments` | `{ name, thumb? }[]` | `[]` | Tiles, or the empty sentence |
 | `domainOption` | `boolean` | `false` | Controlled |
 | `onDomainOptionChange` | `(value: boolean) => void` | — | |
 | `loading` | `boolean` | `false` | Spins whichever answer is in flight |

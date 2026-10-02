@@ -2,6 +2,35 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — `FileAttachment` rebuilt to Figma's card (2 October 2026)
+
+**The tile now matches Figma's `_File_Attachment_Card` and its states.** Before,
+the code drew a thumbnail well with a smaller name and a file size underneath;
+Figma draws one bordered card with the glyph over the name, and nothing else.
+
+- **One card**, glyph (32) centred over the name, name inside the border.
+- **Name** in `body-sm-regular` (was `caption-md-medium`). A long name keeps
+  its extension and shortens the stem instead: "2)-Curr… .pdf".
+- **No file size**, and the `size` prop is gone.
+- **Hover** fills the card `surface.brand.faint`; **pressed** fills it
+  `surface.brand.subtle` and hides the ✕. These replace the border tints this
+  PR first shipped, which were a best guess before Figma's states frame was read.
+- **Remove** is Figma's red-tonal round button in the card's corner.
+- **Domain badge** is Figma's neutral-tonal pill with a pen-nib glyph, and a
+  new `domainIcon` prop for other domains' glyphs.
+
+New tokens (minor): `neutral.tonal.surface.default` and
+`neutral.tonal.content.default`, Figma's own variables for the badge. New
+glyph: Phosphor `pen-nib`.
+
+`HandoffAVModal` and `ReviewAVModal` pass their `attachments` straight into
+FileAttachment, so their attachment items lose `size` too: the field would
+otherwise be accepted and silently never shown.
+
+Migration: delete `size="…"` from any `<FileAttachment>`, and `size` from
+the items in either modal's `attachments`. Nothing else changes. 0.1.0 is
+unreleased, so the version isn't bumped, per the convention above.
+
 ### Breaking — 24 September 2026
 
 **The type ramp gains a weight per size.** `tokens/semantic/type.json` goes
