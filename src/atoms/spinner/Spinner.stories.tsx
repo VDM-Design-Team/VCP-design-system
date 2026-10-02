@@ -38,7 +38,7 @@ export const Sizes: Story = {
       {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex flex-col items-center gap-2">
           <Spinner {...args} size={size} />
-          <span className="text-caption-sm text-text-subtle">{size}</span>
+          <span className="text-caption-sm-semibold text-text-subtle">{size}</span>
         </div>
       ))}
     </div>
@@ -75,7 +75,7 @@ export const SilentInsideAControl: Story = {
   render: (args) => (
     <span
       aria-busy
-      className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-action-primary-surface-default px-4 font-sans text-label-lg text-action-primary-content-default"
+      className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-action-primary-surface-default px-4 font-sans text-label-sm-medium text-action-primary-content-default"
     >
       <Spinner {...args} />
       Saving…

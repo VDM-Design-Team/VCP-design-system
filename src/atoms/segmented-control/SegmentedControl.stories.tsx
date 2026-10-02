@@ -102,7 +102,7 @@ export const Controlled: Story = {
     return (
       <div className="flex flex-col gap-2">
         <SegmentedControl {...args} value={value} onChange={setValue} />
-        <p className="text-body-sm text-text-secondary">Showing: {value}</p>
+        <p className="text-caption-md-regular text-text-secondary">Showing: {value}</p>
       </div>
     );
   },

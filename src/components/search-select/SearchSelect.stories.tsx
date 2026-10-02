@@ -49,7 +49,7 @@ export const Default: Story = {
     return (
       <div className="flex h-80 w-72 flex-col gap-3">
         <SearchSelect {...args} value={value} onChange={setValue} aria-label="Assignee" />
-        <span className="font-sans text-body-sm text-text-tertiary">
+        <span className="font-sans text-caption-md-regular text-text-tertiary">
           Chosen: {value ?? '—'}
         </span>
       </div>
@@ -74,7 +74,7 @@ export const Multiple: Story = {
           placeholder="Add watchers…"
           aria-label="Watchers"
         />
-        <span className="font-sans text-body-sm text-text-tertiary">
+        <span className="font-sans text-caption-md-regular text-text-tertiary">
           {value.length ? value.join(', ') : 'Nobody yet'}
         </span>
       </div>

@@ -87,7 +87,7 @@ export function RejectPendingAVModal({
         {/* The design shows a visible label above the select. `RejectionReason`
             names its own select through `label`, so both come from one
             constant and cannot drift — see the doc. */}
-        <span className="text-label-md text-text-primary">{REASON_LABEL}</span>
+        <span className="text-label-sm-medium text-text-primary">{REASON_LABEL}</span>
         <RejectionReason
           reasons={PENDING_REJECTION_REASONS}
           label={REASON_LABEL}

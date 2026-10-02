@@ -77,7 +77,7 @@ const positioner = cva(
 const bubble = cva([
   'rounded-sm px-2.5 py-1.5',
   'bg-surface-neutral-stronger text-text-inverted-primary',
-  'font-sans text-body-sm text-pretty',
+  'font-sans text-caption-md-regular text-pretty',
   'shadow-menu',
 ]);
 

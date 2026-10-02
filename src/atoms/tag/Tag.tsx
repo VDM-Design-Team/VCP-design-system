@@ -45,9 +45,9 @@ const tag = cva(
     variants: {
       size: {
         /* 24 tall — dense tables, inline beside body text. */
-        sm: 'h-6 gap-1 px-2 text-label-md',
+        sm: 'h-6 gap-1 px-2 text-label-sm-medium',
         /* 28 tall — the default, and what TypeTag/UrgencyTag already ship at. */
-        md: 'h-7 gap-2 px-2 text-label-lg',
+        md: 'h-7 gap-2 px-2 text-label-sm-medium',
       },
     },
     defaultVariants: { size: 'md' },

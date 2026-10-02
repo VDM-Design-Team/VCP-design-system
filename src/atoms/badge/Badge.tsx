@@ -49,9 +49,9 @@ const badge = cva(
     variants: {
       size: {
         /* 24 tall — dense tables, inline beside body text. ds-lint-ignore */
-        sm: 'h-6 gap-1 px-2 text-label-md',
+        sm: 'h-6 gap-1 px-2 text-label-sm-medium',
         /* 28 tall — the default, and what the Figma Badge ships at. ds-lint-ignore */
-        md: 'h-7 gap-2 px-2 text-label-lg',
+        md: 'h-7 gap-2 px-2 text-label-sm-medium',
       },
     },
     defaultVariants: { size: 'md' },

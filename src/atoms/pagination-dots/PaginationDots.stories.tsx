@@ -59,7 +59,7 @@ export const UnderACard: Story = {
     const slides = ['Welcome to VCP', 'Propose an Added Value', 'Track it to production'];
     return (
       <div className="flex w-96 flex-col items-center gap-4">
-        <div className="grid h-32 w-full place-items-center rounded-md border border-stroke-subtle bg-surface-elevated text-body-md text-text-secondary">
+        <div className="grid h-32 w-full place-items-center rounded-md border border-stroke-subtle bg-surface-elevated text-body-sm-regular text-text-secondary">
           {slides[index]}
         </div>
         <PaginationDots {...args} count={slides.length} index={index} onChange={setIndex} />

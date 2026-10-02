@@ -116,7 +116,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
         />
         <span
           className={cn(
-            'font-sans text-body-sm',
+            'font-sans text-caption-md-regular',
             disabled ? 'text-text-disabled' : 'text-text-secondary',
           )}
         >
@@ -124,7 +124,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
               colour is what the surface was designed around. */}
           <span
             className={cn(
-              'text-label-md',
+              'text-label-sm-medium',
               !disabled && (error ? 'text-accent-critical-tonal-content-default' : 'text-text-link-default'),
             )}
           >
@@ -136,7 +136,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           <span
             id={messageId}
             className={cn(
-              'font-sans text-label-sm',
+              'font-sans text-caption-md-medium',
               error
                 ? 'text-accent-critical-tonal-content-default'
                 : disabled

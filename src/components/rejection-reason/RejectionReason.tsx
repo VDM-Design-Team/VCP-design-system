@@ -165,7 +165,7 @@ export const RejectionReason = React.forwardRef<HTMLDivElement, RejectionReasonP
         />
 
         {chosen?.description && (
-          <p id={descriptionId} className="text-body-sm text-text-tertiary">
+          <p id={descriptionId} className="text-caption-md-regular text-text-tertiary">
             {chosen.description}
           </p>
         )}

@@ -70,7 +70,7 @@ export const Matrix: Story = {
     <div className="flex flex-col gap-3">
       {VARIANTS.map((variant) => (
         <div key={variant} className="flex items-center gap-3">
-          <span className="w-16 text-label-sm text-text-subtle">{variant}</span>
+          <span className="w-16 text-caption-md-medium text-text-subtle">{variant}</span>
           {TONES.map((tone) => (
             <Tag {...args} key={tone} variant={variant} tone={tone}>
               {tone}
@@ -91,7 +91,7 @@ export const Sizes: Story = {
     <div className="flex flex-col gap-4">
       {(['sm', 'md'] as const).map((size) => (
         <div key={size} className="flex flex-wrap items-center gap-2">
-          <span className="w-8 text-caption-sm text-text-tertiary">{size}</span>
+          <span className="w-8 text-caption-sm-semibold text-text-tertiary">{size}</span>
           {TONES.map((tone) => (
             <Tag {...args} key={tone} tone={tone} size={size}>
               {tone}
@@ -130,7 +130,7 @@ export const BesideBadge: Story = {
   render: () => (
     <div className="flex items-center gap-3">
       <Tag tone="brand">Tag</Tag>
-      <span className="text-label-sm text-text-subtle">rounded-sm</span>
+      <span className="text-caption-md-medium text-text-subtle">rounded-sm</span>
     </div>
   ),
 };
