@@ -71,7 +71,7 @@ Everything else (`data-*`, `onMouseEnter`, …) is forwarded to the wrapper.
 | Panel shadow | `shadow.menu` | `shadow-menu` |
 | Radius | `radius.md` | `rounded-md` |
 | Panel text | `text.secondary` | `text-text-secondary` |
-| Panel type | `type.body-md` | `text-body-md` |
+| Panel type | `type.body-sm-regular` | `text-body-sm-regular` |
 | Type family | `type.font.sans` (Poppins) | `font-sans` |
 | Padding, width, offset | Tailwind numeric scale — VCP's spacing scale | `p-4`, `w-56` / `w-72` / `w-96`, `mt-2` / `mb-2` |
 

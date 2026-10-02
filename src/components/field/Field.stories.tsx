@@ -13,7 +13,7 @@ function DemoInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
       {...props}
       className={
         'h-10 w-full rounded-md border border-stroke-default bg-surface-elevated px-3 ' +
-        'font-sans text-body-md text-text-primary placeholder:text-text-subtle ' +
+        'font-sans text-body-sm-regular text-text-primary placeholder:text-text-subtle ' +
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused ' +
         'aria-invalid:border-accent-critical-outline-border-default'
       }
@@ -28,7 +28,7 @@ function DemoTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) 
       rows={3}
       className={
         'w-full rounded-md border border-stroke-default bg-surface-elevated p-3 ' +
-        'font-sans text-body-md text-text-primary placeholder:text-text-subtle ' +
+        'font-sans text-body-sm-regular text-text-primary placeholder:text-text-subtle ' +
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused ' +
         'aria-invalid:border-accent-critical-outline-border-default'
       }
@@ -42,7 +42,7 @@ function DemoSelect(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
       {...props}
       className={
         'h-10 w-full rounded-md border border-stroke-default bg-surface-elevated px-3 ' +
-        'font-sans text-body-md text-text-primary ' +
+        'font-sans text-body-sm-regular text-text-primary ' +
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused'
       }
     >

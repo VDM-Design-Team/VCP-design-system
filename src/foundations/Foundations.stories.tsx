@@ -94,13 +94,13 @@ const actionTokens = tokens.action as Record<
 export const Colors: StoryObj = {
   render: () => (
     <div className="p-8 bg-surface-canvas">
-      <h2 className="text-heading-lg font-semibold mb-xs">Semantic — use these in components</h2>
-      <h3 className="text-body-sm text-text-secondary mb-1">Surface → bg-*</h3>
+      <h2 className="text-heading-lg-semibold font-semibold mb-xs">Semantic — use these in components</h2>
+      <h3 className="text-caption-md-regular text-text-secondary mb-1">Surface → bg-*</h3>
       <Grid>{group(flat(tokens.surface), 'surface', 'bg-surface')}</Grid>
-      <h3 className="text-body-sm text-text-secondary mb-1">Text → text-*</h3>
+      <h3 className="text-caption-md-regular text-text-secondary mb-1">Text → text-*</h3>
       <Grid>{group(flat(tokens.text), 'text', 'text-text')}</Grid>
-      <h2 className="text-heading-lg font-semibold mb-1">Action — grouped by part</h2>
-      <p className="text-body-sm text-text-secondary mb-2">
+      <h2 className="text-heading-lg-semibold font-semibold mb-1">Action — grouped by part</h2>
+      <p className="text-caption-md-regular text-text-secondary mb-2">
         A control is built from three parts, and each part maps to a different Tailwind utility.
         Pick the part you are styling, then read across primary, secondary and tertiary to compare
         how the same part behaves at each level of prominence. Every row is one part's complete
@@ -108,13 +108,13 @@ export const Colors: StoryObj = {
       </p>
       {ACTION_PARTS.map(({ part, util, note }) => (
         <section key={part}>
-          <h3 className="text-body-sm text-text-secondary mb-1">
+          <h3 className="text-caption-md-regular text-text-secondary mb-1">
             {part} → <code>{util}-*</code>
           </h3>
-          <p className="text-caption-md text-text-secondary mb-2">{note}</p>
+          <p className="text-caption-md-medium text-text-secondary mb-2">{note}</p>
           {ACTION_PROMINENCE.filter((p) => part in actionTokens[p]).map((p) => (
             <div key={p}>
-              <h4 className="text-caption-md text-text-secondary mb-1 capitalize">{p}</h4>
+              <h4 className="text-caption-md-medium text-text-secondary mb-1 capitalize">{p}</h4>
               <Grid>
                 {group(
                   actionTokens[p][part],
@@ -127,11 +127,11 @@ export const Colors: StoryObj = {
           ))}
         </section>
       ))}
-      <h3 className="text-body-sm text-text-secondary mb-1">Stroke → border-*</h3>
+      <h3 className="text-caption-md-regular text-text-secondary mb-1">Stroke → border-*</h3>
       <Grid>{group(flat(tokens.stroke), 'stroke', 'border-stroke')}</Grid>
-      <h3 className="text-body-sm text-text-secondary mb-1">Accent</h3>
+      <h3 className="text-caption-md-regular text-text-secondary mb-1">Accent</h3>
       <Grid>{group(flat(tokens.accent), 'accent', 'bg-accent')}</Grid>
-      <h2 className="text-heading-lg font-semibold mb-xs">Core — referenced by semantic tokens only</h2>
+      <h2 className="text-heading-lg-semibold font-semibold mb-xs">Core — referenced by semantic tokens only</h2>
       {Object.entries(tokens.color).map(([name, ramp]) => (
         <div key={name}>
           <h3 className="text-sm text-text-secondary mb-2xs">{name}</h3>
@@ -145,7 +145,7 @@ export const Colors: StoryObj = {
 export const Shape: StoryObj = {
   render: () => (
     <div className="p-8 bg-surface-canvas">
-      <h2 className="text-heading-lg font-semibold mb-1">Radius → rounded-*</h2>
+      <h2 className="text-heading-lg-semibold font-semibold mb-1">Radius → rounded-*</h2>
       <Grid>
         {Object.entries(tokens.radius).map(([k, v]) => (
           <div key={k} className="flex items-center gap-2 border border-stroke-default rounded-md p-1.5">
@@ -158,7 +158,7 @@ export const Shape: StoryObj = {
           </div>
         ))}
       </Grid>
-      <h2 className="text-heading-lg font-semibold mb-1">Elevation → shadow-*</h2>
+      <h2 className="text-heading-lg-semibold font-semibold mb-1">Elevation → shadow-*</h2>
       <Grid>
         {Object.entries(tokens.shadow).map(([k, v]) => {
           const s = v as { color: string; offsetX: string; offsetY: string; blur: string; spread: string };

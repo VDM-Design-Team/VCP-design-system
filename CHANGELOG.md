@@ -2,6 +2,34 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — 24 September 2026
+
+**The type ramp gains a weight per size.** `tokens/semantic/type.json` goes
+from 15 tokens (one weight each) to 47, named `{tier}-{size}-{weight}`
+(`display-xl-bold`, `body-md-semibold`, …) instead of `{tier}-{size}`. See
+`docs/type-tokens.md` for the full ramp and the old→new class table.
+
+Every one of the ~115 files that referenced an old class (components,
+stories, docs) was migrated to the new token carrying the **same rendered
+size and weight** — this is a rename, not a restyle. Two exceptions, both
+sub-pixel and disclosed in `docs/type-tokens.md`: `label-md` (13px) and
+`label-sm` (11px) had no equivalent in the new ramp and round to the nearest
+step (14px and 12px). `display-lg`/`display-md` had no consumers to migrate.
+
+`src/lib/cn.ts`'s `TYPE_RAMP` (the list that keeps `tailwind-merge` from
+filing these as colour utilities) and `scripts/lint-hardcoded-values.mjs`'s
+drift check both updated to match — the check's own pattern for parsing that
+list needed widening, since it assumed every old class name ended in exactly
+two letters (`xl`, `lg`, `md`, `sm`), which no longer holds once class names
+end in a weight (`bold`, `semibold`, `medium`, `regular`).
+
+`Skeleton`'s `textStyle` prop is unaffected — its public keys
+(`'body-md'`, `'label-lg'`, …) are unchanged; only its internal CSS-variable
+lookup was repointed at the new matching token.
+
+Free in practice while 0.1.0 is unreleased and nothing outside this repo
+imports the package, which is why the version is not bumped.
+
 ### `AVTable` — the Added Value table (11 September 2026)
 
 The list every VCP workspace is built around. `DataTable` specialised, exactly

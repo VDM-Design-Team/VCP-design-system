@@ -98,15 +98,15 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
               )}
             >
               <Icon name="link" className="size-2.5" />
-              <span className="text-caption-md leading-none">{domainLabel}</span>
+              <span className="text-caption-md-medium leading-none">{domainLabel}</span>
             </span>
           )}
         </span>
         {domainLabel && <span className="sr-only">{domainLabel} domain.</span>}
-        <span className="w-full truncate text-left text-label-sm text-text-secondary" title={name}>
+        <span className="w-full truncate text-left text-caption-md-medium text-text-secondary" title={name}>
           {name}
         </span>
-        {size && <span className="w-full text-left text-label-sm text-text-subtle">{size}</span>}
+        {size && <span className="w-full text-left text-caption-md-medium text-text-subtle">{size}</span>}
       </>
     );
 

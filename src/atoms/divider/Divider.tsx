@@ -86,7 +86,7 @@ export const Divider = React.forwardRef<HTMLElement, DividerProps>(
           <span aria-hidden="true" className="h-px flex-1 border-0 bg-stroke-default" />
           <span
             aria-hidden={decorative ? undefined : true}
-            className="shrink-0 font-sans text-label-sm uppercase text-text-subtle"
+            className="shrink-0 font-sans text-caption-md-medium uppercase text-text-subtle"
           >
             {label}
           </span>

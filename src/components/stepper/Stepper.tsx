@@ -140,12 +140,12 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           /* font.family.numeric — this is a number, set as one. */
           className={cn(
             'w-14 min-w-0 border-0 bg-transparent text-center outline-none',
-            'font-numeric text-caption-md text-text-primary',
+            'font-numeric text-caption-md-medium text-text-primary',
             'disabled:cursor-not-allowed disabled:text-text-disabled',
           )}
         />
         {suffix && (
-          <span aria-hidden="true" className="grid place-items-center pr-2 font-sans text-body-sm text-text-tertiary">
+          <span aria-hidden="true" className="grid place-items-center pr-2 font-sans text-caption-md-regular text-text-tertiary">
             {suffix}
           </span>
         )}

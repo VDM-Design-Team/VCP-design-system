@@ -69,7 +69,7 @@ export const Sizes: Story = {
       {SIZES.map((size) => (
         <div key={size} className="flex flex-col items-center gap-2">
           <Avatar {...args} size={size} />
-          <span className="text-caption-sm text-text-tertiary">{size}</span>
+          <span className="text-caption-sm-semibold text-text-tertiary">{size}</span>
         </div>
       ))}
     </div>
@@ -111,15 +111,15 @@ export const BrokenImage: Story = {
     <div className="flex items-center gap-6">
       <div className="flex flex-col items-center gap-2">
         <Avatar {...args} name="Ali Rahman" src={photo(210)} />
-        <span className="text-caption-sm text-text-tertiary">loads</span>
+        <span className="text-caption-sm-semibold text-text-tertiary">loads</span>
       </div>
       <div className="flex flex-col items-center gap-2">
         <Avatar {...args} name="Ali Rahman" src="/no-such-portrait.png" />
-        <span className="text-caption-sm text-text-tertiary">404 → initials</span>
+        <span className="text-caption-sm-semibold text-text-tertiary">404 → initials</span>
       </div>
       <div className="flex flex-col items-center gap-2">
         <Avatar {...args} src="/no-such-portrait.png" />
-        <span className="text-caption-sm text-text-tertiary">404, no name → glyph</span>
+        <span className="text-caption-sm-semibold text-text-tertiary">404, no name → glyph</span>
       </div>
     </div>
   ),
@@ -159,7 +159,7 @@ export const ToneRange: Story = {
         {NAMES.map((name) => (
           <div key={name} className="flex items-center gap-2">
             <Avatar {...args} name={name} />
-            <span className="text-label-md text-text-secondary">{name}</span>
+            <span className="text-label-sm-medium text-text-secondary">{name}</span>
           </div>
         ))}
       </div>
@@ -167,7 +167,7 @@ export const ToneRange: Story = {
         {AVATAR_TONES.map((tone) => (
           <div key={tone} className="flex items-center gap-2">
             <Avatar {...args} tone={tone} initials="AB" />
-            <span className="text-caption-sm text-text-tertiary">
+            <span className="text-caption-sm-semibold text-text-tertiary">
               {tone} — {NAMES.filter((n) => toneForName(n) === tone).length} of {NAMES.length}
             </span>
           </div>
@@ -189,21 +189,21 @@ export const DecorativeVsStandalone: Story = {
       <div className="flex items-center gap-3">
         <Avatar {...args} name="Ali Rahman" />
         <div className="flex flex-col">
-          <span className="text-label-lg text-text-primary">Ali Rahman</span>
-          <span className="text-body-sm text-text-tertiary">
+          <span className="text-label-sm-medium text-text-primary">Ali Rahman</span>
+          <span className="text-caption-md-regular text-text-tertiary">
             decorative — the name beside it carries the meaning
           </span>
         </div>
       </div>
       <div className="flex items-center gap-3">
         <Avatar {...args} name="Ali Rahman" standalone />
-        <span className="text-body-sm text-text-tertiary">
+        <span className="text-caption-md-regular text-text-tertiary">
           <code>standalone</code> — nothing else names this person
         </span>
       </div>
       <div className="flex items-center gap-3">
         <Avatar {...args} name="Ali Rahman" label="Ali Rahman, owner" />
-        <span className="text-body-sm text-text-tertiary">
+        <span className="text-caption-md-regular text-text-tertiary">
           <code>label</code> — overrides what is announced, and implies standalone
         </span>
       </div>
