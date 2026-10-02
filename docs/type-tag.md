@@ -1,8 +1,8 @@
 # TypeTag
 
-An Added Value's type, as a glyph and a word — an atom, and the owner of VCP's
-type vocabulary: this file and its `.tsx` are where the type → glyph/colour
-mapping lives, and nowhere else.
+An Added Value's type, as a glyph and a word — a component, and the owner of
+VCP's type vocabulary: this file and its `.tsx` are where the type →
+glyph/colour mapping lives, and nowhere else.
 
 Read off the Figma `Type_Tag` set (`3491:6845`), audit batch 5,
 11 September 2026.
@@ -11,9 +11,14 @@ Read off the Figma `Type_Tag` set (`3491:6845`), audit batch 5,
 
 | Piece | Tier |
 |---|---|
+| `Tag` | atom |
 | `Icon` | sub-atomic |
 
 Generated from the real imports — `npm test` fails if this list drifts.
+`TypeTag` composes `Tag` (`variant="textual"`, `tone="neutral"`) rather than
+hand-rolling its own shell — which is also why this piece lives in
+`src/components/`, not `src/atoms/`: composing another piece of the system
+moves it down a tier, per CLAUDE.md's composition rule.
 
 ## When to use
 
@@ -76,5 +81,6 @@ same pixels under a different name. Read a spec off the canvas by value.
 ## Still open
 
 Figma draws tonal, faint-fill and outline styles for every type. None is
-assembled on any screen. When one is needed, add a `variant` here rather than a
-second component.
+assembled on any screen. `Tag` (the piece this composes) already supports all
+four styles — when one is needed here, pass `variant` through to the `Tag` this
+renders rather than building a second component.

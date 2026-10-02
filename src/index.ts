@@ -17,10 +17,9 @@ export * from './atoms/segmented-control';
 export * from './atoms/select';
 export * from './atoms/skeleton';
 export * from './atoms/spinner';
+export * from './atoms/tag';
 export * from './atoms/textarea';
 export * from './atoms/toggle';
-export * from './atoms/type-tag';
-export * from './atoms/urgency-tag';
 
 /* Components — units assembled from atoms (and other components). */
 export * from './components/accordion';
@@ -55,6 +54,8 @@ export * from './components/tag-editor';
 export * from './components/timeline';
 export * from './components/toast';
 export * from './components/tooltip';
+export * from './components/type-tag';
+export * from './components/urgency-tag';
 
 /* Patterns — 2+ components forming a page section. Templates — page layouts. */
 export * from './patterns';
