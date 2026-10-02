@@ -56,7 +56,7 @@ export interface ReviewAVModalProps {
   estimate?: string;
   completionDate?: string;
   links?: readonly string[];
-  attachments?: ReadonlyArray<{ name: string; size?: string; thumb?: string }>;
+  attachments?: ReadonlyArray<{ name: string; thumb?: string }>;
   /** The domain's one choice. Controlled. */
   domainOption?: boolean;
   onDomainOptionChange?: (value: boolean) => void;
@@ -167,7 +167,6 @@ export function ReviewAVModal({
                   <FileAttachment
                     key={file.name}
                     name={file.name}
-                    size={file.size}
                     thumb={file.thumb}
                     kind="image"
                   />

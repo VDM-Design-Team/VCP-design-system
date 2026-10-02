@@ -701,6 +701,18 @@
           "$value": "{color.slate.200}"
         }
       }
+    },
+    "tonal": {
+      "surface": {
+        "default": {
+          "$value": "{color.slate.200}"
+        }
+      },
+      "content": {
+        "default": {
+          "$value": "{color.slate.700}"
+        }
+      }
     }
   },
   "stroke": {
