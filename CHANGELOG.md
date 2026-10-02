@@ -2,6 +2,20 @@
 
 ## 0.1.0 — unreleased
 
+### Breaking — `FileAttachment` drops the file size (2 October 2026)
+
+**The tile no longer shows a file size, and the `size` prop is gone.** Figma's
+`_File_Attachment_Card` is the kind glyph and the file name, nothing else, so
+the small grey size line under the name was the code drifting from the design.
+
+`HandoffAVModal` and `ReviewAVModal` pass their `attachments` straight into
+FileAttachment, so their attachment items lose `size` too: the field would
+otherwise be accepted and silently never shown.
+
+Migration: delete `size="…"` from any `<FileAttachment>`, and `size` from
+the items in either modal's `attachments`. Nothing else changes. 0.1.0 is
+unreleased, so the version isn't bumped, per the convention above.
+
 ### Breaking — 24 September 2026
 
 **The type ramp gains a weight per size.** `tokens/semantic/type.json` goes

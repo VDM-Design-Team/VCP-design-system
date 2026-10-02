@@ -4,7 +4,7 @@ import { Icon, type IconName } from '../../atoms/icon';
 
 /**
  * FileAttachment — one attached file as a small tile: thumbnail or kind
- * glyph, name, size, optional open and remove. The gallery row under a
+ * glyph, name, optional open and remove. The gallery row under a
  * comment or an evidence panel is a run of these; `Dropzone` is how they
  * arrive, `AttachmentPreview` is where opening one leads.
  *
@@ -29,6 +29,9 @@ import { Icon, type IconName } from '../../atoms/icon';
  *   confirmed beyond the border-colour case; treat them as the best
  *   reading of the reference, not a measurement.
  *
+ * **No file size.** Figma's card is the glyph and the name, nothing else, so
+ * the old `size` line (and its prop) is gone.
+ *
  * Also new: **`domainLabel`**, a small corner badge (Figma's `Domain
  * Label=Yes` variant) — decorative on its own, so its text is repeated for
  * assistive tech via visually-hidden text rather than left `aria-hidden`
@@ -50,8 +53,6 @@ const KIND_ICON: Record<FileAttachmentKind, IconName> = {
 
 export interface FileAttachmentProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string;
-  /** Human-readable — '1.2 MB'. Formatting is the caller's. */
-  size?: string;
   kind?: FileAttachmentKind;
   /** Image src for a real thumbnail; otherwise the kind glyph. */
   thumb?: string;
@@ -67,7 +68,7 @@ export interface FileAttachmentProps extends React.HTMLAttributes<HTMLDivElement
 }
 
 export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentProps>(
-  ({ className, name, size, kind = 'doc', thumb, domainLabel, onClick, onRemove, ...props }, ref) => {
+  ({ className, name, kind = 'doc', thumb, domainLabel, onClick, onRemove, ...props }, ref) => {
     const preview = (
       <>
         <span
@@ -106,7 +107,6 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
         <span className="w-full truncate text-left text-caption-md-medium text-text-secondary" title={name}>
           {name}
         </span>
-        {size && <span className="w-full text-left text-caption-md-medium text-text-subtle">{size}</span>}
       </>
     );
 

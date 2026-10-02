@@ -1,7 +1,7 @@
 # FileAttachment
 
-One attached file as a small tile: thumbnail or kind glyph, name, size,
-optional open and remove.
+One attached file as a small tile: thumbnail or kind glyph and name,
+optional open and remove. No file size: Figma's card doesn't show one.
 
 ## Composed of
 
@@ -25,7 +25,6 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `name` | `string` | required | Truncates with a `title` tooltip; also names the ✕ ("Remove ${name}") |
-| `size` | `string` | — | Human-readable — '1.2 MB'. Formatting is the caller's |
 | `kind` | `image \| pdf \| doc \| csv \| video` | `doc` | Picks the glyph when there is no `thumb` |
 | `thumb` | `string` | — | Image src for a real thumbnail |
 | `domainLabel` | `string` | — | A short domain/workspace code as a corner badge on the thumbnail — "DS". Omit it and there's no badge |
@@ -48,8 +47,7 @@ sibling — a button never contains a button.
 ## Tokens
 
 Preview well `surface.canvas` on a `stroke.subtle` border (`radius.md`);
-kind glyph `text.tertiary`; name `label-sm` `text.secondary`; size
-`label-sm` `text.subtle`; hover lifts with `shadow.raised`. New glyphs
+kind glyph `text.tertiary`; name `label-sm` `text.secondary`; hover lifts with `shadow.raised`. New glyphs
 **`image`** and (for the preview panel) **`download-simple`** added from
 Phosphor per docs/icon.md.
 
@@ -77,11 +75,10 @@ a screen reader.
 | Pair | Light | Dark |
 |---|---|---|
 | Name under the tile | **9.90:1** | **14.48:1** |
-| Size line *(secondary info)* | **4.55:1** | **6.96:1** |
 
 ## Accessibility
 
-- Openable tile = real button whose name is the visible name + size; ✕ =
+- Openable tile = real button whose name is the visible file name; ✕ =
   "Remove ${name}" — ten tiles, ten distinct names.
 - The thumbnail is `alt=""` — the name below is the caption; announcing the
   filename twice is noise.
