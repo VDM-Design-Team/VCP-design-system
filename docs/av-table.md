@@ -158,11 +158,11 @@ supply. **Open question for design**, below.
   `surface.brand.faint`. Figma writes the word in `text.brand.medium`. One step
   of brand navy apart on the text; the `Badge` tone is used so every brand
   chip in the system stays one colour.
-- **Pagination is the repo's `Pagination`**, which draws arrows and five page
-  numbers. Figma's `VCP_Pagination` additionally draws First/Last buttons, an
-  items-per-page select and a "1–50 of 1,250" range. `docs/pagination.md` says
-  to extend that component rather than compose around it, so those three are a
-  follow-up on `Pagination`, not something rebuilt here.
+- **Pagination is the repo's `Pagination`**, which since 5 Oct 2026 draws
+  Figma's `VCP_Pagination`: First/Last, an ellipsis for long page counts, and —
+  when given `itemCount`, `pageSize` and `onPageSizeChange` — the Items select
+  and the "1-50 of 1,250" range. `AVTable` passes only the page props today,
+  so it shows Figma's Small version.
 - **Column widths** are `<col>` percentages, not Figma's grid `fr` tracks —
   `1fr` has no meaning in a table. Task Title takes 40%, matching its 4fr
   against six roughly-1fr columns.

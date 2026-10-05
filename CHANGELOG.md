@@ -2,6 +2,23 @@
 
 ## 0.1.0 — unreleased
 
+### `Pagination` — built to Figma's `VCP_Pagination` (5 October 2026)
+
+**New** (minor): **First** and **Last** buttons either end; an **ellipsis** for
+long page counts, with the first and last page always shown ("1 2 3 4 … 25");
+an **Items** per-page select (`pageSize`, `pageSizeOptions`,
+`onPageSizeChange`); a **range readout**, "1-50 of 1,250" (`itemCount` +
+`pageSize`); and `variant="compact"` for Figma's Tiny version without First and
+Last. Closes #114.
+
+**Changed, visually:** controls take Figma's `stroke.default` border and
+`text.primary` labels (were `stroke.subtle`, `text.secondary`); the active page
+is `surface.brand.strong` (was `action.primary`); the trailing "Page 3 of 12"
+is gone — Figma doesn't draw it, and the range readout says more. The window
+is no longer a fixed five numbers. The root is now a `<div>` around the
+`<nav>`; `ref` points at it. Every existing caller (`AVTable`) keeps working
+unchanged and now shows First and Last.
+
 ### `neutral.textual.content` — a token for content with no fill or border (5 October 2026)
 
 **New token** (minor): `neutral.textual.content` (`default` / `hover` /
