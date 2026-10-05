@@ -17,7 +17,7 @@ Follow-up to #126; built to Figma's attachments elements.
 
 **`Dropzone`**
 - **2 dashed `stroke.default` border** (was 1 dashed `stroke.field`) on `surface.neutral.faint`
-  (was `surface.elevated`); **24 padding, 8 gap**; a **48 `paperclip`** (was a 24 cloud).
+  (was `surface.elevated`); **24 padding, 8 gap**; a **32 `paperclip`** in `text.subtle` (was a 24 cloud).
 - **Copy:** the label defaults to **"Upload a file"** (was "Choose files") and the hint to
   "PNG, JPG, GIF, DOCX, CSV and PDF file up to 10MB"; line one is 14 regular `text.primary`
   with an underlined link-blue verb, the hint `caption-md-regular`.

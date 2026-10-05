@@ -15,7 +15,7 @@ import { Icon } from '../../atoms/icon';
  *
  * Built to Figma's `_Attachment_Drop_Container` (design review, 5 Oct 2026): a
  * 2 dashed `stroke.default` border over `surface.neutral.faint`, 24 padding,
- * 8 between a 48 paperclip and two lines — "Upload a file or drag and drop" in
+ * 8 between a 32 paperclip in `text.subtle` and two lines — "Upload a file or drag and drop" in
  * 14 regular (the link in link blue, the rest `text.primary`), then the accepted
  * types in `text.tertiary`, `caption-md-regular`. Three states:
  *
@@ -162,12 +162,10 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           name="paperclip"
           aria-hidden="true"
           className={cn(
-            'size-12 shrink-0',
-            disabled
-              ? 'text-text-disabled'
-              : error
-                ? 'text-accent-critical-tonal-content-default'
-                : 'text-text-tertiary',
+            'size-8 shrink-0',
+            /* `text.subtle` in every state but disabled (design review): the
+               error and drag-over states are told by the stroke and fill. */
+            disabled ? 'text-text-disabled' : 'text-text-subtle',
           )}
         />
         <span

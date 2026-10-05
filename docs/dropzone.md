@@ -52,7 +52,7 @@ again (the input resets after each hand-off).
 
 Built to Figma's `_Attachment_Drop_Container` (design review, 5 Oct 2026). The
 zone is a 2 dashed border, 24 padding, 8 between the parts, over `radius.md`. A
-48 `paperclip` (`text.tertiary`) sits above two lines: **"Upload a file or drag
+32 `paperclip` (`text.subtle`, in every state but disabled) sits above two lines: **"Upload a file or drag
 and drop"** in `body-sm-regular` (14 regular) — the link in `text.link.default`,
 underlined (the system's link style), the rest `text.primary` — and the accepted
 types in `text.tertiary`, `caption-md-regular`.
@@ -90,6 +90,8 @@ draws about 4-long dashes in Chromium. CSS cannot set it exactly without an SVG 
 | Link while dragging (line colour) on the drag-over tint | **13.69:1** | **9.04:1** |
 | Line one on the resting fill | **19.28:1** | **17.85:1** |
 | Hint on the resting fill | **7.24:1** | **12.02:1** |
+| Paperclip (`text.subtle`) on the resting fill | **4.55:1** | **6.96:1** |
+| Paperclip (`text.subtle`) on the drag-over tint | **3.23:1** | **3.53:1** |
 
 ⚠ **The resting border is well under the 3:1 a control boundary needs**, in both themes.
 The previous version used `stroke.field` (4.76:1) for exactly this reason; the design
