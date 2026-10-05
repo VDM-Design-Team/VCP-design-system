@@ -105,14 +105,21 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     /* Roving focus over the days: one tab stop; arrows move by day/week and
        drag the view across month boundaries. */
     const [focusIso, setFocusIso] = React.useState(() => value ?? toIso(new Date()));
-    const pendingFocus = React.useRef(false);
+    /* The day that should take focus once it has rendered — the date itself,
+       not a yes/no flag. React can flush an earlier render's effect at the
+       start of handling the next key; a flag would let that stale effect
+       focus the *old* day and clear itself. Holding the target means any
+       effect that runs focuses the right day, and only clears once it has. */
+    const pendingFocus = React.useRef<string | null>(null);
     const dayButtons = React.useRef(new Map<string, HTMLButtonElement>());
     const tabStop = inMonth(focusIso) ? focusIso : toIso(days[0]);
 
     React.useEffect(() => {
-      if (pendingFocus.current) {
-        pendingFocus.current = false;
-        dayButtons.current.get(focusIso)?.focus();
+      const target = pendingFocus.current;
+      const button = target ? dayButtons.current.get(target) : undefined;
+      if (button) {
+        pendingFocus.current = null;
+        button.focus();
       }
     });
 
@@ -121,8 +128,8 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
       target.setDate(target.getDate() + deltaDays);
       const targetIso = toIso(target);
       if ((min && targetIso < min) || (max && targetIso > max)) return;
+      pendingFocus.current = targetIso;
       setFocusIso(targetIso);
-      pendingFocus.current = true;
       if (!inMonth(targetIso)) setView(new Date(target.getFullYear(), target.getMonth(), 1));
     };
 

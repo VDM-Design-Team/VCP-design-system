@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fireEvent, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 import { Button } from '../../atoms/button';
@@ -337,6 +337,14 @@ export const LightAndDark: Story = {
    not the 6 the default would. */
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/* Move focus to an element. A window that isn't focused — a background tab, some
+   CI browsers — moves focus without firing focus events, which is what the
+   toast listens to, so fire the one the browser skipped. */
+const focusOn = (el: HTMLElement) => {
+  el.focus();
+  if (!document.hasFocus()) fireEvent.focusIn(el);
+};
+
 /** A toast that unmounts when it dismisses — as a caller's state would make it. */
 function Dismissing({ onDismiss, ...props }: React.ComponentProps<typeof Toast>) {
   const [shown, setShown] = React.useState(true);
@@ -358,7 +366,7 @@ export const AutoDismissesAfterItsDuration: Story = {
   parameters: { controls: { disable: true } },
   args: { onDismiss: fn() },
   render: (args) => (
-    <Dismissing tone="success" title="Draft saved" duration={600} onDismiss={args.onDismiss}>
+    <Dismissing tone="success" title="Draft saved" duration={1000} onDismiss={args.onDismiss}>
       Nothing to do.
     </Dismissing>
   ),
@@ -385,7 +393,7 @@ export const PausesOnHoverAndFocus: Story = {
         data-testid="hovered"
         tone="success"
         title="Deliverable submitted"
-        duration={600}
+        duration={1500}
         onDismiss={args.onDismiss}
         onPauseChange={args.onPauseChange}
       >
@@ -394,7 +402,7 @@ export const PausesOnHoverAndFocus: Story = {
       <Dismissing
         tone="info"
         title="Sync finished"
-        duration={600}
+        duration={1500}
         dismissLabel="Dismiss the sync message"
         onDismiss={args.onDismiss}
       >
@@ -405,13 +413,14 @@ export const PausesOnHoverAndFocus: Story = {
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
 
-    /* Hover: paused, and still there well past its 600ms. */
+    /* Hold both at once, before either 1.5s timer can run out: focus on the
+       second toast's dismiss control, the pointer over the first. */
+    const dismissSync = canvas.getByRole('button', { name: 'Dismiss the sync message' });
+    focusOn(dismissSync);
     await userEvent.hover(canvas.getByTestId('hovered'));
     await waitFor(() => expect(args.onPauseChange).toHaveBeenLastCalledWith(true));
-    /* Focus the second toast's dismiss control: that holds it too. */
-    const dismissSync = canvas.getByRole('button', { name: 'Dismiss the sync message' });
-    dismissSync.focus();
-    await sleep(1000);
+    /* Well past their 1.5s, both are still there. */
+    await sleep(2000);
     await expect(args.onDismiss).not.toHaveBeenCalled();
     await expect(canvas.getByText('Deliverable submitted')).toBeVisible();
     await expect(canvas.getByText('Sync finished')).toBeVisible();
@@ -424,7 +433,7 @@ export const PausesOnHoverAndFocus: Story = {
     /* Leave the first: it resumes and runs out. */
     await userEvent.unhover(canvas.getByTestId('hovered'));
     await waitFor(() => expect(args.onPauseChange).toHaveBeenLastCalledWith(false));
-    await waitFor(() => expect(args.onDismiss).toHaveBeenCalledTimes(2), { timeout: 2000 });
+    await waitFor(() => expect(args.onDismiss).toHaveBeenCalledTimes(2), { timeout: 3000 });
   },
 };
 
