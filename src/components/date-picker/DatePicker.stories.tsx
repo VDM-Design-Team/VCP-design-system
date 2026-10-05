@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DatePicker } from './DatePicker';
 import { Popover } from '../popover';
 import { Button } from '../../atoms/button';
@@ -149,4 +150,111 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+const day = (canvas: ReturnType<typeof within>, name: string) => canvas.getByRole('button', { name });
+
+/**
+ * **Flow:** the day grid is one tab stop, landing on the selected date. Arrows
+ * move by a day and a week; crossing into the next month moves the view with
+ * the focus, and the month heading (a polite live region) says so. Enter
+ * chooses the focused day.
+ */
+export const KeyboardGrid: Story = {
+  parameters: { controls: { disable: true } },
+  args: { value: '2026-09-14', onChange: fn() },
+  render: function Render(args) {
+    const [value, setValue] = React.useState(args.value);
+    return (
+      <DatePicker
+        {...args}
+        value={value}
+        onChange={(iso) => {
+          setValue(iso);
+          args.onChange?.(iso);
+        }}
+      />
+    );
+  },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    const heading = canvas.getByText('September 2026');
+    await expect(heading).toHaveAttribute('aria-live', 'polite');
+
+    /* One tab stop in the grid, and it is the selected day. */
+    const selected = day(canvas, '14 September 2026');
+    await expect(selected).toHaveAttribute('tabindex', '0');
+    await expect(selected).toHaveAttribute('aria-pressed', 'true');
+    await expect(day(canvas, '15 September 2026')).toHaveAttribute('tabindex', '-1');
+
+    selected.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await waitFor(() => expect(day(canvas, '15 September 2026')).toHaveFocus());
+    await userEvent.keyboard('{ArrowDown}');
+    await waitFor(() => expect(day(canvas, '22 September 2026')).toHaveFocus());
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(day(canvas, '21 September 2026')).toHaveFocus());
+    await userEvent.keyboard('{ArrowUp}');
+    await waitFor(() => expect(day(canvas, '14 September 2026')).toHaveFocus());
+
+    /* Across the month boundary: the view follows, and the heading changes. */
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}');
+    await waitFor(() => expect(day(canvas, '5 October 2026')).toHaveFocus());
+    await expect(canvas.getByText('October 2026')).toBeInTheDocument();
+    await userEvent.keyboard('{ArrowUp}');
+    await waitFor(() => expect(day(canvas, '28 September 2026')).toHaveFocus());
+    await expect(canvas.getByText('September 2026')).toBeInTheDocument();
+
+    /* Moving never chooses; Enter does. */
+    await expect(args.onChange).not.toHaveBeenCalled();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onChange).toHaveBeenCalledWith('2026-09-28');
+    await expect(day(canvas, '28 September 2026')).toHaveAttribute('aria-pressed', 'true');
+  },
+};
+
+/**
+ * **Flow:** with `min` and `max`, days outside the window are disabled and the
+ * arrows refuse to leave it.
+ */
+export const KeyboardRespectsBounds: Story = {
+  parameters: { controls: { disable: true } },
+  args: { value: '2026-09-14', min: '2026-09-07', max: '2026-09-25' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(day(canvas, '6 September 2026')).toBeDisabled();
+    await expect(day(canvas, '26 September 2026')).toBeDisabled();
+
+    day(canvas, '14 September 2026').focus();
+    await userEvent.keyboard('{ArrowUp}');
+    await waitFor(() => expect(day(canvas, '7 September 2026')).toHaveFocus());
+    /* A week before the minimum: refused, focus stays. */
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(day(canvas, '7 September 2026')).toHaveFocus();
+    /* A day before it: refused too. */
+    await userEvent.keyboard('{ArrowLeft}');
+    await expect(day(canvas, '7 September 2026')).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    await waitFor(() => expect(day(canvas, '21 September 2026')).toHaveFocus());
+    /* A week past the maximum: refused. */
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(day(canvas, '21 September 2026')).toHaveFocus();
+  },
+};
+
+/** **Flow:** the month buttons page the view and report it through `onMonthChange`. */
+export const MonthButtons: Story = {
+  parameters: { controls: { disable: true } },
+  args: { value: '2026-09-14', onMonthChange: fn() },
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Next month' }));
+    await expect(canvas.getByText('October 2026')).toBeInTheDocument();
+    await expect(args.onMonthChange).toHaveBeenLastCalledWith('2026-10-01');
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous month' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous month' }));
+    await expect(canvas.getByText('August 2026')).toBeInTheDocument();
+    await expect(args.onMonthChange).toHaveBeenLastCalledWith('2026-08-01');
+  },
 };
