@@ -2,6 +2,19 @@
 
 ## 0.1.0 — unreleased
 
+### AV table glyphs match Figma: the Urgent flame and the sort icons (5 October 2026)
+
+**Changed, visually** (no API change):
+
+- **`UrgencyTag`'s Urgent flame is solid** (`fire-fill`, new in `icons.ts`).
+  Figma draws a filled flame (Heroicons' mini `fire`); the system ships
+  Phosphor only, and `fire-fill` is the same shape. All four urgency glyphs
+  are now Figma's 20 (were 24).
+- **`DataTable`'s sort glyphs are Figma's `_AV_Table_Sort`**: `arrows-down-up`
+  when unsorted, `sort-ascending` / `sort-descending` when sorted, 20 and
+  `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
+  unsorted in `text.subtle`). `AVTable` inherits both.
+
 ### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
 
 **New** (minor): `mode` — `day` (default), `range` (two clicks, reported through

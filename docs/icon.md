@@ -97,7 +97,7 @@ Phosphor's `fill` style (Figma's `Style=Fill`) — for now, the title icon on
 `-fill` suffix (`note-pencil-fill`, `check-circle-fill`, `check-square-fill`,
 `calendar-x-fill`, `chat-dots-fill`, `thumbs-up-fill`, `x-circle-fill`,
 `warning-fill`, `users-fill`, `clock-fill`, `chats-circle-fill`, `graph-fill`,
-`file-fill`),
+`file-fill`, and `fire-fill` for `UrgencyTag`'s Urgent),
 copied from `@phosphor-icons/core/assets/fill/` the same way. Add another by the
 same route; don't mix the two weights inside one row.
 
