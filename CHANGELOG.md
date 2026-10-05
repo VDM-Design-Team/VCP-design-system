@@ -9,6 +9,7 @@ Follow-up to #133.
 - **Dual view keeps its order:** the right calendar is always after the left. Left Next / right Previous disable
   where they would meet; month grids grey out crossing months.
 - **Quick picks follow the mode:** a single-date picker shows only Today; ranges only appear in range mode.
+- **Overdue / Due Soon are filters** (`filter: true` on a preset): they do nothing to the calendar, only call `onSelect`. The list is centred vertically.
 - **Quick picks look like a dropdown menu** on desktop (4 inset, square 40-high rows, brand tints, 140 wide) —
   Figma doesn't define the list, so this is a proposal to test. The touch row is unchanged.
 

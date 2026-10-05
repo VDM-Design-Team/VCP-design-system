@@ -19,8 +19,8 @@ const PRESETS: DatePickerPreset[] = [
   { label: 'This Month', value: '2026-09-01', rangeEnd: '2026-09-30' },
   { label: 'Last Month', value: '2026-08-01', rangeEnd: '2026-08-31' },
   { label: 'This Quarter', value: '2026-07-01', rangeEnd: '2026-09-30' },
-  { label: 'Overdue', value: '2026-08-17', rangeEnd: '2026-09-14' },
-  { label: 'Due Soon', value: TODAY, rangeEnd: '2026-09-22' },
+  { label: 'Overdue', value: '2026-08-17', rangeEnd: '2026-09-14', filter: true },
+  { label: 'Due Soon', value: TODAY, rangeEnd: '2026-09-22', filter: true },
 ];
 
 /** The Storybook-only switches that stand in for Figma's yes/no axes. */
@@ -503,6 +503,11 @@ export const PresetsAndClear: Story = {
     await expect(args.onClear).toHaveBeenCalledOnce();
     await expect(lastMonth).toHaveAttribute('aria-pressed', 'false');
     await expect(day(canvas, '1 August 2026')).not.toHaveAttribute('aria-pressed');
+
+    /* Overdue and Due Soon are filters: they leave the calendar alone. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Overdue' }));
+    await expect(canvas.getByRole('button', { name: 'Overdue' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(args.onRangeChange).toHaveBeenCalledTimes(1);
   },
 };
 

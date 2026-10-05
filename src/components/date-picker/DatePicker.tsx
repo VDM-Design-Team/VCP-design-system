@@ -58,6 +58,12 @@ export interface DatePickerPreset {
   value: string;
   /** ISO end, for range presets. */
   rangeEnd?: string;
+  /**
+   * A filter rather than a period (Overdue, Due Soon): clicking it leaves the
+   * calendar and the value alone and only calls `onSelect`. Range mode only.
+   */
+  filter?: boolean;
+  onSelect?: () => void;
 }
 
 export interface DatePickerProps
@@ -615,6 +621,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     };
 
     const pickPreset = (preset: DatePickerPreset) => {
+      if (preset.filter) return preset.onSelect?.();
       if (mode === 'range' || preset.rangeEnd) onRangeChange?.(preset.value, preset.rangeEnd);
       else onChange?.(preset.value);
       setChoosing(null);
@@ -675,11 +682,11 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
     };
 
     const isPresetActive = (p: DatePickerPreset) =>
-      p.value === value && (p.rangeEnd ?? undefined) === (rangeEnd ?? undefined);
+      !p.filter && p.value === value && (p.rangeEnd ?? undefined) === (rangeEnd ?? undefined);
 
     /* A single date has one quick pick — Today. The ranges (last 7 days, this
        month, overdue…) only make sense when the picker takes a range. */
-    const visiblePresets = presets?.filter((p) => mode === 'range' || !p.rangeEnd);
+    const visiblePresets = presets?.filter((p) => mode === 'range' || (!p.rangeEnd && !p.filter));
 
     /* The desktop list is drawn like the system's dropdown menu (Menu_Dropdown):
        a 4 inset, square full-width rows 40 high with 12 either side, brand
@@ -692,7 +699,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           'flex shrink-0',
           mobile
             ? 'overflow-x-auto border-b border-stroke-default py-1'
-            : 'w-35 flex-col border-r border-stroke-default py-1',
+            : 'w-35 flex-col justify-center border-r border-stroke-default py-1',
         )}
       >
         {visiblePresets.map((p) => (

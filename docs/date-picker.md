@@ -55,7 +55,7 @@ controls flip every axis.
 | `month` / `onMonthChange` | ISO / `(iso) => void` | internal | Controlled visible month (the first calendar's in dual view) |
 | `dualView` | `boolean` | `false` | Two calendars side by side |
 | `mobile` | `boolean` | `false` | Touch layout |
-| `presets` | `{ label, value, rangeEnd? }[]` | — | Quick picks; pressed while their dates are the value |
+| `presets` | `{ label, value, rangeEnd?, filter?, onSelect? }[]` | — | Quick picks; pressed while their dates are the value |
 | `clearable` | `boolean` | `true` | The footer Clear button. On by default; `false` hides it. The same button in the same place in the day and month views |
 | `onClear` | `() => void` | — | What Clear does. The panel holds no value of its own to reset, so supply this whenever the button is shown |
 | `clearLabel` | `string` | `'Clear'` | Figma labels the range variant's button "Cancel" |
@@ -89,7 +89,7 @@ controls flip every axis.
   is drawn like the system's dropdown menu: a 4 inset, square 40-high rows,
   12 either side, `surface.brand.faint` on hover, `.subtle` on press, and the
   current pick semibold on `.faint` (not `text.brand.medium`: it is 3.5:1 on that fill in dark). Figma doesn't define this list,
-  so it is a proposal to test.
+  so it is a proposal to test. The list is centred vertically in the panel. **Filters** (`filter: true` — Overdue, Due Soon) are not periods: clicking one leaves the calendar and the value alone, is never pressed, and only calls the preset's `onSelect`; they show in range mode only.
 - **Presets** apply their dates (through `onRangeChange` when they carry a
   `rangeEnd` or the mode is range, `onChange` otherwise) and page the
   calendar to them.
