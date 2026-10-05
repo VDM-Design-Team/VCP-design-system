@@ -13,19 +13,29 @@ import { Icon, type IconName } from '../../atoms/icon';
  *
  * - **One bordered card**, 8 padding, glyph (32) centred over the name — the
  *   name sits *inside* the card, not under a separate thumbnail well.
- * - **Name** in `body-sm-regular`, `text.secondary`. A long name shortens its
- *   stem and keeps the extension: "2)-Curr… .pdf", never "2)-Current-and-…".
+ * - **Name** in `body-sm-regular` (14 regular), `text.secondary`, centred under
+ *   the glyph. A long name shortens its stem and keeps the extension:
+ *   "2)-Some….pdf" for "2)-Some-very-long-file-name.pdf", never
+ *   "2)-Some-very-long-…".
  * - **No file size.** Figma's card is the glyph and the name, nothing else.
- * - **Hover** fills the card `surface.brand.faint`; **pressed** fills it
+ * - **Edit mode** (has `onRemove`): hovering the card fills it
+ *   `surface.brand.faint` and shows the ✕; hovering the ✕ itself does not fill
+ *   the card ("Hover Remove Only"); pressing an openable card fills it
  *   `surface.brand.subtle` and hides the ✕, so it's clear the press opens the
- *   file. Only an openable card has these — a read-only one doesn't react.
+ *   file. **View mode** (no `onRemove`): hover `surface.brand.faint`, pressed
+ *   `surface.brand.subtle`, no ✕. A card that is neither openable nor removable
+ *   doesn't react at all.
  * - **Remove** is a 28 critical-tonal circle in the card's top-right corner,
- *   revealed on hover or focus, with its own hover and pressed fills.
- *   Hovering it does not fill the card ("Hover Remove Only").
+ *   inset 2 from the edge on both sides, revealed on hover or focus, with its
+ *   own default, hover and pressed fills (`accent.critical.tonal.surface`).
  * - **Glyph** `neutral.outline.content.default`; the ✕ is
  *   `accent.critical.outline.content` on `accent.critical.tonal.surface`.
- * - **`domainLabel`** is a neutral-tonal pill (`caption-sm-medium`, inverse
- *   border) inset 4 from the card's top-left corner, with a domain glyph.
+ * - **`domain`** is the badge for an AV handed over from another domain: a
+ *   neutral-tonal pill (20 high, 8 either side, 2 above and below, 4 between,
+ *   `caption-sm-medium`, inverse 1 border) inset 4 from the card's top-left
+ *   corner — glyph then code. Six domains, and this component owns that mapping
+ *   (below): Design DS, Development DV, Governance GV, Content CN, Partners PT,
+ *   QA QA. `domainLabel` / `domainIcon` remain for a code outside the six.
  *
  * The export made the tile a clickable `<div>` and only mounted the remove
  * button while the pointer hovered — a control keyboards could never reach.
@@ -41,6 +51,27 @@ import { Icon, type IconName } from '../../atoms/icon';
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 export type FileAttachmentKind = 'image' | 'pdf' | 'doc' | 'csv' | 'video';
+
+/** The domain an AV was handed over from — the corner badge. */
+export type FileAttachmentDomain =
+  | 'design'
+  | 'development'
+  | 'governance'
+  | 'content'
+  | 'partners'
+  | 'qa';
+
+/* THE mapping — domain → glyph and code, off Figma's `_Domain_Label` set. The
+   badge colour is the same for every domain (`neutral.tonal`, fixed); only the
+   glyph and the two letters tell them apart. */
+const DOMAIN: Record<FileAttachmentDomain, { icon: IconName; code: string; name: string }> = {
+  design: { icon: 'pen-nib', code: 'DS', name: 'Design' },
+  development: { icon: 'code', code: 'DV', name: 'Development' },
+  governance: { icon: 'bank', code: 'GV', name: 'Governance' },
+  content: { icon: 'image', code: 'CN', name: 'Content' },
+  partners: { icon: 'handshake', code: 'PT', name: 'Partners' },
+  qa: { icon: 'file-magnifying-glass', code: 'QA', name: 'QA' },
+};
 
 const KIND_ICON: Record<FileAttachmentKind, IconName> = {
   image: 'image',
@@ -59,12 +90,16 @@ export interface FileAttachmentProps extends React.HTMLAttributes<HTMLDivElement
    */
   thumb?: string;
   /**
-   * A short domain/workspace code shown as a corner badge — "DS" for the
-   * domain a file was uploaded under. Omit it and there is no badge: a file
-   * with nothing to disambiguate has nothing to add.
+   * The domain this AV was handed over from — draws the corner badge with that
+   * domain's glyph and code. Omit it and there is no badge: a file with nothing
+   * to disambiguate has nothing to add.
+   */
+  domain?: FileAttachmentDomain;
+  /**
+   * A badge code outside the six domains. Ignored when `domain` is set.
    */
   domainLabel?: string;
-  /** The badge's glyph. Figma draws the DS domain with a pen nib. */
+  /** The glyph for `domainLabel`. Ignored when `domain` is set. */
   domainIcon?: IconName;
   /** Makes the card a real button — usually "open the preview". */
   onClick?: () => void;
@@ -84,10 +119,15 @@ function splitName(name: string): [string, string] {
 
 export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentProps>(
   (
-    { className, name, kind = 'doc', thumb, domainLabel, domainIcon = 'pen-nib', onClick, onRemove, ...props },
+    { className, name, kind = 'doc', thumb, domain, domainLabel, domainIcon = 'pen-nib', onClick, onRemove, ...props },
     ref,
   ) => {
     const [stem, ext] = splitName(name);
+    const badge = domain
+      ? DOMAIN[domain]
+      : domainLabel
+        ? { icon: domainIcon, code: domainLabel, name: domainLabel }
+        : undefined;
 
     const card = (
       <span className="relative flex w-full flex-col items-center rounded-sm border border-stroke-subtle p-2">
@@ -101,7 +141,10 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
           className="flex w-full items-center justify-center whitespace-nowrap font-sans text-body-sm-regular text-text-secondary"
           title={name}
         >
-          <span className="min-w-0 flex-1 truncate text-right">{stem}</span>
+          {/* Hugs its text, so a short name stays centred under the glyph; it
+              only shrinks (with an ellipsis) when the name is too long, and the
+              extension never does. */}
+          <span className="min-w-0 truncate">{stem}</span>
           {ext && <span className="shrink-0">{ext}</span>}
         </span>
       </span>
@@ -127,9 +170,19 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
             {card}
           </button>
         ) : (
-          <span className="flex w-full">{card}</span>
+          /* Edit mode without an open action still reacts to hover, as the
+             design draws it. The ✕ is a sibling overlay, so hovering it leaves
+             this unfilled. */
+          <span
+            className={cn(
+              'flex w-full rounded-md transition-colors',
+              onRemove && 'hover:bg-surface-brand-faint',
+            )}
+          >
+            {card}
+          </span>
         )}
-        {domainLabel && (
+        {badge && (
           <>
             <span
               aria-hidden="true"
@@ -138,11 +191,11 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
                 'border border-stroke-inverse bg-neutral-tonal-surface-default text-neutral-tonal-content-default',
               )}
             >
-              <Icon name={domainIcon} className="size-3" />
-              <span className="text-caption-sm-medium">{domainLabel}</span>
+              <Icon name={badge.icon} className="size-3" />
+              <span className="text-caption-sm-medium">{badge.code}</span>
             </span>
-            {/* The badge is decorative; its text still reaches a screen reader. */}
-            <span className="sr-only">{domainLabel} domain.</span>
+            {/* The badge is decorative; the domain still reaches a screen reader. */}
+            <span className="sr-only">{badge.name} domain.</span>
           </>
         )}
         {onRemove && (
@@ -151,7 +204,7 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
             aria-label={`Remove ${name}`}
             onClick={onRemove}
             className={cn(
-              'group/remove absolute right-0 top-0 grid size-7 place-items-center rounded-full p-0.5',
+              'group/remove absolute right-0.5 top-0.5 grid size-7 place-items-center rounded-full p-0.5',
               /* In the tab order always; visible on card hover or any focus —
                  never mounted-by-hover, which no keyboard can trigger. Hidden
                  while the card itself is pressed, per Figma's note. */

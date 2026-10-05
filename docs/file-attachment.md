@@ -25,11 +25,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `name` | `string` | required | A long name shortens its stem and keeps the extension ("2)-Curr… .pdf"), with the full name in a `title` tooltip; also names the ✕ ("Remove ${name}") |
+| `name` | `string` | required | A long name shortens its stem and keeps the extension ("2)-Some….pdf" for "2)-Some-very-long-file-name.pdf"); a short one stays centred under the glyph. The full name is in a `title` tooltip and names the ✕ ("Remove ${name}") |
 | `kind` | `image \| pdf \| doc \| csv \| video` | `doc` | Picks the glyph when there is no `thumb` |
 | `thumb` | `string` | — | Image src, shown in the glyph's place at the glyph's 32 size — the card keeps its shape |
-| `domainLabel` | `string` | — | A short domain/workspace code as a corner badge — "DS". Omit it and there's no badge |
-| `domainIcon` | `IconName` | `pen-nib` | The badge's glyph. Figma draws DS with a pen nib; pass the domain's own glyph for others |
+| `domain` | `design \| development \| governance \| content \| partners \| qa` | — | The domain an AV was handed over from — draws the corner badge with that domain's glyph and code (below). Omit it and there's no badge |
+| `domainLabel` | `string` | — | A badge code outside the six domains. Ignored when `domain` is set |
+| `domainIcon` | `IconName` | `pen-nib` | The glyph for `domainLabel`. Ignored when `domain` is set |
 | `onClick` | `() => void` | — | Makes the card a real button — usually "open the preview". Only an openable card has hover and pressed fills |
 | `onRemove` | `() => void` | — | The ✕ — its own sibling button, never nested |
 | `className` | `string` | — | On the wrapper |
@@ -69,12 +70,36 @@ The ✕ is Figma's `_File_Attachment_Remove_Button`: a 28 box, 24 circle,
 `accent.critical.tonal.surface` behind an `x` in
 `accent.critical.outline.content`, in the card's top-right corner.
 
-`domainLabel` is Figma's `_Domain_Label`: a pill in
-`neutral.tonal.surface.default` / `neutral.tonal.content.default` with a
-`stroke.inverse` border, `caption-sm-medium` text and a 12 glyph, inset 4
-from the card's top-left corner. Both `neutral.tonal` tokens were added for
-it. Figma draws the glyph as a Heroicons pen nib; per docs/icon.md this
-system uses Phosphor's `pen-nib` instead.
+`domain` is Figma's `_Domain_Label`, shown when an AV is handed from one domain to
+another: a pill in `neutral.tonal.surface.default` / `neutral.tonal.content.default`
+(the same for every domain — it does not change) with a 1 `stroke.inverse` border.
+It is 20 high — 8 either side, 2 above and below, 4 between glyph and code, a 12
+glyph, `caption-sm-medium` text — inset 4 from the card's top-left corner. Figma draws
+the glyph as Heroicons; per docs/icon.md this system uses Phosphor.
+
+The badge's mapping is owned here, and only here:
+
+| `domain` | Glyph | Code |
+|---|---|---|
+| `design` | `pen-nib` | DS |
+| `development` | `code` | DV |
+| `governance` | `bank` | GV |
+| `content` | `image` | CN |
+| `partners` | `handshake` | PT |
+| `qa` | `file-magnifying-glass` | QA |
+
+`file-magnifying-glass` was added to the icon set from Phosphor for it.
+
+**Edit mode** (has `onRemove`) and **view mode** (no `onRemove`):
+
+| | Edit mode | View mode |
+|---|---|---|
+| Hover the card | Fills `surface.brand.faint`; the ✕ appears | Fills `surface.brand.faint` |
+| Hover the ✕ | Card unfilled; the ✕ takes its hover fill | — |
+| Pressed | Fills `surface.brand.subtle`; no ✕ | Fills `surface.brand.subtle` |
+
+A remove-only card (`onRemove` without `onClick`) still takes the hover fill and the
+✕; it has no pressed state, since there is nothing to press.
 
 | Pair | Light | Dark | Needs |
 |---|---|---|---|
@@ -91,10 +116,10 @@ system uses Phosphor's `pen-nib` instead.
   "Remove ${name}" — ten tiles, ten distinct names.
 - A `thumb` image is `alt=""` — the name below is the caption; announcing
   the filename twice is noise.
-- The ✕ is 28 in the card's corner — pointer-dense exemption; the card
-  itself is the big target.
-- `domainLabel`'s badge is `aria-hidden`; its text is repeated as
-  visually-hidden text in the card instead of being silently dropped.
+- The ✕ is 28 in the card's corner, 2 in from the top and right edges —
+  pointer-dense exemption; the card itself is the big target.
+- The domain badge is `aria-hidden`; the domain is repeated as visually-hidden
+  text ("Design domain.") in the card instead of being silently dropped.
 - Keyboard focus gets the standard `stroke.focused` ring on the card and on
   the ✕. Figma draws no focus state; the ring is the system's rule 5.
 

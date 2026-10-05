@@ -59,15 +59,51 @@ export const OpenAndRemove: Story = {
 };
 
 /**
- * `domainLabel` adds a small corner badge — a domain or workspace code, when
- * a file's origin isn't otherwise obvious. Hover a card to see it fill; press
- * and hold to see the deeper fill.
+ * `domain` adds the corner badge for an AV handed over from another domain —
+ * the domain's glyph and code, in a fixed neutral-tonal pill. Hover a card to
+ * see it fill; press and hold to see the deeper fill.
  */
 export const WithDomainLabel: Story = {
   render: (args) => (
     <div className="flex flex-wrap gap-3">
-      <FileAttachment {...args} domainLabel="DS" onClick={() => {}} />
+      <FileAttachment {...args} domain="design" onClick={() => {}} />
       <FileAttachment {...args} name="capacity-export.csv" kind="csv" onClick={() => {}} />
+    </div>
+  ),
+};
+
+/** All six domains: Design DS, Development DV, Governance GV, Content CN, Partners PT, QA QA. */
+export const Domains: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-3">
+      <FileAttachment name="brand-guide.pdf" kind="pdf" domain="design" onClick={() => {}} />
+      <FileAttachment name="release-notes.pdf" kind="pdf" domain="development" onClick={() => {}} />
+      <FileAttachment name="policy-draft.pdf" kind="pdf" domain="governance" onClick={() => {}} />
+      <FileAttachment name="hero-image.png" kind="image" domain="content" onClick={() => {}} />
+      <FileAttachment name="contract-signed.pdf" kind="pdf" domain="partners" onClick={() => {}} />
+      <FileAttachment name="test-report.pdf" kind="pdf" domain="qa" onClick={() => {}} />
+    </div>
+  ),
+};
+
+/**
+ * The edit-mode states, one hover at a time: hover the card (fills, ✕ appears);
+ * hover the ✕ (the card stays unfilled, the ✕ takes its hover fill); press the card
+ * (deeper fill, no ✕). Without `onRemove` it is view mode: hover and pressed fills
+ * only, no ✕.
+ */
+export const EditAndViewMode: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <span className="w-24 font-sans text-caption-md-medium text-text-tertiary">Edit mode</span>
+        <FileAttachment name="audit-evidence.pdf" kind="pdf" domain="design" onClick={() => {}} onRemove={() => {}} />
+        <FileAttachment name="remove-only.csv" kind="csv" onRemove={() => {}} />
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="w-24 font-sans text-caption-md-medium text-text-tertiary">View mode</span>
+        <FileAttachment name="audit-evidence.pdf" kind="pdf" domain="design" onClick={() => {}} />
+      </div>
     </div>
   ),
 };
@@ -85,8 +121,8 @@ export const GalleryRow: Story = {
 };
 
 /**
- * A long name shortens its stem and keeps the extension. The full name stays
- * in the tooltip and the ✕'s label.
+ * A long name shortens its stem and keeps the extension; a short one stays
+ * centred under the glyph. The full name stays in the tooltip and the ✕'s label.
  */
 export const LongName: Story = {
   args: { name: 'supplier-consolidation-proposal-final-v3-revised.pdf' },
