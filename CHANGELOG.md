@@ -2,6 +2,32 @@
 
 ## 0.1.0 — unreleased
 
+### `DatePicker` — design review of the variants (October 2026)
+
+Follow-up to #133.
+
+- **Clear is on by default** (`clearable`, default `true`; `false` hides it). It is outside the view swap, so it
+  is the same button in the same place in the day and month views.
+- **The month heading is a toggle, both ways.** "Sep 2026 ▾" opens the months; "2026 ▴" returns to the days. It
+  is Figma's small textual button, 24 high, with a 12 filled caret; the label is `text.secondary`.
+- **Carets follow `neutral.textual.content`** (default, hover, pressed) — the previous/next arrows and the heading's
+  — not the action blue. New icons: `caret-down-fill`, `caret-up-fill`.
+- **Type:** cells `label-sm-regular` (was 16px `body-md`, in the numeric face), today `label-sm-semibold`, range
+  `label-sm-medium`, selected `label-sm-semibold`; the heading `label-sm-medium` `text.secondary` (was 16px
+  `title-sm-semibold` `text.primary`). Today's month is semibold too.
+- **A range has no seams:** the day grid is seven whole 36 columns centred in the calendar (260 ÷ 7 left 37.14 columns
+  whose edges anti-aliased into lines), rows 35 apart.
+- **Pointer cursor** on cells, quick picks, the heading and the arrows.
+- **Dual view matches the design:** 685 × 329, a 118 quick-picks column, 8 above the footer.
+- **Fixed:** in a `Popover` the calendar overflowed its container with doubled padding — the story now uses
+  `width="auto"` and no panel padding.
+- **Storybook:** the control-combination pages (*Day And Range*, *…With Button*, *Month*, *…With Button*, *Month
+  Buttons*) are gone — the **Default** playground is live and covers them; the heading test now covers paging and
+  the view swap.
+
+Migration: callers that relied on the button being absent without `onClear` pass `clearable={false}`; no caller
+imports `DatePicker` yet.
+
 ### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
 
 **New** (minor): `mode` — `day` (default), `range` (two clicks, reported through

@@ -9,13 +9,16 @@ import { IconButton } from '../../atoms/icon-button';
  * `Date_Picker_VCP` set draws (3169:1227, revised 5 Oct 2026):
  *
  * - `mode` — **day** (one date), **range** (two clicks: start, then end) or
- *   **month** (a year of months). In day and range mode the month heading
- *   opens the month grid too, which is what the caret beside it promises.
+ *   **month** (a year of months). In day and range mode the month heading is a
+ *   toggle: "Jun 2022 ▾" swaps the panel to the month grid, whose heading reads
+ *   "2022 ▴" and swaps back. The panel's footer stays put across the swap.
  * - `dualView` — two calendars side by side, each paging on its own, so a
  *   range can start in June and end in September with both ends visible.
  * - `mobile` — the touch layout: 40-point day targets (`h-10`), full width, presets as a
  *   scrolling row across the top instead of a column down the side.
- * - `onClear` — the footer button (Figma's `Button=Yes`).
+ * - the footer **Clear** button (Figma's `Button=Yes`) is **on by default**;
+ *   `clearable={false}` turns it off, `onClear` is what it does and `clearLabel`
+ *   renames it (Figma's range variant says "Cancel").
  *
  * `presets` are the quick picks Figma lists beside the calendar ("Today",
  * "Last 7 days", "Overdue"…). The panel only knows label → dates; what
@@ -27,6 +30,15 @@ import { IconButton } from '../../atoms/icon-button';
  * Dates are ISO `yyyy-mm-dd` strings end to end, parsed and formatted in
  * LOCAL time — the export round-tripped through `toISOString()`, which
  * shifts dates across midnight for anyone east of UTC.
+ *
+ * Type (design review, 5 Oct 2026): weekdays `caption-md-semibold` in
+ * `text.tertiary`; day and month cells `label-sm-regular` in `text.secondary`;
+ * today's date and today's month `label-sm-semibold`; the days between a range's
+ * ends `label-sm-medium` in `text.primary`; the selected ends `label-sm-semibold`.
+ * The heading is `label-sm-medium` in `text.secondary`, and the carets —
+ * previous, next and the heading's — follow `neutral.textual.content` through
+ * default, hover and pressed (not the action blue). Every clickable cell and
+ * toggle shows the pointer cursor.
  *
  * Keyboard: each grid is one tab stop (roving tabindex). Arrows move by day
  * and week (or month and row of months) and cross boundaries — the view
@@ -69,7 +81,12 @@ export interface DatePickerProps
   mobile?: boolean;
   /** Quick picks beside (or, on mobile, above) the calendar. */
   presets?: readonly DatePickerPreset[];
-  /** Shows the footer button. */
+  /**
+   * The footer Clear button. On by default — turn it off with `false`. It sits
+   * in the same place in the day and month views.
+   */
+  clearable?: boolean;
+  /** What the Clear button does. The panel holds no value of its own to reset. */
   onClear?: () => void;
   /** The footer button's label. Default "Clear". */
   clearLabel?: string;
@@ -106,6 +123,11 @@ const monthKey = (y: number, m: number) => `${y}-${pad(m + 1)}`;
 
 const FOCUS_RING =
   'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused';
+
+/* The carets are `neutral.textual.content` — one colour per state — not the
+   action blue a tertiary icon button wears by default. */
+const CARET_COLOUR =
+  'text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed';
 
 /** The day and month grids share the roving-focus mechanics. */
 function useRovingFocus() {
@@ -153,6 +175,8 @@ function Header({
   onPrev,
   onNext,
   onHeadingClick,
+  headingLabel,
+  caret = 'down',
 }: {
   heading: string;
   /** What's drawn — Figma's "Jun 2022". `heading` is what's announced. */
@@ -160,7 +184,12 @@ function Header({
   unit: 'month' | 'year';
   onPrev: () => void;
   onNext: () => void;
+  /** Makes the heading a toggle between the day and month views. */
   onHeadingClick?: () => void;
+  /** The toggle's accessible name — say where it goes. */
+  headingLabel?: string;
+  /** Which way the heading's caret points: down opens the months, up goes back. */
+  caret?: 'down' | 'up';
 }) {
   /* Announces paging without stealing focus from the grid — in full, while
      the eye gets Figma's short form. */
@@ -170,10 +199,10 @@ function Header({
       <span className="sr-only">{heading}</span>
     </span>
   );
+  const caretIcon = caret === 'up' ? 'caret-up-fill' : 'caret-down-fill';
   return (
     /* h-6 = Figma's 24 header; the 36 nav targets overhang it (-my-1.5)
-       rather than pushing the grid down. Chevrons are text.tertiary per
-       Figma, turning action blue on hover like every tertiary control. */
+       rather than pushing the grid down. */
     <div className="flex h-6 items-center justify-between">
       <IconButton
         variant="tertiary"
@@ -181,24 +210,40 @@ function Header({
         icon="caret-left"
         label={`Previous ${unit}`}
         onClick={onPrev}
-        className="-my-1.5 text-text-tertiary"
+        className={cn('-my-1.5 cursor-pointer', CARET_COLOUR)}
       />
       {onHeadingClick ? (
+        /* Figma's small textual button, filling the header's 24: the label in
+           text.secondary, a 12 filled caret on the neutral-textual colours,
+           which change with the button's state. */
         <button
           type="button"
           onClick={onHeadingClick}
-          aria-label={`${heading}, choose month`}
+          aria-label={headingLabel ?? heading}
           className={cn(
-            'flex items-center gap-0.5 rounded-xs px-1 text-title-sm-semibold text-text-primary',
-            'hover:text-action-tertiary-content-hover',
+            'group flex h-6 cursor-pointer items-center gap-2 rounded-sm px-3 transition-colors',
+            'text-label-sm-medium text-text-secondary',
             FOCUS_RING,
           )}
         >
           {live}
-          <Icon name="caret-down" size="sm" className="text-text-tertiary" />
+          <Icon
+            name={caretIcon}
+            aria-hidden="true"
+            className="size-3 shrink-0 text-neutral-textual-content-default group-hover:text-neutral-textual-content-hover group-active:text-neutral-textual-content-pressed"
+          />
         </button>
       ) : (
-        <span className="text-title-sm-semibold text-text-primary">{live}</span>
+        /* A heading with nothing to toggle to (month mode on its own) — the
+           same look, not a button. */
+        <span className="flex h-6 items-center gap-2 px-3 text-label-sm-medium text-text-secondary">
+          {live}
+          <Icon
+            name={caretIcon}
+            aria-hidden="true"
+            className="size-3 shrink-0 text-neutral-textual-content-default"
+          />
+        </span>
       )}
       <IconButton
         variant="tertiary"
@@ -206,7 +251,7 @@ function Header({
         icon="caret-right"
         label={`Next ${unit}`}
         onClick={onNext}
-        className="-my-1.5 text-text-tertiary"
+        className={cn('-my-1.5 cursor-pointer', CARET_COLOUR)}
       />
     </div>
   );
@@ -266,7 +311,7 @@ function DayGrid({
       key={toIso(d)}
       aria-hidden="true"
       className={cn(
-        'grid place-items-center font-numeric text-body-md-regular text-text-subtle',
+        'grid place-items-center text-label-sm-regular text-text-subtle',
         mobile ? 'h-10' : 'h-8',
       )}
     >
@@ -283,20 +328,28 @@ function DayGrid({
         onPrev={() => setView(addMonths(view, -1))}
         onNext={() => setView(addMonths(view, 1))}
         onHeadingClick={onHeadingClick}
+        headingLabel={`${monthName} ${year}, choose month`}
+        caret="down"
       />
-      <div>
+      {/* Seven 36 columns, exactly Figma's 252. A column that is not a whole
+          number of pixels (260 ÷ 7 in the dual view) anti-aliases the seam
+          between two tinted cells into a visible line, which is what a range
+          must not have. The grid centres in a wider calendar. */}
+      <div className={mobile ? undefined : 'mx-auto w-63'}>
         <div aria-hidden="true" className="grid grid-cols-7">
           {WEEKDAYS.map((d) => (
             <span
               key={d}
-              className="grid h-8 place-items-center text-caption-md-semibold text-text-tertiary"
+              className="grid h-9 place-items-center text-caption-md-semibold text-text-tertiary"
             >
               {d}
             </span>
           ))}
         </div>
         <div
-          className={cn('grid grid-cols-7', mobile ? 'gap-y-2' : 'gap-y-0.5')}
+          /* Rows sit 35 apart (a 32 cell and 3 between), Figma's pitch — the
+             tint runs unbroken along a row, and the rows read as bands. */
+          className={cn('grid grid-cols-7', mobile ? 'gap-y-2' : 'gap-y-0.75')}
           onKeyDown={(e) => {
             const delta = arrowDelta(e.key, 7);
             if (delta) {
@@ -329,13 +382,13 @@ function DayGrid({
                 onClick={() => onPick(isoDate)}
                 onFocus={() => setFocusIso(isoDate)}
                 className={cn(
-                  'relative grid place-items-center font-numeric text-body-md-regular transition-colors',
+                  'relative grid cursor-pointer place-items-center text-label-sm-regular transition-colors',
                   mobile ? 'h-10' : 'h-8',
                   /* A range reads as one bar: the ends round their outer
                      corners only, the days between run square. */
                   selected
                     ? cn(
-                        'bg-surface-brand-strong text-body-md-semibold text-text-inverted-primary',
+                        'bg-surface-brand-strong text-label-sm-semibold text-text-inverted-primary',
                         ranged && isStart && !isEnd
                           ? 'rounded-l-md'
                           : ranged && isEnd && !isStart
@@ -343,13 +396,13 @@ function DayGrid({
                             : 'rounded-md',
                       )
                     : between
-                      ? 'bg-surface-brand-faint text-body-md-medium text-text-primary'
+                      ? 'bg-surface-brand-faint text-label-sm-medium text-text-primary'
                       : isFlagged
                         ? 'rounded-md bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default'
                         : cn(
                             'rounded-md hover:bg-surface-neutral-subtle',
                             isoDate === today
-                              ? 'text-body-md-semibold text-text-primary'
+                              ? 'text-label-sm-semibold text-text-primary'
                               : 'text-text-secondary',
                           ),
                   'disabled:pointer-events-none disabled:text-text-disabled',
@@ -385,6 +438,7 @@ function MonthGrid({
   setView,
   selected,
   onPick,
+  onHeadingClick,
   shared,
 }: {
   view: Date;
@@ -392,9 +446,11 @@ function MonthGrid({
   /** `yyyy-mm` of the highlighted month. */
   selected?: string;
   onPick: (month: Date) => void;
+  /** Swaps back to the days. Omit in month mode, where there are none. */
+  onHeadingClick?: () => void;
   shared: Shared;
 }) {
-  const { min, max, mobile } = shared;
+  const { min, max, mobile, today } = shared;
   const year = view.getFullYear();
   const [focusKey, setFocusKey] = React.useState(() => selected ?? monthKey(year, view.getMonth()));
   const { pendingFocus, register } = useRovingFocus();
@@ -421,6 +477,9 @@ function MonthGrid({
         unit="year"
         onPrev={() => setView(new Date(year - 1, view.getMonth(), 1))}
         onNext={() => setView(new Date(year + 1, view.getMonth(), 1))}
+        onHeadingClick={onHeadingClick}
+        headingLabel={`${year}, show days`}
+        caret="up"
       />
       <div
         className="grid grid-cols-3"
@@ -436,6 +495,7 @@ function MonthGrid({
           const key = monthKey(year, m);
           const date = new Date(year, m, 1);
           const isSelected = key === selected;
+          const isThisMonth = key === today.slice(0, 7);
           return (
             <button
               key={key}
@@ -449,11 +509,16 @@ function MonthGrid({
               onFocus={() => setFocusKey(key)}
               className={cn(
                 /* h-13 = Figma's 52 month rows (208 grid ÷ 4). */
-                'grid place-items-center rounded-md text-body-md-regular transition-colors',
+                'grid cursor-pointer place-items-center rounded-md text-label-sm-regular transition-colors',
                 mobile ? 'h-14' : 'h-13',
                 isSelected
-                  ? 'bg-surface-brand-strong text-body-md-semibold text-text-inverted-primary'
-                  : 'text-text-secondary hover:bg-surface-neutral-subtle',
+                  ? 'bg-surface-brand-strong text-label-sm-semibold text-text-inverted-primary'
+                  : cn(
+                      'hover:bg-surface-neutral-subtle',
+                      isThisMonth
+                        ? 'text-label-sm-semibold text-text-primary'
+                        : 'text-text-secondary',
+                    ),
                 'disabled:pointer-events-none disabled:text-text-disabled',
                 FOCUS_RING,
               )}
@@ -481,6 +546,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
       dualView = false,
       mobile = false,
       presets,
+      clearable = true,
       onClear,
       clearLabel = 'Clear',
       markers = {},
@@ -550,6 +616,8 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
               setV(d);
               setChoosing(null);
             }}
+            /* "2026 ▴" swaps back to the days of the month that was open. */
+            onHeadingClick={() => setChoosing(null)}
             shared={shared}
           />
         );
@@ -578,7 +646,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           'flex shrink-0',
           mobile
             ? 'overflow-x-auto border-b border-stroke-default py-1'
-            : 'w-30 flex-col border-r border-stroke-default py-4',
+            : 'w-29.5 flex-col border-r border-stroke-default py-4',
         )}
       >
         {presets.map((p) => (
@@ -588,7 +656,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
             aria-pressed={isPresetActive(p)}
             onClick={() => pickPreset(p)}
             className={cn(
-              'h-10 shrink-0 whitespace-nowrap rounded-md px-4 text-left text-body-sm-regular text-text-primary transition-colors',
+              'h-10 shrink-0 cursor-pointer whitespace-nowrap rounded-md px-4 text-left text-body-sm-regular text-text-primary transition-colors',
               'hover:bg-surface-neutral-subtle active:bg-surface-neutral-medium',
               'aria-pressed:bg-surface-neutral-subtle aria-pressed:text-body-sm-medium',
               FOCUS_RING,
@@ -615,8 +683,10 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
         {...props}
       >
         {presetList}
-        <div className="flex min-w-0 flex-col gap-3 p-4">
-          <div className="flex gap-4">
+        <div className={cn('flex min-w-0 flex-col p-4', dual ? 'gap-2' : 'gap-3')}>
+          {/* Dual view's calendars area is 252 tall in Figma (the single view's is
+              244 in a 5-row month), which makes the panel 685 x 329. */}
+          <div className={cn('flex gap-4', dual && 'min-h-63')}>
             {(dual ? [0, 1] : [0]).map((index) => (
               <div
                 key={index}
@@ -628,9 +698,11 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
               </div>
             ))}
           </div>
-          {onClear && (
+          {/* Outside `calendar()`, so it is the same button in the same place in
+              the day and month views. */}
+          {clearable && (
             <div className="flex justify-end">
-              <Button variant="secondary" size="sm" onClick={onClear}>
+              <Button variant="secondary" size="sm" onClick={onClear} className="cursor-pointer">
                 {clearLabel}
               </Button>
             </div>
