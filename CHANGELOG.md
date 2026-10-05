@@ -2,6 +2,26 @@
 
 ## 0.1.0 — unreleased
 
+### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
+
+**New** (minor): `mode` — `day` (default), `range` (two clicks, reported through
+the new `onRangeChange(start, end?)`) and `month` (a year of months);
+`dualView` for two calendars that page independently; `mobile` for the touch
+layout (`h-10` days, full width, presets as a scrolling row); `presets` for
+the quick picks Figma lists beside the calendar; `onClear`/`clearLabel` for
+the footer button; `today` (stories pin it). In day and range mode the month
+heading now opens the month grid. Storybook's first story has a control for
+each Figma variant property.
+
+**Changed, visually:** no panel border (Figma draws none); weekdays read
+"Mon"…"Sun" in `text.tertiary`; days are `body-md` in `text.secondary`, today
+semibold; the selected day is `surface.brand.strong` (was `action.primary`);
+a range draws as one bar with rounded ends. The heading reads "Sep 2026" (the
+full name is still announced). Neighbouring months' days show, greyed in
+`text.subtle` — Figma's `text.disabled` there fails contrast. Day cells are
+32 high (were 36). Every existing prop keeps its meaning; no caller imports
+`DatePicker` yet.
+
 ### `Pagination` — built to Figma's `VCP_Pagination` (5 October 2026)
 
 **New** (minor): **First** and **Last** buttons either end; an **ellipsis** for
