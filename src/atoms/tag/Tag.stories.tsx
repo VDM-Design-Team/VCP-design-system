@@ -83,8 +83,8 @@ export const Matrix: Story = {
 };
 
 /**
- * `md` (28 tall) is the default. `sm` (24 tall) is for dense tables and for
- * sitting inline beside body text.
+ * `md` (28 tall, 14 type) is the default. `sm` (24 tall, 12 type) is for dense
+ * tables and for sitting inline beside body text.
  */
 export const Sizes: Story = {
   render: (args) => (
