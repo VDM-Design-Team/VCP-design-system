@@ -505,3 +505,56 @@ export const PresetsAndClear: Story = {
     await expect(day(canvas, '1 August 2026')).not.toHaveAttribute('aria-pressed');
   },
 };
+
+/**
+ * The right calendar is always after the left. September beside October: the
+ * left can't page forward, the right can't page back, and the month grids
+ * grey out the months that would cross.
+ */
+export const DualViewKeepsOrder: Story = {
+  parameters: { controls: { disable: true } },
+  args: {
+    mode: 'range',
+    value: '2026-09-14',
+    rangeEnd: '2026-10-02',
+    dualView: true,
+    showPresets: false,
+  },
+  render: (args) => <Live {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const left = within(canvas.getByRole('group', { name: 'First calendar' }));
+    const right = within(canvas.getByRole('group', { name: 'Second calendar' }));
+    await expect(left.getByRole('button', { name: 'Next month' })).toBeDisabled();
+    await expect(right.getByRole('button', { name: 'Previous month' })).toBeDisabled();
+    await expect(right.getByRole('button', { name: 'Next month' })).toBeEnabled();
+
+    await userEvent.click(right.getByRole('button', { name: 'Next month' }));
+    await expect(right.getByText('November 2026')).toBeInTheDocument();
+    await expect(left.getByRole('button', { name: 'Next month' })).toBeEnabled();
+    await userEvent.click(left.getByRole('button', { name: 'Next month' }));
+    await expect(left.getByText('October 2026')).toBeInTheDocument();
+    await expect(right.getByRole('button', { name: 'Previous month' })).toBeDisabled();
+  },
+};
+
+/**
+ * Quick picks follow the mode: a single-date picker offers only Today, a range
+ * picker offers every range as well.
+ */
+export const PresetsFollowTheMode: Story = {
+  parameters: { controls: { disable: true } },
+  args: { mode: 'day', showPresets: true },
+  render: (args) => (
+    <div className="flex flex-col gap-6">
+      <Live {...args} mode="day" />
+      <Live {...args} mode="range" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const lists = canvas.getAllByRole('group', { name: 'Quick picks' });
+    await expect(within(lists[0]).getAllByRole('button').map((b) => b.textContent)).toEqual(['Today']);
+    await expect(within(lists[1]).getAllByRole('button')).toHaveLength(7);
+  },
+};

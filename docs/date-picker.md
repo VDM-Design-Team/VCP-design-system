@@ -79,7 +79,17 @@ controls flip every axis.
   not a button — there are no days to go back to.
 - **Dual view pages each calendar on its own**, as Figma draws it (June
   beside September), so both ends of a long range can be in view. The second
-  starts one month after the first; a preset moves both to its ends.
+  starts one month after the first; a preset moves both to its ends. **The
+  right calendar is always after the left** — never the same month, never
+  before: the left's Next arrow and the right's Previous arrow disable where
+  they would meet, and the month grids grey out the months that would cross.
+- **Presets follow the mode.** A single-date picker (`day`, `month`) shows
+  only the presets without a `rangeEnd` — Today; a range picker shows them
+  all. With nothing left to show the column is dropped. On desktop the list
+  is drawn like the system's dropdown menu: a 4 inset, square 40-high rows,
+  12 either side, `surface.brand.faint` on hover, `.subtle` on press, and the
+  current pick semibold on `.faint` (not `text.brand.medium`: it is 3.5:1 on that fill in dark). Figma doesn't define this list,
+  so it is a proposal to test.
 - **Presets** apply their dates (through `onRangeChange` when they carry a
   `rangeEnd` or the mode is range, `onChange` otherwise) and page the
   calendar to them.
@@ -145,11 +155,13 @@ text a reader may want (which weekday is the 31st?), and axe fails them.
 | Days — `text.secondary` on `surface.elevated` | 10.35:1 | 11.87:1 |
 | Weekdays — `text.tertiary` on `surface.elevated` | 7.58:1 | 9.85:1 |
 | Neighbouring days — `text.subtle` on `surface.elevated` | 4.76:1 | 5.71:1 |
-| Pressed preset — `text.primary` on `surface.neutral.subtle` | 18.41:1 | 10.35:1 |
+| Pressed preset (touch row) — `text.primary` on `surface.neutral.subtle` | 18.41:1 | 10.35:1 |
+| Pressed preset (desktop) — `text.primary` on `surface.brand.faint` | 17.34:1 | 13.23:1 |
 
 Flagged stays the `accent.critical.tonal` pair (8.36:1 light / 12.00:1
-dark); markers the accent filled surfaces. Presets hover
-`surface.neutral.subtle`, press `surface.neutral.medium`; separators
+dark); markers the accent filled surfaces. Presets (desktop) hover
+`surface.brand.faint`, press `surface.brand.subtle`; the touch row uses
+`surface.neutral.subtle` / `.medium`; separators
 `stroke.default`; footer `Button secondary sm`.
 
 **Type is on the ramp.** The earlier 16px `body-md` / `title-sm` mapping is gone: Figma's

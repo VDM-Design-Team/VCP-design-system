@@ -6,6 +6,12 @@
 
 Follow-up to #133.
 
+- **Dual view keeps its order:** the right calendar is always after the left. Left Next / right Previous disable
+  where they would meet; month grids grey out crossing months.
+- **Quick picks follow the mode:** a single-date picker shows only Today; ranges only appear in range mode.
+- **Quick picks look like a dropdown menu** on desktop (4 inset, square 40-high rows, brand tints, 140 wide) —
+  Figma doesn't define the list, so this is a proposal to test. The touch row is unchanged.
+
 - **Clear is on by default** (`clearable`, default `true`; `false` hides it). It is outside the view swap, so it
   is the same button in the same place in the day and month views.
 - **The month heading is a toggle, both ways.** "Sep 2026 ▾" opens the months; "2026 ▴" returns to the days. It
