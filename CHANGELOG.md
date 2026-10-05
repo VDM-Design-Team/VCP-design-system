@@ -51,6 +51,41 @@ Migration: delete `size="…"` from any `<FileAttachment>`, and `size` from
 the items in either modal's `attachments`. Nothing else changes. 0.1.0 is
 unreleased, so the version isn't bumped, per the convention above.
 
+### Breaking — `StatCard`: one card per dashboard, and a group form (October 2026)
+
+Rebuilt against Figma's `VCP Pages & Flows` dashboards (5 Oct 2026). There are
+two cards, set by **`variant`**, and a grouped form:
+
+- **`default`** — the admin and user dashboards' `Value_Card`: an 8 stripe,
+  **left-aligned**, label over a 36 bold value, exactly 100 high and at least
+  175 wide.
+- **`superadmin`** — the super admin dashboard's metric card: a 12 stripe,
+  **centred**, accent icon + label + info hint over a 36 semibold value and a
+  24 unit, exactly 150 high.
+- **New: `StatCardGroup`** — the super admin dashboard's grouped card: two or
+  more values under one title, split by `Divider`s, centred.
+- **New: a `brand` tone** for `accent` — the brand blue the Value_Card uses for
+  In Progress.
+- **New filled glyphs** for the super admin cards: `check-square-fill`,
+  `calendar-x-fill`, `chat-dots-fill`, `thumbs-up-fill`, `x-circle-fill`.
+
+**Breaking changes to `StatCard`** (major):
+
+- **Removed: `delta`, `deltaTone` and `footer`.** Figma's cards have neither a
+  change figure nor a line under the value.
+- **The look changed.** Full container width; the stripe sits inside a 1px
+  `stroke.default` outline (was `stroke.subtle`); no shadow. The icon is 24 in
+  the `accent` tone, the label `label-sm-medium` `text.secondary` (was caption,
+  tertiary), the tooltip glyph 20 (was 16). The value is 36 and `unit` 24, both
+  `text.primary` Poppins (the value was 24 Inter) — written out as type-ramp
+  exceptions, since the ramp has no 36 step and no `heading-lg-medium`.
+- **Alignment follows the card, not a prop**: the Value_Card is left-aligned,
+  the super admin card centred. The 24 Sep audit had centred every card.
+
+Migration: drop `delta`, `deltaTone` and `footer`; pass `variant="superadmin"`
+on the super admin dashboard; pass icons as `<Icon size="lg" />` (the old
+`size="sm"` glyphs now sit small in the box).
+
 ### Breaking — 24 September 2026
 
 **The type ramp gains a weight per size.** `tokens/semantic/type.json` goes

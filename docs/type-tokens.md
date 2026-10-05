@@ -15,7 +15,7 @@ combination into existence.
 
 All Poppins (`font.family.sans`). Components that need Inter for dense
 numerics or tabular figures still add `font-numeric` alongside the size
-utility (`StatCard`, `Chip`'s count, `DatePicker`'s grid) — that pairing is
+utility (`Chip`'s count, `DatePicker`'s grid) — that pairing is
 unchanged by this ramp.
 
 ## The ramp

@@ -50,9 +50,9 @@ const Panel = ({ title, children }: { title: string; children: React.ReactNode }
 
 const Stats = () => (
   <div className="grid grid-cols-3 gap-4 py-6">
-    <StatCard label="My Added Values" value="12" delta="+3" deltaTone="positive" icon={<Icon name="lightbulb" />} />
+    <StatCard label="My Added Values" value="12" icon={<Icon name="lightbulb" />} />
     <StatCard label="Assigned to me" value="4" icon={<Icon name="assigned-value" />} />
-    <StatCard label="In review" value="2" delta="−1" deltaTone="neutral" icon={<Icon name="archive" />} />
+    <StatCard label="In review" value="2" icon={<Icon name="archive" />} />
   </div>
 );
 
