@@ -62,9 +62,9 @@ export const Default: Story = {
   },
 };
 
-/** Figma's three versions: Mid size, Tiny and Small. */
+/** Figma's three versions: Mid size, Tiny and Small. Three `<nav>`s on one page is the story's doing, so the landmark-uniqueness rule stands down here only. */
 export const AllVersions: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
   render: () => (
     <div className="flex flex-col gap-5">
       <Pagination page={2} pageCount={25} itemCount={1250} pageSize={50} onPageSizeChange={() => {}} />
