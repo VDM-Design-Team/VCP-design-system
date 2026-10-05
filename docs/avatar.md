@@ -6,9 +6,10 @@ A person, as a photo or as their initials, on the neutral tone by default.
 
 | Size | Diameter | Use for | Notes |
 |---|---|---|---|
-| `sm` | 24 | Dense table rows, inline beside body text, a `sm` `AvatarGroup` | Never a control at this size |
-| `md` | 32 | The default — comment threads, list rows, card headers | The export's own default size |
-| `lg` | 40 | Profile headers, account menus, anything the user can press | The only size that meets the 40 minimum target |
+| `xs` | 16 | Inline with small text, an `xs` `AvatarGroup` | Type 10 (`caption-sm-medium`). Never a control |
+| `sm` | 24 | Dense table rows, inline beside body text, a `sm` `AvatarGroup` | Type 12 (`caption-md-medium`). Never a control at this size |
+| `md` | 32 | The default — comment threads, list rows, card headers | Type 12 (`caption-md-medium`). The export's own default size |
+| `lg` | 36 | Profile headers, account menus | Type 14 (`label-sm-medium`). Under the 40 minimum target — see *Target size* |
 
 Reach for something else when:
 
@@ -26,7 +27,7 @@ Reach for something else when:
 | `name` | `string` | `''` | Drives the initials. Not rendered as text |
 | `initials` | `string` | — | Overrides the derived initials — mononyms, team codes |
 | `src` | `string` | — | Photo URL. On a load failure the initials are drawn instead |
-| `size` | `sm \| md \| lg` | `md` | 24 / 32 / 40. **Not a number** — see "Deviations" |
+| `size` | `xs \| sm \| md \| lg` | `md` | 16 / 24 / 32 / 36. **Not a number** — see "Deviations" |
 | `tone` | `neutral \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing |
 | `ring` | `boolean` | `false` | `surface.elevated` ring, for overlapping stacks. `AvatarGroup` sets it |
 | `standalone` | `boolean` | `false` | The avatar is the only identification of this person — give it a real accessible name |
@@ -107,7 +108,8 @@ Nothing was invented here.
   dark. The `ring` is decoration between two avatars, not a boundary that carries
   meaning, so 1.4.11's 3:1 does not apply to it.
 - **Target size.** Avatar is not a control and takes no focus, so the 40 minimum
-  does not apply. If you wrap one in a `Button` or an `<a>`, use `lg` — it is 40.
+  does not apply. **No size is 40 any more** (`lg` is 36): if you wrap one in a
+  `Button` or an `<a>`, give the control its own padding so the hit area reaches 40.
 
 ## Don't
 

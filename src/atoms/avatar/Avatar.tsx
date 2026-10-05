@@ -60,12 +60,11 @@ export function initialsForName(name: string): string {
  *    applied unless asked for.
  * 2. **`size` is a variant, not a number.** The export took `size?: number` and
  *    derived the font size from it (`size * 0.38`), which cannot be tokenised —
- *    every value it produces is an off-ramp number. The three steps here sit on
- *    Tailwind's numeric scale and carry a type-ramp step each: `md` is the
- *    export's own default, `lg` is the 40 minimum target from CLAUDE.md rule 5
- *    for the one case where an avatar is a control, and `sm` is the dense-row
- *    size. The export's AvatarGroup default of 28 has no step here; that row
- *    uses `sm` or `md`.
+ *    every value it produces is an off-ramp number. The four steps here sit on
+ *    Tailwind's numeric scale and carry a type-ramp step each (design review,
+ *    5 Oct 2026): `xs` is 16 with 10 type, `sm` 24 with 12, `md` 32 with 12 (the
+ *    export's own default size) and `lg` 36 with 14. The export's AvatarGroup
+ *    default of 28 has no step here; that row uses `sm` or `md`.
  * 3. **No `title` tooltip.** The export set `title={name}`. A `title` is a
  *    hover-only, keyboard-unreachable, touch-invisible accessible name. If the
  *    avatar is the only identification, say so with `standalone` and it gets a
@@ -85,13 +84,15 @@ const avatar = cva(
   {
     variants: {
       size: {
-        /* 24 — dense table rows and inline beside body text. */
+        /* 16, 10 type — inline with small text, a count chip's neighbour. */
+        xs: 'size-4 text-caption-sm-medium',
+        /* 24, 12 type — dense table rows and inline beside body text. */
         sm: 'size-6 text-caption-md-medium',
-        /* 32 — the default, and the export's own default. */
-        md: 'size-8 text-label-sm-medium',
-        /* 40 — meets the minimum target size, so this is the only size that may
-           carry a control (a menu trigger, a link to a profile). */
-        lg: 'size-10 text-label-sm-medium',
+        /* 32, 12 type — the default, and the export's own default. */
+        md: 'size-8 text-caption-md-medium',
+        /* 36, 14 type — profile headers, account menus. Below the 40 minimum
+           target, so a control wrapping it adds its own padding to reach 40. */
+        lg: 'size-9 text-label-sm-medium',
       },
       tone: {
         /* surface.neutral + text.secondary — the default every avatar starts
@@ -103,7 +104,7 @@ const avatar = cva(
         yellow: 'bg-accent-yellow-faint text-accent-yellow-stronger',
       },
       /* Separates one avatar from the one it overlaps in a stack. Drawn outside
-         the box as a ring so it never eats into the 24/32/40 the size promises,
+         the box as a ring so it never eats into the 16/24/32/36 the size promises,
          and coloured `surface.elevated` so it reads as the page showing through
          in both themes. */
       ring: { true: 'ring-2 ring-surface-elevated', false: '' },
@@ -188,7 +189,12 @@ export const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
         ) : (
           /* No name, no initials, no photo — an unknown person, not an empty
              circle. `Icon` renders itself `aria-hidden` when given no label. */
-          <Icon name="user" size={size} />
+          <Icon
+            name="user"
+            size={size === 'xs' ? 'sm' : size}
+            /* Icon has no step below 16, which is the whole `xs` avatar. */
+            className={size === 'xs' ? 'size-2.5' : undefined}
+          />
         )}
       </span>
     );

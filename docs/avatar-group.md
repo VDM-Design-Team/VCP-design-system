@@ -30,7 +30,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `people` | `Array<string \| { name, initials, src, tone }>` | — | In reading order. A bare string is shorthand for `{ name }` |
 | `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N` |
-| `size` | `sm \| md \| lg` | `md` | Passed straight down to every `Avatar`. 24 / 32 / 40 |
+| `size` | `xs \| sm \| md \| lg` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 |
 | `label` | `string` | — | What the stack **is** — `"Assignees"`. Prefixed to the announced summary |
 | `className` | `string` | — | Merged onto the row via `cn()` |
 | `ref` | `Ref<HTMLSpanElement>` | — | Points at the row |
@@ -57,6 +57,12 @@ The group adds only these:
 
 The chip is deliberately neutral rather than a fifth tone: it is a count, not a
 person, and a coloured chip reads as one more member of the stack.
+
+**Stacking order.** The leftmost person is on top, and each person after them is
+tucked behind the one before; the `+N` chip is furthest back. That is the opposite
+of the DOM's paint order, so it is set with `z-index` (the group is `isolate`d so
+it can't leak above anything else) rather than by reversing the markup, which would
+also reverse the reading order.
 
 **Token gap.** The overlap is about a quarter of the avatar at each size and comes
 from the numeric scale directly. There is no `spacing.overlap` token and none is

@@ -15,7 +15,7 @@ const photo = (hue: number) =>
       `</svg>`,
   )}`;
 
-const SIZES = ['sm', 'md', 'lg'] as const;
+const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
 
 /** A spread wide enough to land on all four tones several times over. */
 const NAMES = [
