@@ -80,8 +80,10 @@ absent here, so nobody re-derives it from the presets.
 
 ## Collapsed
 
-At 76 the labels go and the glyphs stay on one axis. Two things keep the rail
-usable:
+At 76 the labels go and the glyphs stay on one axis. Every row fills the rail's
+52-wide column, glyph left-aligned; a row with sub-items shows a filled caret, and
+opening it shows a flyout beside the row (`SidebarItem` documents it) — the rail does
+not reflow. Two things keep the rail usable:
 
 - **`aria-label` on every row**, which `SidebarItem` does — an icon-only link
   would otherwise announce as nothing.

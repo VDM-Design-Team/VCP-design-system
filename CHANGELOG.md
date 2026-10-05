@@ -2,6 +2,23 @@
 
 ## 0.1.0 — unreleased
 
+### `SidebarItem` / `Sidebar` — a flyout for the collapsed rail, and regular sub-items (October 2026)
+
+Design review of build 39 (#123); the flyout is Figma's `Menu_Dropdown` (`27:10048`).
+
+- **Collapsed, a disclosure opens a flyout** to the row's right instead of expanding inline:
+  211 wide, top aligned with the row, its left edge 8 inside the rail's right edge. Escape,
+  a press outside, focus leaving, or choosing a row closes it. The row does not grow and the
+  caret does not flip. Expanded sub-items still open inline.
+- **The collapsed caret is filled** (`caret-down-fill`, new icon).
+- **Collapsed rows fill the rail's column** (52) — they hugged their content (40, or 52 with a
+  caret) — glyphs still left-aligned. The footer row fills it too.
+- **Expanded sub-items are regular weight** (were medium); the current sub-item is told apart
+  by colour and `aria-current`.
+
+Migration: none; the collapsed flyout replaces the unconfirmed inline-list behaviour that
+`docs/sidebar-item.md` flagged. No API change.
+
 ### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
 
 **New** (minor): `mode` — `day` (default), `range` (two clicks, reported through
