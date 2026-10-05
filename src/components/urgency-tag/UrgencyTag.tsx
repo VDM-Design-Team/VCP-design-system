@@ -48,15 +48,15 @@ export const AV_URGENCIES: readonly AVUrgency[] = ['Low', 'Normal', 'High', 'Urg
    is the same value in the right family, so that is what is used here — the
    pixels are identical. Raised with design, 11 September 2026.
 
-   The flame is **solid**: Figma draws Heroicons' mini `fire`, which this
-   system doesn't ship (Phosphor only), so it is Phosphor's `fire-fill` — the
-   same filled shape. The other three are Phosphor regular, as in Figma
+   The flame is **solid** and is the design's own: Figma draws Heroicons'
+   mini `fire`, kept as the in-house `fire-solid` glyph — Phosphor's flames
+   don't match it at 20. The other three are Phosphor regular, as in Figma
    (AV table review, 5 October 2026). */
 const URGENCY: Record<AVUrgency, { icon: IconName; className: string }> = {
   Low: { icon: 'caret-double-down', className: 'text-accent-success-outline-content-default' },
   Normal: { icon: 'equals', className: 'text-neutral-outline-content-default' },
   High: { icon: 'caret-double-up', className: 'text-accent-warning-outline-content-default' },
-  Urgent: { icon: 'fire-fill', className: 'text-accent-critical-outline-content-default' },
+  Urgent: { icon: 'fire-solid', className: 'text-accent-critical-outline-content-default' },
 };
 
 export interface UrgencyTagProps extends React.HTMLAttributes<HTMLSpanElement> {

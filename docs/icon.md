@@ -50,6 +50,12 @@ Three of the navigation glyphs needed that (8 Sep 2026):
 | `assigned-value` | Assigned. A Figma layer of VCP's own — `Assigned Added Value`, not a library icon at all |
 | `rectangle-stack` | Manage. Phosphor's `stack` glyphs are isometric; the design's is face-on |
 
+And one status glyph (5 Oct 2026):
+
+| Glyph | Why |
+|---|---|
+| `fire-solid` | `UrgencyTag`'s Urgent. The design's flame (Heroicons' mini `fire`, solid, inner tongue cut out) is drawn for 20; Phosphor's `fire` is an outline and `fire-fill` a plain blob at that size. Exported from Figma and scaled from its 20 box. Solid, so it has no stroke weight to match |
+
 `assigned-value` and `rectangle-stack` are exported from the SideBar page and
 transformed from their 24 box onto the 256 viewBox, so the shapes are the
 design's exactly rather than an approximation of them. Heroicons' 1.5 stroke
@@ -97,7 +103,7 @@ Phosphor's `fill` style (Figma's `Style=Fill`) — for now, the title icon on
 `-fill` suffix (`note-pencil-fill`, `check-circle-fill`, `check-square-fill`,
 `calendar-x-fill`, `chat-dots-fill`, `thumbs-up-fill`, `x-circle-fill`,
 `warning-fill`, `users-fill`, `clock-fill`, `chats-circle-fill`, `graph-fill`,
-`file-fill`, and `fire-fill` for `UrgencyTag`'s Urgent),
+`file-fill`),
 copied from `@phosphor-icons/core/assets/fill/` the same way. Add another by the
 same route; don't mix the two weights inside one row.
 
@@ -112,6 +118,7 @@ Current in-house glyphs:
 | Name | Why | Used by |
 |---|---|---|
 | `caret-triple-up` | Phosphor stops at `caret-double-up` | Planning table "raise to top" |
+| `fire-solid` | Figma's Urgent flame is Heroicons' mini `fire`, drawn for 20; Phosphor's `fire` (outline) and `fire-fill` (a solid blob) don't read the same at that size. Kept as the design's geometry — an exception to Phosphor-only, decided 5 October 2026 | `UrgencyTag` (Urgent) |
 | `smiley-plus` | Phosphor's `smiley` has no plus mark; the design's glyph (General Design Library `SmileyPlus`, Regular) carries it in the top-right corner | `EmojiReactionPicker`'s add-reaction button |
 
 **Adding one — export as SVG, not PNG.** A raster cannot do the two things this

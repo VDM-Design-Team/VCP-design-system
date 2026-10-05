@@ -47,7 +47,7 @@ filters, legends and tests.
 | Low | `caret-double-down` | `accent.success.outline.content.default` |
 | Normal | `equals` | `neutral.outline.content.default` |
 | High | `caret-double-up` | `accent.warning.outline.content.default` |
-| Urgent | `fire-fill` | `accent.critical.outline.content.default` |
+| Urgent | `fire-solid` | `accent.critical.outline.content.default` |
 
 The **label** is `neutral.outline.content.default` for all four. That is the
 design's decision, not a simplification: four coloured words in a table column
@@ -85,7 +85,7 @@ same pixels under a different name. Read a spec off the canvas by value.
 ## Don't
 
 - **Don't re-derive the mapping at a call site.** If you are writing
-  `urgency === 'Urgent' ? 'fire-fill' : …`, the line you want is already in
+  `urgency === 'Urgent' ? 'fire-solid' : …`, the line you want is already in
   `UrgencyTag.tsx`. That is the whole reason this component exists.
 - **Don't colour the label by urgency.** It reads as four statuses, not a
   scale.
