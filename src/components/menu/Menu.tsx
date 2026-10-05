@@ -33,9 +33,11 @@ const menuItem = cva(
     /* A transparent resting fill, same token the ghost Button rests on. */
     'bg-action-tertiary-surface-default transition-colors cursor-pointer',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    /* The highlight rides `:focus` as well as `:hover`, so a menu opened with the
-       mouse still shows where the keyboard is. `:focus-visible` alone would leave
-       the first item unmarked after a pointer open. */
+    /* The highlight rides `:hover` and `:focus-visible` — not plain `:focus`.
+       Opening the menu moves focus to the first item (so the arrows work), and
+       plain `:focus` made that item look hovered the moment a pointer opened it.
+       `:focus-visible` is false after a pointer open and true after a keyboard
+       one, so a mouse opens a clean menu and a keyboard still sees where it is. */
     'disabled:pointer-events-none disabled:text-text-disabled',
   ],
   {
@@ -44,7 +46,7 @@ const menuItem = cva(
         default: [
           'text-text-secondary',
           'hover:bg-surface-brand-faint hover:text-text-primary',
-          'focus:bg-surface-brand-faint focus:text-text-primary',
+          'focus-visible:bg-surface-brand-faint focus-visible:text-text-primary',
         ],
         /* accent.critical.outline — critical content on a tinted hover fill.
            Colour is never the only signal here; see the icon and the
@@ -52,7 +54,7 @@ const menuItem = cva(
         danger: [
           'text-accent-critical-outline-content-default',
           'hover:bg-accent-critical-outline-surface-hover hover:text-accent-critical-outline-content-hover',
-          'focus:bg-accent-critical-outline-surface-hover focus:text-accent-critical-outline-content-hover',
+          'focus-visible:bg-accent-critical-outline-surface-hover focus-visible:text-accent-critical-outline-content-hover',
         ],
       },
     },
