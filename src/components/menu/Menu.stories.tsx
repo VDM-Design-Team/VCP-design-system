@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Menu, type MenuItem } from './Menu';
 import { Button } from '../../atoms/button';
 
@@ -173,5 +174,133 @@ export const LightAndDark: Story = {
         <div className="dark">{set}</div>
       </div>
     );
+  },
+};
+
+const actions: MenuItem[] = [
+  { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+  { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
+  { key: 'share', label: 'Share with team', icon: 'users' },
+  { key: 'export', label: 'Export as file', icon: 'file' },
+];
+const item = (name: string) => screen.getByRole('menuitem', { name });
+
+/**
+ * **Flow:** the whole keyboard contract. Down on the trigger opens on the first
+ * item, Up on the last; arrows move and wrap; Home and End jump; a letter jumps
+ * to the next match; the list is one tab stop (roving tabindex); Escape closes
+ * and hands focus back to the trigger.
+ */
+export const KeyboardFlow: Story = {
+  args: { items: actions, trigger: <Button variant="secondary">Deliverable actions</Button> },
+  parameters: { controls: { disable: true } },
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Deliverable actions' });
+    await expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    trigger.focus();
+    await userEvent.keyboard('{ArrowDown}');
+    await screen.findByRole('menu');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await waitFor(() => expect(item('Edit deliverable')).toHaveFocus());
+
+    /* One tab stop: only the item with focus is tabbable. */
+    await expect(item('Edit deliverable')).toHaveAttribute('tabindex', '0');
+    await expect(item('Duplicate')).toHaveAttribute('tabindex', '-1');
+
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(item('Duplicate')).toHaveFocus();
+    await userEvent.keyboard('{End}');
+    await expect(item('Export as file')).toHaveFocus();
+    /* Past the end wraps to the start, and back. */
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(item('Edit deliverable')).toHaveFocus();
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(item('Export as file')).toHaveFocus();
+    await userEvent.keyboard('{Home}');
+    await expect(item('Edit deliverable')).toHaveFocus();
+
+    /* Type-ahead: "s" lands on the first item starting with it. */
+    await userEvent.keyboard('s');
+    await expect(item('Share with team')).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await expect(trigger).toHaveFocus();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    /* Up on the trigger opens on the last item. */
+    await userEvent.keyboard('{ArrowUp}');
+    await waitFor(() => expect(item('Export as file')).toHaveFocus());
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+  },
+};
+
+/**
+ * **Flow:** the arrows step over dividers and disabled items rather than
+ * landing on them — the disabled item stays visible, so the action is still
+ * discoverable.
+ */
+export const SkipsDisabledAndDividers: Story = {
+  args: {
+    trigger: <Button variant="secondary">Deliverable actions</Button>,
+    items: [
+      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { divider: true },
+      { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
+      { key: 'share', label: 'Share with team', icon: 'users' },
+    ],
+  },
+  parameters: { controls: { disable: true } },
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Deliverable actions' });
+    trigger.focus();
+    await userEvent.keyboard('{ArrowDown}');
+    await waitFor(() => expect(item('Edit deliverable')).toHaveFocus());
+
+    await expect(item('Publish')).toBeDisabled();
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(item('Share with team')).toHaveFocus();
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(item('Edit deliverable')).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+  },
+};
+
+/**
+ * **Flow:** choosing an item — by click or by Enter — reports its `key` through
+ * `onSelect`, closes the menu and returns focus to the trigger. Landing on an
+ * item never chooses it.
+ */
+export const SelectCloses: Story = {
+  args: {
+    items: actions,
+    trigger: <Button variant="secondary">Deliverable actions</Button>,
+    onSelect: fn(),
+  },
+  parameters: { controls: { disable: true } },
+  play: async ({ args, canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Deliverable actions' });
+
+    await userEvent.click(trigger);
+    await screen.findByRole('menu');
+    await userEvent.click(item('Duplicate'));
+    await expect(args.onSelect).toHaveBeenCalledWith('duplicate');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await expect(trigger).toHaveFocus();
+
+    /* By keyboard: moving does nothing, Enter chooses. */
+    await userEvent.keyboard('{ArrowDown}');
+    await waitFor(() => expect(item('Edit deliverable')).toHaveFocus());
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    await expect(args.onSelect).toHaveBeenCalledTimes(1);
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onSelect).toHaveBeenLastCalledWith('share');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await expect(trigger).toHaveFocus();
   },
 };
