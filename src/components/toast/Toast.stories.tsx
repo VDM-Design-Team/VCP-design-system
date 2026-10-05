@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 import { Button } from '../../atoms/button';
@@ -330,4 +331,170 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/* Flows wait on real timers with short durations, so a run takes seconds,
+   not the 6 the default would. */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** A toast that unmounts when it dismisses — as a caller's state would make it. */
+function Dismissing({ onDismiss, ...props }: React.ComponentProps<typeof Toast>) {
+  const [shown, setShown] = React.useState(true);
+  return shown ? (
+    <Toast
+      {...props}
+      onDismiss={() => {
+        setShown(false);
+        onDismiss?.();
+      }}
+    />
+  ) : (
+    <p className="text-label-sm-medium text-text-secondary">Dismissed</p>
+  );
+}
+
+/** **Flow:** with a `duration`, the toast dismisses itself once it runs out. */
+export const AutoDismissesAfterItsDuration: Story = {
+  parameters: { controls: { disable: true } },
+  args: { onDismiss: fn() },
+  render: (args) => (
+    <Dismissing tone="success" title="Draft saved" duration={600} onDismiss={args.onDismiss}>
+      Nothing to do.
+    </Dismissing>
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('Draft saved')).toBeVisible();
+    await expect(args.onDismiss).not.toHaveBeenCalled();
+    await waitFor(() => expect(args.onDismiss).toHaveBeenCalledTimes(1), { timeout: 2000 });
+    await expect(canvas.queryByText('Draft saved')).not.toBeInTheDocument();
+  },
+};
+
+/**
+ * **Flow:** WCAG 2.2.1 — the timer holds while the pointer is over the toast
+ * and while focus is inside it, and resumes when either leaves. The dismiss
+ * control is reachable by keyboard and closes it on the spot.
+ */
+export const PausesOnHoverAndFocus: Story = {
+  parameters: { controls: { disable: true } },
+  args: { onDismiss: fn(), onPauseChange: fn() },
+  render: (args) => (
+    <div className="flex w-full max-w-sm flex-col gap-4">
+      <Dismissing
+        data-testid="hovered"
+        tone="success"
+        title="Deliverable submitted"
+        duration={600}
+        onDismiss={args.onDismiss}
+        onPauseChange={args.onPauseChange}
+      >
+        Hover holds this one.
+      </Dismissing>
+      <Dismissing
+        tone="info"
+        title="Sync finished"
+        duration={600}
+        dismissLabel="Dismiss the sync message"
+        onDismiss={args.onDismiss}
+      >
+        Focus holds this one.
+      </Dismissing>
+    </div>
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    /* Hover: paused, and still there well past its 600ms. */
+    await userEvent.hover(canvas.getByTestId('hovered'));
+    await waitFor(() => expect(args.onPauseChange).toHaveBeenLastCalledWith(true));
+    /* Focus the second toast's dismiss control: that holds it too. */
+    const dismissSync = canvas.getByRole('button', { name: 'Dismiss the sync message' });
+    dismissSync.focus();
+    await sleep(1000);
+    await expect(args.onDismiss).not.toHaveBeenCalled();
+    await expect(canvas.getByText('Deliverable submitted')).toBeVisible();
+    await expect(canvas.getByText('Sync finished')).toBeVisible();
+
+    /* The dismiss control works from the keyboard. */
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onDismiss).toHaveBeenCalledTimes(1);
+    await expect(canvas.queryByText('Sync finished')).not.toBeInTheDocument();
+
+    /* Leave the first: it resumes and runs out. */
+    await userEvent.unhover(canvas.getByTestId('hovered'));
+    await waitFor(() => expect(args.onPauseChange).toHaveBeenLastCalledWith(false));
+    await waitFor(() => expect(args.onDismiss).toHaveBeenCalledTimes(2), { timeout: 2000 });
+  },
+};
+
+/**
+ * **Flow:** a toast with an action never dismisses itself, whatever `duration`
+ * says — the user is never made to race a timer to reach a control.
+ */
+export const ActionNeverAutoDismisses: Story = {
+  parameters: { controls: { disable: true } },
+  args: { onDismiss: fn(), onAction: fn() },
+  render: (args) => (
+    <Dismissing
+      tone="danger"
+      title="Save failed"
+      duration={300}
+      actionLabel="Retry"
+      onAction={args.onAction}
+      onDismiss={args.onDismiss}
+    >
+      We could not reach the server.
+    </Dismissing>
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    await sleep(1000);
+    await expect(args.onDismiss).not.toHaveBeenCalled();
+    await expect(canvas.getByText('Save failed')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Retry' }));
+    await expect(args.onAction).toHaveBeenCalledTimes(1);
+  },
+};
+
+/**
+ * **Flow:** through `useToast()`, the live regions are in the page before any
+ * toast arrives — that is what gets them announced. Errors land in the
+ * assertive `role="alert"` region, everything else in the polite
+ * `role="status"` one, and focus never leaves the button the user pressed.
+ */
+export const ProviderRoutesToLiveRegions: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
+    <ToastProvider position="bottom-right">
+      <div className="flex min-h-96 flex-col gap-4 bg-surface-canvas p-8">
+        <ToastTriggers />
+      </div>
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const polite = screen.getByRole('status');
+    const assertive = screen.getByRole('alert');
+    /* Already there, already empty. */
+    await expect(polite).toBeEmptyDOMElement();
+    await expect(assertive).toBeEmptyDOMElement();
+
+    const raisePolite = canvas.getByRole('button', { name: 'Polite toast' });
+    await userEvent.click(raisePolite);
+    await waitFor(() => expect(within(polite).getByText('Draft saved')).toBeVisible());
+    await expect(assertive).toBeEmptyDOMElement();
+    await expect(raisePolite).toHaveFocus();
+
+    const raiseError = canvas.getByRole('button', { name: 'Assertive toast, with an action' });
+    await userEvent.click(raiseError);
+    await waitFor(() => expect(within(assertive).getByText('Save failed')).toBeVisible());
+    await expect(raiseError).toHaveFocus();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Dismiss all' }));
+    await waitFor(() => {
+      expect(polite).toBeEmptyDOMElement();
+      expect(assertive).toBeEmptyDOMElement();
+    });
+  },
 };
