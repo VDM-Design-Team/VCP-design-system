@@ -2,6 +2,26 @@
 
 ## 0.1.0 — unreleased
 
+### `neutral.textual.content` — a token for content with no fill or border (5 October 2026)
+
+**New token** (minor): `neutral.textual.content` (`default` / `hover` /
+`pressed` / `disabled`), for `EmojiReactionPicker`'s quick-react and
+add-reaction glyphs. `.default` is Figma's value; the other states mirror
+`neutral.outline.content`, in light and dark. The dark values were missing at
+first, which left these glyphs at 2.36:1 in dark mode; they are now 12.02:1.
+
+### `SidebarItem` and `Sidebar` — the collapsed caret, and every rail open (2 October 2026)
+
+**Collapsed, a disclosure's caret now sits beside its glyph, not on it.** Figma's
+`_Sidebar_Item` (`Collapsed`) draws a 12 caret straight after the 24 glyph.
+Collapsed rows also stop centring their glyph and start it at the same 8 inset
+as Figma's rail, so every glyph shares one axis. Expanded rows are unchanged:
+the caret stays at the far right.
+
+**New: `Sidebar`'s `defaultOpen`** (minor) — the keys of the rows with sub-items
+that start open. The Storybook "Fully Expanded" story uses it to show any user
+type's rail with every section open.
+
 ### Breaking — `FileAttachment` rebuilt to Figma's card (2 October 2026)
 
 **The tile now matches Figma's `_File_Attachment_Card` and its states.** Before,
@@ -90,6 +110,74 @@ lookup was repointed at the new matching token.
 
 Free in practice while 0.1.0 is unreleased and nothing outside this repo
 imports the package, which is why the version is not bumped.
+
+### `IconButton` defaults to round, not square (21 September 2026)
+
+Visual change to a shipped component. `IconButton` now defaults to
+`shape="round"` (`rounded-pill`) across all five variants — a compose FAB, a
+toolbar action, a dismiss are round the great majority of the time across VCP,
+and the component previously defaulted to matching `Button`'s square corner
+unconditionally, which meant every common-case caller had to fight the
+default rather than the rare exception opting out of it.
+
+**`shape="square"`** (`rounded-sm`, `Button`'s own corner) is the new explicit
+exception, for a control that has to sit flush inside a square-cornered row
+rather than stand alone. `DetailRow`'s inline edit affordance is the one
+identified case and now opts into it explicitly.
+
+No new tokens — both shapes reuse the existing `shape.radius.pill` and
+`shape.radius.sm`. Minor bump: additive prop, but flagged for review because
+it silently changes the rendered shape of every existing `IconButton` call
+site that doesn't pass `shape="square"`, with no compile-time signal.
+
+### `Tag`, and Badge's corner corrected to match GDL's actual shape (21 September 2026)
+
+**A structural fix, not just a new atom.** `Badge` and `Tag` were conflated
+from the start: this repo's `Badge` was built and measured against Figma's
+`Tag` component by mistake (`docs/figma-audit.md`, 3 Sep 2026), so it shipped
+`rounded-sm` — Tag's shape, not Badge's. They're separate components in the
+General Design Library with separate shapes: `Badge` is fully rounded
+(`shape.radius.pill`), `Tag` is a rounded-rectangle (`shape.radius.sm`). No
+new radius tokens were needed — both values already existed, just applied to
+the wrong component.
+
+**New `Tag` atom** (`src/atoms/tag/`), the rounded-rectangle counterpart to
+`Badge`. Same four styles as Badge now share — `textual`, `outline`, `tonal`,
+`filled` — all VCP's own semantics; GDL's Tag primitive doesn't dictate them.
+The style × tone colour matrix moved into `src/lib/classification-tones.ts`,
+shared by both components rather than duplicated.
+
+**`Badge` gains `textual` and `outline`** alongside its existing `tonal`
+(default) and `filled`, for the rare case a badge needs one of Tag's other
+styles.
+
+**`TypeTag` and `UrgencyTag` now compose `Tag`** instead of each hand-rolling
+an identical shell — they were byte-for-byte duplicated between the two files
+before this. **Breaking, for anyone importing by path rather than through the
+package root:** both move from `src/atoms/` to `src/components/`, since
+composing another piece of the system is what the atom-composition rule
+tracks, not the vocabulary they carry. `import { TypeTag } from
+'@vcp/design-system'` is unaffected — the flat package export doesn't change
+— but a deep import from `@vcp/design-system/atoms/type-tag` (or
+`/urgency-tag`) needs to become `/components/type-tag` (or `/urgency-tag`).
+Their Storybook location moves from `Atoms/` to `Components/Display/` to
+match.
+
+**`TagEditor`'s own `Tag`/`TagTone` types renamed** to `TagEditorTag`/
+`TagEditorTagTone` to resolve the export collision with the new `Tag`
+component — those were always TagEditor-local data shapes, not the shared
+system piece, so the generic names were only safe while no real `Tag`
+existed.
+
+Minor bump for the new atom and the two additive variants; the tier move
+above is the one part of this that can break an existing deep import.
+
+### `Checkbox` — corner corrected to `radius.xs` (21 September 2026)
+
+The box shipped `rounded-sm` (6px); Figma's variable is `radius-2`, which is
+`shape.radius.xs` (4px) in this repo's own scale. One class, applies in every
+state — checked and mixed included, since there was never a separate radius
+rule for them. Visual correction, no API change.
 
 ### `AVTable` — the Added Value table (11 September 2026)
 

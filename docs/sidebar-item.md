@@ -99,6 +99,14 @@ collapsed rows** rather than this component wrapping itself: a tooltip on
 every row of an expanded sidebar would be noise, and the expanded rail already
 shows its labels.
 
+**Collapsed, a disclosure's caret is 12 and sits right after the glyph**, the
+way Figma's `_Sidebar_Item` (`Collapsed`) draws it — beside the glyph, never
+on it. Every collapsed row starts its glyph at the same 8 inset, so the rail's
+glyphs share one axis, and hugs its content with 8 on both sides (40 wide, or
+52 with the caret) so the selected fill and focus ring are even. Expanded, the caret is 20 and sits at the row's far
+right. Whether opening a collapsed disclosure should show a flyout instead of
+the inline list is unconfirmed against Figma and not addressed here.
+
 ## What the export invented
 
 This shipped first as a port of the Claude Design export, which turned out to
