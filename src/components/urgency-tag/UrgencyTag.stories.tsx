@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { UrgencyTag, AV_URGENCIES } from './UrgencyTag';
 
 const meta = {
-  title: 'Atoms/UrgencyTag',
+  title: 'Components/Display/UrgencyTag',
   component: UrgencyTag,
   parameters: {
     docs: {

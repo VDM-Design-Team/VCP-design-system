@@ -23,6 +23,15 @@ import { Icon, type IconName } from '../../atoms/icon';
  * contract `Accordion` uses, because a control that reveals something is not
  * a control that goes somewhere.
  *
+ * **Collapsed, the caret shrinks and sits beside the glyph.** Figma's
+ * `_Sidebar_Item` (`Collapsed`, `5322:55417`) draws a 12 caret directly after
+ * the 24 glyph, inside the same 8 padding — not on the glyph, and not the
+ * expanded row's 20 caret. Every collapsed row starts its glyph at the same
+ * 8 inset, so the rail's glyphs share one axis and the caret only adds width
+ * to the right. Expanded, the caret stays at the row's far right, as Figma
+ * draws it. Whether a collapsed disclosure should open a flyout instead of
+ * the inline list below is still unconfirmed against Figma.
+ *
  * **The current page carries `aria-current="page"`.** The tinted fill is the
  * sighted half of a fact the markup states anyway, never the only signal.
  *
@@ -77,9 +86,14 @@ export interface SidebarItemProps
    exactly, which is why there is no `size` prop. */
 const row = (selected: boolean, collapsed: boolean) =>
   cn(
-    'flex h-10 w-full items-center rounded-md font-sans text-label-sm-medium transition-colors',
+    'flex h-10 items-center rounded-md font-sans text-label-sm-medium transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    collapsed ? 'justify-center px-2' : 'gap-2 px-2',
+    /* Collapsed rows hug their content with 8 either side — 40 for a glyph,
+       52 with a disclosure's caret — so the fill and focus ring are even on
+       both sides. They start at the rail's same inset rather than centring,
+       so every glyph stays on one axis and a caret only adds width to the
+       right. Expanded rows fill the rail. */
+    collapsed ? 'w-fit px-2' : 'w-full gap-2 px-2',
     selected
       ? 'bg-surface-brand-subtle font-medium text-text-brand-strong'
       : 'text-text-secondary hover:bg-surface-brand-faint',
@@ -154,16 +168,20 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
             {...shared}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >
-            {glyph}
-            {text}
-            {/* The `Right Icon` axis. Collapsed, it shrinks to a marker beside
-                the glyph — the design draws the caret but no open state for
-                the rail, so this does not expand inline at 76 wide. */}
-            <Icon
-              name={isOpen ? 'caret-up' : 'caret-down'}
-              size={collapsed ? 'sm' : 'md'}
-              className="shrink-0"
-            />
+            {/* The `Right Icon` axis. Collapsed, Figma shrinks the caret to 12
+                and sets it straight after the glyph, with no gap. */}
+            {collapsed ? (
+              <>
+                {glyph}
+                <Icon name={isOpen ? 'caret-up' : 'caret-down'} className="size-3 shrink-0" />
+              </>
+            ) : (
+              <>
+                {glyph}
+                {text}
+                <Icon name={isOpen ? 'caret-up' : 'caret-down'} size="md" className="shrink-0" />
+              </>
+            )}
           </button>
           <ul id={listId} hidden={!isOpen} className="flex flex-col pb-2">
             {items.map((sub) => (

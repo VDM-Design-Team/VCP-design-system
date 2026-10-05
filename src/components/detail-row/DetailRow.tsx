@@ -15,6 +15,10 @@ import { IconButton } from '../../atoms/icon-button';
  * while `editing`. The button's name is `Edit ${label}` — which is why `label`
  * is a `string`, not a node: the row's identity has to be speakable.
  *
+ * `shape="square"` overrides `IconButton`'s round default here on purpose:
+ * this affordance sits flush inside a rectangular row rather than floating
+ * over the surface, so it should read as square-cornered like the row itself.
+ *
  * This renders a `<div>` row, not `<dt>/<dd>` — a details panel mixes rows
  * with editors and dividers, where a definition list's strict content model
  * fights the markup. The label/value relationship is carried visually and by
@@ -66,6 +70,7 @@ export const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
         <IconButton
           variant="tertiary"
           size="sm"
+          shape="square"
           icon={editing ? 'check' : 'pencil-simple'}
           label={`${editing ? 'Confirm' : 'Edit'} ${label}`}
           onClick={onEdit}

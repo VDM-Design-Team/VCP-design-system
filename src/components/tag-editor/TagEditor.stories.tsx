@@ -1,8 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { TagEditor, type Tag } from './TagEditor';
+import { TagEditor, type TagEditorTag } from './TagEditor';
 
-const TAGS: Tag[] = [
+const TAGS: TagEditorTag[] = [
   { label: 'packaging', tone: 'blue' },
   { label: 'quick win', tone: 'green' },
   { label: 'needs data', tone: 'yellow' },
@@ -31,7 +31,7 @@ type Story = StoryObj<typeof meta>;
 /** Live: pick a tone, name a tag, Enter or Add; remove from the pills. */
 export const Default: Story = {
   render: (args) => {
-    const [tags, setTags] = React.useState<Tag[]>(args.tags ? [...args.tags] : []);
+    const [tags, setTags] = React.useState<TagEditorTag[]>(args.tags ? [...args.tags] : []);
     return (
       <div className="w-128">
         <TagEditor
@@ -67,7 +67,7 @@ export const Tones: Story = {
 /** Empty and editable — the starting state. */
 export const Empty: Story = {
   render: (args) => {
-    const [tags, setTags] = React.useState<Tag[]>([]);
+    const [tags, setTags] = React.useState<TagEditorTag[]>([]);
     return (
       <div className="w-128">
         <TagEditor

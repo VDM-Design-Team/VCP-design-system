@@ -1,8 +1,8 @@
 # UrgencyTag
 
-How urgent an Added Value is, as a glyph and a word — an atom, and the owner
-of VCP's urgency vocabulary: this file and its `.tsx` are where the urgency →
-glyph/colour mapping lives, and nowhere else.
+How urgent an Added Value is, as a glyph and a word — a component, and the
+owner of VCP's urgency vocabulary: this file and its `.tsx` are where the
+urgency → glyph/colour mapping lives, and nowhere else.
 
 Read off the Figma `Urgency_Tag` set (`3330:314`), audit batch 5,
 11 September 2026.
@@ -11,6 +11,7 @@ Read off the Figma `Urgency_Tag` set (`3330:314`), audit batch 5,
 
 | Piece | Tier |
 |---|---|
+| `Tag` | atom |
 | `Icon` | sub-atomic |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -23,10 +24,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `Badge` | Generic classification with no VCP vocabulary |
 | `TypeTag` | An AV's *type*, which is a different scale with its own glyphs |
 
-**The tier rule, demonstrated.** This composes no piece of the system — only
-`Icon`, which is sub-atomic decoration — so it is an atom, per CLAUDE.md's
-composition test. The VCP vocabulary it carries doesn't change its tier; it
-changes its *ownership*.
+**The tier rule, demonstrated — the other way this time.** This composes
+`Tag`, a piece of the system, not just `Icon`'s sub-atomic decoration — so per
+CLAUDE.md's composition test it is a *component*, not an atom, even though the
+VCP vocabulary it carries doesn't change. (It was an atom before it composed
+`Tag`, when it hand-rolled its own shell instead — see `docs/tag.md` for why
+that changed.)
 
 ## Props
 
@@ -57,11 +60,11 @@ Two Figma deviations, both zero-pixel and both raised with design on
 - Figma paints the flame with `accent.critical.filled.surface.default`, a
   background token used as a foreground. `accent.critical.outline.content.default`
   is the same value in the right family and is what ships.
-- Figma's `Urgency_Tag` labels use `neutral.textual.content.default`, a family
-  this repo does not model yet. It resolves to slate-600, which is exactly
-  `neutral.outline.content.default`. See issue #103 — modelling the full
-  neutral families (`filled`, `tonal`, `outline`, `textual`) belongs with the
-  General Design Library work, not here.
+- Figma's `Urgency_Tag` labels use `neutral.textual.content.default`, a token
+  family that still doesn't exist in `tokens/semantic/`. `Tag`'s `textual`
+  variant (which this composes) works around that by reusing
+  `neutral.outline.content.default` — the same value, slate-600 — rather than
+  waiting on the token. See issue #103 for the token-family gap itself.
 
 **A trap worth naming:** the repo's type ramp and Figma's share names but not
 values. Figma draws the label at its `label-sm`, which is 14px; this repo's
@@ -94,5 +97,6 @@ same pixels under a different name. Read a spec off the canvas by value.
 ## Still open
 
 Figma draws tonal and outline styles for every urgency. Neither is assembled
-on any screen. They are not built here — when a screen needs one, add a
-`variant` to this atom rather than a second component.
+on any screen. `Tag` (the piece this composes) already supports all four
+styles — when one is needed here, pass `variant` through to the `Tag` this
+renders rather than building a second component.

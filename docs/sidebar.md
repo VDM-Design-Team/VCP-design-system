@@ -35,6 +35,7 @@ this list drifts, and fails a pattern composing fewer than two pieces.
 | `userType` | `SidebarUserType` | `'user'` | Which rail the design draws. Ignored when `items` is given |
 | `items` | `SidebarNavItem[]` | — | Override the nav set, for a rail the design hasn't drawn |
 | `active` | `string` | — | The `key` of the current row |
+| `defaultOpen` | `string[]` | — | Keys of rows with sub-items that start open — `'archive'`, `'planning'` |
 | `onNavigate` | `(key: string) => void` | — | A row press, for rows without an `href` |
 | `collapsed` | `boolean` | `false` | The 76-wide rail |
 | `onToggleCollapse` | `() => void` | — | Omit to hide the floating toggle entirely |
