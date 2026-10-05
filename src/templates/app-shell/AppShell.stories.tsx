@@ -48,11 +48,13 @@ const Panel = ({ title, children }: { title: string; children: React.ReactNode }
   </section>
 );
 
+/* Each card is at least 16.5rem wide and grows to share the row; when three no
+   longer fit, the flex container wraps the rest onto the next row. */
 const Stats = () => (
-  <div className="grid grid-cols-3 gap-4 py-6">
-    <StatCard label="My Added Values" value="12" icon={<Icon name="lightbulb" />} />
-    <StatCard label="Assigned to me" value="4" icon={<Icon name="assigned-value" />} />
-    <StatCard label="In review" value="2" icon={<Icon name="archive" />} />
+  <div className="flex flex-wrap gap-4 py-6">
+    <StatCard className="min-w-66 flex-1" label="My Added Values" value="12" icon={<Icon name="lightbulb" />} />
+    <StatCard className="min-w-66 flex-1" label="Assigned to me" value="4" icon={<Icon name="assigned-value" />} />
+    <StatCard className="min-w-66 flex-1" label="In review" value="2" icon={<Icon name="archive" />} />
   </div>
 );
 
