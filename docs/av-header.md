@@ -49,14 +49,17 @@ Exactly the Figma `Type` variant pair. The design's boolean
 
 ## Tokens
 
-No new tokens. The frame is the design's 32 above / 16 below and sides
-(`pt-8 pb-4 px-4`), which puts the 36-tall buttons in an 84-tall header
-against the design's 85. The back arrow rests at `text.primary` — the same
-colour as the title beside it (design audit, 24 Sep 2026) — and only shifts
-to `action.tertiary.content.hover` on hover. Both back affordances (the link
-and the `IconButton`) get this resting colour explicitly, since
-`IconButton`'s shared `tertiary` variant defaults to `action.tertiary.content`
-for every other use of it.
+No new tokens. The frame is 32 above and to each side, 16 below
+(`pt-8 pb-4 px-8`) — the sides match `PageTitle` and the page body, so the title
+sits on the same left edge as the content under it — which puts the 36-tall
+buttons in an 84-tall header against the design's 85. The back arrow rests at
+`text.primary` — the same colour as the title beside it (design audit, 24 Sep
+2026) — and shifts to **`text.brand.medium`** on hover (design review,
+5 Oct 2026; `surface.brand.strong` is the same blue). `action.tertiary.content.hover`
+was tried first, but its navy is too close to the near-black rest to read as a
+change. Both back affordances (the link and the `IconButton`) get these colours
+explicitly, since `IconButton`'s shared `tertiary` variant defaults to
+`action.tertiary.content` for every other use of it.
 
 ⚠️ The design's `new` title is **18px**, between our ramp's 16 (`heading-sm`)
 and 20 (`heading-md`). We take the larger step rather than add an 18px token
