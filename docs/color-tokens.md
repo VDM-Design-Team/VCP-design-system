@@ -120,7 +120,8 @@ itself, so neither wears the bordered pill treatment the real reactions do.
 Unlike `outline`, `textual` has no `surface` or `border` slot: no fill, no
 edge, content only. Only `.default` is confirmed directly against Figma;
 `hover` / `pressed` / `disabled` mirror `neutral.outline.content`'s own
-slate steps rather than a separately measured value.
+slate steps rather than a separately measured value, and so do its dark
+values (`slate.300` / `200` / `100` / `500`).
 
 > **"Neutral" names two different things, and they are not the same grey.**
 > The semantic family above is VCP's own. The **ramp** `color.neutral.*`

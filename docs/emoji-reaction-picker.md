@@ -95,12 +95,15 @@ text glyphs.
 **One token added earlier:** `neutral.textual.content` (`default`/`hover`/`pressed`/
 `disabled`), for the two icon buttons. Only `.default` is confirmed against
 Figma directly; the other three mirror `neutral.outline.content`'s slate steps.
+Its dark values mirror `neutral.outline.content`'s dark steps the same way —
+until 5 Oct 2026 it had none, so dark mode kept the light slate-600 (2.36:1).
 Hover on these buttons uses `text.brand.medium` rather than
 `neutral.textual.content.hover`.
 
 | Pair (on `surface.canvas`) | Light | Dark |
 |---|---|---|
 | Count on another person's pill (`neutral.outline.content.default`) | **7.24:1** | **12.02:1** |
+| Quick-react and add-reaction glyphs (`neutral.textual.content.default`) | **7.24:1** | **12.02:1** |
 | Count on a *mine* pill (`text.brand.medium`) | **5.91:1** | **4.74:1** |
 | *Mine* border (`stroke.focused`) | **5.91:1** | **7.73:1** |
 | Another person's border (`neutral.outline.border.default`) | **2.45:1** — under the 3:1 UI-border bar | **3.75:1** |

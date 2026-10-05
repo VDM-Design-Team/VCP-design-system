@@ -712,6 +712,22 @@
             "$value": "{color.slate.200}"
           }
         }
+      },
+      "textual": {
+        "content": {
+          "default": {
+            "$value": "{color.slate.300}"
+          },
+          "disabled": {
+            "$value": "{color.slate.500}"
+          },
+          "hover": {
+            "$value": "{color.slate.200}"
+          },
+          "pressed": {
+            "$value": "{color.slate.100}"
+          }
+        }
       }
     },
     "stroke": {

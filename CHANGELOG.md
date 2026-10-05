@@ -2,6 +2,14 @@
 
 ## 0.1.0 — unreleased
 
+### `neutral.textual.content` — a token for content with no fill or border (5 October 2026)
+
+**New token** (minor): `neutral.textual.content` (`default` / `hover` /
+`pressed` / `disabled`), for `EmojiReactionPicker`'s quick-react and
+add-reaction glyphs. `.default` is Figma's value; the other states mirror
+`neutral.outline.content`, in light and dark. The dark values were missing at
+first, which left these glyphs at 2.36:1 in dark mode; they are now 12.02:1.
+
 ### `SidebarItem` and `Sidebar` — the collapsed caret, and every rail open (2 October 2026)
 
 **Collapsed, a disclosure's caret now sits beside its glyph, not on it.** Figma's
