@@ -3,6 +3,21 @@ import { StatCard, StatCardGroup } from './StatCard';
 import { Icon } from '../../atoms/icon';
 import { DonutChart } from '../../atoms/donut-chart';
 
+/* The icon control: a dropdown of the filled glyphs the dashboards use,
+   mapped to real `<Icon size="lg" />` nodes — a ReactNode prop otherwise only
+   offers "Set object". */
+const ICONS = [
+  'check-square-fill',
+  'note-pencil-fill',
+  'calendar-x-fill',
+  'users-fill',
+  'clock-fill',
+  'chat-dots-fill',
+  'thumbs-up-fill',
+  'x-circle-fill',
+] as const;
+const ICON_MAPPING = Object.fromEntries(ICONS.map((n) => [n, <Icon name={n} size="lg" />]));
+
 const meta = {
   title: 'Components/Display/StatCard',
   component: StatCard,
@@ -24,6 +39,8 @@ const meta = {
   args: { label: 'Completed', value: '12', accent: 'success', variant: 'default' },
   argTypes: {
     variant: { control: 'radio', options: ['default', 'superadmin'] },
+    icon: { control: 'select', options: ['none', ...ICONS], mapping: { none: undefined, ...ICON_MAPPING } },
+    hint: { control: 'text' },
     accent: {
       control: 'select',
       options: ['neutral', 'brand', 'info', 'success', 'critical', 'warning'],
@@ -36,14 +53,23 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * The admin and user dashboards' Value_Card: the stripe, the label, the bold
- * value. Flip `variant` to see the same content as the super admin card.
+ * value. Flip `variant` to `superadmin` and the super admin card's title row
+ * fills in — an icon and an info hint, as Figma draws it — unless you've set
+ * your own in the controls.
  */
 export const Default: Story = {
-  render: (args) => (
-    <div className="w-60 pt-16">
-      <StatCard {...args} />
-    </div>
-  ),
+  render: (args) => {
+    const superadmin = args.variant === 'superadmin';
+    return (
+      <div className={superadmin ? 'w-72 pt-16' : 'w-60 pt-16'}>
+        <StatCard
+          {...args}
+          icon={args.icon ?? (superadmin ? <Icon name="check-square-fill" size="lg" /> : undefined)}
+          hint={args.hint ?? (superadmin ? 'Added Values moved to Completed in the selected period.' : undefined)}
+        />
+      </div>
+    );
+  },
 };
 
 /**
