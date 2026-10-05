@@ -39,7 +39,7 @@ the status → tone mapping lives here and only here.
 | `status` | `AVStatus` | — | A spine status. Ten values; a typo is a compile error |
 | `custom` | `string` | — | A domain step, by whatever name the domain gives it |
 | `actionable` | `boolean` | `false` | Draw the design's button style. Today only `Review` differs |
-| `size` | `'sm' \| 'md'` | `'md'` | Inherited from `Badge` |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Inherited from `Badge` |
 
 **`status` and `custom` are mutually exclusive**, enforced by the type. Exactly
 one is required. That is the whole API: a domain label can never silently take

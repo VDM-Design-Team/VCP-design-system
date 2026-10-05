@@ -2,6 +2,19 @@
 
 ## 0.1.0 — unreleased
 
+### `Badge` — type sizes per size, and a large size (October 2026)
+
+Each size now has its own type size, and there is a third size.
+
+- **Type:** `sm` 10 (`caption-sm-medium`), `md` 12 (`caption-md-medium`) and the new
+  `lg` 14 (`label-sm-medium`). All three were 14 before, so **every existing `sm` and
+  `md` Badge now renders smaller text** — including `StatusPill`, `DueDatePill` and the
+  Badges in `AVTable` and `ChangeLogModal`. Heights are unchanged (24 / 28).
+- **New `size="lg"`:** 32 tall, 12 either side (`px-3`), 14 type. Fixed height, pill shape,
+  same styles and tones as the others.
+
+Migration: none required; a caller that wanted the old 14 type on an `md` Badge can use `lg`.
+
 ### `Pagination` — built to Figma's `VCP_Pagination` (5 October 2026)
 
 **New** (minor): **First** and **Last** buttons either end; an **ellipsis** for

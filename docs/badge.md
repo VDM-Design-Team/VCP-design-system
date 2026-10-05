@@ -33,7 +33,7 @@ that mapping wants to live in `StatusPill` instead.
 |---|---|---|---|
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | Shared with `Tag` — see `docs/tag.md`. `tonal` is the common case |
 | `tone` | `neutral \| brand \| info \| success \| warning \| danger` | `neutral` | Generic tones only. No VCP status names — see above |
-| `size` | `sm \| md` | `md` | 24 / 28 tall. `sm` for dense tables and inline-with-body-text |
+| `size` | `sm \| md \| lg` | `md` | 24 / 28 / 32 tall, with 10 / 12 / 14 type. `sm` for dense tables and inline-with-body-text; `lg` is the large Badge |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the badge's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
 | `className` | `string` | — | Merged via `cn()` |
@@ -75,11 +75,12 @@ Everything else:
 | Part | Token | Utility |
 |---|---|---|
 | Radius | `shape.radius.pill` | `rounded-pill` |
-| Type ramp, `md` | `type.label.lg` — Poppins 500, 14/20 | `text-label-sm-medium` |
-| Type ramp, `sm` | `type.label.md` — Poppins 500, 13/18 | `text-label-sm-medium` |
-| Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
-| Padding | Tailwind numeric scale | `px-2` (8), both sizes |
-| Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |
+| Type ramp, `sm` | Poppins 500, 10 | `text-caption-sm-medium` |
+| Type ramp, `md` | Poppins 500, 12 | `text-caption-md-medium` |
+| Type ramp, `lg` | Poppins 500, 14 | `text-label-sm-medium` |
+| Height | Tailwind numeric scale | `h-6` (`sm`, 24) / `h-7` (`md`, 28) / `h-8` (`lg`, 32) |
+| Padding | Tailwind numeric scale | `px-2` (8) on `sm` and `md`; `px-3` (12) on `lg` |
+| Gap | Tailwind numeric scale | `gap-1` (`sm`, 4) / `gap-2` (`md` and `lg`, 8) |
 | Icon colour | — | Inherited from the tone's content token via `currentColor` |
 
 The dark theme comes for free — every colour class above is a semantic token that

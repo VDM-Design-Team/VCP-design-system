@@ -29,7 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `children` | `ReactNode` | — | The date, already formatted |
 | `proximity` | `DueDateProximity` | `'default'` | `default` · `due-soon` · `overdue` |
-| `size` | `'sm' \| 'md'` | `'sm'` | Inherited from `Badge`. The AV table uses `sm` |
+| `size` | `'sm' \| 'md' \| 'lg'` | `'sm'` | Inherited from `Badge`. The AV table uses `sm` |
 
 ## The mapping
 
