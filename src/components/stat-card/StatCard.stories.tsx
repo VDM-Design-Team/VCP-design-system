@@ -10,20 +10,20 @@ const meta = {
     docs: {
       description: {
         component:
-          'One number that matters, on a card. `StatCard` is one value with a coloured left ' +
-          'stripe; `StatCardGroup` is two or more values under one title, split by dividers. ' +
-          '`variant` picks the look: `default` is the Value_Card on normal and admin dashboards, ' +
-          '`superadmin` the larger card of the superadmin dashboard. `accent` sets the stripe ' +
-          'and icon tone; `hint` adds a focusable info glyph after the label. `align` is left ' +
-          '(the default) or centred — a control on every story, for both forms. The label is ' +
-          'not a heading: the dashboard section owns the outline.',
+          'One number that matters, on a card. There are two, one per dashboard, set by ' +
+          '`variant`: `default` is the **Value_Card** on the admin and user dashboards — an 8 ' +
+          'stripe, left-aligned, label over a bold value, 100 high. `superadmin` is the **super ' +
+          'admin metric card** — a 12 stripe, centred, an icon, label and info hint over a ' +
+          'semibold value and unit, 150 high. `StatCardGroup` is the super admin dashboard’s ' +
+          'grouped card: two or more values under one title, split by dividers. `accent` sets ' +
+          'the stripe and icon tone. The label is not a heading: the dashboard section owns the ' +
+          'outline.',
       },
     },
   },
-  args: { label: 'Open claims', value: '128', align: 'start', variant: 'default' },
+  args: { label: 'Completed', value: '12', accent: 'success', variant: 'default' },
   argTypes: {
     variant: { control: 'radio', options: ['default', 'superadmin'] },
-    align: { control: 'radio', options: ['start', 'center'] },
     accent: {
       control: 'select',
       options: ['neutral', 'brand', 'info', 'success', 'critical', 'warning'],
@@ -35,130 +35,177 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * One value, with every option switched on: an icon, the label, an info
- * tooltip (`hint`), the value and its measurement (`unit`), and the stripe's
- * tone (`accent`). Use the controls to flip `align` between left and centred,
- * change the tone, or clear any of them.
+ * The admin and user dashboards' Value_Card: the stripe, the label, the bold
+ * value. Flip `variant` to see the same content as the super admin card.
  */
 export const Default: Story = {
+  render: (args) => (
+    <div className="w-60 pt-16">
+      <StatCard {...args} />
+    </div>
+  ),
+};
+
+/**
+ * The admin and user dashboards' "Value Cards" row, as Figma draws it (`VCP
+ * Pages & Flows`, node `947:306362`): one card per Added Value status,
+ * left-aligned, sharing the row. In Progress is the brand blue; the others
+ * are accent or neutral.
+ */
+export const AdminAndUserDashboard: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex w-280 flex-wrap gap-3">
+      {(
+        [
+          ['Completed', '12', 'success'],
+          ['Overdue', '3', 'critical'],
+          ['In Progress', '8', 'brand'],
+          ['Pending', '4', 'warning'],
+          ['Draft', '5', 'neutral'],
+        ] as const
+      ).map(([label, value, accent]) => (
+        <div key={label} className="flex-1">
+          <StatCard label={label} value={value} accent={accent} />
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * One super admin card with everything switched on: the accent icon, the
+ * label, the info hint, and a value with its unit. Centred, 150 high.
+ */
+export const SuperAdmin: Story = {
   args: {
-    label: 'Overdue rate',
+    variant: 'superadmin',
+    label: 'Overdue Value Rate',
     value: '26',
     unit: '%',
-    accent: 'info',
+    accent: 'critical',
     hint: 'Share of active Added Values past their due date.',
-    icon: <Icon name="graph-fill" size="lg" />,
+    icon: <Icon name="calendar-x-fill" size="lg" />,
   },
   render: (args) => (
-    <div className="w-72 pt-16">
+    <div className="w-80 pt-16">
       <StatCard {...args} />
     </div>
   ),
 };
 
-/** `unit` is the measurement beside the value — "%", "days" — bottom-aligned with it. */
+/**
+ * The super admin dashboard's metrics, as Figma draws them (`VCP Pages &
+ * Flows`, node `3:4848`): four single cards, then two grouped cards — both
+ * rows 150 high.
+ */
+export const SuperAdminDashboard: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex w-280 flex-col gap-6 pt-16">
+      <div className="grid grid-cols-4 gap-6">
+        <StatCard
+          variant="superadmin"
+          label="Values Created"
+          value="25"
+          accent="info"
+          hint="Added Values created in the selected period."
+          icon={<Icon name="note-pencil-fill" size="lg" />}
+        />
+        <StatCard
+          variant="superadmin"
+          label="Values Completed"
+          value="31"
+          accent="success"
+          hint="Added Values moved to Completed in the selected period."
+          icon={<Icon name="check-square-fill" size="lg" />}
+        />
+        <StatCard
+          variant="superadmin"
+          label="Overdue Value Rate"
+          value="26"
+          unit="%"
+          accent="critical"
+          hint="Share of active Added Values past their due date."
+          icon={<Icon name="calendar-x-fill" size="lg" />}
+        />
+        <StatCard
+          variant="superadmin"
+          label="Active / Total Users"
+          value="12"
+          unit="/ 15"
+          accent="neutral"
+          hint="Count of unique users from total users in the Domain who created, updated, or completed a Value in the selected period"
+          icon={<Icon name="users-fill" size="lg" />}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-6">
+        <StatCardGroup
+          title="Avg. Time"
+          items={[
+            {
+              label: 'In Pending',
+              value: '9.2',
+              unit: 'days',
+              accent: 'warning',
+              icon: <Icon name="clock-fill" size="lg" />,
+              hint: 'Average of: (Accepted date OR Rejected date) – Submitted date',
+            },
+            {
+              label: 'In Review',
+              value: '6.5',
+              unit: 'days',
+              accent: 'info',
+              icon: <Icon name="chat-dots-fill" size="lg" />,
+              hint: 'Average of: Review decision date – Completion date',
+            },
+          ]}
+        />
+        <StatCardGroup
+          title="Review"
+          items={[
+            {
+              label: 'Acceptance Rate',
+              value: '95',
+              unit: '%',
+              accent: 'info',
+              icon: <Icon name="thumbs-up-fill" size="lg" />,
+              hint: 'Share of reviewed Added Values that were accepted.',
+            },
+            {
+              label: 'Values Rejected',
+              value: '3',
+              accent: 'critical',
+              icon: <Icon name="x-circle-fill" size="lg" />,
+              hint: 'Added Values rejected in the selected period.',
+            },
+          ]}
+        />
+      </div>
+    </div>
+  ),
+};
+
+/** `unit` is the measurement beside the value — "%", "days" — on its baseline. */
 export const WithUnit: Story = {
-  args: { label: 'Overdue rate', value: '26', unit: '%', accent: 'critical' },
+  args: { variant: 'superadmin', label: 'In Pending', value: '9.2', unit: 'days', accent: 'warning' },
   render: (args) => (
-    <div className="w-64">
+    <div className="w-72">
       <StatCard {...args} />
     </div>
   ),
 };
 
 /**
- * The Value_Card on normal and admin dashboards (Figma node 4200:21967): a title and
- * a value, with the stripe in the card's tone. In Review and In Progress use the
- * `brand` tone; the rest are accent or neutral. The default variant.
- */
-export const DashboardValueCards: Story = {
-  render: (args) => (
-    <div className="grid w-280 grid-cols-6 gap-5">
-      <StatCard align={args.align} variant={args.variant} label="Completed" value="12" accent="success" />
-      <StatCard align={args.align} variant={args.variant} label="In Review" value="6" accent="brand" />
-      <StatCard align={args.align} variant={args.variant} label="Overdue" value="3" accent="critical" />
-      <StatCard align={args.align} variant={args.variant} label="In Progress" value="8" accent="brand" />
-      <StatCard align={args.align} variant={args.variant} label="Pending" value="4" accent="warning" />
-      <StatCard align={args.align} variant={args.variant} label="Draft" value="5" accent="neutral" />
-    </div>
-  ),
-};
-
-/**
- * A stripe and icon in each card's tone, and a focusable info glyph (`hint`)
- * after the label. This is the `superadmin` variant, matching Figma's
- * `_SuperAdmin_Metric_Card_Coloured_Base`; the superadmin dashboard sets
- * `align` to `center`.
- */
-export const TonesAndHints: Story = {
-  args: { variant: 'superadmin' },
-  render: (args) => (
-    <div className="grid w-200 grid-cols-2 gap-4 pt-16">
-      <StatCard
-        align={args.align}
-        variant={args.variant}
-        label="Values Created"
-        value="25"
-        accent="info"
-        hint="Added Values created in the selected cycle."
-        icon={<Icon name="note-pencil-fill" size="lg" />}
-      />
-      <StatCard
-        align={args.align}
-        variant={args.variant}
-        label="Values Completed"
-        value="31"
-        accent="success"
-        hint="Added Values moved to Completed."
-        icon={<Icon name="check-circle-fill" size="lg" />}
-      />
-      <StatCard
-        align={args.align}
-        variant={args.variant}
-        label="Overdue Value Rate"
-        value="26"
-        unit="%"
-        accent="critical"
-        hint="Share of active Added Values past their due date."
-        icon={<Icon name="warning-fill" size="lg" />}
-      />
-      <StatCard
-        align={args.align}
-        variant={args.variant}
-        label="Active / Total Users"
-        value="12"
-        unit="/ 15"
-        accent="neutral"
-        icon={<Icon name="users-fill" size="lg" />}
-      />
-    </div>
-  ),
-};
-
-/** A dashboard row — the natural habitat. */
-export const Tiled: Story = {
-  render: (args) => (
-    <div className="grid w-200 grid-cols-4 gap-4">
-      <StatCard align={args.align} variant={args.variant} label="Open claims" value="128" icon={<Icon name="file-fill" size="lg" />} />
-      <StatCard align={args.align} variant={args.variant} label="Escalations" value="6" icon={<Icon name="warning-fill" size="lg" />} />
-      <StatCard align={args.align} variant={args.variant} label="Reconciled" value="1,204" icon={<Icon name="check-circle-fill" size="lg" />} />
-      <StatCard align={args.align} variant={args.variant} label="Avg. response" value="2.4" unit="days" icon={<Icon name="clock-fill" size="lg" />} />
-    </div>
-  ),
-};
-
-/**
- * Values are nodes — a `DonutChart` makes a gauge tile. The card is a fixed
- * height, so the ring is sized to leave room for the title row above it.
+ * Values are nodes — a `DonutChart` makes a gauge tile. Use the super admin
+ * card: its 150 leaves room for the ring under the title row.
  */
 export const WithADonut: Story = {
-  args: { label: 'Capacity used' },
+  args: { variant: 'superadmin', label: 'Capacity used', accent: 'info' },
   render: (args) => (
     <div className="w-64">
       <StatCard
-        align={args.align}
-        variant={args.variant}
-        label={args.label}
+        {...args}
         value={<DonutChart value={26} max={40} size={88} thickness={10} caption="of 40 pts" />}
       />
     </div>
@@ -166,17 +213,15 @@ export const WithADonut: Story = {
 };
 
 /**
- * Two or more values under one title, split by vertical dividers. No stripe;
- * each item's icon carries its own tone. Matches Figma's
- * `_SuperAdmin_Metric_Card_Grouped_Base`. The group title is always centred;
- * `align` moves the items' content.
+ * Two or more values under one title, split by vertical dividers — the super
+ * admin dashboard's `_SuperAdmin_Metric_Card_Grouped`. No stripe; each item's
+ * icon carries its own tone. Centred.
  */
 export const Grouped: Story = {
-  argTypes: { variant: { table: { disable: true } } },
-  render: (args) => (
+  parameters: { controls: { disable: true } },
+  render: () => (
     <div className="w-150 pt-16">
       <StatCardGroup
-        align={args.align}
         title="Avg. Time"
         items={[
           {
@@ -192,7 +237,7 @@ export const Grouped: Story = {
             value: '6.5',
             unit: 'days',
             accent: 'info',
-            icon: <Icon name="chats-circle-fill" size="lg" />,
+            icon: <Icon name="chat-dots-fill" size="lg" />,
             hint: 'Average of: Review decision date – Completion date',
           },
         ]}
@@ -203,39 +248,52 @@ export const Grouped: Story = {
 
 /** More than two items share the width equally. */
 export const GroupedThreeItems: Story = {
-  argTypes: { variant: { table: { disable: true } } },
-  render: (args) => (
+  parameters: { controls: { disable: true } },
+  render: () => (
     <div className="w-200 pt-16">
       <StatCardGroup
-        align={args.align}
         title="Avg. Time"
         items={[
           { label: 'In Pending', value: '9.2', unit: 'days', accent: 'warning', icon: <Icon name="clock-fill" size="lg" /> },
-          { label: 'In Review', value: '6.5', unit: 'days', accent: 'info', icon: <Icon name="chats-circle-fill" size="lg" /> },
-          { label: 'Completed', value: '3.1', unit: 'days', accent: 'success', icon: <Icon name="check-circle-fill" size="lg" /> },
+          { label: 'In Review', value: '6.5', unit: 'days', accent: 'info', icon: <Icon name="chat-dots-fill" size="lg" /> },
+          { label: 'Completed', value: '3.1', unit: 'days', accent: 'success', icon: <Icon name="check-square-fill" size="lg" /> },
         ]}
       />
     </div>
   ),
 };
 
-/** Card, numerals and dividers are tokens, so dark is free. */
+/** Both cards and the group are tokens throughout, so dark is free. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen' },
-  render: (args) => (
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="grid grid-cols-2 gap-4 bg-surface-canvas p-8">
-            <StatCard align={args.align} variant={args.variant} label="Points delivered" value="34" accent="success" />
-            <StatCard align={args.align} variant={args.variant} label="Handling cost" value="41" unit="k" accent="critical" />
+            <StatCard label="Completed" value="12" accent="success" />
+            <StatCard label="In Progress" value="8" accent="brand" />
+            <StatCard
+              variant="superadmin"
+              label="Values Created"
+              value="25"
+              accent="info"
+              icon={<Icon name="note-pencil-fill" size="lg" />}
+            />
+            <StatCard
+              variant="superadmin"
+              label="Overdue Value Rate"
+              value="26"
+              unit="%"
+              accent="critical"
+              icon={<Icon name="calendar-x-fill" size="lg" />}
+            />
             <div className="col-span-2">
               <StatCardGroup
-                align={args.align}
                 title="Avg. Time"
                 items={[
                   { label: 'In Pending', value: '9.2', unit: 'days', accent: 'warning', icon: <Icon name="clock-fill" size="lg" /> },
-                  { label: 'In Review', value: '6.5', unit: 'days', accent: 'info', icon: <Icon name="chats-circle-fill" size="lg" /> },
+                  { label: 'In Review', value: '6.5', unit: 'days', accent: 'info', icon: <Icon name="chat-dots-fill" size="lg" /> },
                 ]}
               />
             </div>

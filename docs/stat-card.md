@@ -2,21 +2,25 @@
 
 One number that matters, on a card: a title row (optional icon, label,
 optional info tooltip), then the value with an optional measurement beside it.
-Dashboards tile these. Two forms:
+Dashboards tile these. **There are two cards, one per dashboard**, read off
+Figma's `VCP Pages & Flows` file (5 Oct 2026) and set by `variant`:
 
-- **`StatCard`** — one value, with a thick coloured **stripe** on the left edge.
-  Two looks, set by `variant`:
-  - `default` — Figma's `Value_Card`, what normal and admin users see on their
-    dashboards. Bold value, height hugs the content.
-  - `superadmin` — Figma's `_SuperAdmin_Metric_Card_Coloured_Base`. Semibold
-    value, a fixed 150 high.
-- **`StatCardGroup`** — two or more values under one title, side by side, split
-  by vertical dividers. No stripe. Figma's `_SuperAdmin_Metric_Card_Grouped_Base`,
-  so it has the superadmin look only, at a fixed 150 high (`h-37.5` on Tailwind's
-  numeric scale).
+| | `default` — admin & user dashboards | `superadmin` — super admin dashboard |
+|---|---|---|
+| Figma | `Value_Card` (node `947:306362`, "Value Cards") | `_SuperAdmin_Metric_Card_Coloured` (node `3:4848`) |
+| Stripe | 8 wide | 12 wide |
+| Alignment | **Left** | **Centred** |
+| Size | Exactly 100 high, at least 175 wide | Exactly 150 high |
+| Title | Label only (Figma draws no icon or hint) | Accent icon, label, info hint |
+| Value | 36 **bold**, 44 line | 36 **semibold**, 36 line, plus a 24 unit |
 
-Both fill their container's width. Every prop works in both looks of `StatCard`;
-only the measurements and the value's weight differ.
+**`StatCardGroup`** is the super admin dashboard's
+`_SuperAdmin_Metric_Card_Grouped`: two or more values under one title, side by
+side, split by vertical dividers, centred, 150 high. No stripe.
+
+Alignment belongs to the look rather than being a prop — Figma never draws a
+centred Value_Card or a left-aligned super admin card. Every form fills its
+container's width.
 
 ## Composed of
 
@@ -47,9 +51,8 @@ only the measurements and the value's weight differ.
 | `unit` | `ReactNode` | — | The measurement beside the value — "%", "days", "of 40 pts" |
 | `icon` | `ReactNode` | — | An `<Icon size="lg" />` before the label — Figma draws it in the `-fill` style. Decorative; takes the `accent` colour |
 | `hint` | `string` | — | Explanation behind an info glyph after the label. Omit it and there's no glyph |
-| `variant` | `default \| superadmin` | `default` | The look: `default` is the Value_Card (normal and admin dashboards), `superadmin` the larger fixed-height card |
+| `variant` | `default \| superadmin` | `default` | Which dashboard's card: `default` is the Value_Card (admin and user — left-aligned, 100 high), `superadmin` the super admin card (centred, 150 high) |
 | `accent` | `neutral \| brand \| info \| success \| critical \| warning` | `neutral` | The tone: the left stripe's colour, and the icon's. `brand` is the brand blue Value_Card uses for In Review / In Progress |
-| `align` | `start \| center` | `start` | Left-aligned, or centred |
 | `className` | `string` | — | Merged via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | The card |
 
@@ -57,9 +60,8 @@ only the measurements and the value's weight differ.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `title` | `ReactNode` | required | The group's overall title. Always centred, whatever `align` is |
+| `title` | `ReactNode` | required | The group's overall title, centred above the items |
 | `items` | `[item, item, ...item[]]` | required | **Two or more** — the type enforces it. For one value, use `StatCard` |
-| `align` | `start \| center` | `start` | How each item's content aligns |
 | `className`, `ref` | | | On the card |
 
 An item takes `label`, `value`, `unit`, `icon`, `hint` and `accent` — the same
@@ -72,20 +74,18 @@ Items have no padding, hug their height and share the width equally.
 is `surface.elevated`, a group is `surface.base`. No shadow — Figma's cards are
 flat.
 
-**Both looks** have a `space.8` stripe on the left edge *inside* the outline, in
-the `accent` tone. **Left-aligned**, the stripe is its own column: the content area
-starts after it and its padding is measured from there, so it never overlaps the
-content. **Centred**, the stripe is laid over the card's edge instead, so it does
-not push the content off-centre and the text is centred on the whole card.
+**The stripe** sits on the left edge *inside* the outline, in the `accent`
+tone, and is always its own column: the content area starts after it, so
+centred content centres in the space beside the stripe — as Figma draws it.
 
-**Single, `default` (Value_Card):** `space.16` padding either side of the content,
-with `space.20` above and below. No gap between the
-title row and the value. At least 100 high, hugging its content. The value is bold
-on a 44 line.
+**Single, `default` (Value_Card):** an 8 stripe; `space.16` either side of the
+content, left-aligned and centred vertically; no gap between the label and the
+value. Exactly 100 high and at least 175 wide (`h-25 min-w-43.75`). The value
+is bold on a 44 line.
 
-**Single, `superadmin`:** `space.24` side padding (after the stripe), content centred vertically,
-exactly 150 high; `space.12` between the title row and the value row. The value is semibold on a
-36 line.
+**Single, `superadmin`:** a 12 stripe; `space.24` either side, content centred
+both ways; `space.12` between the title row and the value row. Exactly 150
+high (`h-37.5`). The value is semibold on a 36 line.
 
 **Group:** `space.16` top and `space.24` on the other three sides; the title at
 the top, `label-sm-semibold` in `text.secondary`; `space.12` below it, the row
@@ -158,5 +158,5 @@ they are a known soft spot of `outline.border.default` as a fill. The 1px
   merely sit next to each other — a group says "these share a title".
 - **Don't tile twelve.** Past a handful, the headline figures stop being
   headlines; the rest is a table.
-- **Don't mix the two looks in one row.** `default` and `superadmin` have
-  different stripes, padding and heights; a dashboard uses one or the other.
+- **Don't mix the two looks in one row.** `default` and `superadmin` belong to
+  different dashboards and have different stripes, alignment and heights.

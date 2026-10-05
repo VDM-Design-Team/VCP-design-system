@@ -4,6 +4,5 @@ export type {
   StatCardGroupProps,
   StatCardGroupItem,
   StatCardAccent,
-  StatCardAlign,
   StatCardVariant,
 } from './StatCard';

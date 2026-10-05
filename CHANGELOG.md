@@ -51,37 +51,40 @@ Migration: delete `size="…"` from any `<FileAttachment>`, and `size` from
 the items in either modal's `attachments`. Nothing else changes. 0.1.0 is
 unreleased, so the version isn't bumped, per the convention above.
 
-### `StatCard` — two looks, a group form and an alignment option (October 2026)
+### Breaking — `StatCard`: one card per dashboard, and a group form (October 2026)
 
-Rebuilt against Figma's `Value_Card`, `_SuperAdmin_Metric_Card_Coloured_Base` and
-`_Grouped_Base`. **New:** `StatCardGroup` (two or more values under one title,
-split by `Divider`s); an `align` prop (`start` | `center`); a `variant` prop
-(`default` = the Value_Card on normal and admin dashboards, `superadmin` = the
-larger fixed-height card); and a `brand` tone for `accent` (the brand blue
-Value_Card uses for In Review / In Progress).
+Rebuilt against Figma's `VCP Pages & Flows` dashboards (5 Oct 2026). There are
+two cards, set by **`variant`**, and a grouped form:
 
-**Behaviour changes to `StatCard`**, all deliberate, all visual:
+- **`default`** — the admin and user dashboards' `Value_Card`: an 8 stripe,
+  **left-aligned**, label over a 36 bold value, exactly 100 high and at least
+  175 wide.
+- **`superadmin`** — the super admin dashboard's metric card: a 12 stripe,
+  **centred**, accent icon + label + info hint over a 36 semibold value and a
+  24 unit, exactly 150 high.
+- **New: `StatCardGroup`** — the super admin dashboard's grouped card: two or
+  more values under one title, split by `Divider`s, centred.
+- **New: a `brand` tone** for `accent` — the brand blue the Value_Card uses for
+  In Progress.
+- **New filled glyphs** for the super admin cards: `check-square-fill`,
+  `calendar-x-fill`, `chat-dots-fill`, `thumbs-up-fill`, `x-circle-fill`.
 
-- **Left-aligned by default.** The 24 Sep audit centred it; pass `align="center"`
-  where that is wanted.
-- **Full container width**, and a new default look (`variant="default"`, the
-  Value_Card): 20/16 padding, a bold value, a height that hugs its
-  content. The previous size-and-spacing is `variant="superadmin"` (fixed 150 high).
-- The stripe is 8 wide (was 4) and sits inside a 1px `stroke.default` outline
-  (was `stroke.subtle`); the card has no shadow.
-- The icon is 24 and takes the `accent` tone, matching the stripe. Pass
-  `<Icon size="lg" />`; the old `size="sm"` glyphs now sit small in the box.
-- The label is `label-sm-medium` in `text.secondary` (was caption, tertiary);
-  the tooltip glyph is 20 (was 16).
-- The value is 36 bold (`default`) or semibold (`superadmin`) and `unit` is 24
-  medium, both `text.primary` in Poppins (the value was 24 in Inter). Both are written out as type-ramp
-  exceptions — the ramp has no 36 step and no `heading-lg-medium`.
+**Breaking changes to `StatCard`** (major):
+
 - **Removed: `delta`, `deltaTone` and `footer`.** Figma's cards have neither a
-  change figure nor a line under the value, so they are not introduced.
+  change figure nor a line under the value.
+- **The look changed.** Full container width; the stripe sits inside a 1px
+  `stroke.default` outline (was `stroke.subtle`); no shadow. The icon is 24 in
+  the `accent` tone, the label `label-sm-medium` `text.secondary` (was caption,
+  tertiary), the tooltip glyph 20 (was 16). The value is 36 and `unit` 24, both
+  `text.primary` Poppins (the value was 24 Inter) — written out as type-ramp
+  exceptions, since the ramp has no 36 step and no `heading-lg-medium`.
+- **Alignment follows the card, not a prop**: the Value_Card is left-aligned,
+  the super admin card centred. The 24 Sep audit had centred every card.
 
-Migration: callers that relied on centring add `align="center"`; callers
-passing small icons switch to `size="lg"`; drop `delta`, `deltaTone` and
-`footer`.
+Migration: drop `delta`, `deltaTone` and `footer`; pass `variant="superadmin"`
+on the super admin dashboard; pass icons as `<Icon size="lg" />` (the old
+`size="sm"` glyphs now sit small in the box).
 
 ### Breaking — 24 September 2026
 

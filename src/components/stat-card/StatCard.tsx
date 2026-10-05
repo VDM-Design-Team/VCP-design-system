@@ -8,24 +8,28 @@ import { Tooltip } from '../tooltip';
  * StatCard — one number that matters, on a card: open claims, points
  * consumed, suppliers active. A title row (optional icon, the label, optional
  * info tooltip), then the value with an optional measurement beside it.
- * Dashboards tile these. Two forms, from Figma's
- * `_SuperAdmin_Metric_Card_Coloured_Base` and `_Grouped_Base`:
+ * Dashboards tile these.
  *
- * - **`StatCard`** — one value. A thick coloured stripe on the left edge, in
- *   the card's `accent` tone; the icon takes the same tone.
- * - **`StatCardGroup`** — two or more values under one title, side by side,
- *   split by vertical dividers. No stripe; each item carries its own tone on
- *   its icon.
+ * **Two cards, one per dashboard**, set by `variant` — read off Figma's
+ * `VCP Pages & Flows` file (5 Oct 2026):
  *
- * Both fill their container's width. Content is left-aligned by default;
- * `align="center"` centres it.
+ * - **`default`** — the `Value_Card` on the admin and user dashboards (node
+ *   `947:306362`, "Value Cards"). An 8 stripe, **left-aligned**, label over a
+ *   36 bold value, exactly 100 high and at least 175 wide. Figma draws it with
+ *   no icon and no hint; the slots still work if a dashboard needs them.
+ * - **`superadmin`** — `_SuperAdmin_Metric_Card_Coloured` on the super admin
+ *   dashboard (node `3:4848`). A 12 stripe, **centred**, a title row (accent
+ *   icon, label, info hint) over a 36 semibold value and a 24 unit, exactly
+ *   150 high.
  *
- * **Two looks for the single card**, set by `variant`. `default` is Figma's
- * `Value_Card` — what normal and admin users see on their dashboards: a bold
- * value and a height that hugs its content. `superadmin` is
- * `_SuperAdmin_Metric_Card_Coloured_Base`: a semibold value and a fixed height.
- * Both have the same 8 stripe. Every prop works in both; only the measurements and the
- * value's weight differ. `StatCardGroup` has the superadmin look only.
+ * **`StatCardGroup`** is the super admin dashboard's
+ * `_SuperAdmin_Metric_Card_Grouped`: two or more values under one title, side
+ * by side, split by vertical dividers. No stripe; each item carries its own
+ * tone on its icon. Centred, like the single super admin card.
+ *
+ * Alignment belongs to the look rather than being a prop: Figma never draws a
+ * centred Value_Card or a left-aligned super admin card. All forms fill their
+ * container's width.
  *
  * The label is a `<span>`, not a heading — a wall of stat tiles with eight
  * `<h3>`s turns the outline into noise; the surrounding dashboard section
@@ -48,7 +52,6 @@ import { Tooltip } from '../tooltip';
  */
 export type StatCardAccent = 'neutral' | 'brand' | 'info' | 'success' | 'critical' | 'warning';
 export type StatCardVariant = 'default' | 'superadmin';
-export type StatCardAlign = 'start' | 'center';
 
 interface StatCardContent {
   /** What the number is — "Open claims". */
@@ -78,12 +81,11 @@ export interface StatCardProps
   extends StatCardContent,
     Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   /**
-   * `default` is the Value_Card that normal and admin dashboards use;
-   * `superadmin` is the larger, fixed-height card of the superadmin dashboard.
+   * `default` is the Value_Card on the admin and user dashboards: left-aligned,
+   * 100 high. `superadmin` is the super admin dashboard's metric card: centred,
+   * 150 high.
    */
   variant?: StatCardVariant;
-  /** Left-aligned (the default) or centred. */
-  align?: StatCardAlign;
 }
 
 /** One value in a `StatCardGroup`. Same contents as a single card, less the stripe. */
@@ -91,12 +93,10 @@ export type StatCardGroupItem = StatCardContent;
 
 export interface StatCardGroupProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
-  /** The group's overall title — always centred, whatever `align` is. */
+  /** The group's overall title, centred above the items. */
   title: React.ReactNode;
   /** Two or more values. For one value, use `StatCard`. */
   items: readonly [StatCardGroupItem, StatCardGroupItem, ...StatCardGroupItem[]];
-  /** Left-aligned (the default) or centred. */
-  align?: StatCardAlign;
 }
 
 /* The six tones Figma draws — the accent categories, the brand blue
@@ -121,34 +121,37 @@ const ICON_TONE: Record<StatCardAccent, string> = {
   warning: 'text-accent-warning-outline-border-default',
 };
 
-const ALIGN: Record<StatCardAlign, { items: string; justify: string; text: string }> = {
+/* What differs between the two looks — all on Tailwind's numeric scale. The
+   stripe is always its own column, as Figma draws it: the content area starts
+   after it, so centred content centres in the space beside the stripe.
+   `default` (Value_Card): 8 stripe, left-aligned, 16 either side, no gap
+   between label and value, exactly 100 high and at least 175 wide — the
+   content is centred vertically in that height. `superadmin`: 12 stripe,
+   centred, 24 either side, 12 between title row and value, exactly 150 high. */
+type Align = 'start' | 'center';
+const ALIGN: Record<Align, { items: string; justify: string; text: string }> = {
   start: { items: 'items-start', justify: 'justify-start', text: 'text-left' },
   center: { items: 'items-center', justify: 'justify-center', text: 'text-center' },
 };
-
-/* What differs between the two looks — all on Tailwind's numeric scale.
-   Both have an 8 stripe. Left-aligned, it is its own column: the content area
-   starts after it and its padding is measured from there, so it never overlaps the
-   content. Centred, it is laid over the card's edge instead, so it does not push
-   the content off-centre.
-   `default` (Value_Card): 16 either side and 20 above and below, no gap between the
-   title and the value, and the card is at least 100 high. `superadmin`: 24 either
-   side, 12 between title and value, exactly 150 high. */
 const VARIANT: Record<
   StatCardVariant,
-  { card: string; content: string; gap: string; valueWeight: string }
+  { card: string; stripe: string; content: string; gap: string; valueWeight: string; align: Align }
 > = {
   default: {
-    card: 'min-h-25',
-    content: 'px-4 py-5',
+    card: 'h-25 min-w-43.75',
+    stripe: 'w-2',
+    content: 'px-4',
     gap: 'gap-0',
     valueWeight: 'font-bold leading-11',
+    align: 'start',
   },
   superadmin: {
     card: 'h-37.5',
+    stripe: 'w-3',
     content: 'px-6',
     gap: 'gap-3',
     valueWeight: 'font-semibold leading-9',
+    align: 'center',
   },
 };
 
@@ -158,7 +161,6 @@ const VALUE_SIZE = 'text-[36px]'; // ds-lint-ignore — no 36 step in the ramp
 const UNIT_TYPE = 'text-[24px] font-medium leading-9'; // ds-lint-ignore — no heading-lg-medium in the ramp
 
 interface MetricProps extends StatCardContent {
-  align: StatCardAlign;
   variant: StatCardVariant;
 }
 
@@ -170,10 +172,9 @@ function Metric({
   icon,
   hint,
   accent = 'neutral',
-  align,
   variant,
 }: MetricProps) {
-  const a = ALIGN[align];
+  const a = ALIGN[VARIANT[variant].align];
   return (
     <div className={cn('flex min-w-0 flex-col', VARIANT[variant].gap, a.items, a.text)}>
       <div className={cn('flex w-full items-center gap-1.5', a.justify)}>
@@ -221,7 +222,6 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
       accent = 'neutral',
       hint,
       variant = 'default',
-      align = 'start',
       ...props
     },
     ref,
@@ -235,16 +235,10 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
       )}
       {...props}
     >
-      {/* Left-aligned: its own column, so the content starts after it and never under
-          it. Centred: laid over the card's edge instead, so it does not push the
-          content off-centre. */}
+      {/* Its own column — the content starts after it and never under it. */}
       <span
         aria-hidden="true"
-        className={cn(
-          'w-2 rounded-l-md',
-          align === 'center' ? 'absolute inset-y-0 left-0' : 'shrink-0',
-          STRIPE[accent],
-        )}
+        className={cn('shrink-0 rounded-l-md', VARIANT[variant].stripe, STRIPE[accent])}
       />
       <div className={cn('flex min-w-0 flex-1 items-center', VARIANT[variant].content)}>
         <div className="w-full min-w-0">
@@ -255,7 +249,6 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
             icon={icon}
             hint={hint}
             accent={accent}
-            align={align}
             variant={variant}
           />
         </div>
@@ -266,7 +259,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
 StatCard.displayName = 'StatCard';
 
 export const StatCardGroup = React.forwardRef<HTMLDivElement, StatCardGroupProps>(
-  ({ className, title, items, align = 'start', ...props }, ref) => {
+  ({ className, title, items, ...props }, ref) => {
     const titleId = React.useId();
     return (
       <div
@@ -290,7 +283,7 @@ export const StatCardGroup = React.forwardRef<HTMLDivElement, StatCardGroupProps
             <React.Fragment key={i}>
               {i > 0 && <Divider orientation="vertical" />}
               <div className="min-w-0 flex-1 basis-0">
-                <Metric {...item} align={align} variant="superadmin" />
+                <Metric {...item} variant="superadmin" />
               </div>
             </React.Fragment>
           ))}
