@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { Badge, type BadgeProps } from '../../atoms/badge';
+import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
- * DueDatePill — an Added Value's due date, worn as a pill that changes colour
- * as the date approaches. A `Badge` plus the owner of VCP's due-date → tone
+ * DueDatePill — an Added Value's due date, worn as a tag that changes colour
+ * as the date approaches. A `Tag` plus the owner of VCP's due-date → tone
  * mapping: this file is where that mapping lives, and nowhere else.
  *
  * Read off the Figma `Due_Date_Tag` set (`3429:11064`), audit batch 5,
@@ -31,18 +31,18 @@ export type DueDateProximity = 'default' | 'due-soon' | 'overdue';
 
 /* THE mapping — the three rows of the Figma `Due_Date_Tag` set, tonal style.
 
-   Figma's Default row is `neutral.tonal.*` (slate-200 on slate-700); `Badge`'s
+   Figma's Default row is `neutral.tonal.*` (slate-200 on slate-700); `Tag`'s
    own neutral tonal is `surface.neutral.subtle` on `text.secondary` —
    slate-100 on slate-700. One step of slate apart on the fill, same text. The
-   Badge tone is used rather than adding a near-duplicate token family, so
+   Tag tone is used rather than adding a near-duplicate token family, so
    every neutral pill in the system stays one colour. Noted in the doc. */
-const PROXIMITY: Record<DueDateProximity, NonNullable<BadgeProps['tone']>> = {
+const PROXIMITY: Record<DueDateProximity, NonNullable<TagProps['tone']>> = {
   default: 'neutral',
   'due-soon': 'warning',
   overdue: 'danger',
 };
 
-export interface DueDatePillProps extends Omit<BadgeProps, 'tone' | 'variant' | 'children'> {
+export interface DueDatePillProps extends Omit<TagProps, 'tone' | 'variant' | 'children'> {
   /** How near the date is. Compute it with `dueDateTone` if you have a `Date`. */
   proximity?: DueDateProximity;
   /** The date, already formatted. "October 1, 2025". */
@@ -51,9 +51,9 @@ export interface DueDatePillProps extends Omit<BadgeProps, 'tone' | 'variant' | 
 
 export const DueDatePill = React.forwardRef<HTMLSpanElement, DueDatePillProps>(
   ({ proximity = 'default', children, size = 'sm', ...props }, ref) => (
-    <Badge ref={ref} tone={PROXIMITY[proximity]} size={size} {...props}>
+    <Tag ref={ref} tone={PROXIMITY[proximity]} size={size} {...props}>
       {children}
-    </Badge>
+    </Tag>
   ),
 );
 DueDatePill.displayName = 'DueDatePill';
