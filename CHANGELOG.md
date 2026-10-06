@@ -4,6 +4,11 @@
 
 ### `DataTable` cells — copy, inline edit, column hints, always left-aligned (October 2026)
 
+- **`InlineEdit` is reworked to Figma's buttons** (`_Planning_Table_Icon_Button`): cancel on the left, confirm on the right, 24 tonal discs, the pen a
+  `note-pencil` with an "Edit" tooltip. **New `InlineDateEdit`**: a date with a calendar button that opens a `DatePicker` in a popover; picking a
+  day commits it, no confirm. The Inline Editing story now shows all three kinds: type, choose, calendar.
+- **`IconButton` gains `variant="tonal"` and `size="xs"` (24, 16 glyph).** New tokens `neutral.tonal.surface.{hover,pressed,disabled}` and
+  `neutral.tonal.content.{hover,pressed,disabled}`, from Figma's `colors/neutral/tonal/*`.
 - **New `CopyText`**: a non-link value that underlines on hover and, on click, copies itself and shows "Copied" for 800ms
   (Figma `_AV_Table_ID`, `7247:39763`). **New `InlineEdit`**: a value with a pen that swaps to a caller-supplied control with confirm and
   cancel buttons, Enter/Escape and focus handling.

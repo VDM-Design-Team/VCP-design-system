@@ -705,11 +705,29 @@
         "surface": {
           "default": {
             "$value": "{color.slate.700}"
+          },
+          "disabled": {
+            "$value": "{color.slate.800}"
+          },
+          "hover": {
+            "$value": "{color.slate.500}"
+          },
+          "pressed": {
+            "$value": "{color.slate.400}"
           }
         },
         "content": {
           "default": {
             "$value": "{color.slate.200}"
+          },
+          "disabled": {
+            "$value": "{color.slate.600}"
+          },
+          "hover": {
+            "$value": "{color.slate.200}"
+          },
+          "pressed": {
+            "$value": "{color.slate.100}"
           }
         }
       },

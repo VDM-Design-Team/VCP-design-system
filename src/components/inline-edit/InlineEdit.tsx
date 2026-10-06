@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { IconButton } from '../../atoms/icon-button';
+import { Tooltip } from '../tooltip';
 
 /**
  * InlineEdit — a value you can change in place: read it, press the pen, change
@@ -17,7 +18,14 @@ import { IconButton } from '../../atoms/icon-button';
  *
  * **States.** Reading: the value, with a pen that appears on hover or focus
  * (it is always in the tab order, so a keyboard user never has to find it by
- * hovering). Editing: the control, a confirm (check) and a cancel (x).
+ * hovering). Editing: the control, then **cancel on the left and confirm on the
+ * right** — Figma's `_Planning_Table_Icon_Button` set (`5813:118401`): 24 tonal
+ * discs, grey at rest, darker on hover and darker again pressed, the pen
+ * showing an "Edit" tooltip.
+ *
+ * **Typing, choosing, or picking a date.** The control is the caller's: an
+ * `Input` to type, a `Select` to choose. For a date use `InlineDateEdit`, which
+ * is the same idea with a calendar in a popover and no confirm step.
  *
  * **Keys.** Enter confirms (from a single-line field — not from a `textarea`
  * or a button, where it already means something); Escape cancels. Focus moves
@@ -134,8 +142,9 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
             <div data-inline-editor="" className="min-w-0 flex-1">
               {editor}
             </div>
-            <IconButton icon="check" label={confirmLabel} size="sm" onClick={confirm} />
-            <IconButton icon="x" label={cancelLabel} size="sm" onClick={cancel} />
+            {/* Cancel on the left, confirm on the right. */}
+            <IconButton icon="x" label={cancelLabel} variant="tonal" size="xs" onClick={cancel} />
+            <IconButton icon="check" label={confirmLabel} variant="tonal" size="xs" onClick={confirm} />
           </>
         ) : (
           <>
@@ -143,18 +152,21 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
             {!disabled && (
               /* Hidden until the cell is hovered or something in it has focus,
                  and never `display:none` — it stays tabbable and announced. */
-              <IconButton
-                ref={pen}
-                icon="pencil-simple"
-                label={`Edit ${label}`}
-                size="sm"
-                onClick={() => setEditing(true)}
-                className={cn(
-                  'opacity-0 transition-opacity',
-                  'group-hover/inline-edit:opacity-100 group-focus-within/inline-edit:opacity-100 focus-visible:opacity-100',
-                  'motion-reduce:transition-none',
-                )}
-              />
+              <Tooltip content="Edit" placement="top">
+                <IconButton
+                  ref={pen}
+                  icon="note-pencil"
+                  label={`Edit ${label}`}
+                  variant="tonal"
+                  size="xs"
+                  onClick={() => setEditing(true)}
+                  className={cn(
+                    'opacity-0 transition-opacity',
+                    'group-hover/inline-edit:opacity-100 group-focus-within/inline-edit:opacity-100 focus-visible:opacity-100',
+                    'motion-reduce:transition-none',
+                  )}
+                />
+              </Tooltip>
             )}
           </>
         )}

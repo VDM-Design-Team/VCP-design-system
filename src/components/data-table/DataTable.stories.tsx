@@ -11,7 +11,7 @@ import { Input } from '../../atoms/input';
 import { Select } from '../../atoms/select';
 import { Menu, type MenuItem } from '../menu';
 import { CopyText } from '../copy-text';
-import { InlineEdit } from '../inline-edit';
+import { InlineEdit, InlineDateEdit } from '../inline-edit';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 interface Claim {
@@ -317,19 +317,35 @@ export const CopyableColumn: Story = {
 };
 
 /**
- * Cells you can edit in place. `InlineEdit` is the frame — the pen, confirm and
- * cancel, Enter and Escape, focus in and back — and the cell passes it the
- * control that fits: a text field for the owner, a select for the points.
- * The draft lives in the story, not the component; confirm commits it.
+ * Cells you can edit in place — three ways, one frame. **Owner** is typed
+ * (`InlineEdit` around an `Input`), **Points** is chosen (`InlineEdit` around a
+ * `Select`), **Due date** is picked from a calendar (`InlineDateEdit`).
+ * Typing and choosing end in a confirm — cancel on the left, confirm on the
+ * right, Enter and Escape too; a calendar has no confirm, because picking a day
+ * is the decision. The drafts live in the story, not the components.
+ *
+ * The calendar opens in a popover, which the table's scroll container would
+ * clip, so the table is `overflow-visible` — see Actions Column.
  */
 export const InlineEditing: Story = {
   render: (args) => {
     const [rows, setRows] = React.useState(CLAIMS.slice(0, 3));
+    const [due, setDue] = React.useState<Record<string, string>>({
+      'AV-2041': '2026-09-28',
+      'AV-2037': '2026-10-02',
+      'AV-2033': '2026-10-09',
+    });
     const [drafts, setDrafts] = React.useState<Record<string, string>>({});
     const draft = (id: string, key: string, fallback: string) => drafts[`${id}:${key}`] ?? fallback;
     const setDraft = (id: string, key: string, v: string) =>
       setDrafts((d) => ({ ...d, [`${id}:${key}`]: v }));
-    const commit = (id: string, key: 'owner' | 'points') =>
+    const reset = (id: string, key: string) =>
+      setDrafts((d) => {
+        const next = { ...d };
+        delete next[`${id}:${key}`];
+        return next;
+      });
+    const commit = (id: string, key: 'owner' | 'points') => {
       setRows((rs) =>
         rs.map((r) =>
           r.id === id
@@ -337,80 +353,110 @@ export const InlineEditing: Story = {
             : r,
         ),
       );
-    const reset = (id: string, key: string) =>
-      setDrafts((d) => {
-        const next = { ...d };
-        delete next[`${id}:${key}`];
-        return next;
-      });
+      reset(id, key);
+    };
     return (
-      <DataTable
-        {...args}
-        columns={asColumns([
-          COLUMNS[0],
-          COLUMNS[1],
-          {
-            key: 'owner',
-            label: 'Owner',
-            width: '220px',
-            render: (r) => (
-              <InlineEdit
-                label="owner"
-                onConfirm={() => commit(r.id, 'owner')}
-                onCancel={() => reset(r.id, 'owner')}
-                editor={
-                  <Input
-                    aria-label={`Owner of ${r.id}`}
-                    value={draft(r.id, 'owner', r.owner)}
-                    onChange={(e) => setDraft(r.id, 'owner', e.target.value)}
-                  />
-                }
-              >
-                {r.owner}
-              </InlineEdit>
-            ),
-          },
-          {
-            key: 'points',
-            label: 'Points',
-            width: '160px',
-            render: (r) => (
-              <InlineEdit
-                label="points"
-                onConfirm={() => commit(r.id, 'points')}
-                onCancel={() => reset(r.id, 'points')}
-                editor={
-                  <Select
-                    aria-label={`Points for ${r.id}`}
-                    size="sm"
-                    value={draft(r.id, 'points', String(r.points))}
-                    onChange={(v) => setDraft(r.id, 'points', v)}
-                    options={['8', '12', '21', '34', '40']}
-                  />
-                }
-              >
-                <span className="font-numeric text-caption-md-medium text-text-primary">{r.points}</span>
-              </InlineEdit>
-            ),
-          },
-        ])}
-        rows={rows}
-      />
+      <div className="min-h-[28rem]">
+        <DataTable
+          {...args}
+          className="overflow-visible"
+          columns={asColumns([
+            { ...COLUMNS[0], width: '110px' },
+            {
+              key: 'owner',
+              label: 'Owner (type)',
+              width: '230px',
+              render: (r) => (
+                <InlineEdit
+                  label="owner"
+                  onConfirm={() => commit(r.id, 'owner')}
+                  onCancel={() => reset(r.id, 'owner')}
+                  editor={
+                    <Input
+                      aria-label={`Owner of ${r.id}`}
+                      value={draft(r.id, 'owner', r.owner)}
+                      onChange={(e) => setDraft(r.id, 'owner', e.target.value)}
+                    />
+                  }
+                >
+                  {r.owner}
+                </InlineEdit>
+              ),
+            },
+            {
+              key: 'points',
+              label: 'Points (choose)',
+              width: '190px',
+              render: (r) => (
+                <InlineEdit
+                  label="points"
+                  onConfirm={() => commit(r.id, 'points')}
+                  onCancel={() => reset(r.id, 'points')}
+                  editor={
+                    <Select
+                      aria-label={`Points for ${r.id}`}
+                      size="sm"
+                      value={draft(r.id, 'points', String(r.points))}
+                      onChange={(v) => setDraft(r.id, 'points', v)}
+                      options={['8', '12', '21', '34', '40']}
+                    />
+                  }
+                >
+                  <span className="font-numeric text-caption-md-medium text-text-primary">{r.points}</span>
+                </InlineEdit>
+              ),
+            },
+            {
+              key: 'due',
+              label: 'Due date (calendar)',
+              width: '210px',
+              render: (r) => (
+                <InlineDateEdit
+                  label={`due date of ${r.id}`}
+                  value={due[r.id]}
+                  onChange={(iso) => setDue((d) => ({ ...d, [r.id]: iso }))}
+                  align="right"
+                  picker={{ today: '2026-09-15' }}
+                />
+              ),
+            },
+          ])}
+          rows={rows}
+        />
+      </div>
     );
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    /* Confirm with Enter. */
+
+    /* Type: Enter confirms. */
     await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[0]);
     const field = canvas.getByRole('textbox', { name: 'Owner of AV-2041' });
     await expect(field).toHaveFocus();
+    /* Cancel is on the left, confirm on the right. */
+    const cancel = canvas.getByRole('button', { name: 'Cancel' });
+    const save = canvas.getByRole('button', { name: 'Save' });
+    await expect(cancel.compareDocumentPosition(save) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await userEvent.clear(field);
     await userEvent.type(field, 'Nina Voss{Enter}');
     await expect(canvas.getByText('Nina Voss')).toBeInTheDocument();
     await expect(canvas.getAllByRole('button', { name: 'Edit owner' })[0]).toHaveFocus();
-    /* Cancel with Escape: the draft is dropped. */
+
+    /* Type: Escape cancels and drops the draft. */
     await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[1]);
     await userEvent.type(canvas.getByRole('textbox', { name: 'Owner of AV-2037' }), 'x{Escape}');
     await expect(canvas.getByText('Marvin Ode')).toBeInTheDocument();
+
+    /* Choose: pick, then confirm with the check. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Edit points' })[0]);
+    await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Points for AV-2041' }), '40');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
+    await expect(canvas.getAllByText('40').length).toBeGreaterThan(0);
+
+    /* Calendar: open, pick a day, no confirm. */
+    await expect(canvas.getByText('2026-09-28')).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Change due date of AV-2041' }));
+    await userEvent.click(await canvas.findByRole('button', { name: /^20 September 2026/ }));
+    await expect(canvas.getByText('2026-09-20')).toBeInTheDocument();
   },
 };

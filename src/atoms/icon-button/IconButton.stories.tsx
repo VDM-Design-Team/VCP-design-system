@@ -29,9 +29,9 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger'],
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'danger'],
     },
-    size: { control: 'radio', options: ['sm', 'md', 'lg'] },
+    size: { control: 'radio', options: ['xs', 'sm', 'md', 'lg'] },
     shape: { control: 'radio', options: ['round', 'square'] },
   },
 } satisfies Meta<typeof IconButton>;
@@ -48,15 +48,17 @@ export const Variants: Story = {
       <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" />
       <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" />
       <IconButton {...args} variant="tertiary" icon="pencil-simple" label="Edit deliverable" />
+      <IconButton {...args} variant="tonal" icon="note-pencil" label="Edit deliverable (tonal)" />
       <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" />
     </div>
   ),
 };
 
-/** 32 / 40 / 48 — Button's scale exactly. `md` is the only size that meets the 40 target. */
+/** 24 / 36 / 40 / 48. `md` is the only size that meets the 40 target; `xs` is the table's inline-edit disc. */
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex items-center gap-3">
+      <IconButton {...args} size="xs" variant="tonal" />
       <IconButton {...args} size="sm" variant="secondary" />
       <IconButton {...args} size="md" variant="secondary" />
       <IconButton {...args} size="lg" variant="secondary" />
@@ -162,6 +164,7 @@ export const LightAndDark: Story = {
         <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" />
         <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" />
         <IconButton {...args} variant="tertiary" icon="pencil-simple" label="Edit deliverable" />
+      <IconButton {...args} variant="tonal" icon="note-pencil" label="Edit deliverable (tonal)" />
         <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" />
         <IconButton {...args} variant="secondary" icon="x" label="Dismiss" disabled />
         <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" loading />
