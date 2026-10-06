@@ -2,6 +2,20 @@
 
 ## 0.1.0 — unreleased
 
+### `Badge` — type sizes per size, and a large size (October 2026)
+
+Each size now has its own type size, and there is a third size.
+
+- **Type:** `sm` 10 (`caption-sm-medium`), `md` 12 (`caption-md-medium`) and the new
+  `lg` 14 (`label-sm-medium`). All three were 14 before, so **every existing `sm` and
+  `md` Badge now renders smaller text** — in product code, the version Badge in
+  `ChangeLogModal`. (`StatusPill`, `DueDatePill` and the AV table's labels are `Tag`s
+  since the tags-not-badges change and are unaffected.) Heights are unchanged (24 / 28).
+- **New `size="lg"`:** 32 tall, 12 either side (`px-3`), 14 type. Fixed height, pill shape,
+  same styles and tones as the others.
+
+Migration: none required; a caller that wanted the old 14 type on an `md` Badge can use `lg`.
+
 ### Status, due dates and tables are tags, not badges (October 2026)
 
 Design review of the `Tag` / `Badge` split (Chromatic build 27 on #117): a status, a
