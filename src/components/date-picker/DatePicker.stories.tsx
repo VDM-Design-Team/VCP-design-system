@@ -47,7 +47,8 @@ const meta = {
       },
     },
   },
-  args: { value: '2026-09-14', today: TODAY },
+  /* `clearable` is set here so its control reads "true" and flips to hide the footer Clear. */
+  args: { value: '2026-09-14', today: TODAY, clearable: true },
   argTypes: {
     mode: {
       control: 'inline-radio',
@@ -512,9 +513,9 @@ export const PresetsAndClear: Story = {
 };
 
 /**
- * The right calendar is always after the left. September beside October: the
- * left can't page forward, the right can't page back, and the month grids
- * grey out the months that would cross.
+ * The right calendar is always after the left, and nothing is disabled to make
+ * it so: page the left onto the right's month and the right jumps to the month
+ * after it; page the right back onto the left's and the left steps back.
  */
 export const DualViewKeepsOrder: Story = {
   parameters: { controls: { disable: true } },
@@ -530,16 +531,28 @@ export const DualViewKeepsOrder: Story = {
     const canvas = within(canvasElement);
     const left = within(canvas.getByRole('group', { name: 'First calendar' }));
     const right = within(canvas.getByRole('group', { name: 'Second calendar' }));
-    await expect(left.getByRole('button', { name: 'Next month' })).toBeDisabled();
-    await expect(right.getByRole('button', { name: 'Previous month' })).toBeDisabled();
-    await expect(right.getByRole('button', { name: 'Next month' })).toBeEnabled();
+    /* September beside October, and every arrow is live. */
+    await expect(left.getByText('September 2026')).toBeInTheDocument();
+    await expect(right.getByText('October 2026')).toBeInTheDocument();
+    for (const b of canvas.getAllByRole('button', { name: /^(Previous|Next) month$/ })) {
+      await expect(b).toBeEnabled();
+    }
 
-    await userEvent.click(right.getByRole('button', { name: 'Next month' }));
-    await expect(right.getByText('November 2026')).toBeInTheDocument();
-    await expect(left.getByRole('button', { name: 'Next month' })).toBeEnabled();
+    /* The left goes onto the right's month: the right jumps to the one after. */
     await userEvent.click(left.getByRole('button', { name: 'Next month' }));
     await expect(left.getByText('October 2026')).toBeInTheDocument();
-    await expect(right.getByRole('button', { name: 'Previous month' })).toBeDisabled();
+    await expect(right.getByText('November 2026')).toBeInTheDocument();
+
+    /* The right goes back onto the left's month: the left steps back. */
+    await userEvent.click(right.getByRole('button', { name: 'Previous month' }));
+    await expect(right.getByText('October 2026')).toBeInTheDocument();
+    await expect(left.getByText('September 2026')).toBeInTheDocument();
+
+    /* Far apart, they stay where they are. */
+    await userEvent.click(right.getByRole('button', { name: 'Next month' }));
+    await userEvent.click(right.getByRole('button', { name: 'Next month' }));
+    await expect(right.getByText('December 2026')).toBeInTheDocument();
+    await expect(left.getByText('September 2026')).toBeInTheDocument();
   },
 };
 

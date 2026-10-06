@@ -79,10 +79,11 @@ controls flip every axis.
   not a button — there are no days to go back to.
 - **Dual view pages each calendar on its own**, as Figma draws it (June
   beside September), so both ends of a long range can be in view. The second
-  starts one month after the first; a preset moves both to its ends. **The
-  right calendar is always after the left** — never the same month, never
-  before: the left's Next arrow and the right's Previous arrow disable where
-  they would meet, and the month grids grey out the months that would cross.
+  starts one month after the first; a preset moves both to its ends. **The right calendar is always after the left** — never the same month, never
+  before — and nothing is disabled to make it so. Page the left onto the right's
+  month (or past it) and the right jumps to the month after it; page the right back
+  onto the left's month (or before) and the left steps to the month before. Months
+  further apart stay put (design review of #143).
 - **Presets follow the mode.** A single-date picker (`day`, `month`) shows
   only the presets without a `rangeEnd` — Today; a range picker shows them
   all. With nothing left to show the column is dropped. On desktop the list

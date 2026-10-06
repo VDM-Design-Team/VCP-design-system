@@ -133,7 +133,7 @@ const FOCUS_RING =
 /* The carets are `neutral.textual.content` — one colour per state — not the
    action blue a tertiary icon button wears by default. */
 const CARET_COLOUR =
-  'text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed disabled:text-neutral-textual-content-disabled';
+  'text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed';
 
 /** The day and month grids share the roving-focus mechanics. */
 function useRovingFocus() {
@@ -183,8 +183,6 @@ function Header({
   onHeadingClick,
   headingLabel,
   caret = 'down',
-  prevDisabled,
-  nextDisabled,
 }: {
   heading: string;
   /** What's drawn — Figma's "Jun 2022". `heading` is what's announced. */
@@ -198,9 +196,6 @@ function Header({
   headingLabel?: string;
   /** Which way the heading's caret points: down opens the months, up goes back. */
   caret?: 'down' | 'up';
-  /** The arrow refuses to page that way (the dual view's two calendars keep their order). */
-  prevDisabled?: boolean;
-  nextDisabled?: boolean;
 }) {
   /* Announces paging without stealing focus from the grid — in full, while
      the eye gets Figma's short form. */
@@ -221,7 +216,6 @@ function Header({
         icon="caret-left"
         label={`Previous ${unit}`}
         onClick={onPrev}
-        disabled={prevDisabled}
         className={cn('-my-1.5 cursor-pointer', CARET_COLOUR)}
       />
       {onHeadingClick ? (
@@ -263,7 +257,6 @@ function Header({
         icon="caret-right"
         label={`Next ${unit}`}
         onClick={onNext}
-        disabled={nextDisabled}
         className={cn('-my-1.5 cursor-pointer', CARET_COLOUR)}
       />
     </div>
@@ -276,17 +269,12 @@ function DayGrid({
   setView,
   onPick,
   onHeadingClick,
-  minView,
-  maxView,
   shared,
 }: {
   view: Date;
   setView: (d: Date) => void;
   onPick: (iso: string) => void;
   onHeadingClick: () => void;
-  /** The earliest and latest month this calendar may show (the dual view's order). */
-  minView?: Date;
-  maxView?: Date;
   shared: Shared;
 }) {
   const { value, rangeEnd, min, max, markers, flagged, today, mobile } = shared;
@@ -348,8 +336,6 @@ function DayGrid({
         onHeadingClick={onHeadingClick}
         headingLabel={`${monthName} ${year}, choose month`}
         caret="down"
-        prevDisabled={Boolean(minView && addMonths(view, -1) < minView)}
-        nextDisabled={Boolean(maxView && addMonths(view, 1) > maxView)}
       />
       {/* Seven 36 columns, exactly Figma's 252. A column that is not a whole
           number of pixels (260 ÷ 7 in the dual view) anti-aliases the seam
@@ -459,8 +445,6 @@ function MonthGrid({
   selected,
   onPick,
   onHeadingClick,
-  minView,
-  maxView,
   shared,
 }: {
   view: Date;
@@ -470,9 +454,6 @@ function MonthGrid({
   onPick: (month: Date) => void;
   /** Swaps back to the days. Omit in month mode, where there are none. */
   onHeadingClick?: () => void;
-  /** The earliest and latest month this calendar may show (the dual view's order). */
-  minView?: Date;
-  maxView?: Date;
   shared: Shared;
 }) {
   const { min, max, mobile, today } = shared;
@@ -482,16 +463,8 @@ function MonthGrid({
   const tabStop = focusKey.startsWith(`${year}-`) ? focusKey : monthKey(year, 0);
 
   /* A month is out when it ends before `min` or starts after `max`. */
-  const viewKey = (d?: Date) => (d ? monthKey(d.getFullYear(), d.getMonth()) : undefined);
-  const lowest = viewKey(minView);
-  const highest = viewKey(maxView);
   const disabled = (m: number) =>
-    Boolean(
-      (min && monthKey(year, m) < min.slice(0, 7)) ||
-        (max && monthKey(year, m) > max.slice(0, 7)) ||
-        (lowest && monthKey(year, m) < lowest) ||
-        (highest && monthKey(year, m) > highest),
-    );
+    Boolean((min && monthKey(year, m) < min.slice(0, 7)) || (max && monthKey(year, m) > max.slice(0, 7)));
 
   const moveFocus = (delta: number) => {
     const [y, m] = tabStop.split('-').map(Number);
@@ -513,8 +486,6 @@ function MonthGrid({
         onHeadingClick={onHeadingClick}
         headingLabel={`${year}, show days`}
         caret="up"
-        prevDisabled={Boolean(lowest && monthKey(year - 1, 11) < lowest)}
-        nextDisabled={Boolean(highest && monthKey(year + 1, 0) > highest)}
       />
       <div
         className="grid grid-cols-3"
@@ -603,8 +574,9 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
        beside September — starting one month after the first. */
     const [secondRaw, setSecondView] = React.useState(() => addMonths(view, 1));
     /* The right calendar is always after the left — never the same month, never
-       before. The arrows and the month grid refuse to cross; this catches the
-       left moving on its own (a controlled `month`). */
+       before. Nothing is disabled: moving one past the other pushes the other
+       along (see `calendar()`); this catches the left moving on its own (a
+       controlled `month`). */
     const secondView = secondRaw > view ? secondRaw : addMonths(view, 1);
     /* Which calendar (0 or 1) has its heading open on the month grid. */
     const [choosing, setChoosing] = React.useState<number | null>(null);
@@ -634,9 +606,18 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 
     const calendar = (index: number) => {
       const v = index === 0 ? view : secondView;
-      const setV = index === 0 ? setView : setSecondView;
-      const minView = dual && index === 1 ? addMonths(view, 1) : undefined;
-      const maxView = dual && index === 0 ? addMonths(secondView, -1) : undefined;
+      /* In the dual view the calendars push each other: take the left on to or
+         past the right and the right jumps to the month after it; bring the
+         right back to or before the left and the left steps to the month before. */
+      const setV = (d: Date) => {
+        if (index === 0) {
+          setView(d);
+          if (dual && d >= secondView) setSecondView(addMonths(d, 1));
+        } else {
+          setSecondView(d);
+          if (dual && d <= view) setView(addMonths(d, -1));
+        }
+      };
       if (mode === 'month') {
         return (
           <MonthGrid
@@ -660,8 +641,6 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
             }}
             /* "2026 ▴" swaps back to the days of the month that was open. */
             onHeadingClick={() => setChoosing(null)}
-            minView={minView}
-            maxView={maxView}
             shared={shared}
           />
         );
@@ -674,8 +653,6 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           setView={setV}
           onPick={pickDay}
           onHeadingClick={() => setChoosing(index)}
-          minView={minView}
-          maxView={maxView}
           shared={shared}
         />
       );
