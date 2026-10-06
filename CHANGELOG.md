@@ -2,6 +2,15 @@
 
 ## 0.1.0 — unreleased
 
+### `SegmentedControl` — five sizes, strokes (October 2026)
+
+- **Sizes** follow Figma's `Segmented_Control`: `xs` / `sm` / `md` / `lg` / `xl` = 28 / 32 / 36 / 40 / 48 high, segments 4 in from the
+  edge (20 / 24 / 28 / 32 / 40), type 12 / 14 / 14 / 14 / 16 medium. **`xl` is the default.**
+- **Strokes:** the track and the selected segment each draw a 1px `stroke.default`; the selected segment keeps its `shadow.card`,
+  the lightest elevation.
+- **Breaking:** `size` was `sm | md` (default `md`). Migration: old `sm` (32 segment) is now `lg`; old `md` (40 segment, the default)
+  is now `xl`. Callers that pass no `size` get `xl`, a little taller than before (48 vs 46).
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.

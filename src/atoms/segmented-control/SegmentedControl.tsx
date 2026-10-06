@@ -28,10 +28,12 @@ import type { SavingStatus } from '../../lib/saving';
  */
 const track = cva(
   [
-    'inline-flex items-center gap-0.5 p-0.5',
+    /* 3 of padding inside a 1 stroke puts the segments 4 from the outer edge,
+       as Figma draws it: the track is always the segment's height plus 8. */
+    'inline-flex items-center gap-0.5 p-0.75',
     'bg-surface-neutral-subtle rounded-sm',
-    /* The border is always there, transparent, so the error stroke shifts nothing. */
-    'border border-transparent transition-colors',
+    /* The stroke is always there, so the error stroke swaps colour and shifts nothing. */
+    'border border-stroke-default transition-colors',
   ],
   {
     variants: {
@@ -56,14 +58,24 @@ const segment = cva(
     'hover:text-text-primary',
     'focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-stroke-focused',
     'disabled:cursor-not-allowed disabled:text-text-disabled disabled:hover:text-text-disabled',
-    /* Selected: lifts onto its own surface and the label darkens. The lift — a
-       raised surface plus a shadow — is the non-colour half of the cue; the
-       label's colour change is the half that carries real contrast. */
-    'aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
+    /* Selected: lifts onto its own surface, with a 1 stroke and the lightest
+       shadow, and the label darkens. The lift is the non-colour half of the
+       cue; the label's colour change is the half that carries real contrast.
+       Every segment carries the border (transparent) so selecting shifts nothing. */
+    'border border-transparent',
+    'aria-checked:border-stroke-default aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
   ],
   {
     variants: {
-      size: { sm: 'h-8 px-3 text-label-sm-medium', md: 'h-10 px-4 text-label-sm-medium' },
+      /* Segment heights are the Figma sizes less the 8 of track padding; the type
+         is the ramp's 12 / 14 / 14 / 14 / 16 medium. */
+      size: {
+        xs: 'h-5 px-1.5 text-caption-md-medium',
+        sm: 'h-6 px-3 text-label-sm-medium',
+        md: 'h-7 px-3 text-label-sm-medium',
+        lg: 'h-8 px-3 text-label-sm-medium',
+        xl: 'h-10 px-4 text-label-md-medium',
+      },
       fullWidth: { true: 'flex-1', false: '' },
       /* Pending mutes the selected label back to the unselected colour and
          holds the others where they are — nothing is clickable until the
@@ -73,7 +85,7 @@ const segment = cva(
         false: '',
       },
     },
-    defaultVariants: { size: 'md', fullWidth: false, pending: false },
+    defaultVariants: { size: 'xl', fullWidth: false, pending: false },
   },
 );
 

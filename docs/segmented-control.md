@@ -24,7 +24,7 @@ if you need more than about two words per segment, the wrong control is being us
 | `value` | `string` | — | Controlled selection |
 | `defaultValue` | `string` | first enabled option | Uncontrolled starting selection |
 | `onChange` | `(value: string) => void` | — | Fires on click and on arrow-key movement |
-| `size` | `sm \| md` | `md` | `sm` only where a pointer is guaranteed — see Accessibility |
+| `size` | `xs \| sm \| md \| lg \| xl` | `xl` | Figma's five sizes — 28 / 32 / 36 / 40 / 48 high. Below `lg` only where a pointer is guaranteed — see Accessibility |
 | `fullWidth` | `boolean` | `false` | Stretches to the container; segments share the width evenly |
 | `status` | `idle \| pending \| success \| error` | `idle` | Where the save of the current selection stands. Parent-driven; see below |
 | `aria-label` | `string` | — | Required unless you pass `aria-labelledby` |
@@ -36,12 +36,24 @@ Set `aria-label` on an option whose `label` isn't plain text.
 
 | Part | Token |
 |---|---|
-| Track | `surface.neutral.subtle`, `radius.md` |
-| Selected segment | `surface.elevated`, `text.primary`, `shadow.card`, `radius.sm` |
+| Track | `surface.neutral.subtle`, `radius.md`, 1px `stroke.default` |
+| Selected segment | `surface.elevated`, `text.primary`, 1px `stroke.default`, `shadow.card` (the lightest elevation), `radius.sm` |
 | Unselected label | `text.tertiary` → `text.primary` on hover |
 | Disabled label | `text.disabled` |
 | Focus ring | `stroke.focused` at 2px |
-| Type | `type.label-sm-medium` (`sm`) / `type.label-sm-medium` (`md`) |
+| Type | `caption-md-medium` (`xs`, 12) · `label-sm-medium` (`sm`, `md`, `lg`, 14) · `label-md-medium` (`xl`, 16) |
+
+**Sizes** (Figma `Segmented_Control`, node `7366:76081`). Every size has 4px between the
+track's outer edge and its segments (a 1px stroke plus 3px of padding), so the segment is
+always the track less 8:
+
+| Size | Track | Segment | Segment padding | Type |
+|---|---|---|---|---|
+| `xs` | 28 | 20 | 6 | 12 medium |
+| `sm` | 32 | 24 | 12 | 14 medium |
+| `md` | 36 | 28 | 12 | 14 medium |
+| `lg` | 40 | 32 | 12 | 14 medium |
+| `xl` | 48 | 40 | 16 | 16 medium |
 | Error stroke | `accent.critical.outline.border.default` — the stroke `Input` draws when invalid |
 | Success check | `accent.success.tonal.content.default` |
 | Pending label | `text.tertiary` — the selected label mutes to the unselected colour |
@@ -95,18 +107,18 @@ forty lines of parent code, and they run as tests.
 - **Roving tab stop.** The whole control is one stop in the tab order. `←`/`↑` and
   `→`/`↓` move between segments and select as they go; `Home` and `End` jump to the
   ends. Disabled segments are skipped.
-- **Target size.** A `md` segment is 40px tall, meeting the 40px minimum. A `sm`
-  segment is 32px — use it only where a pointer is guaranteed (dense desktop
-  toolbars, table headers), never on a touch surface.
+- **Target size.** An `xl` segment is 40px tall, meeting the 40px minimum; `lg` is 32px,
+  `md` 28, `sm` 24 and `xs` 20 — use anything below `xl` only where a pointer is guaranteed
+  (dense desktop toolbars, table headers), never on a touch surface.
 - **The selected segment is carried by more than its background.** The white
   selected surface sits at only **1.1:1** against the track in light theme and
   1.4:1 in dark, so the surface colour alone would not satisfy WCAG 1.4.11. Two
   things make up for it: the label darkens from `text.tertiary` to `text.primary`
   (6.9:1 against the track, 20:1 on the selected surface), and the segment lifts —
-  `shadow.card` gives a shape cue that survives a greyscale check. Label weight
-  does *not* change: `type.label-sm-medium` carries weight 500 as part of the token, and
-  the ramp has no 500/400 pair at 13px, so a weight shift can't be done
-  consistently across both sizes without a new token. If you want the selected
+  a 1px `stroke.default` outline plus `shadow.card` give a shape cue that survives a greyscale check. Label weight
+  does *not* change: the type token carries weight 500, and the ramp has no
+  500/400 pair at every size, so a weight shift can't be done
+  consistently across the sizes without a new token. If you want the selected
   *surface* itself to clear 3:1, that also needs a new token — raise it with the
   design lead rather than reaching for an arbitrary class.
 - **Contrast, light / dark:** selected label 20.2:1 / 14.6:1, unselected label

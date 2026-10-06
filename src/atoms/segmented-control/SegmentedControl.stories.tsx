@@ -25,7 +25,7 @@ const meta = {
     defaultValue: 'Board',
   },
   argTypes: {
-    size: { control: 'radio', options: ['sm', 'md'] },
+    size: { control: 'radio', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
     fullWidth: { control: 'boolean' },
     status: { control: 'inline-radio', options: ['idle', 'pending', 'success', 'error'] },
   },
@@ -36,13 +36,30 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
+/**
+ * Figma's five sizes (`Segmented_Control`, node 7366:76081): the control is
+ * 28 / 32 / 36 / 40 / 48 high, its segments 4 in from the edge — 20 / 24 / 28 /
+ * 32 / 40 — set in 12 / 14 / 14 / 14 / 16 medium. XL is the default.
+ */
 export const Sizes: Story = {
   render: (args) => (
-    <div className="flex items-center gap-4">
-      <SegmentedControl {...args} size="sm" />
-      <SegmentedControl {...args} size="md" />
+    <div className="flex flex-col items-start gap-4">
+      {(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => (
+        <SegmentedControl key={size} {...args} size={size} aria-label={`View mode, ${size}`} />
+      ))}
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const groups = within(canvasElement).getAllByRole('radiogroup');
+    const tracks = groups.map((g) => g.getBoundingClientRect().height);
+    const segments = groups.map((g) => g.querySelector('button')!.getBoundingClientRect().height);
+    await expect(tracks).toEqual([28, 32, 36, 40, 48]);
+    await expect(segments).toEqual([20, 24, 28, 32, 40]);
+    /* Container and selected segment both draw a 1 stroke. */
+    await expect(getComputedStyle(groups[0]).borderTopWidth).toBe('1px');
+    const selected = within(groups[0]).getByRole('radio', { checked: true });
+    await expect(getComputedStyle(selected).borderTopWidth).toBe('1px');
+  },
 };
 
 /** Two options is the floor. Below that, use a Toggle. */
