@@ -46,12 +46,17 @@ export const AV_URGENCIES: readonly AVUrgency[] = ['Low', 'Normal', 'High', 'Urg
    Figma paints the flame with `accent.critical.filled.surface.default`, a
    background token used as a foreground. `accent.critical.outline.content.default`
    is the same value in the right family, so that is what is used here — the
-   pixels are identical. Raised with design, 11 September 2026. */
+   pixels are identical. Raised with design, 11 September 2026.
+
+   The flame is **solid** and is the design's own: Figma draws Heroicons'
+   mini `fire`, kept as the in-house `fire-solid` glyph — Phosphor's flames
+   don't match it at 20. The other three are Phosphor regular, as in Figma
+   (AV table review, 5 October 2026). */
 const URGENCY: Record<AVUrgency, { icon: IconName; className: string }> = {
   Low: { icon: 'caret-double-down', className: 'text-accent-success-outline-content-default' },
   Normal: { icon: 'equals', className: 'text-neutral-outline-content-default' },
   High: { icon: 'caret-double-up', className: 'text-accent-warning-outline-content-default' },
-  Urgent: { icon: 'fire', className: 'text-accent-critical-outline-content-default' },
+  Urgent: { icon: 'fire-solid', className: 'text-accent-critical-outline-content-default' },
 };
 
 export interface UrgencyTagProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -68,7 +73,8 @@ export const UrgencyTag = React.forwardRef<HTMLSpanElement, UrgencyTagProps>(
         tone="neutral"
         /* Decorative: the word beside it already says which urgency this is,
            so naming the glyph too would make every cell announce twice. */
-        icon={<Icon name={icon} size="lg" className={cn('shrink-0', tone)} />}
+        /* md = Figma's 20 glyph in the 28 tag (was lg, 24). */
+        icon={<Icon name={icon} size="md" className={cn('shrink-0', tone)} />}
         className={className}
         {...props}
       >

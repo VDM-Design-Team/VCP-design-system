@@ -1,6 +1,6 @@
 # StatusPill
 
-An Added Value's status, worn as a pill — a component composing `Badge`,
+An Added Value's status, worn as a tag — a component composing `Tag`,
 and the owner of VCP's status vocabulary: this file and its `.tsx` are where
 the status → tone mapping lives, and nowhere else.
 
@@ -15,7 +15,7 @@ ten statuses by name and accepts any number it has never heard of.
 
 | Piece | Tier |
 |---|---|
-| `Badge` | atom |
+| `Tag` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -27,7 +27,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `Badge` | Generic classification with no VCP vocabulary |
 | The options dropdown *(to port)* | **Changing** a status — this pill only shows one |
 
-**The tier rule, demonstrated.** StatusPill composes one atom (`Badge`) into
+**The tier rule, demonstrated.** StatusPill composes one atom (`Tag`) into
 one richer unit — a component, per CLAUDE.md's composition test. The VCP
 vocabulary it carries doesn't change its tier; it changes its *ownership*:
 the status → tone mapping lives here and only here.
@@ -39,7 +39,7 @@ the status → tone mapping lives here and only here.
 | `status` | `AVStatus` | — | A spine status. Ten values; a typo is a compile error |
 | `custom` | `string` | — | A domain step, by whatever name the domain gives it |
 | `actionable` | `boolean` | `false` | Draw the design's button style. Today only `Review` differs |
-| `size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Inherited from `Badge` |
+| `size` | `'sm' \| 'md'` | `'md'` | Inherited from `Tag` |
 
 **`status` and `custom` are mutually exclusive**, enforced by the type. Exactly
 one is required. That is the whole API: a domain label can never silently take
@@ -89,7 +89,7 @@ looking changes.
 `actionable` on any other status is a no-op. The design draws one treatment
 for each of them, and this component will not invent a filled variant nobody
 has drawn — when design draws another, it gets a row in
-`ACTIONABLE_TREATMENT`. That is also why `Badge` has a `variant`: the
+`ACTIONABLE_TREATMENT`. That is also why `Tag` has a `variant`: the
 treatment belongs to the atom, and this component composes it.
 
 **Every domain step wears one treatment:** the info tonal, `#dbeafe` on
@@ -144,12 +144,12 @@ the text should be carrying.
 
 ## Accessibility
 
-- Everything Badge guarantees, inherited: no focus, no events, truncation,
+- Everything Tag guarantees, inherited: no focus, no events, truncation,
   AA contrast per tone.
 - The status word is the signal — there is no dot (the design has none), so
   two statuses sharing a fill are still told apart by their text.
 - **Not clickable, on purpose.** The export offered `interactive`/`onClick`
-  on a span; Badge's rule holds — changing status is the options dropdown's
+  on a span; Tag's rule holds — changing status is the options dropdown's
   job (`AV_Options_Dropdown` in docs/figma-annotations.md), which will be its
   own component with real menu semantics.
 
