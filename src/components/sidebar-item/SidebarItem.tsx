@@ -116,23 +116,26 @@ const subRow = (selected: boolean) =>
     selected ? 'text-text-brand-strong' : 'text-text-secondary hover:bg-surface-brand-faint',
   );
 
-/* The collapsed flyout — Figma's `Menu_Dropdown`: 211 wide, 4 above and below,
-   `surface.elevated` with a `stroke.subtle` edge, over everything (`z-60` clears
+/* The collapsed flyout — drawn exactly like `Menu` (Figma's `Menu_Dropdown`):
+   211 wide, `p-1` round the rows, `surface.elevated` with a `stroke.default`
+   edge, `radius.md` and `shadow.menu`, over everything (`z-60` clears
    the rail's tooltip, which would otherwise sit in the same spot). It starts 5
    past the row's right edge, so it overlaps the rail's right edge by 8: the
    rail pads 12 either side of its column and draws a 1 right border (12 + 1 - 8). */
 const flyout =
-  'absolute left-full top-0 z-60 ml-1.25 flex w-52.75 flex-col rounded-md border border-stroke-subtle bg-surface-elevated py-1 shadow-menu';
+  'absolute left-full top-0 z-60 ml-1.25 flex w-52.75 flex-col rounded-md border border-stroke-default bg-surface-elevated p-1 shadow-menu';
 
-/* A flyout row — Figma's `Menu_Item`: 40 tall, 12 either side, body-sm. The
-   current one is semibold `text.brand.medium` on `surface.brand.faint`. */
+/* A flyout row — `Menu`'s item: at least 40 tall, 12 either side, `radius.sm`,
+   `label-sm-medium` in `text.secondary`, `surface.brand.faint` and `text.primary`
+   on hover. `Menu` has no "current" row; here it is semibold `text.brand.medium`
+   on the same faint fill. */
 const flyoutRow = (selected: boolean) =>
   cn(
-    'flex h-10 w-full items-center px-3 text-left font-sans transition-colors',
-    'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
+    'flex min-h-10 w-full items-center gap-2 rounded-sm px-3 py-2 text-left font-sans transition-colors',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     selected
-      ? 'bg-surface-brand-faint text-body-sm-semibold text-text-brand-medium'
-      : 'text-body-sm-regular text-text-primary hover:bg-surface-brand-faint',
+      ? 'bg-surface-brand-faint text-label-sm-semibold text-text-brand-medium'
+      : 'text-label-sm-medium text-text-secondary hover:bg-surface-brand-faint hover:text-text-primary',
   );
 
 export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(

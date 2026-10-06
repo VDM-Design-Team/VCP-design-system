@@ -119,17 +119,19 @@ A dropdown opens to the row's right:
 - **Placement** — top aligned with the row; its left edge overlaps the rail's right
   edge by 8 (the rail pads 12 and draws a 1 border, so the flyout starts 5 past the
   column). `z-60`, so it sits over the page and over the rail's own tooltip.
-- **Surface** — 211 wide, 4 above and below, `surface.elevated`, `stroke.subtle` 1,
-  `radius.md`, `shadow.menu`.
-- **Rows** — 40 tall, 12 either side, `body-sm-regular` in `text.primary`; the current
-  one is `body-sm-semibold` in `text.brand.medium` on `surface.brand.faint`; hover
-  fills `surface.brand.faint`.
+- **Surface** — drawn like `Menu`: 211 wide, `space.4` of padding round the rows,
+  `surface.elevated`, `stroke.default` 1, `radius.md`, `shadow.menu` (design review of
+  #141: "the same design as our menu, with the elevation shadow").
+- **Rows** — `Menu`'s item: at least 40 tall, 12 either side, `radius.sm`,
+  `label-sm-medium` in `text.secondary`; hover fills `surface.brand.faint` and darkens the
+  label to `text.primary`. The current one (which `Menu` has no equivalent for) is
+  `label-sm-semibold` in `text.brand.medium` on `surface.brand.faint`.
 - **Closing** — Escape (focus returns to the row), a press outside, focus moving out, or
   choosing a row. It is a disclosure of links, not an ARIA menu: the row carries
   `aria-expanded` and `aria-controls`, the rows carry `aria-current`.
 
-It is built here rather than on `Menu` or `Popover`: `Popover` places a panel above or
-below only, and `Menu`'s rows are medium-weight `text.secondary` with no current state.
+It is built here rather than on `Menu` or `Popover`, though it looks the same: `Popover`
+places a panel above or below only, and `Menu`'s rows have no current state.
 Expanded, sub-items still open inline under the row.
 
 ## What the export invented

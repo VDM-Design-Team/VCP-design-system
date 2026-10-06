@@ -10,6 +10,9 @@ Design review of build 39 (#123); the flyout is Figma's `Menu_Dropdown` (`27:100
   211 wide, top aligned with the row, its left edge 8 inside the rail's right edge. Escape,
   a press outside, focus leaving, or choosing a row closes it. The row does not grow and the
   caret does not flip. Expanded sub-items still open inline.
+- **The flyout looks like `Menu`** (design review of build 67): `stroke.default` edge, 4 of padding round the rows, rounded
+  `radius.sm` rows in `label-sm-medium` `text.secondary` that darken to `text.primary` on the `surface.brand.faint` hover, and
+  `shadow.menu`. The current row stays semibold `text.brand.medium`.
 - **The collapsed caret is filled** (`caret-down-fill`, new icon).
 - **Collapsed rows fill the rail's column** (52) — they hugged their content (40, or 52 with a
   caret) — glyphs still left-aligned. The footer row fills it too.
