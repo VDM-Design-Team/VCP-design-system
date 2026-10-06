@@ -18,7 +18,7 @@ import { Popover } from '../popover';
  *
  * The button is the same 24 tonal disc as `InlineEdit`'s (Figma's
  * `_Planning_Table_Icon_Button`, `Type=Date Picker`), always in the tab order
- * and only drawn on hover or focus.
+ * and only drawn on hover, keyboard focus, or while the picker is open.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -50,6 +50,12 @@ export const InlineDateEdit = React.forwardRef<HTMLDivElement, InlineDateEditPro
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    /* Opened from the keyboard (a click with no pointer, `detail === 0`)? Then
+       focus moves into the picker. Opened with the mouse, focus stays on the
+       button: moving it in by script and back out on close would leave the
+       browser treating the button as keyboard-focused, and it would stay drawn
+       after the pointer had left. */
+    const [byKeyboard, setByKeyboard] = React.useState(false);
     return (
       <div
         ref={ref}
@@ -66,7 +72,7 @@ export const InlineDateEdit = React.forwardRef<HTMLDivElement, InlineDateEditPro
             width="auto"
             align={align}
             panelClassName="p-0"
-            autoFocus
+            autoFocus={byKeyboard}
             trigger={
               /* The button itself is the trigger — `Popover` wires `aria-expanded`
                  onto it, so it cannot sit inside a `Tooltip` wrapper. Its name
@@ -76,10 +82,14 @@ export const InlineDateEdit = React.forwardRef<HTMLDivElement, InlineDateEditPro
                 label={`Change ${label}`}
                 variant="tonal"
                 size="xs"
+                onClick={(event) => setByKeyboard(event.detail === 0)}
                 className={cn(
                   'opacity-0 transition-opacity',
-                  'group-hover/inline-edit:opacity-100 group-focus-within/inline-edit:opacity-100',
-                  'focus-visible:opacity-100 aria-expanded:opacity-100 motion-reduce:transition-none',
+                  /* Hover, keyboard focus, or the picker being open — not any focus:
+                     closing the picker returns focus here, and a button that
+                     stayed drawn would look like the cell were still hovered. */
+                  'group-hover/inline-edit:opacity-100 focus-visible:opacity-100 aria-expanded:opacity-100',
+                  'motion-reduce:transition-none',
                 )}
               />
             }

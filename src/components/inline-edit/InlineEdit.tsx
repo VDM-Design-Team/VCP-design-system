@@ -27,6 +27,14 @@ import { Tooltip } from '../tooltip';
  * `Input` to type, a `Select` to choose. For a date use `InlineDateEdit`, which
  * is the same idea with a calendar in a popover and no confirm step.
  *
+ * **Clicking away cancels.** A press anywhere outside the cell while it is
+ * editing — another cell's pen, the page, anything — drops the draft, the same
+ * as the cancel button. Nothing is saved by wandering off.
+ *
+ * **The pen is drawn on hover and on *keyboard* focus only.** Not on any focus:
+ * closing the editor returns focus to the pen, and a pen that stayed drawn
+ * after a mouse click would look like the cell was still being hovered.
+ *
  * **Keys.** Enter confirms (from a single-line field — not from a `textarea`
  * or a button, where it already means something); Escape cancels. Focus moves
  * into the control on entering and returns to the pen on leaving, so a
@@ -89,6 +97,9 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
     const root = React.useRef<HTMLDivElement | null>(null);
     const pen = React.useRef<HTMLButtonElement | null>(null);
     const wasEditing = React.useRef(isEditing);
+    /* Off for a click-away: the pointer has already put focus where the user
+       wants it, and a pen refocused after a mouse click would stay drawn. */
+    const restoreFocus = React.useRef(true);
 
     /* Into the control on opening; back to the pen on closing. */
     React.useEffect(() => {
@@ -97,7 +108,8 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
           ?.querySelector<HTMLElement>('[data-inline-editor] :is(input, select, textarea, button, [tabindex])')
           ?.focus();
       }
-      if (!isEditing && wasEditing.current) pen.current?.focus();
+      if (!isEditing && wasEditing.current && restoreFocus.current) pen.current?.focus();
+      restoreFocus.current = true;
       wasEditing.current = isEditing;
     }, [isEditing]);
 
@@ -109,6 +121,22 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
       onCancel?.();
       setEditing(false);
     };
+
+    /* A press outside the cell cancels. Kept in a ref so the listener is added
+       once per editing session and always calls the latest `cancel`. */
+    const cancelRef = React.useRef(cancel);
+    cancelRef.current = cancel;
+    React.useEffect(() => {
+      if (!isEditing) return undefined;
+      const onPointerDown = (event: PointerEvent) => {
+        if (root.current && !root.current.contains(event.target as Node)) {
+          restoreFocus.current = false;
+          cancelRef.current();
+        }
+      };
+      document.addEventListener('pointerdown', onPointerDown, true);
+      return () => document.removeEventListener('pointerdown', onPointerDown, true);
+    }, [isEditing]);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       onKeyDown?.(event);
@@ -138,20 +166,21 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
         {...props}
       >
         {isEditing ? (
-          <>
-            <div data-inline-editor="" className="min-w-0 flex-1">
+          /* 6 between the control and the buttons, and between the buttons. */
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">
+            <div data-inline-editor="" className="min-w-0">
               {editor}
             </div>
             {/* Cancel on the left, confirm on the right. */}
             <IconButton icon="x" label={cancelLabel} variant="tonal" size="xs" onClick={cancel} />
             <IconButton icon="check" label={confirmLabel} variant="tonal" size="xs" onClick={confirm} />
-          </>
+          </div>
         ) : (
           <>
             <div className="min-w-0">{children}</div>
             {!disabled && (
-              /* Hidden until the cell is hovered or something in it has focus,
-                 and never `display:none` — it stays tabbable and announced. */
+              /* Hidden until the cell is hovered or the pen has keyboard focus, and
+                 never `display:none` — it stays tabbable and announced. */
               <Tooltip content="Edit" placement="top">
                 <IconButton
                   ref={pen}
@@ -162,7 +191,7 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
                   onClick={() => setEditing(true)}
                   className={cn(
                     'opacity-0 transition-opacity',
-                    'group-hover/inline-edit:opacity-100 group-focus-within/inline-edit:opacity-100 focus-visible:opacity-100',
+                    'group-hover/inline-edit:opacity-100 focus-visible:opacity-100',
                     'motion-reduce:transition-none',
                   )}
                 />

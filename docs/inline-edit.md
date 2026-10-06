@@ -111,13 +111,21 @@ feature, and the pen is reachable by keyboard and focus. Don't use it on a touch
 
 ## Accessibility
 
-- **The pen is always in the tab order.** It is only *drawn* on hover or focus
+- **The pen is always in the tab order.** It is only *drawn* on hover or **keyboard** focus
   (opacity, never `display:none`), so a keyboard or screen-reader user never has to
-  find it by hovering. It is named "Edit owner", not "Edit".
+  find it by hovering. Not on any focus: after a mouse click closes the editor, focus
+  goes back to the pen, and a pen that stayed drawn would look like the cell was still
+  hovered. The calendar button likewise stays drawn only while the picker is open. It is named "Edit owner", not "Edit".
 - **Enter confirms** from a single-line field, and not from a `textarea` or a button,
   where Enter already means something. **Escape cancels** and does not reach the
   page.
-- **Focus** moves into the control on opening and back to the pen on closing.
+- **Focus** moves into the control on opening and back to the pen on closing — except
+  after a click-away, where the pointer has already put it where the user wants. The
+  calendar picker takes focus on a keyboard open only; opened with the mouse, focus stays
+  on its button.
+- **Clicking away cancels.** A press anywhere outside an editing cell — another cell's pen,
+  the page — drops the draft, the same as the cancel button. Nothing is saved by wandering
+  off. (Tabbing away does not cancel.)
 - Give the editor its own accessible name that says *which row*: "Owner of AV-2041",
   not "Owner" ten times.
 

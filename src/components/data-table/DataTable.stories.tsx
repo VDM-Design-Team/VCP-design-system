@@ -453,10 +453,47 @@ export const InlineEditing: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
     await expect(canvas.getAllByText('40').length).toBeGreaterThan(0);
 
+    /* Clicking away from an editing cell cancels it — here onto another cell's pen. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[2]);
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Owner of AV-2033' }), 'zzz');
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Edit points' })[2]);
+    await expect(canvas.queryByRole('textbox', { name: 'Owner of AV-2033' })).toBeNull();
+    await expect(canvas.getByText('Ali Reza')).toBeInTheDocument();
+    /* ...and so does clicking the page. */
+    await userEvent.click(canvasElement.ownerDocument.body);
+    await expect(canvas.queryByRole('combobox', { name: 'Points for AV-2033' })).toBeNull();
+
+    /* The pen is not left drawn after the pointer leaves, though focus returned to it. */
+    await userEvent.unhover(canvas.getAllByRole('button', { name: 'Edit points' })[2]);
+    await waitFor(() =>
+      expect(getComputedStyle(canvas.getAllByRole('button', { name: 'Edit points' })[2]).opacity).toBe('0'),
+    );
+
+    /* The 6 gap between a control and the buttons. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[0]);
+    const box = canvas.getByRole('textbox', { name: 'Owner of AV-2041' }).closest('[data-inline-editor]')!;
+    await expect(
+      Math.round(canvas.getByRole('button', { name: 'Cancel' }).getBoundingClientRect().left - box.getBoundingClientRect().right),
+    ).toBe(6);
+    await userEvent.keyboard('{Escape}');
+
     /* Calendar: open, pick a day, no confirm. */
     await expect(canvas.getByText('2026-09-28')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Change due date of AV-2041' }));
     await userEvent.click(await canvas.findByRole('button', { name: /^20 September 2026/ }));
     await expect(canvas.getByText('2026-09-20')).toBeInTheDocument();
+
+    /* Dismissed — by Cancel or by clicking away — the picker is closed and the button
+       is no longer held open. (That it is also not drawn without hover depends on the real
+       pointer and `:focus-visible`, which a scripted click cannot reproduce; it is checked by
+       hand in the browser, see the PR.) */
+    const dateButton = canvas.getByRole('button', { name: 'Change due date of AV-2041' });
+    await userEvent.click(dateButton);
+    await expect(dateButton).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.click(await canvas.findByRole('button', { name: 'Cancel' }));
+    await expect(dateButton).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(dateButton);
+    await userEvent.click(canvasElement.ownerDocument.body);
+    await expect(dateButton).toHaveAttribute('aria-expanded', 'false');
   },
 };
