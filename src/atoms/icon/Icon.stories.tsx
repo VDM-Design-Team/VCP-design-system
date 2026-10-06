@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Icon, ICON_NAMES, CUSTOM_ICON_NAMES } from './Icon';
+import { expect } from 'storybook/test';
+import { Icon, ICON_NAMES, ICON_SIZES, CUSTOM_ICON_NAMES } from './Icon';
 
 const meta = {
   title: 'Atoms/Icon',
@@ -8,8 +9,9 @@ const meta = {
     docs: {
       description: {
         component:
-          'Phosphor Icons at `regular` weight, trimmed to the glyphs the VCP Figma library ' +
-          'references, plus the in-house glyphs Phosphor has no equivalent for. ' +
+          'Phosphor Icons, trimmed to the glyphs the VCP Figma library references — each in ' +
+          '`regular` and `fill` (the `-fill` names) — plus the in-house glyphs Phosphor has ' +
+          'no equivalent for. Nine sizes: 10, 12, 16, 20, 24, 28, 32, 40 and 48. ' +
           'Filled paths that inherit `currentColor` — set colour on the parent with a text token.',
       },
     },
@@ -23,18 +25,66 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 16 in dense cells, 20 inline, 24 for nav. */
+/**
+ * The nine sizes Figma draws, regular above fill. Each is a whole box with the
+ * glyph centred inside it and a little in from the edges — Phosphor's own
+ * artboard margin, scaled with the box. `sm` / `md` / `lg` still work as
+ * 16 / 20 / 24.
+ */
 export const Sizes: Story = {
   render: () => (
-    <div className="flex items-end gap-4 text-text-primary">
-      {(['sm', 'md', 'lg'] as const).map((size) => (
-        <div key={size} className="flex flex-col items-center gap-1">
-          <Icon name="bell" size={size} />
-          <span className="text-caption-sm-semibold text-text-tertiary">{size}</span>
+    <div className="flex flex-col gap-4 text-text-primary">
+      {(['bell', 'bell-fill'] as const).map((name) => (
+        <div key={name} className="flex items-end gap-4">
+          {ICON_SIZES.map((size) => (
+            <div key={size} className="flex flex-col items-center gap-1">
+              <Icon name={name} size={size} className="outline outline-1 outline-stroke-subtle" />
+              <span className="text-caption-sm-semibold text-text-tertiary">{size}</span>
+            </div>
+          ))}
         </div>
       ))}
     </div>
   ),
+};
+
+/**
+ * Every glyph ships both weights: `name` and `name-fill`. Only the in-house
+ * glyphs that have no Figma fill drawn yet are exempt — see the docs.
+ */
+export const RegularAndFill: Story = {
+  render: () => (
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-4">
+      {ICON_NAMES.filter((n) => !n.endsWith('-fill')).map((name) => (
+        <div
+          key={name}
+          className="flex flex-col items-center gap-2 rounded-md border border-stroke-subtle p-3 text-text-secondary"
+        >
+          <div className="flex gap-2">
+            <Icon name={name} size={24} />
+            {ICON_NAMES.includes(`${name}-fill` as never) ? (
+              <Icon name={`${name}-fill` as never} size={24} />
+            ) : (
+              <span className="size-6" />
+            )}
+          </div>
+          <span className="text-caption-sm-semibold text-text-tertiary text-center break-all">{name}</span>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async () => {
+    /* Glyphs drawn in-house with no fill in Figma yet; `fire-solid` is solid already. */
+    const EXEMPT = ['rectangle-group', 'assigned-value', 'rectangle-stack', 'fire-solid'];
+    const missing = ICON_NAMES.filter(
+      (n) => !n.endsWith('-fill') && !EXEMPT.includes(n) && !ICON_NAMES.includes(`${n}-fill` as never),
+    );
+    await expect(missing).toEqual([]);
+    const orphans = ICON_NAMES.filter(
+      (n) => n.endsWith('-fill') && !ICON_NAMES.includes(n.slice(0, -5) as never),
+    );
+    await expect(orphans).toEqual([]);
+  },
 };
 
 /**

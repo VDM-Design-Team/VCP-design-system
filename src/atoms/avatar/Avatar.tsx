@@ -188,7 +188,7 @@ export const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
         ) : (
           /* No name, no initials, no photo — an unknown person, not an empty
              circle. `Icon` renders itself `aria-hidden` when given no label. */
-          <Icon name="user" size={size} />
+          <Icon name="user" size={size ?? undefined} />
         )}
       </span>
     );

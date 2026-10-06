@@ -2,6 +2,15 @@
 
 ## 0.1.0 — unreleased
 
+### `Icon` — nine sizes, and a fill for every glyph (October 2026)
+
+- **Sizes:** `size` takes 10, 12, 16, 20, 24, 28, 32, 40 or 48 — the sizes Figma draws every icon at — instead of only
+  `sm` / `md` / `lg`. Those three still work as 16 / 20 / 24 (default stays `md`, 20). Exports `ICON_SIZES`, `IconSize`.
+  The glyph already sits centred with a margin from the edges (Phosphor's own 256 artboard), at every size.
+- **Regular and fill:** every glyph now ships both. 83 `-fill` glyphs added from Phosphor, plus `check-square` (it had
+  only a fill), `caret-triple-up-fill` (built like the regular) and `smiley-plus-fill` (Figma, node 3605:1853). Still without
+  a fill: the in-house `rectangle-group`, `assigned-value` and `rectangle-stack`, which Figma doesn't draw filled.
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.
