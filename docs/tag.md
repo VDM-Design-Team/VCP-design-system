@@ -19,7 +19,8 @@ Nothing — Tag is the shared shell, not a composition. `TypeTag` and
 | `Tag` | Generic classification that needs one of the four Figma styles, or is the base for a new contextual tag | Rounded-rectangle (`shape.radius.sm`) | No | Generic tones only |
 | `Badge` | Generic classification, the common case | Pill (`shape.radius.pill`) | No | Generic tones only |
 | `Chip` | A value the user can act on: a selected filter, a removable tag | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
-| `StatusPill` *(component)* | A VCP status | Badge's pill | No | VCP's status vocabulary |
+| `StatusPill` *(component)* | A VCP status | Tag's rounded-rectangle | No | VCP's status vocabulary |
+| `DueDatePill` *(component)* | An AV's due date | Tag's rounded-rectangle | No | Proximity → tone |
 | `TypeTag` / `UrgencyTag` *(components)* | An AV's type or urgency | Tag's rounded-rectangle, `textual` | No | VCP's type/urgency vocabulary |
 
 **`Tag` and `Badge` are separate shapes on purpose, ported from separate
@@ -29,7 +30,7 @@ other's corner.
 
 **Introducing a new contextual tag family (a third `*Tag`) means composing
 `Tag`**, the way `TypeTag`/`UrgencyTag` already do and the way
-`StatusPill`/`DueDatePill` compose `Badge` — never a new hand-rolled shell.
+`StatusPill`/`DueDatePill` compose `Tag` — never a new hand-rolled shell.
 That was the mistake this component fixes: `TypeTag` and `UrgencyTag`
 originally duplicated an identical shell between them instead of sharing one.
 
@@ -39,7 +40,7 @@ originally duplicated an identical shell between them instead of sharing one.
 |---|---|---|---|
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | All four are VCP's own semantics — GDL's Tag primitive doesn't dictate them |
 | `tone` | `neutral \| brand \| info \| success \| warning \| danger` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
-| `size` | `sm \| md` | `md` | 24 / 28 tall. `sm` for dense tables and inline-with-body-text |
+| `size` | `sm \| md` | `md` | 24 / 28 tall, with 12 / 14 type. `sm` for dense tables and inline-with-body-text |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the tag's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
 | `className` | `string` | — | Merged via `cn()` |
@@ -56,8 +57,8 @@ differs between the two:
 | Part | Token | Utility |
 |---|---|---|
 | Radius | `shape.radius.sm` | `rounded-sm` |
-| Type ramp, `md` | `type.label.lg` — Poppins 500, 14/20 | `text-label-sm-medium` |
-| Type ramp, `sm` | `type.label.md` — Poppins 500, 13/18 | `text-label-sm-medium` |
+| Type ramp, `md` | Poppins 500, 14 | `text-label-sm-medium` |
+| Type ramp, `sm` | Poppins 500, 12 | `text-caption-md-medium` |
 | Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
 | Padding | Tailwind numeric scale | `px-2` (8), both sizes |
 | Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |
