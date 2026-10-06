@@ -10,7 +10,7 @@ Figma's `VCP Pages & Flows` file (5 Oct 2026) and set by `variant`:
 | Figma | `Value_Card` (node `947:306362`, "Value Cards") | `_SuperAdmin_Metric_Card_Coloured` (node `3:4848`) |
 | Stripe | 8 wide | 12 wide |
 | Alignment | **Left** | **Centred** |
-| Size | Exactly 100 high, at least 175 wide | Exactly 150 high |
+| Size | Exactly 100 high, at least 16.5rem wide | Exactly 150 high |
 | Title | Label only (Figma draws no icon or hint) | Accent icon, label, info hint |
 | Value | 36 **bold**, 44 line | 36 **semibold**, 36 line, plus a 24 unit |
 
@@ -68,6 +68,15 @@ An item takes `label`, `value`, `unit`, `icon`, `hint` and `accent` — the same
 contents as a single card, less the stripe. `accent` colours the item's icon.
 Items have no padding, hug their height and share the width equally.
 
+## Laying cards out
+
+A default card has a minimum width (16.5rem), so a fixed-column grid can force
+cards past their cell and into each other when the space is tight. Put a row of
+them in a **wrapping flex container** — `flex flex-wrap gap-4` — and give each
+card `className="flex-1"` so they share the row and drop onto the next one when
+three no longer fit. The card doesn't set `flex-1` itself: in a column it would
+collapse the card's fixed height.
+
 ## Tokens
 
 **Card.** `stroke.default` outline, 1px, all round; `radius.md`. A single card
@@ -80,7 +89,7 @@ centred content centres in the space beside the stripe — as Figma draws it.
 
 **Single, `default` (Value_Card):** an 8 stripe; `space.16` either side of the
 content, left-aligned and centred vertically; no gap between the label and the
-value. Exactly 100 high and at least 175 wide (`h-25 min-w-43.75`). The value
+value. Exactly 100 high and at least 16.5rem wide (`h-25 min-w-66`; Figma's own minimum is 175, widened so the card stays readable). The value
 is bold on a 44 line.
 
 **Single, `superadmin`:** a 12 stripe; `space.24` either side, content centred
