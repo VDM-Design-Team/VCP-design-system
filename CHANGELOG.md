@@ -2,6 +2,22 @@
 
 ## 0.1.0 — unreleased
 
+### Status, due dates and tables are tags, not badges (October 2026)
+
+Design review of the `Tag` / `Badge` split (Chromatic build 27 on #117): a status, a
+due date and a table cell are tags — the rounded-rectangle — not the pill.
+
+- **`StatusPill` and `DueDatePill` are now built on `Tag`** (they composed `Badge`).
+  They keep their names, props and tone mappings; only the shape changes, from the
+  pill to `Tag`'s rounded-rectangle, and their `size` prop is now `Tag`'s.
+- **`AVTable`'s domain label is a `Tag`**, and the `DataTable` story's status cells are
+  `Tag`s.
+- **`Tag`'s `sm` size is 12 type** (`caption-md-medium`; was 14). `md` is unchanged at 14.
+  That also shrinks `StatusPill`/`DueDatePill` at `sm`.
+
+`Badge` is unchanged here and is still the pill, used where something is a badge
+(for example the version in `ChangeLogModal`).
+
 ### AV table glyphs match Figma: the Urgent flame and the sort icons (5 October 2026)
 
 **Changed, visually** (no API change):
