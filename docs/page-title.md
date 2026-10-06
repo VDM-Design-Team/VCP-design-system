@@ -54,6 +54,11 @@ frame is 27, but no rail I measured actually draws the arrow, so there is no
 design height to match — if design draws one at 27, that is a conversation
 about the target size, not a number to copy.
 
+**The back control and the title are vertically centred on each other**, as Figma's
+`Back Nav` is (counter-axis centre). The control is 40 tall and the title row 26, so
+with `items-start` the title sat 7px above the arrow's centre. With a subtitle, the
+title and subtitle are centred as one block against the arrow.
+
 ## Its relationship to AVHeader — unresolved
 
 **They draw the same band.** `Page_Title` in Figma carries a hidden

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { PageTitle } from './PageTitle';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
@@ -54,6 +55,17 @@ export const WithSubtitle: Story = {
  */
 export const WithBack: Story = {
   args: { title: 'VCP-12345', backHref: '#values', backLabel: 'Back to my Added Values' },
+  /* The back control and the title share a centre line. */
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const back = canvas.getByRole(args.backHref ? 'link' : 'button', { name: args.backLabel });
+    const title = canvas.getByRole('heading', { level: 1 });
+    const centre = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    await expect(Math.abs(centre(back) - centre(title))).toBeLessThan(1);
+  },
   render: (args) => (
     <Page>
       <PageTitle {...args} />
@@ -64,6 +76,17 @@ export const WithBack: Story = {
 /** Back as history, for the cases where there is genuinely no URL. */
 export const BackAsAction: Story = {
   args: { title: 'VCP-12345', onBack: () => {}, backLabel: 'Back to my Added Values' },
+  /* The back control and the title share a centre line. */
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const back = canvas.getByRole(args.backHref ? 'link' : 'button', { name: args.backLabel });
+    const title = canvas.getByRole('heading', { level: 1 });
+    const centre = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    await expect(Math.abs(centre(back) - centre(title))).toBeLessThan(1);
+  },
   render: (args) => (
     <Page>
       <PageTitle {...args} />

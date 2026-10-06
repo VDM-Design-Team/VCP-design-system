@@ -50,7 +50,9 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
       )}
       {...props}
     >
-      <div className="flex min-w-0 items-start gap-1">
+      {/* `items-center`: the 40 back control and the title share a centre line —
+          Figma's `Back Nav` aligns its counter axis to the centre. */}
+      <div className="flex min-w-0 items-center gap-1">
         {backHref ? (
           /* A real link — middle-click and open-in-new-tab work, which they
              cannot on a button. Named here, so the glyph stays decorative. */

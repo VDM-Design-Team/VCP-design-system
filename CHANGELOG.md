@@ -2,6 +2,10 @@
 
 ## 0.1.0 — unreleased
 
+### `PageTitle` — back arrow and title centred (October 2026)
+
+With a back control, the arrow and the title now share a centre line (the title sat above the arrow). No API change.
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.
