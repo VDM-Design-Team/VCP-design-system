@@ -469,12 +469,18 @@ export const InlineEditing: Story = {
       expect(getComputedStyle(canvas.getAllByRole('button', { name: 'Edit points' })[2]).opacity).toBe('0'),
     );
 
-    /* The 6 gap between a control and the buttons. */
+    /* The 6 gap between a control and the buttons, and 4 between the two buttons. */
     await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[0]);
     const box = canvas.getByRole('textbox', { name: 'Owner of AV-2041' }).closest('[data-inline-editor]')!;
     await expect(
       Math.round(canvas.getByRole('button', { name: 'Cancel' }).getBoundingClientRect().left - box.getBoundingClientRect().right),
     ).toBe(6);
+    await expect(
+      Math.round(
+        canvas.getByRole('button', { name: 'Save' }).getBoundingClientRect().left -
+          canvas.getByRole('button', { name: 'Cancel' }).getBoundingClientRect().right,
+      ),
+    ).toBe(4);
     await userEvent.keyboard('{Escape}');
 
     /* Calendar: open, pick a day, no confirm. */

@@ -166,14 +166,16 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
         {...props}
       >
         {isEditing ? (
-          /* 6 between the control and the buttons, and between the buttons. */
+          /* 6 between the control and the buttons; 4 between the two buttons. */
           <div className="flex min-w-0 flex-1 items-center gap-1.5">
             <div data-inline-editor="" className="min-w-0">
               {editor}
             </div>
             {/* Cancel on the left, confirm on the right. */}
-            <IconButton icon="x" label={cancelLabel} variant="tonal" size="xs" onClick={cancel} />
-            <IconButton icon="check" label={confirmLabel} variant="tonal" size="xs" onClick={confirm} />
+            <div className="flex shrink-0 items-center gap-1">
+              <IconButton icon="x" label={cancelLabel} variant="tonal" size="xs" onClick={cancel} />
+              <IconButton icon="check" label={confirmLabel} variant="tonal" size="xs" onClick={confirm} />
+            </div>
           </div>
         ) : (
           <>

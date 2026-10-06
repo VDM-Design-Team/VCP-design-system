@@ -8,7 +8,7 @@
   `note-pencil` with an "Edit" tooltip. **New `InlineDateEdit`**: a date with a calendar button that opens a `DatePicker` in a popover; picking a
   day commits it, no confirm. The Inline Editing story now shows all three kinds: type, choose, calendar.
 - **`InlineEdit`: clicking outside an editing cell cancels it; the pen and the calendar button are drawn on hover or keyboard focus only (they stayed
-  drawn after a mouse click closed the editor); the control sits 6 from the cancel and confirm buttons.**
+  drawn after a mouse click closed the editor); the control sits 6 from the cancel and confirm buttons, and the two buttons are 4 apart.**
 - **`IconButton` gains `variant="tonal"` and `size="xs"` (24, 16 glyph).** New tokens `neutral.tonal.surface.{hover,pressed,disabled}` and
   `neutral.tonal.content.{hover,pressed,disabled}`, from Figma's `colors/neutral/tonal/*`.
 - **New `CopyText`**: a non-link value that underlines on hover and, on click, copies itself and shows "Copied" for 800ms
