@@ -24,7 +24,7 @@ import {
  * This is the shared shell every contextual tag composes — `TypeTag`,
  * `UrgencyTag`, and whatever comes next — each owning its own vocabulary →
  * tone mapping on top. Introducing a new tag family means composing this,
- * the way `StatusPill`/`DueDatePill` already compose `Badge`, never a new
+ * the way `StatusPill`/`DueDatePill` compose it, never a new
  * hand-rolled shell.
  *
  * Tag is not a control: it takes no focus and fires no events, same as
@@ -44,9 +44,9 @@ const tag = cva(
   {
     variants: {
       size: {
-        /* 24 tall — dense tables, inline beside body text. */
-        sm: 'h-6 gap-1 px-2 text-label-sm-medium',
-        /* 28 tall — the default, and what TypeTag/UrgencyTag already ship at. */
+        /* 24 tall, 12 type — dense tables, inline beside body text. */
+        sm: 'h-6 gap-1 px-2 text-caption-md-medium',
+        /* 28 tall, 14 type — the default, and what TypeTag/UrgencyTag already ship at. */
         md: 'h-7 gap-2 px-2 text-label-sm-medium',
       },
     },

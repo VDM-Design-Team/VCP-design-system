@@ -14,10 +14,10 @@ page, audit batch 5, 11 September 2026.
 
 | Piece | Tier |
 |---|---|
-| `Badge` | atom |
 | `Button` | atom |
 | `Divider` | atom |
 | `Icon` | sub-atomic |
+| `Tag` | atom |
 | `TypeTag` | atom |
 | `UrgencyTag` | atom |
 | `AvatarGroup` | component |
@@ -154,24 +154,23 @@ supply. **Open question for design**, below.
 
 ## Deviations from Figma
 
-- **The domain badge** is `Badge tone="brand"` — `text.brand.strong` on
+- **The domain tag** is `Tag tone="brand"` — `text.brand.strong` on
   `surface.brand.faint`. Figma writes the word in `text.brand.medium`. One step
-  of brand navy apart on the text; the `Badge` tone is used so every brand
+  of brand navy apart on the text; the `Tag` tone is used so every brand
   chip in the system stays one colour.
-- **Pagination is the repo's `Pagination`**, which draws arrows and five page
-  numbers. Figma's `VCP_Pagination` additionally draws First/Last buttons, an
-  items-per-page select and a "1–50 of 1,250" range. `docs/pagination.md` says
-  to extend that component rather than compose around it, so those three are a
-  follow-up on `Pagination`, not something rebuilt here.
+- **Pagination is the repo's `Pagination`**, which since 5 Oct 2026 draws
+  Figma's `VCP_Pagination`: First/Last, an ellipsis for long page counts, and —
+  when given `itemCount`, `pageSize` and `onPageSizeChange` — the Items select
+  and the "1-50 of 1,250" range. `AVTable` passes only the page props today,
+  so it shows Figma's Small version.
 - **Column widths** are `<col>` percentages, not Figma's grid `fr` tracks —
   `1fr` has no meaning in a table. Task Title takes 40%, matching its 4fr
   against six roughly-1fr columns.
 - **The reference and Last Updated** use the repo's `text.tertiary`, which is
   one slate step darker than Figma's — a pre-existing, deliberate contrast fix
   in this repo, not a reading error. See `docs/figma-audit.md`, batch 5.
-- **Pills are 13px**, `Badge`'s own small size; Figma draws 12. One consistent
-  pixel across every pill in the system, which is better than one table
-  disagreeing with the rest.
+- **Tags are 12px**, `Tag`'s own small size, matching Figma. Tables use tags, not
+  badges (design review, 5 Oct 2026).
 
 Row height, cell padding and avatar size were **measured in the browser against
 the canvas**: 81, 16 and 32 respectively, all exact.

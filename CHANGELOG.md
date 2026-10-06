@@ -2,6 +2,87 @@
 
 ## 0.1.0 — unreleased
 
+### `Badge` — type sizes per size, and a large size (October 2026)
+
+Each size now has its own type size, and there is a third size.
+
+- **Type:** `sm` 10 (`caption-sm-medium`), `md` 12 (`caption-md-medium`) and the new
+  `lg` 14 (`label-sm-medium`). All three were 14 before, so **every existing `sm` and
+  `md` Badge now renders smaller text** — in product code, the version Badge in
+  `ChangeLogModal`. (`StatusPill`, `DueDatePill` and the AV table's labels are `Tag`s
+  since the tags-not-badges change and are unaffected.) Heights are unchanged (24 / 28).
+- **New `size="lg"`:** 32 tall, 12 either side (`px-3`), 14 type. Fixed height, pill shape,
+  same styles and tones as the others.
+
+Migration: none required; a caller that wanted the old 14 type on an `md` Badge can use `lg`.
+
+### Status, due dates and tables are tags, not badges (October 2026)
+
+Design review of the `Tag` / `Badge` split (Chromatic build 27 on #117): a status, a
+due date and a table cell are tags — the rounded-rectangle — not the pill.
+
+- **`StatusPill` and `DueDatePill` are now built on `Tag`** (they composed `Badge`).
+  They keep their names, props and tone mappings; only the shape changes, from the
+  pill to `Tag`'s rounded-rectangle, and their `size` prop is now `Tag`'s.
+- **`AVTable`'s domain label is a `Tag`**, and the `DataTable` story's status cells are
+  `Tag`s.
+- **`Tag`'s `sm` size is 12 type** (`caption-md-medium`; was 14). `md` is unchanged at 14.
+  That also shrinks `StatusPill`/`DueDatePill` at `sm`.
+
+`Badge` is unchanged here and is still the pill, used where something is a badge
+(for example the version in `ChangeLogModal`).
+
+### AV table glyphs match Figma: the Urgent flame and the sort icons (5 October 2026)
+
+**Changed, visually** (no API change):
+
+- **`UrgencyTag`'s Urgent flame is Figma's own** — the new in-house glyph
+  `fire-solid`, exported from the design file (Heroicons' mini `fire`, a solid
+  flame with the inner tongue cut out). Phosphor's flames don't read the same
+  at 20, so this is a named exception to Phosphor-only, listed in
+  `docs/icon.md`. All four urgency glyphs are now Figma's 20 (were 24).
+- **`DataTable`'s sort glyphs are Figma's `_AV_Table_Sort`**: `arrows-down-up`
+  when unsorted, `sort-ascending` / `sort-descending` when sorted, 20 and
+  `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
+  unsorted in `text.subtle`). `AVTable` inherits both.
+
+### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
+
+**New** (minor): `mode` — `day` (default), `range` (two clicks, reported through
+the new `onRangeChange(start, end?)`) and `month` (a year of months);
+`dualView` for two calendars that page independently; `mobile` for the touch
+layout (`h-10` days, full width, presets as a scrolling row); `presets` for
+the quick picks Figma lists beside the calendar; `onClear`/`clearLabel` for
+the footer button; `today` (stories pin it). In day and range mode the month
+heading now opens the month grid. Storybook's first story has a control for
+each Figma variant property.
+
+**Changed, visually:** no panel border (Figma draws none); weekdays read
+"Mon"…"Sun" in `text.tertiary`; days are `body-md` in `text.secondary`, today
+semibold; the selected day is `surface.brand.strong` (was `action.primary`);
+a range draws as one bar with rounded ends. The heading reads "Sep 2026" (the
+full name is still announced). Neighbouring months' days show, greyed in
+`text.subtle` — Figma's `text.disabled` there fails contrast. Day cells are
+32 high (were 36). Every existing prop keeps its meaning; no caller imports
+`DatePicker` yet.
+
+### `Pagination` — built to Figma's `VCP_Pagination` (5 October 2026)
+
+**New** (minor): **First** and **Last** buttons either end; an **ellipsis** for
+long page counts, with the first and last page always shown ("1 2 3 4 … 25");
+an **Items** per-page select (`pageSize`, `pageSizeOptions`,
+`onPageSizeChange`); a **range readout**, "1-50 of 1,250" (`itemCount` +
+`pageSize`); and `variant="compact"` for Figma's Tiny version without First and
+Last. Closes #114.
+
+**Changed, visually:** controls take Figma's `stroke.default` border and
+`text.primary` labels (were `stroke.subtle`, `text.secondary`); the active page
+is `surface.brand.strong` (was `action.primary`); the trailing "Page 3 of 12"
+is gone — Figma doesn't draw it, and the range readout says more. The window
+is no longer a fixed five numbers. The root is now a `<div>` around the
+`<nav>`; `ref` points at it. Every existing caller (`AVTable`) keeps working
+unchanged and now shows First and Last.
+
 ### `neutral.textual.content` — a token for content with no fill or border (5 October 2026)
 
 **New token** (minor): `neutral.textual.content` (`default` / `hover` /

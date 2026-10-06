@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Popover } from './Popover';
 import { Button } from '../../atoms/button';
 import { IconButton } from '../../atoms/icon-button';
@@ -160,5 +161,112 @@ export const LightAndDark: Story = {
         <div className="dark">{set}</div>
       </div>
     );
+  },
+};
+
+/* The panel a trigger controls — only rendered while open, so this is null
+   when it is closed. */
+const panelOf = (trigger: HTMLElement) => {
+  const id = trigger.getAttribute('aria-controls');
+  return id ? document.getElementById(id) : null;
+};
+
+/**
+ * **Flow:** opening wires the trigger to the panel (`aria-expanded`,
+ * `aria-controls`) and leaves focus on the trigger — a plain-content popover
+ * does not grab focus. Escape closes it and focus stays on the trigger.
+ */
+export const OpensAndEscapes: Story = {
+  parameters: { controls: { disable: true } },
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Open popover' });
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).not.toHaveAttribute('aria-controls');
+
+    await userEvent.click(trigger);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    const panel = panelOf(trigger);
+    await expect(panel).toBeVisible();
+    await expect(panel).toHaveTextContent('Deliverables move to In review');
+    /* Not trapped, not moved: the user is still on the trigger. */
+    await expect(trigger).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+    await expect(panelOf(trigger)).toBeNull();
+    await expect(trigger).toHaveFocus();
+  },
+};
+
+/** **Flow:** a click anywhere outside the popover closes it. */
+export const OutsideClickCloses: Story = {
+  parameters: { controls: { disable: true } },
+  render: (args) => (
+    <div className="flex items-start gap-6">
+      <Popover {...args} />
+      <Button variant="tertiary">Somewhere else</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Open popover' });
+
+    await userEvent.click(trigger);
+    await expect(panelOf(trigger)).toBeVisible();
+
+    /* A click inside the panel is not "outside". */
+    await userEvent.click(panelOf(trigger)!);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Somewhere else' }));
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+    await expect(panelOf(trigger)).toBeNull();
+  },
+};
+
+/**
+ * **Flow:** with `autoFocus`, opening puts focus on the panel's first control.
+ * Tab moves through the panel — no trap — and Tab past its last control lands
+ * on the page beyond and closes the popover, leaving focus where the user went.
+ */
+export const FocusMovesInAndOut: Story = {
+  parameters: { controls: { disable: true } },
+  args: {
+    autoFocus: true,
+    trigger: <IconButton icon="funnel-simple" label="Filter deliverables" variant="secondary" />,
+    content: (
+      <div className="flex flex-col gap-3">
+        <Input aria-label="Owner" placeholder="Search people" fullWidth />
+        <div className="flex justify-end gap-2">
+          <Button variant="tertiary" size="sm">
+            Reset
+          </Button>
+          <Button size="sm">Apply</Button>
+        </div>
+      </div>
+    ),
+  },
+  render: (args) => (
+    <div className="flex items-start gap-6">
+      <Popover {...args} />
+      <Button variant="tertiary">Next on the page</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Filter deliverables' });
+
+    await userEvent.click(trigger);
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Owner' })).toHaveFocus());
+
+    await userEvent.tab();
+    await expect(screen.getByRole('button', { name: 'Reset' })).toHaveFocus();
+    await userEvent.tab();
+    await expect(screen.getByRole('button', { name: 'Apply' })).toHaveFocus();
+
+    /* Off the end of the panel: onto the page, and the popover closes. */
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Next on the page' })).toHaveFocus();
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
   },
 };

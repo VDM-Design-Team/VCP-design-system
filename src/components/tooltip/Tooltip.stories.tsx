@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Tooltip } from './Tooltip';
 import { Button } from '../../atoms/button';
 import { IconButton } from '../../atoms/icon-button';
@@ -246,5 +247,100 @@ export const LightAndDark: Story = {
         <div className="dark">{set}</div>
       </div>
     );
+  },
+};
+
+/* The bubble a trigger is described by, and the positioner that shows or hides
+   it. Closed is `opacity-0`, never `hidden`, so the bubble stays in the
+   accessibility tree — which is why these flows read the class, not visibility. */
+const bubbleOf = (trigger: HTMLElement) => {
+  const ids = (trigger.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
+  const bubble = document.getElementById(ids[ids.length - 1] ?? '');
+  if (!bubble) throw new Error('The trigger is not described by a tooltip');
+  return bubble;
+};
+const isOpen = (trigger: HTMLElement) => bubbleOf(trigger).parentElement?.classList.contains('opacity-100');
+
+/**
+ * **Flow:** Tab reveals the tooltip at once — no hover delay for focus — and
+ * the trigger is described by it. Escape dismisses it without moving focus;
+ * Tab on reveals the next one and closes the last; tabbing away closes it.
+ */
+export const RevealsOnFocus: Story = {
+  parameters: { controls: { disable: true } },
+  render: (args) => (
+    <div className="flex items-center gap-4 p-16">
+      <Tooltip {...args} placement="bottom" content="Reconciled nightly at 02:00 UTC">
+        <Button variant="secondary">Last reconciliation</Button>
+      </Tooltip>
+      <Tooltip {...args} placement="bottom" content="Who reconciled it">
+        <IconButton icon="info" label="About reconciliation" variant="secondary" />
+      </Tooltip>
+      <Button variant="tertiary">No tooltip here</Button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByRole('button', { name: 'Last reconciliation' });
+    const second = canvas.getByRole('button', { name: 'About reconciliation' });
+
+    await expect(isOpen(first)).toBe(false);
+
+    /* Focus opens it — immediately, with no hover delay to wait out. */
+    await userEvent.tab();
+    await expect(first).toHaveFocus();
+    await waitFor(() => expect(isOpen(first)).toBe(true), { timeout: 100 });
+
+    /* The association a screen reader follows: role="tooltip", named by id. */
+    const bubble = bubbleOf(first);
+    await expect(bubble).toHaveAttribute('role', 'tooltip');
+    await expect(bubble).toHaveTextContent('Reconciled nightly at 02:00 UTC');
+
+    /* Escape dismisses it, and focus stays exactly where it was. */
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(isOpen(first)).toBe(false));
+    await expect(first).toHaveFocus();
+
+    /* Tab on: the next tooltip opens, the previous one stays shut. */
+    await userEvent.tab();
+    await expect(second).toHaveFocus();
+    await waitFor(() => expect(isOpen(second)).toBe(true));
+    await expect(isOpen(first)).toBe(false);
+
+    /* Tab away: nothing is left open behind the user. */
+    await userEvent.tab();
+    await waitFor(() => expect(isOpen(second)).toBe(false));
+  },
+};
+
+/**
+ * **Flow:** hover waits for the open delay before revealing, the pointer can
+ * move onto the bubble without it closing (§1.4.13 "Hoverable"), and leaving
+ * closes it.
+ */
+export const RevealsOnHover: Story = {
+  parameters: { controls: { disable: true } },
+  render: (args) => (
+    <div className="p-16">
+      <Tooltip {...args} placement="right" content="Move the pointer onto this bubble — it stays open.">
+        <Button variant="secondary">Hover me</Button>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Hover me' });
+
+    await userEvent.hover(trigger);
+    /* Not on contact: the default 300ms delay waits for intent. */
+    await expect(isOpen(trigger)).toBe(false);
+    await waitFor(() => expect(isOpen(trigger)).toBe(true), { timeout: 1500 });
+
+    /* Onto the bubble itself — still open. */
+    await userEvent.hover(bubbleOf(trigger));
+    await expect(isOpen(trigger)).toBe(true);
+
+    /* Away — closed. */
+    await userEvent.unhover(bubbleOf(trigger));
+    await waitFor(() => expect(isOpen(trigger)).toBe(false));
   },
 };
