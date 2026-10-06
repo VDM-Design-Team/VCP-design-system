@@ -4,8 +4,8 @@
 
 ### `SegmentedControl` — five sizes, strokes (October 2026)
 
-- **Sizes** follow Figma's `Segmented_Control`: `xs` / `sm` / `md` / `lg` / `xl` = 28 / 32 / 36 / 40 / 48 high, segments 4 in from the
-  edge (20 / 24 / 28 / 32 / 40), type 12 / 14 / 14 / 14 / 16 medium. **`xl` is the default.**
+- **Sizes** follow Figma's `Segmented_Control`: `xs` / `sm` / `md` / `lg` / `xl` = 28 / 32 / 36 / 40 / 48 high, track padding exactly 4 (the stroke is an inset ring and takes no room), segments fill
+  20 / 24 / 28 / 32 / 40 with 6 / 8 / 12 / 12 / 16 either side, type 12 / 14 / 14 / 14 / 16 medium. **`xl` is the default.**
 - **Strokes:** the track and the selected segment each draw a 1px `stroke.default`; the selected segment keeps its `shadow.card`,
   the lightest elevation.
 - **No gap between segments** (was 2px) — Figma's item spacing is 0.

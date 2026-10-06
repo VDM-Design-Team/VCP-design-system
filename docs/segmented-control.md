@@ -43,17 +43,17 @@ Set `aria-label` on an option whose `label` isn't plain text.
 | Focus ring | `stroke.focused` at 2px |
 | Type | `caption-md-medium` (`xs`, 12) · `label-sm-medium` (`sm`, `md`, `lg`, 14) · `label-md-medium` (`xl`, 16) |
 
-**Sizes** (Figma `Segmented_Control`, node `7366:76081`). Every size has 4px between the
-track's outer edge and its segments (a 1px stroke plus 3px of padding), so the segment is
-always the track less 8:
+**Sizes** (Figma `Segmented_Control`, node `7366:76081`). The track has a fixed height and
+`space.4` of padding all round; the segments have no height of their own, they fill what is
+left. The 1px stroke is an inset ring, so it takes no room and the padding stays exactly 4.
 
-| Size | Track | Segment | Segment padding | Type |
+| Size | Track | Segment (fills) | Segment side padding | Type |
 |---|---|---|---|---|
-| `xs` | 28 | 20 | 6 | 12 medium |
-| `sm` | 32 | 24 | 12 | 14 medium |
-| `md` | 36 | 28 | 12 | 14 medium |
-| `lg` | 40 | 32 | 12 | 14 medium |
-| `xl` | 48 | 40 | 16 | 16 medium |
+| `xs` | 28 | 20 | `space.6` | 12 medium |
+| `sm` | 32 | 24 | `space.8` | 14 medium |
+| `md` | 36 | 28 | `space.12` | 14 medium |
+| `lg` | 40 | 32 | `space.12` | 14 medium |
+| `xl` | 48 | 40 | `space.16` | 16 medium |
 | Error stroke | `accent.critical.outline.border.default` — the stroke `Input` draws when invalid |
 | Success check | `accent.success.tonal.content.default` |
 | Pending label | `text.tertiary` — the selected label mutes to the unselected colour |
