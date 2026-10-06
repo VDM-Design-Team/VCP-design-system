@@ -181,11 +181,20 @@ export function DataTable<Row extends { id?: string | number }>({
                         )}
                       >
                         {c.label}
-                        {/* Unsorted: the both-ways glyph, faint. Sorted: the
-                            direction, full strength. aria-sort carries the fact. */}
+                        {/* Figma's `_AV_Table_Sort`: arrows-down-up unsorted,
+                            sort-ascending / sort-descending sorted — 20, in
+                            text.secondary like the label. aria-sort carries
+                            the fact; the glyph is decoration. */}
                         <Icon
-                          name={sorted ? (sort!.direction === 'asc' ? 'caret-up' : 'caret-down') : 'caret-up-down'}
-                          className={cn('size-3', sorted ? 'text-text-secondary' : 'text-text-subtle')}
+                          name={
+                            sorted
+                              ? sort!.direction === 'asc'
+                                ? 'sort-ascending'
+                                : 'sort-descending'
+                              : 'arrows-down-up'
+                          }
+                          size="md"
+                          className="text-text-secondary"
                         />
                       </button>
                     ) : (
