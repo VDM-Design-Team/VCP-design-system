@@ -1,11 +1,18 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DataTable, type DataTableColumn, type DataTableSort } from './DataTable';
+import { DataTable, ColumnHint, type DataTableColumn, type DataTableSort } from './DataTable';
 import { Tag } from '../../atoms/tag';
 import { Avatar } from '../../atoms/avatar';
 import { EmptyState } from '../empty-state';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
+import { IconButton } from '../../atoms/icon-button';
+import { Input } from '../../atoms/input';
+import { Select } from '../../atoms/select';
+import { Menu, type MenuItem } from '../menu';
+import { CopyText } from '../copy-text';
+import { InlineEdit } from '../inline-edit';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 interface Claim {
   id: string;
@@ -55,7 +62,6 @@ const COLUMNS: DataTableColumn<Claim>[] = [
     key: 'points',
     label: 'Points',
     width: '90px',
-    align: 'right',
     sortable: true,
     render: (r) => <span className="font-numeric text-caption-md-medium text-text-primary">{r.points}</span>,
   },
@@ -177,4 +183,234 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/* ---- Recipes: how a column becomes something other than text ---- */
+
+const ROW_ACTIONS: MenuItem[] = [
+  { key: 'edit', label: 'Edit', icon: 'pencil-simple' },
+  { key: 'duplicate', label: 'Duplicate' },
+  { divider: true },
+  { key: 'delete', label: 'Delete', icon: 'trash', tone: 'danger' },
+];
+
+const asColumns = (cols: DataTableColumn<Claim>[]) => cols as DataTableColumn<unknown>[];
+
+/**
+ * An actions column: a three-dot button that opens a `Menu`. The column's
+ * `render` is just a function from the row to a node, so the menu closes over
+ * the row it belongs to — `Actions for AV-2041` names the right one. The
+ * trigger carries the row in its accessible name; "More actions" ten times
+ * down a column is ten identical buttons to a screen reader.
+ *
+ * **One catch:** the menu is a child of its trigger, with no portal, so the
+ * table's scroll container clips it. `className="overflow-visible"` lets it
+ * out, at the price of horizontal scrolling — fine where the table fits.
+ */
+export const ActionsColumn: Story = {
+  render: (args) => {
+    const [last, setLast] = React.useState('nothing yet');
+    return (
+      <div className="flex min-h-80 flex-col gap-3">
+        <DataTable
+          {...args}
+          /* A menu is a child of its trigger, so the table's own scroll
+             container would clip it — `overflow-visible` lets it out. That
+             costs horizontal scrolling, so use it only where the table fits. */
+          className="overflow-visible"
+          columns={asColumns([
+            ...COLUMNS.slice(0, 4),
+            {
+              key: 'actions',
+              label: 'Actions',
+              width: '88px',
+              render: (r) => (
+                <Menu
+                  align="right"
+                  items={ROW_ACTIONS}
+                  onSelect={(key) => setLast(`${key} on ${r.id}`)}
+                  trigger={
+                    <IconButton
+                      icon="dots-three-vertical"
+                      label={`Actions for ${r.id}`}
+                      variant="tertiary"
+                      size="sm"
+                    />
+                  }
+                />
+              ),
+            },
+          ])}
+          rows={CLAIMS.slice(0, 3)}
+        />
+        <span className="font-sans text-caption-md-regular text-text-tertiary">Last chosen: {last}</span>
+      </div>
+    );
+  },
+};
+
+/**
+ * A header that explains itself: `hint` takes any node, and `ColumnHint` is the
+ * ready-made one — the info glyph with a tooltip. It opens on hover and on
+ * keyboard focus, and sits outside the sort button so a sortable column can
+ * have one too.
+ */
+export const ColumnTooltips: Story = {
+  render: (args) => (
+    <DataTable
+      {...args}
+      columns={asColumns([
+        { ...COLUMNS[0] },
+        {
+          ...COLUMNS[1],
+          hint: <ColumnHint column="supplier" text="The company that raised the claim." />,
+        },
+        {
+          ...COLUMNS[2],
+          hint: <ColumnHint column="owner" text="Who is working it. Unassigned claims show nothing." />,
+        },
+        {
+          ...COLUMNS[4],
+          hint: <ColumnHint column="points" text="Capacity points the claim consumes once delivered." />,
+        },
+      ])}
+      rows={CLAIMS.slice(0, 3)}
+    />
+  ),
+};
+
+/**
+ * A value that is not a link but is interactive: it underlines on hover, and
+ * clicking it copies it and shows "Copied" for 800ms. Use `CopyText` as the
+ * cell's `render`.
+ */
+export const CopyableColumn: Story = {
+  render: (args) => (
+    <div className="pt-12">
+      <DataTable
+        {...args}
+        columns={asColumns([
+          { ...COLUMNS[0], sortable: false, render: (r) => <CopyText text={r.id} /> },
+          COLUMNS[1],
+          COLUMNS[2],
+        ])}
+        rows={CLAIMS.slice(0, 3)}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByRole('button', { name: 'AV-2041' });
+    /* Stand in for the clipboard so the test does not depend on browser permissions. */
+    const written: string[] = [];
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async (t: string) => void written.push(t) },
+    });
+    await userEvent.click(first);
+    const status = first.parentElement!.querySelector('[role="status"]')!;
+    await waitFor(() => expect(status).toHaveTextContent('Copied'));
+    await expect(written).toEqual(['AV-2041']);
+    /* And it goes away by itself. */
+    await waitFor(() => expect(status).toHaveTextContent(''), { timeout: 2000 });
+  },
+};
+
+/**
+ * Cells you can edit in place. `InlineEdit` is the frame — the pen, confirm and
+ * cancel, Enter and Escape, focus in and back — and the cell passes it the
+ * control that fits: a text field for the owner, a select for the points.
+ * The draft lives in the story, not the component; confirm commits it.
+ */
+export const InlineEditing: Story = {
+  render: (args) => {
+    const [rows, setRows] = React.useState(CLAIMS.slice(0, 3));
+    const [drafts, setDrafts] = React.useState<Record<string, string>>({});
+    const draft = (id: string, key: string, fallback: string) => drafts[`${id}:${key}`] ?? fallback;
+    const setDraft = (id: string, key: string, v: string) =>
+      setDrafts((d) => ({ ...d, [`${id}:${key}`]: v }));
+    const commit = (id: string, key: 'owner' | 'points') =>
+      setRows((rs) =>
+        rs.map((r) =>
+          r.id === id
+            ? { ...r, [key]: key === 'points' ? Number(draft(id, key, String(r.points))) : draft(id, key, r.owner) }
+            : r,
+        ),
+      );
+    const reset = (id: string, key: string) =>
+      setDrafts((d) => {
+        const next = { ...d };
+        delete next[`${id}:${key}`];
+        return next;
+      });
+    return (
+      <DataTable
+        {...args}
+        columns={asColumns([
+          COLUMNS[0],
+          COLUMNS[1],
+          {
+            key: 'owner',
+            label: 'Owner',
+            width: '220px',
+            render: (r) => (
+              <InlineEdit
+                label="owner"
+                onConfirm={() => commit(r.id, 'owner')}
+                onCancel={() => reset(r.id, 'owner')}
+                editor={
+                  <Input
+                    aria-label={`Owner of ${r.id}`}
+                    value={draft(r.id, 'owner', r.owner)}
+                    onChange={(e) => setDraft(r.id, 'owner', e.target.value)}
+                  />
+                }
+              >
+                {r.owner}
+              </InlineEdit>
+            ),
+          },
+          {
+            key: 'points',
+            label: 'Points',
+            width: '160px',
+            render: (r) => (
+              <InlineEdit
+                label="points"
+                onConfirm={() => commit(r.id, 'points')}
+                onCancel={() => reset(r.id, 'points')}
+                editor={
+                  <Select
+                    aria-label={`Points for ${r.id}`}
+                    size="sm"
+                    value={draft(r.id, 'points', String(r.points))}
+                    onChange={(v) => setDraft(r.id, 'points', v)}
+                    options={['8', '12', '21', '34', '40']}
+                  />
+                }
+              >
+                <span className="font-numeric text-caption-md-medium text-text-primary">{r.points}</span>
+              </InlineEdit>
+            ),
+          },
+        ])}
+        rows={rows}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* Confirm with Enter. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[0]);
+    const field = canvas.getByRole('textbox', { name: 'Owner of AV-2041' });
+    await expect(field).toHaveFocus();
+    await userEvent.clear(field);
+    await userEvent.type(field, 'Nina Voss{Enter}');
+    await expect(canvas.getByText('Nina Voss')).toBeInTheDocument();
+    await expect(canvas.getAllByRole('button', { name: 'Edit owner' })[0]).toHaveFocus();
+    /* Cancel with Escape: the draft is dropped. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Edit owner' })[1]);
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Owner of AV-2037' }), 'x{Escape}');
+    await expect(canvas.getByText('Marvin Ode')).toBeInTheDocument();
+  },
 };

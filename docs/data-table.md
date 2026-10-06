@@ -9,6 +9,7 @@ empty slot. A real `<table>`, not a div grid.
 |---|---|
 | `Checkbox` | atom |
 | `Icon` | atom |
+| `Tooltip` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -30,7 +31,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, hint?, align?, render? }` |
+| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, hint?, render? }` |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
@@ -46,7 +47,12 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 badge. It sits **outside** the sort button, because a header that both sorts
 and explains would otherwise nest one interactive element inside another:
 invalid HTML, and the inner one unreachable by keyboard. `AVTable` uses it for
-the four info tooltips its design draws.
+the four info tooltips its design draws. `ColumnHint` is the ready-made one: the info
+glyph with a tooltip, on hover and on keyboard focus (`hint: <ColumnHint column="owner"
+text="Who is working it" />`).
+
+**Cell values and headers are always left-aligned.** There is no `align` option — the
+VCP design never draws right-aligned numbers (design review, October 2026).
 
 **Headers are 14px medium, sentence case.** They were 11px uppercase until
 11 September 2026, which came from the original export and matched nothing:
@@ -62,6 +68,31 @@ canvas by *value*, not by token name — 14px medium here is `label-lg`.
 `<col>` — **not** the export's grid tracks; `'1fr'` has no meaning in a table.
 Unsized columns share the remainder, and the container scrolls horizontally
 when the table cannot fit (the page never does).
+
+## How developers customise it
+
+`DataTable` has no cell types. A column's `render` is `(row) => ReactNode`, so a cell is
+anything you can write in JSX, closed over its row — and the system's pieces slot in
+without the table knowing about them. That is the whole extension model.
+
+| You want | Do this | Story |
+|---|---|---|
+| Plain text | Nothing — `key` reads `row[key]` | Default |
+| A link, a tag, an avatar | `render: (r) => <a …/>`, `<Tag/>`, `<Avatar/>` | Default |
+| **An actions column** | `render: (r) => <Menu items={…} trigger={<IconButton icon="dots-three-vertical" label={`Actions for ${r.id}`} />} />` | Actions Column |
+| **A header that explains itself** | `hint: <ColumnHint column="owner" text="…" />` | Column Tooltips |
+| **A value you copy, not follow** | `render: (r) => <CopyText text={r.id} />` — underline on hover, "Copied" for 800ms | Copyable Column |
+| **A cell you edit in place** | `render: (r) => <InlineEdit label="owner" editor={<Input …/>} onConfirm={…}>{r.owner}</InlineEdit>` | Inline Editing |
+| A table for one domain | A pattern in `src/patterns/` that builds `columns` and calls `DataTable` — `AVTable` is the model | — |
+
+Three rules keep it customisable without it becoming a bag of options: the table never
+sorts or fetches (rows arrive in order), it never knows a domain (a pattern owns that),
+and an interactive cell is a real control inside the cell, never a whole-row click.
+
+**An actions menu is clipped by the table's scroll container.** A `Menu` is a child of its
+trigger with no portal, and the table scrolls horizontally, so a menu opened near the
+bottom is cut off. Pass `className="overflow-visible"` where the table fits its space.
+A portal for `Popover`/`Menu` is the real fix and is not built yet.
 
 ## Two deliberate API changes from the export
 

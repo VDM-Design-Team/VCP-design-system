@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { Checkbox } from '../../atoms/checkbox';
+import { Tooltip } from '../tooltip';
 
 /**
  * DataTable — the generic table: columns, rows, sortable headers, optional
@@ -22,6 +23,10 @@ import { Checkbox } from '../../atoms/checkbox';
  * - **No `onRowClick`.** Same decision as Card, for the same reason: a
  *   whole-row click target hides the real action from keyboards and screen
  *   readers. Give a column a `render` with the actual link or button.
+ *
+ * **Everything reads left-aligned**, headers and cell values alike. There is no
+ * `align` option: right-aligned numbers are a spreadsheet habit, and the VCP
+ * design never draws them (design review, October 2026).
  *
  * **Headers are `label-lg`, sentence case.** They were `label-sm` uppercase
  * until 11 September 2026, which came from the original export and matched
@@ -52,7 +57,6 @@ export interface DataTableColumn<Row> {
    * inside another, which is invalid and unreachable by keyboard.
    */
   hint?: React.ReactNode;
-  align?: 'left' | 'right';
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
 }
@@ -93,6 +97,32 @@ const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-
 
 /* Label and hint side by side. `gap-1.5` is the Figma header's own 6. */
 const headerInner = 'flex items-center gap-1.5';
+
+/**
+ * The info glyph that explains a column — Figma's header `ⓘ`. Pass it as a
+ * column's `hint`: it sits beside the label, outside the sort button, and opens
+ * `text` in a tooltip on hover **and** on keyboard focus. There is no default
+ * copy; the product says what the column is for. With no `text` it renders
+ * nothing, so a conditional hint needs no conditional.
+ */
+export function ColumnHint({ text, column }: { text?: string; column: string }) {
+  if (!text) return null;
+  return (
+    <Tooltip content={text} placement="bottom">
+      <button
+        type="button"
+        aria-label={`About ${column}`}
+        className={cn(
+          'grid size-4 shrink-0 place-items-center rounded-sm text-text-tertiary',
+          'hover:text-text-secondary',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+        )}
+      >
+        <Icon name="info" size="sm" />
+      </button>
+    </Tooltip>
+  );
+}
 
 export function DataTable<Row extends { id?: string | number }>({
   className,
@@ -166,9 +196,7 @@ export function DataTable<Row extends { id?: string | number }>({
                   }
                   className={headerCell}
                 >
-                  <span
-                    className={cn(headerInner, c.align === 'right' && 'flex-row-reverse')}
-                  >
+                  <span className={headerInner}>
                     {c.sortable ? (
                       <button
                         type="button"
@@ -177,7 +205,6 @@ export function DataTable<Row extends { id?: string | number }>({
                           'inline-flex items-center gap-1.5 rounded-sm',
                           'text-label-sm-medium text-text-secondary transition-colors hover:text-text-primary',
                           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                          c.align === 'right' && 'flex-row-reverse',
                         )}
                       >
                         {c.label}
@@ -239,10 +266,7 @@ export function DataTable<Row extends { id?: string | number }>({
                     </td>
                   )}
                   {columns.map((c) => (
-                    <td
-                      key={c.key}
-                      className={cn(cell(dense), c.align === 'right' && 'text-right')}
-                    >
+                    <td key={c.key} className={cn(cell(dense), 'text-left')}>
                       {c.render
                         ? c.render(row)
                         : ((row as Record<string, unknown>)[c.key] as React.ReactNode)}
