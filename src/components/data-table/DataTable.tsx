@@ -51,10 +51,11 @@ export interface DataTableColumn<Row> {
   width?: string;
   sortable?: boolean;
   /**
-   * Rendered after the label, inside the header cell but **outside** the sort
-   * button — a tooltip trigger, a count, a badge. Outside, because a header
-   * that both sorts and explains would otherwise nest one interactive element
-   * inside another, which is invalid and unreachable by keyboard.
+   * Rendered after the label and **before** the sort arrows — a tooltip
+   * trigger, a count, a badge: "Label ⓘ ⇅". It is outside the sort button,
+   * because a header that both sorts and explains would otherwise nest one
+   * interactive element inside another, which is invalid and unreachable by
+   * keyboard.
    */
   hint?: React.ReactNode;
   /** Cell content. Defaults to `row[key]` rendered as text. */
@@ -196,38 +197,47 @@ export function DataTable<Row extends { id?: string | number }>({
                   }
                   className={headerCell}
                 >
-                  <span className={headerInner}>
+                  {/* Label, then the hint, then the sort arrows — in that order, as
+                      Figma draws a header that has both. The sort button is the
+                      label alone; its `::after` stretches over the whole row so a
+                      click on the arrows sorts too, and the hint (raised above the
+                      overlay) keeps its own click. One tab stop per control. */}
+                  <span className={cn(headerInner, 'group/sort relative w-fit')}>
                     {c.sortable ? (
                       <button
                         type="button"
                         onClick={() => requestSort(c.key)}
                         className={cn(
-                          'inline-flex items-center gap-1.5 rounded-sm',
-                          'text-label-sm-medium text-text-secondary transition-colors hover:text-text-primary',
-                          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                          'rounded-sm text-label-sm-medium text-text-secondary transition-colors',
+                          'group-hover/sort:text-text-primary',
+                          'after:absolute after:-inset-1 after:rounded-sm',
+                          'focus-visible:after:outline-2 focus-visible:after:outline-offset-0 focus-visible:after:outline-stroke-focused',
                         )}
                       >
                         {c.label}
-                        {/* Figma's `_AV_Table_Sort`: arrows-down-up unsorted,
-                            sort-ascending / sort-descending sorted — 20, in
-                            text.secondary like the label. aria-sort carries
-                            the fact; the glyph is decoration. */}
-                        <Icon
-                          name={
-                            sorted
-                              ? sort!.direction === 'asc'
-                                ? 'sort-ascending'
-                                : 'sort-descending'
-                              : 'arrows-down-up'
-                          }
-                          size="md"
-                          className="text-text-secondary"
-                        />
                       </button>
                     ) : (
                       <span className="text-label-sm-medium text-text-secondary">{c.label}</span>
                     )}
-                    {c.hint}
+                    {c.hint && <span className="relative z-10 inline-flex">{c.hint}</span>}
+                    {c.sortable && (
+                      /* Figma's `_AV_Table_Sort`: arrows-down-up unsorted,
+                         sort-ascending / sort-descending sorted — 20, in
+                         text.secondary like the label. aria-sort carries the
+                         fact; the glyph is decoration, and it is not a second
+                         button — the label's overlay is what you click. */
+                      <Icon
+                        name={
+                          sorted
+                            ? sort!.direction === 'asc'
+                              ? 'sort-ascending'
+                              : 'sort-descending'
+                            : 'arrows-down-up'
+                        }
+                        size="md"
+                        className="shrink-0 text-text-secondary transition-colors group-hover/sort:text-text-primary"
+                      />
+                    )}
                   </span>
                 </th>
               );

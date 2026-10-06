@@ -256,9 +256,13 @@ export const ActionsColumn: Story = {
  * have one too.
  */
 export const ColumnTooltips: Story = {
-  render: (args) => (
+  render: (args) => {
+    const { sort, setSort, rows } = useSorted(undefined);
+    return (
     <DataTable
       {...args}
+      sort={sort}
+      onSortChange={setSort}
       columns={asColumns([
         { ...COLUMNS[0] },
         {
@@ -274,9 +278,30 @@ export const ColumnTooltips: Story = {
           hint: <ColumnHint column="points" text="Capacity points the claim consumes once delivered." />,
         },
       ])}
-      rows={CLAIMS.slice(0, 3)}
+      rows={rows.slice(0, 3)}
     />
-  ),
+    );
+  },
+  /* A sortable header with a tooltip reads "Label ⓘ ⇅": label, hint, sort arrows. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const header = canvas.getByRole('columnheader', { name: /Supplier/ });
+    const label = within(header).getByRole('button', { name: 'Supplier' });
+    const hint = within(header).getByRole('button', { name: 'About supplier' });
+    const arrows = [...header.querySelectorAll('svg')].at(-1)!; // the last glyph: ⓘ comes first
+    const left = (el: Element) => el.getBoundingClientRect().left;
+    await expect(left(label)).toBeLessThan(left(hint));
+    await expect(left(hint)).toBeLessThan(left(arrows));
+    /* The arrows sort; the hint does not. */
+    await userEvent.click(hint);
+    await expect(header).not.toHaveAttribute('aria-sort');
+    /* Click where the arrows are: hit-testing finds the sort button's overlay there. */
+    const box = arrows.getBoundingClientRect();
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)!;
+    await expect(hit).toBe(label);
+    await userEvent.click(hit);
+    await expect(header).toHaveAttribute('aria-sort', 'ascending');
+  },
 };
 
 /**

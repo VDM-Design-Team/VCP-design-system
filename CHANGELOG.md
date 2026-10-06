@@ -14,6 +14,8 @@
 - **New `CopyText`**: a non-link value that underlines on hover and, on click, copies itself and shows "Copied" for 800ms
   (Figma `_AV_Table_ID`, `7247:39763`). **New `InlineEdit`**: a value with a pen that swaps to a caller-supplied control with confirm and
   cancel buttons, Enter/Escape and focus handling.
+- **Header order: label, hint, then the sort arrows** ("Supplier ⓘ ⇅"). The sort button is now the label alone, with an overlay that makes
+  the arrows clickable too, and the hint raised above it; still one tab stop per control.
 - **`ColumnHint`** is exported from `DataTable` — the header info glyph with a tooltip, formerly private to `AVTable` (which now uses it).
 - **Breaking:** `DataTableColumn.align` is removed. Cell values and headers are always left-aligned. Migration: delete `align: 'right'`;
   nothing in the repo used it outside the DataTable story.

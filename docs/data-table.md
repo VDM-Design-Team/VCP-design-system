@@ -43,8 +43,8 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `caption` | `string` | — | Visually hidden `<caption>` naming the table. Strongly encouraged |
 | `className` | `string` | — | On the scrolling container |
 
-`DataTableColumn.hint` renders after the label — a tooltip trigger, a count, a
-badge. It sits **outside** the sort button, because a header that both sorts
+`DataTableColumn.hint` renders after the label and **before the sort arrows** — a
+tooltip trigger, a count, a badge: "Label ⓘ ⇅". It sits **outside** the sort button, because a header that both sorts
 and explains would otherwise nest one interactive element inside another:
 invalid HTML, and the inner one unreachable by keyboard. `AVTable` uses it for
 the four info tooltips its design draws. `ColumnHint` is the ready-made one: the info
