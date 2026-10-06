@@ -8,6 +8,7 @@
   edge (20 / 24 / 28 / 32 / 40), type 12 / 14 / 14 / 14 / 16 medium. **`xl` is the default.**
 - **Strokes:** the track and the selected segment each draw a 1px `stroke.default`; the selected segment keeps its `shadow.card`,
   the lightest elevation.
+- **No gap between segments** (was 2px) — Figma's item spacing is 0.
 - **Breaking:** `size` was `sm | md` (default `md`). Migration: old `sm` (32 segment) is now `lg`; old `md` (40 segment, the default)
   is now `xl`. Callers that pass no `size` get `xl`, a little taller than before (48 vs 46).
 

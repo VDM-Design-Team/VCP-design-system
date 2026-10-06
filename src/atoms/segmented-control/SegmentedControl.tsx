@@ -29,8 +29,9 @@ import type { SavingStatus } from '../../lib/saving';
 const track = cva(
   [
     /* 3 of padding inside a 1 stroke puts the segments 4 from the outer edge,
-       as Figma draws it: the track is always the segment's height plus 8. */
-    'inline-flex items-center gap-0.5 p-0.75',
+       as Figma draws it: the track is always the segment's height plus 8.
+       No gap between segments — Figma's item spacing is 0. */
+    'inline-flex items-center p-0.75',
     'bg-surface-neutral-subtle rounded-sm',
     /* The stroke is always there, so the error stroke swaps colour and shifts nothing. */
     'border border-stroke-default transition-colors',
