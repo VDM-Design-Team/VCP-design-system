@@ -20,7 +20,11 @@ const meta = {
     },
   },
   args: { title: 'My Added Values' },
-  argTypes: { title: { control: 'text' }, subtitle: { control: 'text' } },
+  argTypes: {
+    title: { control: 'text' },
+    subtitle: { control: 'text' },
+    size: { control: 'inline-radio', options: ['md', 'sm'] },
+  },
 } satisfies Meta<typeof PageTitle>;
 
 export default meta;
@@ -65,12 +69,38 @@ export const WithBack: Story = {
       return r.top + r.height / 2;
     };
     await expect(Math.abs(centre(back) - centre(title))).toBeLessThan(1);
+    /* The arrow hugs its 20 glyph, with 8 between it and the title. */
+    const box = back.getBoundingClientRect();
+    await expect(box.width).toBe(20);
+    await expect(box.height).toBe(20);
+    await expect(Math.round(title.getBoundingClientRect().left - box.right)).toBe(8);
+    /* The default title is 18 semibold. */
+    await expect(getComputedStyle(title).fontSize).toBe('18px');
+    await expect(getComputedStyle(title).fontWeight).toBe('600');
   },
   render: (args) => (
     <Page>
       <PageTitle {...args} />
     </Page>
   ),
+};
+
+/**
+ * The small title: 14 medium, for pages that want a quieter band. The default
+ * is 18 semibold. Both are `text.secondary`.
+ */
+export const SmallTitle: Story = {
+  args: { title: 'VCP-12345', backHref: '#values', backLabel: 'Back to my Added Values', size: 'sm' },
+  render: (args) => (
+    <Page>
+      <PageTitle {...args} />
+    </Page>
+  ),
+  play: async ({ canvasElement }) => {
+    const title = within(canvasElement).getByRole('heading', { level: 1 });
+    await expect(getComputedStyle(title).fontSize).toBe('14px');
+    await expect(getComputedStyle(title).fontWeight).toBe('500');
+  },
 };
 
 /** Back as history, for the cases where there is genuinely no URL. */

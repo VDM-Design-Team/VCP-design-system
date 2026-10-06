@@ -10,8 +10,7 @@ Read off the Figma `Page_Template` → `Page_Title` (8 Sep 2026).
 
 | Piece | Tier | Role here |
 |---|---|---|
-| `Icon` | atom | The back arrow, when back is an `href` |
-| `IconButton` | atom | The back arrow, when back is a history action |
+| `Icon` | atom | The back arrow, for both the link and the history button |
 
 The import rows are checked against the real imports — `npm test` fails if this
 list drifts.
@@ -31,9 +30,10 @@ list drifts.
 | `title` | `ReactNode` | required | The page's one `h1` |
 | `subtitle` | `ReactNode` | — | A line beneath. The design draws it and hides it by default |
 | `backHref` | `string` | — | Renders a real link. **Preferred** |
-| `onBack` | `() => void` | — | Back as history. Renders an `IconButton` |
+| `onBack` | `() => void` | — | Back as history. Renders a `button` |
 | `backLabel` | `string` | `'Back'` | Say where it goes — "Back to my Added Values" |
 | `actions` | `ReactNode` | — | The page's actions, right-aligned |
+| `size` | `sm \| md` | `md` | The title's size: `md` is 18 semibold, `sm` is 14 medium. Both `text.secondary` |
 
 ## Measurements
 
@@ -41,23 +41,25 @@ list drifts.
 |---|---|---|
 | Band, no back arrow | 75 | **74** |
 | Padding | 32 top / 16 bottom / 32 sides | same |
-| Title row | 27 | 26 |
+| Title row | 27 | 26 (`body-lg-semibold`, 18/26) |
 
-The one pixel is the type ramp: `heading-md` is 20/26 where the design's title
+The one pixel is the type ramp: the 18 step is 26 high where the design's title
 row is 27. That is the ramp's business, not this component's — the same
 one-step difference `Button`'s `sm` carries against the design's 37.
 
-**With a back arrow the band is 88, not 75.** The control is 40 tall because
-that is the touch-target minimum, and it is taller than the text beside it.
-`AVHeader` makes the same trade for the same reason. The design's `Back Nav`
-frame is 27, but no rail I measured actually draws the arrow, so there is no
-design height to match — if design draws one at 27, that is a conversation
-about the target size, not a number to copy.
+**The back arrow hugs its glyph** (design review): a 20 × 20 icon with no padding either
+side, and 8 between it and the title. It is in the neutral palette —
+`neutral.outline.content` default, hover and pressed — not the action blue, which was
+only the ghost button's default and is not in Figma (Figma's arrow is a dark grey, the
+title `text/primary`). The title is `text.secondary` in both sizes. Because the arrow
+is smaller than the 40 touch-target minimum, a `::after` stretches the pointer target
+to 40 × 40 (10 each way) without taking layout room, so nothing beside it moves. The band with a
+back arrow is therefore the same height as without (74): the arrow is shorter than
+the title row.
 
 **The back control and the title are vertically centred on each other**, as Figma's
-`Back Nav` is (counter-axis centre). The control is 40 tall and the title row 26, so
-with `items-start` the title sat 7px above the arrow's centre. With a subtitle, the
-title and subtitle are centred as one block against the arrow.
+`Back Nav` is (counter-axis centre). With a subtitle, the title and subtitle are
+centred as one block against the arrow.
 
 ## Its relationship to AVHeader — unresolved
 
