@@ -2,6 +2,10 @@
 
 ## 0.1.0 — unreleased
 
+### `Carousel` — neutral arrows (October 2026)
+
+The left and right arrows are `neutral.outline.content` (default, hover, pressed, disabled) instead of the action blue. No API change.
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.
