@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DataTable, type DataTableColumn, type DataTableSort } from './DataTable';
-import { Badge } from '../../atoms/badge';
+import { Tag } from '../../atoms/tag';
 import { Avatar } from '../../atoms/avatar';
 import { EmptyState } from '../empty-state';
 import { Button } from '../../atoms/button';
@@ -49,7 +49,7 @@ const COLUMNS: DataTableColumn<Claim>[] = [
     key: 'status',
     label: 'Status',
     width: '110px',
-    render: (r) => <Badge size="sm" tone={STATUS_TONE[r.status]}>{r.status}</Badge>,
+    render: (r) => <Tag size="sm" tone={STATUS_TONE[r.status]}>{r.status}</Tag>,
   },
   {
     key: 'points',

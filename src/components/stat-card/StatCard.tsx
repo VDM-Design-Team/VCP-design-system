@@ -15,7 +15,9 @@ import { Tooltip } from '../tooltip';
  *
  * - **`default`** — the `Value_Card` on the admin and user dashboards (node
  *   `947:306362`, "Value Cards"). An 8 stripe, **left-aligned**, label over a
- *   32 bold value, exactly 100 high and at least 175 wide. Figma draws it with
+ *   32 bold value, exactly 100 high and at least 16.5rem wide (Figma's own
+ *   minimum is 175; this one is wider so the card stays readable and drops onto
+ *   the next row, in a wrapping flex container, before it gets cramped). Figma draws it with
  *   no icon and no hint; the slots still work if a dashboard needs them.
  * - **`superadmin`** — `_SuperAdmin_Metric_Card_Coloured` on the super admin
  *   dashboard (node `3:4848`). A 12 stripe, **centred**, a title row (accent
@@ -142,7 +144,7 @@ const VARIANT: Record<
   { card: string; stripe: string; content: string; gap: string; valueType: string; align: Align }
 > = {
   default: {
-    card: 'h-25 min-w-43.75',
+    card: 'h-25 min-w-66',
     stripe: 'w-2',
     content: 'px-4',
     gap: 'gap-0',

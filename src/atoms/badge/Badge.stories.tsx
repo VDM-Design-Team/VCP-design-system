@@ -23,7 +23,7 @@ const meta = {
   argTypes: {
     variant: { control: 'radio', options: ['textual', 'outline', 'tonal', 'filled'] },
     tone: { control: 'select', options: TONES },
-    size: { control: 'radio', options: ['sm', 'md'] },
+    size: { control: 'radio', options: ['sm', 'md', 'lg'] },
     icon: { control: false },
     trailingIcon: { control: false },
   },
@@ -65,13 +65,14 @@ export const Tones: Story = {
 };
 
 /**
- * `md` (28 tall) is the default and what the Figma Tag ships at. `sm` (24 tall)
- * is for dense tables and for sitting inline beside body text.
+ * `md` (28 tall, 12 type) is the default. `sm` (24 tall, 10 type) is for dense
+ * tables and for sitting inline beside body text. `lg` (32 tall, 14 type, 12
+ * either side) is the large Badge.
  */
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">
-      {(['sm', 'md'] as const).map((size) => (
+      {(['sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex flex-wrap items-center gap-2">
           <span className="w-8 text-caption-sm-semibold text-text-tertiary">{size}</span>
           {TONES.map((tone) => (
@@ -183,7 +184,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex min-h-40 flex-col gap-3 bg-surface-canvas p-8">
-            {(['md', 'sm'] as const).map((size) => (
+            {(['lg', 'md', 'sm'] as const).map((size) => (
               <div key={size} className="flex flex-wrap items-center gap-2">
                 {TONES.map((tone) => (
                   <Badge key={tone} tone={tone} size={size}>

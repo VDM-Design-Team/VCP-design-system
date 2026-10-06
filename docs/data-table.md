@@ -32,7 +32,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 |---|---|---|---|
 | `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, hint?, align?, render? }` |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
-| `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a caret |
+| `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
 | `selectable` | `boolean` | — | Leading checkbox column + select-all header (indeterminate when partial) |
 | `selected` / `onSelectedChange` | ids / `(ids) => void` | — | Ids are `row.id`, falling back to the row index — give rows real ids |
@@ -67,8 +67,9 @@ when the table cannot fit (the page never does).
 
 - **Sort has a direction.** The export's `sort?: string` couldn't say which
   way. The component still never sorts rows — the server or the caller does —
-  it only *asks* via `onSortChange` and *shows* via `aria-sort` and the caret.
-  Unsorted sortable columns show the faint both-ways glyph.
+  it only *asks* via `onSortChange` and *shows* via `aria-sort` and a glyph —
+  Figma's `_AV_Table_Sort`: `arrows-down-up` unsorted, `sort-ascending` /
+  `sort-descending` sorted, 20 and `text.secondary` like the label.
 - **No `onRowClick`.** The system does not offer whole-row click targets
   anywhere, for one reason: such a target is invisible to keyboards and screen
   readers, and it swallows clicks meant for controls inside cells. Put the

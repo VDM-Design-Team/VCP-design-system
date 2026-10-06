@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Badge, type BadgeProps } from '../../atoms/badge';
+import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
- * StatusPill — an Added Value's status, worn as a pill: a `Badge` carrying
+ * StatusPill — an Added Value's status, worn as a tag: a `Tag` carrying
  * VCP's status vocabulary and the status → treatment mapping that
- * docs/badge.md promised would live in exactly one place — this one.
+ * docs/tag.md promised would live in exactly one place — this one.
  *
  * **The vocabulary is open, and deliberately so.** An AV's flow is a fixed
  * spine with a per-domain middle: the flow board's `Custom Statuses` section
@@ -91,8 +91,8 @@ export const AV_STATUSES: readonly AVStatus[] = [
 ];
 
 type Treatment = {
-  tone: NonNullable<BadgeProps['tone']>;
-  variant?: NonNullable<BadgeProps['variant']>;
+  tone: NonNullable<TagProps['tone']>;
+  variant?: NonNullable<TagProps['variant']>;
 };
 
 /* THE mapping — every row measured off the Figma `Status_Tag_General` set.
@@ -139,7 +139,7 @@ const ACTIONABLE_TREATMENT: Partial<Record<AVStatus, Treatment>> = {
 const CUSTOM_TREATMENT: Treatment = { tone: 'info' };
 
 type StatusPillBase = Omit<
-  BadgeProps,
+  TagProps,
   'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children' | 'status'
 > & {
   /**
@@ -175,9 +175,9 @@ export const StatusPill = React.forwardRef<HTMLSpanElement, StatusPillProps>(
       ? ((actionable ? ACTIONABLE_TREATMENT[status] : undefined) ?? STATUS_TREATMENT[status])
       : CUSTOM_TREATMENT;
     return (
-      <Badge ref={ref} tone={tone} variant={variant} {...props}>
+      <Tag ref={ref} tone={tone} variant={variant} {...props}>
         {label}
-      </Badge>
+      </Tag>
     );
   },
 );
