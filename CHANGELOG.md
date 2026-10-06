@@ -2,6 +2,10 @@
 
 ## 0.1.0 — unreleased
 
+### `Accordion` — space above the open content (October 2026)
+
+The expanded panel's content now has 8 of top padding (`pt-2`), so the paragraph no longer sits against the header. No API change.
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.
