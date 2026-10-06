@@ -2,6 +2,50 @@
 
 ## 0.1.0 — unreleased
 
+### `Badge` — type sizes per size, and a large size (October 2026)
+
+Each size now has its own type size, and there is a third size.
+
+- **Type:** `sm` 10 (`caption-sm-medium`), `md` 12 (`caption-md-medium`) and the new
+  `lg` 14 (`label-sm-medium`). All three were 14 before, so **every existing `sm` and
+  `md` Badge now renders smaller text** — in product code, the version Badge in
+  `ChangeLogModal`. (`StatusPill`, `DueDatePill` and the AV table's labels are `Tag`s
+  since the tags-not-badges change and are unaffected.) Heights are unchanged (24 / 28).
+- **New `size="lg"`:** 32 tall, 12 either side (`px-3`), 14 type. Fixed height, pill shape,
+  same styles and tones as the others.
+
+Migration: none required; a caller that wanted the old 14 type on an `md` Badge can use `lg`.
+
+### Status, due dates and tables are tags, not badges (October 2026)
+
+Design review of the `Tag` / `Badge` split (Chromatic build 27 on #117): a status, a
+due date and a table cell are tags — the rounded-rectangle — not the pill.
+
+- **`StatusPill` and `DueDatePill` are now built on `Tag`** (they composed `Badge`).
+  They keep their names, props and tone mappings; only the shape changes, from the
+  pill to `Tag`'s rounded-rectangle, and their `size` prop is now `Tag`'s.
+- **`AVTable`'s domain label is a `Tag`**, and the `DataTable` story's status cells are
+  `Tag`s.
+- **`Tag`'s `sm` size is 12 type** (`caption-md-medium`; was 14). `md` is unchanged at 14.
+  That also shrinks `StatusPill`/`DueDatePill` at `sm`.
+
+`Badge` is unchanged here and is still the pill, used where something is a badge
+(for example the version in `ChangeLogModal`).
+
+### AV table glyphs match Figma: the Urgent flame and the sort icons (5 October 2026)
+
+**Changed, visually** (no API change):
+
+- **`UrgencyTag`'s Urgent flame is Figma's own** — the new in-house glyph
+  `fire-solid`, exported from the design file (Heroicons' mini `fire`, a solid
+  flame with the inner tongue cut out). Phosphor's flames don't read the same
+  at 20, so this is a named exception to Phosphor-only, listed in
+  `docs/icon.md`. All four urgency glyphs are now Figma's 20 (were 24).
+- **`DataTable`'s sort glyphs are Figma's `_AV_Table_Sort`**: `arrows-down-up`
+  when unsorted, `sort-ascending` / `sort-descending` when sorted, 20 and
+  `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
+  unsorted in `text.subtle`). `AVTable` inherits both.
+
 ### `Menu` — opening with a pointer no longer highlights the first item (October 2026)
 
 Opening a `Menu` moves focus to its first item, and the item highlight rode plain `:focus`,
