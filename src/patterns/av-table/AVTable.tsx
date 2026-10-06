@@ -12,7 +12,7 @@ import { Pagination } from '../../components/pagination';
 import { Tooltip } from '../../components/tooltip';
 import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 import { TypeTag, type AVType } from '../../components/type-tag';
-import { Badge } from '../../atoms/badge';
+import { Tag } from '../../atoms/tag';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
@@ -204,9 +204,9 @@ export function AVTable({
           {(row.domain || row.attachments || row.comments) && (
             <div className="flex items-center gap-2">
               {row.domain && (
-                <Badge tone="brand" size="sm">
+                <Tag tone="brand" size="sm">
                   {row.domain}
-                </Badge>
+                </Tag>
               )}
               <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
               <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />

@@ -48,11 +48,18 @@ const Panel = ({ title, children }: { title: string; children: React.ReactNode }
   </section>
 );
 
+/* The dashboard's Value_Cards (Figma "Value Cards"): a title and a number, with the
+   stripe in the status's tone. A StatCard is at least 16.5rem wide; `flex-1` lets
+   the cards share the row, and when they no longer fit the flex container wraps
+   the rest onto the next row. */
 const Stats = () => (
-  <div className="grid grid-cols-3 gap-4 py-6">
-    <StatCard label="My Added Values" value="12" icon={<Icon name="lightbulb" />} />
-    <StatCard label="Assigned to me" value="4" icon={<Icon name="assigned-value" />} />
-    <StatCard label="In review" value="2" icon={<Icon name="archive" />} />
+  <div className="flex flex-wrap gap-4 py-6">
+    <StatCard className="flex-1" label="Completed" value="12" accent="success" />
+    <StatCard className="flex-1" label="In Review" value="6" accent="brand" />
+    <StatCard className="flex-1" label="Overdue" value="3" accent="critical" />
+    <StatCard className="flex-1" label="In Progress" value="8" accent="brand" />
+    <StatCard className="flex-1" label="Pending" value="4" accent="warning" />
+    <StatCard className="flex-1" label="Draft" value="5" accent="neutral" />
   </div>
 );
 

@@ -61,7 +61,7 @@ export const Default: Story = {
   render: (args) => {
     const superadmin = args.variant === 'superadmin';
     return (
-      <div className={superadmin ? 'w-72 pt-16' : 'w-60 pt-16'}>
+      <div className="w-72 pt-16">
         <StatCard
           {...args}
           icon={args.icon ?? (superadmin ? <Icon name="check-square-fill" size="lg" /> : undefined)}
@@ -297,8 +297,11 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="grid grid-cols-2 gap-4 bg-surface-canvas p-8">
-            <StatCard label="Completed" value="12" accent="success" />
-            <StatCard label="In Progress" value="8" accent="brand" />
+            {/* Default cards are at least 16.5rem wide, so they sit in a wrapping row. */}
+            <div className="col-span-2 flex flex-wrap gap-4">
+              <StatCard className="flex-1" label="Completed" value="12" accent="success" />
+              <StatCard className="flex-1" label="In Progress" value="8" accent="brand" />
+            </div>
             <StatCard
               variant="superadmin"
               label="Values Created"
