@@ -42,12 +42,11 @@ are stroked. A component built to stroke them renders nothing.
 family. Where Phosphor has no equivalent, take the design's own geometry and
 add it to `CUSTOM_ICONS` at Phosphor's weight — 256 viewBox, 16-unit stroke.
 
-Three of the navigation glyphs needed that (8 Sep 2026):
+Two of the navigation glyphs needed that (8 Sep 2026):
 
 | Glyph | Why |
 |---|---|
 | `rectangle-group` | Dashboard. Phosphor has no three-panel form; redrawn in Phosphor's weight |
-| `assigned-value` | Assigned. A Figma layer of VCP's own — `Assigned Added Value`, not a library icon at all |
 | `rectangle-stack` | Manage. Phosphor's `stack` glyphs are isometric; the design's is face-on |
 
 And one status glyph (5 Oct 2026):
@@ -56,8 +55,8 @@ And one status glyph (5 Oct 2026):
 |---|---|
 | `fire-solid` | `UrgencyTag`'s Urgent. The design's flame (Heroicons' mini `fire`, solid, inner tongue cut out) is drawn for 20; Phosphor's `fire` is an outline and `fire-fill` a plain blob at that size. Exported from Figma and scaled from its 20 box. Solid, so it has no stroke weight to match |
 
-`assigned-value` and `rectangle-stack` are exported from the SideBar page and
-transformed from their 24 box onto the 256 viewBox, so the shapes are the
+`rectangle-stack` is exported from the SideBar page and
+transformed from its 24 box onto the 256 viewBox, so the shape is the
 design's exactly rather than an approximation of them. Heroicons' 1.5 stroke
 on a 24 box is exactly Phosphor's 16 units at 256, so a stroked glyph sits in
 the set at the right weight.
@@ -105,10 +104,14 @@ it. Fills are copied from `@phosphor-icons/core/assets/fill/` the same way as th
 regulars; **when you add a glyph, add both**. Don't mix the two weights inside one
 row. A story test fails if a regular glyph has no fill, or a fill no regular.
 
-The exceptions are in-house glyphs whose fill Figma doesn't draw yet:
-`rectangle-group`, `assigned-value` and `rectangle-stack` (fire-solid is a solid
-already). `caret-triple-up-fill` and `smiley-plus-fill` are built the same way as
-their regulars — see the table below.
+The exceptions are in-house glyphs whose fill Figma doesn't draw: `rectangle-stack`
+(and `fire-solid`, a solid already). `rectangle-group-fill` and `smiley-plus-fill`
+are Figma's own fills, exported; `caret-triple-up-fill` is built the same way as
+its regular.
+
+**Assigned** uses Phosphor's `user-check` — the design replaced its old
+`Assigned Added Value` layer with it (6 Oct 2026 review of #144), so the in-house
+`assigned-value` glyph is gone.
 
 **Sizes.** Figma draws every glyph at 10, 12, 16, 20, 24, 28, 32, 40 and 48 px,
 each a whole box with the glyph scaled inside it. That is already how `Icon`
@@ -189,6 +192,6 @@ because it cannot participate in theming either way.
 
 ## Available names
 
-`archive` · `archive-fill` · `arrow-down` · `arrow-down-fill` · `arrow-left` · `arrow-left-fill` · `arrow-right` · `arrow-right-fill` · `arrow-u-up-left` · `arrow-u-up-left-fill` · `arrow-u-up-right` · `arrow-u-up-right-fill` · `arrow-up` · `arrow-up-fill` · `arrows-down-up` · `arrows-down-up-fill` · `arrows-split` · `arrows-split-fill` · `assigned-value` · `bank` · `bank-fill` · `bell` · `bell-fill` · `calendar-blank` · `calendar-blank-fill` · `calendar-dots` · `calendar-dots-fill` · `calendar-x` · `calendar-x-fill` · `caret-double-down` · `caret-double-down-fill` · `caret-double-left` · `caret-double-left-fill` · `caret-double-right` · `caret-double-right-fill` · `caret-double-up` · `caret-double-up-fill` · `caret-down` · `caret-down-fill` · `caret-left` · `caret-left-fill` · `caret-right` · `caret-right-fill` · `caret-triple-up` · `caret-triple-up-fill` · `caret-up` · `caret-up-down` · `caret-up-down-fill` · `caret-up-fill` · `chat-centered-text` · `chat-centered-text-fill` · `chat-dots` · `chat-dots-fill` · `chats-circle` · `chats-circle-fill` · `check` · `check-circle` · `check-circle-fill` · `check-fat` · `check-fat-fill` · `check-fill` · `check-square` · `check-square-fill` · `circle` · `circle-fill` · `circle-notch` · `circle-notch-fill` · `clock` · `clock-fill` · `cloud-arrow-up` · `cloud-arrow-up-fill` · `cloud-check` · `cloud-check-fill` · `code` · `code-fill` · `database` · `database-fill` · `dots-six-vertical` · `dots-six-vertical-fill` · `dots-three` · `dots-three-fill` · `dots-three-vertical` · `dots-three-vertical-fill` · `download-simple` · `download-simple-fill` · `equals` · `equals-fill` · `eye` · `eye-fill` · `eye-slash` · `eye-slash-fill` · `file` · `file-fill` · `film-reel` · `film-reel-fill` · `fire` · `fire-fill` · `fire-solid` · `flask` · `flask-fill` · `function` · `function-fill` · `funnel-simple` · `funnel-simple-fill` · `git-branch` · `git-branch-fill` · `globe` · `globe-fill` · `globe-simple` · `globe-simple-fill` · `graph` · `graph-fill` · `handshake` · `handshake-fill` · `hourglass-low` · `hourglass-low-fill` · `house-line` · `house-line-fill` · `image` · `image-fill` · `info` · `info-fill` · `layout` · `layout-fill` · `lightbulb` · `lightbulb-fill` · `link` · `link-fill` · `list` · `list-bullets` · `list-bullets-fill` · `list-dashes` · `list-dashes-fill` · `list-fill` · `list-numbers` · `list-numbers-fill` · `magnifying-glass` · `magnifying-glass-fill` · `megaphone` · `megaphone-fill` · `minus` · `minus-circle` · `minus-circle-fill` · `minus-fill` · `note-pencil` · `note-pencil-fill` · `package` · `package-fill` · `paint-brush` · `paint-brush-fill` · `palette` · `palette-fill` · `paperclip` · `paperclip-fill` · `pen-nib` · `pen-nib-fill` · `pencil-simple` · `pencil-simple-fill` · `plus` · `plus-circle` · `plus-circle-fill` · `plus-fill` · `rectangle-group` · `rectangle-stack` · `rocket` · `rocket-fill` · `rows` · `rows-fill` · `seal-check` · `seal-check-fill` · `smiley` · `smiley-fill` · `smiley-plus` · `smiley-plus-fill` · `sort-ascending` · `sort-ascending-fill` · `sort-descending` · `sort-descending-fill` · `thumbs-up` · `thumbs-up-fill` · `trash` · `trash-fill` · `trash-simple` · `trash-simple-fill` · `user` · `user-check` · `user-check-fill` · `user-fill` · `users` · `users-fill` · `users-three` · `users-three-fill` · `warning` · `warning-circle` · `warning-circle-fill` · `warning-fill` · `x` · `x-circle` · `x-circle-fill` · `x-fill`
+`archive` · `archive-fill` · `arrow-down` · `arrow-down-fill` · `arrow-left` · `arrow-left-fill` · `arrow-right` · `arrow-right-fill` · `arrow-u-up-left` · `arrow-u-up-left-fill` · `arrow-u-up-right` · `arrow-u-up-right-fill` · `arrow-up` · `arrow-up-fill` · `arrows-down-up` · `arrows-down-up-fill` · `arrows-split` · `arrows-split-fill` · `bank` · `bank-fill` · `bell` · `bell-fill` · `calendar-blank` · `calendar-blank-fill` · `calendar-dots` · `calendar-dots-fill` · `calendar-x` · `calendar-x-fill` · `caret-double-down` · `caret-double-down-fill` · `caret-double-left` · `caret-double-left-fill` · `caret-double-right` · `caret-double-right-fill` · `caret-double-up` · `caret-double-up-fill` · `caret-down` · `caret-down-fill` · `caret-left` · `caret-left-fill` · `caret-right` · `caret-right-fill` · `caret-triple-up` · `caret-triple-up-fill` · `caret-up` · `caret-up-down` · `caret-up-down-fill` · `caret-up-fill` · `chat-centered-text` · `chat-centered-text-fill` · `chat-dots` · `chat-dots-fill` · `chats-circle` · `chats-circle-fill` · `check` · `check-circle` · `check-circle-fill` · `check-fat` · `check-fat-fill` · `check-fill` · `check-square` · `check-square-fill` · `circle` · `circle-fill` · `circle-notch` · `circle-notch-fill` · `clock` · `clock-fill` · `cloud-arrow-up` · `cloud-arrow-up-fill` · `cloud-check` · `cloud-check-fill` · `code` · `code-fill` · `database` · `database-fill` · `dots-six-vertical` · `dots-six-vertical-fill` · `dots-three` · `dots-three-fill` · `dots-three-vertical` · `dots-three-vertical-fill` · `download-simple` · `download-simple-fill` · `equals` · `equals-fill` · `eye` · `eye-fill` · `eye-slash` · `eye-slash-fill` · `file` · `file-fill` · `film-reel` · `film-reel-fill` · `fire` · `fire-fill` · `fire-solid` · `flask` · `flask-fill` · `function` · `function-fill` · `funnel-simple` · `funnel-simple-fill` · `git-branch` · `git-branch-fill` · `globe` · `globe-fill` · `globe-simple` · `globe-simple-fill` · `graph` · `graph-fill` · `handshake` · `handshake-fill` · `hourglass-low` · `hourglass-low-fill` · `house-line` · `house-line-fill` · `image` · `image-fill` · `info` · `info-fill` · `layout` · `layout-fill` · `lightbulb` · `lightbulb-fill` · `link` · `link-fill` · `list` · `list-bullets` · `list-bullets-fill` · `list-dashes` · `list-dashes-fill` · `list-fill` · `list-numbers` · `list-numbers-fill` · `magnifying-glass` · `magnifying-glass-fill` · `megaphone` · `megaphone-fill` · `minus` · `minus-circle` · `minus-circle-fill` · `minus-fill` · `note-pencil` · `note-pencil-fill` · `package` · `package-fill` · `paint-brush` · `paint-brush-fill` · `palette` · `palette-fill` · `paperclip` · `paperclip-fill` · `pen-nib` · `pen-nib-fill` · `pencil-simple` · `pencil-simple-fill` · `plus` · `plus-circle` · `plus-circle-fill` · `plus-fill` · `rectangle-group` · `rectangle-group-fill` · `rectangle-stack` · `rocket` · `rocket-fill` · `rows` · `rows-fill` · `seal-check` · `seal-check-fill` · `smiley` · `smiley-fill` · `smiley-plus` · `smiley-plus-fill` · `sort-ascending` · `sort-ascending-fill` · `sort-descending` · `sort-descending-fill` · `thumbs-up` · `thumbs-up-fill` · `trash` · `trash-fill` · `trash-simple` · `trash-simple-fill` · `user` · `user-check` · `user-check-fill` · `user-fill` · `users` · `users-fill` · `users-three` · `users-three-fill` · `warning` · `warning-circle` · `warning-circle-fill` · `warning-fill` · `x` · `x-circle` · `x-circle-fill` · `x-fill`
 
 In-house glyphs are marked in the table above and listed by `CUSTOM_ICON_NAMES`.

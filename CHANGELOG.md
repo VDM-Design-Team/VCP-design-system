@@ -9,7 +9,10 @@
   The glyph already sits centred with a margin from the edges (Phosphor's own 256 artboard), at every size.
 - **Regular and fill:** every glyph now ships both. 83 `-fill` glyphs added from Phosphor, plus `check-square` (it had
   only a fill), `caret-triple-up-fill` (built like the regular) and `smiley-plus-fill` (Figma, node 3605:1853). Still without
-  a fill: the in-house `rectangle-group`, `assigned-value` and `rectangle-stack`, which Figma doesn't draw filled.
+  a fill: the in-house `rectangle-stack`, which Figma doesn't draw filled. `rectangle-group-fill` comes from Figma
+  (node 3129:61076).
+- **Removed `assigned-value`** (breaking, from the design review): the design replaced the old Assigned glyph with
+  Phosphor's `user-check`. `Sidebar`'s Assigned item now uses it. Migration: use `user-check` (or `user-check-fill`).
 
 ### `Badge` — type sizes per size, and a large size (October 2026)
 

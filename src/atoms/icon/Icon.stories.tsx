@@ -75,7 +75,7 @@ export const RegularAndFill: Story = {
   ),
   play: async () => {
     /* Glyphs drawn in-house with no fill in Figma yet; `fire-solid` is solid already. */
-    const EXEMPT = ['rectangle-group', 'assigned-value', 'rectangle-stack', 'fire-solid'];
+    const EXEMPT = ['rectangle-stack', 'fire-solid'];
     const missing = ICON_NAMES.filter(
       (n) => !n.endsWith('-fill') && !EXEMPT.includes(n) && !ICON_NAMES.includes(`${n}-fill` as never),
     );

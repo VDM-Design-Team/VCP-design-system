@@ -55,7 +55,7 @@ export interface SidebarNavItem {
    for, so `rectangle-group` is an in-house redraw — see docs/icon.md. */
 const DASHBOARD: SidebarNavItem = { key: 'dashboard', label: 'Dashboard', icon: 'rectangle-group' };
 const MY_VALUES: SidebarNavItem = { key: 'my-values', label: 'My Values', icon: 'lightbulb' };
-const ASSIGNED: SidebarNavItem = { key: 'assigned', label: 'Assigned', icon: 'assigned-value' };
+const ASSIGNED: SidebarNavItem = { key: 'assigned', label: 'Assigned', icon: 'user-check' };
 const DRAFTS: SidebarNavItem = { key: 'drafts', label: 'Drafts', icon: 'file' };
 const TASK_LOG: SidebarNavItem = { key: 'task-log', label: 'Task Log Trail', icon: 'list-dashes' };
 const MANAGE: SidebarNavItem = { key: 'manage', label: 'Manage', icon: 'rectangle-stack' };
