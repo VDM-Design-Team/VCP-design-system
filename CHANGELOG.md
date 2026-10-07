@@ -19,7 +19,7 @@
 - **`ColumnHint`** is exported from `DataTable` — the header info glyph with a tooltip, formerly private to `AVTable` (which now uses it).
 - **Breaking:** `DataTableColumn.align` is removed. Cell values and headers are always left-aligned. Migration: delete `align: 'right'`;
   nothing in the repo used it outside the DataTable story.
-- New stories: Actions Column (a `Menu` on a `dots-three-vertical` button), Column Tooltips, Copyable Column, Inline Editing; and a
+- New stories: Actions Column (a `Menu` on a `dots-three` — horizontal — button), Column Tooltips, Copyable Column, Inline Editing; and a
   "How developers customise it" section in `docs/data-table.md`.
 - **Known limit:** a `Menu` in a row is clipped by the table's scroll container (no portal); the story uses `className="overflow-visible"`.
 

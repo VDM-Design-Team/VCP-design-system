@@ -79,7 +79,7 @@ without the table knowing about them. That is the whole extension model.
 |---|---|---|
 | Plain text | Nothing — `key` reads `row[key]` | Default |
 | A link, a tag, an avatar | `render: (r) => <a …/>`, `<Tag/>`, `<Avatar/>` | Default |
-| **An actions column** | `render: (r) => <Menu items={…} trigger={<IconButton icon="dots-three-vertical" label={`Actions for ${r.id}`} />} />` | Actions Column |
+| **An actions column** | `render: (r) => <Menu items={…} trigger={<IconButton icon="dots-three" label={`Actions for ${r.id}`} />} />` | Actions Column |
 | **A header that explains itself** | `hint: <ColumnHint column="owner" text="…" />` | Column Tooltips |
 | **A value you copy, not follow** | `render: (r) => <CopyText text={r.id} />` — underline on hover, "Copied" for 800ms | Copyable Column |
 | **A cell you edit in place** | `render: (r) => <InlineEdit label="owner" editor={<Input …/>} onConfirm={…}>{r.owner}</InlineEdit>` | Inline Editing |

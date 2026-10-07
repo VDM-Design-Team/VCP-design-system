@@ -197,7 +197,7 @@ const ROW_ACTIONS: MenuItem[] = [
 const asColumns = (cols: DataTableColumn<Claim>[]) => cols as DataTableColumn<unknown>[];
 
 /**
- * An actions column: a three-dot button that opens a `Menu`. The column's
+ * An actions column: a three-dot (horizontal) button that opens a `Menu`. The column's
  * `render` is just a function from the row to a node, so the menu closes over
  * the row it belongs to — `Actions for AV-2041` names the right one. The
  * trigger carries the row in its accessible name; "More actions" ten times
@@ -231,7 +231,7 @@ export const ActionsColumn: Story = {
                   onSelect={(key) => setLast(`${key} on ${r.id}`)}
                   trigger={
                     <IconButton
-                      icon="dots-three-vertical"
+                      icon="dots-three"
                       label={`Actions for ${r.id}`}
                       variant="tertiary"
                       size="sm"
