@@ -200,7 +200,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         </div>
 
         {/* The design pins one row to the bottom of every rail. */}
-        <div className="px-3">
+        <div className="flex flex-col px-3">
           {renderItem({ key: 'report', label: 'Report a problem', icon: 'warning' })}
         </div>
 
