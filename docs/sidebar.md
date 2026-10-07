@@ -81,7 +81,7 @@ absent here, so nobody re-derives it from the presets.
 ## Collapsed
 
 At 76 the labels go and the glyphs stay on one axis. Every row hugs its glyph with
-8 either side; a row with sub-items adds a filled caret (52 wide), and
+8 either side; a row with sub-items adds a 12 chevron (52 wide), and
 opening it shows a flyout beside the row (`SidebarItem` documents it) — the rail does
 not reflow. Two things keep the rail usable:
 
