@@ -46,6 +46,24 @@ due date and a table cell are tags — the rounded-rectangle — not the pill.
   `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
   unsorted in `text.subtle`). `AVTable` inherits both.
 
+### `SidebarItem` / `Sidebar` — a flyout for the collapsed rail, and regular sub-items (October 2026)
+
+Design review of build 39 (#123); the flyout is Figma's `Menu_Dropdown` (`27:10048`).
+
+- **Collapsed, a disclosure opens a flyout** to the row's right instead of expanding inline:
+  211 wide, top aligned with the row, its left edge 8 inside the rail's right edge. Escape,
+  a press outside, focus leaving, or choosing a row closes it. The row does not grow and the
+  caret does not flip. Expanded sub-items still open inline.
+- **The flyout looks like `Menu`** (design review of build 67): `stroke.default` edge, 4 of padding round the rows, rounded
+  `radius.sm` rows in `label-sm-medium` `text.secondary` that darken to `text.primary` on the `surface.brand.faint` hover, and
+  `shadow.menu`. The current row stays semibold `text.brand.medium`.
+- **The collapsed caret is filled** (`caret-down-fill`, new icon).
+- **Expanded sub-items are regular weight** (were medium); the current sub-item is told apart
+  by colour and `aria-current`.
+
+Migration: none; the collapsed flyout replaces the unconfirmed inline-list behaviour that
+`docs/sidebar-item.md` flagged. No API change.
+
 ### `DatePicker` — design review of the variants (October 2026)
 
 Follow-up to #133.
