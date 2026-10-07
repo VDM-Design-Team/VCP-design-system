@@ -67,6 +67,7 @@ applies to; so is a form error at the top of the whole page.
 | `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical` |
 | `title` | `ReactNode` | — | The headline. One clause |
 | `children` | `ReactNode` | — | The body. Say what happened and what to do |
+| `showIcon` | `boolean` | `true` | Shows the tone glyph. Off, the tint, stroke and words still carry the banner, and the tone word ("Warning: ") is announced from visually hidden text, so assistive tech does not lose it |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
 | `actionLabel` | `string` | — | Renders one action, inline at the end of the row |
 | `onAction` | `() => void` | — | Fired by the action. Required for the action to render |

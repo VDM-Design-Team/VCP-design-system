@@ -178,6 +178,13 @@ interface BannerBaseProps
   children?: React.ReactNode;
   /** Overrides the word the tone glyph is announced as. Set it to localise; never to `''`. */
   toneLabel?: string;
+  /**
+   * Show the tone glyph. Default `true`. Turn it off for a quieter banner: the
+   * tint, the stroke and the words still say what it is, and the tone word
+   * ("Warning") moves into hidden text so a screen reader still hears it. The
+   * glyph is reinforcement, not the message.
+   */
+  showIcon?: boolean;
   /** Label for a single inline action. Rendered only with `onAction`. */
   actionLabel?: string;
   /** Fired when the action is pressed. */
@@ -237,6 +244,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
     title,
     children,
     toneLabel,
+    showIcon = true,
     actionLabel,
     onAction,
     onDismiss,
@@ -264,17 +272,21 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
     >
       {/* Named, not decorative. Colour is never the only signal: the shape
           differs per tone, and this gives the tone a word in the announcement. */}
-      <Icon
-        name={TONE_ICON[tone]}
-        size="md"
-        label={toneLabel ?? TONE_LABEL[tone]}
-        /* The title's line is 24 and the glyph 20, so 2 of top margin centres the
-           glyph on the title line. With no title the first line is the message's
-           20, and the glyph already fills it. */
-        className={cn(TONE_GLYPH[tone], title != null && 'mt-0.5')}
-      />
+      {showIcon && (
+        <Icon
+          name={TONE_ICON[tone]}
+          size="md"
+          label={toneLabel ?? TONE_LABEL[tone]}
+          /* The title's line is 24 and the glyph 20, so 2 of top margin centres the
+             glyph on the title line. With no title the first line is the message's
+             20, and the glyph already fills it. */
+          className={cn(TONE_GLYPH[tone], title != null && 'mt-0.5')}
+        />
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {/* Without the glyph, its name moves here so the tone is still announced. */}
+        {!showIcon && <span className="sr-only">{toneLabel ?? TONE_LABEL[tone]}: </span>}
         {title != null && <p className="text-title-sm-semibold">{title}</p>}
         {children != null && children !== false && (
           <div className="text-body-sm-regular">{children}</div>

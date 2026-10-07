@@ -41,6 +41,7 @@ const meta = {
     children: 'Sources will be re-checked tonight at 02:00 UTC. No action needed.',
     showAction: false,
     dismissible: false,
+    showIcon: true,
   },
   argTypes: {
     tone: { control: 'select', options: TONES },
@@ -54,6 +55,11 @@ const meta = {
       control: 'boolean',
       name: 'dismiss button',
       description: 'Adds the optional dismiss button. Needs `onDismiss` and a `dismissLabel`.',
+    },
+    showIcon: {
+      control: 'boolean',
+      name: 'icon',
+      description: 'Shows the tone glyph. Off, the tone word is still announced in hidden text.',
     },
     actionLabel: { control: 'text' },
     dismissLabel: { control: 'text' },
@@ -98,6 +104,19 @@ export const Default: Story = {
     /* Neither optional button is there until its control is on. */
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('button')).toBeNull();
+  },
+};
+
+/**
+ * The glyph is optional too (`showIcon={false}`): the tint, the stroke and the words
+ * still carry the banner, and the tone word is announced from hidden text.
+ */
+export const WithoutIcon: Story = {
+  args: { showIcon: false, tone: 'warning', title: 'Two deliverables are missing evidence' },
+  render: Default.render,
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('svg')).toBeNull();
+    await expect(canvasElement.querySelector('.sr-only')).toHaveTextContent('Warning');
   },
 };
 
@@ -150,6 +169,9 @@ export const AllBanners: Story = {
             second line to show how the glyph, title and buttons hold their places.
           </Banner>
           <Banner tone={tone}>Message only, no title.</Banner>
+          <Banner tone={tone} title="Title of inline banner" showIcon={false}>
+            Inline banner message content goes here, with no icon.
+          </Banner>
         </section>
       ))}
     </div>
