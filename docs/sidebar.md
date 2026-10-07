@@ -80,6 +80,11 @@ absent here, so nobody re-derives it from the presets.
 
 ## Collapsed
 
+**The logo doesn't move or resize.** Collapsed, the diamond is 20 wide — the size it
+is inside the expanded 200 lockup — and in both states the logo starts 22 in, which
+centres the diamond on the nav glyphs' axis (x = 32). Toggling the rail only shows or
+hides the wordmark beside it (design review, 7 Oct 2026).
+
 At 76 the labels go and the glyphs stay on one axis. Every row hugs its glyph with
 8 either side; a row with sub-items adds a filled caret (52 wide), and
 opening it shows a flyout beside the row (`SidebarItem` documents it) — the rail does
