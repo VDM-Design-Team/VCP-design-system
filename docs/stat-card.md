@@ -12,7 +12,7 @@ Figma's `VCP Pages & Flows` file (5 Oct 2026) and set by `variant`:
 | Alignment | **Left** | **Centred** |
 | Size | Exactly 100 high, at least 16.5rem wide | Exactly 150 high |
 | Title | Label only (Figma draws no icon or hint) | Accent icon, label, info hint |
-| Value | 36 **bold**, 44 line | 36 **semibold**, 36 line, plus a 24 unit |
+| Value | 32 **bold** (`heading-xl-bold`) | 32 **semibold** (`heading-xl-semibold`), plus a 24 unit |
 
 **`StatCardGroup`** is the super admin dashboard's
 `_SuperAdmin_Metric_Card_Grouped`: two or more values under one title, side by
@@ -94,7 +94,7 @@ is bold on a 44 line.
 
 **Single, `superadmin`:** a 12 stripe; `space.24` either side, content centred
 both ways; `space.12` between the title row and the value row. Exactly 150
-high (`h-37.5`). The value is semibold on a 36 line.
+high (`h-37.5`). The value is `heading-xl-semibold`.
 
 **Group:** `space.16` top and `space.24` on the other three sides; the title at
 the top, `label-sm-semibold` in `text.secondary`; `space.12` below it, the row
@@ -116,17 +116,35 @@ brand blue, which is not in the accent families) — as a `bg-*`
 fill on the stripe (not a `border-l`, so it can't lose a cascade fight with the
 card's own border) and as a `text-*` colour on the icon.
 
-### Two exceptions to the type ramp
+### The value is on the ramp; the measurement is the one exception
+
+The **value** is `heading-xl` (32): `heading-xl-bold` on the `default` card,
+`heading-xl-semibold` on the `superadmin` card.
+
+**Why it differs from Figma (design decision, 5 Oct 2026).** Figma draws the value
+at 36, which has no step on the type ramp. We use 32 on purpose, for three reasons:
+
+1. **It matches the typography we have.** 32 is `heading-xl`, an existing ramp step
+   — so the value is a token, not a hand-written size.
+2. **It is more consistent.** A one-off 36 would sit between `heading-xl` (32) and
+   `display-md` (40) and belong to no tier; the other numerals in the system are on
+   the ramp.
+3. **It helps once there are a lot of value cards.** A dashboard will show many of
+   these in a row; a slightly smaller figure keeps each card, and the row, from
+   feeling heavy — and is one less thing that scales badly.
+
+If Figma is updated to 32, there is nothing to change here. If a 36 step is ever
+added to the ramp, revisit this.
 
 | | Figma | Why it's written out |
 |---|---|---|
-| Value | 36 / bold on a 44 line (`default`), 36 / semibold on a 36 line (`superadmin`) | The ramp has no 36 step (display-md is 40, heading-xl is 32) |
 | Measurement | 24 / medium, 36 line | There is no `heading-lg-medium` — `heading-lg` ships bold, semibold and regular only |
 
-Both live as marked lines in `StatCard.tsx` (`ds-lint-ignore`), not as new
-tokens. If either becomes a real ramp step, swap the two constants for the token
-class — nothing else changes. Everything else on the card is on the ramp:
-`label-sm-medium` and `label-sm-semibold`.
+It lives as one marked line in `StatCard.tsx` (`ds-lint-ignore`), not as a new
+token. If it becomes a real ramp step, swap the constant for the token class —
+nothing else changes. Everything else on the card is on the ramp:
+`heading-xl-bold` / `heading-xl-semibold` (value), `label-sm-medium` and
+`label-sm-semibold`.
 
 | Pair | Light | Dark |
 |---|---|---|
