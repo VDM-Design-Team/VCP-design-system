@@ -58,8 +58,6 @@ Design review of build 39 (#123); the flyout is Figma's `Menu_Dropdown` (`27:100
   `radius.sm` rows in `label-sm-medium` `text.secondary` that darken to `text.primary` on the `surface.brand.faint` hover, and
   `shadow.menu`. The current row stays semibold `text.brand.medium`.
 - **The collapsed caret is filled** (`caret-down-fill`, new icon).
-- **Collapsed rows fill the rail's column** (52) — they hugged their content (40, or 52 with a
-  caret) — glyphs still left-aligned. The footer row fills it too.
 - **Expanded sub-items are regular weight** (were medium); the current sub-item is told apart
   by colour and `aria-current`.
 

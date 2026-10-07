@@ -104,10 +104,11 @@ shows its labels.
 
 **Collapsed, a disclosure's caret is filled, 12, and sits right after the glyph**,
 the way Figma's `_Sidebar_Item` (`Collapsed`) draws it — a solid triangle
-(`caret-down-fill`), beside the glyph, never on it. Every collapsed row **fills the
-rail's column** — the width the row with a caret needs (8 + 24 + 12 + 8 = 52) — with
-its glyph at the same 8 inset, left-aligned, so the rail's glyphs share one axis and
-the rows are one width, with or without a caret. Expanded, the caret is 20 and sits
+(`caret-down-fill`), beside the glyph, never on it. Every collapsed row starts its
+glyph at the same 8 inset, so the rail's glyphs share one axis, and **hugs its content
+with 8 on both sides** (40 wide, or 52 with the caret) so the selected fill and focus
+ring are even. (Filling the 52 column instead was tried and reverted, design review
+7 Oct 2026: a row without a caret came out 8 | 20.) Expanded, the caret is 20 and sits
 at the row's far right.
 
 ### Collapsed, a disclosure opens a flyout
