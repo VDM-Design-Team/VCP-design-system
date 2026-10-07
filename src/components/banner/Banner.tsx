@@ -24,6 +24,20 @@ const TONE_ICON: Record<BannerTone, IconName> = {
   danger: 'warning-fill',
 };
 
+/**
+ * Tone → the glyph's colour: `outline.border.default`, the bright tone colour,
+ * as Figma draws it. This is **below 3:1 on the tint** (1.78–3.12:1 in light,
+ * 1.98–2.95:1 in dark) — a recorded exception, because the glyph is not the
+ * only thing that says what the banner is: the title and message do, the tint
+ * does, and the glyph is named for assistive tech. See docs/banner.md.
+ */
+const TONE_GLYPH: Record<BannerTone, string> = {
+  info: 'text-accent-info-outline-border-default',
+  success: 'text-accent-success-outline-border-default',
+  warning: 'text-accent-warning-outline-border-default',
+  danger: 'text-accent-critical-outline-border-default',
+};
+
 /** Tone → the word a screen reader hears. The glyph carries it as its name. */
 const TONE_LABEL: Record<BannerTone, string> = {
   info: 'Information',
@@ -250,7 +264,15 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
     >
       {/* Named, not decorative. Colour is never the only signal: the shape
           differs per tone, and this gives the tone a word in the announcement. */}
-      <Icon name={TONE_ICON[tone]} size="md" label={toneLabel ?? TONE_LABEL[tone]} />
+      <Icon
+        name={TONE_ICON[tone]}
+        size="md"
+        label={toneLabel ?? TONE_LABEL[tone]}
+        /* The title's line is 24 and the glyph 20, so 2 of top margin centres the
+           glyph on the title line. With no title the first line is the message's
+           20, and the glyph already fills it. */
+        className={cn(TONE_GLYPH[tone], title != null && 'mt-0.5')}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         {title != null && <p className="text-title-sm-semibold">{title}</p>}

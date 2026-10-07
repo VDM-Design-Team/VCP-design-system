@@ -116,6 +116,47 @@ export const WithBothButtons: Story = {
 };
 
 /**
+ * Every banner in one view: four tones, each as a title and message, with an
+ * action, with both optional buttons, and message-only. For review against
+ * Figma and for visual diffs.
+ */
+export const AllBanners: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex max-w-3xl flex-col gap-8">
+      {TONES.map((tone) => (
+        <section key={tone} className="flex flex-col gap-3" aria-label={`${tone} banners`}>
+          <h3 className="font-sans text-label-sm-medium text-text-tertiary">{tone}</h3>
+          <Banner tone={tone} title="Title of inline banner">
+            Inline banner message content goes here.
+          </Banner>
+          <Banner
+            tone={tone}
+            title="Title of inline banner"
+            actionLabel="Review"
+            onAction={() => {}}
+          >
+            Inline banner message content goes here.
+          </Banner>
+          <Banner
+            tone={tone}
+            title="Title of inline banner"
+            actionLabel="Review"
+            onAction={() => {}}
+            onDismiss={() => {}}
+            dismissLabel={`Dismiss the ${tone} banner`}
+          >
+            Inline banner message content goes here, and when it is long enough it wraps onto a
+            second line to show how the glyph, title and buttons hold their places.
+          </Banner>
+          <Banner tone={tone}>Message only, no title.</Banner>
+        </section>
+      ))}
+    </div>
+  ),
+};
+
+/**
  * Four tones, four `accent.*` families — and four different glyph *shapes*. The
  * tone is never carried by colour alone: the shape differs, and each glyph
  * carries the tone as its accessible name ("Warning", "Error"), so it survives
@@ -133,6 +174,9 @@ export const Tones: Story = {
       await expect(cs.columnGap).toBe('8px');
       const icon = el.querySelector('svg')!.getBoundingClientRect();
       await expect([icon.width, icon.height]).toEqual([20, 20]);
+      /* The glyph is centred on the title's first line. */
+      const titleBox = el.querySelector('p')!.getBoundingClientRect();
+      await expect(Math.abs(icon.top + icon.height / 2 - (titleBox.top + 12))).toBeLessThan(0.5);
       const title = getComputedStyle(el.querySelector('p')!);
       await expect([title.fontSize, title.fontWeight]).toEqual(['16px', '600']);
       const body = getComputedStyle(el.querySelector('p ~ div')!);

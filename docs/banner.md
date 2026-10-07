@@ -211,6 +211,28 @@ its text, none of which depend on the edge.
 Before this it used `outline.content.default`, which cleared 3:1 on both page surfaces
 (floor 3.89:1) — and is one token swap away if the edge ever needs to carry weight again.
 
+### The glyph's colour
+
+The glyph is `accent.<tone>.outline.border.default`, the bright tone colour, as Figma draws
+it (design review: the glyph is not what makes the message understood). **That is below
+3:1 against the tint:**
+
+| Tone | Light | Dark |
+|---|---|---|
+| `info` | 3.08:1 | 1.98:1 |
+| `success` | 2.02:1 | 2.81:1 |
+| `warning` | **1.78:1** | 2.95:1 |
+| `danger` | 3.12:1 | 2.10:1 |
+
+Is that allowed? WCAG 1.4.11 asks 3:1 for a graphic *required to understand the content*.
+Here the glyph is reinforcement: the title and message say what is wrong in words, the
+tint carries the tone, and the glyph is named for assistive tech ("Warning, …"). The repo's
+own rule 5 is about text and UI borders, not decorative or redundant icons. So it is a
+recorded exception, not a violation — but `warning` in light (1.78:1) and `success` (2.02:1)
+are genuinely faint, which is why the title must always work without the colour (see
+*Tone is never carried by colour alone*). Using `outline.content.default` for the glyph would
+clear 3:1 everywhere and is one token swap away.
+
 ### The controls on the fill
 
 The dismiss `IconButton` and the action `Button` sit **on** a tonal fill, where
@@ -253,7 +275,8 @@ focus indicator needs.
 | Gap, title to body | Tailwind numeric scale | `gap-0.5` (2) |
 | Glyph | `Icon` `fill` style | `size="md"` — 20 × 20 |
 | Width | — | `w-full`; the container decides how wide |
-| Glyph colour | — | Inherited from the tone's content token via `currentColor` |
+| Glyph colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
+| Glyph alignment | — | `mt-0.5` with a title: centres the 20 glyph on the title's 24 line |
 
 Dark comes for free: every colour above is a semantic token that
 `tokens/semantic/color.dark.json` overrides under `.dark`.
