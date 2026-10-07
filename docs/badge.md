@@ -3,25 +3,25 @@
 A small, non-interactive label that classifies the thing beside it — a version, a
 count, a state, a category.
 
-## When to use Badge, Tag, Chip, or StatusPill
+## When to use Badge, Tag, Chip, or StatusTag
 
 | Use | For | Shape | Interactive? | Vocabulary |
 |---|---|---|---|---|
 | `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | Pill (`shape.radius.pill`) | No — takes no focus, fires no events | Generic tones only |
 | `Tag` | The same job as Badge, when the rounded-rectangle shape or one of `textual`/`outline` is what's wanted | Rounded-rectangle (`shape.radius.sm`) | No | Generic tones only |
 | `Chip` | A value the user can act on: a selected filter, a removable tag, a toggleable option | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
-| `StatusPill` *(component)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | `Tag`'s rounded-rectangle | No | VCP's status vocabulary |
+| `StatusTag` *(component)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | `Tag`'s rounded-rectangle | No | VCP's status vocabulary |
 
 **`Badge` and `Tag` are separate Figma components with separate shapes** —
 General Design Library's `Badge` (pill) and `Tag` (rounded-rectangle) — not
 one component with a configurable radius. See `docs/tag.md`.
 
-**For VCP statuses use `StatusPill`, not Badge directly.** The Claude Design export
+**For VCP statuses use `StatusTag`, not Badge directly.** The Claude Design export
 mixed VCP status names into Badge's `tone` prop (`tone="for qa"`). That mapping is
-owned by exactly one piece — `StatusPill` (a component composing `Tag`) — so it is
+owned by exactly one piece — `StatusTag` (a component composing `Tag`) — so it is
 deliberately absent here; if you
 find yourself writing `tone={status === 'rejected' ? 'danger' : …}` at a call site,
-that mapping wants to live in `StatusPill` instead.
+that mapping wants to live in `StatusTag` instead.
 
 **If it needs to be clicked or dismissed, it is not a Badge.** Badge renders a
 `<span>` with no handlers, no focus ring and no tab stop. Wrapping one in an
@@ -133,7 +133,7 @@ The dark theme comes for free — every colour class above is a semantic token t
 
 - Don't hardcode colors or spacing. `className="bg-[#dbeafe]"` is a bug — add a token instead.
 - Don't put a VCP status in a Badge. `<Badge tone="warning">For QA</Badge>` is a
-  `StatusPill` waiting to be written, and every call site that does it drifts apart.
+  `StatusTag` waiting to be written, and every call site that does it drifts apart.
 - Don't make a Badge clickable or dismissible. That is a `Chip` — a `<span>` with an
   `onClick` is unreachable by keyboard.
 - Don't put an interactive control in `icon`/`trailingIcon` — the slots are

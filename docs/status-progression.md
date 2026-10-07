@@ -10,7 +10,7 @@ four viewer roles over a spine the system owns and a chain the domain owns.
 | Piece | Tier | Role here |
 |---|---|---|
 | `Button` | atom | Every transition, at `size="sm"` (36 = the design's 37) |
-| `StatusPill` | component | **Type only** — the spine half of `status` is its `AVStatus`. Nothing rendered |
+| `StatusTag` | component | **Type only** — the spine half of `status` is its `AVStatus`. Nothing rendered |
 
 One atom, used twice — which is why this is a **component**, not a pattern:
 it presents as one control unit. `AVHeader` is the pattern that places it.
@@ -134,7 +134,7 @@ are now named:
 reached but isn't final yet** (Development only; see `pendingDeploy`). An AV
 gets there via `Confirmed Prod` → Handoff, and moves on from there via Deploy
 → `Review` → Accept → the real terminal `Completed`. Both `Completed`
-checkpoints render identically on `StatusPill` — same tone, same text — design
+checkpoints render identically on `StatusTag` — same tone, same text — design
 was explicit this is a known, accepted quirk of this one domain, not
 something to design around.
 

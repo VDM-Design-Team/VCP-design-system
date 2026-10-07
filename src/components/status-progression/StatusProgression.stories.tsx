@@ -6,7 +6,7 @@ import {
   type AVChainStep,
   type AVProgressionRole,
 } from './StatusProgression';
-import type { AVStatus } from '../status-pill';
+import type { AVStatus } from '../status-tag';
 
 /* Two domains' chains, one for one with the Figma `Status_Tag_Design_Only`
    and `Status_Tag_Development_Only` sets. `In Progress` is not in either —

@@ -46,7 +46,7 @@ rather than guessing.
 
 **Check for a more specific token first.** A button's label is
 `action.*.content.*`; a status word is `accent.*.tonal.content.*` via
-`StatusPill`. `text.*` is for prose that isn't already owned by a component.
+`StatusTag`. `text.*` is for prose that isn't already owned by a component.
 
 `text.link.*` (`default`, `hover`, `pressed`, `selected`) is for hyperlinks
 specifically.

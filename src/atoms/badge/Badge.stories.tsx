@@ -15,7 +15,7 @@ const meta = {
           '(`shape.radius.pill`) — a different shape from `Tag`\'s rounded-rectangle, even though ' +
           'they share the same four styles and six tones (`../../lib/classification-tones`). ' +
           '**Badge carries no VCP vocabulary** — for statuses like "For QA" or "Confirmed prod" ' +
-          'use the `StatusPill` pattern, which maps VCP statuses onto these tones.',
+          'use the `StatusTag` pattern, which maps VCP statuses onto these tones.',
       },
     },
   },
@@ -51,7 +51,7 @@ export const Variants: Story = {
   ),
 };
 
-/** Six generic tones. None of them names a VCP status — that is `StatusPill`'s job. */
+/** Six generic tones. None of them names a VCP status — that is `StatusTag`'s job. */
 export const Tones: Story = {
   render: (args) => (
     <div className="flex flex-wrap items-center gap-2">

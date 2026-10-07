@@ -5,8 +5,8 @@ import {
   type DataTableColumn,
   type DataTableSort,
 } from '../../components/data-table';
-import { StatusPill, type StatusPillProps } from '../../components/status-pill';
-import { DueDatePill, type DueDateProximity } from '../../components/due-date-pill';
+import { StatusTag, type StatusTagProps } from '../../components/status-tag';
+import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../components/pagination';
 import { Tooltip } from '../../components/tooltip';
@@ -29,8 +29,8 @@ import { Icon } from '../../atoms/icon';
  * Table page, audit batch 5, 11 September 2026.
  *
  * **It owns no mapping.** Every cell that has a vocabulary defers to the piece
- * that owns it: `StatusPill` for status, `UrgencyTag` for urgency, `TypeTag`
- * for type, `DueDatePill` for how near a date is. This file decides *which
+ * that owns it: `StatusTag` for status, `UrgencyTag` for urgency, `TypeTag`
+ * for type, `DueDateTag` for how near a date is. This file decides *which
  * columns exist and in what order*, and that is all — which is the difference
  * between a pattern and a second copy of the system.
  *
@@ -59,12 +59,12 @@ export interface AVTableRow {
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
-  /** The date, already formatted, and how near it is. See `DueDatePill`. */
+  /** The date, already formatted, and how near it is. See `DueDateTag`. */
   due?: { label: string; proximity?: DueDateProximity };
   urgency?: AVUrgency;
   type?: AVType;
   /** `{ status }` for a spine status, `{ custom }` for a domain step. */
-  status?: StatusPillProps;
+  status?: StatusTagProps;
   members?: readonly AvatarGroupEntry[];
   /** "7 days ago". Already formatted — this table does not do relative time. */
   lastUpdated?: string;
@@ -221,7 +221,7 @@ export function AVTable({
       sortable: true,
       render: (row) =>
         row.due ? (
-          <DueDatePill proximity={row.due.proximity}>{row.due.label}</DueDatePill>
+          <DueDateTag proximity={row.due.proximity}>{row.due.label}</DueDateTag>
         ) : null,
     },
     {
@@ -242,7 +242,7 @@ export function AVTable({
       key: 'status',
       label: 'Status',
       hint: <HeaderHint text={hints?.status} column="status" />,
-      render: (row) => (row.status ? <StatusPill size="sm" {...row.status} /> : null),
+      render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
     },
     {
       key: 'members',

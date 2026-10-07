@@ -8,7 +8,7 @@ import {
   type AVProgressionRole,
   type AVTransition,
 } from '../../components/status-progression';
-import type { AVStatus } from '../../components/status-pill';
+import type { AVStatus } from '../../components/status-tag';
 
 /**
  * AVHeader — the page-level header the Figma `AV_Header` set draws: a back

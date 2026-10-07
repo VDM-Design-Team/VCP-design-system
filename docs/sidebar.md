@@ -46,7 +46,7 @@ this list drifts, and fails a pattern composing fewer than two pieces.
 ## It owns the nav vocabulary, and that is deliberate
 
 `NAV_BY_USER_TYPE` maps each of the four user types to its rows. That looks
-like the thing issue #68 spent a day pulling *out* of `StatusPill` and
+like the thing issue #68 spent a day pulling *out* of `StatusTag` and
 `StatusProgression`, and the difference is worth stating.
 
 **A domain names its own workflow steps.** They are configured, renameable,
@@ -56,7 +56,7 @@ and unknowable at build time, so the components had to take them as data.
 presets, and which of them each user type sees is *drawn* — four rails, eight
 variants with their minimised twins. That is design vocabulary, not product
 configuration, so it lives in one place here the way status → tone lives in
-one place in `StatusPill`.
+one place in `StatusTag`.
 
 `items` is the escape hatch for a rail the design has not drawn yet. If it
 starts being used routinely, the vocabulary has moved and this should follow.

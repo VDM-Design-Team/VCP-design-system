@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { StatusPill, AV_STATUSES } from './StatusPill';
+import { StatusTag, AV_STATUSES } from './StatusTag';
 
 const meta = {
-  title: 'Components/Display/StatusPill',
-  component: StatusPill,
+  title: 'Components/Display/StatusTag',
+  component: StatusTag,
   parameters: {
     docs: {
       description: {
         component:
-          'An Added Value’s status as a pill — a component composing `Badge`, and the owner ' +
+          'An Added Value’s status as a tag — a component composing `Tag`, and the owner ' +
           'of VCP’s status vocabulary and its status → treatment mapping. **The vocabulary is ' +
           'open.** The ten spine statuses are fixed and each keeps its own fill, measured off ' +
           'the Figma `Status_Tag_General` set. Domain steps — anything a domain defines in its ' +
@@ -26,7 +26,7 @@ const meta = {
   argTypes: {
     size: { control: 'radio', options: ['sm', 'md'] },
   },
-} satisfies Meta<typeof StatusPill>;
+} satisfies Meta<typeof StatusTag>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -36,7 +36,7 @@ export const SpineStatuses: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
       {AV_STATUSES.map((status) => (
-        <StatusPill key={status} status={status} />
+        <StatusTag key={status} status={status} />
       ))}
     </div>
   ),
@@ -52,19 +52,19 @@ export const DomainSteps: Story = {
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-28 text-label-sm-medium text-text-secondary">Design</span>
         {['Design review'].map((label) => (
-          <StatusPill key={label} custom={label} />
+          <StatusTag key={label} custom={label} />
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-28 text-label-sm-medium text-text-secondary">Development</span>
         {['For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'].map((label) => (
-          <StatusPill key={label} custom={label} />
+          <StatusTag key={label} custom={label} />
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="w-28 text-label-sm-medium text-text-secondary">Governance</span>
         {['Awaiting legal', 'Risk signed off'].map((label) => (
-          <StatusPill key={label} custom={label} />
+          <StatusTag key={label} custom={label} />
         ))}
       </div>
     </div>
@@ -79,13 +79,13 @@ export const DomainSteps: Story = {
 export const OneAVsJourney: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-2">
-      <StatusPill status="Draft" />
-      <StatusPill status="Pending" />
-      <StatusPill status="Accepted" />
-      <StatusPill status="In Progress" />
-      <StatusPill custom="For QA" />
-      <StatusPill custom="Confirmed prod" />
-      <StatusPill status="Completed" />
+      <StatusTag status="Draft" />
+      <StatusTag status="Pending" />
+      <StatusTag status="Accepted" />
+      <StatusTag status="In Progress" />
+      <StatusTag custom="For QA" />
+      <StatusTag custom="Confirmed prod" />
+      <StatusTag status="Completed" />
     </div>
   ),
 };
@@ -97,8 +97,8 @@ export const Sizes: Story = {
       {(['sm', 'md'] as const).map((size) => (
         <div key={size} className="flex items-center gap-2">
           <span className="w-8 text-label-sm-medium text-text-secondary">{size}</span>
-          <StatusPill size={size} status="Pending" />
-          <StatusPill size={size} custom="Awaiting legal" />
+          <StatusTag size={size} status="Pending" />
+          <StatusTag size={size} custom="Awaiting legal" />
         </div>
       ))}
     </div>
@@ -115,11 +115,11 @@ export const ReviewHasTwoStyles: Story = {
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <span className="w-40 text-label-sm-medium text-text-secondary">A user sees</span>
-        <StatusPill status="Review" />
+        <StatusTag status="Review" />
       </div>
       <div className="flex items-center gap-3">
         <span className="w-40 text-label-sm-medium text-text-secondary">An admin sees</span>
-        <StatusPill status="Review" actionable />
+        <StatusTag status="Review" actionable />
       </div>
     </div>
   ),
@@ -132,9 +132,9 @@ export const ReviewHasTwoStyles: Story = {
 export const ActionableIsReviewOnlyToday: Story = {
   render: () => (
     <div className="flex items-center gap-2">
-      <StatusPill status="Pending" actionable />
-      <StatusPill status="Rejected" actionable />
-      <StatusPill custom="For QA" actionable />
+      <StatusTag status="Pending" actionable />
+      <StatusTag status="Rejected" actionable />
+      <StatusTag custom="For QA" actionable />
     </div>
   ),
 };
@@ -148,9 +148,9 @@ export const LightAndDark: Story = {
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex min-h-48 flex-col gap-2 bg-surface-canvas p-8">
             {AV_STATUSES.map((status) => (
-              <StatusPill key={status} status={status} className="self-start" />
+              <StatusTag key={status} status={status} className="self-start" />
             ))}
-            <StatusPill custom="Awaiting legal" className="self-start" />
+            <StatusTag custom="Awaiting legal" className="self-start" />
           </div>
         </div>
       ))}
