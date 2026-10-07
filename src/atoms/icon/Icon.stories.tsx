@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect } from 'storybook/test';
-import { Icon, ICON_NAMES, ICON_SIZES, CUSTOM_ICON_NAMES } from './Icon';
+import { Icon, ICON_NAMES, ICON_SIZES, CUSTOM_ICON_NAMES, type IconName } from './Icon';
 
 const meta = {
   title: 'Atoms/Icon',
@@ -23,29 +23,40 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+/* The stories that draw fixed glyphs, or the whole set, ignore the `name` and
+   `size` controls — so they hide them rather than offer a picker that does
+   nothing. Default and Sizes are the two that follow the controls. */
+const noControls = { controls: { disable: true } };
+
 export const Default: Story = {};
 
 /**
- * The nine sizes Figma draws, regular above fill. Each is a whole box with the
- * glyph centred inside it and a little in from the edges — Phosphor's own
- * artboard margin, scaled with the box. `sm` / `md` / `lg` still work as
- * 16 / 20 / 24.
+ * The nine sizes Figma draws, regular above fill, for the glyph picked in the
+ * `name` control. Each is a whole box with the glyph centred inside it and a
+ * little in from the edges — Phosphor's own artboard margin, scaled with the
+ * box. `sm` / `md` / `lg` still work as 16 / 20 / 24.
  */
 export const Sizes: Story = {
-  render: () => (
-    <div className="flex flex-col gap-4 text-text-primary">
-      {(['bell', 'bell-fill'] as const).map((name) => (
-        <div key={name} className="flex items-end gap-4">
-          {ICON_SIZES.map((size) => (
-            <div key={size} className="flex flex-col items-center gap-1">
-              <Icon name={name} size={size} className="outline outline-1 outline-stroke-subtle" />
-              <span className="text-caption-sm-semibold text-text-tertiary">{size}</span>
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
-  ),
+  argTypes: { size: { table: { disable: true } } },
+  render: ({ name }) => {
+    const regular = name.endsWith('-fill') ? (name.slice(0, -5) as IconName) : name;
+    const fill = `${regular}-fill` as IconName;
+    const rows = ICON_NAMES.includes(fill) ? [regular, fill] : [regular];
+    return (
+      <div className="flex flex-col gap-4 text-text-primary">
+        {rows.map((glyph) => (
+          <div key={glyph} className="flex items-end gap-4">
+            {ICON_SIZES.map((size) => (
+              <div key={size} className="flex flex-col items-center gap-1">
+                <Icon name={glyph} size={size} className="outline outline-1 outline-stroke-subtle" />
+                <span className="text-caption-sm-semibold text-text-tertiary">{size}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  },
 };
 
 /**
@@ -53,6 +64,7 @@ export const Sizes: Story = {
  * glyphs that have no Figma fill drawn yet are exempt — see the docs.
  */
 export const RegularAndFill: Story = {
+  parameters: noControls,
   render: () => (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-4">
       {ICON_NAMES.filter((n) => !n.endsWith('-fill')).map((name) => (
@@ -92,6 +104,7 @@ export const RegularAndFill: Story = {
  * text token and it themes for free — never colour the icon directly.
  */
 export const InheritsColour: Story = {
+  parameters: noControls,
   render: () => (
     <div className="flex items-center gap-4">
       <Icon name="check-circle" className="text-accent-success-tonal-content-default" />
@@ -110,6 +123,7 @@ export const InheritsColour: Story = {
  * `role="img"` with an `aria-label`.
  */
 export const DecorativeVsLabelled: Story = {
+  parameters: noControls,
   render: () => (
     <div className="flex items-center gap-6 text-text-primary">
       <span className="inline-flex items-center gap-1.5">
@@ -127,6 +141,7 @@ export const DecorativeVsLabelled: Story = {
  * compare `caret-triple-up` with Phosphor's `caret-double-up` and `caret-up`.
  */
 export const CustomGlyphs: Story = {
+  parameters: noControls,
   render: () => (
     <div className="flex items-end gap-6 text-text-primary">
       {(['caret-up', 'caret-double-up'] as const).map((name) => (
@@ -149,6 +164,7 @@ export const CustomGlyphs: Story = {
 
 /** Every glyph in the set. */
 export const AllGlyphs: Story = {
+  parameters: noControls,
   render: () => (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-4">
       {ICON_NAMES.map((name) => (
@@ -165,7 +181,7 @@ export const AllGlyphs: Story = {
 };
 
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen' },
+  parameters: { layout: 'fullscreen', ...noControls },
   render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
