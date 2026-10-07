@@ -46,6 +46,19 @@ due date and a table cell are tags — the rounded-rectangle — not the pill.
   `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
   unsorted in `text.subtle`). `AVTable` inherits both.
 
+### `StatCard` — the value is 32, on the type ramp (October 2026)
+
+The value was 36 — written out as a type-ramp exception because the ramp has no 36 step.
+It is now **`heading-xl` (32)**: `heading-xl-bold` on the `default` card, `heading-xl-semibold`
+on the `superadmin` card. Line height follows the ramp (1.2) instead of 44 / 36, so the value
+row is a little shorter; card heights (100 / 150) are unchanged.
+
+**Why it differs from Figma (which draws 36):** it matches the typography we already have
+(an existing ramp step, not a one-off size), it is more consistent with the rest of the
+system, and it helps once there are a lot of value cards in a row. See `docs/stat-card.md`.
+
+The only remaining type exception on the card is the 24 medium `unit`. No API change.
+
 ### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
 
 **New** (minor): `mode` — `day` (default), `range` (two clicks, reported through
