@@ -46,6 +46,39 @@ due date and a table cell are tags — the rounded-rectangle — not the pill.
   `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
   unsorted in `text.subtle`). `AVTable` inherits both.
 
+### `DatePicker` — design review of the variants (October 2026)
+
+Follow-up to #133.
+
+- **Dual view keeps its order:** the right calendar is always after the left, and nothing is disabled. Paging the left onto
+  the right's month makes the right jump to the month after it; paging the right back onto the left's makes the left step back.
+- **Quick picks follow the mode:** a single-date picker shows only Today; ranges only appear in range mode.
+- **Overdue / Due Soon are filters** (`filter: true` on a preset): they do nothing to the calendar, only call `onSelect`. The list is centred vertically.
+- **Quick picks look like a dropdown menu** on desktop (4 inset, square 40-high rows, brand tints, 140 wide) —
+  Figma doesn't define the list, so this is a proposal to test. The touch row is unchanged.
+
+- **Clear is on by default** (`clearable`, default `true`; `false` hides it — a toggle on Storybook's Default controls). It is outside the view swap, so it
+  is the same button in the same place in the day and month views.
+- **The month heading is a toggle, both ways.** "Sep 2026 ▾" opens the months; "2026 ▴" returns to the days. It
+  is Figma's small textual button, 24 high, with a 12 filled caret; the label is `text.secondary`.
+- **Carets follow `neutral.textual.content`** (default, hover, pressed) — the previous/next arrows and the heading's
+  — not the action blue. New icons: `caret-down-fill`, `caret-up-fill`.
+- **Type:** cells `label-sm-regular` (was 16px `body-md`, in the numeric face), today `label-sm-semibold`, range
+  `label-sm-medium`, selected `label-sm-semibold`; the heading `label-sm-medium` `text.secondary` (was 16px
+  `title-sm-semibold` `text.primary`). Today's month is semibold too.
+- **A range has no seams:** the day grid is seven whole 36 columns centred in the calendar (260 ÷ 7 left 37.14 columns
+  whose edges anti-aliased into lines), rows 35 apart.
+- **Pointer cursor** on cells, quick picks, the heading and the arrows.
+- **Dual view matches the design:** 685 × 329, a 118 quick-picks column, 8 above the footer.
+- **Fixed:** in a `Popover` the calendar overflowed its container with doubled padding — the story now uses
+  `width="auto"` and no panel padding.
+- **Storybook:** the control-combination pages (*Day And Range*, *…With Button*, *Month*, *…With Button*, *Month
+  Buttons*) are gone — the **Default** playground is live and covers them; the heading test now covers paging and
+  the view swap.
+
+Migration: callers that relied on the button being absent without `onClear` pass `clearable={false}`; no caller
+imports `DatePicker` yet.
+
 ### `StatCard` — the value is 32, on the type ramp (October 2026)
 
 The value was 36 — written out as a type-ramp exception because the ramp has no 36 step.

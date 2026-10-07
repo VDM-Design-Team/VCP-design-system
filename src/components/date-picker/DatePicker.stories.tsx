@@ -19,14 +19,12 @@ const PRESETS: DatePickerPreset[] = [
   { label: 'This Month', value: '2026-09-01', rangeEnd: '2026-09-30' },
   { label: 'Last Month', value: '2026-08-01', rangeEnd: '2026-08-31' },
   { label: 'This Quarter', value: '2026-07-01', rangeEnd: '2026-09-30' },
-  { label: 'Overdue', value: '2026-08-17', rangeEnd: '2026-09-14' },
-  { label: 'Due Soon', value: TODAY, rangeEnd: '2026-09-22' },
+  { label: 'Overdue', value: '2026-08-17', rangeEnd: '2026-09-14', filter: true },
+  { label: 'Due Soon', value: TODAY, rangeEnd: '2026-09-22', filter: true },
 ];
 
 /** The Storybook-only switches that stand in for Figma's yes/no axes. */
 type PlaygroundArgs = DatePickerProps & {
-  /** Figma `Button=Yes`: the footer button. */
-  button?: boolean;
   /** The quick picks Figma shows with Dual View and Mobile Friendly. */
   showPresets?: boolean;
 };
@@ -39,23 +37,28 @@ const meta = {
       description: {
         component:
           'The calendar panel, in the shapes Figma’s `Date_Picker_VCP` set draws: **Mode** ' +
-          '(day, range, month), **Button** (a footer Clear), **Dual View** (two calendars ' +
-          'that page independently) and **Mobile Friendly** (`h-10` days, presets as a ' +
-          'scrolling row). Flip them with the controls on the first story. One tab stop per ' +
-          'grid — arrows move by day and week and drag the view across month boundaries; the ' +
-          'month heading opens the month grid. Generic `markers`/`flagged`/`presets`; the ' +
+          '(day, range, month), **Button** (a footer Clear, on by default), **Dual View** (two ' +
+          'calendars that page independently) and **Mobile Friendly** (`h-10` days, presets as ' +
+          'a scrolling row). **Every combination is a control on the first story, and it is ' +
+          'live** — pick dates, click the month heading to swap to the months and back, use the ' +
+          'quick picks and Clear. One tab stop per grid — arrows move by day and week and drag ' +
+          'the view across month boundaries. Generic `markers`/`flagged`/`presets`; the ' +
           'planning patterns own their meaning. ISO dates in local time.',
       },
     },
   },
-  args: { value: '2026-09-14', today: TODAY },
+  /* `clearable` is set here so its control reads "true" and flips to hide the footer Clear. */
+  args: { value: '2026-09-14', today: TODAY, clearable: true },
   argTypes: {
     mode: {
       control: 'inline-radio',
       options: ['day', 'range', 'month'],
       description: 'Figma **Mode**: Day, Day & Range, Month.',
     },
-    button: { control: 'boolean', name: 'button (footer)', description: 'Figma **Button**.' },
+    clearable: {
+      control: 'boolean',
+      description: 'Figma **Button**: the footer Clear. On by default; turn it off here.',
+    },
     showPresets: { control: 'boolean', name: 'presets', description: 'Quick picks.' },
     dualView: { control: 'boolean', description: 'Figma **Dual View**. Day and range mode only.' },
     mobile: { control: 'boolean', description: 'Figma **Mobile Friendly**.' },
@@ -77,9 +80,9 @@ type Story = StoryObj<PlaygroundArgs>;
 
 /**
  * Holds the picked value (and range end) so every story is live. Picking in
- * range mode runs the two-click flow; the footer button clears.
+ * range mode runs the two-click flow; the footer Clear empties both.
  */
-function Live({ button, showPresets, ...args }: PlaygroundArgs) {
+function Live({ showPresets, ...args }: PlaygroundArgs) {
   const [value, setValue] = React.useState(args.value);
   const [rangeEnd, setRangeEnd] = React.useState(args.rangeEnd);
   /* Follow the controls when they change the starting point. */
@@ -107,58 +110,35 @@ function Live({ button, showPresets, ...args }: PlaygroundArgs) {
           setRangeEnd(end);
           args.onRangeChange?.(start, end);
         }}
-        onClear={
-          button
-            ? () => {
-                setValue(undefined);
-                setRangeEnd(undefined);
-                args.onClear?.();
-              }
-            : args.onClear
-        }
+        onClear={() => {
+          setValue(undefined);
+          setRangeEnd(undefined);
+          args.onClear?.();
+        }}
       />
     </div>
   );
 }
 
 /**
- * **Playground.** Every Figma variant is a combination of the controls:
- * Mode, Button, Dual View, Mobile Friendly (and presets, which Figma pairs
- * with the last two).
+ * **Playground — and the one place to try it.** Every Figma variant is a
+ * combination of the controls: Mode (day, range, month), Dual View, Mobile
+ * Friendly, presets (which Figma pairs with the last two), and the footer
+ * Clear. It is all live: pick a date (two clicks in range mode), click the
+ * month heading to swap to the months and its "2026 ▴" heading to swap back,
+ * page with the arrows, use a quick pick, press Clear.
  */
 export const Default: Story = {
-  args: { mode: 'day', button: false, showPresets: false, dualView: false, mobile: false },
-  render: (args) => <Live {...args} />,
-};
-
-/** Figma `Mode=Day & Range`: the first click starts the range, the second ends it. */
-export const DayAndRange: Story = {
-  args: { mode: 'range', value: '2026-09-14', rangeEnd: '2026-09-17' },
-  render: (args) => <Live {...args} />,
-};
-
-/** Figma `Mode=Day & Range, Button=Yes` — the footer button (Figma labels this one Cancel). */
-export const DayAndRangeWithButton: Story = {
-  args: { mode: 'range', value: '2026-09-14', rangeEnd: '2026-09-17', button: true, clearLabel: 'Cancel' },
-  render: (args) => <Live {...args} />,
-};
-
-/** Figma `Mode=Month`: a year of months; picking reports the first of the month. */
-export const Month: Story = {
-  args: { mode: 'month', value: '2026-09-01' },
-  render: (args) => <Live {...args} />,
-};
-
-/** Figma `Mode=Month, Button=Yes`. */
-export const MonthWithButton: Story = {
-  args: { mode: 'month', value: '2026-09-01', button: true },
+  args: { mode: 'day', showPresets: false, dualView: false, mobile: false },
   render: (args) => <Live {...args} />,
 };
 
 /**
- * Figma `Dual View=Yes`: quick picks down the side, two calendars that page
- * independently — a range from June can end in September with both ends in
- * view.
+ * Figma `Dual View=Yes`: quick picks down the side with a divider, two
+ * calendars that each page on their own — a range can start in September and
+ * end in October with both ends in view — and Clear bottom right. The tint runs
+ * unbroken along each row and across to the second calendar. A dedicated story
+ * because the layout, not just a flag, changes.
  */
 export const DualView: Story = {
   args: {
@@ -167,7 +147,6 @@ export const DualView: Story = {
     rangeEnd: '2026-10-02',
     dualView: true,
     showPresets: true,
-    button: true,
   },
   render: (args) => <Live {...args} />,
 };
@@ -183,7 +162,6 @@ export const MobileFriendly: Story = {
     rangeEnd: '2026-09-27',
     mobile: true,
     showPresets: true,
-    button: true,
   },
   render: (args) => <Live {...args} />,
 };
@@ -233,7 +211,11 @@ export const MarkersAndFlags: Story = {
 /**
  * The composition: a trigger opening the panel in a Popover. The trigger is a
  * real `Button` — wrapping an `Input` in a button nests two controls, which
- * assistive tech can still reach however the inner one is hidden.
+ * assistive tech can still reach however the inner one is hidden. The Popover
+ * is `width="auto"` with no padding of its own (`panelClassName="p-0"`) and the
+ * calendar drops its own shadow, so the panel is exactly the calendar's 284 —
+ * the default Popover is 288 with 16 of padding, which pushed the calendar out
+ * of its container and doubled the spacing.
  */
 export const InAPopover: Story = {
   render: (args) => {
@@ -244,6 +226,8 @@ export const InAPopover: Story = {
         <Popover
           open={open}
           onOpenChange={setOpen}
+          width="auto"
+          panelClassName="p-0"
           trigger={
             <Button
               variant="secondary"
@@ -261,7 +245,11 @@ export const InAPopover: Story = {
                 setValue(iso);
                 setOpen(false);
               }}
-              className="border-0 shadow-none"
+              onClear={() => {
+                setValue(undefined);
+                setOpen(false);
+              }}
+              className="shadow-none"
             />
           }
         />
@@ -394,22 +382,6 @@ export const KeyboardRespectsBounds: Story = {
   },
 };
 
-/** **Flow:** the month buttons page the view and report it through `onMonthChange`. */
-export const MonthButtons: Story = {
-  parameters: { controls: { disable: true } },
-  args: { value: '2026-09-14', onMonthChange: fn() },
-  play: async ({ args, canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Next month' }));
-    await expect(canvas.getByText('October 2026')).toBeInTheDocument();
-    await expect(args.onMonthChange).toHaveBeenLastCalledWith('2026-10-01');
-    await userEvent.click(canvas.getByRole('button', { name: 'Previous month' }));
-    await userEvent.click(canvas.getByRole('button', { name: 'Previous month' }));
-    await expect(canvas.getByText('August 2026')).toBeInTheDocument();
-    await expect(args.onMonthChange).toHaveBeenLastCalledWith('2026-08-01');
-  },
-};
-
 /**
  * **Flow:** range mode takes two clicks — the first starts a range (no end
  * yet), the second closes it. A click before the start, or any click once
@@ -438,21 +410,41 @@ export const RangeTwoClicks: Story = {
 };
 
 /**
- * **Flow:** in day mode the month heading opens the month grid (the caret
- * promises it); picking a month goes back to its days without choosing a
- * date.
+ * **Flow:** the month heading is a toggle. "September 2026 ▾" swaps the panel
+ * to the months; its heading reads "2026 ▴" and swaps back. Picking a month
+ * goes back to its days without choosing a date, the arrows page months in the
+ * day view and years in the month view (reporting `onMonthChange`), and the
+ * Clear button is the same button in both views.
  */
 export const HeadingOpensMonths: Story = {
   parameters: { controls: { disable: true } },
-  args: { onChange: fn() },
+  args: { onChange: fn(), onMonthChange: fn() },
   render: (args) => <Live {...args} />,
   play: async ({ args, canvasElement }) => {
     const canvas = within(canvasElement);
+
+    /* Paging in the day view. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Next month' }));
+    await expect(canvas.getByText('October 2026')).toBeInTheDocument();
+    await expect(args.onMonthChange).toHaveBeenLastCalledWith('2026-10-01');
+    await userEvent.click(canvas.getByRole('button', { name: 'Previous month' }));
+    await expect(canvas.getByText('September 2026')).toBeInTheDocument();
+
+    /* Down to the months, and the footer does not change. */
+    const clear = canvas.getByRole('button', { name: 'Clear' });
     await userEvent.click(canvas.getByRole('button', { name: 'September 2026, choose month' }));
     await expect(canvas.getByRole('button', { name: 'September 2026' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
+    await expect(canvas.getByRole('button', { name: 'Clear' })).toBe(clear);
+
+    /* The year heading swaps back to the days. */
+    await userEvent.click(canvas.getByRole('button', { name: '2026, show days' }));
+    await expect(day(canvas, '14 September 2026')).toBeInTheDocument();
+
+    /* And through the months to another year, picking a month shows its days. */
+    await userEvent.click(canvas.getByRole('button', { name: 'September 2026, choose month' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Next year' }));
     await userEvent.click(canvas.getByRole('button', { name: 'February 2027' }));
     await expect(day(canvas, '1 February 2027')).toBeInTheDocument();
@@ -494,7 +486,6 @@ export const PresetsAndClear: Story = {
     mode: 'range',
     value: undefined,
     showPresets: true,
-    button: true,
     onRangeChange: fn(),
     onClear: fn(),
   },
@@ -513,5 +504,75 @@ export const PresetsAndClear: Story = {
     await expect(args.onClear).toHaveBeenCalledOnce();
     await expect(lastMonth).toHaveAttribute('aria-pressed', 'false');
     await expect(day(canvas, '1 August 2026')).not.toHaveAttribute('aria-pressed');
+
+    /* Overdue and Due Soon are filters: they leave the calendar alone. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Overdue' }));
+    await expect(canvas.getByRole('button', { name: 'Overdue' })).toHaveAttribute('aria-pressed', 'false');
+    await expect(args.onRangeChange).toHaveBeenCalledTimes(1);
+  },
+};
+
+/**
+ * The right calendar is always after the left, and nothing is disabled to make
+ * it so: page the left onto the right's month and the right jumps to the month
+ * after it; page the right back onto the left's and the left steps back.
+ */
+export const DualViewKeepsOrder: Story = {
+  parameters: { controls: { disable: true } },
+  args: {
+    mode: 'range',
+    value: '2026-09-14',
+    rangeEnd: '2026-10-02',
+    dualView: true,
+    showPresets: false,
+  },
+  render: (args) => <Live {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const left = within(canvas.getByRole('group', { name: 'First calendar' }));
+    const right = within(canvas.getByRole('group', { name: 'Second calendar' }));
+    /* September beside October, and every arrow is live. */
+    await expect(left.getByText('September 2026')).toBeInTheDocument();
+    await expect(right.getByText('October 2026')).toBeInTheDocument();
+    for (const b of canvas.getAllByRole('button', { name: /^(Previous|Next) month$/ })) {
+      await expect(b).toBeEnabled();
+    }
+
+    /* The left goes onto the right's month: the right jumps to the one after. */
+    await userEvent.click(left.getByRole('button', { name: 'Next month' }));
+    await expect(left.getByText('October 2026')).toBeInTheDocument();
+    await expect(right.getByText('November 2026')).toBeInTheDocument();
+
+    /* The right goes back onto the left's month: the left steps back. */
+    await userEvent.click(right.getByRole('button', { name: 'Previous month' }));
+    await expect(right.getByText('October 2026')).toBeInTheDocument();
+    await expect(left.getByText('September 2026')).toBeInTheDocument();
+
+    /* Far apart, they stay where they are. */
+    await userEvent.click(right.getByRole('button', { name: 'Next month' }));
+    await userEvent.click(right.getByRole('button', { name: 'Next month' }));
+    await expect(right.getByText('December 2026')).toBeInTheDocument();
+    await expect(left.getByText('September 2026')).toBeInTheDocument();
+  },
+};
+
+/**
+ * Quick picks follow the mode: a single-date picker offers only Today, a range
+ * picker offers every range as well.
+ */
+export const PresetsFollowTheMode: Story = {
+  parameters: { controls: { disable: true } },
+  args: { mode: 'day', showPresets: true },
+  render: (args) => (
+    <div className="flex flex-col gap-6">
+      <Live {...args} mode="day" />
+      <Live {...args} mode="range" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const lists = canvas.getAllByRole('group', { name: 'Quick picks' });
+    await expect(within(lists[0]).getAllByRole('button').map((b) => b.textContent)).toEqual(['Today']);
+    await expect(within(lists[1]).getAllByRole('button')).toHaveLength(7);
   },
 };
