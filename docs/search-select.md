@@ -45,7 +45,7 @@ placeholder is not a name (same rule as Select).
 
 ## Tokens
 
-The Input's field shell, but with a **`stroke.default`** border (design review, October 2026: `Input` draws the darker `stroke.field`), the `stroke.focused` ring, the disabled treatment, and
+The Input's field shell (`stroke.strong` border, the `stroke.focused` ring, the disabled treatment), and
 the `magnifying-glass` glyph in `text.tertiary`; the panel is
 `surface.elevated` on `stroke.subtle` with `shadow.menu`. Selected rows
 `surface.brand.faint` + `text.brand.strong` (11.37:1 light / 8.97:1 dark);

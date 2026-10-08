@@ -162,10 +162,6 @@ export const RejectionReason = React.forwardRef<HTMLDivElement, RejectionReasonP
           disabled={disabled}
           invalid={invalid}
           fullWidth
-          /* `stroke.default`, as `Field` draws it — the select's own default is the
-             darker `stroke.field`. Merged onto the shell; the invalid and focus
-             borders still win. */
-          className={invalid ? undefined : 'border-stroke-default'}
         />
 
         {chosen?.description && (
@@ -182,7 +178,6 @@ export const RejectionReason = React.forwardRef<HTMLDivElement, RejectionReasonP
             placeholder={detailPlaceholder}
             aria-label={`${label} — details`}
             disabled={disabled}
-            className="border-stroke-default"
           />
         )}
       </div>

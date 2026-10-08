@@ -50,7 +50,7 @@ again (the input resets after each hand-off).
 
 ## Tokens
 
-Resting: dashed `stroke.field` on `surface.elevated` — the form-control
+Resting: dashed `stroke.strong` on `surface.elevated` — the form-control
 border, because this is a form control; the export's `stroke.default`
 measured 2.56:1 against the 3:1 a control boundary needs. Drag-over:
 `stroke.focused` over `surface.brand.base`. The browse verb wears

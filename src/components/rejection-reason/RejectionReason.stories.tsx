@@ -39,9 +39,9 @@ type Story = StoryObj<typeof meta>;
 /** Nothing chosen: the placeholder, and no explanation to give yet. */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    /* The outline is `stroke.default` (#cbd5e1), as `Field` draws it — not the darker `stroke.field`. */
-    const shell = canvasElement.querySelector('select')!.closest('[class*="border-stroke-default"]')!;
-    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(203, 213, 225)');
+    /* A control's boundary is `stroke.strong` (slate-500, #64748b) — 4.76:1 on the field. */
+    const shell = canvasElement.querySelector('select')!.closest('[class*="border-stroke-strong"]')!;
+    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(100, 116, 139)');
   },
 };
 

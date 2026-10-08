@@ -13,7 +13,7 @@ import { Icon } from '../../atoms/icon';
  * open the browse dialog, and the zone paints the shared `focus-within` ring.
  * Drag-and-drop is the pointer bonus on top, never the only way in.
  *
- * The dashed border is `stroke.field` — the form-control resting border, the
+ * The dashed border is `stroke.strong` — the form-control resting border, the
  * same one Input wears, because that is what this is; the export's
  * `stroke.default` measured 2.56:1 against the 3:1 a control's boundary
  * needs. Drag-over swaps to the focused stroke over `surface.brand.base`.
@@ -78,7 +78,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
             ? 'border-stroke-focused bg-surface-brand-base'
             : error
               ? 'border-accent-critical-outline-border-default bg-accent-critical-tonal-surface-default'
-              : 'border-stroke-field bg-surface-elevated',
+              : 'border-stroke-strong bg-surface-elevated',
           disabled
             ? 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'
             : 'cursor-pointer hover:border-stroke-focused',

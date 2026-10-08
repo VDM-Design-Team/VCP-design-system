@@ -36,7 +36,7 @@ Everything else (`id`, `name`, `required`, `aria-*`) is forwarded to the
 
 ## Tokens
 
-Identical to Input by construction: `stroke.field` resting border,
+Identical to Input by construction: `stroke.strong` resting border,
 `stroke.focused` ring and focus border, `accent.critical.outline` when
 invalid, `surface.neutral.subtle` disabled fill. The caret is the system's
 `caret-down` glyph in `text.tertiary` (7.58:1 light / 9.85:1 dark),

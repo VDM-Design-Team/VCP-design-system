@@ -47,7 +47,7 @@ left/right chevrons: nudging is arithmetic, not navigation.
 
 ## Tokens
 
-The Input's shell, with a **`stroke.default`** border (design review, October 2026: `Input` draws the darker `stroke.field`), a
+The Input's shell: a `stroke.strong` border, a
 `stroke.focused` ring and a `surface.neutral.subtle` disabled fill. Value in the numeric face
 (`font.family.numeric` at `caption-md` — the same treatment as DataTable's
 numbers). Nudge glyphs `text.secondary` (10.35:1 light / 11.87:1 dark),
