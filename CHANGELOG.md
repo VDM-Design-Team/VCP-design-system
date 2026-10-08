@@ -2,6 +2,12 @@
 
 ## 0.1.0 — unreleased
 
+### `RejectionReason`, `SearchSelect`, `Stepper` — the outline is `stroke.default` (October 2026)
+
+Design review: the outline was too dark. These three now draw `stroke.default` (slate-300), as Figma's field does, instead of `stroke.field` (slate-500).
+`RejectionReason` composes `Select` and `Input`, so it overrides their border on its own select and its free-text box (`invalid` still shows the critical border;
+focus still shows `stroke.focused`). `Input`, `Select`, `Textarea`, `Checkbox`, `RadioGroup` and `Dropzone` still use `stroke.field` — see the PR for the open question.
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.

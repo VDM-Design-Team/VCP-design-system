@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { SearchSelect } from './SearchSelect';
 
 const PEOPLE = [
@@ -54,6 +55,11 @@ export const Default: Story = {
         </span>
       </div>
     );
+  },
+  play: async ({ canvasElement }) => {
+    /* The outline is `stroke.default` (#cbd5e1), as `Field` draws it — not the darker `stroke.field`. */
+    const shell = canvasElement.querySelector('input')!.closest('[class*="border-stroke-default"]')!;
+    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(203, 213, 225)');
   },
 };
 

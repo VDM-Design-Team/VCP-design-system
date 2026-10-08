@@ -30,7 +30,7 @@ const shell = cva(
     'rounded-md border bg-surface-elevated transition-colors',
     'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
     'has-[:disabled]:cursor-not-allowed has-[:disabled]:bg-surface-neutral-subtle has-[:disabled]:border-stroke-subtle',
-    'border-stroke-field focus-within:border-stroke-focused',
+    'border-stroke-default focus-within:border-stroke-focused',
   ],
   {
     variants: {

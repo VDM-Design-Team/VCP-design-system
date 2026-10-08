@@ -114,7 +114,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         <div
           className={cn(
             'flex h-10 items-center gap-2 rounded-md border bg-surface-elevated px-3 transition-colors',
-            'border-stroke-field focus-within:border-stroke-focused',
+            'border-stroke-default focus-within:border-stroke-focused',
             'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
             'has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-surface-neutral-subtle has-[input:disabled]:border-stroke-subtle',
           )}

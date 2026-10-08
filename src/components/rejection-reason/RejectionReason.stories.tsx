@@ -37,7 +37,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** Nothing chosen: the placeholder, and no explanation to give yet. */
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    /* The outline is `stroke.default` (#cbd5e1), as `Field` draws it — not the darker `stroke.field`. */
+    const shell = canvasElement.querySelector('select')!.closest('[class*="border-stroke-default"]')!;
+    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(203, 213, 225)');
+  },
+};
 
 /** A reason chosen. The explanation is the design's own wording for what it covers. */
 export const ReasonChosen: Story = {
