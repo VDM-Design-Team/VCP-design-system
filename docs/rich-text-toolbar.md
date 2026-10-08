@@ -33,10 +33,11 @@ The editor itself (contenteditable wiring, document model) is deliberately not h
 |---|---|
 | Text styles | `bold`, `italic`, `underline`, `strike` |
 | Lists | `ol`, `ul` — numbered first, as the design orders them |
-| Everything else | `link`, `unlink`, `quote` (block quote), `code` (code block), `undo`, `redo` |
+| Everything else | `link`, `unlink`, `quote` (block quote), `code` (code block), `undo`, `redo`, then `image` when asked for |
 
-There are **no image or file inserts** — VCP has no such function, so the earlier
-`image` and `file` commands are gone.
+`image` (**Insert image**) is the one command that is **opt-in**: the default set is the
+design's twelve, and the **comment editor** — the legacy design that has an image button
+— adds it. There is no file insert; VCP has no such function.
 
 ## Props
 
@@ -44,10 +45,49 @@ There are **no image or file inserts** — VCP has no such function, so the earl
 |---|---|---|---|
 | `active` | `Partial<Record<Command, boolean>>` | `{}` | Which stateful commands are on — `{ bold: true }` |
 | `disabledCommands` | `Partial<Record<Command, boolean>>` | `{}` | Dead commands — `{ unlink: true, undo: true }` |
+| `commands` | `RichTextCommand[]` | the twelve (`DEFAULT_RICH_TEXT_COMMANDS`) | **Which commands to show.** `[...DEFAULT_RICH_TEXT_COMMANDS, 'image']` for comments; a shorter list for a smaller editor. Order and groups never change; a group with nothing left loses its divider |
 | `onCommand` | `(command) => void` | — | Every press lands here |
+| `open` | `boolean` | `true` | Showing or not. Set `false` rather than unmounting and it fades out first |
 | `label` | `string` | `'Text formatting'` | The toolbar's accessible name |
 | `className`, `style` | | — | Where the editor places it (see below) |
 | `ref` | `Ref<HTMLDivElement>` | — | The toolbar |
+
+## Choosing what an editor can do
+
+Not every editor supports everything, so **the editor declares its commands** instead of the
+toolbar guessing. It is an allow-list, so a command a new editor does not support is simply
+absent, and adding a command to the toolbar later does not appear in editors that did not ask.
+
+| Editor | `commands` |
+|---|---|
+| Default (description, long text) | *(omit)* — the twelve |
+| **Comments** | `[...DEFAULT_RICH_TEXT_COMMANDS, 'image']` — everything, plus image |
+| A small field | `['bold', 'italic', 'link']` |
+
+`ALL_RICH_TEXT_COMMANDS` lists every command in display order, `DEFAULT_RICH_TEXT_COMMANDS`
+the default twelve — both exported with the component.
+
+**To disable instead of hide** — a command the editor has but cannot use *right now* — use
+`disabledCommands`. The two differ: hiding is permanent for that editor, disabling is a
+state. Hiding a command because it is momentarily unavailable makes a toolbar that
+reshuffles, which cannot be learned.
+
+## Undo and redo disable themselves — via the editor
+
+The toolbar owns no editor state, so it cannot know whether there is anything to undo.
+**The editor says so**, and the toolbar disables the button: undo is disabled at the start of
+the history, redo at its end, and both while the history is empty.
+
+```tsx
+<RichTextToolbar
+  disabledCommands={{ undo: !history.canUndo, redo: !history.canRedo }}
+  onCommand={(c) => (c === 'undo' ? history.undo() : c === 'redo' ? history.redo() : …)}
+/>
+```
+
+The **Default** story runs this live: each toggle is a history step, Undo starts disabled, a
+change enables it, undoing it enables Redo and disables Undo again, and a new change after an
+undo drops the redo tail. A disabled button is skipped by the arrow keys.
 
 ## Floating over a selection
 
@@ -61,6 +101,18 @@ knows where the selection is. The usual recipe, and the **Floating On Selection*
    8 above it (`-translate-x-1/2 -translate-y-full`, `left`/`top` from the rect).
 3. Keep it inside the viewport — flip below or clamp the left edge when the range is
    near an edge. The component does no collision handling, as with `Popover`.
+
+## Motion
+
+Shown, the toolbar **dissolves in with a tiny drop**: opacity 0 → 1 and 4px down into place,
+150ms ease-out. Hidden with `open={false}` it **fades out where it stands** and only then
+leaves the DOM (150ms); unmount it outright and it just disappears. The motion is on an inner
+card, so the editor's own positioning on the toolbar (a `translate`, a `top`) is never part of it.
+`prefers-reduced-motion` gets none. Enter uses CSS `@starting-style` (the `starting:`
+variant), which every current browser supports; an older one just shows it without the drop.
+
+For the fade-out to play, keep the toolbar rendered and drive `open` — the
+**Floating On Selection** and **Fades In And Out** stories do.
 
 **Pressing a button never costs the selection.** The toolbar swallows `mousedown`, so a
 click on "Bold" does not move focus out of the editor and collapse the text it is meant
@@ -124,8 +176,8 @@ each with its fill).
 
 - **Don't wire it straight to `document.execCommand`** and call it an editor — the
   command surface is stable; the editor behind it is a real decision.
-- **Don't hide commands the editor lacks — disable them.** A toolbar that reshuffles
-  between contexts can't be learned.
+- **Don't hide a command because it is momentarily unavailable — disable it** (`disabledCommands`). Use `commands` for what an editor *never* does; a toolbar that reshuffles
+  between moments can't be learned.
 - **Don't add VCP-specific inserts here** ("insert AV reference") — that is the composer
   pattern extending its own toolbar.
 - **Don't press what has no state** — `active` only affects the eight stateful commands.

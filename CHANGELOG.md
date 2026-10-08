@@ -12,8 +12,14 @@ Rebuilt from the design's toolbar markup, on tokens, with our toolbar accessibil
 - **32 buttons with 16 line icons** (were 28, with the letters B I U S): `text-b`, `text-italic`, `text-underline`, `text-strikethrough`. Glyphs `text.primary`; hover
   `surface.neutral.subtle`; 24-high dividers.
 - **Three groups, the design's order:** text styles · numbered list, bulleted list · link, **unlink**, **block quote**, **code block**, undo, redo.
-- **Breaking:** the `image` and `file` commands are removed (VCP has no such function), and `quote`, `code` and `unlink` are added. `ol` now comes before `ul`; undo and
+- **Breaking:** the `file` command is removed (VCP has no such function); `quote`, `code` and `unlink` are added. `image` stays, **opt-in**: the default set is the twelve,
+  and the comment editor adds it. `ol` now comes before `ul`; undo and
   redo are in the last group. Migration: drop any `image` / `file` handling; add `quote`, `code`, `unlink` to the `onCommand` switch.
+- **`commands` prop** — the editor declares which commands to show (`DEFAULT_RICH_TEXT_COMMANDS`, `ALL_RICH_TEXT_COMMANDS` exported); `[...DEFAULT_RICH_TEXT_COMMANDS, 'image']` for comments. Order and groups
+  are fixed; empty groups drop their divider.
+- **`open` prop and motion:** the toolbar dissolves in with a 4px drop and fades out before leaving the DOM (150ms; none under reduced motion). The card is an inner layer so the editor's
+  positioning is not animated.
+- **Undo and redo** are disabled by the editor through `disabledCommands` (`{ undo: !canUndo, redo: !canRedo }`); the Default story demonstrates a live history.
 - **Keyboard:** the arrows now skip disabled buttons (they used to land on one and strand the tab stop). Dividers are `role="separator"`.
 - New icons (each with its fill): `text-b`, `text-italic`, `text-underline`, `text-strikethrough`, `link-break`, `quotes`.
 
