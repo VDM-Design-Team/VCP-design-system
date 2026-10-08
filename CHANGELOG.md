@@ -4,8 +4,8 @@
 
 ### `stroke.strong` is the control boundary; `stroke.field` is removed (October 2026)
 
-Design review: the outline on `RejectionReason`, `SearchSelect` and `Stepper` read too dark, and `stroke.field` was a token named for a component with `stroke.strong`
-sitting unused beside it.
+`stroke.field` was a token too specific to earn its place — named for a component, with `stroke.strong` sitting unused beside it. Making `strong` the control-boundary
+colour keeps the variables streamlined and meets WCAG AA (1.4.11) for a control's boundary.
 
 - **`stroke.strong` now holds the control-boundary colour:** slate-500 in light (was slate-400), slate-400 in dark (was slate-500) — the values `stroke.field` held. It clears
   WCAG 1.4.11's 3:1 in both themes (4.76:1 / 4.55:1 on white / canvas in light; 5.71:1 / 6.96:1 in dark). Nothing used the old `strong`.
