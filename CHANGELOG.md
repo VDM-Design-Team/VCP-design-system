@@ -15,6 +15,8 @@ Rebuilt from the design's toolbar markup, on tokens, with our toolbar accessibil
 - **Breaking:** the `file` command is removed (VCP has no such function); `quote`, `code` and `unlink` are added. `image` stays, **opt-in**: the default set is the twelve,
   and the comment editor adds it. `ol` now comes before `ul`; undo and
   redo are in the last group. Migration: drop any `image` / `file` handling; add `quote`, `code`, `unlink` to the `onCommand` switch.
+- **Insert image sits left of undo and redo** (undo/redo stay the rightmost pair), and **new `useSelectionToolbar` hook**: shows the toolbar over a finished selection and hides it
+  the moment there is none — on any click, key or programmatic change (it listens to `selectionchange`), not only clicks inside the editor.
 - **`commands` prop** — the editor declares which commands to show (`DEFAULT_RICH_TEXT_COMMANDS`, `ALL_RICH_TEXT_COMMANDS` exported); `[...DEFAULT_RICH_TEXT_COMMANDS, 'image']` for comments. Order and groups
   are fixed; empty groups drop their divider.
 - **`open` prop and motion:** the toolbar dissolves in with a 4px drop and fades out before leaving the DOM (150ms; none under reduced motion). The card is an inner layer so the editor's

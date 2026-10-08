@@ -33,7 +33,7 @@ The editor itself (contenteditable wiring, document model) is deliberately not h
 |---|---|
 | Text styles | `bold`, `italic`, `underline`, `strike` |
 | Lists | `ol`, `ul` — numbered first, as the design orders them |
-| Everything else | `link`, `unlink`, `quote` (block quote), `code` (code block), `undo`, `redo`, then `image` when asked for |
+| Everything else | `link`, `unlink`, `quote` (block quote), `code` (code block), then **`image` when asked for, then `undo` and `redo` — always the rightmost pair** |
 
 `image` (**Insert image**) is the one command that is **opt-in**: the default set is the
 design's twelve, and the **comment editor** — the legacy design that has an image button
@@ -92,15 +92,37 @@ undo drops the redo tail. A disabled button is skipped by the arrow keys.
 ## Floating over a selection
 
 The toolbar is the card; **the editor decides where it goes**, because only the editor
-knows where the selection is. The usual recipe, and the **Floating On Selection** story:
+knows where the selection is. `useSelectionToolbar` does the usual part, and the
+**Floating On Selection** story is the whole recipe:
 
-1. On `mouseup` / `keyup` in the editor, read `getSelection()`. Collapsed, or outside
-   the editor: hide the toolbar.
-2. Otherwise take `range.getBoundingClientRect()` and place the toolbar
-   `position: absolute` in the editor's positioned container, centred on the range and
-   8 above it (`-translate-x-1/2 -translate-y-full`, `left`/`top` from the rect).
-3. Keep it inside the viewport — flip below or clamp the left edge when the range is
-   near an edge. The component does no collision handling, as with `Popover`.
+```tsx
+const { containerRef, open, position } = useSelectionToolbar();
+
+<div ref={containerRef} className="relative">
+  …the editor…
+  <RichTextToolbar
+    open={open}
+    style={position}
+    className="absolute z-10 -translate-x-1/2 -translate-y-full"
+  />
+</div>
+```
+
+- **It shows** when a selection inside the container is finished (`mouseup`, `keyup`), centred
+  over it and 8 above.
+- **It goes away the moment there is no selection to point at** — a click anywhere on the
+  page, an arrow key, a programmatic collapse. The hook listens to the document's
+  `selectionchange`, not only to clicks inside the editor, so it is never left floating over
+  text that is no longer selected. Keep the toolbar rendered and drive `open`, and it fades out.
+- **It does not follow scrolling or resizing and does no collision handling** — a selection near
+  an edge can push the toolbar past it (keep the editor away from the viewport edge, or clamp
+  `position.left` to half the toolbar's width). Those are the editor's to add, as with
+  `Popover`.
+
+**Pressing a button never costs the selection.** The toolbar swallows `mousedown`, so a
+click on "Bold" does not move focus out of the editor and collapse the text it is meant
+to bold. Keyboard use is unaffected: Tab into the toolbar from the editor, Arrow keys
+inside it.
 
 ## Motion
 
@@ -113,11 +135,6 @@ variant), which every current browser supports; an older one just shows it witho
 
 For the fade-out to play, keep the toolbar rendered and drive `open` — the
 **Floating On Selection** and **Fades In And Out** stories do.
-
-**Pressing a button never costs the selection.** The toolbar swallows `mousedown`, so a
-click on "Bold" does not move focus out of the editor and collapse the text it is meant
-to bold. Keyboard use is unaffected: Tab into the toolbar from the editor, Arrow keys
-inside it.
 
 ## One tab stop
 

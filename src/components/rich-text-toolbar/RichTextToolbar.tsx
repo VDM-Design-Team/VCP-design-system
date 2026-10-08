@@ -68,9 +68,9 @@ export const ALL_RICH_TEXT_COMMANDS: readonly RichTextCommand[] = [
   'unlink',
   'quote',
   'code',
+  'image',
   'undo',
   'redo',
-  'image',
 ];
 
 /**
@@ -145,9 +145,10 @@ const GROUPS: Spec[][] = [
     { command: 'unlink', name: 'Unlink', icon: 'link-break' },
     { command: 'quote', name: 'Block quote', icon: 'quotes' },
     { command: 'code', name: 'Code block', icon: 'code' },
+    /* Insert image sits left of history, so undo and redo stay the rightmost pair. */
+    { command: 'image', name: 'Insert image', icon: 'image' },
     { command: 'undo', name: 'Undo', icon: 'arrow-u-up-left' },
     { command: 'redo', name: 'Redo', icon: 'arrow-u-up-right' },
-    { command: 'image', name: 'Insert image', icon: 'image' },
   ],
 ];
 

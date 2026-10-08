@@ -6,6 +6,7 @@ import {
   DEFAULT_RICH_TEXT_COMMANDS,
   type RichTextCommand,
 } from './RichTextToolbar';
+import { useSelectionToolbar } from './useSelectionToolbar';
 
 const meta = {
   title: 'Components/Forms/RichTextToolbar',
@@ -106,9 +107,12 @@ export const ForComments: Story = {
     await expect(within(canvas.getByRole('toolbar')).getAllByRole('button')).toHaveLength(13);
     const image = canvas.getByRole('button', { name: 'Insert image' });
     await expect(image).toBeInTheDocument();
-    /* It is the last button, after Redo. */
-    const buttons = within(canvas.getByRole('toolbar')).getAllByRole('button');
-    await expect(buttons[buttons.length - 1]).toBe(image);
+    /* Image sits left of history: ...Code block, Insert image, Undo, Redo — undo and redo
+       stay the rightmost pair. */
+    const names = within(canvas.getByRole('toolbar'))
+      .getAllByRole('button')
+      .map((b) => b.getAttribute('aria-label'));
+    await expect(names.slice(-4)).toEqual(['Code block', 'Insert image', 'Undo', 'Redo']);
   },
 };
 
@@ -138,42 +142,24 @@ export const PickedCommands: Story = {
 export const FloatingOnSelection: Story = {
   parameters: { layout: 'padded' },
   render: (args) => {
-    const box = React.useRef<HTMLDivElement>(null);
-    const [pos, setPos] = React.useState<{ left: number; top: number } | null>(null);
-    const [visible, setVisible] = React.useState(false);
+    const { containerRef, open, position } = useSelectionToolbar();
     const [active, setActive] = React.useState<Partial<Record<RichTextCommand, boolean>>>({});
     const [last, setLast] = React.useState<RichTextCommand>();
-
-    const place = () => {
-      const sel = window.getSelection();
-      /* Hide with `open`, not by unmounting, so it fades out where it stood. */
-      if (!sel || sel.isCollapsed || !box.current?.contains(sel.anchorNode)) return setVisible(false);
-      const r = sel.getRangeAt(0).getBoundingClientRect();
-      const b = box.current.getBoundingClientRect();
-      /* Centred over the selection, 8 above it. */
-      setPos({ left: r.left + r.width / 2 - b.left, top: r.top - b.top - 8 });
-      setVisible(true);
-    };
-
     return (
-      <div
-        ref={box}
-        className="relative w-128 pt-14"
-        onMouseUp={place}
-        onKeyUp={place}
-      >
-        <p className="font-sans text-body-sm-regular text-text-secondary">
-          Two deliverables are missing evidence. They cannot move to Confirmed prod until a
-          source is attached, and the review that was scheduled for Friday has moved to next
-          week. Select any of these words to bring the toolbar up.
-        </p>
-        <p className="mt-3 font-sans text-caption-md-regular text-text-tertiary">
-          Last command: {last ?? '—'}
-        </p>
-        {pos && (
+      <div className="flex flex-col gap-4">
+        <div ref={containerRef} className="relative ml-56 w-128 pt-14">
+          <p className="font-sans text-body-sm-regular text-text-secondary">
+            Two deliverables are missing evidence. They cannot move to Confirmed prod until a
+            source is attached, and the review that was scheduled for Friday has moved to next
+            week. Select any of these words to bring the toolbar up.
+          </p>
+          <p className="mt-3 font-sans text-caption-md-regular text-text-tertiary">
+            Last command: {last ?? '—'}
+          </p>
+          {/* Always rendered, driven by `open`, so it fades out where it stood. */}
           <RichTextToolbar
             {...args}
-            open={visible}
+            open={open}
             active={active}
             disabledCommands={{ unlink: true }}
             onCommand={(c) => {
@@ -181,11 +167,33 @@ export const FloatingOnSelection: Story = {
               if (STATEFUL.includes(c)) setActive((a) => ({ ...a, [c]: !a[c] }));
             }}
             className="absolute z-10 -translate-x-1/2 -translate-y-full"
-            style={{ left: pos.left, top: pos.top }}
+            style={position}
           />
-        )}
+        </div>
+        <p className="font-sans text-caption-md-regular text-text-tertiary">
+          Click here, outside the editor, to see it go away.
+        </p>
       </div>
     );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const paragraph = canvasElement.querySelector('p')!;
+    const text = [...paragraph.childNodes].find((n) => n.nodeType === Node.TEXT_NODE)!;
+    const at = text.textContent!.indexOf('missing evidence');
+    const range = document.createRange();
+    range.setStart(text, at);
+    range.setEnd(text, at + 'missing evidence'.length);
+    const sel = window.getSelection()!;
+    sel.removeAllRanges();
+    sel.addRange(range);
+    paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    await waitFor(() => expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open'));
+
+    /* The selection goes away by any route — here, programmatically, with no click in
+       the editor at all — and the toolbar goes with it. */
+    sel.removeAllRanges();
+    await waitFor(() => expect(canvas.queryByRole('toolbar')).toBeNull(), { timeout: 1500 });
   },
 };
 
