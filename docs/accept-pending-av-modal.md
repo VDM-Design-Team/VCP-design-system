@@ -82,7 +82,7 @@ as a second call to action, which is why that one is grey. See
 |---|---|---|
 | Title at `title-sm` (16/semibold) | `Modal`'s `heading-md` (20) | `Modal` owns its title's size. A 16 title would need a size prop on `Modal`, which one dialog does not justify — if a third wants it, that is the trigger |
 | Dialog width 564 | `size="md"` (512) | Widths ride the spacing scale; 512 is the nearest step |
-| Card radius 8, padding 16, gap 12 | `rounded-md`, `p-4`, `gap-3` | Exact — the numeric scale lands on all three |
+| Card radius 8, padding 16, gap 12 | `rounded-md`, `p-4`, and `Checkbox`'s own `gap-2` (8) | Radius and padding are exact. The box-to-label gap is 8 everywhere (design review, October 2026), so the card no longer overrides it |
 
 ## ⚠️ Five field molecules exist in the design and are used nowhere
 

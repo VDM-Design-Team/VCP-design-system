@@ -95,7 +95,7 @@ export function AcceptPendingAVModal({
           aria-label="Multipart Value"
           aria-describedby={descriptionId}
           className={cn(
-            'w-full items-start gap-3 rounded-md border p-4',
+            'w-full items-start rounded-md border p-4',
             multipart
               ? 'border-stroke-focused bg-surface-brand-faint'
               : 'border-stroke-default bg-surface-elevated',
