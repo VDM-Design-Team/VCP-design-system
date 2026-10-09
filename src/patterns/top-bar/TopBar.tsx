@@ -146,7 +146,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                    motion and the dot stays. */
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-1 top-0.5 size-3"
+                  className="pointer-events-none absolute right-1.5 top-1 size-3"
                 >
                   <span className="absolute inset-0 animate-ping rounded-full bg-accent-critical-outline-border-default opacity-60 motion-reduce:hidden" />
                   <span className="absolute inset-0 rounded-full bg-accent-critical-outline-border-default" />
