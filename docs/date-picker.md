@@ -23,7 +23,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Mode = Day | `mode="day"` (default) | One date; `onChange(iso)` |
 | Mode = Day & Range | `mode="range"` | Two clicks; `onRangeChange(start, end?)` |
 | Mode = Month | `mode="month"` | A year of months; `onChange` gets the first of the month |
-| Button = Yes | `onClear` (+ `clearLabel`) | Footer button; label defaults to "Clear" |
+| Button = Yes | `clearable` (default **on**), `onClear`, `clearLabel` | Footer button, visible by default; `clearable={false}` turns it off. Label defaults to "Clear" |
 | Dual View = Yes | `dualView` | Two calendars, paging independently. Day and range mode |
 | Mobile Friendly = Yes | `mobile` | `h-10` day targets, full width, presets as a scrolling row |
 | Theme | — | Dark comes from the tokens, as in Figma's variable mode |
@@ -55,8 +55,9 @@ controls flip every axis.
 | `month` / `onMonthChange` | ISO / `(iso) => void` | internal | Controlled visible month (the first calendar's in dual view) |
 | `dualView` | `boolean` | `false` | Two calendars side by side |
 | `mobile` | `boolean` | `false` | Touch layout |
-| `presets` | `{ label, value, rangeEnd? }[]` | — | Quick picks; pressed while their dates are the value |
-| `onClear` | `() => void` | — | Shows the footer button |
+| `presets` | `{ label, value, rangeEnd?, filter?, onSelect? }[]` | — | Quick picks; pressed while their dates are the value |
+| `clearable` | `boolean` | `true` | The footer Clear button. On by default; `false` hides it. The same button in the same place in the day and month views |
+| `onClear` | `() => void` | — | What Clear does. The panel holds no value of its own to reset, so supply this whenever the button is shown |
 | `clearLabel` | `string` | `'Clear'` | Figma labels the range variant's button "Cancel" |
 | `min` / `max` | ISO | — | Inclusive bounds; outside days and months disable, arrows refuse to leave |
 | `markers` | `Record<iso, 'success' \| 'warning' \| 'danger'>` | `{}` | Dot under the day — pair with a legend |
@@ -70,12 +71,26 @@ controls flip every axis.
   the second closes it (`onRangeChange(start, end)`). A click before the
   start, or any click once the range is closed, starts a new one. The panel
   never holds the range itself — `value` and `rangeEnd` stay the caller's.
-- **The month heading opens the month grid** in day and range mode — the
-  caret beside it promises that. Picking a month goes back to its days
-  without choosing a date.
+- **The month heading is a toggle** in day and range mode. "Sep 2026 ▾" swaps
+  the panel to the month grid, whose heading reads "2026 ▴" and swaps back;
+  picking a month also goes back to its days, without choosing a date. The
+  footer Clear button is outside the swap, so it is the same button in the same
+  place in both views. In month mode on its own the heading draws the ▴ but is
+  not a button — there are no days to go back to.
 - **Dual view pages each calendar on its own**, as Figma draws it (June
   beside September), so both ends of a long range can be in view. The second
-  starts one month after the first; a preset moves both to its ends.
+  starts one month after the first; a preset moves both to its ends. **The right calendar is always after the left** — never the same month, never
+  before — and nothing is disabled to make it so. Page the left onto the right's
+  month (or past it) and the right jumps to the month after it; page the right back
+  onto the left's month (or before) and the left steps to the month before. Months
+  further apart stay put (design review of #143).
+- **Presets follow the mode.** A single-date picker (`day`, `month`) shows
+  only the presets without a `rangeEnd` — Today; a range picker shows them
+  all. With nothing left to show the column is dropped. On desktop the list
+  is drawn like the system's dropdown menu: a 4 inset, square 40-high rows,
+  12 either side, `surface.brand.faint` on hover, `.subtle` on press, and the
+  current pick semibold on `.faint` (not `text.brand.medium`: it is 3.5:1 on that fill in dark). Figma doesn't define this list,
+  so it is a proposal to test. The list is centred vertically in the panel. **Filters** (`filter: true` — Overdue, Due Soon) are not periods: clicking one leaves the calendar and the value alone, is never pressed, and only calls the preset's `onSelect`; they show in range mode only.
 - **Presets** apply their dates (through `onRangeChange` when they carry a
   `rangeEnd` or the mode is range, `onChange` otherwise) and page the
   calendar to them.
@@ -101,11 +116,35 @@ bug, fixed by never letting a `Date` cross a timezone.
 ## Tokens
 
 Panel `surface.elevated`, `radius.md`, `shadow.menu`, no border (Figma
-draws none). Header: `IconButton tertiary sm` chevrons tinted
-`text.tertiary` as in Figma; heading `title-sm-semibold` `text.primary`.
-Weekdays `caption-md-semibold` `text.tertiary`. Days in the numeric face,
-`body-md-regular` `text.secondary`; today `body-md-semibold` `text.primary`;
-out-of-bounds days `text.disabled`. Neighbouring months' days are
+draws none). **Type (design review, 5 Oct 2026):** weekdays `caption-md-semibold`
+`text.tertiary`; day and month cells `label-sm-regular` (14) `text.secondary`;
+today's date and today's month `label-sm-semibold` `text.primary`; the days
+between a range's ends `label-sm-medium` `text.primary`; the selected ends
+`label-sm-semibold` `text.inverted.primary`; the heading `label-sm-medium`
+`text.secondary`. All Poppins. Out-of-bounds days `text.disabled`.
+
+**Header.** Previous and next are `IconButton tertiary sm` whose glyphs follow
+**`neutral.textual.content`** — `default`, `hover`, `pressed` — not the action blue.
+The heading is Figma's small textual button, filling the header's 24: the label in
+`text.secondary`, a **12 filled caret** (`caret-down-fill` in the days, `caret-up-fill`
+in the months) on the same neutral-textual colours, which change with the button's
+state. Figma draws today's month ("Jun") medium; this makes it semibold, per the same
+review.
+
+**Pointer.** Day cells, month cells, quick picks, the heading and the arrows all show
+the pointer cursor — Tailwind's preflight leaves buttons on the arrow.
+
+**Range.** A range reads as unbroken bands: the calendar's grid is seven **36** columns
+(Figma's 252) centred in the calendar, because a column that is not a whole number of
+pixels — 260 ÷ 7 in the dual view — anti-aliases the seam between two tinted cells into a
+visible line. Rows sit 35 apart (a 32 cell and 3 between), Figma's pitch.
+
+**Dual view and popover sizes.** The dual panel is 685 × 329: a 118 quick-picks column
+with a divider, then two 260 calendars 16 apart over 252 of height, 8 above the footer. In
+a `Popover` use `width="auto"` and `panelClassName="p-0"`; the default popover is 288 wide
+with 16 of padding, which pushed the 284 calendar out of its container with doubled spacing.
+
+Neighbouring months' days are
 `text.subtle` (4.76:1 light / 5.71:1 dark) — **a deliberate step off
 Figma**, which greys them with `text.disabled` (1.48:1). They're still
 text a reader may want (which weekday is the 31st?), and axe fails them.
@@ -117,16 +156,18 @@ text a reader may want (which weekday is the 31st?), and axe fails them.
 | Days — `text.secondary` on `surface.elevated` | 10.35:1 | 11.87:1 |
 | Weekdays — `text.tertiary` on `surface.elevated` | 7.58:1 | 9.85:1 |
 | Neighbouring days — `text.subtle` on `surface.elevated` | 4.76:1 | 5.71:1 |
-| Pressed preset — `text.primary` on `surface.neutral.subtle` | 18.41:1 | 10.35:1 |
+| Pressed preset (touch row) — `text.primary` on `surface.neutral.subtle` | 18.41:1 | 10.35:1 |
+| Pressed preset (desktop) — `text.primary` on `surface.brand.faint` | 17.34:1 | 13.23:1 |
 
 Flagged stays the `accent.critical.tonal` pair (8.36:1 light / 12.00:1
-dark); markers the accent filled surfaces. Presets hover
-`surface.neutral.subtle`, press `surface.neutral.medium`; separators
+dark); markers the accent filled surfaces. Presets (desktop) hover
+`surface.brand.faint`, press `surface.brand.subtle`; the touch row uses
+`surface.neutral.subtle` / `.medium`; separators
 `stroke.default`; footer `Button secondary sm`.
 
-**Type is mapped to the nearest ramp step.** Figma sets days and the
-heading at 15 and weekdays at 11 — neither is on the ramp — so they use
-`body-md`/`title-sm` (16) and `caption-md` (12). No new tokens.
+**Type is on the ramp.** The earlier 16px `body-md` / `title-sm` mapping is gone: Figma's
+`Label/sm` (14) and `Caption/md` (12) are ramp steps, so the cells and heading use them
+directly. No new tokens; two icons (`caret-down-fill`, `caret-up-fill`) were added.
 
 ## Accessibility
 
