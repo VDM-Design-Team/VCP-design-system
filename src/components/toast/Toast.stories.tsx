@@ -76,9 +76,9 @@ export const Tones: Story = {
  * ignores the timer entirely once `actionLabel` is present — note the absence
  * of `data-duration` on the element.
  *
- * The action is a real `Button` rendered by the component, not a slot: on a
- * tonal fill it needs the tone's own content token to stay above 4.5:1, and a
- * caller passing a plain `<Button>` would not know that.
+ * The action is a real `Button` rendered by the component, not a slot, so its
+ * size and variant stay as the design draws them: small, outlined, top-aligned
+ * beside the close control.
  */
 export const WithAction: Story = {
   args: {
@@ -293,10 +293,8 @@ function ToastTriggers() {
 }
 
 /**
- * Every colour is a semantic token, so dark comes for free. The tonal fill and
- * content pair is the one Badge already measured; the border is the tone's
- * `outline.content.default`, which clears 3:1 against the page in both themes
- * so a floating toast always has a visible edge.
+ * Every colour is a semantic token, so dark comes for free: the card is
+ * `surface.elevated`, and only the glyph and the timer bar carry the tone.
  */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
@@ -313,7 +311,7 @@ export const LightAndDark: Story = {
                 onDismiss={() => {}}
                 dismissLabel={`Dismiss the ${tone} toast`}
               >
-                The same tonal pair in both themes.
+                The same card in both themes.
               </Toast>
             ))}
             <Toast
