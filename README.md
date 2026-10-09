@@ -85,7 +85,9 @@ component before it merges, not a screenshot of it.
 - `main` is protected. Everything lands via PR.
 - CI fails on hardcoded values, stale `dist/`, and type errors.
 - Semver: new token or variant = minor. Rename or removal = major + a migration
-  note in `CHANGELOG.md`.
+  note. Each PR's changelog entry is its own file in `changes/` (see
+  `changes/README.md`); `npm run changelog` folds them into `CHANGELOG.md` at
+  release.
 - One named engineering owner reviews design's PRs. **This is the part that
   actually makes the system work** — without it the repo drifts.
 
