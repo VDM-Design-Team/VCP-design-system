@@ -24,15 +24,15 @@ states …
 - **`bump`** is `patch`, `minor` or `major` (rule 6 in `CLAUDE.md`):
   - `patch`: a fix or a visual adjustment, with no new API.
   - `minor`: a new token, variant, prop or piece.
-  - `major`: a rename or removal. It must include a line starting
-    `Migration:` that says what callers change.
+  - `major`: a rename or removal. It must include a `Migration:` note, on
+    its own line or inside a bullet, that says what callers change.
 - **The body** is the entry exactly as it will read in `CHANGELOG.md`: a
   `### ` heading naming the piece and the month, then the prose.
 - **A small fix still gets a file.** A heading and one sentence is fine.
 
 `npm test` (and CI) fails a PR that changes `src/` or `tokens/` without
 adding a file here, a PR that edits `CHANGELOG.md` directly, and a file with
-no valid `bump`, no `### ` heading, or a `major` with no `Migration:` line.
+no valid `bump`, no `### ` heading, or a `major` with no `Migration:` note.
 
 ## Releasing
 

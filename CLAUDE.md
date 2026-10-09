@@ -30,7 +30,7 @@ Claude Design project — those mirror this repo, not the other way round.
    `changes/`** (`changes/<branch-name>.md`, with `bump: patch|minor|major`) —
    never edit `CHANGELOG.md` directly; `npm run changelog` writes it at
    release. `npm run lint:changes` (part of `npm test`) enforces it, and a
-   `major` entry must carry a `Migration:` line. See `changes/README.md`.
+   `major` entry must carry a `Migration:` note. See `changes/README.md`.
 7. **Pick the tier before you write.** See the next section. Getting this
    wrong is expensive to undo once other things import it.
 
