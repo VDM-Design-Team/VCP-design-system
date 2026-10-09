@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
-import { IconButton } from '../../atoms/icon-button';
 
 /**
  * PageTitle — the band under the top bar that says which page you are on: an
@@ -37,10 +36,30 @@ export interface PageTitleProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   backLabel?: string;
   /** The page's actions, on the right. */
   actions?: React.ReactNode;
+  /**
+   * The title's size: `md` is 18 semibold, `sm` is 14 medium. Both are
+   * `text.secondary`. Default `md`.
+   */
+  size?: 'sm' | 'md';
 }
 
+/* The back control hugs its 20 glyph — no padding either side — in the neutral
+   palette, with its states. A `::after` stretches the pointer target to 40
+   without moving anything, so the touch minimum still holds. */
+const BACK_CONTROL = cn(
+  'relative inline-flex shrink-0 rounded-sm after:absolute after:-inset-2.5',
+  'text-neutral-outline-content-default transition-colors',
+  'hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+);
+
+const TITLE_TYPE = {
+  md: 'text-body-lg-semibold',
+  sm: 'text-label-sm-medium',
+} as const;
+
 export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
-  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', actions, ...props }, ref) => (
+  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', actions, size = 'md', ...props }, ref) => (
     /* 32 above, 16 below, 32 each side — the design's own frame. */
     <header
       ref={ref}
@@ -50,30 +69,29 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
       )}
       {...props}
     >
-      <div className="flex min-w-0 items-start gap-1">
+      {/* `items-center`: the back control and the title share a centre line —
+          Figma's `Back Nav` aligns its counter axis to the centre. */}
+      <div className="flex min-w-0 items-center gap-2">
         {backHref ? (
           /* A real link — middle-click and open-in-new-tab work, which they
              cannot on a button. Named here, so the glyph stays decorative. */
           <a
             href={backHref}
             aria-label={backLabel}
-            className={cn(
-              'inline-flex size-10 shrink-0 items-center justify-center rounded-sm',
-              'text-action-tertiary-content-default transition-colors',
-              'hover:text-action-tertiary-content-hover',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-            )}
+            className={BACK_CONTROL}
           >
             <Icon name="arrow-left" size="md" aria-hidden="true" />
           </a>
         ) : (
           onBack && (
-            <IconButton icon="arrow-left" label={backLabel} variant="tertiary" onClick={onBack} />
+            <button type="button" aria-label={backLabel} onClick={onBack} className={BACK_CONTROL}>
+              <Icon name="arrow-left" size="md" aria-hidden="true" />
+            </button>
           )
         )}
         <div className="min-w-0">
           {/* The page's one h1 — TopBar deliberately has none so this can. */}
-          <h1 className="min-w-0 truncate text-title-md-semibold text-text-primary">{title}</h1>
+          <h1 className={cn('min-w-0 truncate text-text-secondary', TITLE_TYPE[size])}>{title}</h1>
           {subtitle && <p className="mt-1 truncate text-body-sm-regular text-text-secondary">{subtitle}</p>}
         </div>
       </div>
