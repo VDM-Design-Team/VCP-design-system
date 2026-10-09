@@ -250,9 +250,16 @@ queue switch on per the triggers above.
 
 ## Avoiding collisions
 
-The collision hotspots in this repo are **`CHANGELOG.md` and `src/index.ts`** —
-every component PR touches both. Small conflicts there are normal; resolve by
+The collision hotspot in this repo is **`src/index.ts`** — every new
+component's export lands there. Small conflicts there are normal; resolve by
 keeping both sides.
+
+**The changelog is not a hotspot any more:** each PR writes its entry as its
+own file in `changes/` instead of editing `CHANGELOG.md`, so two PRs never
+touch the same lines. `npm run changelog` folds the files into `CHANGELOG.md`
+at release. `changes/README.md` has the format; `npm test` and CI fail a PR
+that changes `src/` or `tokens/` without one, or that edits `CHANGELOG.md`
+directly.
 
 - One person owns a component's structural change at a time.
 - One PR = one concern. Don't combine unrelated components.

@@ -2,22 +2,27 @@
 
 ## 0.1.0 — unreleased
 
-### `Banner` — aligned with Figma (October 2026)
+### `Sidebar` / `Logo` — the rail's logo keeps its size and sits on the glyph axis (October 2026)
 
-Read off the General Design Library's `Banner` (`3494:1336`), design review.
+Design review of the collapsed rail:
 
-- **Title 16 semibold** (`title-sm-semibold`; was 14 medium); body stays 14 regular. **Padding 16 all round** (was 14 / 12), **8** between the icon
-  and the text (was 12), 2 between title and message (was 4).
-- **Icons are `fill`, 20 × 20**, and the tones follow Figma's shapes: **warning is the exclamation in a circle** (`warning-circle-fill`, was
-  the triangle), **danger/critical is the exclamation in a triangle** (`warning-fill`, was the cross-circle), info is `info-fill`, success keeps
-  `check-circle-fill`. New icons: `info-fill`, `warning-circle-fill`.
-- **The glyph is the tone's `outline.border.default`** (Figma's bright colour; was the dark text colour) and is **vertically centred on the title line**
-  (`mt-0.5`: 20 glyph on a 24 line). It is below 3:1 on the tint (1.78–3.12:1 light, 1.98–2.95:1 dark): a recorded exception, see `docs/banner.md`.
-- **The stroke is Figma's `outline.border.default`** (was `outline.content.default`): red-500, yellow-500, blue-500, green-500. It is cosmetic, and
-  no longer clears 3:1 on the page; `docs/banner.md` has the figures.
-- **New `showIcon` prop** (default `true`): the tone glyph is optional. Off, the tone word is announced from visually hidden text, so assistive tech keeps it.
-- **Storybook:** the Default story has *icon*, *action button* and *dismiss button* controls, so both optional elements can be added or removed live.
-  The component API is unchanged — they are still optional (`actionLabel` + `onAction`, `onDismiss` + `dismissLabel`).
+- **The diamond is the same size collapsed and expanded.** It was 24 wide collapsed but
+  20 inside the expanded lockup; it is now 20 in both.
+- **It is centred on the nav glyphs** (x = 32) instead of on the 76 rail (x = 38), and
+  sits in the same place in both states — the wordmark appears beside it. The expanded
+  lockup moves 2 left (inset 22, was Figma's 24) so the diamond doesn't shift.
+- **`Logo collapsed` is the lockup's own diamond, in the lockup's frame height** (was a
+  separate export in a tight box): at the same `size`, mark and lockup draw an identical
+  diamond. A standalone `Logo collapsed` at a given `size` is therefore about 5% smaller
+  than before (the frame now includes the lockup's bottom margin). No API change.
+
+### `SidebarItem` — the collapsed caret is a chevron again (October 2026)
+
+Design review: in the collapsed rail, a row with sub-items (Archive, Planning) shows the
+**chevron** (`caret-down`, 12) beside its glyph, like the expanded row's caret — not the
+filled triangle (`caret-down-fill`) #141 introduced. Same size and place; it still does not
+flip when the flyout opens. No API change. `caret-down-fill` stays in the icon set (the
+`DatePicker` heading uses it).
 
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
@@ -62,6 +67,57 @@ due date and a table cell are tags — the rounded-rectangle — not the pill.
   when unsorted, `sort-ascending` / `sort-descending` when sorted, 20 and
   `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
   unsorted in `text.subtle`). `AVTable` inherits both.
+
+### `SidebarItem` / `Sidebar` — a flyout for the collapsed rail, and regular sub-items (October 2026)
+
+Design review of build 39 (#123); the flyout is Figma's `Menu_Dropdown` (`27:10048`).
+
+- **Collapsed, a disclosure opens a flyout** to the row's right instead of expanding inline:
+  211 wide, top aligned with the row, its left edge 8 inside the rail's right edge. Escape,
+  a press outside, focus leaving, or choosing a row closes it. The row does not grow and the
+  caret does not flip. Expanded sub-items still open inline.
+- **The flyout looks like `Menu`** (design review of build 67): `stroke.default` edge, 4 of padding round the rows, rounded
+  `radius.sm` rows in `label-sm-medium` `text.secondary` that darken to `text.primary` on the `surface.brand.faint` hover, and
+  `shadow.menu`. The current row stays semibold `text.brand.medium`.
+- **The collapsed caret is filled** (`caret-down-fill`, new icon).
+- **Expanded sub-items are regular weight** (were medium); the current sub-item is told apart
+  by colour and `aria-current`.
+
+Migration: none; the collapsed flyout replaces the unconfirmed inline-list behaviour that
+`docs/sidebar-item.md` flagged. No API change.
+
+### `DatePicker` — design review of the variants (October 2026)
+
+Follow-up to #133.
+
+- **Dual view keeps its order:** the right calendar is always after the left, and nothing is disabled. Paging the left onto
+  the right's month makes the right jump to the month after it; paging the right back onto the left's makes the left step back.
+- **Quick picks follow the mode:** a single-date picker shows only Today; ranges only appear in range mode.
+- **Overdue / Due Soon are filters** (`filter: true` on a preset): they do nothing to the calendar, only call `onSelect`. The list is centred vertically.
+- **Quick picks look like a dropdown menu** on desktop (4 inset, square 40-high rows, brand tints, 140 wide) —
+  Figma doesn't define the list, so this is a proposal to test. The touch row is unchanged.
+
+- **Clear is on by default** (`clearable`, default `true`; `false` hides it — a toggle on Storybook's Default controls). It is outside the view swap, so it
+  is the same button in the same place in the day and month views.
+- **The month heading is a toggle, both ways.** "Sep 2026 ▾" opens the months; "2026 ▴" returns to the days. It
+  is Figma's small textual button, 24 high, with a 12 filled caret; the label is `text.secondary`.
+- **Carets follow `neutral.textual.content`** (default, hover, pressed) — the previous/next arrows and the heading's
+  — not the action blue. New icons: `caret-down-fill`, `caret-up-fill`.
+- **Type:** cells `label-sm-regular` (was 16px `body-md`, in the numeric face), today `label-sm-semibold`, range
+  `label-sm-medium`, selected `label-sm-semibold`; the heading `label-sm-medium` `text.secondary` (was 16px
+  `title-sm-semibold` `text.primary`). Today's month is semibold too.
+- **A range has no seams:** the day grid is seven whole 36 columns centred in the calendar (260 ÷ 7 left 37.14 columns
+  whose edges anti-aliased into lines), rows 35 apart.
+- **Pointer cursor** on cells, quick picks, the heading and the arrows.
+- **Dual view matches the design:** 685 × 329, a 118 quick-picks column, 8 above the footer.
+- **Fixed:** in a `Popover` the calendar overflowed its container with doubled padding — the story now uses
+  `width="auto"` and no panel padding.
+- **Storybook:** the control-combination pages (*Day And Range*, *…With Button*, *Month*, *…With Button*, *Month
+  Buttons*) are gone — the **Default** playground is live and covers them; the heading test now covers paging and
+  the view swap.
+
+Migration: callers that relied on the button being absent without `onClear` pass `clearable={false}`; no caller
+imports `DatePicker` yet.
 
 ### `StatCard` — the value is 32, on the type ramp (October 2026)
 
