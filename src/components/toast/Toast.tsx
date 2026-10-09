@@ -95,10 +95,11 @@ const toast = cva([
   'pointer-events-auto',
   /* `relative` + clipping so the timer bar can sit flush on the bottom edge
      and follow the rounded corner. It hugs its content up to `max-w-sm`. */
-  'relative flex w-fit max-w-sm items-start gap-3 overflow-hidden',
+  'relative flex w-fit max-w-sm items-start gap-2 overflow-hidden',
   /* A neutral card, as Figma draws it: the tone is the glyph and the bar, not
-     a tint. shape.radius.sm, borderWidth.default. ds-lint-ignore */
-  'rounded-sm border border-stroke-subtle bg-surface-elevated p-4',
+     a tint. Radius, padding and gaps are the Banner's. shape.radius.md,
+     borderWidth.default. ds-lint-ignore */
+  'rounded-md border border-stroke-subtle bg-surface-elevated p-4',
   /* shape.shadow.menu — the toast floats over the page; the Banner does not.
      Figma stacks two softer shadows that no token matches; this is the
      closest, and the lift is what separates it from a Banner. */
@@ -311,12 +312,13 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
       </div>
 
       {hasAction && (
-        /* Centred on the card, not on the title row, as Figma has it. */
+        /* Top-aligned and pulled back 2, exactly as the Banner's is, so the two
+           components line up on the first row. */
         <Button
           type="button"
           variant="secondary"
           size="sm"
-          className="shrink-0 self-center"
+          className="-my-0.5 shrink-0"
           onClick={onAction}
         >
           {actionLabel}
@@ -324,18 +326,15 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
       )}
 
       {onDismiss && (
-        /* A bare glyph, as drawn: Figma's close is a 20 box with no button
-           chrome. The 36 `sm` target is pulled back by its own padding so the
-           glyph lands where the design puts it while the hit area stays well
-           above the 24 AA floor (WCAG 2.5.8). Neutral: dismissing is not an
-           action to invite. */
+        /* The Banner's own control: `md`, 40 square, pulled into the padding so
+           the card stays compact and the glyph sits where the design puts it.
+           Neutral: dismissing is not an action to invite. */
         <IconButton
           icon="x"
           label={resolvedDismissLabel}
-          size="sm"
+          size="md"
           className={cn(
-            'shrink-0 -my-2 -mr-2',
-            hasAction ? 'ml-2' : '-ml-2',
+            '-my-1 -mr-1 shrink-0',
             'text-text-primary hover:text-text-primary',
             'hover:bg-surface-neutral-faint active:bg-surface-neutral-subtle',
           )}

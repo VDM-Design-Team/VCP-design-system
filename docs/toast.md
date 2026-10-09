@@ -171,7 +171,7 @@ happens.
 Content that disappears on a timer fails **2.2.1 Timing Adjustable** unless the
 user can pause, extend, or dismiss it. All three are satisfied:
 
-- **Dismiss.** `onDismiss` renders a real close control — a 36 square target, keyboard
+- **Dismiss.** `onDismiss` renders a real close control — a 40 square target, keyboard
   reachable, with a name that says what it closes.
 - **Pause, on hover.** The pointer entering the toast stops the countdown.
 - **Pause, on focus.** Focus landing anywhere *inside* the toast stops it too.
@@ -255,9 +255,9 @@ step, both should move to it.
   "Action" — on a white card, exactly where that variant is tuned to sit. No
   tone recolouring any more.
 - **Dismiss** is a neutral `IconButton`: `text.primary`, hover
-  `surface.neutral.faint`, pressed `surface.neutral.subtle`. It draws as a bare
-  glyph. The 36 `sm` target is pulled back by its own padding so the glyph sits
-  where Figma puts it, and the hit area stays above the 24 floor of WCAG 2.5.8.
+  `surface.neutral.faint`, pressed `surface.neutral.subtle`. It is the
+  Banner's own: `md`, 40 square, pulled into the card's padding so the glyph sits
+  where Figma puts it.
 - **Focus ring.** `stroke.focused` on the white card; the same ring every other
   control uses.
 
@@ -265,7 +265,7 @@ step, both should move to it.
 
 | Part | Token | Utility |
 |---|---|---|
-| Radius | `shape.radius.sm` (6, Figma's) | `rounded-sm` |
+| Radius | `shape.radius.md` (8, the Banner's) | `rounded-md` |
 | Border width | `borderWidth.default` | `border` |
 | Surface | `surface.elevated` | `bg-surface-elevated` |
 | Border | `stroke.subtle` | `border-stroke-subtle` |
@@ -273,7 +273,7 @@ step, both should move to it.
 | Title | `type.body-sm-semibold` — 14/20 | `text-body-sm-semibold text-text-primary` |
 | Message | `type.body-sm-medium` — 14/20 | `text-body-sm-medium text-text-secondary` |
 | Padding | Tailwind numeric scale | `p-4` (16) |
-| Gap, glyph to text | Tailwind numeric scale | `gap-3` (12) |
+| Gap, glyph / text / action / close | Tailwind numeric scale | `gap-2` (8), the Banner's |
 | Gap, title to message | — | none |
 | Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content |
 | Glyph and bar colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
@@ -318,9 +318,9 @@ Dark comes for free: every colour above is a semantic token that
   from the title.
 - **The bare `<button>` with a `✕` character became an `IconButton`** — 40
   target, focus ring, required name, real glyph.
-- Raw values mapped to tokens: radius 10 → `rounded-sm` (6, Figma's); the hand-rolled
+- Raw values mapped to tokens: radius 10 → `rounded-md` (8); the hand-rolled
   `boxShadow` → `shape.shadow.menu`; padding `12px 14px` → `p-4` (Figma's 16); gap 12
-  → `gap-3`; `minWidth 320` / `maxWidth 440` →
+  → `gap-2`; `minWidth 320` / `maxWidth 440` →
   `max-w-sm` (384).
 
 ## Don't

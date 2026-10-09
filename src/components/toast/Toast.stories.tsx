@@ -77,8 +77,8 @@ export const Tones: Story = {
  * of `data-duration` on the element.
  *
  * The action is a real `Button` rendered by the component, not a slot, so its
- * size and variant stay as the design draws them: small, outlined, centred on
- * the card.
+ * size and variant stay as the design draws them: small, outlined, top-aligned
+ * beside the close control.
  */
 export const WithAction: Story = {
   args: {
@@ -98,7 +98,7 @@ export const WithAction: Story = {
  * requires a name — and the name defaults to `Dismiss: <title>` rather than a
  * bare "Close", which says nothing in a list of controls.
  *
- * The target is 36 square. Negative margins pull it into the toast's padding so
+ * The target is 40 square. Negative margins pull it into the toast's padding so
  * the box stays compact without shrinking the hit area.
  */
 export const Dismissible: Story = {
