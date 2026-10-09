@@ -11,12 +11,31 @@ export type BannerTone = 'info' | 'success' | 'warning' | 'danger';
 /** How loudly, if at all, the banner announces itself when it appears. */
 export type BannerLive = 'off' | 'polite' | 'assertive';
 
-/** Tone → glyph. Four distinct shapes, so the tone survives greyscale. */
+/**
+ * Tone → glyph, all in Phosphor's `fill` style (Figma's `Style=Fill`, 20). Four
+ * distinct shapes, so the tone survives greyscale. A **warning** is the
+ * exclamation in a circle — the triangle reads as more severe than a warning
+ * should — and the triangle is the **critical** banner's, as in Figma.
+ */
 const TONE_ICON: Record<BannerTone, IconName> = {
-  info: 'info',
-  success: 'check-circle',
-  warning: 'warning',
-  danger: 'x-circle',
+  info: 'info-fill',
+  success: 'check-circle-fill',
+  warning: 'warning-circle-fill',
+  danger: 'warning-fill',
+};
+
+/**
+ * Tone → the glyph's colour: `outline.border.default`, the bright tone colour,
+ * as Figma draws it. This is **below 3:1 on the tint** (1.78–3.12:1 in light,
+ * 1.98–2.95:1 in dark) — a recorded exception, because the glyph is not the
+ * only thing that says what the banner is: the title and message do, the tint
+ * does, and the glyph is named for assistive tech. See docs/banner.md.
+ */
+const TONE_GLYPH: Record<BannerTone, string> = {
+  info: 'text-accent-info-outline-border-default',
+  success: 'text-accent-success-outline-border-default',
+  warning: 'text-accent-warning-outline-border-default',
+  danger: 'text-accent-critical-outline-border-default',
 };
 
 /** Tone → the word a screen reader hears. The glyph carries it as its name. */
@@ -49,9 +68,9 @@ const TONE_LABEL: Record<BannerTone, string> = {
  */
 const banner = cva(
   [
-    'flex w-full items-start gap-3',
-    /* shape.radius.md, borderWidth.default. ds-lint-ignore */
-    'rounded-md border px-3.5 py-3',
+    'flex w-full items-start gap-2',
+    /* shape.radius.md, borderWidth.default; 16 all round. ds-lint-ignore */
+    'rounded-md border p-4',
     /* No shadow. A Banner is *in* the page, not above it — that, and the width,
        is the whole visual difference from a Toast. */
     'font-sans',
@@ -59,28 +78,29 @@ const banner = cva(
   {
     variants: {
       /* The same `accent.<name>.tonal` pairs Badge proved, edged with
-         `outline.content.default` so the boundary clears 3:1 on the page in
-         both themes. docs/banner.md has every figure. */
+         `outline.border.default` — Figma's own stroke (design review: the tonal
+         fill carries the banner, the outline is cosmetic). docs/banner.md has
+         the figures. */
       tone: {
         info: [
           'bg-accent-info-tonal-surface-default',
           'text-accent-info-tonal-content-default',
-          'border-accent-info-outline-content-default',
+          'border-accent-info-outline-border-default',
         ],
         success: [
           'bg-accent-success-tonal-surface-default',
           'text-accent-success-tonal-content-default',
-          'border-accent-success-outline-content-default',
+          'border-accent-success-outline-border-default',
         ],
         warning: [
           'bg-accent-warning-tonal-surface-default',
           'text-accent-warning-tonal-content-default',
-          'border-accent-warning-outline-content-default',
+          'border-accent-warning-outline-border-default',
         ],
         danger: [
           'bg-accent-critical-tonal-surface-default',
           'text-accent-critical-tonal-content-default',
-          'border-accent-critical-outline-content-default',
+          'border-accent-critical-outline-border-default',
         ],
       },
     },
@@ -158,6 +178,13 @@ interface BannerBaseProps
   children?: React.ReactNode;
   /** Overrides the word the tone glyph is announced as. Set it to localise; never to `''`. */
   toneLabel?: string;
+  /**
+   * Show the tone glyph. Default `true`. Turn it off for a quieter banner: the
+   * tint, the stroke and the words still say what it is, and the tone word
+   * ("Warning") moves into hidden text so a screen reader still hears it. The
+   * glyph is reinforcement, not the message.
+   */
+  showIcon?: boolean;
   /** Label for a single inline action. Rendered only with `onAction`. */
   actionLabel?: string;
   /** Fired when the action is pressed. */
@@ -217,6 +244,7 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
     title,
     children,
     toneLabel,
+    showIcon = true,
     actionLabel,
     onAction,
     onDismiss,
@@ -244,10 +272,22 @@ export const Banner = React.forwardRef<HTMLDivElement, BannerProps>(function Ban
     >
       {/* Named, not decorative. Colour is never the only signal: the shape
           differs per tone, and this gives the tone a word in the announcement. */}
-      <Icon name={TONE_ICON[tone]} size="md" label={toneLabel ?? TONE_LABEL[tone]} />
+      {showIcon && (
+        <Icon
+          name={TONE_ICON[tone]}
+          size="md"
+          label={toneLabel ?? TONE_LABEL[tone]}
+          /* The title's line is 24 and the glyph 20, so 2 of top margin centres the
+             glyph on the title line. With no title the first line is the message's
+             20, and the glyph already fills it. */
+          className={cn(TONE_GLYPH[tone], title != null && 'mt-0.5')}
+        />
+      )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {title != null && <p className="text-label-sm-medium">{title}</p>}
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        {/* Without the glyph, its name moves here so the tone is still announced. */}
+        {!showIcon && <span className="sr-only">{toneLabel ?? TONE_LABEL[tone]}: </span>}
+        {title != null && <p className="text-title-sm-semibold">{title}</p>}
         {children != null && children !== false && (
           <div className="text-body-sm-regular">{children}</div>
         )}

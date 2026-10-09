@@ -1,13 +1,25 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Banner, type BannerTone } from './Banner';
+import { expect, userEvent, within } from 'storybook/test';
+import { Banner, type BannerProps, type BannerTone } from './Banner';
 import { Button } from '../../atoms/button';
 
 const TONES: BannerTone[] = ['info', 'success', 'warning', 'danger'];
 
+/** The Storybook-only switches that add and remove the optional buttons. */
+type PlaygroundArgs = Omit<BannerProps, 'onDismiss' | 'dismissLabel'> & {
+  onDismiss?: () => void;
+  dismissLabel?: string;
+  /** Show the inline action button (`actionLabel` + `onAction`). */
+  showAction?: boolean;
+  /** Show the dismiss button (`onDismiss` + `dismissLabel`). */
+  dismissible?: boolean;
+};
+
 const meta = {
   title: 'Components/Feedback/Banner',
-  component: Banner,
+  /* The playground args add two Storybook-only switches, so the component is typed to them. */
+  component: Banner as React.ComponentType<PlaygroundArgs>,
   parameters: {
     docs: {
       description: {
@@ -27,22 +39,141 @@ const meta = {
     tone: 'info',
     title: 'Evidence refresh is scheduled',
     children: 'Sources will be re-checked tonight at 02:00 UTC. No action needed.',
+    showAction: false,
+    dismissible: false,
+    showIcon: true,
   },
   argTypes: {
     tone: { control: 'select', options: TONES },
     live: { control: 'radio', options: ['off', 'polite', 'assertive'] },
+    showAction: {
+      control: 'boolean',
+      name: 'action button',
+      description: 'Adds the optional inline action. Needs `actionLabel` and `onAction`.',
+    },
+    dismissible: {
+      control: 'boolean',
+      name: 'dismiss button',
+      description: 'Adds the optional dismiss button. Needs `onDismiss` and a `dismissLabel`.',
+    },
+    showIcon: {
+      control: 'boolean',
+      name: 'icon',
+      description: 'Shows the tone glyph. Off, the tone word is still announced in hidden text.',
+    },
+    actionLabel: { control: 'text' },
+    dismissLabel: { control: 'text' },
     onDismiss: { control: false },
     onAction: { control: false },
   },
-} satisfies Meta<typeof Banner>;
+} satisfies Meta<PlaygroundArgs>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<PlaygroundArgs>;
 
+/**
+ * The playground. **The action button and the dismiss button are both optional**
+ * — flip *action button* and *dismiss button* in the controls to add or remove
+ * them. Dismissing really closes it here (the component keeps no state; the
+ * story does), and the button under it brings it back.
+ */
 export const Default: Story = {
-  render: (args) => (
-    <div className="max-w-2xl">
-      <Banner {...args} />
+  render: function Playground({ showAction, dismissible, actionLabel = 'Review', dismissLabel, ...args }) {
+    const [open, setOpen] = React.useState(true);
+    React.useEffect(() => setOpen(true), [dismissible]);
+    if (!open) {
+      return (
+        <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+          Bring it back
+        </Button>
+      );
+    }
+    const extras = {
+      ...(showAction ? { actionLabel, onAction: () => {} } : {}),
+      ...(dismissible
+        ? { onDismiss: () => setOpen(false), dismissLabel: dismissLabel ?? 'Dismiss this banner' }
+        : {}),
+    };
+    return (
+      <div className="max-w-2xl">
+        <Banner {...({ ...args, ...extras } as BannerProps)} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    /* Neither optional button is there until its control is on. */
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button')).toBeNull();
+  },
+};
+
+/**
+ * The glyph is optional too (`showIcon={false}`): the tint, the stroke and the words
+ * still carry the banner, and the tone word is announced from hidden text.
+ */
+export const WithoutIcon: Story = {
+  args: { showIcon: false, tone: 'warning', title: 'Two deliverables are missing evidence' },
+  render: Default.render,
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('svg')).toBeNull();
+    await expect(canvasElement.querySelector('.sr-only')).toHaveTextContent('Warning');
+  },
+};
+
+/** Both optional buttons on — what the controls produce when both are flipped. */
+export const WithBothButtons: Story = {
+  args: { showAction: true, dismissible: true, tone: 'warning', title: 'Two deliverables are missing evidence' },
+  render: Default.render,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Review' })).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Dismiss this banner' }));
+    await expect(canvas.queryByRole('button', { name: 'Review' })).toBeNull();
+    await userEvent.click(canvas.getByRole('button', { name: 'Bring it back' }));
+    await expect(canvas.getByRole('button', { name: 'Review' })).toBeInTheDocument();
+  },
+};
+
+/**
+ * Every banner in one view: four tones, each as a title and message, with an
+ * action, with both optional buttons, and message-only. For review against
+ * Figma and for visual diffs.
+ */
+export const AllBanners: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex max-w-3xl flex-col gap-8">
+      {TONES.map((tone) => (
+        <section key={tone} className="flex flex-col gap-3" aria-label={`${tone} banners`}>
+          <h3 className="font-sans text-label-sm-medium text-text-tertiary">{tone}</h3>
+          <Banner tone={tone} title="Title of inline banner">
+            Inline banner message content goes here.
+          </Banner>
+          <Banner
+            tone={tone}
+            title="Title of inline banner"
+            actionLabel="Review"
+            onAction={() => {}}
+          >
+            Inline banner message content goes here.
+          </Banner>
+          <Banner
+            tone={tone}
+            title="Title of inline banner"
+            actionLabel="Review"
+            onAction={() => {}}
+            onDismiss={() => {}}
+            dismissLabel={`Dismiss the ${tone} banner`}
+          >
+            Inline banner message content goes here, and when it is long enough it wraps onto a
+            second line to show how the glyph, title and buttons hold their places.
+          </Banner>
+          <Banner tone={tone}>Message only, no title.</Banner>
+          <Banner tone={tone} title="Title of inline banner" showIcon={false}>
+            Inline banner message content goes here, with no icon.
+          </Banner>
+        </section>
+      ))}
     </div>
   ),
 };
@@ -54,6 +185,29 @@ export const Default: Story = {
  * greyscale, a colour vision deficiency, and a screen reader alike.
  */
 export const Tones: Story = {
+  /* Figma's measurements: 16 padding, an 8 gap, a 20 × 20 icon, a 16 / 600 title, a
+     14 / 400 body, and the tone's `outline.border` for the stroke. */
+  play: async ({ canvasElement }) => {
+    const banners = [...canvasElement.querySelectorAll<HTMLElement>('[data-tone]')];
+    await expect(banners.length).toBe(4);
+    for (const el of banners) {
+      const cs = getComputedStyle(el);
+      await expect([cs.paddingTop, cs.paddingRight, cs.paddingBottom, cs.paddingLeft]).toEqual(Array(4).fill('16px'));
+      await expect(cs.columnGap).toBe('8px');
+      const icon = el.querySelector('svg')!.getBoundingClientRect();
+      await expect([icon.width, icon.height]).toEqual([20, 20]);
+      /* The glyph is centred on the title's first line. */
+      const titleBox = el.querySelector('p')!.getBoundingClientRect();
+      await expect(Math.abs(icon.top + icon.height / 2 - (titleBox.top + 12))).toBeLessThan(0.5);
+      const title = getComputedStyle(el.querySelector('p')!);
+      await expect([title.fontSize, title.fontWeight]).toEqual(['16px', '600']);
+      const body = getComputedStyle(el.querySelector('p ~ div')!);
+      await expect([body.fontSize, body.fontWeight]).toEqual(['14px', '400']);
+    }
+    /* A warning is the circle, the critical banner the triangle. */
+    const icon = (tone: string) => canvasElement.querySelector(`[data-tone="${tone}"] svg`)!.innerHTML;
+    await expect(icon('warning')).not.toBe(icon('danger'));
+  },
   render: () => (
     <div className="flex max-w-2xl flex-col gap-3">
       <Banner tone="info" title="Scheduled maintenance">
