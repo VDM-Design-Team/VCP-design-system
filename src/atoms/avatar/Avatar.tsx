@@ -191,9 +191,8 @@ export const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
              circle. `Icon` renders itself `aria-hidden` when given no label. */
           <Icon
             name="user"
-            size={size === 'xs' ? 'sm' : size}
-            /* Icon has no step below 16, which is the whole `xs` avatar. */
-            className={size === 'xs' ? 'size-2.5' : undefined}
+            /* The 16 `xs` avatar takes Icon's smallest size, 10. */
+            size={size === 'xs' ? 10 : (size ?? undefined)}
           />
         )}
       </span>
