@@ -92,7 +92,7 @@ positioning engine and a system-level decision, not a local fix.
 | Edge | `stroke.default`, 1px | `border border-stroke-default` |
 | Type | `type.caption-md-regular` (12/16, 400, Poppins) | `text-caption-md-regular` |
 | Radius | `shape.radius.sm` (6) | `rounded-sm` |
-| Padding | Tailwind numeric scale | `p-2` (8, as Figma) |
+| Padding | Tailwind numeric scale | `px-3 py-2` — 12 either side, 8 above and below (Figma draws 8 all round; the sides are widened for an even look) |
 | Offset from trigger | Tailwind numeric scale | `pb-2` / `pt-2` / `pr-2` / `pl-2` |
 | Max width | Tailwind numeric scale | `max-w-64` |
 | Shadow | `shadow.menu` | `shadow-menu` |

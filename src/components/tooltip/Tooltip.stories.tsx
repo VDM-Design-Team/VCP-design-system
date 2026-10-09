@@ -297,6 +297,14 @@ export const RevealsOnFocus: Story = {
     /* A light card: white `surface.elevated` with `text.primary` — not an inverted bubble. */
     await expect(getComputedStyle(bubble).backgroundColor).toBe('rgb(255, 255, 255)');
     await expect(getComputedStyle(bubble).color).toBe('rgb(2, 6, 23)');
+    /* 12 either side, 8 above and below. */
+    const pad = getComputedStyle(bubble);
+    await expect([pad.paddingLeft, pad.paddingRight, pad.paddingTop, pad.paddingBottom]).toEqual([
+      '12px',
+      '12px',
+      '8px',
+      '8px',
+    ]);
 
     /* Escape dismisses it, and focus stays exactly where it was. */
     await userEvent.keyboard('{Escape}');

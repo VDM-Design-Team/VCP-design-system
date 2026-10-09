@@ -77,7 +77,7 @@ const positioner = cva(
  * See the token table in `docs/tooltip.md` for the measured figures.
  */
 const bubble = cva([
-  'rounded-sm border border-stroke-default p-2',
+  'rounded-sm border border-stroke-default px-3 py-2',
   'bg-surface-elevated text-text-primary',
   'font-sans text-caption-md-regular text-pretty',
   'shadow-menu',
