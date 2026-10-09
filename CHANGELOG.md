@@ -2,6 +2,11 @@
 
 ## 0.1.0 — unreleased
 
+### `TagEditor` — flagged as unverified (October 2026)
+
+Docs and Storybook only. `TagEditor` was ported from the original export and has no Figma source; design reports tags are edited in a modal (the *Tag Management* page), not inline. Flagged in
+`docs/tag-editor.md`, the Storybook description, `docs/inventory.md` and `docs/figma-audit.md`. No code change; nothing in the repo imports it.
+
 ### `Sidebar` / `Logo` — the rail's logo keeps its size and sits on the glyph axis (October 2026)
 
 Design review of the collapsed rail:

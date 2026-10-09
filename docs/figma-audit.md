@@ -768,3 +768,22 @@ Following batch 4's pattern of molecules drawn but used nowhere: the
 and outline styles, are drawn for every value and appear on no screen. Neither
 is built. When a screen needs one it becomes a `variant` on the existing atom,
 not a second component.
+
+## Source check — October 2026
+
+### ⚠️ `TagEditor` — no Figma source found
+
+`TagEditor` (a tag list, a tone swatch row, a name field and an Add button) was ported from the
+Claude-design export (`_source/claude-design/components/TagEditor`) on 3 September 2026. **No Figma
+node is cited anywhere for it, and none of the audit batches mention it**, so it has never been
+compared with the design. Nothing in the repo imports it — it appears only in other components' docs.
+
+Design reports that the tag editing the product actually has is a **modal**, not this inline
+editor — the library's *Tag Management* page (Admin & SuperAdmin, `7463:91717`) is the likely
+source. **Unverified:** the Figma connection was down when this was checked, so the page has not
+been read against `TagEditor`.
+
+**Status: flagged, not removed.** `docs/tag-editor.md` and the Storybook page now say so. To close
+it: read *Tag Management* against `TagEditor`; then either rebuild to the modal (a pattern
+composing `Modal`, `Input`, tone swatches and `Tag`), or delete the component if the inline form
+is not wanted anywhere.

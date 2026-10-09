@@ -15,6 +15,9 @@ const meta = {
     docs: {
       description: {
         component:
+          '⚠️ **Unverified against Figma:** ported from the original export, not drawn from a Figma ' +
+          'frame — design reports tags are edited in a modal (the *Tag Management* page), not ' +
+          'inline like this. See `docs/tag-editor.md` before building on it.\n\n' +
           'Free-form labels on a thing: the tag list, a tone swatch row, a name field, an ' +
           'add button. Tones, not colours — the export’s raw rgb `TAG_COLOURS` (including a ' +
           'ramp-less indigo) became the `accent.{blue,green,red,yellow}` pairs Avatar proved, ' +

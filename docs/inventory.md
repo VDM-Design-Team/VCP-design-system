@@ -40,7 +40,7 @@ record of when each piece landed.
 | atom | `DonutChart` | PR #47 |
 | component | `Timeline`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
-| component | `TagEditor`, `RichTextToolbar` | PR #49 |
+| component | `TagEditor` ⚠️ *(unverified — no Figma source, see `docs/tag-editor.md`)*, `RichTextToolbar` | PR #49 |
 | component | `DatePicker` | PR #50 |
 | component | `SearchSelect` | PR #51 |
 | atom | `Logo` | PR #52 |

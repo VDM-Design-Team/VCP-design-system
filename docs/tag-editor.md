@@ -1,5 +1,11 @@
 # TagEditor
 
+> ⚠️ **Unverified against Figma.** This component was ported from the original Claude-design
+> export, not drawn from a Figma frame, and was never part of a Figma audit. Design reports the
+> product edits tags in a **modal** (the library's *Tag Management* page, `7463:91717`), not with
+> this inline editor. Don't build a screen on `TagEditor` until it has been checked against that
+> page — see `docs/figma-audit.md`, *Source check — October 2026*.
+
 Free-form labels on a thing: the tag list, a tone swatch row, a name field
 and an add button. `editable={false}` is just the list.
 
