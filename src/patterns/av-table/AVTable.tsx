@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import {
   DataTable,
+  ColumnHint,
   type DataTableColumn,
   type DataTableSort,
 } from '../../components/data-table';
@@ -9,7 +10,6 @@ import { StatusPill, type StatusPillProps } from '../../components/status-pill';
 import { DueDatePill, type DueDateProximity } from '../../components/due-date-pill';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../components/pagination';
-import { Tooltip } from '../../components/tooltip';
 import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 import { TypeTag, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
@@ -107,26 +107,6 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   hints?: AVTableHints;
   empty?: React.ReactNode;
   caption?: string;
-}
-
-/** The info glyph beside a header label, with the product's own copy on it. */
-function HeaderHint({ text, column }: { text?: string; column: string }) {
-  if (!text) return null;
-  return (
-    <Tooltip content={text} placement="bottom">
-      <button
-        type="button"
-        aria-label={`About ${column}`}
-        className={cn(
-          'grid size-4 shrink-0 place-items-center rounded-sm text-text-tertiary',
-          'hover:text-text-secondary',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-        )}
-      >
-        <Icon name="info" size="sm" />
-      </button>
-    </Tooltip>
-  );
 }
 
 /** A count under the title: glyph, number, and the word only for screen readers. */
@@ -227,7 +207,7 @@ export function AVTable({
     {
       key: 'urgency',
       label: 'Urgency',
-      hint: <HeaderHint text={hints?.urgency} column="urgency" />,
+      hint: <ColumnHint text={hints?.urgency} column="urgency" />,
       /* The tag carries Figma's own 8 of padding, so the cell gives it back to
          keep the column's left edge true. */
       render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
@@ -235,19 +215,19 @@ export function AVTable({
     {
       key: 'type',
       label: 'Type',
-      hint: <HeaderHint text={hints?.type} column="type" />,
+      hint: <ColumnHint text={hints?.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
     },
     {
       key: 'status',
       label: 'Status',
-      hint: <HeaderHint text={hints?.status} column="status" />,
+      hint: <ColumnHint text={hints?.status} column="status" />,
       render: (row) => (row.status ? <StatusPill size="sm" {...row.status} /> : null),
     },
     {
       key: 'members',
       label: 'Members',
-      hint: <HeaderHint text={hints?.members} column="members" />,
+      hint: <ColumnHint text={hints?.members} column="members" />,
       render: (row) =>
         row.members?.length ? (
           <AvatarGroup people={row.members} size="md" max={3} label="Members" />

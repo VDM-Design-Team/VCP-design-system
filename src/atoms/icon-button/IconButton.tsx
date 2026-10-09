@@ -86,6 +86,15 @@ const iconButton = cva(
           'hover:text-action-tertiary-content-hover active:text-action-tertiary-content-pressed',
           'disabled:text-action-tertiary-content-disabled',
         ],
+        /* neutral.tonal — a grey disc with a dark glyph. Figma's `Style=Tonal`,
+           the table's inline-edit controls (pen, calendar, confirm, cancel):
+           quiet until it is the thing you are reaching for. */
+        tonal: [
+          'bg-neutral-tonal-surface-default text-neutral-tonal-content-default',
+          'hover:bg-neutral-tonal-surface-hover hover:text-neutral-tonal-content-hover',
+          'active:bg-neutral-tonal-surface-pressed active:text-neutral-tonal-content-pressed',
+          'disabled:bg-neutral-tonal-surface-disabled disabled:text-neutral-tonal-content-disabled',
+        ],
         /* accent.critical.filled — destructive */
         danger: [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
@@ -96,6 +105,9 @@ const iconButton = cva(
       /* Equal width and height, on Button's own height scale: 36 / 40 / 48.
          `md` is the 40 minimum target; `sm` is pointer-dense contexts only. */
       size: {
+        /* 24 — the table's inline-edit controls. Below the 40 touch minimum, so
+           pointer-dense contexts only; see docs/icon-button.md. */
+        xs: 'size-6',
         sm: 'size-9',
         md: 'size-10',
         lg: 'size-12',
@@ -106,7 +118,7 @@ const iconButton = cva(
 );
 
 /** Button size → Icon size. 16 in dense cells, 20 inline, 24 for nav. */
-const ICON_SIZE = { sm: 'sm', md: 'md', lg: 'lg' } as const;
+const ICON_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
 
 export interface IconButtonProps
   extends Omit<
@@ -161,7 +173,7 @@ IconButton.displayName = 'IconButton';
 
 /* Same mark as Button's spinner, sized to the glyph it replaces so the button
    does not twitch when loading starts. */
-const SPINNER_SIZE = { sm: 'size-4', md: 'size-5', lg: 'size-6' } as const;
+const SPINNER_SIZE = { xs: 'size-4', sm: 'size-4', md: 'size-5', lg: 'size-6' } as const;
 
 function Spinner({ size }: { size: keyof typeof SPINNER_SIZE }) {
   return (
