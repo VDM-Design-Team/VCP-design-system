@@ -202,11 +202,19 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
               trigger={
                 <button
                   type="button"
+                  disabled={!domains?.length}
                   aria-label={`Domain: ${domain ?? 'none selected'}. Change domain`}
                   className={cn(
                     'flex w-full items-center justify-between gap-2.5 rounded-md px-3 py-2',
                     'bg-surface-neutral-subtle text-left font-sans text-body-sm-medium text-text-secondary',
-                    'cursor-pointer transition-colors hover:bg-neutral-tonal-surface-default',
+                    /* The neutral outline family's states, as the outline Button
+                       uses: the border steps darker on hover, and stays at the
+                       pressed step while the menu is open. */
+                    'cursor-pointer border border-neutral-outline-border-default transition-colors',
+                    'hover:bg-neutral-outline-surface-hover hover:border-neutral-outline-border-hover',
+                    'active:bg-neutral-outline-surface-pressed active:border-neutral-outline-border-pressed',
+                    'aria-expanded:bg-neutral-outline-surface-pressed aria-expanded:border-neutral-outline-border-pressed',
+                    'disabled:cursor-not-allowed disabled:border-neutral-outline-border-disabled disabled:bg-surface-neutral-subtle disabled:text-neutral-outline-content-disabled',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                   )}
                 >

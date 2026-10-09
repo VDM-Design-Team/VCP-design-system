@@ -108,10 +108,10 @@ does not render — a rail nobody can collapse should not draw the control.
 `showDomainSelector` defaults to `false` and the rail matches what the design
 draws.
 
-The switcher is Figma's `_Domain_Selection_Dropdown`: a filled, borderless
-trigger (`surface.neutral.subtle`, radius 8, 12 / 8 padding, 14 medium in
-`text.secondary`) with a 20 up-down caret in `stroke.strong`, opening the
-system's `Menu` flush to the trigger's width. It is not the native `Select`,
+The switcher is Figma's `_Domain_Selection_Dropdown`: a filled
+trigger (`surface.neutral.subtle` with a 1px `neutral.outline.border` stroke, radius 8,
+12 / 8 padding, 14 medium in `text.secondary`) with a 20 up-down caret in `stroke.strong`, opening the
+system's `Menu` flush to the trigger's width. The stroke is an addition to the design (design review): it takes the neutral outline family's states, so the border steps darker on hover and holds the pressed step while the menu is open; it is disabled when there are no domains. It is not the native `Select`,
 whose popup the platform draws and a design cannot style. The trigger is named
 "Domain: Design. Change domain" so the current value is announced. `Menu` has
 no selected state, so the current domain is only marked by the trigger.
