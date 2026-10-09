@@ -768,3 +768,24 @@ Following batch 4's pattern of molecules drawn but used nowhere: the
 and outline styles, are drawn for every value and appear on no screen. Neither
 is built. When a screen needs one it becomes a `variant` on the existing atom,
 not a second component.
+
+## Source check — October 2026
+
+### ⚠️ `TagEditor` — no Figma source; the design it was assumed to serve is different
+
+`TagEditor` (a list of removable coloured tag pills, a row of tone swatches, a name field and an Add
+button, all inline) was ported from the Claude-design export (`_source/claude-design/components/TagEditor`)
+on 3 September 2026. **No Figma node is cited for it, and none of the audit batches mention it.** Nothing in
+the repo imports it.
+
+Read against the library's *Tag Management* page (`7463:91717`, checked 9 October 2026), it does **not**
+correspond to any part of it. That page is an admin settings screen: **cards** — Domains, Global Tags,
+Domain Tags, Roles, Status, Assignee Types, Projects — each with a title, a primary **Add New** button, a
+divider and a list of rows; a row is one of three types (**Default**: label, edit and delete icon buttons ·
+**Draggable**: a drag handle first · **Non-editable**: a muted label with a "Default" tag and no actions);
+and **modals** for *Add a new Tag* / *Add a new Domain* (a name field, Submit) and *Delete domain*
+(Cancel / a red Confirm). There are **no tone swatches, no coloured tags and no inline add form**.
+
+**Status: flagged, not removed.** `docs/tag-editor.md` and the Storybook page say so. The Tag Management
+design is not built either; see the proposal in the PR that adds it. Until then, `TagEditor` can be deleted
+without losing a screen.

@@ -15,6 +15,10 @@ const meta = {
     docs: {
       description: {
         component:
+          '⚠️ **No Figma source:** ported from the original export, not drawn from a Figma frame. ' +
+          'The product’s tag editing is the *Tag Management* page — cards of rows with Add New, ' +
+          'edit and delete buttons, plus add/delete modals — with no tone swatches or inline ' +
+          'form like this. See `docs/tag-editor.md` before building on it.\n\n' +
           'Free-form labels on a thing: the tag list, a tone swatch row, a name field, an ' +
           'add button. Tones, not colours — the export’s raw rgb `TAG_COLOURS` (including a ' +
           'ramp-less indigo) became the `accent.{blue,green,red,yellow}` pairs Avatar proved, ' +
