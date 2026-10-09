@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        # Full history, so lint:changes can compare the branch with main.
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
@@ -15,6 +17,8 @@ jobs:
       - name: Fail if dist/ is stale
         run: git diff --exit-code dist/ || (echo "::error::dist/ is out of date — run 'npm run tokens' and commit." && exit 1)
       - run: npm run lint:tokens
+      - name: Changelog entry in changes/, not CHANGELOG.md
+        run: npm run lint:changes
       - run: npm run typecheck
       - name: Install the browser the story tests run in
         run: npx playwright install --with-deps chromium
