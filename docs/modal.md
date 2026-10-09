@@ -80,7 +80,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
     <header>                    px-6 pt-5 — only when there is heading text or a close button
       <h2>                      type.title-md-semibold · text.primary         → aria-labelledby
       <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
-      IconButton                icon "x" · md (40 target) · rounded-full · text.primary · pulled into the padding
+      IconButton                icon "x" · md (40 target) · round (the IconButton default) · text.primary · pulled into the padding
     <div>                       px-6 · pt-3 under a description or before a non-text first child (button, form control, card), pt-1 before running text (pt-5 with no header) · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
     <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
 ```

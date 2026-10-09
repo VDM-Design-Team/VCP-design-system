@@ -549,8 +549,6 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                 label={closeLabel}
                 variant="tertiary"
                 className={cn(
-                  /* A circle, as an icon-only button is everywhere else. */
-                  'rounded-full',
                   /* Pulled back into the header's padding so the 40 target sits
                      optically level with the title without inflating the header. */
                   '-mt-2 -mr-2',
