@@ -40,6 +40,11 @@ export interface CarouselProps extends Omit<React.HTMLAttributes<HTMLDivElement>
   nextLabel?: string;
 }
 
+/* The arrows are neutral, not the action blue: `neutral.outline.content` in each
+   state. (`text.secondary` was the other option; it has no hover or pressed.) */
+const ARROW_COLOUR =
+  'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed disabled:text-neutral-outline-content-disabled';
+
 export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(
   (
     {
@@ -84,6 +89,7 @@ export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(
           label={previousLabel}
           variant="tertiary"
           onClick={() => go(-1)}
+          className={ARROW_COLOUR}
         />
 
         {/* `aria-live` so moving between panels is announced. Safe here only
@@ -99,7 +105,13 @@ export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(
           {children}
         </div>
 
-        <IconButton icon="caret-right" label={nextLabel} variant="tertiary" onClick={() => go(1)} />
+        <IconButton
+          icon="caret-right"
+          label={nextLabel}
+          variant="tertiary"
+          onClick={() => go(1)}
+          className={ARROW_COLOUR}
+        />
       </div>
     );
   },

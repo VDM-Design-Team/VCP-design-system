@@ -51,6 +51,15 @@ const [index, setIndex] = useState(0);
 | `children` | `ReactNode` | required | The panel at `index` — one, not all of them |
 | `previousLabel` / `nextLabel` | `string` | `'Previous'` / `'Next'` | Name them for the content where it helps |
 
+## Tokens
+
+The two arrows are `IconButton`s in the ghost (`tertiary`) variant, recoloured to the
+neutral family rather than the action blue: `neutral.outline.content.default` at rest,
+`.hover`, `.pressed` and `.disabled` for the other states (design review). The other
+option, `text.secondary`, has no hover or pressed variants, so it would give a flat
+arrow. Light: slate-600 at rest (7.58:1 on `surface.elevated`; 9.85:1 in dark), slate-700 on hover,
+slate-800 pressed; dark: slate-300, 200, 100. No new tokens.
+
 ## Two decisions worth knowing
 
 **It wraps.** Next on the last panel goes to the first. The alternative was

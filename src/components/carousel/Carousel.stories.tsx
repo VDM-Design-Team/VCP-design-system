@@ -56,6 +56,17 @@ export const Default: Story = {
       </Carousel>
     </div>
   ),
+  /* The arrows are neutral, with a hover and a pressed state — not the action blue. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const name of ['Previous', 'Next']) {
+      const arrow = canvas.getByRole('button', { name });
+      await expect(arrow).toHaveClass('text-neutral-outline-content-default');
+      await expect(arrow).toHaveClass('hover:text-neutral-outline-content-hover');
+      await expect(arrow).toHaveClass('active:text-neutral-outline-content-pressed');
+      await expect(arrow).not.toHaveClass('text-action-tertiary-content-default');
+    }
+  },
 };
 
 /** The last panel. Next wraps back to the first rather than going dead. */
