@@ -29,6 +29,7 @@ Rules of thumb:
 | `defaultChecked` | `boolean` | `false` | Uncontrolled starting value |
 | `indeterminate` | `boolean` | `false` | Mixed state. Set as a DOM property and as `aria-checked="mixed"` |
 | `disabled` | `boolean` | `false` | |
+| `size` | `sm \| md` | `sm` | The box: 16 (`sm`) or 20 (`md`). Both keep a 40 target |
 | `fullWidth` | `boolean` | `false` | Makes the whole row a target — list and settings rows |
 | `onChange` | `(checked: boolean) => void` | — | Gets the new value, not the event |
 | `className` | `string` | — | Applied to the outer `<label>`, not the input |
@@ -77,7 +78,7 @@ Dark theme comes free — the component only uses semantic tokens, and
   "mixed" rather than "checked"/"unchecked".
 - The focus ring is drawn on the visible box (`outline-stroke-focused`, 2px at 2px
   offset), because the real input has no visible area of its own. Never remove it.
-- **Touch target:** the box is 16×16 but the `<label>` carries `p-3`, which makes
+- **Touch target:** the box is 16×16 (`sm`) or 20×20 (`md`) and the `<label>` carries `p-3` or `p-2.5`, which makes
   the smallest possible target 40×40 — the CLAUDE.md minimum. This is why an
   unlabelled checkbox looks like it has generous padding; do not strip it to make
   a dense table row. If the row is already ≥40px tall, use `fullWidth` so the

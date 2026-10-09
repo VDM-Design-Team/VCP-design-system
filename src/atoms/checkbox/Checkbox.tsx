@@ -19,8 +19,6 @@ import { cn } from '../../lib/cn';
 const checkboxRoot = cva(
   [
     'group inline-flex items-start gap-2',
-    /* p-3 (12) around a 16 box gives the 40 minimum touch target from CLAUDE.md */
-    'p-3',
     'font-sans text-body-sm-regular',
     'cursor-pointer select-none',
     'has-disabled:cursor-not-allowed',
@@ -28,14 +26,17 @@ const checkboxRoot = cva(
   {
     variants: {
       fullWidth: { true: 'flex w-full', false: '' },
+      /* Padding around the box brings the target to the 40 minimum from
+         CLAUDE.md: 12 around a 16 box, 10 around a 20 one. */
+      size: { sm: 'p-3', md: 'p-2.5' },
     },
-    defaultVariants: { fullWidth: false },
+    defaultVariants: { fullWidth: false, size: 'sm' },
   },
 );
 
 const checkboxBox = cva(
   [
-    'flex size-4 shrink-0 items-center justify-center',
+    'flex shrink-0 items-center justify-center',
     /* shape.radius.xs — GDL's `radius-2` variable. Applies in every state,
        checked included: there's no separate checked-state radius rule. */
     'rounded-xs border border-stroke-field',
@@ -59,10 +60,16 @@ const checkboxBox = cva(
   ],
   {
     variants: {
-      /* Nudges the box onto the optical centre of the first line of `body-md`. */
-      hasLabel: { true: 'mt-0.5', false: '' },
+      /* The box: 16 (`sm`) or 20 (`md`), the two sizes Figma ships. */
+      size: { sm: 'size-4', md: 'size-5' },
+      hasLabel: { true: '', false: '' },
     },
-    defaultVariants: { hasLabel: false },
+    compoundVariants: [
+      /* Nudges a 16 box onto the optical centre of a 20-high first line; a 20 box
+         already fills it. */
+      { size: 'sm', hasLabel: true, class: 'mt-0.5' },
+    ],
+    defaultVariants: { size: 'sm', hasLabel: false },
   },
 );
 
@@ -87,7 +94,7 @@ const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-  ({ className, label, indeterminate = false, fullWidth, onChange, ...props }, ref) => {
+  ({ className, label, indeterminate = false, fullWidth, size = 'sm', onChange, ...props }, ref) => {
     const inputRef = React.useRef<HTMLInputElement>(null);
     React.useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
 
@@ -97,7 +104,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     }, [indeterminate, props.checked, props.defaultChecked]);
 
     return (
-      <label className={cn(checkboxRoot({ fullWidth }), className)}>
+      <label className={cn(checkboxRoot({ fullWidth, size }), className)}>
         <input
           ref={inputRef}
           type="checkbox"
@@ -106,8 +113,8 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           onChange={(event) => onChange?.(event.target.checked)}
           {...props}
         />
-        <span aria-hidden="true" className={checkboxBox({ hasLabel: label != null })}>
-          {indeterminate ? <MixedGlyph /> : <CheckGlyph />}
+        <span aria-hidden="true" className={checkboxBox({ size, hasLabel: label != null })}>
+          {indeterminate ? <MixedGlyph size={size ?? 'sm'} /> : <CheckGlyph size={size ?? 'sm'} />}
         </span>
         {label != null && <span className={checkboxLabel()}>{label}</span>}
       </label>
@@ -116,10 +123,10 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
 );
 Checkbox.displayName = 'Checkbox';
 
-function CheckGlyph() {
+function CheckGlyph({ size }: { size: 'sm' | 'md' }) {
   return (
     <svg
-      className="hidden size-3 group-has-checked:block"
+      className={cn('hidden group-has-checked:block', size === 'md' ? 'size-3.5' : 'size-3')}
       viewBox="0 0 12 12"
       fill="none"
       aria-hidden="true"
@@ -135,9 +142,9 @@ function CheckGlyph() {
   );
 }
 
-function MixedGlyph() {
+function MixedGlyph({ size }: { size: 'sm' | 'md' }) {
   return (
-    <svg className="size-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+    <svg className={size === 'md' ? 'size-3.5' : 'size-3'} viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path d="M3 6h6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );
