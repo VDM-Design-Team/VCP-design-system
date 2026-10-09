@@ -28,8 +28,7 @@ this list drifts.
 | With primary action | The `Button` passed in `primaryAction` | Screens where creating an Added Value is the headline act |
 | Without | The `Logo`, linked via `homeHref` — or standing alone, naming itself, when there is no `homeHref` | Everywhere else |
 
-Exactly the Figma variant pair — pass `primaryAction` or don't; there is no
-third arrangement. The **page-level** header (back arrow, AV id/title,
+Exactly the Figma variant pair — pass `primaryAction` or don't — plus the third arrangement screens like the AV editor need: `showPrimaryAction={false}` leaves the left side empty. The **page-level** header (back arrow, AV id/title,
 status-move buttons) is a different Figma component, `AV_Header`, and is its
 own pattern — [`AVHeader`](av-header.md). TopBar deliberately carries no
 title, no `h1`, no back.
@@ -39,7 +38,7 @@ title, no `h1`, no back.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `primaryAction` | `ReactNode` | — | The bar's one action — a `Button`. Present ⇒ replaces the logo |
-| `showPrimaryAction` | `boolean` | `true` | `false` hides the action and the bar takes the logo variant, for screens with no "Create Added Value". Pass `primaryAction` regardless and flip this |
+| `showPrimaryAction` | `boolean` | `true` | `false` leaves the **left side empty** — action and logo both — for screens that show nothing there, like an Added Value being edited. Pass `primaryAction` regardless and flip this. The right side stays on the right |
 | `homeHref` | `string` | — | The logo's home link (no-action version) |
 | `notifications` | `number` | — | Bell renders whenever this is a number; `> 0` shows the design's red dot — the count lives in the bell's name |
 | `onNotifications` | `() => void` | — | The bell's click |
@@ -53,7 +52,8 @@ title, no `h1`, no back.
 
 `surface.elevated` bar (64 tall = `h-16`) on `stroke.subtle`; user name
 `label-lg` `text.primary`. The bell is neutral (`neutral.outline.content`, with
-the `surface.neutral` hover fills), not brand blue. The unread dot is 12 and
+the `surface.neutral` hover fills), not brand blue, and its glyph is 24 (the
+`lg` `IconButton`, a 48 target). The unread dot is 12, up and to the right of the glyph, and
 `accent.critical.outline.border.default` — the design's red dot — with a slow
 pulse behind it that is dropped under reduced motion. The divider is the
 `Divider` atom, vertical and 40 tall, drawn only between the bell and the mode

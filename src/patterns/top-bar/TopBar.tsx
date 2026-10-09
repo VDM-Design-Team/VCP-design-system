@@ -45,9 +45,9 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
    */
   primaryAction?: React.ReactNode;
   /**
-   * Whether the primary action is shown. Default `true`. Some screens have no
-   * "Create Added Value"; set `false` and the bar takes the logo variant, so the
-   * caller can keep passing `primaryAction` and flip one flag.
+   * Whether the left side is shown. Default `true`. Some screens have nothing
+   * there — an Added Value being edited, say — so `false` leaves the left side
+   * empty, logo included, and the caller can keep passing `primaryAction`.
    */
   showPrimaryAction?: boolean;
   /** Where the logo links when there is no `primaryAction`. */
@@ -104,7 +104,8 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             there is somewhere for it to go. An `<a>` without `href` is not a
             link and may not carry a name, so without `homeHref` the logo
             stands alone and names itself. */}
-        {(showPrimaryAction ? primaryAction : undefined) ??
+        {showPrimaryAction &&
+          (primaryAction ??
           (homeHref ? (
             <a
               href={homeHref}
@@ -115,13 +116,14 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             </a>
           ) : (
             <Logo size="md" />
-          ))}
-        <div className="flex shrink-0 items-center gap-4">
+          )))}
+        <div className="ml-auto flex shrink-0 items-center gap-4">
           {notifications != null && (
             <span className="relative">
               <IconButton
                 variant="tertiary"
                 icon="bell"
+                size="lg"
                 label={
                   notifications > 0
                     ? `Notifications, ${notifications} unread`
@@ -138,13 +140,13 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 )}
               />
               {notifications > 0 && (
-                /* The design's red dot: 12, critical, sitting on the bell's
-                   top-right shoulder, with a slow pulse behind it. The number
+                /* The design's red dot: 12, critical, up and to the right of the
+                   bell's 24 glyph, with a slow pulse behind it. The number
                    is in the bell's name; the pulse is dropped under reduced
                    motion and the dot stays. */
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-1.5 top-1 size-3"
+                  className="pointer-events-none absolute right-1 top-0.5 size-3"
                 >
                   <span className="absolute inset-0 animate-ping rounded-full bg-accent-critical-outline-border-default opacity-60 motion-reduce:hidden" />
                   <span className="absolute inset-0 rounded-full bg-accent-critical-outline-border-default" />
