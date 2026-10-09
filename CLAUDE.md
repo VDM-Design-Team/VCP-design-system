@@ -49,7 +49,7 @@ piece of the system.
 
 **`src/components/` — components.** One unit assembled *from* atoms (and
 other components): `IconButton`'s wrapping cousins like `Field`, `Chip`,
-`Menu`, `DataTable`, `StatusPill` (a `Badge` plus the status mapping). However
+`Menu`, `DataTable`, `StatusTag` (a `Badge` plus the status mapping). However
 rich inside, if it presents as one control or one display unit, it is a
 component — `DataTable` and `DatePicker` are components, not patterns.
 
@@ -69,7 +69,7 @@ Rules that follow from the split:
 - **Domain mappings live in one place each.** VCP vocabulary (statuses,
   urgencies, roles, domains) may appear at any tier, but each mapping —
   status → tone, urgency → colour — is owned by exactly one piece
-  (`StatusPill` owns statuses); call sites never re-derive it.
+  (`StatusTag` owns statuses); call sites never re-derive it.
 - **All four tiers ship the same artefacts**: the `.tsx`, a `.stories.tsx`,
   and a `docs/<name>.md`. Rule 4 applies everywhere.
 - **Storybook titles mirror the tiers.** Top level is the tier; components

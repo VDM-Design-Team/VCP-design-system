@@ -115,7 +115,7 @@ Nothing was invented here.
   a `size` step and a `tone`.
 - Don't use a hashed tone to mean something. It is a hash of the name; `red` is
   not "blocked" and `green` is not "approved". That is `Badge`, or the
-  `StatusPill` pattern.
+  `StatusTag` pattern.
 - Don't hash by default. Leave `tone` unset unless the context genuinely needs
   to tell many people apart at a glance — most avatars should stay `neutral`.
 - Don't set `standalone` on an avatar that already sits beside the person's name —

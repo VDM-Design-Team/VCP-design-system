@@ -22,9 +22,9 @@ page, audit batch 5, 11 September 2026.
 | `UrgencyTag` | atom |
 | `AvatarGroup` | component |
 | `DataTable` | component |
-| `DueDatePill` | component |
+| `DueDateTag` | component |
 | `Pagination` | component |
-| `StatusPill` | component |
+| `StatusTag` | component |
 | `Tooltip` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -35,11 +35,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | `AVTable` | Any list of Added Values — the workspace, a filtered view, search results |
 | `DataTable` | A table of something that is not an Added Value |
-| `StatusPill` etc. | One AV's facts outside a table — a card, a detail panel |
+| `StatusTag` etc. | One AV's facts outside a table — a card, a detail panel |
 
 **It owns no mapping.** Every cell that has a vocabulary defers to the piece
-that owns it: `StatusPill` for status, `UrgencyTag` for urgency, `TypeTag` for
-type, `DueDatePill` for how near a date is. This pattern decides *which columns
+that owns it: `StatusTag` for status, `UrgencyTag` for urgency, `TypeTag` for
+type, `DueDateTag` for how near a date is. This pattern decides *which columns
 exist and in what order*, and that is all — which is the difference between a
 pattern and a second copy of the system.
 
@@ -53,10 +53,10 @@ order of a thousand Added Values is the server's business.
 |---|---|---|
 | Checkbox | — | Optional. `selectable` |
 | Task Title | ✓ `title` | Reference, divider, title; domain badge and counts below |
-| Due Date | ✓ `due` | `DueDatePill` |
+| Due Date | ✓ `due` | `DueDateTag` |
 | Urgency | — | `UrgencyTag` |
 | Type | — | `TypeTag` |
-| Status | — | `StatusPill` |
+| Status | — | `StatusTag` |
 | Members | — | `AvatarGroup` |
 | Last Updated | ✓ `lastUpdated` | Already-formatted text |
 | Actions | — | Optional. `actions` |
@@ -109,7 +109,7 @@ value someone chose.
 ```
 
 `due.label` and `lastUpdated` are **already formatted**. This table does no
-date maths and no relative time — see `docs/due-date-pill.md` for why the
+date maths and no relative time — see `docs/due-date-tag.md` for why the
 threshold is not a design-system decision.
 
 ### `hints` has no defaults, deliberately
@@ -180,6 +180,6 @@ the canvas**: 81, 16 and 32 respectively, all exact.
 1. **The four info tooltips have no copy.** Design drew the glyphs; nobody
    wrote the sentences. Until they exist, `hints` is empty and the glyphs do
    not render.
-2. **What "due soon" means** — carried over from `docs/due-date-pill.md`.
+2. **What "due soon" means** — carried over from `docs/due-date-tag.md`.
 3. **`Pagination`'s three missing affordances**, listed above. They belong on
    that component, not here.

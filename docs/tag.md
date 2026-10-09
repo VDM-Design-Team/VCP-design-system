@@ -12,15 +12,15 @@ beside it.
 Nothing — Tag is the shared shell, not a composition. `TypeTag` and
 `UrgencyTag` compose *this*; their own docs carry a "Composed of" section.
 
-## Tag vs Badge vs Chip vs StatusPill
+## Tag vs Badge vs Chip vs StatusTag
 
 | Use | For | Shape | Interactive? | Vocabulary |
 |---|---|---|---|---|
 | `Tag` | Generic classification that needs one of the four Figma styles, or is the base for a new contextual tag | Rounded-rectangle (`shape.radius.sm`) | No | Generic tones only |
 | `Badge` | Generic classification, the common case | Pill (`shape.radius.pill`) | No | Generic tones only |
 | `Chip` | A value the user can act on: a selected filter, a removable tag | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
-| `StatusPill` *(component)* | A VCP status | Tag's rounded-rectangle | No | VCP's status vocabulary |
-| `DueDatePill` *(component)* | An AV's due date | Tag's rounded-rectangle | No | Proximity → tone |
+| `StatusTag` *(component)* | A VCP status | Tag's rounded-rectangle | No | VCP's status vocabulary |
+| `DueDateTag` *(component)* | An AV's due date | Tag's rounded-rectangle | No | Proximity → tone |
 | `TypeTag` / `UrgencyTag` *(components)* | An AV's type or urgency | Tag's rounded-rectangle, `textual` | No | VCP's type/urgency vocabulary |
 
 **`Tag` and `Badge` are separate shapes on purpose, ported from separate
@@ -30,7 +30,7 @@ other's corner.
 
 **Introducing a new contextual tag family (a third `*Tag`) means composing
 `Tag`**, the way `TypeTag`/`UrgencyTag` already do and the way
-`StatusPill`/`DueDatePill` compose `Tag` — never a new hand-rolled shell.
+`StatusTag`/`DueDateTag` compose `Tag` — never a new hand-rolled shell.
 That was the mistake this component fixes: `TypeTag` and `UrgencyTag`
 originally duplicated an identical shell between them instead of sharing one.
 
@@ -105,7 +105,7 @@ same Figma `Tag` node.
 - Don't hardcode colors or spacing. `className="bg-[#dbeafe]"` is a bug — add
   a token instead.
 - Don't put a VCP status in a bare Tag. That is a composing piece's job —
-  `StatusPill` for statuses, or a new `*Tag` composing this for anything else.
+  `StatusTag` for statuses, or a new `*Tag` composing this for anything else.
 - Don't build a new hand-rolled shell for a new contextual tag. Compose `Tag`.
 - Don't make a Tag clickable or dismissible without becoming a `Chip`-shaped
   wrapper around it — a bare `<span>` with an `onClick` is unreachable by

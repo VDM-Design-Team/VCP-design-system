@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
- * DueDatePill — an Added Value's due date, worn as a tag that changes colour
+ * DueDateTag — an Added Value's due date, worn as a tag that changes colour
  * as the date approaches. A `Tag` plus the owner of VCP's due-date → tone
  * mapping: this file is where that mapping lives, and nowhere else.
  *
@@ -13,7 +13,7 @@ import { Tag, type TagProps } from '../../atoms/tag';
  *
  * **The date text is the caller's.** This takes an already-formatted string,
  * because how a date reads — "October 1, 2025", "1 Oct", "in 3 days" — is a
- * locale and product decision that a design-system pill has no business
+ * locale and product decision that a design-system tag has no business
  * making. What it owns is the colour.
  *
  * **The threshold is the caller's too, and deliberately so.** `dueDateTone`
@@ -21,7 +21,7 @@ import { Tag, type TagProps } from '../../atoms/tag';
  * `soonWithinDays` has no default. How many days ahead counts as soon is a
  * product rule that differs by domain, and a design system that invents one
  * has quietly made a product decision. Open question for design — see
- * docs/due-date-pill.md.
+ * docs/due-date-tag.md.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -35,28 +35,28 @@ export type DueDateProximity = 'default' | 'due-soon' | 'overdue';
    own neutral tonal is `surface.neutral.subtle` on `text.secondary` —
    slate-100 on slate-700. One step of slate apart on the fill, same text. The
    Tag tone is used rather than adding a near-duplicate token family, so
-   every neutral pill in the system stays one colour. Noted in the doc. */
+   every neutral tag in the system stays one colour. Noted in the doc. */
 const PROXIMITY: Record<DueDateProximity, NonNullable<TagProps['tone']>> = {
   default: 'neutral',
   'due-soon': 'warning',
   overdue: 'danger',
 };
 
-export interface DueDatePillProps extends Omit<TagProps, 'tone' | 'variant' | 'children'> {
+export interface DueDateTagProps extends Omit<TagProps, 'tone' | 'variant' | 'children'> {
   /** How near the date is. Compute it with `dueDateTone` if you have a `Date`. */
   proximity?: DueDateProximity;
   /** The date, already formatted. "October 1, 2025". */
   children: React.ReactNode;
 }
 
-export const DueDatePill = React.forwardRef<HTMLSpanElement, DueDatePillProps>(
+export const DueDateTag = React.forwardRef<HTMLSpanElement, DueDateTagProps>(
   ({ proximity = 'default', children, size = 'sm', ...props }, ref) => (
     <Tag ref={ref} tone={PROXIMITY[proximity]} size={size} {...props}>
       {children}
     </Tag>
   ),
 );
-DueDatePill.displayName = 'DueDatePill';
+DueDateTag.displayName = 'DueDateTag';
 
 /**
  * Which proximity a date falls in. The comparison lives here so that "is this

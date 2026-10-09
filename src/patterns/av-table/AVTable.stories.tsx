@@ -79,8 +79,8 @@ const meta = {
         component:
           'The Added Value table — `DataTable` specialised, exactly as the generic table’s ' +
           'own doc says the VCP tables should be. **It owns no mapping**: every cell with a ' +
-          'vocabulary defers to the piece that owns it — `StatusPill`, `UrgencyTag`, ' +
-          '`TypeTag`, `DueDatePill`. This pattern decides which columns exist and in what ' +
+          'vocabulary defers to the piece that owns it — `StatusTag`, `UrgencyTag`, ' +
+          '`TypeTag`, `DueDateTag`. This pattern decides which columns exist and in what ' +
           'order, and nothing else. It does not sort, filter or paginate; `rows` renders in ' +
           'the order given.',
       },
