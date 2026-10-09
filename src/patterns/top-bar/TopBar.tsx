@@ -123,7 +123,6 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
               <IconButton
                 variant="tertiary"
                 icon="bell"
-                size="lg"
                 label={
                   notifications > 0
                     ? `Notifications, ${notifications} unread`
@@ -141,14 +140,15 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
               />
               {notifications > 0 && (
                 /* The design's red dot: 12, critical, up and to the right of the
-                   bell's 24 glyph, with a slow pulse behind it. The number
+                   bell's 20 glyph, with a slow pulse behind it — a 2.5s cycle, so the flashes are
+                   spaced well apart. The number
                    is in the bell's name; the pulse is dropped under reduced
                    motion and the dot stays. */
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute right-1.5 top-1 size-3"
+                  className="pointer-events-none absolute right-1 top-0.5 size-3"
                 >
-                  <span className="absolute inset-0 animate-ping rounded-full bg-accent-critical-outline-border-default opacity-60 motion-reduce:hidden" />
+                  <span className="absolute inset-0 animate-ping rounded-full bg-accent-critical-outline-border-default opacity-60 [animation-duration:2.5s] motion-reduce:hidden" />
                   <span className="absolute inset-0 rounded-full bg-accent-critical-outline-border-default" />
                 </span>
               )}

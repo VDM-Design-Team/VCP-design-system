@@ -52,10 +52,10 @@ title, no `h1`, no back.
 
 `surface.elevated` bar (64 tall = `h-16`) on `stroke.subtle`; user name
 `label-lg` `text.primary`. The bell is neutral (`neutral.outline.content`, with
-the `surface.neutral` hover fills), not brand blue, and its glyph is 24 (the
-`lg` `IconButton`, a 48 target). The unread dot is 12, up and to the right of the glyph, and
+the `surface.neutral` hover fills), not brand blue, and a standard `IconButton` (a 20 glyph in a 40 target). The unread dot is 12, level with the glyph's right edge and 2 above its top, and
 `accent.critical.outline.border.default` — the design's red dot — with a slow
-pulse behind it that is dropped under reduced motion. The divider is the
+pulse behind it (a 2.5s cycle, where Tailwind's `ping` is 1s) that is dropped under
+reduced motion. The divider is the
 `Divider` atom, vertical and 40 tall, drawn only between the bell and the mode
 and user group. No new tokens —
 every visible piece is a composed component wearing its own.
