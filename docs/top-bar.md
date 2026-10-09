@@ -52,7 +52,7 @@ title, no `h1`, no back.
 
 `surface.elevated` bar (64 tall = `h-16`) on `stroke.subtle`; user name
 `label-lg` `text.primary`. The bell is neutral (`neutral.outline.content`, with
-the `surface.neutral` hover fills), not brand blue, and a standard `IconButton` (a 20 glyph in a 40 target). The unread dot is 12, level with the glyph's right edge and 2 above its top, and
+the `surface.neutral` hover fills), not brand blue, and a standard `IconButton` (a 20 glyph in a 40 target). The unread dot is 10, level with the glyph's right edge and 2 above its top, and
 `accent.critical.outline.border.default` — the design's red dot — with a slow
 pulse behind it (a 2.5s cycle, where Tailwind's `ping` is 1s) that is dropped under
 reduced motion. The divider is the
