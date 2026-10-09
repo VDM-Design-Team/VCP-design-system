@@ -205,7 +205,7 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
                   disabled={!domains?.length}
                   aria-label={`Domain: ${domain ?? 'none selected'}. Change domain`}
                   className={cn(
-                    'flex w-full items-center justify-between gap-2.5 rounded-md px-3 py-2',
+                    'group flex w-full items-center justify-between gap-2.5 rounded-md px-3 py-2',
                     'bg-surface-neutral-subtle text-left font-sans text-body-sm-medium text-text-secondary',
                     /* The neutral outline family's states, as the outline Button
                        uses: the border steps darker on hover, and stays at the
@@ -219,7 +219,19 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
                   )}
                 >
                   <span className="min-w-0 truncate">{domain}</span>
-                  <Icon name="caret-up-down" size="md" className="shrink-0 text-stroke-strong" />
+                  <Icon
+                    name="caret-up-down"
+                    size="md"
+                    /* Follows the border through every state, so the two always
+                       read as one control. */
+                    className={cn(
+                      'shrink-0 text-neutral-outline-border-default transition-colors',
+                      'group-hover:text-neutral-outline-border-hover',
+                      'group-active:text-neutral-outline-border-pressed',
+                      'group-aria-expanded:text-neutral-outline-border-pressed',
+                      'group-disabled:text-neutral-outline-border-disabled',
+                    )}
+                  />
                 </button>
               }
             />
