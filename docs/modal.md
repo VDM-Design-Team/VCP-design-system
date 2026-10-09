@@ -48,7 +48,7 @@ Rules of thumb:
 | `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
 | `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
 | `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby` |
-| `showDescription` | `boolean` | `true` | Show the sub-heading. Hidden, the gap to the body drops from 12 to 4 |
+| `showDescription` | `boolean` | `true` | Show the sub-heading. Hidden, the gap to the body is 4 — unless the body opens with a control or card, which keeps 12 |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s |
 | `showFooter` | `boolean` | `true` | Show the footer actions. Hidden, the body takes its own bottom padding |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
@@ -78,10 +78,10 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 <div>                           backdrop — fixed inset-0 · z-50 · surface.overlay · p-6 · grid place-items-center
   <div role="dialog">           surface.elevated · shadow.modal · radius.md · max-h-full · size max-width
     <header>                    px-6 pt-5 — only when there is heading text or a close button
-      <h2>                      type.body-lg-semibold (18) · text.primary         → aria-labelledby
+      <h2>                      type.title-md-semibold · text.primary         → aria-labelledby
       <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
       IconButton                icon "x" · md (40 target) · rounded-full · text.primary · pulled into the padding
-    <div>                       px-6 · pt-3 under a description, pt-1 without one (pt-5 with no header) · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
+    <div>                       px-6 · pt-3 under a description or before a non-text first child (button, form control, card), pt-1 before running text (pt-5 with no header) · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
     <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
 ```
 
@@ -93,7 +93,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 | Panel surface | `surface.elevated` | `bg-surface-elevated` |
 | Elevation | `shadow.modal` | `shadow-modal` |
 | Radius | `radius.md` | `rounded-md` |
-| Title type | `type.body-lg-semibold` (18/26) | `text-body-lg-semibold` |
+| Title type | `type.title-md-semibold` | `text-title-md-semibold` |
 | Title colour | `text.primary` | `text-text-primary` |
 | Description type | `type.caption-md-regular` | `text-caption-md-regular` |
 | Description colour | `text.tertiary` | `text-text-tertiary` |

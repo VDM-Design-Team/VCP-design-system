@@ -132,6 +132,27 @@ export const Default: Story = {
 };
 
 /**
+ * No subtitle, but the body opens with a control rather than text, so the gap
+ * under the title stays at 12. With running text it would be 4 (see Default
+ * with `showDescription` off).
+ */
+export const BodyStartsWithControl: Story = {
+  args: { title: 'Reject this AV?', size: 'sm' },
+  render: (args) => (
+    <Modal {...args} footer={<ConfirmFooter onClose={args.onClose} />}>
+      <Field label="Reason">
+        <Input />
+      </Field>
+    </Modal>
+  ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    const body = dialog.querySelector('header')!.nextElementSibling as HTMLElement;
+    await expect(getComputedStyle(body).paddingTop).toBe('12px');
+  },
+};
+
+/**
  * A form inside a dialog. `initialFocusRef` overrides the default and puts focus
  * straight on the first input, because there is exactly one thing to do here and
  * the user should be able to start typing. The `<form>` owns submission; labels

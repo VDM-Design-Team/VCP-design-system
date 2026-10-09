@@ -70,6 +70,26 @@ const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
   defaultVariants: { hasText: true },
 });
 
+/** Layout effect where there is a DOM, plain effect on a server (no warning). */
+const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
+/** Elements that read as running text, so a body starting with one sits close
+    under the title. Anything else (a button, a form control, a selectable card)
+    is a block of its own and wants the larger gap. */
+const TEXT_TAGS = new Set([
+  'P', 'SPAN', 'STRONG', 'EM', 'B', 'I', 'A', 'SMALL', 'CODE', 'UL', 'OL', 'DL',
+  'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
+]);
+
+function startsWithText(body: HTMLElement): boolean {
+  const first = Array.from(body.childNodes).find(
+    (n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '',
+  );
+  if (!first) return true;
+  if (first.nodeType === Node.TEXT_NODE) return true;
+  return TEXT_TAGS.has((first as HTMLElement).tagName);
+}
+
 /* ------------------------------------------------------------------ */
 /* Scroll lock                                                         */
 /* ------------------------------------------------------------------ */
@@ -261,7 +281,7 @@ interface ModalBaseProps
   onClose: () => void;
   /** Sub-heading under the title. Wired to `aria-describedby`. */
   description?: React.ReactNode;
-  /** Show the sub-heading. `false` hides it and tightens the gap to the body. */
+  /** Show the sub-heading. Without it the gap to the body is 4, unless the body opens with a control or card. */
   showDescription?: boolean;
   /** Right-aligned action row at the bottom. Usually two `Button`s. */
   footer?: React.ReactNode;
@@ -350,6 +370,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
      arrow keys; when it does not, it stays out of the tab order rather than
      adding a stop that does nothing. */
   const [scrollable, setScrollable] = React.useState(false);
+  /* Whether the body opens with running text — decides the gap under the header. */
+  const [leadsWithText, setLeadsWithText] = React.useState(true);
+  useIsoLayoutEffect(() => {
+    if (open && mounted && bodyRef.current) setLeadsWithText(startsWithText(bodyRef.current));
+  }, [open, mounted, children]);
   /* Tracks whether the pointer went *down* on the backdrop, so a drag that
      starts inside the panel and ends outside it does not close the dialog. */
   const pointerDownOnBackdrop = React.useRef(false);
@@ -507,7 +532,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             {hasHeaderText && (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {hasTitle && (
-                  <h2 id={titleId} className="text-body-lg-semibold text-text-primary">
+                  <h2 id={titleId} className="text-title-md-semibold text-text-primary">
                     {title}
                   </h2>
                 )}
@@ -550,9 +575,14 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
             'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
-            /* 12 under a sub-heading, 4 under a bare title, 20 when there is no
-               header at all. */
-            hasHeaderText || showClose ? (hasDescription ? 'pt-3' : 'pt-1') : 'pt-5',
+            /* 12 under a sub-heading, or when the body opens with a control or
+               card; 4 when running text follows a bare title; 20 when there is
+               no header at all. */
+            hasHeaderText || showClose
+              ? hasDescription || !leadsWithText
+                ? 'pt-3'
+                : 'pt-1'
+              : 'pt-5',
             /* The footer owns the gap above the actions, so the body must not
                add to it. It cannot be left to the body in any case: a bottom
                padding inside a scrolling box scrolls away with the content,
