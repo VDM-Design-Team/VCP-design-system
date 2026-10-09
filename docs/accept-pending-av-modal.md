@@ -63,7 +63,7 @@ as a second call to action, which is why that one is grey. See
 ## Accessibility
 
 - **The card is the checkbox's label**, so the whole 500-odd-pixel block is a
-  target rather than just the 20px box.
+  target rather than just the 20px box (`Checkbox` `size="md"`). The title and the explanation are both 14 medium, in `text.primary` and `text.tertiary`.
 - **The announced name is the title alone** — "Multipart Value" — with the
   explanation wired as `aria-describedby`. Reading a twenty-word explanation as
   part of the *name* would bury it; as a description it arrives after.
