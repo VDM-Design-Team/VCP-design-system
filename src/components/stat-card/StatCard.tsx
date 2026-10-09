@@ -15,13 +15,13 @@ import { Tooltip } from '../tooltip';
  *
  * - **`default`** — the `Value_Card` on the admin and user dashboards (node
  *   `947:306362`, "Value Cards"). An 8 stripe, **left-aligned**, label over a
- *   36 bold value, exactly 100 high and at least 16.5rem wide (Figma's own
+ *   32 bold value, exactly 100 high and at least 16.5rem wide (Figma's own
  *   minimum is 175; this one is wider so the card stays readable and drops onto
  *   the next row, in a wrapping flex container, before it gets cramped). Figma draws it with
  *   no icon and no hint; the slots still work if a dashboard needs them.
  * - **`superadmin`** — `_SuperAdmin_Metric_Card_Coloured` on the super admin
  *   dashboard (node `3:4848`). A 12 stripe, **centred**, a title row (accent
- *   icon, label, info hint) over a 36 semibold value and a 24 unit, exactly
+ *   icon, label, info hint) over a 32 semibold value and a 24 unit, exactly
  *   150 high.
  *
  * **`StatCardGroup`** is the super admin dashboard's
@@ -38,10 +38,14 @@ import { Tooltip } from '../tooltip';
  * owns the heading. Not built on `Card` for the same reason: Card renders a
  * real heading, which is exactly what this must not do.
  *
- * **Two type exceptions.** The value is 36 semibold and the measurement is 24
- * medium, both on a 36 line — neither exists in the ramp (no 36 step, and no
- * `heading-lg-medium`), so both are written out here and marked
- * `ds-lint-ignore` rather than invented as tokens. Everything else is ramp.
+ * **The value is on the type ramp**: `heading-xl` (32), bold on the default
+ * card and semibold on the superadmin card. Figma draws 36, which has no step;
+ * 32 is deliberate (design decision, 5 Oct 2026): it matches the typography we
+ * have, it is more consistent, and it helps once there are a lot of value cards
+ * (docs/stat-card.md has the reasoning). **One type exception** remains: the measurement is
+ * 24 medium on a 36 line, and there is no `heading-lg-medium`, so it is written
+ * out here and marked `ds-lint-ignore` rather than invented as a token.
+ * Everything else is ramp.
  *
  * The stripe is a decorative `span`, not a `border-l`, so its colour can never
  * fight the card's own `border` over which one wins the left side. It rounds its
@@ -137,14 +141,14 @@ const ALIGN: Record<Align, { items: string; justify: string; text: string }> = {
 };
 const VARIANT: Record<
   StatCardVariant,
-  { card: string; stripe: string; content: string; gap: string; valueWeight: string; align: Align }
+  { card: string; stripe: string; content: string; gap: string; valueType: string; align: Align }
 > = {
   default: {
     card: 'h-25 min-w-66',
     stripe: 'w-2',
     content: 'px-4',
     gap: 'gap-0',
-    valueWeight: 'font-bold leading-11',
+    valueType: 'text-heading-xl-bold',
     align: 'start',
   },
   superadmin: {
@@ -152,14 +156,13 @@ const VARIANT: Record<
     stripe: 'w-3',
     content: 'px-6',
     gap: 'gap-3',
-    valueWeight: 'font-semibold leading-9',
+    valueType: 'text-heading-xl-semibold',
     align: 'center',
   },
 };
 
-/* The exceptions to the type ramp — see the component docs. The value is 36 in
-   both looks (bold on a 44 line, or semibold on a 36 line), the unit 24 medium. */
-const VALUE_SIZE = 'text-[36px]'; // ds-lint-ignore — no 36 step in the ramp
+/* The one exception to the type ramp — see the component docs. The value is
+   `heading-xl` (see `VARIANT`); the unit is 24 medium. */
 const UNIT_TYPE = 'text-[24px] font-medium leading-9'; // ds-lint-ignore — no heading-lg-medium in the ramp
 
 interface MetricProps extends StatCardContent {
@@ -206,7 +209,7 @@ function Metric({
         )}
       </div>
       <div className={cn('flex w-full flex-wrap items-baseline gap-2', a.justify)}>
-        <span className={cn(VALUE_SIZE, VARIANT[variant].valueWeight, 'text-text-primary')}>{value}</span>
+        <span className={cn(VARIANT[variant].valueType, 'text-text-primary')}>{value}</span>
         {unit && <span className={cn(UNIT_TYPE, 'text-text-primary')}>{unit}</span>}
       </div>
     </div>

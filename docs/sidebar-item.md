@@ -60,7 +60,10 @@ When the parent is *also* the current page it tints brand and the children
 stay on white, which is the design's third Planning variant.
 
 Sub-rows are **32 against the design's 33**, carry no glyph, and are indented
-instead. The indent is what says they belong to the row above.
+instead. The indent is what says they belong to the row above. They are
+**regular weight** (`body-sm-regular`), the current one included (design review,
+5 Oct 2026): it is told apart by `text.brand.strong` and `aria-current`, not by
+weight. The parent row stays medium.
 
 ## A real control, not a clickable div
 
@@ -99,13 +102,39 @@ collapsed rows** rather than this component wrapping itself: a tooltip on
 every row of an expanded sidebar would be noise, and the expanded rail already
 shows its labels.
 
-**Collapsed, a disclosure's caret is 12 and sits right after the glyph**, the
-way Figma's `_Sidebar_Item` (`Collapsed`) draws it — beside the glyph, never
-on it. Every collapsed row starts its glyph at the same 8 inset, so the rail's
-glyphs share one axis, and hugs its content with 8 on both sides (40 wide, or
-52 with the caret) so the selected fill and focus ring are even. Expanded, the caret is 20 and sits at the row's far
-right. Whether opening a collapsed disclosure should show a flyout instead of
-the inline list is unconfirmed against Figma and not addressed here.
+**Collapsed, a disclosure's caret is a 12 chevron and sits right after the glyph**,
+the way Figma's `_Sidebar_Item` (`Collapsed`) draws it — `caret-down`, the same
+chevron as the expanded row's, not a filled triangle (design review 7 Oct 2026) —
+beside the glyph, never on it. Every collapsed row starts its
+glyph at the same 8 inset, so the rail's glyphs share one axis, and **hugs its content
+with 8 on both sides** (40 wide, or 52 with the caret) so the selected fill and focus
+ring are even. (Filling the 52 column instead was tried and reverted, design review
+7 Oct 2026: a row without a caret came out 8 | 20.) Expanded, the caret is 20 and sits
+at the row's far right.
+
+### Collapsed, a disclosure opens a flyout
+
+Confirmed against Figma's `Menu_Dropdown` (`27:10048`, design review 5 Oct 2026).
+Opening a collapsed disclosure does **not** grow the row, and the caret does not flip.
+A dropdown opens to the row's right:
+
+- **Placement** — top aligned with the row; its left edge overlaps the rail's right
+  edge by 8 (the rail pads 12 and draws a 1 border, so the flyout starts 5 past the
+  column). `z-60`, so it sits over the page and over the rail's own tooltip.
+- **Surface** — drawn like `Menu`: 211 wide, `space.4` of padding round the rows,
+  `surface.elevated`, `stroke.default` 1, `radius.md`, `shadow.menu` (design review of
+  #141: "the same design as our menu, with the elevation shadow").
+- **Rows** — `Menu`'s item: at least 40 tall, 12 either side, `radius.sm`,
+  `label-sm-medium` in `text.secondary`; hover fills `surface.brand.faint` and darkens the
+  label to `text.primary`. The current one (which `Menu` has no equivalent for) is
+  `label-sm-semibold` in `text.brand.medium` on `surface.brand.faint`.
+- **Closing** — Escape (focus returns to the row), a press outside, focus moving out, or
+  choosing a row. It is a disclosure of links, not an ARIA menu: the row carries
+  `aria-expanded` and `aria-controls`, the rows carry `aria-current`.
+
+It is built here rather than on `Menu` or `Popover`, though it looks the same: `Popover`
+places a panel above or below only, and `Menu`'s rows have no current state.
+Expanded, sub-items still open inline under the row.
 
 ## What the export invented
 
