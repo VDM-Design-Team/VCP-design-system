@@ -2,17 +2,27 @@
 
 ## 0.1.0 — unreleased
 
-### `Icon` — nine sizes, and a fill for every glyph (October 2026)
+### `Sidebar` / `Logo` — the rail's logo keeps its size and sits on the glyph axis (October 2026)
 
-- **Sizes:** `size` takes 10, 12, 16, 20, 24, 28, 32, 40 or 48 — the sizes Figma draws every icon at — instead of only
-  `sm` / `md` / `lg`. Those three still work as 16 / 20 / 24 (default stays `md`, 20). Exports `ICON_SIZES`, `IconSize`.
-  The glyph already sits centred with a margin from the edges (Phosphor's own 256 artboard), at every size.
-- **Regular and fill:** every glyph now ships both. 83 `-fill` glyphs added from Phosphor, plus `check-square` (it had
-  only a fill), `caret-triple-up-fill` (built like the regular) and `smiley-plus-fill` (Figma, node 3605:1853). Still without
-  a fill: the in-house `rectangle-stack`, which Figma doesn't draw filled. `rectangle-group-fill` comes from Figma
-  (node 3129:61076).
-- **Figma's own glyphs override Phosphor's** for `user`, `user-check`, `user-plus`, `user-minus`, `user-sound`, `users`,
-  `users-three` and `fire` (Regular and Fill). Same names, redrawn shapes; `user-plus`, `user-minus` and `user-sound` are new.
+Design review of the collapsed rail:
+
+- **The diamond is the same size collapsed and expanded.** It was 24 wide collapsed but
+  20 inside the expanded lockup; it is now 20 in both.
+- **It is centred on the nav glyphs** (x = 32) instead of on the 76 rail (x = 38), and
+  sits in the same place in both states — the wordmark appears beside it. The expanded
+  lockup moves 2 left (inset 22, was Figma's 24) so the diamond doesn't shift.
+- **`Logo collapsed` is the lockup's own diamond, in the lockup's frame height** (was a
+  separate export in a tight box): at the same `size`, mark and lockup draw an identical
+  diamond. A standalone `Logo collapsed` at a given `size` is therefore about 5% smaller
+  than before (the frame now includes the lockup's bottom margin). No API change.
+
+### `SidebarItem` — the collapsed caret is a chevron again (October 2026)
+
+Design review: in the collapsed rail, a row with sub-items (Archive, Planning) shows the
+**chevron** (`caret-down`, 12) beside its glyph, like the expanded row's caret — not the
+filled triangle (`caret-down-fill`) #141 introduced. Same size and place; it still does not
+flip when the flyout opens. No API change. `caret-down-fill` stays in the icon set (the
+`DatePicker` heading uses it).
 
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
