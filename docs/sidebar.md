@@ -12,7 +12,7 @@ Read off the Figma `SideBar` section (`2349:935`, audit batch 3, 8 Sep 2026).
 |---|---|---|
 | `SidebarItem` | component | Every row, including the pinned footer row |
 | `Tooltip` | component | The label of a collapsed row, which has no visible one |
-| `Select` | atom | The domain switcher, when shown |
+| `Menu` | component | The domain switcher's dropdown, when shown |
 | `Logo` | atom | The wordmark, or the diamond alone when collapsed |
 | `Icon` | atom | The collapse toggle's double chevron |
 
@@ -108,9 +108,13 @@ does not render — a rail nobody can collapse should not draw the control.
 `showDomainSelector` defaults to `false` and the rail matches what the design
 draws.
 
-⚠️ It renders as `Select`, which is **not** the Figma component. That one has
-its own Default/Opened states and has not been ported. Treat this as a
-placeholder until it is.
+The switcher is Figma's `_Domain_Selection_Dropdown`: a filled, borderless
+trigger (`surface.neutral.subtle`, radius 8, 12 / 8 padding, 14 medium in
+`text.secondary`) with a 20 up-down caret in `stroke.strong`, opening the
+system's `Menu` flush to the trigger's width. It is not the native `Select`,
+whose popup the platform draws and a design cannot style. The trigger is named
+"Domain: Design. Change domain" so the current value is announced. `Menu` has
+no selected state, so the current domain is only marked by the trigger.
 
 ## Accessibility
 
@@ -134,5 +138,3 @@ placeholder until it is.
   nesting landmarks makes both harder to navigate.
 - **Don't render it without `AppShell`** — the rail assumes a
   full-height flex parent and a `TopBar` beside it.
-- **Don't rely on the domain selector's styling** until the Figma component is
-  ported; it is a placeholder.

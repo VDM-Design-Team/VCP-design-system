@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Logo } from '../../atoms/logo';
 import { Icon } from '../../atoms/icon';
-import { Select } from '../../atoms/select';
+import { Menu } from '../../components/menu';
 import { Tooltip } from '../../components/tooltip';
 import { SidebarItem, type SidebarSubItem } from '../../components/sidebar-item';
 import type { IconName } from '../../atoms/icon';
@@ -190,12 +190,30 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
 
         <div className="mt-10 flex flex-1 flex-col gap-8 px-3">
           {showDomainSelector && !collapsed && (
-            <Select
-              size="sm"
-              options={domains as string[] | undefined}
-              value={domain}
-              onChange={onDomainChange}
-              aria-label="Domain"
+            /* Figma's `_Domain_Selection_Dropdown`: a filled, borderless trigger
+               with an up-down caret, opening the system's `Menu`. Not the native
+               `Select`, whose popup cannot be drawn. */
+            <Menu
+              className="w-full"
+              panelClassName="w-full"
+              align="left"
+              items={(domains ?? []).map((name) => ({ key: name, label: name }))}
+              onSelect={(key) => key && onDomainChange?.(key)}
+              trigger={
+                <button
+                  type="button"
+                  aria-label={`Domain: ${domain ?? 'none selected'}. Change domain`}
+                  className={cn(
+                    'flex w-full items-center justify-between gap-2.5 rounded-md px-3 py-2',
+                    'bg-surface-neutral-subtle text-left font-sans text-body-sm-medium text-text-secondary',
+                    'cursor-pointer transition-colors hover:bg-neutral-tonal-surface-default',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                  )}
+                >
+                  <span className="min-w-0 truncate">{domain}</span>
+                  <Icon name="caret-up-down" size="md" className="shrink-0 text-stroke-strong" />
+                </button>
+              }
             />
           )}
           <nav aria-label={label} className="flex flex-col gap-2">
