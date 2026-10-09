@@ -25,8 +25,12 @@ Claude Design project — those mirror this repo, not the other way round.
    visible focus ring, 40px minimum target for touch, `aria-label` on icon-only
    controls.
 6. **Changes are versioned.** Adding a token or variant is a minor bump. Renaming
-   or removing one is a major bump and needs a note in `CHANGELOG.md` with the
-   migration path.
+   or removing one is a major bump and needs a migration note. Every PR that
+   touches `src/` or `tokens/` adds its changelog entry as **its own file in
+   `changes/`** (`changes/<branch-name>.md`, with `bump: patch|minor|major`) —
+   never edit `CHANGELOG.md` directly; `npm run changelog` writes it at
+   release. `npm run lint:changes` (part of `npm test`) enforces it, and a
+   `major` entry must carry a `Migration:` line. See `changes/README.md`.
 7. **Pick the tier before you write.** See the next section. Getting this
    wrong is expensive to undo once other things import it.
 
@@ -106,7 +110,8 @@ Rules that follow from the split:
 |---|---|
 | `npm run tokens` | Rebuild `dist/` from `tokens/` |
 | `npm run dev` | Storybook at :6006 |
-| `npm test` | Token lint + composition lint + typecheck (what CI runs) |
+| `npm test` | Token lint + composition lint + changelog-entry lint + typecheck (what CI runs) |
+| `npm run changelog` | At release: fold `changes/` into `CHANGELOG.md` and set the version |
 
 ## How design proposes a change
 
