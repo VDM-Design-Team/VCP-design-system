@@ -2,9 +2,27 @@
 
 ## 0.1.0 — unreleased
 
-### `Carousel` — neutral arrows (October 2026)
+### `Sidebar` / `Logo` — the rail's logo keeps its size and sits on the glyph axis (October 2026)
 
-The left and right arrows are `neutral.outline.content` (default, hover, pressed, disabled) instead of the action blue. No API change.
+Design review of the collapsed rail:
+
+- **The diamond is the same size collapsed and expanded.** It was 24 wide collapsed but
+  20 inside the expanded lockup; it is now 20 in both.
+- **It is centred on the nav glyphs** (x = 32) instead of on the 76 rail (x = 38), and
+  sits in the same place in both states — the wordmark appears beside it. The expanded
+  lockup moves 2 left (inset 22, was Figma's 24) so the diamond doesn't shift.
+- **`Logo collapsed` is the lockup's own diamond, in the lockup's frame height** (was a
+  separate export in a tight box): at the same `size`, mark and lockup draw an identical
+  diamond. A standalone `Logo collapsed` at a given `size` is therefore about 5% smaller
+  than before (the frame now includes the lockup's bottom margin). No API change.
+
+### `SidebarItem` — the collapsed caret is a chevron again (October 2026)
+
+Design review: in the collapsed rail, a row with sub-items (Archive, Planning) shows the
+**chevron** (`caret-down`, 12) beside its glyph, like the expanded row's caret — not the
+filled triangle (`caret-down-fill`) #141 introduced. Same size and place; it still does not
+flip when the flyout opens. No API change. `caret-down-fill` stays in the icon set (the
+`DatePicker` heading uses it).
 
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
@@ -49,6 +67,70 @@ due date and a table cell are tags — the rounded-rectangle — not the pill.
   when unsorted, `sort-ascending` / `sort-descending` when sorted, 20 and
   `text.secondary` (were `caret-up-down` / `caret-up` / `caret-down` at 12,
   unsorted in `text.subtle`). `AVTable` inherits both.
+
+### `SidebarItem` / `Sidebar` — a flyout for the collapsed rail, and regular sub-items (October 2026)
+
+Design review of build 39 (#123); the flyout is Figma's `Menu_Dropdown` (`27:10048`).
+
+- **Collapsed, a disclosure opens a flyout** to the row's right instead of expanding inline:
+  211 wide, top aligned with the row, its left edge 8 inside the rail's right edge. Escape,
+  a press outside, focus leaving, or choosing a row closes it. The row does not grow and the
+  caret does not flip. Expanded sub-items still open inline.
+- **The flyout looks like `Menu`** (design review of build 67): `stroke.default` edge, 4 of padding round the rows, rounded
+  `radius.sm` rows in `label-sm-medium` `text.secondary` that darken to `text.primary` on the `surface.brand.faint` hover, and
+  `shadow.menu`. The current row stays semibold `text.brand.medium`.
+- **The collapsed caret is filled** (`caret-down-fill`, new icon).
+- **Expanded sub-items are regular weight** (were medium); the current sub-item is told apart
+  by colour and `aria-current`.
+
+Migration: none; the collapsed flyout replaces the unconfirmed inline-list behaviour that
+`docs/sidebar-item.md` flagged. No API change.
+
+### `DatePicker` — design review of the variants (October 2026)
+
+Follow-up to #133.
+
+- **Dual view keeps its order:** the right calendar is always after the left, and nothing is disabled. Paging the left onto
+  the right's month makes the right jump to the month after it; paging the right back onto the left's makes the left step back.
+- **Quick picks follow the mode:** a single-date picker shows only Today; ranges only appear in range mode.
+- **Overdue / Due Soon are filters** (`filter: true` on a preset): they do nothing to the calendar, only call `onSelect`. The list is centred vertically.
+- **Quick picks look like a dropdown menu** on desktop (4 inset, square 40-high rows, brand tints, 140 wide) —
+  Figma doesn't define the list, so this is a proposal to test. The touch row is unchanged.
+
+- **Clear is on by default** (`clearable`, default `true`; `false` hides it — a toggle on Storybook's Default controls). It is outside the view swap, so it
+  is the same button in the same place in the day and month views.
+- **The month heading is a toggle, both ways.** "Sep 2026 ▾" opens the months; "2026 ▴" returns to the days. It
+  is Figma's small textual button, 24 high, with a 12 filled caret; the label is `text.secondary`.
+- **Carets follow `neutral.textual.content`** (default, hover, pressed) — the previous/next arrows and the heading's
+  — not the action blue. New icons: `caret-down-fill`, `caret-up-fill`.
+- **Type:** cells `label-sm-regular` (was 16px `body-md`, in the numeric face), today `label-sm-semibold`, range
+  `label-sm-medium`, selected `label-sm-semibold`; the heading `label-sm-medium` `text.secondary` (was 16px
+  `title-sm-semibold` `text.primary`). Today's month is semibold too.
+- **A range has no seams:** the day grid is seven whole 36 columns centred in the calendar (260 ÷ 7 left 37.14 columns
+  whose edges anti-aliased into lines), rows 35 apart.
+- **Pointer cursor** on cells, quick picks, the heading and the arrows.
+- **Dual view matches the design:** 685 × 329, a 118 quick-picks column, 8 above the footer.
+- **Fixed:** in a `Popover` the calendar overflowed its container with doubled padding — the story now uses
+  `width="auto"` and no panel padding.
+- **Storybook:** the control-combination pages (*Day And Range*, *…With Button*, *Month*, *…With Button*, *Month
+  Buttons*) are gone — the **Default** playground is live and covers them; the heading test now covers paging and
+  the view swap.
+
+Migration: callers that relied on the button being absent without `onClear` pass `clearable={false}`; no caller
+imports `DatePicker` yet.
+
+### `StatCard` — the value is 32, on the type ramp (October 2026)
+
+The value was 36 — written out as a type-ramp exception because the ramp has no 36 step.
+It is now **`heading-xl` (32)**: `heading-xl-bold` on the `default` card, `heading-xl-semibold`
+on the `superadmin` card. Line height follows the ramp (1.2) instead of 44 / 36, so the value
+row is a little shorter; card heights (100 / 150) are unchanged.
+
+**Why it differs from Figma (which draws 36):** it matches the typography we already have
+(an existing ramp step, not a one-off size), it is more consistent with the rest of the
+system, and it helps once there are a lot of value cards in a row. See `docs/stat-card.md`.
+
+The only remaining type exception on the card is the 24 medium `unit`. No API change.
 
 ### `DatePicker` — Figma's `Date_Picker_VCP` variants (5 October 2026)
 

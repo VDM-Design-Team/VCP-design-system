@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SidebarItem } from './SidebarItem';
 import { Tooltip } from '../tooltip';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
+import { expect, userEvent, within } from 'storybook/test';
 
 const meta = {
   title: 'Components/Navigation/SidebarItem',
@@ -99,8 +100,10 @@ export const ExpandableSelected: Story = {
  * The 76px rail. The label is hidden but survives as the accessible name, so
  * a screen reader still reads "Dashboard". Sighted users get it back from a
  * `Tooltip` — which `Sidebar` adds, not this component, because a tooltip on
- * every row of an expanded sidebar would be noise. `Archive` has sub-items:
- * its caret shrinks to 12 and sits right after the glyph.
+ * every row of an expanded sidebar would be noise. Every row fills the same 52
+ * column, glyph left-aligned. `Archive` has sub-items: its caret is a filled 12
+ * triangle right after the glyph, and opening it shows a flyout to the right —
+ * held open here — rather than growing the row.
  */
 export const Collapsed: Story = {
   render: () => (
@@ -121,11 +124,49 @@ export const Collapsed: Story = {
           label="Archive"
           icon="archive"
           collapsed
-          items={[{ label: 'Completed' }, { label: 'Rejected' }, { label: 'Backlogs' }]}
+          defaultOpen
+          items={[
+            { label: 'Completed', selected: true },
+            { label: 'Rejected' },
+            { label: 'Backlogs' },
+          ]}
         />
       </Tooltip>
     </Rail>
   ),
+};
+
+/**
+ * The collapsed disclosure, driven: a press opens the flyout beside the row,
+ * Escape closes it and hands focus back to the row. A press outside closes it
+ * too, and so does choosing an item.
+ */
+export const CollapsedFlyout: Story = {
+  render: () => (
+    <Rail width="w-[76px]">
+      <SidebarItem
+        label="Archive"
+        icon="archive"
+        collapsed
+        items={[{ label: 'Completed' }, { label: 'Rejected' }, { label: 'Backlogs' }]}
+      />
+    </Rail>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Archive' });
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(trigger);
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(canvas.getByText('Completed')).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(trigger).toHaveFocus();
+    await userEvent.click(trigger);
+    await userEvent.click(canvas.getByText('Rejected'));
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(trigger);
+  },
 };
 
 /**
