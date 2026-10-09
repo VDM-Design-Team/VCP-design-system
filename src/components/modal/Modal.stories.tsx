@@ -40,6 +40,8 @@ const meta = {
     role: { control: 'radio', options: ['dialog', 'alertdialog'] },
     dismissible: { control: 'boolean' },
     showClose: { control: 'boolean' },
+    showDescription: { control: 'boolean' },
+    showFooter: { control: 'boolean' },
     open: { control: 'boolean' },
   },
 } satisfies Meta<typeof Modal>;
@@ -127,6 +129,33 @@ export const Default: Story = {
       />
     </Background>
   ),
+};
+
+/**
+ * No subtitle, but the body opens with a control rather than text, so the gap
+ * under the title stays at 12. With running text it would be 4 (see Default
+ * with `showDescription` off).
+ */
+export const BodyStartsWithControl: Story = {
+  args: { title: 'Reject this AV?', size: 'sm' },
+  render: (args) => (
+    <Modal {...args} footer={<ConfirmFooter onClose={args.onClose} />}>
+      <Field label="Reason">
+        <Input />
+      </Field>
+    </Modal>
+  ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    const body = dialog.querySelector('header')!.nextElementSibling as HTMLElement;
+    /* 12 at rest: the header's 8 below its text plus the body's own 4. */
+    const head = dialog.querySelector('header') as HTMLElement;
+    await expect(
+      parseFloat(getComputedStyle(head).paddingBottom) + parseFloat(getComputedStyle(body).paddingTop),
+    ).toBe(12);
+    /* Room for the last control's focus ring (2px outline + 2px offset). */
+    await expect(parseFloat(getComputedStyle(body).paddingBottom)).toBeGreaterThanOrEqual(4);
+  },
 };
 
 /**

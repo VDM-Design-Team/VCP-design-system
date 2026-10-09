@@ -48,7 +48,9 @@ Rules of thumb:
 | `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
 | `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
 | `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby` |
+| `showDescription` | `boolean` | `true` | Show the sub-heading. Hidden, the gap to the body is 4 — unless the body opens with a control or card, which keeps 12 |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s |
+| `showFooter` | `boolean` | `true` | Show the footer actions. Hidden, the body takes its own bottom padding |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |
@@ -75,12 +77,12 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 ```
 <div>                           backdrop — fixed inset-0 · z-50 · surface.overlay · p-6 · grid place-items-center
   <div role="dialog">           surface.elevated · shadow.modal · radius.md · max-h-full · size max-width
-    <header>                    px-6 pt-5 — only when there is heading text or a close button
-      <h2>                      type.title-md-semibold · text.primary          → aria-labelledby
+    <header>                    px-6 pt-5, pb-2 under a description or before a non-text first child (button, form control, card), else pb-0 — only when there is heading text or a close button
+      <h2>                      type.title-md-semibold · text.primary         → aria-labelledby
       <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
-      IconButton                icon "x" · md (40 target) · text.primary · pulled into the padding
-    <div>                       px-6 pt-5 · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
-    <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
+      IconButton                icon "x" · md (40 target) · round (the IconButton default) · text.primary · pulled into the padding
+    <div>                       px-6 · pt-1 (pt-5 with no header) · pb-1 with a footer (room for the focus ring), pb-5 without · overflow-y-auto · tabindex 0 while it scrolls
+    <footer>                    px-6 pt-4 pb-5 · justify-end gap-3 — no surface, no divider
 ```
 
 ## Tokens
@@ -103,11 +105,14 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 
 Spacing rides Tailwind's numeric scale, as the system requires: `p-6` (24) around
 the backdrop, `px-6` (24) through the panel, `pt-5`/`py-5` (20) at the header and
-body, `py-5` (20) in the footer, `gap-3` (12) between footer actions. Never
+body, `pt-4`/`pb-5` in the footer, `gap-3` (12) between footer actions. Never
 `gap-sm` or `mb-xs` — those emit nothing here.
 
-**The footer owns the space above its own buttons**, and the body drops its
-bottom padding whenever there is a footer, so the two never stack. That is not
+**The footer owns the space above its own buttons**, and the body keeps only
+4px of bottom padding when there is a footer (the footer's top is 16 to make
+up the 20). Those 4px are not spacing: a focus ring is a 2px outline offset by
+2, so it reaches 4px past the last field, and a scrolling box clips anything
+beyond its padding edge. Without them the last field's ring was cut off. That is not
 only tidiness: a bottom padding inside a scrolling box scrolls away with the
 content, so on a long dialog the last line ended up hard against the buttons
 while a short one had a comfortable gap. Now it is the same 20 above and 20
