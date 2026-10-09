@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Logo } from '../../atoms/logo';
 import { Icon } from '../../atoms/icon';
-import { Select } from '../../atoms/select';
+import { Menu } from '../../components/menu';
 import { Tooltip } from '../../components/tooltip';
 import { SidebarItem, type SidebarSubItem } from '../../components/sidebar-item';
 import type { IconName } from '../../atoms/icon';
@@ -190,12 +190,50 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
 
         <div className="mt-10 flex flex-1 flex-col gap-8 px-3">
           {showDomainSelector && !collapsed && (
-            <Select
-              size="sm"
-              options={domains as string[] | undefined}
-              value={domain}
-              onChange={onDomainChange}
-              aria-label="Domain"
+            /* Figma's `_Domain_Selection_Dropdown`: a filled, borderless trigger
+               with an up-down caret, opening the system's `Menu`. Not the native
+               `Select`, whose popup cannot be drawn. */
+            <Menu
+              className="w-full"
+              panelClassName="w-full"
+              align="left"
+              items={(domains ?? []).map((name) => ({ key: name, label: name }))}
+              onSelect={(key) => key && onDomainChange?.(key)}
+              trigger={
+                <button
+                  type="button"
+                  disabled={!domains?.length}
+                  aria-label={`Domain: ${domain ?? 'none selected'}. Change domain`}
+                  className={cn(
+                    'group flex w-full items-center justify-between gap-2.5 rounded-md px-3 py-2',
+                    'bg-surface-neutral-subtle text-left font-sans text-body-sm-medium text-text-secondary',
+                    /* The neutral outline family's states, as the outline Button
+                       uses: the border steps darker on hover, and stays at the
+                       pressed step while the menu is open. */
+                    'cursor-pointer border border-neutral-outline-border-default transition-colors',
+                    'hover:bg-neutral-outline-surface-hover hover:border-neutral-outline-border-hover',
+                    'active:bg-neutral-outline-surface-pressed active:border-neutral-outline-border-pressed',
+                    'aria-expanded:bg-neutral-outline-surface-pressed aria-expanded:border-neutral-outline-border-pressed',
+                    'disabled:cursor-not-allowed disabled:border-neutral-outline-border-disabled disabled:bg-surface-neutral-subtle disabled:text-neutral-outline-content-disabled',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                  )}
+                >
+                  <span className="min-w-0 truncate">{domain}</span>
+                  <Icon
+                    name="caret-up-down"
+                    size="md"
+                    /* Follows the border through every state, so the two always
+                       read as one control. */
+                    className={cn(
+                      'shrink-0 text-neutral-outline-border-default transition-colors',
+                      'group-hover:text-neutral-outline-border-hover',
+                      'group-active:text-neutral-outline-border-pressed',
+                      'group-aria-expanded:text-neutral-outline-border-pressed',
+                      'group-disabled:text-neutral-outline-border-disabled',
+                    )}
+                  />
+                </button>
+              }
             />
           )}
           <nav aria-label={label} className="flex flex-col gap-2">
