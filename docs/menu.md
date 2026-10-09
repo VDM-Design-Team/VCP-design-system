@@ -90,10 +90,10 @@ carry a label and an action cannot accidentally be a rule.
 | Item radius | `radius.sm` | `rounded-sm` |
 | Item type | `type.label-sm-medium` | `text-label-sm-medium` |
 | Item resting fill | `action.tertiary.surface.default` (transparent) | `bg-action-tertiary-surface-default` |
-| Item content | `text.secondary` → `text.primary` on hover/focus | `text-text-secondary`, `hover:text-text-primary`, `focus:text-text-primary` |
-| Item highlight | `surface.brand.faint` | `hover:bg-surface-brand-faint`, `focus:bg-surface-brand-faint` |
+| Item content | `text.secondary` → `text.primary` on hover / keyboard focus | `text-text-secondary`, `hover:text-text-primary`, `focus-visible:text-text-primary` |
+| Item highlight | `surface.brand.faint` | `hover:bg-surface-brand-faint`, `focus-visible:bg-surface-brand-faint` |
 | Danger content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
-| Danger highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover` |
+| Danger highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover`, `focus-visible:bg-accent-critical-outline-surface-hover` |
 | Disabled content | `text.disabled` | `disabled:text-text-disabled` |
 | Shortcut | `type.caption-md-medium` + `text.subtle` | `text-caption-md-medium text-text-subtle` |
 | Separator | `stroke.default`, via `Divider` | `Divider decorative={false}` |
@@ -162,9 +162,12 @@ reopening never lands on a previously-chosen destructive item.
   the default ellipsis button names it "More actions".
 - **Roving tabindex**, exactly as `Tabs` does it: the open menu is a single tab
   stop, the active item is `tabIndex={0}` and every other item is `tabIndex={-1}`.
-- The highlight rides `:focus` as well as `:hover`, not `:focus-visible` alone,
-  so a menu opened with the mouse still shows where the keyboard is. The 2px
-  `stroke.focused` ring is on top of that for keyboard users.
+- The highlight rides `:hover` and **`:focus-visible`**, not plain `:focus`
+  (design review, 5 Oct 2026). Opening moves focus to the first item so the
+  arrows work, and plain `:focus` made that item look hovered the moment a
+  *pointer* opened the menu. `:focus-visible` is false after a pointer open and
+  true after a keyboard one: a mouse opens a clean menu, and a keyboard still sees
+  where it is, with the 2px `stroke.focused` ring on top.
 
 ### Danger items — the tone is not the only signal
 
