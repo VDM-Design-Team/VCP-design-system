@@ -2,17 +2,27 @@
 
 ## 0.1.0 — unreleased
 
-### `stroke.strong` is the control boundary; `stroke.field` is removed (October 2026)
+### `Sidebar` / `Logo` — the rail's logo keeps its size and sits on the glyph axis (October 2026)
 
-`stroke.field` was a token too specific to earn its place — named for a component, with `stroke.strong` sitting unused beside it. Making `strong` the control-boundary
-colour keeps the variables streamlined and meets WCAG AA (1.4.11) for a control's boundary.
+Design review of the collapsed rail:
 
-- **`stroke.strong` now holds the control-boundary colour:** slate-500 in light (was slate-400), slate-400 in dark (was slate-500) — the values `stroke.field` held. It clears
-  WCAG 1.4.11's 3:1 in both themes (4.76:1 / 4.55:1 on white / canvas in light; 5.71:1 / 6.96:1 in dark). Nothing used the old `strong`.
-- **Breaking: `stroke.field` is removed.** Migration: `border-stroke-field` → `border-stroke-strong` (Input, Select, Textarea, Checkbox, RadioGroup, Dropzone,
-  SearchSelect, Stepper — all migrated here, so **nothing changes visually**). Figma's `stroke/strong` was set to match.
-- `stroke.default` stays the decorative everyday border (1.48:1). `scripts/import-figma-tokens.mjs` now pins `stroke.strong` instead of adding `stroke.field`.
-- `docs/color-tokens.md` documents the roles.
+- **The diamond is the same size collapsed and expanded.** It was 24 wide collapsed but
+  20 inside the expanded lockup; it is now 20 in both.
+- **It is centred on the nav glyphs** (x = 32) instead of on the 76 rail (x = 38), and
+  sits in the same place in both states — the wordmark appears beside it. The expanded
+  lockup moves 2 left (inset 22, was Figma's 24) so the diamond doesn't shift.
+- **`Logo collapsed` is the lockup's own diamond, in the lockup's frame height** (was a
+  separate export in a tight box): at the same `size`, mark and lockup draw an identical
+  diamond. A standalone `Logo collapsed` at a given `size` is therefore about 5% smaller
+  than before (the frame now includes the lockup's bottom margin). No API change.
+
+### `SidebarItem` — the collapsed caret is a chevron again (October 2026)
+
+Design review: in the collapsed rail, a row with sub-items (Archive, Planning) shows the
+**chevron** (`caret-down`, 12) beside its glyph, like the expanded row's caret — not the
+filled triangle (`caret-down-fill`) #141 introduced. Same size and place; it still does not
+flip when the flyout opens. No API change. `caret-down-fill` stays in the icon set (the
+`DatePicker` heading uses it).
 
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
