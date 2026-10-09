@@ -269,8 +269,13 @@ export const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarP
                         'grid size-8 cursor-pointer place-items-center rounded-md transition-colors',
                         on
                           ? 'bg-surface-brand-faint text-text-brand-strong hover:bg-surface-brand-subtle'
-                          : 'text-text-primary hover:bg-surface-neutral-subtle active:bg-surface-neutral-medium',
-                        'disabled:cursor-not-allowed disabled:text-text-disabled disabled:hover:bg-transparent',
+                          : [
+                              /* The glyph is `neutral.outline.content` in each state; the hover
+                                 and press fills are unchanged. */
+                              'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed',
+                              'hover:bg-surface-neutral-subtle active:bg-surface-neutral-medium',
+                            ],
+                        'disabled:cursor-not-allowed disabled:text-neutral-outline-content-disabled disabled:hover:bg-transparent',
                         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                       )}
                     >

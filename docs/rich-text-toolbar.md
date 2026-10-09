@@ -155,10 +155,10 @@ are `aria-hidden`.
 | Card | `surface.elevated`, `stroke.subtle` 1px, `radius.md` (8), `shadow.menu` | `bg-surface-elevated border-stroke-subtle rounded-md shadow-menu` |
 | Padding / gap | 6 / 4 | `p-1.5` / `gap-1` |
 | Button | 32 square, `radius.md`, 16 glyph | `size-8 rounded-md`, `Icon size="sm"` |
-| Glyph | `text.primary` | `text-text-primary` |
+| Glyph | `neutral.outline.content` — `default` / `hover` / `pressed` | `text-neutral-outline-content-default hover:… active:…` |
 | Hover / press | `surface.neutral.subtle` / `surface.neutral.medium` | `hover:bg-surface-neutral-subtle active:bg-surface-neutral-medium` |
 | On (pressed) | `surface.brand.faint` + `text.brand.strong` | — the design shows no on state; this is the system's |
-| Disabled | `text.disabled`, not-allowed cursor | `disabled:text-text-disabled disabled:cursor-not-allowed` |
+| Disabled | `neutral.outline.content.disabled`, not-allowed cursor | `disabled:text-neutral-outline-content-disabled disabled:cursor-not-allowed` |
 | Divider | `stroke.default`, 1 × 24 | `h-6 w-px bg-stroke-default` |
 
 No new tokens. Icons are Phosphor — the design's Lucide glyphs mapped to `text-b`,
@@ -168,7 +168,9 @@ each with its fill).
 
 | Pair | Light | Dark |
 |---|---|---|
-| Glyph on the card (`text.primary` on `surface.elevated`) | **20.17:1** | **14.63:1** |
+| Glyph at rest (`neutral.outline.content.default` on `surface.elevated`) | **7.58:1** | **9.85:1** |
+| Glyph hovered (`.hover` on `surface.neutral.subtle`) | **9.45:1** | **8.40:1** |
+| Glyph pressed (`.pressed` on `surface.neutral.medium`) | **9.85:1** | **4.34:1** |
 | On: glyph on its tint (`text.brand.strong` on `surface.brand.faint`) | **11.37:1** | **8.97:1** |
 
 ## Differences from the design's markup, on purpose

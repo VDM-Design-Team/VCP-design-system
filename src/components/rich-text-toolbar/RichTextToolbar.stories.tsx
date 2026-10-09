@@ -294,6 +294,8 @@ export const Measurements: Story = {
     await expect(cs.borderRadius).toBe('8px');
     const buttons = within(toolbar).getAllByRole('button');
     await expect(buttons).toHaveLength(12);
+    /* The glyph is `neutral.outline.content.default` (slate-600). */
+    await expect(getComputedStyle(buttons[0]).color).toBe('rgb(71, 85, 105)');
     for (const b of buttons) {
       const r = b.getBoundingClientRect();
       await expect([r.width, r.height]).toEqual([32, 32]);
