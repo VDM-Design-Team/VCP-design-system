@@ -19,7 +19,7 @@ doesn't offer, that is a brand conversation, not a prop.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `size` | `sm \| md \| lg` | `md` | The Figma Small/Medium/Big variants → 16/28/44 tall; width follows the aspect |
-| `collapsed` | `boolean` | — | The diamond alone |
+| `collapsed` | `boolean` | — | The diamond alone, in the lockup's own frame height — at the same `size` it is the identical diamond the lockup draws |
 | `decorative` | `boolean` | — | `aria-hidden` — for when a wrapping home link carries the name |
 | `className` | `string` | — | Merged via `cn()` |
 | `ref` | `Ref<SVGSVGElement>` | — | The `<svg>` |

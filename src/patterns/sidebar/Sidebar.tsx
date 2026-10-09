@@ -172,15 +172,19 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         )}
         {...props}
       >
-        {/* The design gives the wordmark 200 of the rail's 256, inset 24 from
-            the left. At the atom's default `h-7` it wants 212 and flex squeezes
-            it to fit — a distorted logo — so the width is set and the height
-            follows. Collapsed, the diamond takes the design's 24. */}
-        <div className={cn('flex items-center', collapsed ? 'justify-center px-3' : 'pl-6 pr-8')}>
+        {/* The design gives the wordmark 200 of the rail's 256. At the atom's
+            default `h-7` it wants 212 and flex squeezes it to fit — a distorted
+            logo — so the width is set and the height follows. Collapsed, the
+            diamond is 20 wide: the size it is inside that 200 lockup, so it
+            does not grow when the rail collapses (design review, 7 Oct 2026).
+            Both start 22 in, which centres the diamond on the nav glyphs' axis
+            (12 rail padding + 8 row padding + half a 24 glyph box = 32), so
+            the mark stays put and the wordmark simply appears beside it. */}
+        <div className={cn('flex items-center pl-5.5', !collapsed && 'pr-8')}>
           <Logo
             collapsed={collapsed}
             decorative
-            className={cn('h-auto shrink-0', collapsed ? 'w-6' : 'w-50')}
+            className={cn('h-auto shrink-0', collapsed ? 'w-5' : 'w-50')}
           />
         </div>
 
