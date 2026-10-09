@@ -9,7 +9,8 @@ signed-in user on the right.
 | Piece | Tier | Role here |
 |---|---|---|
 | `Logo` | atom | The left side, linked home, when there is no `primaryAction` |
-| `Toggle` | atom | The light/dark mode switch |
+| `Toggle` | atom | The light/dark mode switch, with the sun and moon in its knob (`knobIcons`) |
+| `Divider` | atom | The vertical rule between the bell and the mode and user group |
 | `IconButton` | atom | The notification bell |
 | `Avatar` | atom | The signed-in user |
 | `Icon` | atom | The user-menu caret |
@@ -38,6 +39,7 @@ title, no `h1`, no back.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `primaryAction` | `ReactNode` | — | The bar's one action — a `Button`. Present ⇒ replaces the logo |
+| `showPrimaryAction` | `boolean` | `true` | `false` hides the action and the bar takes the logo variant, for screens with no "Create Added Value". Pass `primaryAction` regardless and flip this |
 | `homeHref` | `string` | — | The logo's home link (no-action version) |
 | `notifications` | `number` | — | Bell renders whenever this is a number; `> 0` shows the design's red dot — the count lives in the bell's name |
 | `onNotifications` | `() => void` | — | The bell's click |
@@ -50,8 +52,12 @@ title, no `h1`, no back.
 ## Tokens
 
 `surface.elevated` bar (64 tall = `h-16`) on `stroke.subtle`; user name
-`label-lg` `text.primary`; the unread dot is
-`accent.critical.filled.surface` — the design's red dot. No new tokens —
+`label-lg` `text.primary`. The bell is neutral (`neutral.outline.content`, with
+the `surface.neutral` hover fills), not brand blue. The unread dot is 12 and
+`accent.critical.outline.border.default` — the design's red dot — with a slow
+pulse behind it that is dropped under reduced motion. The divider is the
+`Divider` atom, vertical and 40 tall, drawn only between the bell and the mode
+and user group. No new tokens —
 every visible piece is a composed component wearing its own.
 
 ## Accessibility
@@ -64,9 +70,11 @@ every visible piece is a composed component wearing its own.
   `href` is not a link and may not carry a name, so the `Logo` renders alone
   and names itself. (Found by the story tests, 10 Sep 2026.)
 - The bell is an `IconButton` whose name carries the count ("Notifications,
-  3 unread"); the dot is `aria-hidden` — colour never carries it alone.
+  3 unread"); the dot and its pulse are `aria-hidden` — colour and motion never
+  carry it alone.
 - The mode switch is the system `Toggle` named "Dark mode" — a real switch
-  with real state, not a styled div.
+  with real state, not a styled div. The sun and moon are decoration; the
+  knob's position and the switch state carry it.
 - The user chip is a `<button>` named "`name`, account menu" only when
   `onUserMenu` is given; otherwise a plain group — no dead buttons.
 

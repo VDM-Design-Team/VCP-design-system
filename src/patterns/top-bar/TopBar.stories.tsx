@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
+import { expect, within } from 'storybook/test';
 
 const meta = {
   title: 'Patterns/TopBar',
@@ -15,7 +16,7 @@ const meta = {
           'The app bar, matching the Figma `Top_NavBar` and its two versions: with the ' +
           '“Create Added Value” Button in `primaryAction`, or with the linked Logo when ' +
           'there is none. Right side: bell (unread = the design’s red dot, count in the ' +
-          'accessible name), the light/dark mode Toggle, and the user chip. The page-level ' +
+          'accessible name; neutral, with a pulsing 12px dot), a divider, the light/dark mode Toggle (sun and moon in its knob), and the user chip. `showPrimaryAction` hides the button for screens that have none. The page-level ' +
           'header (back, title, status actions) is `AVHeader` — a separate pattern.',
       },
     },
@@ -26,6 +27,7 @@ const meta = {
   },
   argTypes: {
     notifications: { control: 'number' },
+    showPrimaryAction: { control: 'boolean' },
     theme: { control: 'radio', options: ['light', 'dark'] },
   },
 } satisfies Meta<typeof TopBar>;
@@ -40,6 +42,26 @@ export const WithPrimaryAction: Story = {
     theme: 'light',
     onUserMenu: () => {},
     onNotifications: () => {},
+  },
+};
+
+/**
+ * Some screens have no primary action. `showPrimaryAction={false}` hides it and
+ * the bar takes the logo variant, so a caller can keep passing the `Button` and
+ * flip one flag. The play test checks the button is gone and the logo is there.
+ */
+export const PrimaryActionHidden: Story = {
+  args: {
+    primaryAction: <Button>Create Added Value</Button>,
+    showPrimaryAction: false,
+    homeHref: '#home',
+    theme: 'light',
+    onNotifications: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: 'Create Added Value' })).toBeNull();
+    await expect(canvas.getByRole('link', { name: /home/i })).toBeVisible();
   },
 };
 

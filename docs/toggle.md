@@ -27,6 +27,7 @@ Rules of thumb:
 | `disabled` | `boolean` | `false` | |
 | `label` | `ReactNode` | — | Visible label. Clicking it toggles. Without one, `aria-label` is required. |
 | `status` | `idle \| pending \| success \| error` | `idle` | How the save of the current state is going. Parent-driven; see below |
+| `knobIcons` | `{ on: IconName; off: IconName }` | — | A glyph in the knob for each state — the design's switch "with icon". A mode switch passes `{ on: 'moon-fill', off: 'sun-fill' }`. Decorative: the control still needs its `aria-label`. A save's spinner or check takes the knob over while one shows |
 | `className` | `string` | — | Merged onto the `<label>` wrapper, not the hidden `<input>`. |
 | `style` | `CSSProperties` | — | Applied to the `<label>` wrapper. |
 
