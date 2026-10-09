@@ -14,9 +14,15 @@ export type AvatarGroupEntry = string | AvatarGroupPerson;
  * It composes `Avatar`, and per CLAUDE.md that keeps it a component, not a
  * pattern: nothing here knows a thing about VCP.
  *
- * Sizes are `Avatar`'s own three steps and are passed straight down, so the
+ * Sizes are `Avatar`'s own four steps and are passed straight down, so the
  * stack and a lone avatar next to it are never a pixel apart. The overlap is a
  * quarter of the avatar, expressed on Tailwind's numeric scale.
+ *
+ * **The leftmost person is on top**, with each one after it tucked behind the
+ * one before (design review, 5 Oct 2026) — the `+N` chip is furthest back. The
+ * paint order is the opposite of the DOM order, so it is set with `z-index`
+ * rather than by reversing the markup, which would also reverse the reading
+ * order.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -24,7 +30,7 @@ export type AvatarGroupEntry = string | AvatarGroupPerson;
  */
 const overlap = cva('', {
   variants: {
-    size: { sm: '-ml-1.5', md: '-ml-2', lg: '-ml-2.5' },
+    size: { xs: '-ml-1', sm: '-ml-1.5', md: '-ml-2', lg: '-ml-2.25' },
   },
   defaultVariants: { size: 'md' },
 });
@@ -42,7 +48,12 @@ const overflow = cva(
   ],
   {
     variants: {
-      size: { sm: 'size-6 text-caption-md-medium', md: 'size-8 text-label-sm-medium', lg: 'size-10 text-label-sm-medium' },
+      size: {
+        xs: 'size-4 text-caption-sm-medium',
+        sm: 'size-6 text-caption-md-medium',
+        md: 'size-8 text-caption-md-medium',
+        lg: 'size-9 text-label-sm-medium',
+      },
     },
     defaultVariants: { size: 'md' },
   },
@@ -111,7 +122,7 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
        */
       <span
         ref={ref}
-        className={cn('inline-flex items-center', className)}
+        className={cn('isolate inline-flex items-center', className)}
         role={announced ? 'img' : undefined}
         aria-label={announced}
         aria-hidden={announced ? undefined : true}
@@ -120,13 +131,20 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
         {shown.map((person, index) => (
           <span
             key={`${index}-${person.name ?? person.initials ?? ''}`}
-            className={cn('inline-flex', index > 0 && overlap({ size }))}
+            className={cn('relative inline-flex', index > 0 && overlap({ size }))}
+            /* Leftmost highest: the first person is on top of everyone after them. */
+            style={{ zIndex: shown.length - index }}
           >
             <Avatar {...person} size={size} ring />
           </span>
         ))}
         {collapsed > 0 && (
-          <span aria-hidden="true" className={cn(overflow({ size }), overlap({ size }))}>
+          <span
+            aria-hidden="true"
+            className={cn('relative', overflow({ size }), overlap({ size }))}
+            /* Furthest back — behind the last person shown. */
+            style={{ zIndex: 0 }}
+          >
             +{collapsed}
           </span>
         )}
