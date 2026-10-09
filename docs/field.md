@@ -69,7 +69,7 @@ Never show both. `error` wins whenever it is set.
 | Label text | `text-text-primary` + `text-caption-md-medium` / `-md` / `-lg` |
 | Required marker | `text-accent-critical-tonal-content-default` |
 | Helper text | `text-text-tertiary` + `text-caption-sm-semibold` / `-md` / `text-body-sm-regular` |
-| Error text | `text-accent-critical-tonal-content-default` |
+| Error text | `text-accent-critical-outline-content-default` |
 | "+" affordance surface | `bg-action-primary-surface-default`, `-hover`, `-pressed`, `-disabled` |
 | "+" affordance glyph | `text-action-primary-content-default`, `-disabled` |
 | Focus ring | `outline-stroke-focused` |
@@ -92,9 +92,12 @@ Never show both. `error` wins whenever it is set.
   touch target — and cancels that padding with a negative margin so the label
   row's height is unchanged.
 - Focus ring is `outline-stroke-focused` at 2 with 2 offset. Never remove it.
-- Error and required text use `accent.critical.tonal.content.default`, which
-  clears 4.5:1 on `surface.canvas` in both themes. The lighter
-  `accent.critical.outline.content.default` does not — don't substitute it.
+- The required marker uses `accent.critical.tonal.content.default` (8.31:1 on
+  white). The error message uses `accent.critical.outline.content.default` — the
+  colour of the invalid border — per the design review of #145: 4.77:1 on
+  `surface.elevated` and 4.56:1 on `surface.canvas` in light, 5.06:1 / 6.18:1 in
+  dark. It clears 4.5:1 on those two, but **not** on `surface.neutral.subtle`
+  (4.35:1) — don't put a field's error message on that surface.
 
 ## Don't
 
