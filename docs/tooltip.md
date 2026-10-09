@@ -5,7 +5,7 @@ A small floating label describing the element it is attached to.
 It opens on hover **and on keyboard focus**, wires the trigger to the bubble with
 `aria-describedby`, stays visible while the pointer travels onto it, and closes
 on Escape. Those four behaviours are the whole component — everything else is a
-`div` with a dark background.
+`div` styled as a small light card.
 
 A tooltip is the most-misused overlay in any design system, and every misuse is
 the same one: putting something in it that exists nowhere else. Start with the
@@ -87,59 +87,41 @@ positioning engine and a system-level decision, not a local fix.
 
 | Part | Token | Utility |
 |---|---|---|
-| Bubble surface | `surface.neutral.stronger` | `bg-surface-neutral-stronger` |
-| Bubble text | `text.inverted.primary` | `text-text-inverted-primary` |
+| Bubble surface | `surface.elevated` | `bg-surface-elevated` |
+| Bubble text | `text.primary` | `text-text-primary` |
+| Edge | `stroke.default`, 1px | `border border-stroke-default` |
 | Type | `type.caption-md-regular` (12/16, 400, Poppins) | `text-caption-md-regular` |
 | Radius | `shape.radius.sm` (6) | `rounded-sm` |
-| Padding | Tailwind numeric scale | `px-2.5 py-1.5` |
+| Padding | Tailwind numeric scale | `px-3 py-2` — 12 either side, 8 above and below (Figma draws 8 all round; the sides are widened for an even look) |
 | Offset from trigger | Tailwind numeric scale | `pb-2` / `pt-2` / `pr-2` / `pl-2` |
 | Max width | Tailwind numeric scale | `max-w-64` |
 | Shadow | `shadow.menu` | `shadow-menu` |
 
-### Measured contrast
+It is a light card, as Figma draws a tooltip (a white bubble with `text/primary` 12px text and a
+soft shadow), and the same family as `Popover`, `Menu` and `Toast`. It was a dark inverted
+bubble — `surface.neutral.stronger` with `text.inverted.primary` — until October 2026: that was
+the original export's look, carried over when the component was rebuilt on tokens, and the
+figma-audit note ("dark-on-light per the design … consistent with what we ship") was wrong about it.
 
-An inverted surface is exactly where dark theme goes wrong, so these are measured
-off the rendered component, not off the token file.
+### Measured contrast
 
 | Theme | Text | Surface | Ratio | AA (4.5:1) |
 |---|---|---|---|---|
-| Light | `text.inverted.primary` `#ffffff` | `surface.neutral.stronger` `#334155` | **10.35:1** | pass |
-| Dark | `text.inverted.primary` `#020617` | `surface.neutral.stronger` `#e2e8f0` | **16.36:1** | pass |
+| Light | `text.primary` `#020617` | `surface.elevated` `#ffffff` | **20.17:1** | pass |
+| Dark | `text.primary` `#ffffff` | `surface.elevated` `#1e293b` | **14.63:1** | pass |
 
-The bubble also has to be distinguishable from what it floats over, which is why
-it carries no border:
-
-| Theme | Bubble vs `surface.canvas` | Bubble vs `surface.elevated` |
-|---|---|---|
-| Light | 9.90:1 | 10.35:1 |
-| Dark | 14.48:1 | 11.87:1 |
-
-Both clear the 3:1 non-text minimum several times over, so `stroke.inverse` is
-not needed here — adding it would be decoration, and in light theme
-`stroke.inverse` is `#ffffff`, which would draw a white hairline round a dark
-bubble for no reason.
-
-**Why this pair and not something else.** `surface.neutral.stronger` is the only
-surface in the system that inverts in both directions: dark slate in light theme,
-pale slate in dark theme. It is also the only one that pairs cleanly with the
-existing `text.inverted.*` family, which flips the same way. `surface.brand.stronger`
-also inverts and also clears AA (13.23:1 / 13.69:1), but a blue tooltip reads as a
-brand statement rather than as an annotation, and it would collide with
-`Button variant="primary"` sitting underneath it.
+A light card on a light page needs its edge, which is why it has one: the surface is
+1.03:1 against `surface.canvas` in light, so the boundary is carried by the 1px `stroke.default`
+edge and the shadow, exactly as a `Popover` panel is. In dark, `surface.elevated` is a step lighter
+than the canvas and the edge is `stroke.default` again. The bubble's outline is a convenience, not
+the only thing that says "this is a tooltip": it appears beside its trigger and is named by it.
 
 ### Token gaps
 
 Nothing was invented. These are the gaps found, each papered over with the
 closest existing token:
 
-1. **No `surface.inverse`.** `text.inverted.*` and `stroke.inverse` both exist,
-   but there is no matching inverted *surface*, which is the one an inverted
-   component actually needs. `surface.neutral.stronger` does the job and inverts
-   correctly, but it is named for its position on the neutral ramp, not for its
-   intent — so nothing stops it being re-tuned for some other use and quietly
-   changing every tooltip. A `surface.inverse` alias pointing at the same core
-   value would close this.
-2. **No motion tokens.** There is no `motion.duration.*` or `motion.easing.*`
+1. **No motion tokens.** There is no `motion.duration.*` or `motion.easing.*`
    family, so the fade uses Tailwind's `duration-150` and the hover delay is a
    constant in the component (`300`). Both are documented in the source, but
    neither is a token and neither is shared with any other component.
