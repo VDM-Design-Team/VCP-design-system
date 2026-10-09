@@ -16,6 +16,14 @@ Design review of the collapsed rail:
   diamond. A standalone `Logo collapsed` at a given `size` is therefore about 5% smaller
   than before (the frame now includes the lockup's bottom margin). No API change.
 
+### `SidebarItem` — the collapsed caret is a chevron again (October 2026)
+
+Design review: in the collapsed rail, a row with sub-items (Archive, Planning) shows the
+**chevron** (`caret-down`, 12) beside its glyph, like the expanded row's caret — not the
+filled triangle (`caret-down-fill`) #141 introduced. Same size and place; it still does not
+flip when the flyout opens. No API change. `caret-down-fill` stays in the icon set (the
+`DatePicker` heading uses it).
+
 ### `Badge` — type sizes per size, and a large size (October 2026)
 
 Each size now has its own type size, and there is a third size.

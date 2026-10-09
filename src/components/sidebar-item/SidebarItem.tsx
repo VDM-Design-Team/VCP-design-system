@@ -23,14 +23,15 @@ import { Icon, type IconName } from '../../atoms/icon';
  * contract `Accordion` uses, because a control that reveals something is not
  * a control that goes somewhere.
  *
- * **Collapsed, the caret is filled, shrinks and sits beside the glyph.**
- * Figma's `_Sidebar_Item` (`Collapsed`, `5322:55417`) draws a 12 caret —
- * a solid triangle (`caret-down-fill`) — directly after the 24 glyph, inside
- * the same 8 padding: not on the glyph, and not the expanded row's 20 caret.
- * Every collapsed row fills the rail's column (52 — the width the row with a
- * caret needs) and keeps its glyph at the same 8 inset, left-aligned, so the
- * rail's glyphs share one axis and the rows are all one width. Expanded, the
- * caret stays at the row's far right, as Figma draws it.
+ * **Collapsed, the caret shrinks and sits beside the glyph.** Figma's
+ * `_Sidebar_Item` (`Collapsed`, `5322:55417`) draws a 12 caret directly after
+ * the 24 glyph, inside the same 8 padding — not on the glyph, and not the
+ * expanded row's 20 caret. It is the chevron (`caret-down`), like the expanded
+ * row's, not a filled triangle (design review, 7 Oct 2026). Every collapsed
+ * row hugs its content with 8 either side (40, or 52 with the caret) and keeps
+ * its glyph at the same 8 inset, so the rail's glyphs share one axis and each
+ * row's fill and focus ring are even. Expanded, the caret stays at the row's
+ * far right, as Figma draws it.
  *
  * **Collapsed, a disclosure opens a flyout, not an inline list** (design
  * review, 5 Oct 2026; Figma `Menu_Dropdown`, `27:10048`). The row does not
@@ -253,14 +254,14 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
             {...shared}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >
-            {/* The `Right Icon` axis. Collapsed, Figma shrinks the caret to 12,
-                fills it, and sets it straight after the glyph, with no gap. It
-                does not flip when open: the row does not change, a flyout
-                appears beside it. */}
+            {/* The `Right Icon` axis. Collapsed, Figma shrinks the caret to 12
+                and sets it straight after the glyph, with no gap. It does not
+                flip when open: the row does not change, a flyout appears
+                beside it. */}
             {collapsed ? (
               <>
                 {glyph}
-                <Icon name="caret-down-fill" className="size-3 shrink-0" aria-hidden="true" />
+                <Icon name="caret-down" className="size-3 shrink-0" aria-hidden="true" />
               </>
             ) : (
               <>
