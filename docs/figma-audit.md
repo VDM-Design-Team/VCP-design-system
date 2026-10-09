@@ -771,19 +771,21 @@ not a second component.
 
 ## Source check — October 2026
 
-### ⚠️ `TagEditor` — no Figma source found
+### ⚠️ `TagEditor` — no Figma source; the design it was assumed to serve is different
 
-`TagEditor` (a tag list, a tone swatch row, a name field and an Add button) was ported from the
-Claude-design export (`_source/claude-design/components/TagEditor`) on 3 September 2026. **No Figma
-node is cited anywhere for it, and none of the audit batches mention it**, so it has never been
-compared with the design. Nothing in the repo imports it — it appears only in other components' docs.
+`TagEditor` (a list of removable coloured tag pills, a row of tone swatches, a name field and an Add
+button, all inline) was ported from the Claude-design export (`_source/claude-design/components/TagEditor`)
+on 3 September 2026. **No Figma node is cited for it, and none of the audit batches mention it.** Nothing in
+the repo imports it.
 
-Design reports that the tag editing the product actually has is a **modal**, not this inline
-editor — the library's *Tag Management* page (Admin & SuperAdmin, `7463:91717`) is the likely
-source. **Unverified:** the Figma connection was down when this was checked, so the page has not
-been read against `TagEditor`.
+Read against the library's *Tag Management* page (`7463:91717`, checked 9 October 2026), it does **not**
+correspond to any part of it. That page is an admin settings screen: **cards** — Domains, Global Tags,
+Domain Tags, Roles, Status, Assignee Types, Projects — each with a title, a primary **Add New** button, a
+divider and a list of rows; a row is one of three types (**Default**: label, edit and delete icon buttons ·
+**Draggable**: a drag handle first · **Non-editable**: a muted label with a "Default" tag and no actions);
+and **modals** for *Add a new Tag* / *Add a new Domain* (a name field, Submit) and *Delete domain*
+(Cancel / a red Confirm). There are **no tone swatches, no coloured tags and no inline add form**.
 
-**Status: flagged, not removed.** `docs/tag-editor.md` and the Storybook page now say so. To close
-it: read *Tag Management* against `TagEditor`; then either rebuild to the modal (a pattern
-composing `Modal`, `Input`, tone swatches and `Tag`), or delete the component if the inline form
-is not wanted anywhere.
+**Status: flagged, not removed.** `docs/tag-editor.md` and the Storybook page say so. The Tag Management
+design is not built either; see the proposal in the PR that adds it. Until then, `TagEditor` can be deleted
+without losing a screen.
