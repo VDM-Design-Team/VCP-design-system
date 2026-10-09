@@ -298,8 +298,6 @@ export function HandoffAVModal({
               </div>
             )}
             <Dropzone
-              label="Attach Files"
-              hint="PNG, JPG, GIF, DOCX, CSV and PDF file up to 10MB"
               onFiles={(picked) => setFiles((current) => [...current, ...picked])}
             />
           </div>
