@@ -168,34 +168,40 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
           {notifications != null && (theme || user) && (
             <Divider orientation="vertical" className="h-10 min-h-0 self-center" />
           )}
-          {theme && (
-            /* The design's mode switch, as the system Toggle with the sun and
-               the moon in its knob. It reports the wish; the app owns the theme
-               (and the `.dark` class). */
-            <Toggle
-              aria-label="Dark mode"
-              knobIcons={{ on: 'moon-fill', off: 'sun-fill' }}
-              checked={theme === 'dark'}
-              onChange={(on) => onThemeChange?.(on ? 'dark' : 'light')}
-            />
+          {/* The mode switch and the user chip are one group with their own 8
+              gap, closer than the bell and the divider are to each other. */}
+          {(theme || user) && (
+            <div className="flex items-center gap-2">
+              {theme && (
+                /* The design's mode switch, as the system Toggle with the sun and
+                   the moon in its knob. It reports the wish; the app owns the theme
+                   (and the `.dark` class). */
+                <Toggle
+                  aria-label="Dark mode"
+                  knobIcons={{ on: 'moon-fill', off: 'sun-fill' }}
+                  checked={theme === 'dark'}
+                  onChange={(on) => onThemeChange?.(on ? 'dark' : 'light')}
+                />
+              )}
+              {user &&
+                (onUserMenu ? (
+                  <button
+                    type="button"
+                    aria-label={`${user.name}, account menu`}
+                    onClick={onUserMenu}
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-2 py-1 text-left transition-colors',
+                      'hover:bg-surface-neutral-faint',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                    )}
+                  >
+                    {userChip}
+                  </button>
+                ) : (
+                  <span className="flex items-center gap-2 px-2 py-1">{userChip}</span>
+                ))}
+            </div>
           )}
-          {user &&
-            (onUserMenu ? (
-              <button
-                type="button"
-                aria-label={`${user.name}, account menu`}
-                onClick={onUserMenu}
-                className={cn(
-                  'flex items-center gap-2 rounded-md px-2 py-1 text-left transition-colors',
-                  'hover:bg-surface-neutral-faint',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                )}
-              >
-                {userChip}
-              </button>
-            ) : (
-              <span className="flex items-center gap-2 px-2 py-1">{userChip}</span>
-            ))}
         </div>
       </header>
     );
