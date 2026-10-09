@@ -20,7 +20,7 @@ import { Tooltip } from '../tooltip';
  *   the next row, in a wrapping flex container, before it gets cramped). Figma draws it with
  *   no icon and no hint; the slots still work if a dashboard needs them.
  * - **`superadmin`** — `_SuperAdmin_Metric_Card_Coloured` on the super admin
- *   dashboard (node `3:4848`). A 12 stripe, **centred**, a title row (accent
+ *   dashboard (node `3:4848`). An 8 stripe, **centred**, a title row (accent
  *   icon, label, info hint) over a 32 semibold value and a 24 unit, exactly
  *   150 high.
  *
@@ -132,7 +132,7 @@ const ICON_TONE: Record<StatCardAccent, string> = {
    after it, so centred content centres in the space beside the stripe.
    `default` (Value_Card): 8 stripe, left-aligned, 16 either side, no gap
    between label and value, exactly 100 high and at least 175 wide — the
-   content is centred vertically in that height. `superadmin`: 12 stripe,
+   content is centred vertically in that height. `superadmin`: 8 stripe,
    centred, 24 either side, 12 between title row and value, exactly 150 high. */
 type Align = 'start' | 'center';
 const ALIGN: Record<Align, { items: string; justify: string; text: string }> = {
@@ -153,7 +153,7 @@ const VARIANT: Record<
   },
   superadmin: {
     card: 'h-37.5',
-    stripe: 'w-3',
+    stripe: 'w-2',
     content: 'px-6',
     gap: 'gap-3',
     valueType: 'text-heading-xl-semibold',
