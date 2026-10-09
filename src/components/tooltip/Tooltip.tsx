@@ -69,14 +69,16 @@ const positioner = cva(
 );
 
 /**
- * The visible bubble. An inverted surface — `surface.neutral.stronger` with
- * `text.inverted.primary` — which is the one pairing in this system that flips
- * correctly in both themes and clears AA in both. See the token table in
- * `docs/tooltip.md` for the measured figures.
+ * The visible bubble: a small light card, as Figma draws it — `surface.elevated`
+ * with `text.primary`, a `stroke.default` edge and the menu shadow, the same family
+ * as `Popover`, `Menu` and `Toast`. Every colour is a semantic token, so it flips
+ * with the theme on its own (dark in dark mode). It was a dark inverted bubble
+ * until October 2026, a leftover of the original export that Figma never drew.
+ * See the token table in `docs/tooltip.md` for the measured figures.
  */
 const bubble = cva([
-  'rounded-sm px-2.5 py-1.5',
-  'bg-surface-neutral-stronger text-text-inverted-primary',
+  'rounded-sm border border-stroke-default p-2',
+  'bg-surface-elevated text-text-primary',
   'font-sans text-caption-md-regular text-pretty',
   'shadow-menu',
 ]);

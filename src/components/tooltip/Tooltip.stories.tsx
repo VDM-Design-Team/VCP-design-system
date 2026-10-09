@@ -220,10 +220,9 @@ export const OpenDelay: Story = {
 };
 
 /**
- * Both themes. The bubble is an inverted surface — `surface.neutral.stronger`
- * with `text.inverted.primary` — so it flips with the theme and stays legible:
- * 10.35:1 in light, 16.36:1 in dark, both well past AA. Every colour is a
- * semantic token, so the dark theme comes for free via `.dark`.
+ * Both themes. The bubble is a light card — `surface.elevated` with `text.primary` —
+ * so it flips with the theme: 20.17:1 in light, 14.63:1 in dark, both far past AA.
+ * Every colour is a semantic token, so the dark theme comes for free via `.dark`.
  */
 export const LightAndDark: Story = {
   name: 'Light and dark',
@@ -295,6 +294,9 @@ export const RevealsOnFocus: Story = {
     const bubble = bubbleOf(first);
     await expect(bubble).toHaveAttribute('role', 'tooltip');
     await expect(bubble).toHaveTextContent('Reconciled nightly at 02:00 UTC');
+    /* A light card: white `surface.elevated` with `text.primary` — not an inverted bubble. */
+    await expect(getComputedStyle(bubble).backgroundColor).toBe('rgb(255, 255, 255)');
+    await expect(getComputedStyle(bubble).color).toBe('rgb(2, 6, 23)');
 
     /* Escape dismisses it, and focus stays exactly where it was. */
     await userEvent.keyboard('{Escape}');
