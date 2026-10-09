@@ -138,6 +138,11 @@ export const PickedCommands: Story = {
  * What an editor does when text is selected: show the toolbar just above it, centred
  * on the selection, and put it away when the selection goes. The toolbar does not do
  * this itself — it has no idea where the text is. **Select some words below.**
+ *
+ * It also goes with the selection, however the selection goes: click anywhere else on the
+ * page, press an arrow key, or have code clear it. (The hook listens to the document's
+ * `selectionchange`, not just clicks inside the editor.) The test below does the last one,
+ * then selects again so the toolbar is showing in the snapshot.
  */
 export const FloatingOnSelection: Story = {
   parameters: { layout: 'padded' },
@@ -188,46 +193,23 @@ export const FloatingOnSelection: Story = {
     /* Select and finish the selection — inside the wait, so a slow machine whose hook has
        not attached its listeners yet (they go on in an effect) just tries again, instead
        of losing a one-shot `mouseup` and timing out. */
-    await waitFor(
-      () => {
-        sel.removeAllRanges();
-        sel.addRange(range);
-        paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-        expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open');
-      },
-      { timeout: 4000, interval: 200 },
-    );
-  },
-};
+    const select = () =>
+      waitFor(
+        () => {
+          sel.removeAllRanges();
+          sel.addRange(range);
+          paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+          expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open');
+        },
+        { timeout: 4000, interval: 200 },
+      );
 
-/**
- * The toolbar goes with the selection — however the selection goes: a click anywhere on the
- * page, an arrow key, or code clearing it, with no click in the editor at all. (The hook
- * listens to the document's `selectionchange`.) Here the selection is cleared by code.
- */
-export const HidesWhenTheSelectionGoes: Story = {
-  parameters: { layout: 'padded' },
-  render: FloatingOnSelection.render,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const paragraph = canvasElement.querySelector('p')!;
-    const text = [...paragraph.childNodes].find((n) => n.nodeType === Node.TEXT_NODE)!;
-    const at = text.textContent!.indexOf('missing evidence');
-    const range = document.createRange();
-    range.setStart(text, at);
-    range.setEnd(text, at + 'missing evidence'.length);
-    const sel = window.getSelection()!;
-    await waitFor(
-      () => {
-        sel.removeAllRanges();
-        sel.addRange(range);
-        paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-        expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open');
-      },
-      { timeout: 4000, interval: 200 },
-    );
+    await select();
+    /* The selection goes — no click in the editor at all — and the toolbar goes with it. */
     sel.removeAllRanges();
     await waitFor(() => expect(canvas.queryByRole('toolbar')).toBeNull(), { timeout: 3000 });
+    /* Select again, so the toolbar is up for the snapshot. */
+    await select();
   },
 };
 
