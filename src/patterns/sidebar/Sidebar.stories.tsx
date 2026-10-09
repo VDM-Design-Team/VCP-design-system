@@ -103,8 +103,8 @@ export const EveryUserType: Story = {
 };
 
 /**
- * The 76-wide rail. Every row fills the rail's column, keeps its name in a tooltip
- * and in `aria-label`, and a row with sub-items shows a filled caret — opening it
+ * The 76-wide rail. Every row hugs its glyph, keeps its name in a tooltip
+ * and in `aria-label`, and a row with sub-items shows a small chevron — opening it
  * shows a flyout beside the row (`Archive`, held open here) rather than growing it.
  */
 export const Collapsed: Story = {
