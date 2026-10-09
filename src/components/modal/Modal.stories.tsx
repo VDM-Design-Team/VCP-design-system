@@ -40,6 +40,8 @@ const meta = {
     role: { control: 'radio', options: ['dialog', 'alertdialog'] },
     dismissible: { control: 'boolean' },
     showClose: { control: 'boolean' },
+    showDescription: { control: 'boolean' },
+    showFooter: { control: 'boolean' },
     open: { control: 'boolean' },
   },
 } satisfies Meta<typeof Modal>;

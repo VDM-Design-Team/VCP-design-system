@@ -261,8 +261,12 @@ interface ModalBaseProps
   onClose: () => void;
   /** Sub-heading under the title. Wired to `aria-describedby`. */
   description?: React.ReactNode;
+  /** Show the sub-heading. `false` hides it and tightens the gap to the body. */
+  showDescription?: boolean;
   /** Right-aligned action row at the bottom. Usually two `Button`s. */
   footer?: React.ReactNode;
+  /** Show the footer actions. `false` hides them without dropping the `footer` node. */
+  showFooter?: boolean;
   /**
    * `alertdialog` for a destructive confirmation the user must answer. It makes
    * screen readers announce the description immediately, so give one.
@@ -311,7 +315,9 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     onClose,
     title,
     description,
-    footer,
+    showDescription = true,
+    footer: footerProp,
+    showFooter = true,
     size,
     role = 'dialog',
     dismissible = true,
@@ -455,7 +461,9 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   if (!open || !mounted) return null;
 
   const hasTitle = title !== undefined && title !== null && title !== false;
-  const hasDescription = description !== undefined && description !== null && description !== false;
+  const hasDescription =
+    showDescription && description !== undefined && description !== null && description !== false;
+  const footer = showFooter ? footerProp : undefined;
   const hasHeaderText = hasTitle || hasDescription;
 
   return createPortal(
@@ -499,7 +507,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             {hasHeaderText && (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {hasTitle && (
-                  <h2 id={titleId} className="text-title-md-semibold text-text-primary">
+                  <h2 id={titleId} className="text-body-lg-semibold text-text-primary">
                     {title}
                   </h2>
                 )}
@@ -516,6 +524,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                 label={closeLabel}
                 variant="tertiary"
                 className={cn(
+                  /* A circle, as an icon-only button is everywhere else. */
+                  'rounded-full',
                   /* Pulled back into the header's padding so the 40 target sits
                      optically level with the title without inflating the header. */
                   '-mt-2 -mr-2',
@@ -539,7 +549,10 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           /* Only a tab stop while it actually scrolls — see `scrollable`. */
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-5',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
+            /* 12 under a sub-heading, 4 under a bare title, 20 when there is no
+               header at all. */
+            hasHeaderText || showClose ? (hasDescription ? 'pt-3' : 'pt-1') : 'pt-5',
             /* The footer owns the gap above the actions, so the body must not
                add to it. It cannot be left to the body in any case: a bottom
                padding inside a scrolling box scrolls away with the content,
