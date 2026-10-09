@@ -26,7 +26,7 @@ const group = cva('flex', {
 
 /** The clickable row. `min-h-10` + `py-2` guarantees the 40 unit minimum target. */
 const optionRow = cva(
-  ['group/radio flex min-h-10 items-start gap-2.5 py-2', 'font-sans text-body-sm-regular'],
+  ['group/radio flex min-h-10 items-start gap-2 py-2', 'font-sans text-body-sm-regular'],
   {
     variants: {
       disabled: {
