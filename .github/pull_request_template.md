@@ -8,7 +8,7 @@
 <!-- Components, patterns, tokens, docs -->
 
 ## Breaking change
-No <!-- If yes: what breaks, and the migration path (goes in CHANGELOG.md too) -->
+No <!-- If yes: what breaks, and the migration path (goes in your changes/ file too, as a `Migration:` line) -->
 
 ## How to review
 <!-- e.g. Open the Chromatic preview → try each size → tab through it -->
