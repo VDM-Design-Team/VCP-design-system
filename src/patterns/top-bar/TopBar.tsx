@@ -85,7 +85,16 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         <Avatar name={user.name} src={user.src} size="md" />
         <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
         {onUserMenu && (
-          <Icon name="caret-down" size="sm" aria-hidden="true" className="text-text-tertiary" />
+          /* The glyph draws about 3 inside its 16 box, so at the chip's own 4 of
+             padding the caret sat 7 from the right edge against the avatar's 4
+             on the left. Pulling the box 3 into the padding evens them, whatever the
+             chip's own padding (8 each side, 4 top and bottom). */
+          <Icon
+            name="caret-down"
+            size="sm"
+            aria-hidden="true"
+            className="-mr-0.75 text-text-tertiary"
+          />
         )}
       </>
     );
@@ -177,7 +186,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 aria-label={`${user.name}, account menu`}
                 onClick={onUserMenu}
                 className={cn(
-                  'flex items-center gap-2 rounded-md p-1 text-left transition-colors',
+                  'flex items-center gap-2 rounded-md px-2 py-1 text-left transition-colors',
                   'hover:bg-surface-neutral-faint',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                 )}
@@ -185,7 +194,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 {userChip}
               </button>
             ) : (
-              <span className="flex items-center gap-2 p-1">{userChip}</span>
+              <span className="flex items-center gap-2 px-2 py-1">{userChip}</span>
             ))}
         </div>
       </header>
