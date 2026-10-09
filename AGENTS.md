@@ -21,8 +21,12 @@ Claude Design project — those mirror this repo, not the other way round.
    visible focus ring, 40px minimum target for touch, `aria-label` on icon-only
    controls.
 6. **Changes are versioned.** Adding a token or variant is a minor bump. Renaming
-   or removing one is a major bump and needs a note in `CHANGELOG.md` with the
-   migration path.
+   or removing one is a major bump and needs a migration note. Every PR that
+   touches `src/` or `tokens/` adds its changelog entry as **its own file in
+   `changes/`** (`changes/<branch-name>.md`, with `bump: patch|minor|major`) —
+   never edit `CHANGELOG.md` directly; `npm run changelog` writes it at
+   release. `npm run lint:changes` (part of `npm test`) enforces it, and a
+   `major` entry must carry a `Migration:` note. See `changes/README.md`.
 
 ## Naming
 
