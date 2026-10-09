@@ -7,7 +7,7 @@
  * 2. Fails a branch that edits `CHANGELOG.md` directly. The release step is
  *    the exception: it edits `CHANGELOG.md` while deleting fragments.
  * 3. Fails any fragment in the tree that is malformed (header, heading, or a
- *    `major` without a `Migration:` line).
+ *    `major` without a `Migration:` note).
  *
  * The branch is compared with its merge base on `main` (in CI, the PR's base
  * branch), working-tree edits and new files included, so it gives the same

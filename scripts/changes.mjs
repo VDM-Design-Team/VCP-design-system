@@ -33,7 +33,8 @@ export const parseFragment = (path) => {
   const body = m[2].trim();
   if (!BUMPS.includes(bump)) problems.push(`\`bump:\` must be ${BUMPS.join(', ')} (found ${bump ?? 'none'})`);
   if (!body.startsWith('### ')) problems.push('the entry must start with a `### ` heading');
-  if (bump === 'major' && !/^Migration:/m.test(body))
-    problems.push('a `major` entry needs a line starting `Migration:` saying what callers change');
+  /* Anywhere in the entry: a breaking bullet often reads "- **Breaking:** … Migration: …". */
+  if (bump === 'major' && !/Migration:/.test(body))
+    problems.push('a `major` entry needs a `Migration:` note saying what callers change');
   return { path, bump, body, problems };
 };
