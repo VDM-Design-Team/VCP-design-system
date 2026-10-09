@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { Stepper } from './Stepper';
 import { Field } from '../field';
 
@@ -35,6 +36,11 @@ export const Default: Story = {
   render: (args) => {
     const [value, setValue] = React.useState(args.value);
     return <Stepper {...args} value={value} onChange={setValue} max={40} />;
+  },
+  play: async ({ canvasElement }) => {
+    /* A control's boundary is `stroke.strong` (slate-500, #64748b) — 4.76:1 on the field. */
+    const shell = canvasElement.querySelector('input')!.closest('[class*="border-stroke-strong"]')!;
+    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(100, 116, 139)');
   },
 };
 

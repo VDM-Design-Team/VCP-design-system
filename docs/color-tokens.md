@@ -151,9 +151,10 @@ composing from `surface.neutral.*` plus `text.*` or `stroke.*`. `Badge`'s
 
 | Token | Use for |
 |---|---|
-| `stroke.default` | The everyday border — panels, cards, modals |
+| `stroke.default` | The everyday border — panels, cards, modals, dividers. Decorative: 1.48:1, so **not** for the boundary of a control |
 | `stroke.focused` | The focus ring. Always the brand color |
-| `stroke.field` | A form control's resting border (not `default` — see `docs/*.md` for the components that use it; it exists because `default` fails contrast against a field and `strong`/`stronger` read as an active or error state) |
+| `stroke.strong` | **The boundary of a control** — a form field's resting border, the unchecked checkbox and radio ring, the dropzone's dashed edge. slate-500 in light, slate-400 in dark: 4.76:1 / 5.71:1 on the field, which clears the 3:1 that WCAG 1.4.11 asks of a control a person has to find. (Until October 2026 this was a separate `stroke.field` token; it was folded into `strong` so a role is not named after a component.) |
+| `stroke.stronger` | A heavier line — slate-600 in light. Used for a focused tag chip and the timeline's neutral ring |
 | `stroke.inverse` | Like `text.inverted` — **not** a dark-mode shortcut |
 | `stroke.brand.*` | Sparing use, brand-colored stroke, only without a more specific fit |
 

@@ -38,7 +38,7 @@ const checkboxBox = cva(
     'flex size-4 shrink-0 items-center justify-center',
     /* shape.radius.xs — GDL's `radius-2` variable. Applies in every state,
        checked included: there's no separate checked-state radius rule. */
-    'rounded-xs border border-stroke-field',
+    'rounded-xs border border-stroke-strong',
     'bg-surface-base text-action-primary-content-default',
     'transition-colors',
     /* The focus ring lives here because the real input is visually hidden. */

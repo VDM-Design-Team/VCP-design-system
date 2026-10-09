@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { SearchSelect } from './SearchSelect';
 
 const PEOPLE = [
@@ -54,6 +55,11 @@ export const Default: Story = {
         </span>
       </div>
     );
+  },
+  play: async ({ canvasElement }) => {
+    /* A control's boundary is `stroke.strong` (slate-500, #64748b) — 4.76:1 on the field. */
+    const shell = canvasElement.querySelector('input')!.closest('[class*="border-stroke-strong"]')!;
+    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(100, 116, 139)');
   },
 };
 
