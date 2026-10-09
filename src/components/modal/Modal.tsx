@@ -581,11 +581,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                 ? 'pt-3'
                 : 'pt-1'
               : 'pt-5',
-            /* The footer owns the gap above the actions, so the body must not
-               add to it. It cannot be left to the body in any case: a bottom
-               padding inside a scrolling box scrolls away with the content,
-               which put the last line hard against the buttons. */
-            footer ? 'pb-0' : 'pb-5',
+            /* The footer owns the gap above the actions, but the body keeps 4 of
+               its own: a focus ring is a 2-wide outline offset by 2, so it reaches 4
+               outside the last control, and the scroll box would clip it at the
+               padding edge. The footer's top padding is 4 shorter to compensate,
+               so the visible gap stays 20. */
+            footer ? 'pb-1' : 'pb-5',
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
             bodyClassName,
           )}
@@ -599,7 +600,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             symmetric, and it is the footer's own, so the gap above the buttons
             is the same 20 whether the body scrolls or not. */}
         {footer && (
-          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 py-5">
+          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
             {footer}
           </footer>
         )}

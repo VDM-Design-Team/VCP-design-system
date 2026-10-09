@@ -149,6 +149,8 @@ export const BodyStartsWithControl: Story = {
     const dialog = await screen.findByRole('dialog');
     const body = dialog.querySelector('header')!.nextElementSibling as HTMLElement;
     await expect(getComputedStyle(body).paddingTop).toBe('12px');
+    /* Room for the last control's focus ring (2px outline + 2px offset). */
+    await expect(parseFloat(getComputedStyle(body).paddingBottom)).toBeGreaterThanOrEqual(4);
   },
 };
 

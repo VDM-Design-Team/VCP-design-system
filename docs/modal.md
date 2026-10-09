@@ -81,8 +81,8 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
       <h2>                      type.title-md-semibold · text.primary         → aria-labelledby
       <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
       IconButton                icon "x" · md (40 target) · round (the IconButton default) · text.primary · pulled into the padding
-    <div>                       px-6 · pt-3 under a description or before a non-text first child (button, form control, card), pt-1 before running text (pt-5 with no header) · pb-5 only when there is no footer · overflow-y-auto · tabindex 0 while it scrolls
-    <footer>                    px-6 py-5 · justify-end gap-3 — no surface, no divider
+    <div>                       px-6 · pt-3 under a description or before a non-text first child (button, form control, card), pt-1 before running text (pt-5 with no header) · pb-1 with a footer (room for the focus ring), pb-5 without · overflow-y-auto · tabindex 0 while it scrolls
+    <footer>                    px-6 pt-4 pb-5 · justify-end gap-3 — no surface, no divider
 ```
 
 ## Tokens
@@ -105,11 +105,14 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 
 Spacing rides Tailwind's numeric scale, as the system requires: `p-6` (24) around
 the backdrop, `px-6` (24) through the panel, `pt-5`/`py-5` (20) at the header and
-body, `py-5` (20) in the footer, `gap-3` (12) between footer actions. Never
+body, `pt-4`/`pb-5` in the footer, `gap-3` (12) between footer actions. Never
 `gap-sm` or `mb-xs` — those emit nothing here.
 
-**The footer owns the space above its own buttons**, and the body drops its
-bottom padding whenever there is a footer, so the two never stack. That is not
+**The footer owns the space above its own buttons**, and the body keeps only
+4px of bottom padding when there is a footer (the footer's top is 16 to make
+up the 20). Those 4px are not spacing: a focus ring is a 2px outline offset by
+2, so it reaches 4px past the last field, and a scrolling box clips anything
+beyond its padding edge. Without them the last field's ring was cut off. That is not
 only tidiness: a bottom padding inside a scrolling box scrolls away with the
 content, so on a long dialog the last line ended up hard against the buttons
 while a short one had a comfortable gap. Now it is the same 20 above and 20
