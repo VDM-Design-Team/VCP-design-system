@@ -114,6 +114,17 @@ neutral outline uses), chosen by the design, so it is flagged here rather than
 changed in this component. The emoji and count inside carry the meaning; the
 border only outlines the control.
 
+## Emoji font
+
+Emoji glyphs — the palette cells and the pills' emoji — take `font-emoji`
+(`font.family.emoji`, a new core token). Without it the browser falls from Poppins to
+the generic `sans-serif`, and on some platforms a text-style font there claims the
+smiley code points before the colour emoji font does. Chromatic renders on Linux, and
+there 😄😅😂😮😊 came out as monochrome outline faces while 👀🤔🤩 rendered in colour
+(design review of build 41, 5 Oct 2026). macOS and Windows already picked their colour
+fonts, so the bug did not show locally. The token names the colour emoji fonts first
+(`Apple Color Emoji`, `Segoe UI Emoji`, `Noto Color Emoji`, `Twemoji Mozilla`).
+
 ## Accessibility
 
 - Pills are toggle buttons: `aria-pressed` for "you reacted", with the name
