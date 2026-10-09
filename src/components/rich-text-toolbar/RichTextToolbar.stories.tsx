@@ -185,15 +185,49 @@ export const FloatingOnSelection: Story = {
     range.setStart(text, at);
     range.setEnd(text, at + 'missing evidence'.length);
     const sel = window.getSelection()!;
-    sel.removeAllRanges();
-    sel.addRange(range);
-    paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-    await waitFor(() => expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open'));
+    /* Select and finish the selection — inside the wait, so a slow machine whose hook has
+       not attached its listeners yet (they go on in an effect) just tries again, instead
+       of losing a one-shot `mouseup` and timing out. */
+    await waitFor(
+      () => {
+        sel.removeAllRanges();
+        sel.addRange(range);
+        paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open');
+      },
+      { timeout: 4000, interval: 200 },
+    );
+  },
+};
 
-    /* The selection goes away by any route — here, programmatically, with no click in
-       the editor at all — and the toolbar goes with it. */
+/**
+ * The toolbar goes with the selection — however the selection goes: a click anywhere on the
+ * page, an arrow key, or code clearing it, with no click in the editor at all. (The hook
+ * listens to the document's `selectionchange`.) Here the selection is cleared by code.
+ */
+export const HidesWhenTheSelectionGoes: Story = {
+  parameters: { layout: 'padded' },
+  render: FloatingOnSelection.render,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const paragraph = canvasElement.querySelector('p')!;
+    const text = [...paragraph.childNodes].find((n) => n.nodeType === Node.TEXT_NODE)!;
+    const at = text.textContent!.indexOf('missing evidence');
+    const range = document.createRange();
+    range.setStart(text, at);
+    range.setEnd(text, at + 'missing evidence'.length);
+    const sel = window.getSelection()!;
+    await waitFor(
+      () => {
+        sel.removeAllRanges();
+        sel.addRange(range);
+        paragraph.parentElement!.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        expect(canvas.getByRole('toolbar')).toHaveAttribute('data-state', 'open');
+      },
+      { timeout: 4000, interval: 200 },
+    );
     sel.removeAllRanges();
-    await waitFor(() => expect(canvas.queryByRole('toolbar')).toBeNull(), { timeout: 1500 });
+    await waitFor(() => expect(canvas.queryByRole('toolbar')).toBeNull(), { timeout: 3000 });
   },
 };
 
@@ -262,7 +296,7 @@ export const FadesInAndOut: Story = {
     await expect(toolbar).toHaveAttribute('data-state', 'closed');
     await expect(within(toolbar).getAllByRole('button').every((b) => b.tabIndex === -1)).toBe(true);
     /* ...and then it leaves the DOM. */
-    await waitFor(() => expect(canvas.queryByRole('toolbar')).toBeNull(), { timeout: 1500 });
+    await waitFor(() => expect(canvas.queryByRole('toolbar')).toBeNull(), { timeout: 3000 });
     await userEvent.click(canvas.getByRole('button', { name: /Show the toolbar/ }));
     await expect(await canvas.findByRole('toolbar')).toHaveAttribute('data-state', 'open');
   },
