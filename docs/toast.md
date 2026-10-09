@@ -171,7 +171,7 @@ happens.
 Content that disappears on a timer fails **2.2.1 Timing Adjustable** unless the
 user can pause, extend, or dismiss it. All three are satisfied:
 
-- **Dismiss.** `onDismiss` renders a real close control — 40 square, keyboard
+- **Dismiss.** `onDismiss` renders a real close control — a 36 square target, keyboard
   reachable, with a name that says what it closes.
 - **Pause, on hover.** The pointer entering the toast stops the countdown.
 - **Pause, on focus.** Focus landing anywhere *inside* the toast stops it too.
@@ -206,11 +206,13 @@ go there. The announcement is the live region's job, not focus's.
 
 ### Tone is never colour alone
 
-The fill barely registers as a shape: it sits at 1.03–1.22:1 against the page in
-light and 1.72–2.06:1 in dark. Nothing about the tone is carried by it. So:
+The card is neutral; the tone is a small bright glyph and the timer bar, and both
+sit below 3:1 against the card for two tones (see *The glyph and the bar* below).
+So nothing about the tone rests on colour:
 
-- **The glyphs are four different shapes** — `info` (circle-i), `check-circle`,
-  `warning` (triangle), `x-circle` — which survive greyscale, a colour vision
+- **The glyphs are four different shapes** — `info-fill` (circle-i),
+  `check-circle-fill`, `warning-circle-fill` (circle-exclamation, for warning)
+  and `warning-fill` (triangle, for danger) — which survive greyscale, a colour vision
   deficiency, and a screenshot.
 - **Each glyph carries the tone as its accessible name**, so the tone survives
   into the announcement as a word: *"Error, Save failed, we could not reach the
@@ -220,92 +222,72 @@ light and 1.72–2.06:1 in dark. Nothing about the tone is carried by it. So:
 
 ## Tokens
 
-Each tone is one `accent.<name>.tonal` surface/content pair — the same pairs
-`docs/badge.md` measured, reused deliberately rather than re-chosen. Text on its
-own fill, measured, both themes. AA asks 4.5:1.
+The card is neutral, as Figma draws it: `surface.elevated` with a
+`stroke.subtle` border. Text on it:
 
-| Tone | Fill | Content | Light | Dark |
-|---|---|---|---|---|
-| `info` | `accent.info.tonal.surface.default` | `accent.info.tonal.content.default` | **5.60:1** | **7.29:1** |
-| `success` | `accent.success.tonal.surface.default` | `accent.success.tonal.content.default` | **8.24:1** | **6.46:1** |
-| `warning` | `accent.warning.tonal.surface.default` | `accent.warning.tonal.content.default` | **4.59:1** | **7.45:1** |
-| `danger` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
-
-**`warning` in light is the floor at 4.59:1**, exactly as it is for Badge — 0.09
-above the line. Any move of either token breaks this component and Badge at the
-same time.
-
-### The border
-
-The toast floats over arbitrary page content, so it needs an edge of its own.
-
-| Border token | Light, vs `surface.canvas` / `surface.base` | Dark, vs canvas / base |
-|---|---|---|
-| `accent.info.outline.content.default` | 5.01:1 / 5.25:1 | 4.75:1 / 3.89:1 |
-| `accent.success.outline.content.default` | 4.73:1 / 4.95:1 | 8.05:1 / 6.60:1 |
-| `accent.warning.outline.content.default` | 4.71:1 / 4.93:1 | 9.35:1 / 7.66:1 |
-| `accent.critical.outline.content.default` | 4.56:1 / 4.77:1 | 6.18:1 / 5.06:1 |
-
-`outline.**border**.default` — the token whose *name* says border — is not used,
-because it does not clear the house 3:1 rule for a boundary: 1.83:1 for
-`warning` and 2.12:1 for `success` against the canvas in light. See *Token gaps*.
-
-### The controls on the fill
-
-The dismiss `IconButton` and the action `Button` sit **on** a tonal fill, where
-their own `action.*` families are out of place: `action.tertiary.content.default`
-and `action.secondary.content.default` both measure 3.75–5.75:1 there, dropping
-to **3.92:1 (`success`) and 3.75:1 (`warning`) in dark** — under AA. Both
-controls are therefore recoloured onto the tone's own tonal triad.
-
-| State | Content / surface | Light range | Dark range |
+| Part | Token | Light | Dark |
 |---|---|---|---|
-| Rest | `tonal.content.default` on `tonal.surface.default` | 4.59 – 8.24:1 | 6.46 – 8.22:1 |
-| Hover | `tonal.content.hover` on `tonal.surface.hover` | 5.88 – 7.50:1 | **4.10** – 7.64:1 |
-| Pressed | `tonal.content.pressed` on `tonal.surface.pressed` | 5.72 – 10.67:1 | 4.50 – 6.28:1 |
+| Title | `text.primary` on `surface.elevated` | 20.17:1 | 14.63:1 |
+| Message | `text.secondary` on `surface.elevated` | 10.35:1 | 11.87:1 |
 
-**The floor is 4.10:1** — `success`, dark, hover. The dismiss control is a glyph
-with no visible text, so 1.4.11's 3:1 is the applicable threshold and it clears
-it comfortably; everything carrying actual text is at 4.50:1 or above.
+### The glyph and the bar
 
-The action button's outline takes `tonal.content.default` rather than
-`outline.border.default`, which would sit at 1.78–3.12:1 on the pale fills — a
-control border has to reach 3:1. As drawn it matches the label, 4.59:1 at worst.
+The tone lives in two places, both the accent's own bright colour,
+`accent.<tone>.outline.border.default`, as Figma draws it:
 
-**Focus ring.** `stroke.focused` on the tonal fills: 5.07 / 5.63 / 5.75 / 5.07:1
-in light and 4.49 / 3.92 / 3.75 / 4.34:1 in dark. Floor 3.75:1, above the 3:1 a
-focus indicator needs.
+| Tone | Light, on white | Dark, on `surface.elevated` |
+|---|---|---|
+| `info` | 3.76:1 | 2.79:1 |
+| `success` | **2.22:1** | 4.54:1 |
+| `warning` | **1.91:1** | 4.98:1 |
+| `danger` | 3.81:1 | 3.07:1 |
+
+**Several of these are below 3:1, and that is a deliberate exception**, the same
+one `Banner` records: the glyph is not what makes the message understood. The
+title says what happened, the glyph's shape differs per tone, and it is announced
+as a word. The timer bar is `aria-hidden` and shows a countdown that the toast
+already communicates by dismissing. If the family ever gets a stronger border
+step, both should move to it.
+
+### The controls
+
+- **Action** is the standard `Button`, `secondary`, `sm` — Figma's outlined blue
+  "Action" — on a white card, exactly where that variant is tuned to sit. No
+  tone recolouring any more.
+- **Dismiss** is a neutral `IconButton`: `text.primary`, hover
+  `surface.neutral.faint`, pressed `surface.neutral.subtle`. It draws as a bare
+  glyph. The 36 `sm` target is pulled back by its own padding so the glyph sits
+  where Figma puts it, and the hit area stays above the 24 floor of WCAG 2.5.8.
+- **Focus ring.** `stroke.focused` on the white card; the same ring every other
+  control uses.
 
 ### Everything else
 
 | Part | Token | Utility |
 |---|---|---|
-| Radius | `shape.radius.md` | `rounded-md` |
+| Radius | `shape.radius.sm` (6, Figma's) | `rounded-sm` |
 | Border width | `borderWidth.default` | `border` |
-| Elevation | `shape.shadow.menu` | `shadow-menu` — the visual difference from a Banner |
-| Title | `type.label.lg` — Poppins 500, 14/20 | `text-label-sm-medium` |
-| Body | `type.body.md` — Poppins 400, 14/20 | `text-body-sm-regular` |
-| Padding | Tailwind numeric scale | `px-3.5 py-3` (14 / 12) |
+| Surface | `surface.elevated` | `bg-surface-elevated` |
+| Border | `stroke.subtle` | `border-stroke-subtle` |
+| Elevation | `shape.shadow.menu` | `shadow-menu` — the visual difference from a Banner. Figma stacks two softer shadows no token matches; this is the closest |
+| Title | `type.body-sm-semibold` — 14/20 | `text-body-sm-semibold text-text-primary` |
+| Message | `type.body-sm-medium` — 14/20 | `text-body-sm-medium text-text-secondary` |
+| Padding | Tailwind numeric scale | `p-4` (16) |
 | Gap, glyph to text | Tailwind numeric scale | `gap-3` (12) |
-| Gap, title to body | Tailwind numeric scale | `gap-1` (4) |
-| Width | Tailwind container scale | `max-w-sm` |
-| Glyph colour | — | Inherited from the tone's content token via `currentColor` |
+| Gap, title to message | — | none |
+| Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content |
+| Glyph and bar colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
 
 Dark comes for free: every colour above is a semantic token that
 `tokens/semantic/color.dark.json` overrides under `.dark`.
 
 ### Token gaps
 
-- **No `accent.<tone>.tonal` treatment for a control sitting on a tonal
-  surface.** The `tonal` triad describes a *tonal control's own* fill; there is
-  no declared pair for a button on top of a tonal message. This component reuses
-  the triad's hover/pressed states for that, which holds (4.10:1 floor) but is a
-  convention it invented rather than a pair the tokens state.
-- **`accent.<tone>.outline.border.default` cannot be used as a container
-  edge.** Against `surface.canvas` in light it measures 3.60 (`info`), 2.12
-  (`success`), 1.83 (`warning`), 3.64 (`danger`) — two of the four fail 3:1. The
-  token named `border` is the one you cannot draw a border with. Either it moves
-  a step or two darker, or the family needs a separate `border.strong`.
+- **`accent.<tone>.outline.border.default` is below 3:1 on a white card** for
+  `success` and `warning` (and `info` in dark). Fine for a redundant glyph, not
+  for anything that must be seen on its own. See *The glyph and the bar*.
+- **No two-layer toast shadow.** Figma draws `0 1 3` and `0 4 8 +3`, both 10%
+  black. The shadow tokens are single layers, so `shadow-menu` stands in.
 - **No motion or timing tokens.** `DEFAULT_TOAST_DURATION` is a TypeScript
   constant. Auto-dismiss timing is a design decision like any other and belongs
   in `tokens/` — `motion.duration.*`, or a `timing.notification.*` group.
@@ -314,8 +296,6 @@ Dark comes for free: every colour above is a semantic token that
   wants an `elevation.z.*` scale rather than three components guessing.
 - **`shape.shadow.*` has no dark-theme override.** `shadow-menu` is tuned for a
   light page and is used unchanged in dark, where a shadow does much less work.
-- **No `accent.neutral` triad** — the same gap Badge reports — so there is no
-  neutral toast for a message with no valence.
 - **No 13/400 in the type ramp.** The export set the body at 13px 400; the ramp
   offers `body-sm` (12/400) and `label-md` (13/500, wrong weight). The body uses
   `body-md` (14/400), one pixel large, rather than change weight.
@@ -325,23 +305,22 @@ Dark comes for free: every colour above is a semantic token that
 - **`style` is gone.** The export positioned and coloured itself with inline
   styles; every value is a class here, and the numbers that varied became props.
 - **The dark saturated fills are gone.** The export painted white on
-  `rgb(14,10,73)` / `rgb(185,28,28)` and so on. Those are single-theme colours
-  with no dark counterpart. The tonal pairs replace them, which also makes Toast
-  and Badge agree.
+  `rgb(14,10,73)` / `rgb(185,28,28)` and so on. Those were single-theme colours
+  with no dark counterpart. Toast is now Figma's neutral card, which flips with
+  the theme on its own. (It was a tonal card between 3 Sep and October 2026.)
 - **`opacity: .9` on the body is gone.** It reduced contrast for a hierarchy the
   type ramp already provides through weight.
 - **`role="status"` moved off the element** onto the viewport — see above. The
   export put it on the toast itself, and also used it for errors.
-- **`action: ReactNode` became `actionLabel` + `onAction`.** A caller-supplied
-  button inherits `action.*` colours that fail on a tonal fill; rendering it here
-  is what lets it take the tone's own tokens.
+- **`action: ReactNode` became `actionLabel` + `onAction`.** Rendering the
+  button here keeps its size and variant fixed to the design.
 - **`aria-label="Dismiss"` became a name that says what it dismisses**, derived
   from the title.
 - **The bare `<button>` with a `✕` character became an `IconButton`** — 40
   target, focus ring, required name, real glyph.
-- Raw values mapped to tokens: radius 10 → `rounded-md` (8); the hand-rolled
-  `boxShadow` → `shape.shadow.menu`; padding `12px 14px` → `py-3 px-3.5`; gap 12
-  → `gap-3`; title/body gap 2 → `gap-1` (4); `minWidth 320` / `maxWidth 440` →
+- Raw values mapped to tokens: radius 10 → `rounded-sm` (6, Figma's); the hand-rolled
+  `boxShadow` → `shape.shadow.menu`; padding `12px 14px` → `p-4` (Figma's 16); gap 12
+  → `gap-3`; `minWidth 320` / `maxWidth 440` →
   `max-w-sm` (384).
 
 ## Don't

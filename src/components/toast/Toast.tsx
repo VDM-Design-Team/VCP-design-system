@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Icon, type IconName } from '../../atoms/icon';
@@ -24,10 +24,22 @@ export const DEFAULT_TOAST_DURATION = 6000;
  * alone".
  */
 const TONE_ICON: Record<ToastTone, IconName> = {
-  info: 'info',
-  success: 'check-circle',
-  warning: 'warning',
-  danger: 'x-circle',
+  info: 'info-fill',
+  success: 'check-circle-fill',
+  warning: 'warning-circle-fill',
+  danger: 'warning-fill',
+};
+
+/**
+ * Tone → the one place colour carries the tone: the glyph and the timer bar.
+ * The card itself is neutral, as Figma draws it. `outline.border.default` is
+ * the accent's own bright colour, so it reads as the tone without a tint.
+ */
+const TONE_COLOUR: Record<ToastTone, string> = {
+  info: 'text-accent-info-outline-border-default',
+  success: 'text-accent-success-outline-border-default',
+  warning: 'text-accent-warning-outline-border-default',
+  danger: 'text-accent-critical-outline-border-default',
 };
 
 /**
@@ -76,121 +88,27 @@ const TONE_LABEL: Record<ToastTone, string> = {
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-const toast = cva(
-  [
-    /* The viewport is `pointer-events-none` so it never eats a click on the
-       page underneath; the toast itself puts them back so it can be hovered,
-       which is what pauses the timer. */
-    'pointer-events-auto',
-    /* `relative` + clipping so the timer bar can sit flush on the bottom edge
-       and follow the rounded corner. */
-    'relative flex w-full max-w-sm items-start gap-3 overflow-hidden',
-    /* shape.radius.md, borderWidth.default. ds-lint-ignore */
-    'rounded-md border px-3.5 py-3',
-    /* shape.shadow.menu — the toast floats over the page; the Banner does not.
-       This shadow is the whole visual difference between the two. */
-    'shadow-menu',
-    'font-sans',
-  ],
-  {
-    variants: {
-      /* Each tone is the `accent.<name>.tonal` surface/content pair Badge
-         already proved in both themes, edged with `outline.content.default` so
-         the boundary clears 3:1 against the page. docs/toast.md has the figures. */
-      tone: {
-        info: [
-          'bg-accent-info-tonal-surface-default',
-          'text-accent-info-tonal-content-default',
-          'border-accent-info-outline-content-default',
-        ],
-        success: [
-          'bg-accent-success-tonal-surface-default',
-          'text-accent-success-tonal-content-default',
-          'border-accent-success-outline-content-default',
-        ],
-        warning: [
-          'bg-accent-warning-tonal-surface-default',
-          'text-accent-warning-tonal-content-default',
-          'border-accent-warning-outline-content-default',
-        ],
-        danger: [
-          'bg-accent-critical-tonal-surface-default',
-          'text-accent-critical-tonal-content-default',
-          'border-accent-critical-outline-content-default',
-        ],
-      },
-    },
-    defaultVariants: { tone: 'info' },
-  },
-);
-
-/**
- * The dismiss control sits *on* a tonal fill, so it cannot keep IconButton's
- * `action.tertiary.*` colours — those are tuned for the page surface and drop
- * to 3.75:1 on the pale fills in dark. These put it back on the tone's own
- * tonal triad, which measures 4.10:1 at worst across every state and theme.
- */
-const TONE_CONTROL: Record<ToastTone, string> = {
-  info: [
-    'text-accent-info-tonal-content-default',
-    'hover:bg-accent-info-tonal-surface-hover hover:text-accent-info-tonal-content-hover',
-    'active:bg-accent-info-tonal-surface-pressed active:text-accent-info-tonal-content-pressed',
-  ].join(' '),
-  success: [
-    'text-accent-success-tonal-content-default',
-    'hover:bg-accent-success-tonal-surface-hover hover:text-accent-success-tonal-content-hover',
-    'active:bg-accent-success-tonal-surface-pressed active:text-accent-success-tonal-content-pressed',
-  ].join(' '),
-  warning: [
-    'text-accent-warning-tonal-content-default',
-    'hover:bg-accent-warning-tonal-surface-hover hover:text-accent-warning-tonal-content-hover',
-    'active:bg-accent-warning-tonal-surface-pressed active:text-accent-warning-tonal-content-pressed',
-  ].join(' '),
-  danger: [
-    'text-accent-critical-tonal-content-default',
-    'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover',
-    'active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed',
-  ].join(' '),
-};
-
-/**
- * The action button, same problem and same answer. The outline takes the tone's
- * *content* colour rather than `outline.border.default`, which would sit at
- * 1.78:1 on the pale fills — a control border has to clear 3:1.
- */
-const TONE_ACTION: Record<ToastTone, string> = {
-  info: [
-    'bg-transparent text-accent-info-tonal-content-default',
-    'border-accent-info-tonal-content-default',
-    'hover:bg-accent-info-tonal-surface-hover hover:text-accent-info-tonal-content-hover hover:border-accent-info-tonal-content-hover',
-    'active:bg-accent-info-tonal-surface-pressed active:text-accent-info-tonal-content-pressed active:border-accent-info-tonal-content-pressed',
-  ].join(' '),
-  success: [
-    'bg-transparent text-accent-success-tonal-content-default',
-    'border-accent-success-tonal-content-default',
-    'hover:bg-accent-success-tonal-surface-hover hover:text-accent-success-tonal-content-hover hover:border-accent-success-tonal-content-hover',
-    'active:bg-accent-success-tonal-surface-pressed active:text-accent-success-tonal-content-pressed active:border-accent-success-tonal-content-pressed',
-  ].join(' '),
-  warning: [
-    'bg-transparent text-accent-warning-tonal-content-default',
-    'border-accent-warning-tonal-content-default',
-    'hover:bg-accent-warning-tonal-surface-hover hover:text-accent-warning-tonal-content-hover hover:border-accent-warning-tonal-content-hover',
-    'active:bg-accent-warning-tonal-surface-pressed active:text-accent-warning-tonal-content-pressed active:border-accent-warning-tonal-content-pressed',
-  ].join(' '),
-  danger: [
-    'bg-transparent text-accent-critical-tonal-content-default',
-    'border-accent-critical-tonal-content-default',
-    'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover hover:border-accent-critical-tonal-content-hover',
-    'active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed active:border-accent-critical-tonal-content-pressed',
-  ].join(' '),
-};
+const toast = cva([
+  /* The viewport is `pointer-events-none` so it never eats a click on the
+     page underneath; the toast itself puts them back so it can be hovered,
+     which is what pauses the timer. */
+  'pointer-events-auto',
+  /* `relative` + clipping so the timer bar can sit flush on the bottom edge
+     and follow the rounded corner. It hugs its content up to `max-w-sm`. */
+  'relative flex w-fit max-w-sm items-start gap-3 overflow-hidden',
+  /* A neutral card, as Figma draws it: the tone is the glyph and the bar, not
+     a tint. shape.radius.sm, borderWidth.default. ds-lint-ignore */
+  'rounded-sm border border-stroke-subtle bg-surface-elevated p-4',
+  /* shape.shadow.menu — the toast floats over the page; the Banner does not.
+     Figma stacks two softer shadows that no token matches; this is the
+     closest, and the lift is what separates it from a Banner. */
+  'shadow-menu',
+  'font-sans text-text-secondary',
+]);
 
 export interface ToastProps
   /* Native `title` is a tooltip string; ours is the rendered headline. */
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>,
-    /* `tone` is redeclared below: cva types a variant as `… | null`, and null is
-       not an index into the tone maps. ds-lint-ignore */
-    Omit<VariantProps<typeof toast>, 'tone'> {
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   /** Which accent family the toast speaks in. */
   tone?: ToastTone;
   /** The headline. One short clause — "Deploy failed", not a paragraph. */
@@ -347,7 +265,7 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
   return (
     <div
       ref={ref}
-      className={cn(toast({ tone }), className)}
+      className={cn(toast(), className)}
       /* Deliberately no `role`, no `aria-live`, no `tabIndex`. The live region
          is `ToastViewport`, which was already in the DOM when this arrived, and
          focus stays exactly where the user put it. */
@@ -378,46 +296,61 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
     >
       {/* Named, not decorative: this glyph is the only thing carrying the tone,
           so the tone has to survive into the announcement as a word. */}
-      <Icon name={TONE_ICON[tone]} size="md" label={toneLabel ?? TONE_LABEL[tone]} />
+      <Icon
+        name={TONE_ICON[tone]}
+        size="md"
+        label={toneLabel ?? TONE_LABEL[tone]}
+        className={cn('shrink-0', TONE_COLOUR[tone])}
+      />
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {title != null && <p className="text-label-sm-medium">{title}</p>}
+      <div className="flex min-w-0 flex-1 flex-col">
+        {title != null && <p className="text-body-sm-semibold text-text-primary">{title}</p>}
         {children != null && children !== false && (
-          <div className="text-body-sm-regular">{children}</div>
-        )}
-        {hasAction && (
-          <div className="mt-1 flex">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className={TONE_ACTION[tone]}
-              onClick={onAction}
-            >
-              {actionLabel}
-            </Button>
-          </div>
+          <div className="text-body-sm-medium">{children}</div>
         )}
       </div>
 
+      {hasAction && (
+        /* Centred on the card, not on the title row, as Figma has it. */
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="shrink-0 self-center"
+          onClick={onAction}
+        >
+          {actionLabel}
+        </Button>
+      )}
+
       {onDismiss && (
+        /* A bare glyph, as drawn: Figma's close is a 20 box with no button
+           chrome. The 36 `sm` target is pulled back by its own padding so the
+           glyph lands where the design puts it while the hit area stays well
+           above the 24 AA floor (WCAG 2.5.8). Neutral: dismissing is not an
+           action to invite. */
         <IconButton
           icon="x"
           label={resolvedDismissLabel}
-          size="md"
-          className={cn('-my-1 -mr-1', TONE_CONTROL[tone])}
+          size="sm"
+          className={cn(
+            'shrink-0 -my-2 -mr-2',
+            hasAction ? 'ml-2' : '-ml-2',
+            'text-text-primary hover:text-text-primary',
+            'hover:bg-surface-neutral-faint active:bg-surface-neutral-subtle',
+          )}
           onClick={onDismiss}
         />
       )}
 
       {timed && (
-        /* 4 tall, flush to the bottom edge, in the tone's own content colour
-           at low opacity so it reads as a track rather than a second border. */
-        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 overflow-hidden">
-          <span
-            ref={barRef}
-            className="block h-full origin-left bg-current opacity-40"
-          />
+        /* 4 tall, flush to the bottom edge, in the tone's solid colour, and
+           shrinking from the right as the time runs out. */
+        <span
+          aria-hidden="true"
+          className={cn('absolute inset-x-0 bottom-0 h-1 overflow-hidden', TONE_COLOUR[tone])}
+        >
+          <span ref={barRef} className="block h-full origin-left bg-current" />
         </span>
       )}
     </div>
