@@ -66,8 +66,12 @@ const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
     /* With no heading text the close button is the only child, so it hugs the
        right edge rather than sitting alone on the left. */
     hasText: { true: '', false: 'justify-end' },
+    /* Part of the gap to the body lives here, not in the body: padding inside a
+       scrolling box scrolls away, and long content then slid up to the header's
+       edge and ran hard against the caption. */
+    roomy: { true: 'pb-2', false: 'pb-0' },
   },
-  defaultVariants: { hasText: true },
+  defaultVariants: { hasText: true, roomy: false },
 });
 
 /** Layout effect where there is a DOM, plain effect on a server (no warning). */
@@ -489,6 +493,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   const hasDescription =
     showDescription && description !== undefined && description !== null && description !== false;
   const footer = showFooter ? footerProp : undefined;
+  /* 12 under a sub-heading, or when the body opens with a control or card; else 4. */
+  const roomy = hasDescription || !leadsWithText;
   const hasHeaderText = hasTitle || hasDescription;
 
   return createPortal(
@@ -528,7 +534,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
         className={cn(panel({ size }), className)}
       >
         {(hasHeaderText || showClose) && (
-          <header className={header({ hasText: hasHeaderText })}>
+          <header className={header({ hasText: hasHeaderText, roomy })}>
             {hasHeaderText && (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {hasTitle && (
@@ -573,14 +579,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
             'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
-            /* 12 under a sub-heading, or when the body opens with a control or
-               card; 4 when running text follows a bare title; 20 when there is
-               no header at all. */
-            hasHeaderText || showClose
-              ? hasDescription || !leadsWithText
-                ? 'pt-3'
-                : 'pt-1'
-              : 'pt-5',
+            /* The gap to the header is split: the header's own padding-bottom
+               (8, or 0) stays put while the body scrolls, and this 4 scrolls
+               away and doubles as room for a focus ring at the very top. That
+               makes 12 or 4 at rest, and content scrolls out 8 or 0 below the
+               header's text instead of against it. 20 when there is no header. */
+            hasHeaderText || showClose ? 'pt-1' : 'pt-5',
             /* The footer owns the gap above the actions, but the body keeps 4 of
                its own: a focus ring is a 2-wide outline offset by 2, so it reaches 4
                outside the last control, and the scroll box would clip it at the

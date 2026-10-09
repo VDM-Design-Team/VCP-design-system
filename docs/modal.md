@@ -77,11 +77,11 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 ```
 <div>                           backdrop — fixed inset-0 · z-50 · surface.overlay · p-6 · grid place-items-center
   <div role="dialog">           surface.elevated · shadow.modal · radius.md · max-h-full · size max-width
-    <header>                    px-6 pt-5 — only when there is heading text or a close button
+    <header>                    px-6 pt-5, pb-2 under a description or before a non-text first child (button, form control, card), else pb-0 — only when there is heading text or a close button
       <h2>                      type.title-md-semibold · text.primary         → aria-labelledby
       <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
       IconButton                icon "x" · md (40 target) · round (the IconButton default) · text.primary · pulled into the padding
-    <div>                       px-6 · pt-3 under a description or before a non-text first child (button, form control, card), pt-1 before running text (pt-5 with no header) · pb-1 with a footer (room for the focus ring), pb-5 without · overflow-y-auto · tabindex 0 while it scrolls
+    <div>                       px-6 · pt-1 (pt-5 with no header) · pb-1 with a footer (room for the focus ring), pb-5 without · overflow-y-auto · tabindex 0 while it scrolls
     <footer>                    px-6 pt-4 pb-5 · justify-end gap-3 — no surface, no divider
 ```
 
