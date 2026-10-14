@@ -96,7 +96,7 @@ Button's scale and corner exactly.
 
 ### ✅ Checkbox — box sizes
 
-Figma ships **16 and 20**; ours are 16 (`sm`) and 20 (`md`). Match.
+Figma ships **16 and 20**. Ours was 16 only until October 2026, when `size="md"` (20) was added for the Accept Pending AV card; the earlier "match" here was wrong.
 
 ### 🔧 Pagination — control height and corner
 
