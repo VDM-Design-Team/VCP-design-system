@@ -62,7 +62,7 @@ export const HistoryDisabled: Story = {
 /** Above a Textarea — the composition CommentComposer (pattern) will make real. */
 export const AboveAnEditor: Story = {
   render: (args) => (
-    <div className="w-128 overflow-hidden rounded-md border border-stroke-field bg-surface-elevated focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused">
+    <div className="w-128 overflow-hidden rounded-md border border-stroke-strong bg-surface-elevated focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused">
       <RichTextToolbar {...args} />
       <Textarea
         aria-label="Comment"
