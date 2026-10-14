@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { PageTitle } from './PageTitle';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
@@ -19,7 +20,11 @@ const meta = {
     },
   },
   args: { title: 'My Added Values' },
-  argTypes: { title: { control: 'text' }, subtitle: { control: 'text' } },
+  argTypes: {
+    title: { control: 'text' },
+    subtitle: { control: 'text' },
+    size: { control: 'inline-radio', options: ['md', 'sm'] },
+  },
 } satisfies Meta<typeof PageTitle>;
 
 export default meta;
@@ -54,6 +59,25 @@ export const WithSubtitle: Story = {
  */
 export const WithBack: Story = {
   args: { title: 'VCP-12345', backHref: '#values', backLabel: 'Back to my Added Values' },
+  /* The back control and the title share a centre line. */
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const back = canvas.getByRole(args.backHref ? 'link' : 'button', { name: args.backLabel });
+    const title = canvas.getByRole('heading', { level: 1 });
+    const centre = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    await expect(Math.abs(centre(back) - centre(title))).toBeLessThan(1);
+    /* The arrow hugs its 20 glyph, with 8 between it and the title. */
+    const box = back.getBoundingClientRect();
+    await expect(box.width).toBe(20);
+    await expect(box.height).toBe(20);
+    await expect(Math.round(title.getBoundingClientRect().left - box.right)).toBe(8);
+    /* The default title is 18 semibold. */
+    await expect(getComputedStyle(title).fontSize).toBe('18px');
+    await expect(getComputedStyle(title).fontWeight).toBe('600');
+  },
   render: (args) => (
     <Page>
       <PageTitle {...args} />
@@ -61,9 +85,38 @@ export const WithBack: Story = {
   ),
 };
 
+/**
+ * The small title: 14 medium, for pages that want a quieter band. The default
+ * is 18 semibold. Both are `text.secondary`.
+ */
+export const SmallTitle: Story = {
+  args: { title: 'VCP-12345', backHref: '#values', backLabel: 'Back to my Added Values', size: 'sm' },
+  render: (args) => (
+    <Page>
+      <PageTitle {...args} />
+    </Page>
+  ),
+  play: async ({ canvasElement }) => {
+    const title = within(canvasElement).getByRole('heading', { level: 1 });
+    await expect(getComputedStyle(title).fontSize).toBe('14px');
+    await expect(getComputedStyle(title).fontWeight).toBe('500');
+  },
+};
+
 /** Back as history, for the cases where there is genuinely no URL. */
 export const BackAsAction: Story = {
   args: { title: 'VCP-12345', onBack: () => {}, backLabel: 'Back to my Added Values' },
+  /* The back control and the title share a centre line. */
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const back = canvas.getByRole(args.backHref ? 'link' : 'button', { name: args.backLabel });
+    const title = canvas.getByRole('heading', { level: 1 });
+    const centre = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    await expect(Math.abs(centre(back) - centre(title))).toBeLessThan(1);
+  },
   render: (args) => (
     <Page>
       <PageTitle {...args} />
