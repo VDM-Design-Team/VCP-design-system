@@ -129,8 +129,9 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                   role="region"
                   id={panelId}
                   aria-labelledby={headerId}
-                  /* Left edge aligns the content under the title, past the caret. */
-                  className="px-3.5 pb-3.5 pl-10 text-body-sm-regular text-text-secondary"
+                  /* Left edge aligns the content under the title, past the caret; 8
+                     above it keeps the paragraph off the header. */
+                  className="px-3.5 pb-3.5 pl-10 pt-2 text-body-sm-regular text-text-secondary"
                 >
                   {item.content}
                 </div>
