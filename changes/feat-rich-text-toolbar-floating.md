@@ -8,13 +8,13 @@ Rebuilt from the design's toolbar markup, on tokens, with our toolbar accessibil
 - **A floating card, not a strip:** `surface.elevated`, `stroke.subtle`, `shadow.menu`, 8 corners, 6 padding, 4 between controls. The editor places it over
   the selection (a new **Floating On Selection** story shows how); the component does no positioning. Pressing a button no longer collapses the selection
   (`mousedown` is swallowed).
-- **32 buttons with 16 line icons** (were 28, with the letters B I U S): `text-b`, `text-italic`, `text-underline`, `text-strikethrough`. Glyphs `text.primary`; hover
-  `surface.neutral.subtle`; 24-high dividers.
+- **32 buttons with 16 line icons** (were 28, with the letters B I U S): `text-b`, `text-italic`, `text-underline`, `text-strikethrough`. Glyphs `neutral.outline.content`; hover
+  `surface.neutral.subtle`, press `surface.neutral.medium`; 24-high dividers.
 - **Three groups, the design's order:** text styles · numbered list, bulleted list · link, **unlink**, **block quote**, **code block**, undo, redo.
 - **Breaking:** the `file` command is removed (VCP has no such function); `quote`, `code` and `unlink` are added. `image` stays, **opt-in**: the default set is the twelve,
   and the comment editor adds it. `ol` now comes before `ul`; undo and
-  redo are in the last group. Migration: drop any `image` / `file` handling; add `quote`, `code`, `unlink` to the `onCommand` switch.
-- **The glyphs are `neutral.outline.content`** (default, hover, pressed, disabled) instead of `text.primary`; the hover and press fills are unchanged. 7.58:1 at rest in light, 9.85:1 in dark; the lowest is 4.34:1 (dark, pressed).
+  redo are in the last group. Migration: drop any `file` handling (`image` is now opt-in via `commands`); add `quote`, `code`, `unlink` to the `onCommand` switch.
+- **The glyphs are `neutral.outline.content`** (default, hover, pressed, disabled) instead of `text.secondary`; the hover moves from the brand tint (`surface.brand.base`) to neutral `surface.neutral.subtle`, with a new `surface.neutral.medium` press fill. 7.58:1 at rest in light, 9.85:1 in dark; the lowest is 4.34:1 (dark, pressed).
 - **Insert image sits left of undo and redo** (undo/redo stay the rightmost pair), and **new `useSelectionToolbar` hook**: shows the toolbar over a finished selection and hides it
   the moment there is none — on any click, key or programmatic change (it listens to `selectionchange`), not only clicks inside the editor.
 - **`commands` prop** — the editor declares which commands to show (`DEFAULT_RICH_TEXT_COMMANDS`, `ALL_RICH_TEXT_COMMANDS` exported); `[...DEFAULT_RICH_TEXT_COMMANDS, 'image']` for comments. Order and groups
