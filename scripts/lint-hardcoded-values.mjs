@@ -6,7 +6,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
 const RULES = [
-  [/#[0-9a-fA-F]{3,8}\b/g,            'hex color — add a token in tokens/core/color.json'],
+  [/#[0-9a-fA-F]{3,8}\b/g,            'hex color — use a token (VCP ramps: tokens/core/color.json; shared ones come from GDL)'],
   [/\b(rgb|rgba|hsl|hsla)\(/g,        'raw color function — use a token'],
   [/\b(bg|text|border|fill|stroke|outline)-\[[^\]]+\]/g, 'arbitrary Tailwind color — use a token utility'],
   [/\b(p|m|gap|w|h|top|left|right|bottom)[trblxy]?-\[[^\]]+\]/g, 'arbitrary Tailwind size — use a spacing token'],
@@ -39,7 +39,8 @@ for (const file of walk('src')) {
    If those two drift, `cn()` silently drops a component's type or its colour —
    which is exactly the class of bug that shipped in Button. Fail loudly instead. */
 {
-  const tokens = Object.keys(JSON.parse(readFileSync('tokens/semantic/type.json', 'utf8')).type)
+  const ramp = new URL(import.meta.resolve('@vdm-design-team/gdl/tokens/semantic/type.json'));
+  const tokens = Object.keys(JSON.parse(readFileSync(ramp, 'utf8')).type)
     .filter((k) => !k.startsWith('$'));
   const declared = [
     ...readFileSync('src/lib/cn.ts', 'utf8').matchAll(/^\s*'([a-z0-9-]+)',$/gm),
@@ -48,7 +49,7 @@ for (const file of walk('src')) {
   const extra = declared.filter((d) => !tokens.includes(d));
   if (missing.length || extra.length) {
     console.error(
-      `\nsrc/lib/cn.ts TYPE_RAMP is out of step with tokens/semantic/type.json` +
+      `\nsrc/lib/cn.ts TYPE_RAMP is out of step with GDL's type ramp (@vdm-design-team/gdl/tokens/semantic/type.json)` +
         (missing.length ? `\n  missing: ${missing.join(', ')}` : '') +
         (extra.length ? `\n  stale:   ${extra.join(', ')}` : ''),
     );

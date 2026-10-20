@@ -13,6 +13,12 @@ Claude Design project — those mirror this repo, not the other way round.
 2. **Two token layers.** `tokens/core/` holds raw values (`color.brand.500`).
    `tokens/semantic/` holds intent (`surface.brand`, `content.muted`, `line.default`)
    and must only ever reference core tokens. **Components use semantic tokens only.**
+   The shared scales — the colour families (`slate`, `blue`, `green`, …),
+   spacing, fonts, elevation and the type ramp — come from **GDL**
+   (`@vdm-design-team/gdl`, the parent design system), so `tokens/core/` keeps
+   only VCP's own (`color.vcp-blue`, `color.brand.navy`, the UI face). A new
+   shared value is a GDL PR, then a GDL bump here. `npm run check:contract`
+   checks the semantic names against GDL's contract.
 3. **`dist/` is generated.** Never hand-edit it. It is rebuilt from `tokens/`.
 4. **Every component ships with**: the `.tsx`, a `.stories.tsx` covering all
    variants/sizes/states, and a `docs/<name>.md` with a when-to-use table,
@@ -96,7 +102,7 @@ Rules that follow from the split:
   `display|heading|title|body|label|caption` × a tier-specific size × a weight
   (`bold|semibold|medium|regular`, only the weights each size actually ships).
   Size, line-height, weight and tracking come as a unit from `type.*`
-  (`tokens/semantic/type.json`); see `docs/type-tokens.md` for the full ramp
+  (GDL's `tokens/semantic/type.json`); see `docs/type-tokens.md` for the full ramp
   and the pre-24 September names it replaced. Poppins for UI (`font-sans`);
   `font-numeric` (Inter) still layers on for dense numerics/tabular figures.
 - Dark theme exists: `tokens/semantic/color.dark.json` builds to `dist/tokens.dark.css`
@@ -110,7 +116,7 @@ Rules that follow from the split:
 |---|---|
 | `npm run tokens` | Rebuild `dist/` from `tokens/` |
 | `npm run dev` | Storybook at :6006 |
-| `npm test` | Token lint + composition lint + changelog-entry lint + typecheck (what CI runs) |
+| `npm test` | Token lint + composition lint + changelog-entry lint + GDL contract + typecheck (what CI runs) |
 | `npm run changelog` | At release: fold `changes/` into `CHANGELOG.md` and set the version |
 
 ## How design proposes a change
