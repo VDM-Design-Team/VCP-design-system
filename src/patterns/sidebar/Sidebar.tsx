@@ -203,8 +203,10 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           </nav>
         </div>
 
-        {/* The design pins one row to the bottom of every rail. */}
-        <div className="flex flex-col px-3">
+        {/* The design pins one row to the bottom of every rail. At least 32
+            above it (`mt-8`), so even a rail with no room to spare shows a gap
+            and the row reads as pinned to the bottom, not as the last nav item. */}
+        <div className="mt-8 flex flex-col px-3">
           {renderItem({ key: 'report', label: 'Report a problem', icon: 'warning' })}
         </div>
 

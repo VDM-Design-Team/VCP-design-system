@@ -8,7 +8,7 @@ Figma's `VCP Pages & Flows` file (5 Oct 2026) and set by `variant`:
 | | `default` — admin & user dashboards | `superadmin` — super admin dashboard |
 |---|---|---|
 | Figma | `Value_Card` (node `947:306362`, "Value Cards") | `_SuperAdmin_Metric_Card_Coloured` (node `3:4848`) |
-| Stripe | 8 wide | 12 wide |
+| Stripe | 8 wide | 8 wide |
 | Alignment | **Left** | **Centred** |
 | Size | Exactly 100 high, at least 16.5rem wide | Exactly 150 high |
 | Title | Label only (Figma draws no icon or hint) | Accent icon, label, info hint |
@@ -92,7 +92,7 @@ content, left-aligned and centred vertically; no gap between the label and the
 value. Exactly 100 high and at least 16.5rem wide (`h-25 min-w-66`; Figma's own minimum is 175, widened so the card stays readable). The value
 is bold on a 44 line.
 
-**Single, `superadmin`:** a 12 stripe; `space.24` either side, content centred
+**Single, `superadmin`:** an 8 stripe — the same as the Value_Card's (design review, October 2026; it was 12); `space.24` either side, content centred
 both ways; `space.12` between the title row and the value row. Exactly 150
 high (`h-37.5`). The value is `heading-xl-semibold`.
 

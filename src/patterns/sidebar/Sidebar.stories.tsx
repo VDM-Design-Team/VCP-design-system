@@ -88,14 +88,17 @@ export const Default: Story = {
 export const EveryUserType: Story = {
   parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
   render: () => (
-    <div className="flex h-screen gap-6 overflow-x-auto bg-surface-canvas p-6">
+    /* The row is as tall as its tallest rail, not the window: a fixed
+       `h-screen` let the longer rails spill past their border whenever the
+       preview was shorter than them. The columns stretch to that one height
+       and each rail fills its column (`flex-1`), so every rail is the same
+       height and "Report a problem" sits at the bottom of each — the gap
+       above it, at least the rail's own 32, shows it is pinned there. */
+    <div className="flex gap-6 overflow-x-auto bg-surface-canvas p-6">
       {(['user', 'admin', 'admin-dev', 'super-admin'] as SidebarUserType[]).map((t) => (
-        /* `min-h-0` + `flex-1` on the rail: without them each column sizes to
-           its own content, the four end up different heights, and the footer
-           row sits under the last nav item instead of at the bottom. */
-        <div key={t} className="flex min-h-0 flex-col gap-2">
+        <div key={t} className="flex flex-col gap-2">
           <p className="text-label-sm-medium text-text-tertiary">{t}</p>
-          <Sidebar userType={t} active="dashboard" className="min-h-0 flex-1 rounded-md border" />
+          <Sidebar userType={t} active="dashboard" className="flex-1 rounded-md border" />
         </div>
       ))}
     </div>
@@ -123,7 +126,9 @@ export const Collapsed: Story = {
 export const BothWidths: Story = {
   parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
   render: () => (
-    <div className="flex h-screen gap-6 bg-surface-canvas p-6">
+    /* As tall as the rails' content, not the window, so nothing spills out of
+       a short preview — see Every User Type. */
+    <div className="flex gap-6 bg-surface-canvas p-6">
       <Sidebar userType="admin-dev" active="planning" className="rounded-md border" />
       <Sidebar userType="admin-dev" active="planning" collapsed className="rounded-md border" />
     </div>
