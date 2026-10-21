@@ -208,7 +208,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                   aria-label={unread ? 'Mark as read' : 'Mark as unread'}
                   className={cn(
                     'flex size-full items-center justify-center rounded-pill',
-                    'text-stroke-brand-medium hover:text-stroke-focused',
+                    'text-stroke-focused hover:text-text-brand-strong',
                     'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
                     'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',

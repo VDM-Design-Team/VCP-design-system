@@ -73,8 +73,8 @@ Row `surface.elevated`; hover `neutral.outline.surface.hover`, focused
 sentence is `body-sm-bold` for the bold runs and `body-sm-regular` for the subject,
 `text.primary`; the time is `caption-md-regular` `text.tertiary`. The unread dot is
 8, `surface.brand.strong` (Figma binds `text.brand.medium`, the same blue). The
-trailing 24 box holds a 20 check-circle in `stroke.brand.medium`, `stroke.focused` on
-hover: **outlined** on an unread row (the mark-read button, which the dot dissolves
+trailing 24 box holds a 20 check-circle in `stroke.focused`, `text.brand.strong` on
+hover (a darker blue in light, a lighter one in dark): **outlined** on an unread row (the mark-read button, which the dot dissolves
 into on hover and focus) and **filled** on a read row (the mark-unread button, which
 dissolves in on hover and focus; the box is empty at rest), as `_Mark_Read_Unread` draws
 it. Every change in that box, and the row's fill, is a 200ms dissolve (none under
@@ -92,6 +92,12 @@ close; with no button the text keeps its 8.
   unread", reachable by Tab even when it is not visible. On an unread row it
   dissolves in on hover and focus where the dot was; on a read row it dissolves in as the filled
   check. The right side is empty at rest on a read row. The row never shifts.
+- **The check and the dot clear 3:1 in both themes**, against the row at rest and against
+  its hover and pressed fills (`stroke.focused` 6.18 / 5.64 / 5.01 in light, 6.33 / 4.48 /
+  3.28 in dark; the dot is the same blue). Figma binds the check to `stroke.brand.medium`,
+  which in dark is `#1a56db`: 2.37:1 on the row and 1.68:1 on its hover fill, so the icon
+  all but vanished. `stroke.focused` is the lightest blue that holds in both themes; in
+  light it is darker than Figma's default, which is the cost.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
 - **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus) says what the button's own name says. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
