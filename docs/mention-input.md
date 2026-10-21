@@ -45,7 +45,8 @@ type MentionSegment =
 ```
 
 `mentionedIds(value)` is who to notify (in order, no repeats); `plainText(value)` is the
-words, with each tag as "@Label". In the DOM a tag is
+words, with each tag as "@Label". `MentionTag` draws the same tag for a posted comment, so
+a mention reads the same when written and when read. In the DOM a tag is
 
 ```html
 <span data-type="mention" data-id="182" data-label="Anna" contenteditable="false">@Anna</span>
