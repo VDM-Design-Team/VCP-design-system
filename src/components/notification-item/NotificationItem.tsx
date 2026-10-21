@@ -149,7 +149,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         ref={ref}
         data-unread={unread || undefined}
         className={cn(
-          'group relative flex flex-col gap-2 bg-surface-elevated p-4 font-sans transition-colors',
+          'group relative flex flex-col gap-2 bg-surface-elevated p-4 font-sans',
+          'transition-colors duration-200 ease-out motion-reduce:transition-none',
           interactive && [
             'hover:bg-neutral-outline-surface-hover',
             /* Figma's focused row: the pressed surface. The ring above is what
@@ -174,16 +175,23 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             <p className="min-w-0 flex-1 text-body-sm-regular text-text-primary">{message}</p>
           )}
 
-          {/* The trailing slot: the unread dot, or on hover and focus the
-              mark-read button. They share the 24 box, so the row never shifts. */}
+          {/* The trailing slot, one 24 box so the row never shifts. Unread: the dot
+              until the row is hovered or focused, when it dissolves into the
+              mark-read button (an outlined check-circle). Read: a filled
+              check-circle, which is also the mark-unread button when there is
+              one. Every change is a dissolve, not a jump. */}
           <span className="relative flex size-6 shrink-0 items-center justify-center">
             {unread && (
               <span
                 aria-hidden="true"
-                className="size-2 rounded-full bg-surface-brand-strong group-hover:opacity-0 group-has-[button:focus-visible]:opacity-0"
+                className={cn(
+                  'size-2 rounded-full bg-surface-brand-strong',
+                  'transition-opacity duration-200 ease-out motion-reduce:transition-none',
+                  'group-hover:opacity-0 group-has-[button:focus-visible]:opacity-0',
+                )}
               />
             )}
-            {onToggleRead && (
+            {onToggleRead ? (
               <button
                 type="button"
                 onClick={onToggleRead}
@@ -191,12 +199,24 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 className={cn(
                   'absolute inset-0 z-10 flex items-center justify-center rounded-pill',
                   'text-stroke-brand-medium hover:text-stroke-focused',
-                  'opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100',
+                  'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
+                  unread
+                    ? 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+                    : 'opacity-100',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                 )}
               >
-                <Icon name="check-circle" size="md" />
+                <Icon name={unread ? 'check-circle' : 'check-circle-fill'} size="md" />
               </button>
+            ) : (
+              !unread && (
+                <Icon
+                  data-read-mark
+                  name="check-circle-fill"
+                  size="md"
+                  className="text-stroke-brand-medium"
+                />
+              )
             )}
           </span>
         </div>
@@ -224,6 +244,7 @@ function CommentPreview({ text }: { text: string }) {
   const textRef = React.useRef<HTMLParagraphElement>(null);
   const [expanded, setExpanded] = React.useState(false);
   const [overflowing, setOverflowing] = React.useState(false);
+  const hasToggle = overflowing || expanded;
 
   React.useLayoutEffect(() => {
     const el = textRef.current;
@@ -236,8 +257,10 @@ function CommentPreview({ text }: { text: string }) {
   }, [text, expanded]);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-md border border-stroke-default bg-surface-elevated">
-      <div className="relative px-3 pt-2 pb-2">
+    <div className="flex flex-col overflow-hidden rounded-md bg-surface-elevated">
+      {/* No bottom padding while "Show more / less" follows, so the text and the
+          button sit close; with no button the text keeps its 8. */}
+      <div className={cn('relative px-3 pt-2', hasToggle ? 'pb-0' : 'pb-2')}>
         <p
           id={id}
           ref={textRef}
@@ -252,11 +275,11 @@ function CommentPreview({ text }: { text: string }) {
           /* A fade over the last line, so the cut reads as "there is more". */
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-2 h-5 bg-linear-to-t from-surface-elevated to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-linear-to-t from-surface-elevated to-transparent"
           />
         )}
       </div>
-      {(overflowing || expanded) && (
+      {hasToggle && (
         <div className="flex justify-center">
           <Button
             variant="tertiary"
