@@ -8,3 +8,5 @@ The tinted card is gone. A Toast is a white `surface.elevated` card with a `stro
 Also: `ToastViewport` packs the stack against the edge it is anchored to (flush right for the right positions, centred for the centred ones). A short toast no longer sits at the left of the 384px column, and toasts of mixed widths line up.
 
 Also: a toast with only a title (or only a message) centres its row, so the glyph, text, action and X share a midline. With both a title and a message the controls stay on the first line.
+
+Also: a blank `title`, message or `actionLabel` (absent, `false` or an empty string) renders nothing, so clearing a control in Storybook no longer leaves an empty description box. No new props.

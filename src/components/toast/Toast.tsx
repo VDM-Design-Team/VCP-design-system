@@ -107,6 +107,13 @@ const toast = cva([
   'font-sans text-text-secondary',
 ]);
 
+/** Whether a node would draw anything: not absent, not `false`, not a blank string. */
+const hasContent = (node: React.ReactNode): boolean =>
+  node !== undefined &&
+  node !== null &&
+  node !== false &&
+  !(typeof node === 'string' && node.trim() === '');
+
 export interface ToastProps
   /* Native `title` is a tooltip string; ours is the rendered headline. */
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
@@ -179,14 +186,16 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
   },
   ref,
 ) {
-  const hasAction = Boolean(actionLabel);
+  const hasAction = Boolean(actionLabel?.trim());
+  const hasTitle = hasContent(title);
+  const hasMessage = hasContent(children);
 
   /* With a title and a message the rows stack and the controls line up with the
      first line (`items-start`, as the design draws it). With only one of them
      there is one line of text, and the controls are taller than it — a 40
      dismiss target on a 20 line — so top-aligning left the title at the top and
      the X visibly lower. Centre the row instead. */
-  const hasBothLines = title != null && children != null && children !== false;
+  const hasBothLines = hasTitle && hasMessage;
 
   /* A toast the user is asked to act on must wait for them. This is not a
      suggestion the caller can override — passing both is a mistake, and the
@@ -312,10 +321,8 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {title != null && <p className="text-body-sm-semibold text-text-primary">{title}</p>}
-        {children != null && children !== false && (
-          <div className="text-body-sm-medium">{children}</div>
-        )}
+        {hasTitle && <p className="text-body-sm-semibold text-text-primary">{title}</p>}
+        {hasMessage && <div className="text-body-sm-medium">{children}</div>}
       </div>
 
       {hasAction && (

@@ -43,7 +43,51 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+/**
+ * Storybook-only switches — **not Toast props**. A Toast shows an action by being
+ * given an `actionLabel` and a dismiss button by being given `onDismiss`; the
+ * story turns these toggles into exactly that, or their absence. A blank `title`
+ * or message (an empty control) leaves nothing behind either.
+ */
+type PlaygroundArgs = React.ComponentProps<typeof Toast> & {
+  withAction?: boolean;
+  withDismiss?: boolean;
+};
+
+export const Default: StoryObj<PlaygroundArgs> = {
+  args: { withAction: false, withDismiss: false, actionLabel: 'Undo' },
+  argTypes: {
+    withAction: { control: 'boolean', name: 'action button', table: { disable: true } },
+    withDismiss: { control: 'boolean', name: 'dismiss button', table: { disable: true } },
+  },
+  render: (storyArgs: PlaygroundArgs) => {
+    const { withAction, withDismiss, actionLabel, ...args } = storyArgs;
+    return (
+      <Toast
+        {...args}
+        actionLabel={withAction ? actionLabel : undefined}
+        onAction={withAction ? () => {} : undefined}
+        onDismiss={withDismiss ? () => {} : undefined}
+      />
+    );
+  },
+};
+
+/**
+ * An empty part renders nothing. A blank `title`, message or `actionLabel` (an
+ * empty string, `false`) leaves no empty line, description box or button holding
+ * space.
+ */
+export const EmptyPartsRenderNothing: Story = {
+  args: { title: 'Only a title', children: '', actionLabel: '' },
+  play: async ({ canvasElement }) => {
+    const toast = canvasElement.querySelector('[data-tone]') as HTMLElement;
+    await expect(toast.querySelectorAll('p')).toHaveLength(1);
+    /* The text block holds just the title: no empty description div under it. */
+    await expect((toast.querySelector('p') as HTMLElement).parentElement?.children).toHaveLength(1);
+    await expect(toast.querySelector('button')).toBeNull();
+  },
+};
 
 /**
  * Four tones, four `accent.*` families — and four different glyph *shapes*, so

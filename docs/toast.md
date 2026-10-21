@@ -61,13 +61,13 @@ top of the form. `tone="danger"` on a Toast is for something that failed
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical`, and routes to the assertive region |
-| `title` | `ReactNode` | — | The headline. One clause |
-| `children` | `ReactNode` | — | Supporting detail. Usually unnecessary |
+| `title` | `ReactNode` | — | The headline. One clause. Left out, `false` or blank, nothing renders for it |
+| `children` | `ReactNode` | — | Supporting detail. Usually unnecessary. Left out, `false` or blank, no description renders and the row is centred |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
-| `actionLabel` | `string` | — | Renders one action. **Suppresses auto-dismiss entirely** |
+| `actionLabel` | `string` | — | Renders one action; left out or blank, there is no button. **Suppresses auto-dismiss entirely** |
 | `onAction` | `() => void` | — | Fired by the action |
 | `onDismiss` | `() => void` | — | Renders the close control, and is what the timer calls |
-| `dismissLabel` | `string` | `Dismiss: <title>` | Falls back to `Dismiss notification` when `title` is not a string |
+| `dismissLabel` | `string` | `Dismiss: <title>` | The accessible name of the X button, which `onDismiss` renders. Falls back to `Dismiss notification` when `title` is not a string |
 | `duration` | `number \| null` | `null` | Milliseconds, or `null` for never. Pauses on hover, focus and tab-hide |
 | `onPauseChange` | `(paused: boolean) => void` | — | Instrumentation. The pause happens with or without it |
 | `className` | `string` | — | Merged via `cn()` |
