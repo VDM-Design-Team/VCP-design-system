@@ -277,7 +277,7 @@ ever gets a stronger border step, both should move to it.
 | Padding | Tailwind numeric scale | `p-4` (16) |
 | Gap, glyph / text / action / close | Tailwind numeric scale | `gap-2` (8), the Banner's |
 | Gap, title to message | — | none |
-| Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content |
+| Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content. The viewport packs the stack to its anchored edge (`items-end`, or `items-center` for the centred positions) so mixed widths line up |
 | Glyph and bar colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
 
 Dark comes for free: every colour above is a semantic token that

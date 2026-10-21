@@ -232,6 +232,46 @@ export const Stacked: Story = {
 };
 
 /**
+ * Toasts hug their content, so a short one is narrower than the column the stack
+ * lives in. The stack packs against the edge it is anchored to — flush right for
+ * the right positions, centred for the centred ones — so mixed widths line up
+ * instead of sitting ragged at the column's left. The play test measures it.
+ */
+export const MixedWidthsAlign: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => {
+    const toasts = [
+      { id: '1', tone: 'success' as const, title: 'Saved' },
+      {
+        id: '2',
+        tone: 'info' as const,
+        title: 'Export queued',
+        description: 'Two files will be ready in a few minutes.',
+      },
+      { id: '3', tone: 'warning' as const, title: 'Out of date' },
+    ];
+    return (
+      <div className="min-h-96 bg-surface-canvas">
+        <div data-testid="right">
+          <ToastViewport position="top-right" toasts={toasts} onDismiss={() => {}} />
+        </div>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const toasts = Array.from(
+      within(canvasElement).getByTestId('right').querySelectorAll<HTMLElement>('[data-tone]'),
+    );
+    await expect(toasts).toHaveLength(3);
+    const rights = toasts.map((t) => Math.round(t.getBoundingClientRect().right));
+    /* Every toast ends at the same x — flush right — though their widths differ. */
+    await expect(new Set(rights).size).toBe(1);
+    const widths = toasts.map((t) => Math.round(t.getBoundingClientRect().width));
+    await expect(new Set(widths).size).toBeGreaterThan(1);
+  },
+};
+
+/**
  * The supported path end to end. `ToastProvider` renders your app, then the
  * viewport — so both live regions are in the page before anything is raised,
  * and the viewport sits *after* the content in the DOM, which is why a keyboard
