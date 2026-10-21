@@ -118,16 +118,19 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
     const trail = phrase.trail?.(status);
     const interactive = Boolean(href || onSelect);
 
+    /* The spaces are text nodes of their own: a space at the start of an inline
+       `<span>` is dropped when the accessible name is computed, which ran the
+       words together ("John Kestrel commented onChange the notification"). */
     const message = (
       <>
         {unread && <span className="sr-only">Unread: </span>}
-        <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>
-        <span className="text-body-sm-regular"> {subject}</span>
+        <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>{' '}
+        <span className="text-body-sm-regular">{subject}</span>
         {trail && (
-          <span className="text-body-sm-bold">
-            {trail.startsWith('.') ? '' : ' '}
-            {trail}
-          </span>
+          <>
+            {!trail.startsWith('.') && ' '}
+            <span className="text-body-sm-bold">{trail}</span>
+          </>
         )}{' '}
         <span className="text-caption-md-regular text-text-tertiary">{time}</span>
       </>
