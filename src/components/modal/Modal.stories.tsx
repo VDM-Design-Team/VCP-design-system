@@ -173,13 +173,19 @@ export const EmptyPartsRenderNothing: Story = {
     await expect(dialog.querySelector('footer')).toBeNull();
     /* No description means nothing for aria-describedby to point at. */
     await expect(dialog.hasAttribute('aria-describedby')).toBe(false);
+    /* The gap under the header is the same 12 with a text body and no caption. */
+    const head = dialog.querySelector('header') as HTMLElement;
+    const body = head.nextElementSibling as HTMLElement;
+    await expect(
+      parseFloat(getComputedStyle(head).paddingBottom) + parseFloat(getComputedStyle(body).paddingTop),
+    ).toBe(12);
   },
 };
 
 /**
- * No subtitle, but the body opens with a control rather than text, so the gap
- * under the title stays at 12. With running text it would be 4 (see Default
- * without a `description`).
+ * The gap under the header is one fixed 12, whatever the body opens with — a
+ * control here, running text in Default. (It is the header's 8 plus the body's own
+ * 4, so it survives scrolling.)
  */
 export const BodyStartsWithControl: Story = {
   args: { title: 'Reject this AV?', size: 'sm' },

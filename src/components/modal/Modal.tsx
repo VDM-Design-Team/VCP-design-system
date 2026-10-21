@@ -61,17 +61,17 @@ const panel = cva(
   },
 );
 
-const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
+/* The gap to the body is 12, one fixed value, split so it survives scrolling: 8
+   here (pb-2) and 4 as the body's own top padding. Padding inside a scrolling box
+   scrolls away, and long content then slid up to the header's edge and ran hard
+   against the caption; the header's share stays put. */
+const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5 pb-2', {
   variants: {
     /* With no heading text the close button is the only child, so it hugs the
        right edge rather than sitting alone on the left. */
     hasText: { true: '', false: 'justify-end' },
-    /* Part of the gap to the body lives here, not in the body: padding inside a
-       scrolling box scrolls away, and long content then slid up to the header's
-       edge and ran hard against the caption. */
-    roomy: { true: 'pb-2', false: 'pb-0' },
   },
-  defaultVariants: { hasText: true, roomy: false },
+  defaultVariants: { hasText: true },
 });
 
 /** Whether a node would draw anything: not absent, not `false`, not a blank string. */
@@ -80,26 +80,6 @@ const hasContent = (node: React.ReactNode): boolean =>
   node !== null &&
   node !== false &&
   !(typeof node === 'string' && node.trim() === '');
-
-/** Layout effect where there is a DOM, plain effect on a server (no warning). */
-const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
-
-/** Elements that read as running text, so a body starting with one sits close
-    under the title. Anything else (a button, a form control, a selectable card)
-    is a block of its own and wants the larger gap. */
-const TEXT_TAGS = new Set([
-  'P', 'SPAN', 'STRONG', 'EM', 'B', 'I', 'A', 'SMALL', 'CODE', 'UL', 'OL', 'DL',
-  'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
-]);
-
-function startsWithText(body: HTMLElement): boolean {
-  const first = Array.from(body.childNodes).find(
-    (n) => n.nodeType === Node.ELEMENT_NODE || (n.textContent ?? '').trim() !== '',
-  );
-  if (!first) return true;
-  if (first.nodeType === Node.TEXT_NODE) return true;
-  return TEXT_TAGS.has((first as HTMLElement).tagName);
-}
 
 /* ------------------------------------------------------------------ */
 /* Scroll lock                                                         */
@@ -383,11 +363,6 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
      arrow keys; when it does not, it stays out of the tab order rather than
      adding a stop that does nothing. */
   const [scrollable, setScrollable] = React.useState(false);
-  /* Whether the body opens with running text — decides the gap under the header. */
-  const [leadsWithText, setLeadsWithText] = React.useState(true);
-  useIsoLayoutEffect(() => {
-    if (open && mounted && bodyRef.current) setLeadsWithText(startsWithText(bodyRef.current));
-  }, [open, mounted, children]);
   /* Tracks whether the pointer went *down* on the backdrop, so a drag that
      starts inside the panel and ends outside it does not close the dialog. */
   const pointerDownOnBackdrop = React.useRef(false);
@@ -502,8 +477,6 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
      empty heading, caption or footer holding space. */
   const hasTitle = hasContent(title);
   const hasDescription = hasContent(description);
-  /* 12 under a sub-heading, or when the body opens with a control or card; else 4. */
-  const roomy = hasDescription || !leadsWithText;
   const hasHeaderText = hasTitle || hasDescription;
 
   return createPortal(
@@ -543,7 +516,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
         className={cn(panel({ size }), className)}
       >
         {(hasHeaderText || showClose) && (
-          <header className={header({ hasText: hasHeaderText, roomy })}>
+          <header className={header({ hasText: hasHeaderText })}>
             {hasHeaderText && (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {hasTitle && (
@@ -588,11 +561,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
             'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
-            /* The gap to the header is split: the header's own padding-bottom
-               (8, or 0) stays put while the body scrolls, and this 4 scrolls
-               away and doubles as room for a focus ring at the very top. That
-               makes 12 or 4 at rest, and content scrolls out 8 or 0 below the
-               header's text instead of against it. 20 when there is no header. */
+            /* The 12 under the header is split: the header's own 8 stays put
+               while the body scrolls, and this 4 scrolls away and doubles as
+               room for a focus ring at the very top. Content scrolls out 8
+               below the header's text instead of against it. 20 when there is
+               no header at all. */
             hasHeaderText || showClose ? 'pt-1' : 'pt-5',
             /* The footer owns the gap above the actions, but the body keeps 4 of
                its own: a focus ring is a 2-wide outline offset by 2, so it reaches 4

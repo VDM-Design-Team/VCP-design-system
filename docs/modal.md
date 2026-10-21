@@ -75,7 +75,7 @@ There is no `style` and no `width`. See [Deviations](#deviations-from-the-claude
 ```
 <div>                           backdrop — fixed inset-0 · z-50 · surface.overlay · p-6 · grid place-items-center
   <div role="dialog">           surface.elevated · shadow.modal · radius.md · max-h-full · size max-width
-    <header>                    px-6 pt-5, pb-2 under a description or before a non-text first child (button, form control, card), else pb-0 — only when there is heading text or a close button
+    <header>                    px-6 pt-5 pb-2 — only when there is heading text or a close button
       <h2>                      type.title-md-semibold · text.primary         → aria-labelledby
       <p>                       type.caption-md-regular · text.tertiary            → aria-describedby
       IconButton                icon "x" · md (40 target) · round (the IconButton default) · text.primary · pulled into the padding
@@ -105,6 +105,8 @@ Spacing rides Tailwind's numeric scale, as the system requires: `p-6` (24) aroun
 the backdrop, `px-6` (24) through the panel, `pt-5`/`py-5` (20) at the header and
 body, `pt-4`/`pb-5` in the footer, `gap-3` (12) between footer actions. Never
 `gap-sm` or `mb-xs` — those emit nothing here.
+
+**The gap under the header is one fixed 12**, whether or not there is a subtitle and whatever the body opens with (text, a field, a selectable card). It is split so it survives scrolling: the header keeps 8 (`pb-2`) and the body's own top padding is 4 (`pt-1`), which also leaves room for a focus ring on a first field. Padding inside a scrolling box scrolls away, so a gap made only of body padding let long content slide up against the subtitle.
 
 **The footer owns the space above its own buttons**, and the body keeps only
 4px of bottom padding when there is a footer (the footer's top is 16 to make
