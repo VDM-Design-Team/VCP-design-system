@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
-import type { AVStatus } from '../status-pill';
+import type { AVStatus } from '../status-tag';
 
 /**
  * StatusProgression — the "move this Added Value along" buttons: at most a
@@ -139,7 +139,7 @@ export function avTransitions(options: {
    * Development-only exception, named in issue #60 (7 Sep 2026): an admin
    * hands an AV off (`Confirmed Prod` → Handoff) into a `Completed` that
    * isn't final yet — it still owes a `Deploy` action before the real,
-   * terminal `Completed`. Both render identically on `StatusPill` (same
+   * terminal `Completed`. Both render identically on `StatusTag` (same
    * tone, same text "Completed"); this flag is the only place the
    * distinction exists, and only the admin who deploys needs it. Not a
    * general concept — most domains' `Completed` has no such gate, and this
