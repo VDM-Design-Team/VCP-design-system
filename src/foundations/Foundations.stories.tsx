@@ -142,6 +142,22 @@ export const Colors: StoryObj = {
   ),
 };
 
+type ShadowLayer = { color: string; offsetX: string; offsetY: string; blur: string; spread: string };
+
+/* Shadows are one layer (VCP's card, menu, …) or several (GDL's elevation.1–7,
+   nested a level deeper); either way the CSS is the layers joined. */
+const shadows = (obj: object, path: string[] = []): [string[], string][] =>
+  Object.entries(obj).flatMap(([k, v]) =>
+    Array.isArray(v) || 'color' in v
+      ? [[[...path, k], ([] as ShadowLayer[]).concat(v).map((l) => `${l.offsetX} ${l.offsetY} ${l.blur} ${l.spread} ${l.color}`).join(', ')]]
+      : shadows(v as object, [...path, k]),
+  );
+
+/* Swatches take the token's value inline, like the colour swatches. A
+   `rounded-${k}` built at runtime never reaches Tailwind's source scan, so only
+   the names some component already spells out (rounded-md, shadow-menu, …) got a
+   utility — GDL's rounded-8 or shadow-elevation-3 rendered square and flat here,
+   though they work in components, where the class is written in full. */
 export const Shape: StoryObj = {
   render: () => (
     <div className="p-8 bg-surface-canvas">
@@ -149,7 +165,7 @@ export const Shape: StoryObj = {
       <Grid>
         {Object.entries(tokens.radius).map(([k, v]) => (
           <div key={k} className="flex items-center gap-2 border border-stroke-default rounded-md p-1.5">
-            <div className={`size-10 bg-action-primary-surface-default shrink-0 rounded-${k}`} />
+            <div className="size-10 bg-action-primary-surface-default shrink-0" style={{ borderRadius: v as string }} />
             <div className="min-w-0">
               <div className="text-sm font-medium break-words">radius.{k}</div>
               <div className="text-xs text-text-secondary">{v as string}</div>
@@ -160,21 +176,16 @@ export const Shape: StoryObj = {
       </Grid>
       <h2 className="text-heading-lg-semibold font-semibold mb-1">Elevation → shadow-*</h2>
       <Grid>
-        {Object.entries(tokens.shadow).map(([k, v]) => {
-          const s = v as { color: string; offsetX: string; offsetY: string; blur: string; spread: string };
-          return (
-            <div key={k} className="flex items-center gap-2 border border-stroke-default rounded-md p-1.5">
-              <div className={`size-10 bg-surface-elevated shrink-0 rounded-sm shadow-${k}`} />
-              <div className="min-w-0">
-                <div className="text-sm font-medium break-words">shadow.{k}</div>
-                <div className="text-xs text-text-secondary">
-                  {s.offsetX} {s.offsetY} {s.blur} {s.color}
-                </div>
-                <code className="text-xs text-text-secondary">shadow-{k}</code>
-              </div>
+        {shadows(tokens.shadow).map(([path, css]) => (
+          <div key={path.join('.')} className="flex items-center gap-2 border border-stroke-default rounded-md p-1.5">
+            <div className="size-10 bg-surface-elevated shrink-0 rounded-sm" style={{ boxShadow: css }} />
+            <div className="min-w-0">
+              <div className="text-sm font-medium break-words">shadow.{path.join('.')}</div>
+              <div className="text-xs text-text-secondary">{css}</div>
+              <code className="text-xs text-text-secondary">shadow-{path.join('-')}</code>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </Grid>
     </div>
   ),
