@@ -187,10 +187,12 @@ export const LightAndDark: Story = {
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex flex-col bg-surface-canvas p-8">
+          <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
+            <div className="w-96">
             <NotificationItem {...args} />
             <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
             <NotificationItem {...args} preview={LONG_COMMENT} />
+            </div>
           </div>
         </div>
       ))}
