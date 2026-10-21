@@ -4,7 +4,7 @@ The bell and the panel that opens from it: a header with the All / Mentions filt
 the "Unread only" switch and an overflow menu with "Mark all as read", the list of
 notifications, and a link to the full inbox.
 
-Read off Figma's `Notification_Popover` (`2428:4386`): 512 wide, `radius.md`, the
+Read off Figma's `Notification_Popover` (`2428:4386`): 528 wide and up to 448 tall (Figma: 500), `radius.md`, the
 header over a rule, a scrolling list, and the footer link under a second rule.
 
 ## Composed of
@@ -52,10 +52,10 @@ and renders whatever it is given: the `Open` story filters its own list.
 
 ## Tokens
 
-Panel `surface.elevated`, `radius.md`, `shadow.menu` (Popover's), 512 wide
-(`w-128`, 32rem); header and footer 16 padding all round on `stroke.default` rules; title
+Panel `surface.elevated`, `radius.md`, `shadow.menu` (Popover's), 528 wide
+(`w-132`, 33rem) and up to 448 tall (28rem, border included); header and footer 16 padding all round on `stroke.default` rules; title
 `body-lg-semibold` `text.primary`; the footer link `body-sm-medium`
-`text.link.default` (hover `text.link.hover`). The list scrolls past 224 (`max-h-56`, near the design's 219).
+`text.link.default` (hover `text.link.hover`). The list takes the height the header and footer leave, and scrolls when the rows do not fit; under 448 the panel hugs its rows.
 No new tokens.
 
 ## Accessibility
@@ -75,7 +75,7 @@ No new tokens.
 - **The filter is `SegmentedControl`**, not Figma's brand-filled two-button toggle:
   the system's own two-option control, in its `sm` size (32, the design's height).
 - **No empty state is drawn.** "No notifications" is a plain tertiary line.
-- **512 wide, not Figma's 500** (design review); the list never scrolls sideways.
+- **528 wide and up to 448 tall, not Figma's 500 by 328** (design review); the list never scrolls sideways.
 - **The overflow menu button is the standard `IconButton`** (40 target, 20 glyph, the filled `dots-three-outline-vertical` glyph) in `neutral.outline.content`, as the bell; Figma's is a 24 target with a 16 glyph and is hard to find. It sits against the "Unread only" switch with no gap of its own (the switch's own padding is the space between them).
 - **No dividers between rows**, as the design draws it.
 - **The footer link is `text.link.default`, not `text.brand.medium`** as Figma binds it: in dark, `text.brand.medium` is 3.88:1 on the panel, under the 4.5:1 text needs.

@@ -12,7 +12,7 @@ import { Popover } from '../../components/popover';
  * the filter (All or Mentions), the "Unread only" switch and a menu with "Mark
  * all as read", the list of notifications, and a link to the full inbox.
  *
- * Read off Figma's `Notification_Popover` (`2428:4386`): 500 wide in Figma, 512 here, `radius.md`,
+ * Read off Figma's `Notification_Popover` (`2428:4386`): 500 wide in Figma, 528 here (and up to 448 tall), `radius.md`,
  * the header over a rule, a scrolling list, and the footer link under a second
  * rule. The pieces are the system's — `Popover` carries the open and close,
  * Escape and the click-away, `NotificationBell` is the trigger, `Menu` the
@@ -113,11 +113,14 @@ export function NotificationPopover({
       align="right"
       panelRole="dialog"
       label={title}
-      /* 512 wide (32rem), and no panel padding: the header and footer draw their
+      /* 528 wide (33rem), and no panel padding: the header and footer draw their
          own, with their own rules. */
-      panelClassName="w-128 overflow-hidden p-0"
+      panelClassName="w-132 overflow-hidden p-0"
       content={
-        <div className="flex flex-col">
+        /* Up to 448 tall (28rem) counting the panel's 1 border each side, so 446 here:
+           the header and the footer keep their height and the list takes the rest and
+           scrolls. Shorter than that, it hugs the rows. */
+        <div className="flex max-h-111.5 flex-col">
           {/* A div, not <header>: a <header> outside a sectioning element is a banner
               landmark, and the page already has one (the top bar). */}
           <div className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
@@ -159,7 +162,7 @@ export function NotificationPopover({
                       )}
                     />
                   }
-                  items={[{ key: 'mark-all', label: 'Mark all as read', icon: 'check-circle' }]}
+                  items={[{ key: 'mark-all', label: 'Mark all as read' }]}
                   onSelect={(key) => key === 'mark-all' && onMarkAllRead()}
                 />
               )}
@@ -170,7 +173,7 @@ export function NotificationPopover({
             ref={listRef}
             /* Only a tab stop while it actually scrolls. */
             tabIndex={scrollable ? 0 : undefined}
-            className="max-h-56 overflow-x-hidden overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused"
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused"
           >
             {items.length > 0 ? (
               <ul>
