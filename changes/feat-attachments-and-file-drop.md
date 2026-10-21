@@ -9,7 +9,7 @@ Follow-up to #126; built to Figma's attachments elements.
 - **New `domain` prop** — the corner badge for an AV handed over from another domain, with
   its glyph and code: Design DS, Development DV, Governance GV, Content CN, Partners PT,
   QA QA. The mapping is owned by the component. `domainLabel` / `domainIcon` stay for a code
-  outside the six. New icon: `file-magnifying-glass`.
+  outside the six. New icon: `file-magnifying-glass`, with its `-fill` partner (every glyph ships both weights).
 - The remove button sits **2 in from the top-right corner** (was flush).
 - **Fixed:** a short name was pushed to the card's right edge; it now stays centred under the glyph.
 - A remove-only card (`onRemove`, no `onClick`) takes the hover fill, as edit mode draws it.
@@ -29,3 +29,5 @@ Follow-up to #126; built to Figma's attachments elements.
 
 Migration: callers that relied on "Choose files" or the 1 `stroke.field` border pass `label` or
 restyle; nothing else.
+
+**`Dropzone` border, a deliberate exception:** the resting dashed border is `stroke.strong`, not the design's `stroke.default` (1.42:1), so a control's boundary clears 3:1. The weight, fill and states are the design's.

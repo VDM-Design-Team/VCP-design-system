@@ -61,7 +61,7 @@ Three states, each a change of stroke and fill:
 
 | State | Stroke | Fill |
 |---|---|---|
-| Regular | `stroke.default` | `surface.neutral.faint` |
+| Regular | `stroke.strong` (a deliberate exception — see below) | `surface.neutral.faint` |
 | Drag-over | `stroke.focused` | `surface.brand.subtle` |
 | Error | `accent.critical.outline.border.default` | `surface.neutral.faint` (the same as regular) |
 
@@ -83,7 +83,7 @@ draws about 4-long dashes in Chromium. CSS cannot set it exactly without an SVG 
 
 | Pair | Light | Dark |
 |---|---|---|
-| Dashed border on the resting fill | **1.42:1** ⚠ | **2.36:1** ⚠ |
+| Dashed border on the resting fill (`stroke.strong`) | **4.55:1** | **6.96:1** |
 | Drag-over border on its tint | **4.19:1** | **3.91:1** |
 | Error border on the resting fill | **3.64:1** | **3.74:1** |
 | Link on the resting fill | **4.79:1** | **8.22:1** |
@@ -93,11 +93,14 @@ draws about 4-long dashes in Chromium. CSS cannot set it exactly without an SVG 
 | Paperclip (`text.subtle`) on the resting fill | **4.55:1** | **6.96:1** |
 | Paperclip (`text.subtle`) on the drag-over tint | **3.23:1** | **3.53:1** |
 
-⚠ **The resting border is well under the 3:1 a control boundary needs**, in both themes.
-The previous version used `stroke.field` (4.76:1) for exactly this reason; the design
-specifies `stroke.default`, so this follows the design. The zone is still identified by its
-text and icon, and the border darkens to `stroke.focused` on hover, but it is a known soft
-spot — a candidate for `stroke.field` if design agrees.
+**Deliberate exception to the design.** Figma draws the resting border in `stroke.default`,
+which is 1.42:1 on the resting fill (2.36:1 in dark): well under the 3:1 WCAG 1.4.11 asks of a
+control's boundary. The dropzone is a control a person has to find, so it uses `stroke.strong`
+(slate-500 in light, slate-400 in dark), the token for a control's boundary, which is what the
+earlier `stroke.field` was before it was folded into `strong`. The 2px dashed weight, the fill
+and the hover (`stroke.focused`) are the design's. Decided in review of this PR, October
+2026; if the design is ever "fixed" back to `stroke.default`, this is why it is not.
+(The figures above are for `stroke.strong` as set by the stroke.strong change, slate-500 / slate-400.)
 
 ## Accessibility
 

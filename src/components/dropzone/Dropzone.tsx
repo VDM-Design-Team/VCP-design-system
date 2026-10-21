@@ -14,7 +14,8 @@ import { Icon } from '../../atoms/icon';
  * Drag-and-drop is the pointer bonus on top, never the only way in.
  *
  * Built to Figma's `_Attachment_Drop_Container` (design review, 5 Oct 2026): a
- * 2 dashed `stroke.default` border over `surface.neutral.faint`, 24 padding,
+ * 2 dashed border over `surface.neutral.faint`, 24 padding — in `stroke.strong`, not the
+ * design's `stroke.default`, a deliberate exception (see docs/dropzone.md) —
  * 8 between a 32 paperclip in `text.subtle` and two lines — "Upload a file or drag and drop" in
  * 14 regular (the link in link blue, the rest `text.primary`), then the accepted
  * types in `text.tertiary`, `caption-md-regular`. Three states:
@@ -135,7 +136,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
             ? 'border-stroke-focused bg-surface-brand-subtle'
             : error
               ? 'border-accent-critical-outline-border-default bg-surface-neutral-faint'
-              : 'border-stroke-default bg-surface-neutral-faint',
+              : 'border-stroke-strong bg-surface-neutral-faint',
           disabled
             ? 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'
             : cn('cursor-pointer', !over && !error && 'hover:border-stroke-focused'),
