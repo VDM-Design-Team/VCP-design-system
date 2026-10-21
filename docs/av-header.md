@@ -12,7 +12,7 @@ above, page identity below.
 | `IconButton` | atom | The back arrow, when back is a history action |
 | `Icon` | atom | The back arrow's glyph, when back is an `href` |
 | `StatusProgression` | component | The lifecycle buttons on the right |
-| `StatusPill` | component | **Type only** — `status` is its `AVStatus`. Nothing rendered |
+| `StatusTag` | component | **Type only** — `status` is its `AVStatus`. Nothing rendered |
 
 The import rows are checked against the real imports — `npm test` fails if
 this list drifts.
