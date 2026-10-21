@@ -40,6 +40,7 @@ export * from './components/field';
 export * from './components/file-attachment';
 export * from './components/menu';
 export * from './components/modal';
+export * from './components/notification-item';
 export * from './components/page-title';
 export * from './components/pagination';
 export * from './components/popover';
