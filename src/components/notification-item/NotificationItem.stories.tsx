@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { NotificationItem, type NotificationKind } from './NotificationItem';
 
 const SUBJECT = 'Change the notification layout for testing';
@@ -81,6 +81,15 @@ export const Unread: Story = {
     const mark = canvas.getByRole('button', { name: 'Mark as read' });
     await userEvent.click(mark);
     await expect(args.onToggleRead).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. */
+export const MarkReadTooltip: Story = {
+  play: async () => {
+    await userEvent.tab();
+    await userEvent.tab();
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent('Mark as read');
   },
 };
 
