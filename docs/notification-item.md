@@ -14,6 +14,7 @@ hover button.
 |---|---|---|
 | `Avatar` | atom | The actor, 36 (`lg`), initials or a photo, with the avatar's white outline (`ring`) as Figma's `Profile_Initials` draws it |
 | `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`) |
+| `Tooltip` | component | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
 | `Icon` | atom | The check-circle in the mark-read button |
 
 ## When to use
@@ -93,6 +94,7 @@ close; with no button the text keeps its 8.
   check. The right side is empty at rest on a read row. The row never shifts.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
+- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus) says what the button's own name says. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
 - The mark-read target is 24, not 40. It sits inside a row that is itself the large
   target, and 24 is the WCAG 2.5.8 floor: a recorded exception, like the table cells.
 - **The preview's** "Show more" is a real button with `aria-expanded` and

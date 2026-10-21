@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
+import { Tooltip } from '../tooltip';
 
 /**
  * NotificationItem — one line in a list of notifications: who did what to which
@@ -193,20 +194,29 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
               />
             )}
             {onToggleRead && (
-              <button
-                type="button"
-                onClick={onToggleRead}
-                aria-label={unread ? 'Mark as read' : 'Mark as unread'}
-                className={cn(
-                  'absolute inset-0 z-10 flex items-center justify-center rounded-pill',
-                  'text-stroke-brand-medium hover:text-stroke-focused',
-                  'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                  'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                )}
+              /* After a half-second rest, the design's tooltip names the action.
+                 The wrapper fills the 24 box, over the dot, so the button inside
+                 keeps the box's whole area. */
+              <Tooltip
+                content={unread ? 'Mark as read' : 'Mark as unread'}
+                openDelay={500}
+                className="absolute inset-0 z-10 flex"
               >
-                <Icon name={unread ? 'check-circle' : 'check-circle-fill'} size="md" />
-              </button>
+                <button
+                  type="button"
+                  onClick={onToggleRead}
+                  aria-label={unread ? 'Mark as read' : 'Mark as unread'}
+                  className={cn(
+                    'flex size-full items-center justify-center rounded-pill',
+                    'text-stroke-brand-medium hover:text-stroke-focused',
+                    'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                    'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                  )}
+                >
+                  <Icon name={unread ? 'check-circle' : 'check-circle-fill'} size="md" />
+                </button>
+              </Tooltip>
             )}
           </span>
         </div>
