@@ -12,7 +12,7 @@ hover button.
 
 | Piece | Tier | Role here |
 |---|---|---|
-| `Avatar` | atom | The actor, 36 (`lg`), initials or a photo |
+| `Avatar` | atom | The actor, 36 (`lg`), initials or a photo, with the avatar's white outline (`ring`) as Figma's `Profile_Initials` draws it |
 | `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`) |
 | `Icon` | atom | The check-circle in the mark-read button |
 
@@ -74,10 +74,10 @@ sentence is `body-sm-bold` for the bold runs and `body-sm-regular` for the subje
 8, `surface.brand.strong` (Figma binds `text.brand.medium`, the same blue). The
 trailing 24 box holds a 20 check-circle in `stroke.brand.medium`, `stroke.focused` on
 hover: **outlined** on an unread row (the mark-read button, which the dot dissolves
-into on hover and focus) and **filled** on a read row (always drawn, and the mark-unread
-button when there is one), as `_Mark_Read_Unread` draws it. Every change in that box,
-and the row's fill, is a 200ms dissolve (none under reduced motion). The preview is `surface.elevated` with no border (a stroke around it
-was taken out in review), `radius.md`, 12 / 8 padding, `body-sm-regular`
+into on hover and focus) and **filled** on a read row (the mark-unread button, which
+dissolves in on hover and focus; the box is empty at rest), as `_Mark_Read_Unread` draws
+it. Every change in that box, and the row's fill, is a 200ms dissolve (none under
+reduced motion). The preview is `surface.elevated` with a 1 `stroke.default` border, `radius.md`, 12 / 8 padding, `body-sm-regular`
 `text.primary`, indented 52 on the left (past the avatar) and 24 on the right (past the
 dot). While "Show more / less" follows, the text has no bottom padding, so the two sit
 close; with no button the text keeps its 8.
@@ -89,8 +89,8 @@ close; with no button the text keeps its 8.
   is in the name as text, not only as a dot.
 - **The mark-read button is a separate control**, named "Mark as read" or "Mark as
   unread", reachable by Tab even when it is not visible. On an unread row it
-  dissolves in on hover and focus where the dot was; on a read row it is the filled
-  check, always there. The row never shifts.
+  dissolves in on hover and focus where the dot was; on a read row it dissolves in as the filled
+  check. The right side is empty at rest on a read row. The row never shifts.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
 - The mark-read target is 24, not 40. It sits inside a row that is itself the large
