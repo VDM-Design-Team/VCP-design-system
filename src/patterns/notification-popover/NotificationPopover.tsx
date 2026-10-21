@@ -12,7 +12,7 @@ import { Popover } from '../../components/popover';
  * the filter (All or Mentions), the "Unread only" switch and a menu with "Mark
  * all as read", the list of notifications, and a link to the full inbox.
  *
- * Read off Figma's `Notification_Popover` (`2428:4386`): 500 wide, `radius.md`,
+ * Read off Figma's `Notification_Popover` (`2428:4386`): 500 wide in Figma, 528 here (and up to 448 tall), `radius.md`,
  * the header over a rule, a scrolling list, and the footer link under a second
  * rule. The pieces are the system's — `Popover` carries the open and close,
  * Escape and the click-away, `NotificationBell` is the trigger, `Menu` the
@@ -113,12 +113,17 @@ export function NotificationPopover({
       align="right"
       panelRole="dialog"
       label={title}
-      /* The design's 500 wide, and no panel padding: the header and footer draw
-         their own, with their own rules. */
-      panelClassName="w-125 overflow-hidden p-0"
+      /* 528 wide (33rem), and no panel padding: the header and footer draw their
+         own, with their own rules. */
+      panelClassName="w-132 overflow-hidden p-0"
       content={
-        <div className="flex flex-col">
-          <header className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
+        /* Up to 448 tall (28rem) counting the panel's 1 border each side, so 446 here:
+           the header and the footer keep their height and the list takes the rest and
+           scrolls. Shorter than that, it hugs the rows. */
+        <div className="flex max-h-111.5 flex-col">
+          {/* A div, not <header>: a <header> outside a sectioning element is a banner
+              landmark, and the page already has one (the top bar). */}
+          <div className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
             <div className="flex min-w-0 items-center gap-2">
               <h2 className="text-body-lg-semibold text-text-primary">{title}</h2>
               <SegmentedControl
@@ -132,7 +137,7 @@ export function NotificationPopover({
                 }}
               />
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-0">
               <Toggle
                 label="Unread only"
                 checked={onlyUnread}
@@ -146,25 +151,29 @@ export function NotificationPopover({
                   align="right"
                   trigger={
                     <IconButton
-                      icon="dots-three-vertical"
+                      icon="dots-three-outline-vertical-fill"
                       label="More notification actions"
-                      size="xs"
+                      className={cn(
+                        /* Neutral and the standard size, as the bell: Figma's 24 target in
+                           the blue tertiary colour was hard to find and harder to hit. */
+                        'text-neutral-outline-content-default',
+                        'hover:bg-surface-neutral-subtle hover:text-neutral-outline-content-hover',
+                        'active:bg-surface-neutral-medium active:text-neutral-outline-content-pressed',
+                      )}
                     />
                   }
-                  items={[{ key: 'mark-all', label: 'Mark all as read', icon: 'check-circle' }]}
+                  items={[{ key: 'mark-all', label: 'Mark all as read' }]}
                   onSelect={(key) => key === 'mark-all' && onMarkAllRead()}
                 />
               )}
             </div>
-          </header>
+          </div>
 
           <div
             ref={listRef}
             /* Only a tab stop while it actually scrolls. */
             tabIndex={scrollable ? 0 : undefined}
-            role={scrollable ? 'region' : undefined}
-            aria-label={scrollable ? `${title} list` : undefined}
-            className="max-h-56 overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused"
+            className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused"
           >
             {items.length > 0 ? (
               <ul>
@@ -181,18 +190,18 @@ export function NotificationPopover({
             )}
           </div>
 
-          <footer className="border-t border-stroke-default px-4 py-2 text-center">
+          <div className="border-t border-stroke-default p-4 text-center">
             <a
               href={inboxHref}
               className={cn(
-                'inline-block rounded-sm text-body-sm-medium text-text-brand-medium',
-                'hover:underline',
+                'inline-block rounded-sm text-body-sm-medium text-text-link-default',
+                'hover:text-text-link-hover hover:underline',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
               )}
             >
               {inboxLabel}
             </a>
-          </footer>
+          </div>
         </div>
       }
     />
