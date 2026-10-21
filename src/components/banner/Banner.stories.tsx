@@ -50,11 +50,14 @@ const meta = {
       control: 'boolean',
       name: 'action button',
       description: 'Adds the optional inline action. Needs `actionLabel` and `onAction`.',
+      /* A Storybook-only switch, not a Banner prop: keep the control, hide the row. */
+      table: { disable: true },
     },
     dismissible: {
       control: 'boolean',
       name: 'dismiss button',
       description: 'Adds the optional dismiss button. Needs `onDismiss` and a `dismissLabel`.',
+      table: { disable: true },
     },
     showIcon: {
       control: 'boolean',
