@@ -188,8 +188,13 @@ const textualIconButton = cn(
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
 );
 
+/* `font-emoji` names the colour emoji fonts first. Without it the browser walks
+   Poppins, then the generic `sans-serif`, and on some platforms (Linux, which is
+   what Chromatic renders on) a text-style font in that fallback claims the
+   smiley code points before the colour emoji font — 😄😅😂😮😊 came out as
+   monochrome outline faces (design review of Chromatic build 41, PR 124). */
 const emojiCell = cn(
-  'grid size-9 place-items-center rounded-xs text-title-md-semibold leading-none transition-colors',
+  'grid size-9 place-items-center rounded-xs font-emoji text-title-md-semibold leading-none transition-colors',
   'hover:bg-surface-neutral-faint active:bg-surface-neutral-medium',
   'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
 );
@@ -305,7 +310,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
                   unsized, so it rendered at the ambient body size next to a
                   much smaller number. Emoji render in their native colours,
                   so the pill's text colour only reaches the count. */}
-              <span aria-hidden="true" className="text-caption-md-regular leading-none">
+              <span aria-hidden="true" className="font-emoji text-caption-md-regular leading-none">
                 {r.emoji}
               </span>
               <span aria-hidden="true" className="font-numeric text-caption-md-regular">

@@ -28,23 +28,28 @@ import type { SavingStatus } from '../../lib/saving';
  */
 const track = cva(
   [
-    'inline-flex items-center gap-0.5 p-0.5',
+    /* The track has a fixed height and 4 of padding, so the segments simply fill
+       what is left — the track less 8 — as Figma draws it. No gap between
+       segments: Figma's item spacing is 0. */
+    'inline-flex items-stretch p-1',
     'bg-surface-neutral-subtle rounded-sm',
-    /* The border is always there, transparent, so the error stroke shifts nothing. */
-    'border border-transparent transition-colors',
+    /* The stroke is an inset ring, so it is drawn inside the box and takes no
+       room — the padding stays exactly 4 and the error stroke shifts nothing. */
+    'ring-1 ring-inset ring-stroke-default transition-colors',
   ],
   {
     variants: {
       fullWidth: { true: 'flex w-full', false: '' },
+      size: { xs: 'h-7', sm: 'h-8', md: 'h-9', lg: 'h-10', xl: 'h-12' },
       status: {
         idle: '',
         pending: '',
         success: '',
         /* The same stroke `Input` draws when invalid — one error, one look. */
-        error: 'border-accent-critical-outline-border-default',
+        error: 'ring-accent-critical-outline-border-default',
       },
     },
-    defaultVariants: { fullWidth: false, status: 'idle' },
+    defaultVariants: { fullWidth: false, size: 'xl', status: 'idle' },
   },
 );
 
@@ -56,14 +61,23 @@ const segment = cva(
     'hover:text-text-primary',
     'focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-stroke-focused',
     'disabled:cursor-not-allowed disabled:text-text-disabled disabled:hover:text-text-disabled',
-    /* Selected: lifts onto its own surface and the label darkens. The lift — a
-       raised surface plus a shadow — is the non-colour half of the cue; the
-       label's colour change is the half that carries real contrast. */
-    'aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
+    /* Selected: lifts onto its own surface, with a 1 stroke and the lightest
+       shadow, and the label darkens. The lift is the non-colour half of the
+       cue; the label's colour change is the half that carries real contrast.
+       The stroke is an inset ring, so selecting changes no size or padding. */
+    'aria-checked:ring-1 aria-checked:ring-inset aria-checked:ring-stroke-default aria-checked:bg-surface-elevated aria-checked:text-text-primary aria-checked:shadow-card',
   ],
   {
     variants: {
-      size: { sm: 'h-8 px-3 text-label-sm-medium', md: 'h-10 px-4 text-label-sm-medium' },
+      /* No height of its own: the track's padding sets it. Side padding 6 / 8 / 12
+         / 12 / 16; the type is the ramp's 12 / 14 / 14 / 14 / 16 medium. */
+      size: {
+        xs: 'px-1.5 text-caption-md-medium',
+        sm: 'px-2 text-label-sm-medium',
+        md: 'px-3 text-label-sm-medium',
+        lg: 'px-3 text-label-sm-medium',
+        xl: 'px-4 text-label-md-medium',
+      },
       fullWidth: { true: 'flex-1', false: '' },
       /* Pending mutes the selected label back to the unselected colour and
          holds the others where they are — nothing is clickable until the
@@ -73,7 +87,7 @@ const segment = cva(
         false: '',
       },
     },
-    defaultVariants: { size: 'md', fullWidth: false, pending: false },
+    defaultVariants: { size: 'xl', fullWidth: false, pending: false },
   },
 );
 
@@ -187,7 +201,7 @@ export const SegmentedControl = React.forwardRef<HTMLDivElement, SegmentedContro
         aria-busy={pending || undefined}
         aria-invalid={status === 'error' || undefined}
         data-status={status}
-        className={cn(track({ fullWidth, status }), className)}
+        className={cn(track({ fullWidth, size, status }), className)}
         {...props}
       >
         {items.map((option, i) => {

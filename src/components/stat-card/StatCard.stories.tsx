@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { StatCard, StatCardGroup } from './StatCard';
 import { Icon } from '../../atoms/icon';
 import { DonutChart } from '../../atoms/donut-chart';
@@ -28,7 +29,7 @@ const meta = {
           'One number that matters, on a card. There are two, one per dashboard, set by ' +
           '`variant`: `default` is the **Value_Card** on the admin and user dashboards — an 8 ' +
           'stripe, left-aligned, label over a bold value, 100 high. `superadmin` is the **super ' +
-          'admin metric card** — a 12 stripe, centred, an icon, label and info hint over a ' +
+          'admin metric card** — an 8 stripe, centred, an icon, label and info hint over a ' +
           'semibold value and unit, 150 high. `StatCardGroup` is the super admin dashboard’s ' +
           'grouped card: two or more values under one title, split by dividers. `accent` sets ' +
           'the stripe and icon tone. The label is not a heading: the dashboard section owns the ' +
@@ -127,6 +128,12 @@ export const SuperAdmin: Story = {
  */
 export const SuperAdminDashboard: Story = {
   parameters: { controls: { disable: true } },
+  /* The single cards draw the same 8 left stripe as the Value_Card; the grouped cards have none. */
+  play: async ({ canvasElement }) => {
+    const stripes = [...canvasElement.querySelectorAll<HTMLElement>('div.relative > span[aria-hidden="true"].shrink-0')];
+    await expect(stripes.length).toBe(4);
+    for (const stripe of stripes) await expect(stripe.getBoundingClientRect().width).toBe(8);
+  },
   render: () => (
     <div className="flex w-280 flex-col gap-6 pt-16">
       <div className="grid grid-cols-4 gap-6">
