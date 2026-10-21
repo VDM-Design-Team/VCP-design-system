@@ -258,6 +258,9 @@ const bubbleOf = (trigger: HTMLElement) => {
   if (!bubble) throw new Error('The trigger is not described by a tooltip');
   return bubble;
 };
+/* The bubble mounts in a portal once the host is found, a beat after first
+   render — wait for it before asking whether it is open. */
+const described = (trigger: HTMLElement) => waitFor(() => bubbleOf(trigger));
 const isOpen = (trigger: HTMLElement) => bubbleOf(trigger).parentElement?.classList.contains('opacity-100');
 
 /**
@@ -283,6 +286,7 @@ export const RevealsOnFocus: Story = {
     const first = canvas.getByRole('button', { name: 'Last reconciliation' });
     const second = canvas.getByRole('button', { name: 'About reconciliation' });
 
+    await described(first);
     await expect(isOpen(first)).toBe(false);
 
     /* Focus opens it — immediately, with no hover delay to wait out. */
@@ -340,6 +344,7 @@ export const RevealsOnHover: Story = {
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', { name: 'Hover me' });
 
+    await described(trigger);
     await userEvent.hover(trigger);
     /* Not on contact: the default 300ms delay waits for intent. */
     await expect(isOpen(trigger)).toBe(false);
@@ -379,6 +384,7 @@ export const InsideAScrollingList: Story = {
     const trigger = within(canvasElement).getByRole('button', { name: 'Right edge' });
     await userEvent.tab();
     await expect(trigger).toHaveFocus();
+    await described(trigger);
     const bubble = bubbleOf(trigger);
     await waitFor(() => expect(isOpen(trigger)).toBe(true));
     /* No sideways scrolling in the list... */

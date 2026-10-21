@@ -167,7 +167,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     /* Where the bubble is drawn: the nearest `.dark` ancestor, else the page. Nothing
        is drawn on the server, which has no `document`. */
     const [host, setHost] = React.useState<HTMLElement | null>(null);
-    React.useEffect(() => {
+    React.useLayoutEffect(() => {
       setHost((wrapperRef.current?.closest('.dark') as HTMLElement | null) ?? document.body);
     }, []);
 
