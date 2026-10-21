@@ -63,7 +63,7 @@ as a second call to action, which is why that one is grey. See
 ## Accessibility
 
 - **The card is the checkbox's label**, so the whole 500-odd-pixel block is a
-  target rather than just the 20px box.
+  target rather than just the 20px box (`Checkbox` `size="md"`). The title and the explanation are both 14 medium, in `text.primary` and `text.tertiary`.
 - **The announced name is the title alone** — "Multipart Value" — with the
   explanation wired as `aria-describedby`. Reading a twenty-word explanation as
   part of the *name* would bury it; as a description it arrives after.
@@ -82,7 +82,7 @@ as a second call to action, which is why that one is grey. See
 |---|---|---|
 | Title at `title-sm` (16/semibold) | `Modal`'s `heading-md` (20) | `Modal` owns its title's size. A 16 title would need a size prop on `Modal`, which one dialog does not justify — if a third wants it, that is the trigger |
 | Dialog width 564 | `size="md"` (512) | Widths ride the spacing scale; 512 is the nearest step |
-| Card radius 8, padding 16, gap 12 | `rounded-md`, `p-4`, `gap-3` | Exact — the numeric scale lands on all three |
+| Card radius 8, padding 16, gap 12 | `rounded-md`, `p-4`, and `Checkbox`'s own `gap-2` (8) | Radius and padding are exact. The box-to-label gap is 8 everywhere (design review, October 2026), so the card no longer overrides it |
 
 ## ⚠️ Five field molecules exist in the design and are used nowhere
 

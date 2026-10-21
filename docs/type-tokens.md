@@ -13,7 +13,9 @@ the ramp it replaced.
 size ships every weight; use the table below rather than guessing a
 combination into existence.
 
-All Poppins (`font.family.sans`). Components that need Inter for dense
+All Poppins (`font.family.sans`), except emoji glyphs, which take
+`font.family.emoji` (`font-emoji`) so the colour emoji font wins over a platform's
+monochrome fallback. Components that need Inter for dense
 numerics or tabular figures still add `font-numeric` alongside the size
 utility (`Chip`'s count, `DatePicker`'s grid) — that pairing is
 unchanged by this ramp.
