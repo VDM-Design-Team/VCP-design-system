@@ -40,8 +40,6 @@ const meta = {
     role: { control: 'radio', options: ['dialog', 'alertdialog'] },
     dismissible: { control: 'boolean' },
     showClose: { control: 'boolean' },
-    showDescription: { control: 'boolean' },
-    showFooter: { control: 'boolean' },
     open: { control: 'boolean' },
   },
 } satisfies Meta<typeof Modal>;
@@ -115,26 +113,73 @@ function bodyChildOf(el: HTMLElement): HTMLElement {
  * ------------------------------------------------------------------------- */
 
 /**
+ * Storybook-only switches — **not Modal props**. The component never hears about
+ * them: the story turns them into a real `description` / `footer`, or their
+ * absence. A Modal shows an optional part by being given it, so there is nothing
+ * to switch off on the component itself.
+ */
+type PlaygroundArgs = React.ComponentProps<typeof Modal> & {
+  withDescription?: boolean;
+  withFooter?: boolean;
+};
+
+/**
  * Title, description, body and a footer of actions — the plainest useful dialog,
  * at the default `md` width, over some page content so the backdrop's dim is
- * visible.
+ * visible. The `description` and `footer` controls show and hide those parts.
  */
-export const Default: Story = {
-  render: (args) => (
-    <Background>
-      <Modal
-        {...args}
-        description="This cannot be undone from the supplier portal."
-        footer={<ConfirmFooter onClose={args.onClose} />}
-      />
-    </Background>
-  ),
+export const Default: StoryObj<PlaygroundArgs> = {
+  args: {
+    withDescription: true,
+    withFooter: true,
+    description: 'This cannot be undone from the supplier portal.',
+  },
+  argTypes: {
+    withDescription: {
+      control: 'boolean',
+      name: 'description',
+      table: { disable: true },
+    },
+    withFooter: {
+      control: 'boolean',
+      name: 'footer',
+      table: { disable: true },
+    },
+  },
+  render: (storyArgs: PlaygroundArgs) => {
+    const { withDescription, withFooter, description, ...args } = storyArgs;
+    return (
+      <Background>
+        <Modal
+          {...args}
+          description={withDescription ? description : undefined}
+          footer={withFooter ? <ConfirmFooter onClose={args.onClose} /> : undefined}
+        />
+      </Background>
+    );
+  },
+};
+
+/**
+ * An optional part that is empty renders nothing. A blank `description` or
+ * `footer` (an empty string, `false`) leaves no empty caption or action row
+ * holding space, so the title sits straight over the body.
+ */
+export const EmptyPartsRenderNothing: Story = {
+  args: { title: 'Nothing optional', description: '', footer: false },
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    await expect(dialog.querySelector('p[id$="description"]')).toBeNull();
+    await expect(dialog.querySelector('footer')).toBeNull();
+    /* No description means nothing for aria-describedby to point at. */
+    await expect(dialog.hasAttribute('aria-describedby')).toBe(false);
+  },
 };
 
 /**
  * No subtitle, but the body opens with a control rather than text, so the gap
  * under the title stays at 12. With running text it would be 4 (see Default
- * with `showDescription` off).
+ * without a `description`).
  */
 export const BodyStartsWithControl: Story = {
   args: { title: 'Reject this AV?', size: 'sm' },

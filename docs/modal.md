@@ -47,10 +47,8 @@ Rules of thumb:
 | `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. One of the three naming props |
 | `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
 | `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
-| `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby` |
-| `showDescription` | `boolean` | `true` | Show the sub-heading. Hidden, the gap to the body is 4 — unless the body opens with a control or card, which keeps 12 |
-| `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s |
-| `showFooter` | `boolean` | `true` | Show the footer actions. Hidden, the body takes its own bottom padding |
+| `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby`. Left out, `false` or blank, nothing renders for it |
+| `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s. Left out, `false` or blank, no footer renders |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |

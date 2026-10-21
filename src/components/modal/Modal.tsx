@@ -74,6 +74,13 @@ const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
   defaultVariants: { hasText: true, roomy: false },
 });
 
+/** Whether a node would draw anything: not absent, not `false`, not a blank string. */
+const hasContent = (node: React.ReactNode): boolean =>
+  node !== undefined &&
+  node !== null &&
+  node !== false &&
+  !(typeof node === 'string' && node.trim() === '');
+
 /** Layout effect where there is a DOM, plain effect on a server (no warning). */
 const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
 
@@ -283,14 +290,18 @@ interface ModalBaseProps
    * click when `dismissible`. The dialog never closes itself — you own `open`.
    */
   onClose: () => void;
-  /** Sub-heading under the title. Wired to `aria-describedby`. */
+  /**
+   * Sub-heading under the title. Wired to `aria-describedby`. Leave it out and
+   * nothing renders for it: an empty string or `false` counts as left out, so no
+   * empty element holds space.
+   */
   description?: React.ReactNode;
-  /** Show the sub-heading. Without it the gap to the body is 4, unless the body opens with a control or card. */
-  showDescription?: boolean;
-  /** Right-aligned action row at the bottom. Usually two `Button`s. */
+  /**
+   * Right-aligned action row at the bottom. Usually two `Button`s. Left out (or
+   * `false`, or an empty string), no footer renders and the body takes its own
+   * bottom padding.
+   */
   footer?: React.ReactNode;
-  /** Show the footer actions. `false` hides them without dropping the `footer` node. */
-  showFooter?: boolean;
   /**
    * `alertdialog` for a destructive confirmation the user must answer. It makes
    * screen readers announce the description immediately, so give one.
@@ -339,9 +350,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     onClose,
     title,
     description,
-    showDescription = true,
-    footer: footerProp,
-    showFooter = true,
+    footer,
     size,
     role = 'dialog',
     dismissible = true,
@@ -489,10 +498,10 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
 
   if (!open || !mounted) return null;
 
-  const hasTitle = title !== undefined && title !== null && title !== false;
-  const hasDescription =
-    showDescription && description !== undefined && description !== null && description !== false;
-  const footer = showFooter ? footerProp : undefined;
+  /* Content that is absent, `false`, or an empty string renders nothing — no
+     empty heading, caption or footer holding space. */
+  const hasTitle = hasContent(title);
+  const hasDescription = hasContent(description);
   /* 12 under a sub-heading, or when the body opens with a control or card; else 4. */
   const roomy = hasDescription || !leadsWithText;
   const hasHeaderText = hasTitle || hasDescription;
@@ -590,7 +599,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                outside the last control, and the scroll box would clip it at the
                padding edge. The footer's top padding is 4 shorter to compensate,
                so the visible gap stays 20. */
-            footer ? 'pb-1' : 'pb-5',
+            hasContent(footer) ? 'pb-1' : 'pb-5',
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
             bodyClassName,
           )}
@@ -603,7 +612,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             the same way the header is separated from the body. The padding is
             symmetric, and it is the footer's own, so the gap above the buttons
             is the same 20 whether the body scrolls or not. */}
-        {footer && (
+        {hasContent(footer) && (
           <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
             {footer}
           </footer>
