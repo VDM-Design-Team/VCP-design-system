@@ -1,7 +1,13 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
-import { NotificationItem, type NotificationKind } from './NotificationItem';
+import {
+  NotificationItem,
+  type NotificationKind,
+  type NotificationReply,
+} from './NotificationItem';
+import type { EmojiReaction } from '../emoji-reaction-picker';
+import type { MentionSegment } from '../mention-input';
 
 const SUBJECT = 'Change the notification layout for testing';
 
@@ -191,6 +197,176 @@ export const ShortCommentPreview: Story = {
   args: { preview: 'Looks good to me — shipping it.' },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).queryByRole('button', { name: /Show/ })).toBeNull();
+  },
+};
+
+const MEMBERS = [
+  { id: '182', name: 'Anna Berg' },
+  { id: '204', name: 'Jane Doe' },
+  { id: '231', name: 'John Smith' },
+];
+
+/**
+ * A comment with reactions and one reply, wired the way an app would: the reply and the
+ * reactions are state here, and the item reports what the user did.
+ */
+function CommentThread({
+  initialReply,
+  initialReactions = [
+    { emoji: '👍', count: 2, mine: true },
+    { emoji: '👀', count: 1 },
+  ],
+  ...rest
+}: {
+  initialReply?: NotificationReply;
+  initialReactions?: EmojiReaction[];
+  defaultReplyShown?: boolean;
+}) {
+  const [reply, setReply] = React.useState<NotificationReply | undefined>(initialReply);
+  const [reactions, setReactions] = React.useState<EmojiReaction[]>(initialReactions);
+  const me = { name: 'Kai Lindqvist' };
+  const words = (value: MentionSegment[]) => value;
+  const toggle = (emoji: string) =>
+    setReactions((rs) =>
+      rs
+        .map((r) =>
+          r.emoji === emoji
+            ? { ...r, mine: !r.mine, count: r.count + (r.mine ? -1 : 1) }
+            : r,
+        )
+        .filter((r) => r.count > 0),
+    );
+  const select = (emoji: string) =>
+    setReactions((rs) =>
+      rs.some((r) => r.emoji === emoji)
+        ? rs.map((r) => (r.emoji === emoji && !r.mine ? { ...r, mine: true, count: r.count + 1 } : r))
+        : [...rs, { emoji, count: 1, mine: true }],
+    );
+  return (
+    <NotificationItem
+      kind="commented"
+      actor={{ name: 'John Kestrel' }}
+      subject={SUBJECT}
+      time="a few seconds ago"
+      unread
+      href="#av-1"
+      preview="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut nibh elit, sollicitudin ac est vitae."
+      reactions={reactions}
+      onToggleReaction={toggle}
+      onSelectEmoji={select}
+      reply={reply}
+      members={MEMBERS}
+      currentUser={me}
+      onReply={(value) => setReply({ author: me, value: words(value) })}
+      onEditReply={(value) => setReply({ author: me, value: words(value) })}
+      onDeleteReply={() => setReply(undefined)}
+      {...rest}
+    />
+  );
+}
+
+/** Reactions under a comment: the thumbs-up, the palette, and a pill for each emoji. Pills toggle your own. */
+export const Reactions: Story = {
+  render: () => <CommentThread />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* The pill for 👍 is yours: pressing it takes yours back. */
+    await userEvent.click(canvas.getByRole('button', { name: /Remove thumbs up/ }));
+    await expect(canvas.getByRole('button', { name: /React with thumbs up/ })).toBeInTheDocument();
+  },
+};
+
+/**
+ * Replying, end to end, as the design's flow draws it: Reply opens a composer in place of the
+ * row; sending it posts one reply, hidden by default; "Show Reply" shows it with Edit and Delete;
+ * Edit puts the composer back, filled; Save keeps the change; Delete takes the reply away and
+ * brings "Reply" back.
+ */
+export const ReplyFlow: Story = {
+  render: () => <CommentThread />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
+    /* The row (and its reactions) give way to the composer. */
+    await expect(canvas.queryByRole('button', { name: /React with/ })).toBeNull();
+    const field = canvas.getByRole('textbox', { name: 'Write a reply' });
+    await userEvent.type(field, 'Thanks @jane');
+    await userEvent.keyboard('{Enter}');
+    await userEvent.type(field, 'will review');
+    await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
+
+    /* Posted, and hidden by default. */
+    const show = await canvas.findByRole('button', { name: 'Show Reply' });
+    await expect(show).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.queryByText(/will review/)).toBeNull();
+    await userEvent.click(show);
+    await expect(await canvas.findByText(/will review/)).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Hide Reply' })).toHaveAttribute('aria-expanded', 'true');
+
+    /* Edit, with the reply's words in the field, then Save. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Edit' }));
+    const editor = canvas.getByRole('textbox', { name: 'Write a reply' });
+    await expect(editor).toHaveTextContent('Thanks @Jane Doe will review');
+    await userEvent.type(editor, ' soon');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
+    await expect(await canvas.findByText(/will review soon/)).toBeVisible();
+
+    /* Delete: the reply goes and "Reply" comes back. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Delete' }));
+    await expect(await canvas.findByRole('button', { name: 'Reply' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: /Show Reply|Hide Reply/ })).toBeNull();
+  },
+};
+
+/** A comment that already has a reply, hidden: "Show Reply" is where "Reply" was. */
+export const RepliedHidden: Story = {
+  render: () => (
+    <CommentThread
+      initialReply={{
+        author: { name: 'Kai Lindqvist' },
+        value: [{ type: 'text', text: 'Thanks, shipping it Friday.' }],
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Show Reply' })).toBeVisible();
+    await expect(canvas.queryByText(/shipping it Friday/)).toBeNull();
+  },
+};
+
+/** The same, shown: the reply card with Edit and Delete. */
+export const RepliedShown: Story = {
+  render: () => (
+    <CommentThread
+      defaultReplyShown
+      initialReply={{
+        author: { name: 'Kai Lindqvist' },
+        value: [
+          { type: 'text', text: 'Thanks ' },
+          { type: 'mention', id: '204', label: 'Jane Doe' },
+          { type: 'text', text: ', shipping it Friday.' },
+        ],
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Hide Reply' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Edit' })).toBeVisible();
+    await expect(canvasElement.querySelector('[data-type="mention"]')).toHaveTextContent('@Jane Doe');
+  },
+};
+
+/** Cancelling a reply brings the row back, with its reactions. */
+export const CancelReply: Story = {
+  render: () => <CommentThread />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    await expect(await canvas.findByRole('button', { name: 'Reply' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: /thumbs up/ })).toBeVisible();
   },
 };
 

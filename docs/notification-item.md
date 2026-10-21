@@ -15,6 +15,11 @@ hover button.
 | `Avatar` | atom | The actor, 36 (`lg`), initials or a photo, with the avatar's white outline (`ring`) as Figma's `Profile_Initials` draws it |
 | `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`) |
 | `Tooltip` | component | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
+| `CommentControl` | component | "Reply", "Show Reply" / "Hide Reply", "Edit", "Delete" |
+| `CommentComposer` | component | Writing a reply, and editing it |
+| `CommentCard` | component | The posted reply |
+| `EmojiReactionPicker` | component | The reactions row: thumbs-up, the palette and the pills |
+| `MentionInput` | component | Its `MentionSegment` and `MentionMember` types: the reply's words, and who can be mentioned (the field itself is inside `CommentComposer`) |
 | `Icon` | atom | The check-circle in the mark-read button |
 
 ## When to use
@@ -63,7 +68,16 @@ sites.
 | `href` | `string` | — | The whole row is a link |
 | `onSelect` | `() => void` | — | The whole row is a button, when it does not navigate |
 | `preview` | `string` | — | The comment, as the design's preview card |
-| `previewActions` | `ReactNode` | — | Below the card: the reply and reaction controls, which the caller owns |
+| `reactions` | `EmojiReaction[]` | — | Under the preview, as `EmojiReactionPicker` takes them |
+| `onToggleReaction` | `(emoji) => void` | — | A pill, or the thumbs-up button, was pressed |
+| `onSelectEmoji` | `(emoji) => void` | — | An emoji was chosen from the palette |
+| `reply` | `{ author, value }` | — | The one reply to the comment, when there is one. `value` is `MentionSegment[]` |
+| `onReply` | `(value, ids) => void` | — | Turns replying on: renders "Reply" and the composer it opens. Receives who was mentioned |
+| `onEditReply` | `(value, ids) => void` | — | Renders "Edit" on the reply; fires when the edit is saved |
+| `onDeleteReply` | `() => void` | — | Renders "Delete" on the reply |
+| `members` | `{ id, name }[]` | `[]` | Who can be mentioned in a reply |
+| `currentUser` | `{ name, src? }` | the actor | Who is replying: the composer's avatar |
+| `defaultReplyShown` | `boolean` | `false` | Show the reply from the start. It is hidden by default |
 | `className`, `ref`, rest | | | On the root `<div>` |
 
 ## Tokens
@@ -101,16 +115,34 @@ close; with no button the text keeps its 8.
   `aria-controls`. It appears only when the comment really overflows three lines.
 - Put items in a `<ul>` / `<li>`; the root is a `<div>` so it works in either.
 
-## Not built yet
+## Reacting and replying
 
-The design's reply flow under a comment preview (`Notification_Popover_Comment_Reply`:
-replying, replied, editing) and the emoji reactions need a comment composer, which
-the system does not have yet. `previewActions` is where they will go.
+Under a comment preview, as Figma's `Notification_Popover_Comment_Reply` draws it:
+
+| State | What shows |
+|---|---|
+| **No reply** | "↩ Reply" on the left; the reactions on the right |
+| **Replying** | A composer in place of that row: the avatar, the field (with @-mentions), "Reply" and "Cancel" |
+| **Replied, hidden** | "⌄ Show Reply" where "Reply" was, and the reactions. Hidden by default |
+| **Replied, shown** | "⌃ Hide Reply", and the reply as a card with "Edit" and "Delete" under it |
+| **Editing** | The composer, filled with the reply, with "Save" and "Cancel" |
+
+There is **one reply** per comment. Sending a new reply starts it hidden; Cancel backs out
+of either composer; Delete takes the reply away and brings "Reply" back. The reply and the
+reactions are the caller's data, passed in; the component owns only which of these views is
+showing, and reports what the user did (`onReply`, `onEditReply`, `onDeleteReply`,
+`onToggleReaction`, `onSelectEmoji`).
+
+The reactions work as `EmojiReactionPicker` does: the thumbs-up toggles yours, the smiley
+opens the palette, each pill toggles yours, and extras collapse into "+N".
+
+"Show Reply" / "Hide Reply" carry `aria-expanded` and `aria-controls` for the reply card.
 
 ## Don't
 
 - **Don't write the sentence yourself.** Add a `kind` here, so every list says it
   the same way.
 - **Don't carry unread by colour alone.** The dot is decoration; the name says it.
-- **Don't nest your own link or button in the row.** The row is the target; put
-  extra controls in `previewActions`.
+- **Don't nest your own link or button in the row.** The row is the target; the only
+  controls inside it are the mark-read button and the reply and reaction controls under a
+  preview.

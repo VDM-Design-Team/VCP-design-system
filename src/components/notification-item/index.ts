@@ -3,4 +3,5 @@ export type {
   NotificationItemProps,
   NotificationKind,
   NotificationActor,
+  NotificationReply,
 } from './NotificationItem';

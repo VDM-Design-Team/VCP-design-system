@@ -3,6 +3,11 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
+import { CommentCard } from '../comment-card';
+import { CommentComposer } from '../comment-composer';
+import { CommentControl } from '../comment-control';
+import { EmojiReactionPicker, type EmojiReaction } from '../emoji-reaction-picker';
+import type { MentionMember, MentionSegment } from '../mention-input';
 import { Tooltip } from '../tooltip';
 
 /**
@@ -19,6 +24,15 @@ import { Tooltip } from '../tooltip';
  * is a button. The unread dot is on the right until the row is hovered or
  * focused, when it makes way for the design's mark-read / mark-unread button. The
  * comment preview is the design's: three lines, then "Show more".
+ *
+ * **Reacting and replying** live under the preview, as the design's
+ * `Notification_Popover_Comment_Reply` draws them. The row under the card holds
+ * "Reply" (or, once there is a reply, "Show Reply" / "Hide Reply") on the left and the
+ * reactions on the right, exactly as `EmojiReactionPicker` draws them. "Reply" swaps the
+ * row for a composer; a posted reply is one `CommentCard`, hidden until shown, with Edit
+ * and Delete under it; Edit puts the composer back, filled. There is **one reply** per
+ * comment. The reply and the reactions are the caller's data and come in as props; the
+ * component owns only which of those views is showing.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -91,8 +105,35 @@ export interface NotificationItemProps
   onSelect?: () => void;
   /** The comment, when the event is about one. Drawn as the design's preview card. */
   preview?: string;
-  /** Below the preview — the reply and reaction controls, which the caller owns. */
-  previewActions?: React.ReactNode;
+  /** Reactions under the preview, as `EmojiReactionPicker` takes them. */
+  reactions?: readonly EmojiReaction[];
+  /** A reaction pill or the thumbs-up button was pressed. */
+  onToggleReaction?: (emoji: string) => void;
+  /** An emoji was chosen from the palette. */
+  onSelectEmoji?: (emoji: string) => void;
+  /** The one reply to the comment, when there is one. */
+  reply?: NotificationReply;
+  /**
+   * Turns replying on: renders "Reply" under the preview, and the composer it opens.
+   * Fires with the words and the ids of everyone mentioned.
+   */
+  onReply?: (value: MentionSegment[], mentionedIds: string[]) => void;
+  /** Renders "Edit" on the reply, and fires when the edit is saved. */
+  onEditReply?: (value: MentionSegment[], mentionedIds: string[]) => void;
+  /** Renders "Delete" on the reply, and fires when it is pressed. */
+  onDeleteReply?: () => void;
+  /** Who can be mentioned in a reply. */
+  members?: readonly MentionMember[];
+  /** Who is replying: the composer's avatar. */
+  currentUser?: NotificationActor;
+  /** Show the reply from the start. It is hidden by default, as the design draws it. */
+  defaultReplyShown?: boolean;
+}
+
+/** The one reply to a comment. */
+export interface NotificationReply {
+  author: NotificationActor;
+  value: readonly MentionSegment[];
 }
 
 export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationItemProps>(
@@ -109,11 +150,28 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       href,
       onSelect,
       preview,
-      previewActions,
+      reactions,
+      onToggleReaction,
+      onSelectEmoji,
+      reply,
+      onReply,
+      onEditReply,
+      onDeleteReply,
+      members = [],
+      currentUser,
+      defaultReplyShown = false,
       ...props
     },
     ref,
   ) {
+    /* Which view of the reply flow is showing. The data is the caller's; this is only
+       the screen: the row, the composer for a new reply, or the composer for an edit. */
+    const [mode, setMode] = React.useState<'idle' | 'replying' | 'editing'>('idle');
+    const [replyShown, setReplyShown] = React.useState(defaultReplyShown);
+    const replyId = React.useId();
+    const hasReactions = Boolean(reactions || onToggleReaction || onSelectEmoji);
+    const composerUser = currentUser ?? actor;
+
     const phrase = NOTIFICATION_PHRASES[kind];
     const trail = phrase.trail?.(status);
     const interactive = Boolean(href || onSelect);
@@ -222,9 +280,94 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         </div>
 
         {preview && (
-          <div className="relative z-10 flex flex-col gap-1 pr-6 pl-13">
-            <CommentPreview text={preview} />
-            {previewActions}
+          <div className="relative z-10 flex flex-col gap-3 pr-6 pl-13">
+            <div className="flex flex-col gap-1">
+              <CommentPreview text={preview} />
+
+              {/* The row under the card. Gone while a composer is open, as the
+                  design draws the Replying and Editing states. */}
+              {mode === 'idle' && (onReply || reply || hasReactions) && (
+                <div className="flex items-center justify-between gap-4">
+                  {reply ? (
+                    <CommentControl
+                      kind={replyShown ? 'hide' : 'show'}
+                      label={replyShown ? 'Hide Reply' : 'Show Reply'}
+                      aria-expanded={replyShown}
+                      aria-controls={replyId}
+                      onClick={() => setReplyShown((shown) => !shown)}
+                    />
+                  ) : onReply ? (
+                    <CommentControl kind="reply" label="Reply" onClick={() => setMode('replying')} />
+                  ) : (
+                    <span />
+                  )}
+                  {hasReactions && (
+                    <EmojiReactionPicker
+                      className="shrink-0"
+                      reactions={reactions}
+                      onToggle={onToggleReaction}
+                      onSelect={onSelectEmoji}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {mode === 'replying' && onReply && (
+              <CommentComposer
+                autoFocus
+                user={composerUser}
+                members={members}
+                submitLabel="Reply"
+                onSubmit={(value, ids) => {
+                  onReply(value, ids);
+                  /* A new reply starts hidden, as the design draws it. */
+                  setReplyShown(false);
+                  setMode('idle');
+                }}
+                onCancel={() => setMode('idle')}
+              />
+            )}
+
+            {reply && mode === 'editing' && (
+              <CommentComposer
+                autoFocus
+                user={reply.author}
+                members={members}
+                submitLabel="Save"
+                defaultValue={reply.value}
+                onSubmit={(value, ids) => {
+                  onEditReply?.(value, ids);
+                  setMode('idle');
+                }}
+                onCancel={() => setMode('idle')}
+              />
+            )}
+
+            {reply && replyShown && mode !== 'editing' && (
+              <CommentCard
+                id={replyId}
+                author={reply.author}
+                value={reply.value}
+                actions={
+                  <>
+                    {onEditReply && (
+                      <CommentControl kind="edit" label="Edit" onClick={() => setMode('editing')} />
+                    )}
+                    {onDeleteReply && (
+                      <CommentControl
+                        kind="delete"
+                        label="Delete"
+                        onClick={() => {
+                          onDeleteReply();
+                          setReplyShown(false);
+                        }}
+                      />
+                    )}
+                  </>
+                }
+              />
+            )}
           </div>
         )}
       </div>
