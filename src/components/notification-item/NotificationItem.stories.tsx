@@ -375,7 +375,7 @@ export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   decorators: [],
   render: (args) => (
-    <div className="grid grid-cols-2">
+    <div className="flex flex-col">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
