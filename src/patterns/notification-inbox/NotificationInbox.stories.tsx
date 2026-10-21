@@ -59,6 +59,7 @@ export const Default: Story = {
   render: function Render(args) {
     const [unreadOnly, setUnreadOnly] = React.useState(false);
     const [page, setPage] = React.useState(1);
+    const [pageSize, setPageSize] = React.useState(10);
     return (
       <NotificationInbox
         {...args}
@@ -67,7 +68,17 @@ export const Default: Story = {
           setUnreadOnly(next);
           args.onUnreadOnlyChange?.(next);
         }}
-        pagination={{ page, pageCount: 8, onChange: setPage }}
+        pagination={{
+          page,
+          pageCount: Math.ceil(80 / pageSize),
+          onChange: setPage,
+          itemCount: 80,
+          pageSize,
+          onPageSizeChange: (next) => {
+            setPageSize(next);
+            setPage(1);
+          },
+        }}
       >
         <Rows unreadOnly={unreadOnly} />
       </NotificationInbox>
@@ -83,18 +94,25 @@ export const Default: Story = {
 
     await userEvent.click(canvas.getByRole('button', { name: 'Mark all as read' }));
     await expect(args.onMarkAllRead).toHaveBeenCalledTimes(1);
+
+    await expect(canvas.getByText('1-10 of 80')).toBeVisible();
+    await userEvent.selectOptions(canvas.getByLabelText('Items'), '25');
+    await expect(canvas.getByText('1-25 of 80')).toBeVisible();
   },
 };
 
-/** One page of results: no pager at all. */
+/** One page of results: the pager stays, so the page size can be changed back. */
 export const SinglePage: Story = {
   render: (args) => (
-    <NotificationInbox {...args} pagination={{ page: 1, pageCount: 1 }}>
+    <NotificationInbox
+      {...args}
+      pagination={{ page: 1, pageCount: 1, itemCount: 6, pageSize: 10, onPageSizeChange: fn() }}
+    >
       <Rows unreadOnly={false} />
     </NotificationInbox>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).queryByRole('navigation')).toBeNull();
+    await expect(within(canvasElement).getByLabelText('Items')).toBeVisible();
   },
 };
 
@@ -106,8 +124,8 @@ export const Empty: Story = {
   },
 };
 
-/** Without `onMarkAllRead` there is no button, for a page that cannot mark. */
-export const WithoutMarkAll: Story = {
+/** Without `onMarkAllRead` the button is still there; it just reports nothing. */
+export const WithoutMarkAllHandler: Story = {
   args: { onMarkAllRead: undefined },
   render: (args) => (
     <NotificationInbox {...args}>
@@ -115,6 +133,6 @@ export const WithoutMarkAll: Story = {
     </NotificationInbox>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).queryByRole('button', { name: 'Mark all as read' })).toBeNull();
+    await expect(within(canvasElement).getByRole('button', { name: 'Mark all as read' })).toBeVisible();
   },
 };

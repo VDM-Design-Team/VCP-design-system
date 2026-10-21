@@ -33,8 +33,8 @@ the two lists cannot drift apart.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `unreadOnly` / `onUnreadOnlyChange` | `boolean` | `false` | Uncontrolled when `unreadOnly` is omitted. Reports the wish; filters nothing |
-| `onMarkAllRead` | `() => void` | — | Renders "Mark all as read". Omit it and there is no button |
-| `pagination` | `{ page, pageCount, onChange?, itemCount?, pageSize?, variant? }` | — | The pager. Drawn only when `pageCount > 1` |
+| `onMarkAllRead` | `() => void` | — | Fires on "Mark all as read". The button is always shown |
+| `pagination` | `{ page, pageCount, onChange?, itemCount?, pageSize?, pageSizeOptions?, onPageSizeChange?, variant? }` | — | The large pager: numbers, range and Items select. Shown whenever given, even on one page |
 | `children` | `ReactNode` | — | The `NotificationItem`s. Each is wrapped in a `<li>` |
 | `emptyLabel` | `string` | `No notifications` | What an empty list says |
 | `listLabel` | `string` | `Notifications` | Names the list for assistive tech |
@@ -49,7 +49,7 @@ renders what it is given: the `Default` story filters its own list.
 ## Tokens
 
 Card `surface.elevated`, `radius.md`, `px-8 py-4` (32 / 16), `gap-2.5` (10). The
-controls are 16 apart. The pager sits 24 below the last row, as the design draws it.
+controls are 16 apart, and both the controls and the pager are right-aligned. The pager sits 24 below the last row, as the design draws it.
 No new tokens.
 
 ## Accessibility

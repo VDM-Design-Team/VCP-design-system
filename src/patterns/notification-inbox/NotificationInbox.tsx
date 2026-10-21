@@ -9,7 +9,8 @@ import { Pagination, type PaginationProps } from '../../components/pagination';
  * all as read" and "Show unread only"), the list of rows, and the pager.
  *
  * Read off Figma's `Notification_Inbox_Content` (`7709:99303`): a `surface.elevated`
- * card, 32 / 16 padding, the controls row on top, the rows, then `VCP_Pagination`.
+ * card, 32 / 16 padding, the controls row on top, right-aligned, the rows, then `VCP_Pagination`
+ * (the mid size, with the Items select), right-aligned.
  * The popover's "View notifications inbox" link goes here. The rows are the same
  * `NotificationItem` the popover uses: Figma draws an inbox row of its own
  * (`_Notification_Inbox_Item`), but it is the same thing in a wider list, so the
@@ -28,12 +29,23 @@ export interface NotificationInboxProps extends React.HTMLAttributes<HTMLDivElem
   /** "Show unread only". Uncontrolled (off) when omitted. */
   unreadOnly?: boolean;
   onUnreadOnlyChange?: (unreadOnly: boolean) => void;
-  /** Renders "Mark all as read" and fires when it is pressed. */
+  /** Fires when "Mark all as read" is pressed. The button is always there. */
   onMarkAllRead?: () => void;
-  /** The pager under the list. Omit it for a single page. */
+  /**
+   * The pager under the list, the large one: page numbers, the range readout and
+   * the Items select (give `itemCount`, `pageSize` and `onPageSizeChange`). It
+   * stays on a single page too, so the page size can always be changed back.
+   */
   pagination?: Pick<
     PaginationProps,
-    'page' | 'pageCount' | 'onChange' | 'itemCount' | 'pageSize' | 'variant'
+    | 'page'
+    | 'pageCount'
+    | 'onChange'
+    | 'itemCount'
+    | 'pageSize'
+    | 'pageSizeOptions'
+    | 'onPageSizeChange'
+    | 'variant'
   >;
   /** The rows — `NotificationItem`s. Each is wrapped in a `<li>`. */
   children?: React.ReactNode;
@@ -71,12 +83,10 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
         )}
         {...props}
       >
-        <div className="flex items-center gap-4">
-          {onMarkAllRead && (
-            <Button variant="tertiary" size="sm" onClick={onMarkAllRead}>
-              Mark all as read
-            </Button>
-          )}
+        <div className="flex items-center justify-end gap-4">
+          <Button variant="tertiary" size="sm" onClick={onMarkAllRead}>
+            Mark all as read
+          </Button>
           <Toggle
             label="Show unread only"
             checked={onlyUnread}
@@ -99,9 +109,7 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
           <p className="py-12 text-center text-body-sm-regular text-text-tertiary">{emptyLabel}</p>
         )}
 
-        {pagination && pagination.pageCount > 1 && (
-          <Pagination className="pt-6" {...pagination} />
-        )}
+        {pagination && <Pagination className="justify-end pt-6" {...pagination} />}
       </div>
     );
   },
