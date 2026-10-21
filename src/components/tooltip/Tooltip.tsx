@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 
@@ -22,7 +23,15 @@ import { cn } from '../../lib/cn';
  *   and line breaks, not for links or buttons. If it needs interaction it is a
  *   Popover, which this system does not ship yet.
  *
- * Positioning is static: the four placements are CSS offsets off the trigger,
+ * **The bubble floats above the page, outside the trigger's surroundings.** It is
+ * drawn in a portal, positioned from the trigger's coordinates, so it can never
+ * widen a scrolling list it sits in, be cut off by a container that clips, or add
+ * space to a layout. (It was an absolutely-positioned child of the trigger until
+ * October 2026, which did all three: a tooltip on a row's right-hand button made a
+ * popover's list scroll sideways.) The portal goes into the nearest `.dark`
+ * ancestor when there is one, so a themed wrapper still themes it.
+ *
+ * Placement is still static: the four placements are fixed offsets off the trigger,
  * with no collision detection and no flipping. See `docs/tooltip.md`.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
@@ -45,19 +54,23 @@ import { cn } from '../../lib/cn';
  */
 const positioner = cva(
   [
-    'absolute z-50 flex w-max max-w-64',
+    /* Fixed, so it is positioned by the trigger's coordinates and by nothing
+       around it. The coordinates arrive as an inline style (they are measured, not
+       a design value); the transform pulls the bubble to the right side of that
+       point. */
+    'fixed z-50 flex w-max max-w-64',
     'transition-opacity duration-150 motion-reduce:transition-none',
   ],
   {
     variants: {
-      /* Static offsets off the trigger box. The `p*-2` on each is the gap
-         between trigger and bubble, on Tailwind's numeric spacing scale — and
-         it doubles as the pointer bridge described above. */
+      /* The point is the middle of the trigger's near edge. The `p*-2` is the gap
+         between trigger and bubble, on Tailwind's numeric spacing scale — and it
+         doubles as the pointer bridge described above. */
       placement: {
-        top: 'bottom-full left-1/2 -translate-x-1/2 pb-2',
-        bottom: 'top-full left-1/2 -translate-x-1/2 pt-2',
-        left: 'right-full top-1/2 -translate-y-1/2 pr-2',
-        right: 'left-full top-1/2 -translate-y-1/2 pl-2',
+        top: '-translate-x-1/2 -translate-y-full pb-2',
+        bottom: '-translate-x-1/2 pt-2',
+        left: '-translate-x-full -translate-y-1/2 pr-2',
+        right: '-translate-y-1/2 pl-2',
       },
       open: {
         true: 'opacity-100',
@@ -150,6 +163,32 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const id = tooltipId ?? `tooltip-${generatedId}`;
 
     const wrapperRef = React.useRef<HTMLSpanElement | null>(null);
+
+    /* Where the bubble is drawn: the nearest `.dark` ancestor, else the page. Nothing
+       is drawn on the server, which has no `document`. */
+    const [host, setHost] = React.useState<HTMLElement | null>(null);
+    React.useEffect(() => {
+      setHost((wrapperRef.current?.closest('.dark') as HTMLElement | null) ?? document.body);
+    }, []);
+
+    /* The point the bubble hangs from: the middle of the trigger's near edge. */
+    const [anchor, setAnchor] = React.useState<{ top: number; left: number } | null>(null);
+    const place = React.useCallback(() => {
+      const rect = wrapperRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const centreX = rect.left + rect.width / 2;
+      const centreY = rect.top + rect.height / 2;
+      setAnchor(
+        placement === 'bottom'
+          ? { top: rect.bottom, left: centreX }
+          : placement === 'left'
+            ? { top: centreY, left: rect.left }
+            : placement === 'right'
+              ? { top: centreY, left: rect.right }
+              : { top: rect.top, left: centreX },
+      );
+    }, [placement]);
+
     const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const clearTimer = React.useCallback(() => {
@@ -163,6 +202,19 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       clearTimer();
       setOpen(false);
     }, [clearTimer]);
+
+    /* Measure before the bubble shows, and keep it on the trigger while it is open:
+       the page can scroll or resize under a fixed element. */
+    React.useLayoutEffect(() => {
+      if (!open) return;
+      place();
+      window.addEventListener('scroll', place, true);
+      window.addEventListener('resize', place);
+      return () => {
+        window.removeEventListener('scroll', place, true);
+        window.removeEventListener('resize', place);
+      };
+    }, [open, place]);
 
     /* Clear a pending open if the component goes away mid-delay. */
     React.useEffect(() => clearTimer, [clearTimer]);
@@ -254,14 +306,21 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         {...props}
       >
         {React.cloneElement(child, { 'aria-describedby': describedBy })}
-        <span className={positioner({ placement, open })}>
-          {/* The described element: `role="tooltip"` *and* the id that
-              `aria-describedby` resolves to. One without the other announces
-              nothing. */}
-          <span id={id} role="tooltip" className={bubble()}>
-            {content}
-          </span>
-        </span>
+        {host &&
+          createPortal(
+            <span
+              className={positioner({ placement, open })}
+              style={anchor ? { top: anchor.top, left: anchor.left } : undefined}
+            >
+              {/* The described element: `role="tooltip"` *and* the id that
+                  `aria-describedby` resolves to. One without the other announces
+                  nothing. */}
+              <span id={id} role="tooltip" className={bubble()}>
+                {content}
+              </span>
+            </span>,
+            host,
+          )}
       </span>
     );
   },

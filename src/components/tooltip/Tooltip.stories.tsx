@@ -354,3 +354,36 @@ export const RevealsOnHover: Story = {
     await waitFor(() => expect(isOpen(trigger)).toBe(false));
   },
 };
+
+/**
+ * Inside a scrolling list. The bubble floats above the page, so it is not cut off by the list and
+ * does not make the list scroll sideways, even for a trigger on the list's right edge with the
+ * bubble opening to the right.
+ */
+export const InsideAScrollingList: Story = {
+  render: (args) => (
+    <div
+      data-testid="list"
+      className="h-24 w-64 overflow-auto rounded-md border border-stroke-default bg-surface-elevated p-2"
+    >
+      <div className="flex justify-end">
+        <Tooltip {...args} placement="right" content="A tooltip on the list's right edge">
+          <Button variant="secondary">Right edge</Button>
+        </Tooltip>
+      </div>
+      <div className="h-32" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const list = within(canvasElement).getByTestId('list');
+    const trigger = within(canvasElement).getByRole('button', { name: 'Right edge' });
+    await userEvent.tab();
+    await expect(trigger).toHaveFocus();
+    const bubble = bubbleOf(trigger);
+    await waitFor(() => expect(isOpen(trigger)).toBe(true));
+    /* No sideways scrolling in the list... */
+    await expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
+    /* ...and the bubble is not clipped: it extends past the list's right edge. */
+    await expect(bubble.getBoundingClientRect().right).toBeGreaterThan(list.getBoundingClientRect().right);
+  },
+};
