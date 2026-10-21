@@ -5,8 +5,8 @@ import { Button } from '../../atoms/button';
 import { Icon, type IconName } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 
-/** The four accent families a Toast can speak in. `danger` is `accent.critical`. */
-export type ToastTone = 'info' | 'success' | 'warning' | 'danger';
+/** The four accent families a Toast can speak in, named as the `accent.*` token families are. */
+export type ToastTone = 'info' | 'success' | 'warning' | 'critical';
 
 /**
  * How long a Toast waits before it dismisses itself, when nobody says otherwise.
@@ -27,7 +27,7 @@ const TONE_ICON: Record<ToastTone, IconName> = {
   info: 'info-fill',
   success: 'check-circle-fill',
   warning: 'warning-circle-fill',
-  danger: 'warning-fill',
+  critical: 'warning-fill',
 };
 
 /**
@@ -39,7 +39,7 @@ const TONE_COLOUR: Record<ToastTone, string> = {
   info: 'text-accent-info-outline-border-default',
   success: 'text-accent-success-outline-border-default',
   warning: 'text-accent-warning-outline-border-default',
-  danger: 'text-accent-critical-outline-border-default',
+  critical: 'text-accent-critical-outline-border-default',
 };
 
 /**
@@ -51,7 +51,7 @@ const TONE_LABEL: Record<ToastTone, string> = {
   info: 'Information',
   success: 'Success',
   warning: 'Warning',
-  danger: 'Error',
+  critical: 'Error',
 };
 
 /**

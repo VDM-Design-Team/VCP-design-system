@@ -107,7 +107,7 @@ const STATUS_TREATMENT: Record<AVStatus, Treatment> = {
   'In Progress': { tone: 'info' },
   Reopened: { tone: 'info' },
   Completed: { tone: 'success' },
-  Rejected: { tone: 'danger' },
+  Rejected: { tone: 'critical' },
   /* Tonal is Review's label style — what a viewer who cannot act on it sees.
      The filled treatment lives in ACTIONABLE_TREATMENT below. */
   Review: { tone: 'info' },

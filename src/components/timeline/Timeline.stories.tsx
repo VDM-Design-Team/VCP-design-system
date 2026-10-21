@@ -69,13 +69,13 @@ export const Default: Story = {
 /** All six tones. The glyph, not the hue, is what distinguishes events. */
 export const Tones: Story = {
   args: {
-    items: (['neutral', 'brand', 'info', 'success', 'warning', 'danger'] as const).map(
+    items: (['neutral', 'brand', 'info', 'success', 'warning', 'critical'] as const).map(
       (tone, i) => ({
         id: String(i),
         title: tone,
         timestamp: 'today',
         tone,
-        icon: tone === 'danger' ? 'x-circle' : tone === 'warning' ? 'warning' : 'circle',
+        icon: tone === 'critical' ? 'x-circle' : tone === 'warning' ? 'warning' : 'circle',
       }),
     ),
   },
