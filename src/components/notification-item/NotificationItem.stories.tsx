@@ -65,7 +65,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-96">
+      <div className="w-128">
         <Story />
       </div>
     ),
@@ -137,7 +137,7 @@ export const Kinds: Story = {
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
-      <ul className="w-96">
+      <ul className="w-128">
         {rows.map((row) => (
           <li key={row.kind}>
             <NotificationItem {...args} kind={row.kind} status={row.status} time={row.time} />
@@ -379,7 +379,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
-            <div className="w-96">
+            <div className="w-128">
             <NotificationItem {...args} />
             <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
             <NotificationItem {...args} preview={LONG_COMMENT} />
