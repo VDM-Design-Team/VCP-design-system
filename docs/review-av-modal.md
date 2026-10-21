@@ -43,7 +43,15 @@ a missing value.
 
 One prop, `domainOption`, with the label from the domain. It travels out with
 `onAccept({ domainOption })`, so the caller never reads it back off its own
-state.
+state. The checkbox is the 20px size (`Checkbox` `size="md"`).
+
+## Labels and values
+
+Both are 14. The label ("Original Added Value Estimate") is **regular** in
+`text.tertiary`; the value under it is **medium** in `text.primary`. The value is
+what the admin came to read, so it takes the heavier weight and the darker
+colour, and the label recedes. Two cues, not one: the weight difference still
+shows in greyscale or for a user who cannot tell the two greys apart.
 
 ## Rejecting opens a second dialog
 

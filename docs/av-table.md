@@ -25,7 +25,6 @@ page, audit batch 5, 11 September 2026.
 | `DueDatePill` | component |
 | `Pagination` | component |
 | `StatusPill` | component |
-| `Tooltip` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

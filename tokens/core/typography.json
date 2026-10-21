@@ -3,7 +3,8 @@
     "family": {
       "$type": "fontFamily",
       "sans": { "$value": ["Poppins", "system-ui", "sans-serif"], "$description": "UI type" },
-      "numeric": { "$value": ["Inter", "system-ui", "sans-serif"], "$description": "Dense numerics, micro labels, tabular figures" }
+      "numeric": { "$value": ["Inter", "system-ui", "sans-serif"], "$description": "Dense numerics, micro labels, tabular figures" },
+      "emoji": { "$value": ["Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "sans-serif"], "$description": "Emoji glyphs. Names the colour emoji fonts first, so a platform's text-style fallback (monochrome faces on Linux) can't take the code points before them" }
     },
     "weight": {
       "$type": "fontWeight",

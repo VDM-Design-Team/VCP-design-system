@@ -64,7 +64,7 @@ const fieldMessage = cva('', {
       lg: 'text-body-sm-regular',
     },
     invalid: {
-      true: 'text-accent-critical-tonal-content-default',
+      true: 'text-accent-critical-outline-content-default',
       false: 'text-text-tertiary',
     },
   },
