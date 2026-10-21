@@ -242,12 +242,13 @@ The tone lives in two places, both the accent's own bright colour,
 | `warning` | **1.91:1** | 4.98:1 |
 | `danger` | 3.81:1 | 3.07:1 |
 
-**Several of these are below 3:1, and that is a deliberate exception**, the same
-one `Banner` records: the glyph is not what makes the message understood. The
-title says what happened, the glyph's shape differs per tone, and it is announced
-as a word. The timer bar is `aria-hidden` and shows a countdown that the toast
-already communicates by dismissing. If the family ever gets a stronger border
-step, both should move to it.
+**Several of these are below 3:1, and that is a deliberate exception, signed off by
+design (October 2026).** It is a weaker case than `Banner`'s: there the tint also
+marks the tone, whereas on a white card the glyph and the bar are the only visual
+carriers. What still holds: the title says what happened, the glyph's shape differs
+per tone, and the tone is announced as a word. The timer bar is `aria-hidden` and
+shows a countdown that the toast already communicates by dismissing. If the family
+ever gets a stronger border step, both should move to it.
 
 ### The controls
 
@@ -255,9 +256,10 @@ step, both should move to it.
   "Action" — on a white card, exactly where that variant is tuned to sit. No
   tone recolouring any more.
 - **Dismiss** is a neutral `IconButton`: `text.primary`, hover
-  `surface.neutral.faint`, pressed `surface.neutral.subtle`. It is the
-  Banner's own: `md`, 40 square, pulled into the card's padding so the glyph sits
-  where Figma puts it.
+  `surface.neutral.faint`, pressed `surface.neutral.subtle`. It has the Banner's
+  size and placement (`md`, 40 square, pulled into the card's padding so the glyph
+  sits where Figma puts it) but not its colour: the Banner's dismiss is tonal
+  because it sits on a tint, and a Toast's card is white, so this one is neutral.
 - **Focus ring.** `stroke.focused` on the white card; the same ring every other
   control uses.
 

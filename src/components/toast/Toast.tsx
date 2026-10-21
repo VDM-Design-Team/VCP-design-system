@@ -326,9 +326,10 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
       )}
 
       {onDismiss && (
-        /* The Banner's own control: `md`, 40 square, pulled into the padding so
-           the card stays compact and the glyph sits where the design puts it.
-           Neutral: dismissing is not an action to invite. */
+        /* The Banner's size and placement: `md`, 40 square, pulled into the
+           padding so the card stays compact and the glyph sits where the design
+           puts it. Neutral, unlike the Banner's tonal one, because this card is
+           white, not tinted — and dismissing is not an action to invite. */
         <IconButton
           icon="x"
           label={resolvedDismissLabel}
