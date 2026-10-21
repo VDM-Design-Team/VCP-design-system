@@ -22,7 +22,7 @@ hover button.
 |---|---|
 | `NotificationItem` | A row in the notification popover, or in any list of events about Added Values |
 | `Toast` | A transient message about something the user just did. A notification is a record that stays until read |
-| The inbox row (`NotificationInboxItem`) | The one-line row on the full inbox page, which has no avatar |
+| The inbox page (`NotificationInbox`) | The same row, in the full list |
 
 ## The eleven kinds
 
@@ -72,10 +72,15 @@ Row `surface.elevated`; hover `neutral.outline.surface.hover`, focused
 sentence is `body-sm-bold` for the bold runs and `body-sm-regular` for the subject,
 `text.primary`; the time is `caption-md-regular` `text.tertiary`. The unread dot is
 8, `surface.brand.strong` (Figma binds `text.brand.medium`, the same blue). The
-mark-read glyph is a 20 check-circle in `stroke.brand.medium`, `stroke.focused` on
-hover, in a 24 box. The preview card is `surface.elevated` with a `stroke.default`
-border and `radius.md`, 12 / 8 padding, `body-sm-regular` `text.primary`, indented
-52 on the left (past the avatar) and 24 on the right (past the dot).
+trailing 24 box holds a 20 check-circle in `stroke.brand.medium`, `stroke.focused` on
+hover: **outlined** on an unread row (the mark-read button, which the dot dissolves
+into on hover and focus) and **filled** on a read row (always drawn, and the mark-unread
+button when there is one), as `_Mark_Read_Unread` draws it. Every change in that box,
+and the row's fill, is a 200ms dissolve (none under reduced motion). The preview is `surface.elevated` with no border (a stroke around it
+was taken out in review), `radius.md`, 12 / 8 padding, `body-sm-regular`
+`text.primary`, indented 52 on the left (past the avatar) and 24 on the right (past the
+dot). While "Show more / less" follows, the text has no bottom padding, so the two sit
+close; with no button the text keeps its 8.
 
 ## Accessibility
 
@@ -83,8 +88,9 @@ border and `radius.md`, 12 / 8 padding, `body-sm-regular` `text.primary`, indent
   sentence: "Unread: John commented on *Title*, a few seconds ago". The unread state
   is in the name as text, not only as a dot.
 - **The mark-read button is a separate control**, named "Mark as read" or "Mark as
-  unread", reachable by Tab even when it is not visible. It appears on hover and on
-  focus, and takes the dot's place, so the row never shifts.
+  unread", reachable by Tab even when it is not visible. On an unread row it
+  dissolves in on hover and focus where the dot was; on a read row it is the filled
+  check, always there. The row never shifts.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
 - The mark-read target is 24, not 40. It sits inside a row that is itself the large

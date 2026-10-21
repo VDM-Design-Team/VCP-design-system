@@ -59,7 +59,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-96 border border-stroke-subtle">
+      <div className="w-96">
         <Story />
       </div>
     ),
@@ -90,7 +90,10 @@ export const Read: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('link', { name: /^John Kestrel accepts/ })).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Mark as unread' })).toBeInTheDocument();
+    /* Read: a filled check-circle stays on the right, and it is the mark-unread button. */
+    const mark = canvas.getByRole('button', { name: 'Mark as unread' });
+    await expect(mark).toBeInTheDocument();
+    await expect(getComputedStyle(mark).opacity).toBe('1');
     await expect(canvasElement.querySelector('[data-unread]')).toBeNull();
   },
 };
@@ -113,7 +116,7 @@ export const Kinds: Story = {
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
-      <ul className="w-96 divide-y divide-stroke-subtle border border-stroke-subtle">
+      <ul className="w-96">
         {rows.map((row) => (
           <li key={row.kind}>
             <NotificationItem {...args} kind={row.kind} status={row.status} time={row.time} />
@@ -143,6 +146,11 @@ export const AsAButton: Story = {
 /** Not interactive at all: a plain message, for a read-only list. */
 export const Static: Story = {
   args: { href: undefined, onSelect: undefined, onToggleRead: undefined, unread: false },
+  play: async ({ canvasElement }) => {
+    /* Read with nothing to press: the filled check-circle is still drawn, as decoration. */
+    await expect(canvasElement.querySelector('[data-read-mark]')).not.toBeNull();
+    await expect(within(canvasElement).queryByRole('button')).toBeNull();
+  },
 };
 
 /**
@@ -179,10 +187,12 @@ export const LightAndDark: Story = {
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex flex-col bg-surface-canvas p-8">
+          <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
+            <div className="w-96">
             <NotificationItem {...args} />
             <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
             <NotificationItem {...args} preview={LONG_COMMENT} />
+            </div>
           </div>
         </div>
       ))}

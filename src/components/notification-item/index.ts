@@ -1,4 +1,4 @@
-export { NotificationItem, NOTIFICATION_PHRASES } from './NotificationItem';
+export { NotificationItem } from './NotificationItem';
 export type {
   NotificationItemProps,
   NotificationKind,
