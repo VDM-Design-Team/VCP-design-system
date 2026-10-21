@@ -134,7 +134,7 @@ export function NotificationPopover({
                 }}
               />
             </div>
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-0">
               <Toggle
                 label="Unread only"
                 checked={onlyUnread}
@@ -148,7 +148,7 @@ export function NotificationPopover({
                   align="right"
                   trigger={
                     <IconButton
-                      icon="dots-three-vertical"
+                      icon="dots-three-outline-vertical-fill"
                       label="More notification actions"
                       className={cn(
                         /* Neutral and the standard size, as the bell: Figma's 24 target in
@@ -187,7 +187,7 @@ export function NotificationPopover({
             )}
           </div>
 
-          <div className="border-t border-stroke-default px-4 py-2 text-center">
+          <div className="border-t border-stroke-default p-4 text-center">
             <a
               href={inboxHref}
               className={cn(

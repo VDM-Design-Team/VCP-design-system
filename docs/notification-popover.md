@@ -53,7 +53,7 @@ and renders whatever it is given: the `Open` story filters its own list.
 ## Tokens
 
 Panel `surface.elevated`, `radius.md`, `shadow.menu` (Popover's), 512 wide
-(`w-128`, 32rem); header and footer 16 / 8 padding on `stroke.default` rules; title
+(`w-128`, 32rem); header and footer 16 padding all round on `stroke.default` rules; title
 `body-lg-semibold` `text.primary`; the footer link `body-sm-medium`
 `text.link.default` (hover `text.link.hover`). The list scrolls past 224 (`max-h-56`, near the design's 219).
 No new tokens.
@@ -76,7 +76,7 @@ No new tokens.
   the system's own two-option control, in its `sm` size (32, the design's height).
 - **No empty state is drawn.** "No notifications" is a plain tertiary line.
 - **512 wide, not Figma's 500** (design review); the list never scrolls sideways.
-- **The overflow menu button is the standard `IconButton`** (40 target, 20 glyph) in `neutral.outline.content`, as the bell; Figma's is 24 and hard to find.
+- **The overflow menu button is the standard `IconButton`** (40 target, 20 glyph, the filled `dots-three-outline-vertical` glyph) in `neutral.outline.content`, as the bell; Figma's is a 24 target with a 16 glyph and is hard to find. It sits against the "Unread only" switch with no gap of its own (the switch's own padding is the space between them).
 - **No dividers between rows**, as the design draws it.
 - **The footer link is `text.link.default`, not `text.brand.medium`** as Figma binds it: in dark, `text.brand.medium` is 3.88:1 on the panel, under the 4.5:1 text needs.
 
