@@ -22,7 +22,7 @@ const TEAM = [
   'Yuki Tanaka',
 ];
 
-const SIZES = ['sm', 'md', 'lg'] as const;
+const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
 
 const meta = {
   title: 'Components/Display/AvatarGroup',
@@ -95,7 +95,10 @@ export const Sizes: Story = {
   ),
 };
 
-/** Photos, initials and a failed URL in one stack — the fallback is per person. */
+/**
+ * Photos, initials and a failed URL in one stack — the fallback is per person.
+ * The leftmost person is on top, each one after them tucked behind the one before.
+ */
 export const MixedSources: Story = {
   args: {
     people: [

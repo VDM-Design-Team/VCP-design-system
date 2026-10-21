@@ -81,12 +81,12 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
     },
     ref,
   ) => (
-    /* The Figma frame is 32 above, 16 below and to the sides, which puts the
-       36-tall buttons in an 84-tall header. */
+    /* 32 above and to the sides (matching `PageTitle` and the page body's own
+       `px-8`), 16 below — which puts the 36-tall buttons in an 84-tall header. */
     <header
       ref={ref}
       className={cn(
-        'flex flex-wrap items-center justify-between gap-4 px-4 pb-4 pt-8 font-sans',
+        'flex flex-wrap items-center justify-between gap-4 px-8 pb-4 pt-8 font-sans',
         className,
       )}
       {...props}
@@ -102,9 +102,11 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
               'inline-flex size-10 shrink-0 items-center justify-center rounded-sm',
               /* text.primary at rest — the same colour as the title beside it,
                  per Figma (AV_Header, design audit 24 Sep 2026). Only hover
-                 breaks from it. */
+                 breaks from it, to `text.brand.medium` (the same blue as
+                 `surface.brand.strong`) — `action.tertiary`'s own hover was a
+                 navy too close to the near-black rest to read as a change. */
               'text-text-primary transition-colors',
-              'hover:text-action-tertiary-content-hover',
+              'hover:text-text-brand-medium',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
           >
@@ -117,8 +119,9 @@ export const AVHeader = React.forwardRef<HTMLElement, AVHeaderProps>(
               label={backLabel}
               variant="tertiary"
               onClick={onBack}
-              /* Match the link path's resting colour — see the comment there. */
-              className="text-text-primary"
+              /* Match the link path's resting and hover colours — see the
+                 comment there. */
+              className="text-text-primary hover:text-text-brand-medium"
             />
           )
         )}
