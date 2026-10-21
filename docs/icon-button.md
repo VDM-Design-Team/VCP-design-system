@@ -41,8 +41,8 @@ it needs a visible label, not a better icon.
 |---|---|---|---|
 | `icon` | `IconName` | — | **Required.** A glyph name from the Icon library. Rendered decorative (`aria-hidden`) |
 | `label` | `string` | — | **Required.** The accessible name *and* the pointer tooltip. See below |
-| `variant` | `primary \| secondary \| neutral \| tertiary \| danger` | `tertiary` | Same names and tokens as Button |
-| `size` | `sm \| md \| lg` | `md` | 36 / 40 / 48. `sm` only in dense contexts |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| tonal \| danger` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls |
+| `size` | `xs \| sm \| md \| lg` | `md` | 24 / 36 / 40 / 48. `xs` and `sm` only in dense contexts. `xs` carries a 16 glyph |
 | `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, disables the button, sets `aria-busy` |
 | `disabled` | `boolean` | `false` | Same as Button |
@@ -87,7 +87,7 @@ class.
 | `tertiary` content | `action.tertiary.content.{default,hover,pressed,disabled}` | `text-action-tertiary-content-*` |
 | `danger` surface | `accent.critical.filled.surface.{default,hover,pressed,disabled}` | `bg-accent-critical-filled-surface-*` |
 | `danger` content | `accent.critical.filled.content.default` | `text-accent-critical-filled-content-default` |
-| Size | Tailwind numeric scale | `size-9` (36) / `size-10` (40) / `size-12` (48) |
+| Size | Tailwind numeric scale | `size-6` (24) / `size-9` (36) / `size-10` (40) / `size-12` (48) |
 
 The dark theme comes for free — every class above is a semantic token that
 `tokens/semantic/color.dark.json` overrides under `.dark`.
@@ -157,7 +157,7 @@ component should paper over locally.
   glyph that reliably means "reconcile", "publish" or "archive"; those need words.
 - Don't rely on the tooltip to explain the button. It is not available to
   keyboard or touch users.
-- Don't use `sm` on a touch-first screen — it is 36, under the 40 minimum.
+- Don't use `xs` or `sm` on a touch-first screen — they are 24 and 36, under the 40 minimum.
 - Don't stack more than about five in one toolbar. Past that, an overflow
   `dots-three` menu is easier to scan than another glyph.
 - Don't use `primary` for every action in a row. One filled control, at most.

@@ -1,8 +1,9 @@
 # Sidebar
 
 The app's primary navigation rail: logo, the nav set for whoever is looking,
-and "Report a problem" pinned to the bottom. The last piece `AppShell` was
-waiting on.
+and "Report a problem" pinned to the bottom, with at least 32 above it so it
+never reads as the last nav item, even in a rail with no room to spare. The
+last piece `AppShell` was waiting on.
 
 Read off the Figma `SideBar` section (`2349:935`, audit batch 3, 8 Sep 2026).
 
