@@ -77,7 +77,7 @@ an alert-layout dialog had to repeat its heading as an `aria-label`.
 |---|---|---|
 | ~~The destructive button read **"Complete"**~~ — **fixed in Figma, 11 Sep 2026** | `confirmLabel`, defaulting to **"Delete"** | It was a copy error, almost certainly pasted from another modal, and the file now says "Delete" too. The prop stays so a caller can override the wording |
 | ~~Cancel is a **neutral** outlined button~~ — **no longer a deviation** | `Button variant="neutral"` | The system had no neutral outlined button; `neutral.outline.*` was imported from Figma on 11 Sep 2026 and `Button` gained the variant. The values match the design exactly |
-| Field border `stroke.default` (1.48:1) | `Input`'s own `stroke.field` (4.76:1) | A form control's boundary has to be perceivable — the same correction `Input` already carries against the export |
+| Field border `stroke.default` (1.48:1) | `Input`'s own `stroke.strong` (4.76:1) | A form control's boundary has to be perceivable — the same correction `Input` already carries against the export |
 | Dialog width 561 | `size="md"` (512) | Widths ride the spacing scale; 512 is the nearest step, as `Modal` documents |
 
 ## Don't

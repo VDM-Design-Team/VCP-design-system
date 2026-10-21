@@ -72,7 +72,7 @@ ceremony.
 | The design | Ours | Why |
 |---|---|---|
 | "Description" is a one-line field, the same height as the one above it | An `Input`, as drawn | Ported faithfully, but a field called Description that takes one line is a question for design. If it should wrap, it is a `Textarea` and a one-word change |
-| Field fill `surface.neutral.faint`, border `stroke.default` (1.48:1) | `Input`'s own surface and `stroke.field` (4.76:1) | A form control's boundary has to be perceivable — the same correction `Input` already carries against the export |
+| Field fill `surface.neutral.faint`, border `stroke.default` (1.48:1) | `Input`'s own surface and `stroke.strong` (4.76:1) | A form control's boundary has to be perceivable — the same correction `Input` already carries against the export |
 | The dropzone glyph is a Heroicons photo icon | `Dropzone`'s own Phosphor `cloud-arrow-up` | Phosphor only, decided 8 September. The design file still has Heroicons here |
 | Title at 18/medium | `Modal`'s `heading-md` (20/1.3 semibold) | The ramp has no 18 step — the gap `docs/modal.md` already reports |
 | Dialog width 564 | `size="md"` (512) | Widths ride the spacing scale; 512 is the nearest step |
