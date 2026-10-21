@@ -1,0 +1,201 @@
+import * as React from 'react';
+import { cn } from '../../lib/cn';
+import { IconButton } from '../../atoms/icon-button';
+import { SegmentedControl } from '../../atoms/segmented-control';
+import { Toggle } from '../../atoms/toggle';
+import { Menu } from '../../components/menu';
+import { NotificationBell } from '../../components/notification-bell';
+import { Popover } from '../../components/popover';
+
+/**
+ * NotificationPopover — the bell and the panel that opens from it: a header with
+ * the filter (All or Mentions), the "Unread only" switch and a menu with "Mark
+ * all as read", the list of notifications, and a link to the full inbox.
+ *
+ * Read off Figma's `Notification_Popover` (`2428:4386`): 500 wide, `radius.md`,
+ * the header over a rule, a scrolling list, and the footer link under a second
+ * rule. The pieces are the system's — `Popover` carries the open and close,
+ * Escape and the click-away, `NotificationBell` is the trigger, `Menu` the
+ * overflow menu, and `SegmentedControl` and `Toggle` the controls — so this
+ * pattern is the arrangement, not new behaviour.
+ *
+ * **The list is yours.** Pass `NotificationItem`s as `children`; the popover puts
+ * each in a `<li>`. Which notifications to show for a filter, and what "unread
+ * only" does to them, is the caller's data: this component reports the wish
+ * (`onFilterChange`, `onUnreadOnlyChange`) and does not filter anything itself.
+ *
+ * Every class below resolves to a design token from the VCP Figma variables.
+ * If you need a value that isn't here, add the token in `tokens/` first —
+ * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
+ */
+export type NotificationFilter = 'all' | 'mentions';
+
+export interface NotificationPopoverProps {
+  /** How many are unread: the bell's dot and its name. */
+  count?: number;
+  /** Controlled open state. Pair with `onOpenChange`. */
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Which list is showing. Uncontrolled (starting on All) when omitted. */
+  filter?: NotificationFilter;
+  onFilterChange?: (filter: NotificationFilter) => void;
+  /** "Unread only". Uncontrolled (off) when omitted. */
+  unreadOnly?: boolean;
+  onUnreadOnlyChange?: (unreadOnly: boolean) => void;
+  /** Renders the "Mark all as read" menu item and fires when it is chosen. */
+  onMarkAllRead?: () => void;
+  /** Where "View notifications inbox" goes. */
+  inboxHref: string;
+  /** The notifications — `NotificationItem`s. Each is wrapped in a `<li>`. */
+  children?: React.ReactNode;
+  /** What an empty list says. Defaults to "No notifications". */
+  emptyLabel?: string;
+  /** The panel's title and accessible name. Defaults to "Notifications". */
+  title?: string;
+  /** The footer link's text. Defaults to "View notifications inbox". */
+  inboxLabel?: string;
+  /** Merged onto the wrapper that holds the bell. */
+  className?: string;
+}
+
+const FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'mentions', label: 'Mentions' },
+];
+
+export function NotificationPopover({
+  count = 0,
+  open,
+  defaultOpen,
+  onOpenChange,
+  filter,
+  onFilterChange,
+  unreadOnly,
+  onUnreadOnlyChange,
+  onMarkAllRead,
+  inboxHref,
+  children,
+  emptyLabel = 'No notifications',
+  title = 'Notifications',
+  inboxLabel = 'View notifications inbox',
+  className,
+}: NotificationPopoverProps) {
+  const [filterState, setFilterState] = React.useState<NotificationFilter>('all');
+  const [unreadState, setUnreadState] = React.useState(false);
+  const activeFilter = filter ?? filterState;
+  const onlyUnread = unreadOnly ?? unreadState;
+
+  const items = React.Children.toArray(children);
+
+  /* A scrolling region has to be operable from the keyboard (WCAG 2.1.1): when the
+     list overflows it becomes a tab stop, so the arrow keys can scroll it. */
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const [scrollable, setScrollable] = React.useState(false);
+  React.useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const measure = () => setScrollable(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    for (const child of Array.from(el.children)) observer.observe(child);
+    return () => observer.disconnect();
+  }, [items.length]);
+
+  return (
+    <Popover
+      className={className}
+      trigger={<NotificationBell count={count} />}
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={onOpenChange}
+      align="right"
+      panelRole="dialog"
+      label={title}
+      /* The design's 500 wide, and no panel padding: the header and footer draw
+         their own, with their own rules. */
+      panelClassName="w-125 overflow-hidden p-0"
+      content={
+        <div className="flex flex-col">
+          <header className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <h2 className="text-body-lg-semibold text-text-primary">{title}</h2>
+              <SegmentedControl
+                size="sm"
+                aria-label="Show"
+                options={FILTERS}
+                value={activeFilter}
+                onChange={(next) => {
+                  setFilterState(next as NotificationFilter);
+                  onFilterChange?.(next as NotificationFilter);
+                }}
+              />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Toggle
+                label="Unread only"
+                checked={onlyUnread}
+                onChange={(next) => {
+                  setUnreadState(next);
+                  onUnreadOnlyChange?.(next);
+                }}
+              />
+              {onMarkAllRead && (
+                <Menu
+                  align="right"
+                  trigger={
+                    <IconButton
+                      icon="dots-three-vertical"
+                      label="More notification actions"
+                      size="xs"
+                    />
+                  }
+                  items={[{ key: 'mark-all', label: 'Mark all as read', icon: 'check-circle' }]}
+                  onSelect={(key) => key === 'mark-all' && onMarkAllRead()}
+                />
+              )}
+            </div>
+          </header>
+
+          <div
+            ref={listRef}
+            /* Only a tab stop while it actually scrolls. */
+            tabIndex={scrollable ? 0 : undefined}
+            role={scrollable ? 'region' : undefined}
+            aria-label={scrollable ? `${title} list` : undefined}
+            className="max-h-56 overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused"
+          >
+            {items.length > 0 ? (
+              <ul>
+                {items.map((child, index) => (
+                  <li key={React.isValidElement(child) && child.key != null ? child.key : index}>
+                    {child}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-4 py-8 text-center text-body-sm-regular text-text-tertiary">
+                {emptyLabel}
+              </p>
+            )}
+          </div>
+
+          <footer className="border-t border-stroke-default px-4 py-2 text-center">
+            <a
+              href={inboxHref}
+              className={cn(
+                'inline-block rounded-sm text-body-sm-medium text-text-brand-medium',
+                'hover:underline',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+              )}
+            >
+              {inboxLabel}
+            </a>
+          </footer>
+        </div>
+      }
+    />
+  );
+}
+NotificationPopover.displayName = 'NotificationPopover';
