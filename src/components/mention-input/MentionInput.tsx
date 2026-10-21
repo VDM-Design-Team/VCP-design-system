@@ -48,6 +48,19 @@ export function plainText(value: readonly MentionSegment[]): string {
 }
 
 const MENTION_SELECTOR = '[data-type="mention"]';
+
+/** The tag's look, shared by the field (a DOM node) and a posted comment (`MentionTag`). */
+export const MENTION_TAG_CLASS =
+  'mx-px inline-block rounded-sm bg-surface-brand-faint px-1.5 py-0.5 text-body-sm-medium text-text-brand-strong';
+
+/** A mention as it reads in a posted comment: the same tag the field draws. */
+export function MentionTag({ label, id }: { label: string; id?: string }) {
+  return (
+    <span data-type="mention" data-id={id} data-label={label} className={MENTION_TAG_CLASS}>
+      @{label}
+    </span>
+  );
+}
 const MAX_QUERY = 30;
 const MAX_OPTIONS = 8;
 
@@ -93,8 +106,7 @@ function makeTag(id: string, label: string): HTMLSpanElement {
   span.dataset.id = id;
   span.dataset.label = label;
   span.contentEditable = 'false';
-  span.className =
-    'mx-px inline-block rounded-sm bg-surface-brand-faint px-1.5 py-0.5 text-body-sm-medium text-text-brand-strong';
+  span.className = MENTION_TAG_CLASS;
   span.textContent = `@${label}`;
   return span;
 }
