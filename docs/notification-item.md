@@ -13,13 +13,10 @@ hover button.
 | Piece | Tier | Role here |
 |---|---|---|
 | `Avatar` | atom | The actor, 36 (`lg`), initials or a photo, with the avatar's white outline (`ring`) as Figma's `Profile_Initials` draws it |
-| `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`) |
+| `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`), and Reply / Save / Cancel in the composer |
 | `Tooltip` | component | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
-| `CommentControl` | component | "Reply", "Show Reply" / "Hide Reply", "Edit", "Delete" |
-| `CommentComposer` | component | Writing a reply, and editing it |
-| `CommentCard` | component | The posted reply |
 | `EmojiReactionPicker` | component | The reactions row: thumbs-up, the palette and the pills |
-| `MentionInput` | component | Its `MentionSegment` and `MentionMember` types: the reply's words, and who can be mentioned (the field itself is inside `CommentComposer`) |
+| `MentionInput` | component | The field a reply is written in, with @-mentions, and the `MentionTag` a posted reply draws |
 | `Icon` | atom | The check-circle in the mark-read button |
 
 ## When to use
@@ -132,6 +129,14 @@ of either composer; Delete takes the reply away and brings "Reply" back. The rep
 reactions are the caller's data, passed in; the component owns only which of these views is
 showing, and reports what the user did (`onReply`, `onEditReply`, `onDeleteReply`,
 `onToggleReaction`, `onSelectEmoji`).
+
+The reply control, the composer and the reply card are **parts of this component, not
+exported pieces**. They are drawn to the notification popover's own design (a 24 avatar and
+a bordered card), which differs from the comment section's thread (a 32 avatar, a thread
+line), so they are not called "comment" pieces: that would suggest the comments page can
+use them. If that page is built and the designs converge, what they share can be pulled out
+then, under a name that fits both. The field and the mention tag are the shared part, and
+are `MentionInput`'s.
 
 The reactions work as `EmojiReactionPicker` does: the thumbs-up toggles yours, the smiley
 opens the palette, each pill toggles yours, and extras collapse into "+N".

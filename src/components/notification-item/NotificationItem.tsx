@@ -3,12 +3,10 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
-import { CommentCard } from '../comment-card';
-import { CommentComposer } from '../comment-composer';
-import { CommentControl } from '../comment-control';
 import { EmojiReactionPicker, type EmojiReaction } from '../emoji-reaction-picker';
 import type { MentionMember, MentionSegment } from '../mention-input';
 import { Tooltip } from '../tooltip';
+import { ReplyCard, ReplyComposer, ReplyControl } from './NotificationReply';
 
 /**
  * NotificationItem — one line in a list of notifications: who did what to which
@@ -29,7 +27,7 @@ import { Tooltip } from '../tooltip';
  * `Notification_Popover_Comment_Reply` draws them. The row under the card holds
  * "Reply" (or, once there is a reply, "Show Reply" / "Hide Reply") on the left and the
  * reactions on the right, exactly as `EmojiReactionPicker` draws them. "Reply" swaps the
- * row for a composer; a posted reply is one `CommentCard`, hidden until shown, with Edit
+ * row for a composer; a posted reply is one card, hidden until shown, with Edit
  * and Delete under it; Edit puts the composer back, filled. There is **one reply** per
  * comment. The reply and the reactions are the caller's data and come in as props; the
  * component owns only which of those views is showing.
@@ -289,7 +287,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
               {mode === 'idle' && (onReply || reply || hasReactions) && (
                 <div className="flex items-center justify-between gap-4">
                   {reply ? (
-                    <CommentControl
+                    <ReplyControl
                       kind={replyShown ? 'hide' : 'show'}
                       label={replyShown ? 'Hide Reply' : 'Show Reply'}
                       aria-expanded={replyShown}
@@ -297,7 +295,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                       onClick={() => setReplyShown((shown) => !shown)}
                     />
                   ) : onReply ? (
-                    <CommentControl kind="reply" label="Reply" onClick={() => setMode('replying')} />
+                    <ReplyControl kind="reply" label="Reply" onClick={() => setMode('replying')} />
                   ) : (
                     <span />
                   )}
@@ -314,7 +312,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             </div>
 
             {mode === 'replying' && onReply && (
-              <CommentComposer
+              <ReplyComposer
                 autoFocus
                 user={composerUser}
                 members={members}
@@ -330,7 +328,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             )}
 
             {reply && mode === 'editing' && (
-              <CommentComposer
+              <ReplyComposer
                 autoFocus
                 user={reply.author}
                 members={members}
@@ -345,17 +343,17 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             )}
 
             {reply && replyShown && mode !== 'editing' && (
-              <CommentCard
+              <ReplyCard
                 id={replyId}
                 author={reply.author}
                 value={reply.value}
                 actions={
                   <>
                     {onEditReply && (
-                      <CommentControl kind="edit" label="Edit" onClick={() => setMode('editing')} />
+                      <ReplyControl kind="edit" label="Edit" onClick={() => setMode('editing')} />
                     )}
                     {onDeleteReply && (
-                      <CommentControl
+                      <ReplyControl
                         kind="delete"
                         label="Delete"
                         onClick={() => {
