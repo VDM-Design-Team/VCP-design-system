@@ -100,7 +100,7 @@ close; with no button the text keeps its 8.
   light it is darker than Figma's default, which is the cost.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
-- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus) says what the button's own name says. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
+- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus, opening to the left so it stays inside the row and a scrolling list) says what the button's own name says. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
 - The mark-read target is 24, not 40. It sits inside a row that is itself the large
   target, and 24 is the WCAG 2.5.8 floor: a recorded exception, like the table cells.
 - **The preview's** "Show more" is a real button with `aria-expanded` and

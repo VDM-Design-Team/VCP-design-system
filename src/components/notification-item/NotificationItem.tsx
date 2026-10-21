@@ -196,10 +196,14 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             {onToggleRead && (
               /* After a half-second rest, the design's tooltip names the action.
                  The wrapper fills the 24 box, over the dot, so the button inside
-                 keeps the box's whole area. */
+                 keeps the box's whole area. It opens to the left: the button sits on
+                 the row's right edge, so a bubble above it would hang past the edge
+                 (and widen any scrolling list the row is in), and the top row's would
+                 be cut off by the list's top. */
               <Tooltip
                 content={unread ? 'Mark as read' : 'Mark as unread'}
                 openDelay={500}
+                placement="left"
                 className="absolute inset-0 z-10 flex"
               >
                 <button
