@@ -72,7 +72,7 @@ wrong place.)
   composes nothing else in the system.
 - **Component** — one unit assembled from atoms and other components. However
   rich inside, it presents as a single control or display unit (Field, Menu,
-  DataTable, StatusPill).
+  DataTable, StatusTag).
 - **Pattern** — two or more components composed into a distinct page section
   (TopBar, AVHeader).
 - **Template** — a page-level layout arranging patterns into a whole screen

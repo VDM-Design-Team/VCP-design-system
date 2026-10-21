@@ -86,6 +86,7 @@ export function AcceptPendingAVModal({
     >
       {showMultipart && (
         <Checkbox
+          size="md"
           checked={multipart}
           onChange={onMultipartChange}
           /* The card is the label, so the whole thing is a target. The
@@ -94,15 +95,15 @@ export function AcceptPendingAVModal({
           aria-label="Multipart Value"
           aria-describedby={descriptionId}
           className={cn(
-            'w-full items-start gap-3 rounded-md border p-4',
+            'w-full items-start rounded-md border p-4',
             multipart
               ? 'border-stroke-focused bg-surface-brand-faint'
               : 'border-stroke-default bg-surface-elevated',
           )}
           label={
             <span className="flex flex-col gap-1">
-              <span className="text-caption-md-medium text-text-primary">Multipart Value</span>
-              <span id={descriptionId} className="text-caption-md-medium text-text-tertiary">
+              <span className="text-body-sm-medium text-text-primary">Multipart Value</span>
+              <span id={descriptionId} className="text-body-sm-medium text-text-tertiary">
                 Split this value into parts based on its sets, while keeping the original as the
                 parent for overall progress tracking.
               </span>

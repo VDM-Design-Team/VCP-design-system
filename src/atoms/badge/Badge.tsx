@@ -26,7 +26,7 @@ import {
  *
  * **Generic tones only.** The export's `tone` also accepted VCP status names
  * (`accepted`, `for qa`, `confirmed prod`, …). VCP vocabulary belongs in
- * `src/patterns/`, so those are deliberately absent — `StatusPill` will map the
+ * `src/patterns/`, so those are deliberately absent — `StatusTag` will map the
  * statuses onto these tones. Never reintroduce a status name here.
  *
  * Badge is not a control: it takes no focus and fires no events, so the 40

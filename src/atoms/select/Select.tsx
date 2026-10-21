@@ -9,7 +9,7 @@ import { Icon } from '../icon';
  * the platform, correct on every device, for free. When the list needs search,
  * that is `SearchSelect` (to port), which pays the custom-listbox tax.
  *
- * The shell is `Input`'s, class for class: the same `stroke.field` border,
+ * The shell is `Input`'s, class for class: the same `stroke.strong` border,
  * `focus-within` ring, `invalid` treatment, disabled surface, and the same
  * `sm`/`md` = 32/40 heights. Sits beside an Input in a form and nothing
  * betrays which is which until it opens. The export's `small`/`large` size
@@ -41,7 +41,7 @@ const shell = cva(
       },
       invalid: {
         true: 'border-accent-critical-outline-border-default',
-        false: 'border-stroke-field focus-within:border-stroke-focused',
+        false: 'border-stroke-strong focus-within:border-stroke-focused',
       },
       fullWidth: { true: 'flex w-full', false: '' },
     },

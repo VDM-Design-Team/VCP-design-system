@@ -11,7 +11,7 @@ const meta = {
       description: {
         component:
           'An interactive pill: a selected filter, a removable tag, a toggleable option. If it ' +
-          'only classifies and is never clicked, use `Badge`; for VCP statuses, `StatusPill` ' +
+          'only classifies and is never clicked, use `Badge`; for VCP statuses, `StatusTag` ' +
           'The export nested a button inside a clickable span — ' +
           'rebuilt here as real buttons that are never nested, so every control is a tab stop.',
       },

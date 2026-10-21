@@ -26,7 +26,7 @@ const group = cva('flex', {
 
 /** The clickable row. `min-h-10` + `py-2` guarantees the 40 unit minimum target. */
 const optionRow = cva(
-  ['group/radio flex min-h-10 items-start gap-2.5 py-2', 'font-sans text-body-sm-regular'],
+  ['group/radio flex min-h-10 items-start gap-2 py-2', 'font-sans text-body-sm-regular'],
   {
     variants: {
       disabled: {
@@ -48,7 +48,7 @@ const control = cva(
     variants: {
       state: {
         /* 3:1 ring against surface in both themes — see docs/radio-group.md */
-        unchecked: 'border-stroke-field bg-surface-elevated group-hover/radio:border-stroke-brand-strong',
+        unchecked: 'border-stroke-strong bg-surface-elevated group-hover/radio:border-stroke-brand-strong',
         checked:
           'border-action-primary-surface-default bg-surface-elevated group-hover/radio:border-action-primary-surface-hover',
         disabled: 'border-stroke-subtle bg-surface-neutral-faint',
