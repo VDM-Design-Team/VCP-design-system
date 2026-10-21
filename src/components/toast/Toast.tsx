@@ -95,7 +95,7 @@ const toast = cva([
   'pointer-events-auto',
   /* `relative` + clipping so the timer bar can sit flush on the bottom edge
      and follow the rounded corner. It hugs its content up to `max-w-sm`. */
-  'relative flex w-fit max-w-sm items-start gap-2 overflow-hidden',
+  'relative flex w-fit max-w-sm gap-2 overflow-hidden',
   /* A neutral card, as Figma draws it: the tone is the glyph and the bar, not
      a tint. Radius, padding and gaps are the Banner's. shape.radius.md,
      borderWidth.default. ds-lint-ignore */
@@ -180,6 +180,13 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
   ref,
 ) {
   const hasAction = Boolean(actionLabel);
+
+  /* With a title and a message the rows stack and the controls line up with the
+     first line (`items-start`, as the design draws it). With only one of them
+     there is one line of text, and the controls are taller than it — a 40
+     dismiss target on a 20 line — so top-aligning left the title at the top and
+     the X visibly lower. Centre the row instead. */
+  const hasBothLines = title != null && children != null && children !== false;
 
   /* A toast the user is asked to act on must wait for them. This is not a
      suggestion the caller can override — passing both is a mistake, and the
@@ -266,7 +273,7 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
   return (
     <div
       ref={ref}
-      className={cn(toast(), className)}
+      className={cn(toast(), hasBothLines ? 'items-start' : 'items-center', className)}
       /* Deliberately no `role`, no `aria-live`, no `tabIndex`. The live region
          is `ToastViewport`, which was already in the DOM when this arrived, and
          focus stays exactly where the user put it. */

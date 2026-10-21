@@ -275,6 +275,7 @@ ever gets a stronger border step, both should move to it.
 | Title | `type.body-sm-semibold` — 14/20 | `text-body-sm-semibold text-text-primary` |
 | Message | `type.body-sm-medium` — 14/20 | `text-body-sm-medium text-text-secondary` |
 | Padding | Tailwind numeric scale | `p-4` (16) |
+| Row alignment | — | `items-start` with a title and a message (the controls sit on the first line, as in Figma); `items-center` with only one, so a one-line toast has the glyph, text, action and X on one midline |
 | Gap, glyph / text / action / close | Tailwind numeric scale | `gap-2` (8), the Banner's |
 | Gap, title to message | — | none |
 | Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content. The viewport packs the stack to its anchored edge (`items-end`, or `items-center` for the centred positions) so mixed widths line up |

@@ -232,6 +232,43 @@ export const Stacked: Story = {
 };
 
 /**
+ * With a title and no message there is one line of text, so the row is centred:
+ * the glyph, the title, the action and the X share a midline. (Top-aligned, the
+ * title sat at the top with the taller X visibly lower.) With both a title and a
+ * message the controls stay on the first line, as the design draws it.
+ */
+export const TitleOnlyIsCentred: Story = {
+  /* The default args carry a message; this story is about having none. */
+  args: { children: undefined },
+  render: (args) => (
+    <div className="flex flex-col items-start gap-3">
+      <Toast {...args} tone="success" title="Draft saved" onDismiss={() => {}} />
+      <Toast
+        {...args}
+        tone="danger"
+        title="Upload failed"
+        actionLabel="Retry"
+        onAction={() => {}}
+        onDismiss={() => {}}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const mid = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    for (const toast of Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-tone]'))) {
+      const glyph = toast.querySelector('svg') as SVGElement;
+      const text = toast.querySelector('p') as HTMLElement;
+      const close = toast.querySelector('button[aria-label^="Dismiss"]') as HTMLElement;
+      await expect(Math.abs(mid(glyph) - mid(text))).toBeLessThan(1);
+      await expect(Math.abs(mid(close) - mid(text))).toBeLessThan(1);
+    }
+  },
+};
+
+/**
  * Toasts hug their content, so a short one is narrower than the column the stack
  * lives in. The stack packs against the edge it is anchored to — flush right for
  * the right positions, centred for the centred ones — so mixed widths line up
