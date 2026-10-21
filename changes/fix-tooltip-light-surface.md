@@ -1,5 +1,5 @@
 ---
-bump: patch
+bump: minor
 ---
 ### `Tooltip` — a light card, as Figma draws it (October 2026)
 
