@@ -2,8 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { NotificationInbox } from './NotificationInbox';
-import { NotificationInboxItem } from '../../components/notification-inbox-item';
-import type { NotificationKind } from '../../components/notification-item';
+import { NotificationItem, type NotificationKind } from '../../components/notification-item';
 
 const ROWS: { kind: NotificationKind; time: string; unread: boolean; status?: string }[] = [
   { kind: 'handoff', time: '2 days ago', unread: true },
@@ -18,7 +17,7 @@ function Rows({ unreadOnly }: { unreadOnly: boolean }) {
   return (
     <>
       {ROWS.filter((r) => !unreadOnly || r.unread).map((r, i) => (
-        <NotificationInboxItem
+        <NotificationItem
           key={i}
           kind={r.kind}
           actor={{ name: 'John Smith' }}
@@ -27,6 +26,7 @@ function Rows({ unreadOnly }: { unreadOnly: boolean }) {
           time={r.time}
           unread={r.unread}
           href={`#av-${i}`}
+          onToggleRead={() => {}}
         />
       ))}
     </>
@@ -42,7 +42,7 @@ const meta = {
       description: {
         component:
           'The full notifications page: the controls ("Mark all as read", "Show unread only"), the rows, ' +
-          'and the pager. The list is yours — pass `NotificationInboxItem`s as children and filter and ' +
+          'and the pager. The list is yours — pass `NotificationItem`s as children and filter and ' +
           'page them yourself from `onUnreadOnlyChange` and `pagination.onChange`.',
       },
     },

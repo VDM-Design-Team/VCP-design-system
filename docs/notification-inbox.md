@@ -11,12 +11,15 @@ The popover's "View notifications inbox" link goes here.
 
 | Piece | Tier | Role here |
 |---|---|---|
+| `NotificationItem` | component | The rows, passed as children |
 | `Pagination` | component | The pager under the list |
 | `Button` | atom | "Mark all as read" (`tertiary`, `sm`) |
 | `Toggle` | atom | "Show unread only" |
 
-The rows are passed through **children**: `NotificationInboxItem`s, which the stories
-show.
+The rows are passed through **children**: the same `NotificationItem` the popover uses.
+Figma draws an inbox row of its own (`_Notification_Inbox_Item`, a 40 avatar and 8
+padding), but it is the same thing in a wider list, so the system has one component, and
+the two lists cannot drift apart.
 
 ## When to use
 
@@ -32,7 +35,7 @@ show.
 | `unreadOnly` / `onUnreadOnlyChange` | `boolean` | `false` | Uncontrolled when `unreadOnly` is omitted. Reports the wish; filters nothing |
 | `onMarkAllRead` | `() => void` | — | Renders "Mark all as read". Omit it and there is no button |
 | `pagination` | `{ page, pageCount, onChange?, itemCount?, pageSize?, variant? }` | — | The pager. Drawn only when `pageCount > 1` |
-| `children` | `ReactNode` | — | The `NotificationInboxItem`s. Each is wrapped in a `<li>` |
+| `children` | `ReactNode` | — | The `NotificationItem`s. Each is wrapped in a `<li>` |
 | `emptyLabel` | `string` | `No notifications` | What an empty list says |
 | `listLabel` | `string` | `Notifications` | Names the list for assistive tech |
 | `className`, `ref`, rest | | | On the card |
@@ -58,6 +61,7 @@ No new tokens.
 
 ## Differences from the design
 
+- **The rows are `NotificationItem`**, not a separate inbox row: 36 avatar and 16 padding rather than 40 and 8, with the mark-read button on hover. One component for one idea.
 - **No empty state is drawn.** "No notifications" is a plain tertiary line.
 - **"Show unread only" is the system `Toggle`** (40 × 24), not Figma's 36 × 20 switch.
 - **The controls sit at the left**, as Figma draws them.
@@ -65,4 +69,4 @@ No new tokens.
 ## Don't
 
 - **Don't filter or page inside this component.** Pass it the rows to show.
-- **Don't put anything but `NotificationInboxItem`s in the list.**
+- **Don't put anything but `NotificationItem`s in the list.**

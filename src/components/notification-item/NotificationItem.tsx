@@ -39,11 +39,10 @@ export type NotificationKind =
 /**
  * Kind → the sentence, in two parts: the `verb` that follows the actor's name
  * ("commented on"), and an optional `trail` after the subject ("to the
- * backlog"). The strings are the design's. `NotificationInboxItem` reads the same
- * table, so the two rows can never word an event differently; localise by
- * passing your own through a wrapper, not by editing call sites.
+ * backlog"). The strings are the design's; localise by passing your own through a
+ * wrapper, not by editing call sites.
  */
-export const NOTIFICATION_PHRASES: Record<
+const NOTIFICATION_PHRASES: Record<
   NotificationKind,
   { verb: string; trail?: (status?: string) => string }
 > = {

@@ -10,9 +10,12 @@ import { Pagination, type PaginationProps } from '../../components/pagination';
  *
  * Read off Figma's `Notification_Inbox_Content` (`7709:99303`): a `surface.elevated`
  * card, 32 / 16 padding, the controls row on top, the rows, then `VCP_Pagination`.
- * The popover's "View notifications inbox" link goes here.
+ * The popover's "View notifications inbox" link goes here. The rows are the same
+ * `NotificationItem` the popover uses: Figma draws an inbox row of its own
+ * (`_Notification_Inbox_Item`), but it is the same thing in a wider list, so the
+ * system has one.
  *
- * **The list is yours.** Pass `NotificationInboxItem`s as `children`; each goes in a
+ * **The list is yours.** Pass `NotificationItem`s as `children`; each goes in a
  * `<li>`. Which notifications show, for "unread only" and for the page, is the
  * caller's data: this pattern reports the wishes (`onUnreadOnlyChange`,
  * `pagination.onChange`) and filters and pages nothing itself.
@@ -32,7 +35,7 @@ export interface NotificationInboxProps extends React.HTMLAttributes<HTMLDivElem
     PaginationProps,
     'page' | 'pageCount' | 'onChange' | 'itemCount' | 'pageSize' | 'variant'
   >;
-  /** The rows — `NotificationInboxItem`s. Each is wrapped in a `<li>`. */
+  /** The rows — `NotificationItem`s. Each is wrapped in a `<li>`. */
   children?: React.ReactNode;
   /** What an empty list says. Defaults to "No notifications". */
   emptyLabel?: string;
