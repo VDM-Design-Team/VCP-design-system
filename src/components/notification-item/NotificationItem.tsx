@@ -37,26 +37,27 @@ export type NotificationKind =
   | 'viewer';
 
 /**
- * Kind → the sentence. `lead` is the bold run (who and what they did), then the
- * subject in regular weight, then an optional bold `trail`. The strings are the
- * design's; localise by passing your own through a wrapper, not by editing call
- * sites.
+ * Kind → the sentence, in two parts: the `verb` that follows the actor's name
+ * ("commented on"), and an optional `trail` after the subject ("to the
+ * backlog"). The strings are the design's. `NotificationInboxItem` reads the same
+ * table, so the two rows can never word an event differently; localise by
+ * passing your own through a wrapper, not by editing call sites.
  */
-const MESSAGE: Record<
+export const NOTIFICATION_PHRASES: Record<
   NotificationKind,
-  { lead: (actor: string) => string; trail?: (status?: string) => string }
+  { verb: string; trail?: (status?: string) => string }
 > = {
-  commented: { lead: (a) => `${a} commented on` },
-  mention: { lead: (a) => `${a} mentioned you in a comment on` },
-  moved: { lead: (a) => `${a} moved`, trail: (s) => `to ${s ?? '[Status]'}` },
-  accepted: { lead: (a) => `${a} accepts` },
-  updated: { lead: (a) => `${a} made an update to` },
-  rejected: { lead: (a) => `${a} rejected` },
-  'rejected-feedback': { lead: (a) => `${a} rejected`, trail: () => 'with feedback' },
-  assigned: { lead: (a) => `${a} assigned you` },
-  backlog: { lead: (a) => `${a} moved`, trail: () => 'to the backlog' },
-  handoff: { lead: (a) => `${a} completes`, trail: () => '. Ready for review' },
-  viewer: { lead: (a) => `${a} added you as a viewer to` },
+  commented: { verb: 'commented on' },
+  mention: { verb: 'mentioned you in a comment on' },
+  moved: { verb: 'moved', trail: (s) => `to ${s ?? '[Status]'}` },
+  accepted: { verb: 'accepts' },
+  updated: { verb: 'made an update to' },
+  rejected: { verb: 'rejected' },
+  'rejected-feedback': { verb: 'rejected', trail: () => 'with feedback' },
+  assigned: { verb: 'assigned you' },
+  backlog: { verb: 'moved', trail: () => 'to the backlog' },
+  handoff: { verb: 'completes', trail: () => '. Ready for review' },
+  viewer: { verb: 'added you as a viewer to' },
 };
 
 export interface NotificationActor {
@@ -113,20 +114,23 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
     },
     ref,
   ) {
-    const sentence = MESSAGE[kind];
-    const trail = sentence.trail?.(status);
+    const phrase = NOTIFICATION_PHRASES[kind];
+    const trail = phrase.trail?.(status);
     const interactive = Boolean(href || onSelect);
 
+    /* The spaces are text nodes of their own: a space at the start of an inline
+       `<span>` is dropped when the accessible name is computed, which ran the
+       words together ("John Kestrel commented onChange the notification"). */
     const message = (
       <>
         {unread && <span className="sr-only">Unread: </span>}
-        <span className="text-body-sm-bold">{sentence.lead(actor.name)}</span>
-        <span className="text-body-sm-regular"> {subject}</span>
+        <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>{' '}
+        <span className="text-body-sm-regular">{subject}</span>
         {trail && (
-          <span className="text-body-sm-bold">
-            {trail.startsWith('.') ? '' : ' '}
-            {trail}
-          </span>
+          <>
+            {!trail.startsWith('.') && ' '}
+            <span className="text-body-sm-bold">{trail}</span>
+          </>
         )}{' '}
         <span className="text-caption-md-regular text-text-tertiary">{time}</span>
       </>

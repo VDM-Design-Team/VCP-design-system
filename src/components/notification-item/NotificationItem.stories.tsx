@@ -74,7 +74,9 @@ export const Unread: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     /* The row is named from its message, and says it is unread. */
-    const row = canvas.getByRole('link', { name: /Unread: John Kestrel commented on/ });
+    const row = canvas.getByRole('link', {
+      name: 'Unread: John Kestrel commented on Change the notification layout for testing a few seconds ago',
+    });
     await expect(row).toHaveAttribute('href', '#av-1');
     const mark = canvas.getByRole('button', { name: 'Mark as read' });
     await userEvent.click(mark);
