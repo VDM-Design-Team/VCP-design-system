@@ -118,7 +118,9 @@ export function NotificationPopover({
       panelClassName="w-125 overflow-hidden p-0"
       content={
         <div className="flex flex-col">
-          <header className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
+          {/* A div, not <header>: a <header> outside a sectioning element is a banner
+              landmark, and the page already has one (the top bar). */}
+          <div className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
             <div className="flex min-w-0 items-center gap-2">
               <h2 className="text-body-lg-semibold text-text-primary">{title}</h2>
               <SegmentedControl
@@ -156,14 +158,12 @@ export function NotificationPopover({
                 />
               )}
             </div>
-          </header>
+          </div>
 
           <div
             ref={listRef}
             /* Only a tab stop while it actually scrolls. */
             tabIndex={scrollable ? 0 : undefined}
-            role={scrollable ? 'region' : undefined}
-            aria-label={scrollable ? `${title} list` : undefined}
             className="max-h-56 overflow-y-auto overscroll-contain focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused"
           >
             {items.length > 0 ? (
@@ -181,18 +181,18 @@ export function NotificationPopover({
             )}
           </div>
 
-          <footer className="border-t border-stroke-default px-4 py-2 text-center">
+          <div className="border-t border-stroke-default px-4 py-2 text-center">
             <a
               href={inboxHref}
               className={cn(
-                'inline-block rounded-sm text-body-sm-medium text-text-brand-medium',
-                'hover:underline',
+                'inline-block rounded-sm text-body-sm-medium text-text-link-default',
+                'hover:text-text-link-hover hover:underline',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
               )}
             >
               {inboxLabel}
             </a>
-          </footer>
+          </div>
         </div>
       }
     />
