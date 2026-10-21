@@ -5,7 +5,7 @@ import { Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 import { Button } from '../../atoms/button';
 
-const TONES: ToastTone[] = ['info', 'success', 'warning', 'danger'];
+const TONES: ToastTone[] = ['info', 'success', 'warning', 'critical'];
 
 const meta = {
   title: 'Components/Feedback/Toast',
@@ -63,7 +63,7 @@ export const Tones: Story = {
       <Toast {...args} tone="warning" title="Evidence is out of date">
         Last refreshed 41 days ago.
       </Toast>
-      <Toast {...args} tone="danger" title="Save failed">
+      <Toast {...args} tone="critical" title="Save failed">
         We could not reach the server. Nothing was lost.
       </Toast>
     </div>
@@ -82,7 +82,7 @@ export const Tones: Story = {
  */
 export const WithAction: Story = {
   args: {
-    tone: 'danger',
+    tone: 'critical',
     title: 'Upload failed',
     children: 'evidence-q3.pdf did not finish uploading.',
     actionLabel: 'Retry',
@@ -192,7 +192,7 @@ export const AutoDismissPausesOnHover: Story = {
 };
 
 /**
- * Several at once. Note that the two live regions keep `danger` apart from the
+ * Several at once. Note that the two live regions keep `critical` apart from the
  * rest: errors go to the assertive region, everything else to the polite one,
  * so a confirmation never interrupts and an error never waits its turn. The
  * cost is that a mixed batch is not in strict arrival order on screen.
@@ -219,7 +219,7 @@ export const Stacked: Story = {
           },
           {
             id: '4',
-            tone: 'danger',
+            tone: 'critical',
             title: 'Save failed',
             description: 'We could not reach the server.',
             duration: null,
@@ -274,7 +274,7 @@ function ToastTriggers() {
         size="sm"
         onClick={() =>
           toast({
-            tone: 'danger',
+            tone: 'critical',
             title: 'Save failed',
             description: 'We could not reach the server.',
             actionLabel: 'Retry',
@@ -317,7 +317,7 @@ export const LightAndDark: Story = {
               </Toast>
             ))}
             <Toast
-              tone="danger"
+              tone="critical"
               title="Save failed"
               actionLabel="Retry"
               onAction={() => {}}
@@ -446,7 +446,7 @@ export const ActionNeverAutoDismisses: Story = {
   args: { onDismiss: fn(), onAction: fn() },
   render: (args) => (
     <Dismissing
-      tone="danger"
+      tone="critical"
       title="Save failed"
       duration={300}
       actionLabel="Retry"

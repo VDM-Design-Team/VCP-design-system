@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Banner, type BannerTone } from './Banner';
 import { Button } from '../../atoms/button';
 
-const TONES: BannerTone[] = ['info', 'success', 'warning', 'danger'];
+const TONES: BannerTone[] = ['info', 'success', 'warning', 'critical'];
 
 const meta = {
   title: 'Components/Feedback/Banner',
@@ -65,7 +65,7 @@ export const Tones: Story = {
       <Banner tone="warning" title="Two deliverables are missing evidence">
         They cannot move to Confirmed prod until a source is attached.
       </Banner>
-      <Banner tone="danger" title="This workspace is over its seat limit">
+      <Banner tone="critical" title="This workspace is over its seat limit">
         New members cannot be invited until a seat is freed or the plan is upgraded.
       </Banner>
     </div>
@@ -114,7 +114,7 @@ export const WithAction: Story = {
         They cannot move to Confirmed prod until a source is attached.
       </Banner>
       <Banner
-        tone="danger"
+        tone="critical"
         title="This workspace is over its seat limit"
         actionLabel="Manage seats"
         onAction={() => {}}
@@ -141,7 +141,7 @@ export const Dismissible: Story = {
       info: true,
       success: true,
       warning: true,
-      danger: true,
+      critical: true,
     });
     const anyClosed = TONES.some((tone) => !open[tone]);
     return (
@@ -163,7 +163,7 @@ export const Dismissible: Story = {
             size="sm"
             className="self-start"
             onClick={() =>
-              setOpen({ info: true, success: true, warning: true, danger: true })
+              setOpen({ info: true, success: true, warning: true, critical: true })
             }
           >
             Bring them back
@@ -248,7 +248,7 @@ export const AnnouncedOnAppearance: Story = {
           )}
           {state === 'failed' && (
             <Banner
-              tone="danger"
+              tone="critical"
               title="Save failed"
               actionLabel="Try again"
               onAction={() => setState('saved')}

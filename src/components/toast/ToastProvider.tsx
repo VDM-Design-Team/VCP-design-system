@@ -75,7 +75,7 @@ export function useToast(): ToastContextValue {
  * - `role="status"` (implicitly `aria-live="polite"`) takes `info`, `success`
  *   and `warning`. Polite waits for a gap in speech. A "Saved" confirmation that
  *   cuts the user off mid-sentence costs them their place for no benefit.
- * - `role="alert"` (implicitly `aria-live="assertive"`) takes `danger` only.
+ * - `role="alert"` (implicitly `aria-live="assertive"`) takes `critical` only.
  *   Assertive interrupts. That is only ever worth it when carrying on would
  *   waste the user's work — a failed save, a lost connection. Route anything
  *   else here and users learn to tune the region out.
@@ -132,8 +132,8 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
     },
     ref,
   ) {
-    const polite = toasts.filter((t) => (t.tone ?? 'info') !== 'danger');
-    const assertive = toasts.filter((t) => t.tone === 'danger');
+    const polite = toasts.filter((t) => (t.tone ?? 'info') !== 'critical');
+    const assertive = toasts.filter((t) => t.tone === 'critical');
 
     return (
       <div ref={ref} className={cn(viewport({ position }), className)} {...props}>

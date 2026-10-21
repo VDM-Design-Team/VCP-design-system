@@ -44,7 +44,7 @@ action never auto-dismisses.
 
 **Never use a Toast for an error the user must fix.** Errors that block a task
 belong next to the thing that is broken — a `Field` error, or a `Banner` at the
-top of the form. `tone="danger"` on a Toast is for something that failed
+top of the form. `tone="critical"` on a Toast is for something that failed
 *behind* the user, like a background save.
 
 ## Parts
@@ -60,7 +60,7 @@ top of the form. `tone="danger"` on a Toast is for something that failed
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical`, and routes to the assertive region |
+| `tone` | `info \| success \| warning \| critical` | `info` | `critical` is the `accent.critical` family (it was `danger` before October 2026), and routes to the assertive region |
 | `title` | `ReactNode` | — | The headline. One clause |
 | `children` | `ReactNode` | — | Supporting detail. Usually unnecessary |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
@@ -149,7 +149,7 @@ directions.
   waits for a gap in speech. A "Draft saved" confirmation that cuts a user off
   mid-sentence costs them their place in the page and buys nothing: the save
   already happened, and nothing about it is urgent.
-- **`role="alert"` — assertive — takes `danger` only.** Assertive interrupts
+- **`role="alert"` — assertive — takes `critical` only.** Assertive interrupts
   whatever is being read, immediately. That is only worth its cost when carrying
   on would waste the user's work: a failed save, a dropped connection, an upload
   that did not finish. Route ordinary confirmations here and users learn to tune
@@ -215,7 +215,7 @@ light and 1.72–2.06:1 in dark. Nothing about the tone is carried by it. So:
 - **Each glyph carries the tone as its accessible name**, so the tone survives
   into the announcement as a word: *"Error, Save failed, we could not reach the
   server"*. Override with `toneLabel` to localise; never set it to `''`.
-- **The text always says what happened.** `<Toast tone="danger" />` with no
+- **The text always says what happened.** `<Toast tone="critical" />` with no
   title is a red rectangle that means nothing to anyone.
 
 ## Tokens
@@ -229,7 +229,7 @@ own fill, measured, both themes. AA asks 4.5:1.
 | `info` | `accent.info.tonal.surface.default` | `accent.info.tonal.content.default` | **5.60:1** | **7.29:1** |
 | `success` | `accent.success.tonal.surface.default` | `accent.success.tonal.content.default` | **8.24:1** | **6.46:1** |
 | `warning` | `accent.warning.tonal.surface.default` | `accent.warning.tonal.content.default` | **4.59:1** | **7.45:1** |
-| `danger` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
+| `critical` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
 
 **`warning` in light is the floor at 4.59:1**, exactly as it is for Badge — 0.09
 above the line. Any move of either token breaks this component and Badge at the
@@ -303,7 +303,7 @@ Dark comes for free: every colour above is a semantic token that
   convention it invented rather than a pair the tokens state.
 - **`accent.<tone>.outline.border.default` cannot be used as a container
   edge.** Against `surface.canvas` in light it measures 3.60 (`info`), 2.12
-  (`success`), 1.83 (`warning`), 3.64 (`danger`) — two of the four fail 3:1. The
+  (`success`), 1.83 (`warning`), 3.64 (`critical`) — two of the four fail 3:1. The
   token named `border` is the one you cannot draw a border with. Either it moves
   a step or two darker, or the family needs a separate `border.strong`.
 - **No motion or timing tokens.** `DEFAULT_TOAST_DURATION` is a TypeScript

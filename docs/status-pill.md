@@ -72,7 +72,7 @@ token that already carried that exact hex.
 | Review | info tonal | `#dbeafe` / `#1447e6` |
 | Review *(actionable)* | **info filled** | `#155dfc` / `#ffffff` |
 | Completed | success tonal | `#dcfce7` / `#008236` |
-| Rejected | danger tonal | `#ffe2e2` / `#9f0712` |
+| Rejected | critical tonal | `#ffe2e2` / `#9f0712` |
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
 
@@ -156,7 +156,7 @@ the text should be carrying.
 ## Don't
 
 - **Don't map statuses to tones anywhere else.** `tone={status === 'Blocked'
-  ? 'danger' : …}` at a call site means this file failed; add here instead.
+  ? 'critical' : …}` at a call site means this file failed; add here instead.
 - **Don't add a domain step to `AVStatus`.** The union is the spine — the
   statuses every domain shares and the application branches on. A step that
   belongs to one domain goes through `custom`, whatever it is called.

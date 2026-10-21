@@ -64,7 +64,7 @@ applies to; so is a form error at the top of the whole page.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical` |
+| `tone` | `info \| success \| warning \| critical` | `info` | `critical` is the `accent.critical` family (it was `danger` before October 2026) |
 | `title` | `ReactNode` | — | The headline. One clause |
 | `children` | `ReactNode` | — | The body. Say what happened and what to do |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
@@ -106,7 +106,7 @@ put the region on the slot that was always there:
 // The wrapper is mounted with the form and never unmounts. This is the region.
 <div role="status" aria-live="polite" aria-atomic="false">
   {error && (
-    <Banner tone="danger" title={error} onDismiss={clear} dismissLabel={`Dismiss: ${error}`} />
+    <Banner tone="critical" title={error} onDismiss={clear} dismissLabel={`Dismiss: ${error}`} />
   )}
 </div>
 ```
@@ -192,7 +192,7 @@ measured, both themes. AA asks 4.5:1.
 | `info` | `accent.info.tonal.surface.default` | `accent.info.tonal.content.default` | **5.60:1** | **7.29:1** |
 | `success` | `accent.success.tonal.surface.default` | `accent.success.tonal.content.default` | **8.24:1** | **6.46:1** |
 | `warning` | `accent.warning.tonal.surface.default` | `accent.warning.tonal.content.default` | **4.59:1** | **7.45:1** |
-| `danger` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
+| `critical` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
 
 **`warning` in light is the floor at 4.59:1**, exactly as it is for Badge — 0.09
 above the line. Any move of either token breaks Badge, Banner and Toast at once.
@@ -212,7 +212,7 @@ held to the house 3:1 rule.
 
 Floor 3.89:1. `outline.**border**.default` — the token whose *name* says border
 — is deliberately not used: against the canvas in light it measures 3.60
-(`info`), 2.12 (`success`), **1.83** (`warning`), 3.64 (`danger`), so two of the
+(`info`), 2.12 (`success`), **1.83** (`warning`), 3.64 (`critical`), so two of the
 four tones would give a banner no discernible edge. See *Token gaps*.
 
 ### The controls on the fill
@@ -323,7 +323,7 @@ Dark comes for free: every colour above is a semantic token that
   One per region; if there are genuinely three problems, say so in one banner.
 - **Don't rely on the tint.** The fill is roughly 1.1:1 against the page —
   write a title that works in greyscale.
-- Don't use `danger` for emphasis. It means something is wrong, not that
+- Don't use `critical` for emphasis. It means something is wrong, not that
   something is important.
 - Don't put a form, a link list, or two actions in a Banner. One action, or
   none, and let the body point at where the work happens.

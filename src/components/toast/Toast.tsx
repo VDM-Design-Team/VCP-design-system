@@ -5,8 +5,8 @@ import { Button } from '../../atoms/button';
 import { Icon, type IconName } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 
-/** The four accent families a Toast can speak in. `danger` is `accent.critical`. */
-export type ToastTone = 'info' | 'success' | 'warning' | 'danger';
+/** The four accent families a Toast can speak in, named as the `accent.*` token families are. */
+export type ToastTone = 'info' | 'success' | 'warning' | 'critical';
 
 /**
  * How long a Toast waits before it dismisses itself, when nobody says otherwise.
@@ -27,7 +27,7 @@ const TONE_ICON: Record<ToastTone, IconName> = {
   info: 'info',
   success: 'check-circle',
   warning: 'warning',
-  danger: 'x-circle',
+  critical: 'x-circle',
 };
 
 /**
@@ -39,7 +39,7 @@ const TONE_LABEL: Record<ToastTone, string> = {
   info: 'Information',
   success: 'Success',
   warning: 'Warning',
-  danger: 'Error',
+  critical: 'Error',
 };
 
 /**
@@ -113,7 +113,7 @@ const toast = cva(
           'text-accent-warning-tonal-content-default',
           'border-accent-warning-outline-content-default',
         ],
-        danger: [
+        critical: [
           'bg-accent-critical-tonal-surface-default',
           'text-accent-critical-tonal-content-default',
           'border-accent-critical-outline-content-default',
@@ -146,7 +146,7 @@ const TONE_CONTROL: Record<ToastTone, string> = {
     'hover:bg-accent-warning-tonal-surface-hover hover:text-accent-warning-tonal-content-hover',
     'active:bg-accent-warning-tonal-surface-pressed active:text-accent-warning-tonal-content-pressed',
   ].join(' '),
-  danger: [
+  critical: [
     'text-accent-critical-tonal-content-default',
     'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover',
     'active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed',
@@ -177,7 +177,7 @@ const TONE_ACTION: Record<ToastTone, string> = {
     'hover:bg-accent-warning-tonal-surface-hover hover:text-accent-warning-tonal-content-hover hover:border-accent-warning-tonal-content-hover',
     'active:bg-accent-warning-tonal-surface-pressed active:text-accent-warning-tonal-content-pressed active:border-accent-warning-tonal-content-pressed',
   ].join(' '),
-  danger: [
+  critical: [
     'bg-transparent text-accent-critical-tonal-content-default',
     'border-accent-critical-tonal-content-default',
     'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover hover:border-accent-critical-tonal-content-hover',

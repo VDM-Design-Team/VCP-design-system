@@ -21,7 +21,7 @@ two of these.
 |---|---|---|---|
 | `value` | `number` | required | Clamped into `0…max`; announced in real units |
 | `max` | `number` | `100` | — |
-| `tone` | `brand \| success \| warning \| danger` | `brand` | Consumption status — the caller's judgment |
+| `tone` | `brand \| success \| warning \| critical` | `brand` | Consumption status — the caller's judgment |
 | `size` / `thickness` | `number` | `140` / `16` | SVG geometry — a chart is measured, not stepped |
 | `half` | `boolean` | — | The half-donut gauge (Cycle Summary treatment) |
 | `label` | `ReactNode` | derived `%` | Replaces the centred text. Visual only |
@@ -33,18 +33,18 @@ two of these.
 The export turned amber at 75% and red at 90% on its own, and its `tone`
 accepted arbitrary colour strings. Both removed: **thresholds are domain
 knowledge** (docs/progress-bar.md carries the ruling), and colours are
-tokens. The Tones story shows the caller walking `brand → warning → danger`
+tokens. The Tones story shows the caller walking `brand → warning → critical`
 by its own rules. If the same thresholds appear at three call sites, that is
 a pattern to write.
 
 ## Tokens
 
 The ProgressBar set, stroke-flavoured: track `surface.track`, fills
-`surface.brand.strong` and the `accent.{success,warning,danger}.filled`
+`surface.brand.strong` and the `accent.{success,warning,critical}.filled`
 surfaces. Centre numeral in the numeric face (`font.family.numeric`,
 semibold), scaled with the ring — geometry, not the type ramp; caption
 `label-sm` `text.tertiary`. No new tokens. Fill-vs-track contrast is measured
-per tone in docs/progress-bar.md (floor 3.84:1, dark danger) and applies
+per tone in docs/progress-bar.md (floor 3.84:1, dark critical) and applies
 unchanged.
 
 ## Accessibility
