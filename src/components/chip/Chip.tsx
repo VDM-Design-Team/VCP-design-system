@@ -31,7 +31,15 @@ import { Icon } from '../../atoms/icon';
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 
+export type ChipTone = 'brand' | 'neutral';
+
 export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onClick'> {
+  /**
+   * `brand` (default) is the blue-tinted pill. `neutral` is the grey one a
+   * value wears inside a field (`MultiSelect`'s selected tags), where blue
+   * would read as an action.
+   */
+  tone?: ChipTone;
   /** The visible label. Keep it short — the pill never wraps. */
   label: React.ReactNode;
   /** Leading node — an `<Avatar size="sm" />` fits the 28 pill exactly. */
@@ -61,11 +69,19 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onCl
 
 /* The pill's fill: brand-tinted at rest, one step up when hovered or selected.
    text.primary stays the label colour on both — measured in docs/chip.md. */
-const pill = (interactive: boolean, selected: boolean) =>
+const pill = (interactive: boolean, selected: boolean, tone: ChipTone) =>
   cn(
     'inline-flex h-7 max-w-full items-center rounded-full font-sans text-label-sm-medium text-text-primary transition-colors',
-    selected ? 'bg-surface-brand-subtle' : 'bg-surface-brand-faint',
-    interactive && !selected && 'hover:bg-surface-brand-subtle',
+    tone === 'neutral'
+      ? selected
+        ? 'bg-surface-neutral-medium'
+        : 'bg-surface-neutral-subtle'
+      : selected
+        ? 'bg-surface-brand-subtle'
+        : 'bg-surface-brand-faint',
+    interactive &&
+      !selected &&
+      (tone === 'neutral' ? 'hover:bg-surface-neutral-medium' : 'hover:bg-surface-brand-subtle'),
   );
 
 const focusRing =
@@ -73,7 +89,7 @@ const focusRing =
 
 export const Chip = React.forwardRef<HTMLElement, ChipProps>(
   (
-    { className, label, avatar, count, onRemove, onClick, selected, removeLabel, ...props },
+    { className, tone = 'brand', label, avatar, count, onRemove, onClick, selected, removeLabel, ...props },
     ref,
   ) => {
     const content = (
@@ -105,7 +121,7 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
             type="button"
             onClick={onClick}
             aria-pressed={selected}
-            className={cn(pill(true, !!selected), padding, focusRing, className)}
+            className={cn(pill(true, !!selected, tone), padding, focusRing, className)}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >
             {content}
@@ -115,7 +131,7 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
       return (
         <span
           ref={ref as React.Ref<HTMLSpanElement>}
-          className={cn(pill(false, !!selected), padding, className)}
+          className={cn(pill(false, !!selected, tone), padding, className)}
           {...props}
         >
           {content}
@@ -131,7 +147,7 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
     return (
       <span
         ref={ref as React.Ref<HTMLSpanElement>}
-        className={cn(pill(!!onClick, !!selected), 'pr-1', className)}
+        className={cn(pill(!!onClick, !!selected, tone), 'pr-1', className)}
         {...props}
       >
         {onClick ? (
@@ -162,7 +178,9 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
           onClick={onRemove}
           className={cn(
             'grid size-5 shrink-0 place-items-center rounded-full text-text-secondary transition-colors',
-            'hover:bg-surface-brand-medium hover:text-text-primary',
+            tone === 'neutral'
+              ? 'hover:bg-surface-neutral-medium hover:text-text-primary'
+              : 'hover:bg-surface-brand-medium hover:text-text-primary',
             focusRing,
             'focus-visible:outline-offset-0',
           )}

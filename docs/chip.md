@@ -40,6 +40,7 @@ button inside a button, so the rebuilt Chip changes shape instead:
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
+| `tone` | `'brand' \| 'neutral'` | `brand` | `neutral` is the grey pill a value wears inside a field (`MultiSelect`'s tags), where blue would read as an action |
 | `label` | `ReactNode` | — | Never wraps; truncates with an ellipsis when constrained |
 | `avatar` | `ReactNode` | — | Leading slot. `<Avatar size="sm" />` fits the 28 pill exactly |
 | `count` | `number` | — | Suffix after a hairline rule, set in the numeric face (`caption-md`) |
@@ -67,6 +68,18 @@ Contrast, measured (WCAG AA asks 4.5:1 for text, 3:1 for UI graphics):
 | ✕ glyph on selected fill | **7.03:1** | **7.34:1** |
 | ✕ glyph on its hover fill | **8.73:1** | **3.77:1** |
 | Count hairline on rest fill | 3.24:1 | 2.14:1 |
+
+`tone="neutral"` swaps the fills for `surface.neutral.subtle` at rest and `surface.neutral.medium`
+when hovered or selected (the ✕'s hover fill is `surface.neutral.medium` too). Measured the same way:
+
+| Pair | Light | Dark |
+|---|---|---|
+| Label on rest fill | **18.41:1** | **10.35:1** |
+| Label on selected/hover fill | **13.59:1** | **4.76:1** |
+| ✕ glyph on rest fill | **9.45:1** | **8.40:1** |
+| ✕ glyph on selected fill | **6.97:1** | **3.86:1** |
+
+The first pick for the ✕'s hover fill, `surface.neutral.strong`, measured 1.48:1 in dark and was dropped.
 
 Everything interactive clears its bar in both themes; the ✕-hover floor is
 3.77:1 in dark against the 3:1 a glyph needs. The count hairline is
