@@ -370,6 +370,67 @@ export const CancelReply: Story = {
   },
 };
 
+/* WCAG 1.4.11 asks 3:1 of a graphic that carries meaning. axe does not measure icons or dots, so this does. */
+const rgb = (css: string) => css.match(/\d+/g)!.slice(0, 3).map(Number);
+const hex = (value: string) => {
+  const h = value.trim().replace('#', '');
+  return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+};
+const luminance = ([r, g, b]: number[]) => {
+  const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/**
+ * The unread dot and the mark-read check hold 3:1 in both themes: against the row at rest, and
+ * against the hover and pressed fills the check sits on. The check's own hover colour is checked
+ * too. (An earlier version used `stroke.brand.medium`, which in dark was 2.37:1 on the row.)
+ */
+export const MarkersClear3to1: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  decorators: [],
+  render: (args) => (
+    <div>
+      {[false, true].map((isDark) => (
+        <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
+          <div className="flex justify-center bg-surface-canvas p-8">
+            <div className="w-128">
+              <NotificationItem {...args} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const theme of ['light', 'dark']) {
+      const scope = canvasElement.querySelector(`[data-theme-case="${theme}"]`) as HTMLElement;
+      const row = scope.querySelector('[data-unread]') as HTMLElement;
+      const style = getComputedStyle(row);
+      const rest = rgb(style.backgroundColor);
+      const hover = hex(style.getPropertyValue('--color-neutral-outline-surface-hover'));
+      const pressed = hex(style.getPropertyValue('--color-neutral-outline-surface-pressed'));
+      const dot = rgb(getComputedStyle(row.querySelector('span.rounded-full') as HTMLElement).backgroundColor);
+      const check = rgb(getComputedStyle(row.querySelector('button[aria-label^="Mark"]') as HTMLElement).color);
+      const checkHover = hex(style.getPropertyValue('--color-text-brand-strong'));
+      for (const [name, fg, bg] of [
+        ['dot on the row', dot, rest],
+        ['check on the row', check, rest],
+        ['check on the hover fill', check, hover],
+        ['check on the pressed fill', check, pressed],
+        ['check, hovered, on the hover fill', checkHover, hover],
+        ['check, hovered, on the pressed fill', checkHover, pressed],
+      ] as const) {
+        await expect({ theme, name, ok: contrast(fg, bg) >= 3 }).toEqual({ theme, name, ok: true });
+      }
+    }
+  },
+};
+
 /** Both themes. Every colour is a semantic token, so dark comes for free. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
