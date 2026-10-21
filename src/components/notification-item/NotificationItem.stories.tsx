@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { NotificationItem, type NotificationKind } from './NotificationItem';
 
 const SUBJECT = 'Change the notification layout for testing';
@@ -90,10 +90,16 @@ export const Read: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('link', { name: /^John Kestrel accepts/ })).toBeVisible();
-    /* Read: a filled check-circle stays on the right, and it is the mark-unread button. */
+    /* Read: empty on the right at rest. The mark-unread button is there for the
+       keyboard, but invisible until the row is hovered or focused. */
     const mark = canvas.getByRole('button', { name: 'Mark as unread' });
     await expect(mark).toBeInTheDocument();
-    await expect(getComputedStyle(mark).opacity).toBe('1');
+    await expect(getComputedStyle(mark).opacity).toBe('0');
+    /* Tab to the row, then to the button: focus brings it in. */
+    await userEvent.tab();
+    await userEvent.tab();
+    await expect(mark).toHaveFocus();
+    await waitFor(() => expect(getComputedStyle(mark).opacity).toBe('1'));
     await expect(canvasElement.querySelector('[data-unread]')).toBeNull();
   },
 };
@@ -147,9 +153,9 @@ export const AsAButton: Story = {
 export const Static: Story = {
   args: { href: undefined, onSelect: undefined, onToggleRead: undefined, unread: false },
   play: async ({ canvasElement }) => {
-    /* Read with nothing to press: the filled check-circle is still drawn, as decoration. */
-    await expect(canvasElement.querySelector('[data-read-mark]')).not.toBeNull();
+    /* Read with nothing to press: nothing on the right at all. */
     await expect(within(canvasElement).queryByRole('button')).toBeNull();
+    await expect(canvasElement.querySelector('[data-read-mark]')).toBeNull();
   },
 };
 

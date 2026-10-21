@@ -161,7 +161,9 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         {...props}
       >
         <div className="flex items-center gap-4">
-          <Avatar name={actor.name} src={actor.src} size="lg" className="shrink-0" />
+          {/* `ring` is the avatar's white outline (a `surface.elevated` ring), as Figma's
+              `Profile_Initials` draws its white stroke. */}
+          <Avatar name={actor.name} src={actor.src} size="lg" ring className="shrink-0" />
           {href ? (
             <a data-main href={href} className={stretch}>
               {message}
@@ -175,10 +177,10 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
           )}
 
           {/* The trailing slot, one 24 box so the row never shifts. Unread: the dot
-              until the row is hovered or focused, when it dissolves into the
-              mark-read button (an outlined check-circle). Read: a filled
-              check-circle, which is also the mark-unread button when there is
-              one. Every change is a dissolve, not a jump. */}
+              at rest, which dissolves into an outlined check-circle (mark as read)
+              on hover and focus. Read: empty at rest; on hover and focus a filled
+              check-circle (mark as unread) dissolves in. Every change is a
+              dissolve, not a jump. */}
           <span className="relative flex size-6 shrink-0 items-center justify-center">
             {unread && (
               <span
@@ -190,7 +192,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 )}
               />
             )}
-            {onToggleRead ? (
+            {onToggleRead && (
               <button
                 type="button"
                 onClick={onToggleRead}
@@ -198,24 +200,13 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 className={cn(
                   'absolute inset-0 z-10 flex items-center justify-center rounded-pill',
                   'text-stroke-brand-medium hover:text-stroke-focused',
+                  'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
                   'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
-                  unread
-                    ? 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
-                    : 'opacity-100',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                 )}
               >
                 <Icon name={unread ? 'check-circle' : 'check-circle-fill'} size="md" />
               </button>
-            ) : (
-              !unread && (
-                <Icon
-                  data-read-mark
-                  name="check-circle-fill"
-                  size="md"
-                  className="text-stroke-brand-medium"
-                />
-              )
             )}
           </span>
         </div>
@@ -256,7 +247,7 @@ function CommentPreview({ text }: { text: string }) {
   }, [text, expanded]);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-md bg-surface-elevated">
+    <div className="flex flex-col overflow-hidden rounded-md border border-stroke-default bg-surface-elevated">
       {/* No bottom padding while "Show more / less" follows, so the text and the
           button sit close; with no button the text keeps its 8. */}
       <div className={cn('relative px-3 pt-2', hasToggle ? 'pb-0' : 'pb-2')}>
