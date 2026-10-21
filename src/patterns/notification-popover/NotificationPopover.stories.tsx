@@ -126,6 +126,11 @@ export const Open: Story = {
       expect(inPanel.getAllByRole('link', { name: /John Kestrel/ })).toHaveLength(2),
     );
 
+    /* No sideways scrolling: the list never overflows its width. */
+    const list = inPanel.getAllByRole('link', { name: /John Kestrel/ })[0].closest('ul')!
+      .parentElement as HTMLElement;
+    await expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
+
     /* The footer goes to the inbox. */
     await expect(inPanel.getByRole('link', { name: 'View notifications inbox' })).toHaveAttribute(
       'href',
