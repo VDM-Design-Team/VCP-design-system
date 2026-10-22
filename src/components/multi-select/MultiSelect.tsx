@@ -2,12 +2,12 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
-import { Chip } from '../chip';
+import { Tag } from '../../atoms/tag';
 
 /**
  * MultiSelect — several choices from a fixed list, from a dropdown field. The
- * field shows what is picked, as grey chips you can remove one by one
- * (`display="chips"`, Figma's Tags filter) or as a short summary
+ * field shows what is picked, as grey tags you can remove one by one
+ * (`display="tags"`, Figma's Tags filter) or as a short summary
  * (`display="summary"`, "In Progress" or "3 selected"); the panel is a list of
  * checkbox rows, optionally under group headings.
  *
@@ -24,7 +24,7 @@ import { Chip } from '../chip';
  * `aria-expanded`, `aria-controls` and `aria-activedescendant`, so focus stays
  * on it while arrows move through a `listbox` of `option`s
  * (`aria-multiselectable`). It is a `<button>` so a `Field` label's `htmlFor`
- * reaches it. The chips' ✕ buttons are siblings of it, never inside it: a
+ * reaches it. The tags' ✕ buttons are siblings of it, never inside it: a
  * button may not contain a button.
  *
  * The panel is positioned inline (absolute, under the field), like
@@ -37,14 +37,14 @@ import { Chip } from '../chip';
  */
 export interface MultiSelectOption {
   value: string;
-  /** A string on purpose: it is what the chip and the summary say. */
+  /** A string on purpose: it is what the tag and the summary say. */
   label: string;
   /** Rows sharing a `group` sit under one heading, in the order first seen. */
   group?: string;
   disabled?: boolean;
 }
 
-export type MultiSelectDisplay = 'chips' | 'summary';
+export type MultiSelectDisplay = 'tags' | 'summary';
 
 export interface MultiSelectProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
@@ -83,7 +83,7 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
       value,
       onChange,
       placeholder = 'Select…',
-      display = 'chips',
+      display = 'tags',
       confirm,
       applyLabel = 'Apply',
       clearLabel = 'Clear all',
@@ -218,15 +218,16 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
             disabled && 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle',
           )}
         >
-          {display === 'chips' && committed.length > 0 && (
-            <span className="flex flex-wrap gap-1.5">
+          {display === 'tags' && committed.length > 0 && (
+            <span className="flex flex-wrap gap-2">
               {committed.map((v) => (
-                <Chip
+                <Tag
                   key={v}
-                  tone="neutral"
-                  label={labelOf(v)}
+                  size="sm"
                   onRemove={disabled ? undefined : () => commit(committed.filter((x) => x !== v))}
-                />
+                >
+                  {labelOf(v)}
+                </Tag>
               ))}
             </span>
           )}
@@ -254,14 +255,14 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
               display === 'summary' && summary
                 ? 'text-body-sm-medium text-text-primary'
                 : 'text-body-sm-regular text-text-subtle',
-              display === 'chips' && committed.length > 0 && 'justify-end',
+              display === 'tags' && committed.length > 0 && 'justify-end',
               'disabled:cursor-not-allowed disabled:text-text-disabled',
             )}
           >
             {display === 'summary' && summary ? (
               <span className="min-w-0 truncate">{summary}</span>
-            ) : display === 'chips' && committed.length > 0 ? (
-              /* The chips carry the value; the button still needs a name. */
+            ) : display === 'tags' && committed.length > 0 ? (
+              /* The tags carry the value; the button still needs a name. */
               <span className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
             ) : (
               <span className="min-w-0 truncate">{placeholder}</span>

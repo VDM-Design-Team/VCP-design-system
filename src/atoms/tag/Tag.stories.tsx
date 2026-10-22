@@ -1,4 +1,6 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Tag } from './Tag';
 import { Icon } from '../icon';
 
@@ -12,8 +14,8 @@ const meta = {
     docs: {
       description: {
         component:
-          'A small, non-interactive, rounded-rectangle label that classifies the thing beside ' +
-          'it — a different shape from `Badge`\'s pill, even though they share the same four ' +
+          'A small, rounded-rectangle label that classifies the thing beside it (or, with ' +
+          '`onRemove`, a value you can take back out) — a different shape from `Badge`\'s pill, even though they share the same four ' +
           'styles and six tones (`../../lib/classification-tones`). ' +
           '`TypeTag` and `UrgencyTag` compose this rather than each hand-rolling their own shell ' +
           '— introducing a new contextual tag means composing `Tag`, not building a second one.',
@@ -122,6 +124,47 @@ export const WithLeadingIcon: Story = {
       </Tag>
     </div>
   ),
+};
+
+/**
+ * `onRemove` adds a ✕ at the end — a value picked into a field, or an AV's tag in edit mode.
+ * The ✕ is the only focusable part, named `Remove ${label}`.
+ */
+export const Removable: Story = {
+  args: { onRemove: fn() },
+  render: function Render(args) {
+    const [tags, setTags] = React.useState(['VCP', 'OfferPump', 'WHU']);
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        {tags.map((t) => (
+          <Tag
+            key={t}
+            {...args}
+            size="sm"
+            onRemove={() => {
+              setTags((l) => l.filter((x) => x !== t));
+              args.onRemove?.();
+            }}
+          >
+            {t}
+          </Tag>
+        ))}
+        <Tag {...args} variant="outline" tone="success" onRemove={args.onRemove}>
+          Approved
+        </Tag>
+      </div>
+    );
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    /* Keyboard-reachable: Tab lands on the first ✕, Enter removes it. */
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Remove VCP' })).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onRemove).toHaveBeenCalledTimes(1);
+    await expect(canvas.queryByText('VCP')).toBeNull();
+    await expect(canvas.getByText('OfferPump')).toBeVisible();
+  },
 };
 
 /** Rounded-rectangle beside Badge's pill — the shape difference the two share nothing else in common on. */

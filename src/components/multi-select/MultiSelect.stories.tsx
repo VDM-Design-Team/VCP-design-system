@@ -30,7 +30,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Several choices from a fixed list. The field shows them as removable chips or a short ' +
+          'Several choices from a fixed list. The field shows them as removable tags or a short ' +
           'summary; the panel is checkbox rows, optionally grouped. `confirm` drafts the ticks ' +
           'behind a Clear all / Apply footer. For one choice use `Select`; to find one by typing, ' +
           '`SearchSelect`.',
@@ -39,7 +39,7 @@ const meta = {
   },
   args: { options: TAGS, placeholder: 'Select tags', onChange: fn() },
   argTypes: {
-    display: { control: 'inline-radio', options: ['chips', 'summary'] },
+    display: { control: 'inline-radio', options: ['tags', 'summary'] },
     confirm: { control: 'boolean' },
     disabled: { control: 'boolean' },
     invalid: { control: 'boolean' },
@@ -71,7 +71,7 @@ function Controlled(props: React.ComponentProps<typeof MultiSelect>) {
   );
 }
 
-/** Figma's Tags filter: grey chips in the field, grouped checkbox rows in the panel. */
+/** Figma's Tags filter: grey tags in the field, grouped checkbox rows in the panel. */
 export const Tags: Story = {
   render: (args) => <Controlled {...args} aria-label="Tags" />,
   play: async ({ canvasElement, args }) => {
@@ -92,7 +92,7 @@ export const Tags: Story = {
     await expect(field).toHaveAttribute('aria-expanded', 'false');
     await expect(field).toHaveFocus();
 
-    /* The picks are chips, each with its own ✕. */
+    /* The picks are tags, each with its own ✕. */
     await userEvent.click(canvas.getByRole('button', { name: 'Remove Bug' }));
     await expect(args.onChange).toHaveBeenLastCalledWith(['improvement']);
     await expect(canvas.queryByRole('button', { name: 'Remove Bug' })).toBeNull();
@@ -169,7 +169,7 @@ export const Summary: Story = {
 };
 
 /** A long pick list wraps onto more lines; the caret stays at the end of the first. */
-export const ManyChips: Story = {
+export const ManyTags: Story = {
   args: {
     value: ['bug', 'feature', 'improvement', 'development', 'vcp', 'ops'],
   },
@@ -199,7 +199,7 @@ export const Invalid: Story = {
   },
 };
 
-/** Disabled: no opening, and the chips lose their ✕. */
+/** Disabled: no opening, and the tags lose their ✕. */
 export const Disabled: Story = {
   args: { disabled: true, value: ['bug', 'vcp'] },
   render: (args) => <Controlled {...args} aria-label="Tags" />,
@@ -228,7 +228,7 @@ export const ClosesOnBlur: Story = {
   },
 };
 
-/** Light and dark: the grey chips and checkbox rows hold in both. */
+/** Light and dark: the grey tags and checkbox rows hold in both. */
 export const LightAndDark: Story = {
   args: { value: ['bug', 'vcp'] },
   decorators: [],

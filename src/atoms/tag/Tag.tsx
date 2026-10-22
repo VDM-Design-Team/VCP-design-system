@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { Icon } from '../icon';
 import {
   CLASSIFICATION_STYLE,
   type ClassificationTone,
@@ -27,8 +28,12 @@ import {
  * the way `StatusTag`/`DueDateTag` compose it, never a new
  * hand-rolled shell.
  *
- * Tag is not a control: it takes no focus and fires no events, same as
- * `Badge`. If it needs to be clickable or removable, it is a `Chip`.
+ * Tag is not a control by default: it takes no focus and fires no events, same
+ * as `Badge`. The one exception is **`onRemove`**, which adds a ✕ button at the
+ * end — a value picked into a field (`MultiSelect`'s selections, an AV's tags in
+ * edit mode). The button is the only focusable part, a sibling of the label,
+ * and the tag itself still never takes a click. A tag that should toggle or
+ * open something is a `Chip`.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -72,16 +77,43 @@ export interface TagProps
   icon?: React.ReactNode;
   /** Decorative glyph after the label. Same rules as `icon`. */
   trailingIcon?: React.ReactNode;
+  /**
+   * Renders a ✕ button after the label and calls this when it is pressed. The
+   * button is the only interactive part of the tag.
+   */
+  onRemove?: () => void;
+  /**
+   * Accessible name for the ✕. Defaults to `Remove ${children}` when the
+   * label is a plain string; **required in practice** when it is not.
+   */
+  removeLabel?: string;
 }
 
 export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
   (
-    { className, variant = 'tonal', tone = 'neutral', size, icon, trailingIcon, children, ...props },
+    {
+      className,
+      variant = 'tonal',
+      tone = 'neutral',
+      size,
+      icon,
+      trailingIcon,
+      onRemove,
+      removeLabel,
+      children,
+      ...props
+    },
     ref,
   ) => (
     <span
       ref={ref}
-      className={cn(tag({ size }), CLASSIFICATION_STYLE[variant][tone], className)}
+      className={cn(
+        tag({ size }),
+        CLASSIFICATION_STYLE[variant][tone],
+        /* The ✕ sits closer to the edge than a label would. */
+        onRemove && 'pr-1',
+        className,
+      )}
       {...props}
     >
       {icon && <Adornment>{icon}</Adornment>}
@@ -89,6 +121,22 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
         <span className="min-w-0 truncate">{children}</span>
       )}
       {trailingIcon && <Adornment>{trailingIcon}</Adornment>}
+      {onRemove && (
+        <button
+          type="button"
+          aria-label={removeLabel ?? (typeof children === 'string' ? `Remove ${children}` : 'Remove')}
+          onClick={onRemove}
+          className={cn(
+            'grid size-5 shrink-0 place-items-center rounded-xs transition-colors',
+            /* currentColor, so the hover wash follows whichever tone this is. */
+            'hover:bg-current/10',
+            /* Drawn inside the button: the tag clips its overflow. */
+            'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
+          )}
+        >
+          <Icon name="x" className="size-2.5" />
+        </button>
+      )}
     </span>
   ),
 );

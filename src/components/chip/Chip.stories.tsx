@@ -52,17 +52,6 @@ export const Toggleable: Story = {
   },
 };
 
-/** `tone="neutral"`: the grey pill a value wears inside a field, as in `MultiSelect`. */
-export const Neutral: Story = {
-  render: (args) => (
-    <div className="flex flex-wrap gap-2">
-      <Chip {...args} tone="neutral" label="VCP" onRemove={() => {}} />
-      <Chip {...args} tone="neutral" label="OfferPump" onRemove={() => {}} />
-      <Chip {...args} tone="neutral" label="Selected" selected onClick={() => {}} />
-    </div>
-  ),
-};
-
 /** The ✕ is its own button and its own tab stop, named `Remove ${label}`. */
 export const Removable: Story = {
   render: (args) => {
