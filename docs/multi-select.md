@@ -26,7 +26,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `options` | `Array<string \| { value, label, group?, disabled? }>` | `[]` | Rows sharing a `group` sit under one heading, in the order first seen; ungrouped rows lead |
+| `options` | `Array<string \| { value, label, group?, disabled? }>` | `[]` | `group` is optional: options without one make a flat list, with no headings. Rows sharing a `group` sit under one heading, in the order first seen; ungrouped rows lead |
 | `value` | `string[]` | — | Controlled. Uncontrolled (empty to start) when omitted |
 | `onChange` | `(value: string[]) => void` | — | The next array. With `confirm`, only on Apply |
 | `display` | `'tags' \| 'summary'` | `tags` | Removable tags for a list of picks; summary ("In Progress", "3 selected") for compact filters |

@@ -31,7 +31,8 @@ const meta = {
       description: {
         component:
           'Several choices from a fixed list. The field shows them as removable tags or a short ' +
-          'summary; the panel is checkbox rows, optionally grouped. `confirm` drafts the ticks ' +
+          'summary; the panel is checkbox rows. Group headings are optional: give options a ' +
+          '`group` to sectionise them, or leave it off for a flat list. `confirm` drafts the ticks ' +
           'behind a Clear all / Apply footer. For one choice use `Select`; to find one by typing, ' +
           '`SearchSelect`.',
       },
@@ -96,6 +97,20 @@ export const Tags: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Remove Bug' }));
     await expect(args.onChange).toHaveBeenLastCalledWith(['improvement']);
     await expect(canvas.queryByRole('button', { name: 'Remove Bug' })).toBeNull();
+  },
+};
+
+/** No `group` on any option: a plain checkbox list, no headings. Group headings are optional. */
+export const FlatList: Story = {
+  args: { options: ['Design', 'Frontend', 'Backend', 'QA', 'Operations'] },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Tags' }));
+    await expect(canvas.queryByRole('group')).toBeNull();
+    await expect(canvas.getAllByRole('option')).toHaveLength(5);
+    await userEvent.click(canvas.getByRole('option', { name: 'QA' }));
+    await expect(canvas.getByRole('button', { name: 'Remove QA' })).toBeVisible();
   },
 };
 
