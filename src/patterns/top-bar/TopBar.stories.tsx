@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
+import { expect, within } from 'storybook/test';
 
 const meta = {
   title: 'Patterns/TopBar',
@@ -15,7 +16,7 @@ const meta = {
           'The app bar, matching the Figma `Top_NavBar` and its two versions: with the ' +
           '“Create Added Value” Button in `primaryAction`, or with the linked Logo when ' +
           'there is none. Right side: bell (unread = the design’s red dot, count in the ' +
-          'accessible name), the light/dark mode Toggle, and the user chip. The page-level ' +
+          'accessible name; neutral, with a pulsing 10px dot), a divider, the light/dark mode Toggle (sun and moon in its knob), and the user chip. `showPrimaryAction={false}` empties the left side for screens that show nothing there. The page-level ' +
           'header (back, title, status actions) is `AVHeader` — a separate pattern.',
       },
     },
@@ -26,6 +27,7 @@ const meta = {
   },
   argTypes: {
     notifications: { control: 'number' },
+    showPrimaryAction: { control: 'boolean' },
     theme: { control: 'radio', options: ['light', 'dark'] },
   },
 } satisfies Meta<typeof TopBar>;
@@ -40,6 +42,30 @@ export const WithPrimaryAction: Story = {
     theme: 'light',
     onUserMenu: () => {},
     onNotifications: () => {},
+  },
+};
+
+/**
+ * Some screens have nothing on the left — an Added Value being edited, say.
+ * `showPrimaryAction={false}` leaves the left side empty, logo included, and the
+ * right side stays on the right. The caller can keep passing the `Button` and
+ * flip one flag. The play test checks neither the button nor the logo renders.
+ */
+export const PrimaryActionHidden: Story = {
+  args: {
+    primaryAction: <Button>Create Added Value</Button>,
+    showPrimaryAction: false,
+    homeHref: '#home',
+    theme: 'light',
+    onNotifications: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: 'Create Added Value' })).toBeNull();
+    await expect(canvas.queryByRole('link')).toBeNull();
+    await expect(canvas.queryByRole('img', { name: /value chain/i })).toBeNull();
+    /* The right side is still there, pushed to the right edge. */
+    await expect(canvas.getByRole('button', { name: /notifications/i })).toBeVisible();
   },
 };
 
