@@ -127,15 +127,19 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
           aria-label={removeLabel ?? (typeof children === 'string' ? `Remove ${children}` : 'Remove')}
           onClick={onRemove}
           className={cn(
-            'grid size-5 shrink-0 place-items-center rounded-full transition-opacity',
-            /* Textual: no fill behind a glyph this small. It dims on hover, so
-               it follows whichever tone's colour it inherits. */
-            'hover:opacity-70 motion-reduce:transition-none',
+            'grid size-5 shrink-0 place-items-center rounded-full motion-reduce:transition-none',
+            /* Textual: no fill behind a glyph this small. On a neutral tag that
+               is not solid, it takes `neutral.textual.content` and darkens
+               through hover and pressed; any other tone keeps its own ink and
+               dims on hover instead, since a grey ✕ would clash with it. */
+            tone === 'neutral' && variant !== 'filled'
+              ? 'text-neutral-textual-content-default transition-colors hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed'
+              : 'transition-opacity hover:opacity-70',
             /* Drawn inside the button: the tag clips its overflow. */
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
           )}
         >
-          <Icon name="x" className="size-2.5" />
+          <Icon name="x" className="size-3.5" />
         </button>
       )}
     </span>
