@@ -283,6 +283,12 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
           hidden={!open}
           className="absolute inset-x-0 top-full z-50 mt-1.5 overflow-hidden rounded-md border border-stroke-subtle bg-surface-elevated shadow-menu"
         >
+          {items.length === 0 && (
+            /* Outside the listbox: a listbox may hold only options. */
+            <div className="px-2.5 py-3 text-center text-caption-md-regular text-text-subtle">
+              {emptyText}
+            </div>
+          )}
           <div
             role="listbox"
             id={listId}
@@ -292,67 +298,62 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
             className="max-h-64 overflow-y-auto p-1"
             /* Reachable by keyboard when it scrolls, though focus never needs it. */
             tabIndex={-1}
+            hidden={items.length === 0}
           >
-            {items.length === 0 ? (
-              <div className="px-2.5 py-3 text-center text-caption-md-regular text-text-subtle">
-                {emptyText}
-              </div>
-            ) : (
-              ungroupedFirst.map((g, gi) => (
-                <div
-                  key={g.name ?? '__none'}
-                  role={g.name ? 'group' : 'presentation'}
-                  aria-labelledby={g.name ? `${listId}-grp-${gi}` : undefined}
-                >
-                  {g.name && (
+            {ungroupedFirst.map((g, gi) => (
+              <div
+                key={g.name ?? '__none'}
+                role={g.name ? 'group' : 'presentation'}
+                aria-labelledby={g.name ? `${listId}-grp-${gi}` : undefined}
+              >
+                {g.name && (
+                  <div
+                    id={`${listId}-grp-${gi}`}
+                    className="mx-1 mt-1 border-b border-stroke-subtle px-1.5 py-1.5 text-caption-md-semibold text-text-tertiary"
+                  >
+                    {g.name}
+                  </div>
+                )}
+                {g.rows.map(({ option, index }) => {
+                  const isSelected = shown.includes(option.value);
+                  return (
                     <div
-                      id={`${listId}-grp-${gi}`}
-                      className="mx-1 mt-1 border-b border-stroke-subtle px-1.5 py-1.5 text-caption-md-semibold text-text-tertiary"
+                      key={option.value}
+                      role="option"
+                      id={optionId(index)}
+                      aria-selected={isSelected}
+                      aria-disabled={option.disabled || undefined}
+                      /* mousedown, prevented, so focus never leaves the button. */
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        if (!option.disabled) toggle(option.value);
+                      }}
+                      onMouseMove={() => !option.disabled && setActive(index)}
+                      className={cn(
+                        'flex cursor-pointer items-center gap-3 rounded-sm px-2.5 py-2 text-body-sm-regular text-text-primary',
+                        index === active && 'bg-surface-neutral-faint',
+                        option.disabled && 'cursor-not-allowed text-text-disabled',
+                      )}
                     >
-                      {g.name}
-                    </div>
-                  )}
-                  {g.rows.map(({ option, index }) => {
-                    const isSelected = shown.includes(option.value);
-                    return (
-                      <div
-                        key={option.value}
-                        role="option"
-                        id={optionId(index)}
-                        aria-selected={isSelected}
-                        aria-disabled={option.disabled || undefined}
-                        /* mousedown, prevented, so focus never leaves the button. */
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          if (!option.disabled) toggle(option.value);
-                        }}
-                        onMouseMove={() => !option.disabled && setActive(index)}
+                      {/* Decorative: the row is the control, aria-selected its state. */}
+                      <span
+                        aria-hidden="true"
                         className={cn(
-                          'flex cursor-pointer items-center gap-3 rounded-sm px-2.5 py-2 text-body-sm-regular text-text-primary',
-                          index === active && 'bg-surface-neutral-faint',
-                          option.disabled && 'cursor-not-allowed text-text-disabled',
+                          'grid size-4 shrink-0 place-items-center rounded-xs border text-action-primary-content-default',
+                          isSelected
+                            ? 'border-action-primary-surface-default bg-action-primary-surface-default'
+                            : 'border-stroke-strong bg-surface-base',
+                          option.disabled && 'border-stroke-subtle bg-surface-neutral-faint',
                         )}
                       >
-                        {/* Decorative: the row is the control, aria-selected its state. */}
-                        <span
-                          aria-hidden="true"
-                          className={cn(
-                            'grid size-4 shrink-0 place-items-center rounded-xs border text-action-primary-content-default',
-                            isSelected
-                              ? 'border-action-primary-surface-default bg-action-primary-surface-default'
-                              : 'border-stroke-strong bg-surface-base',
-                            option.disabled && 'border-stroke-subtle bg-surface-neutral-faint',
-                          )}
-                        >
-                          {isSelected && <Icon name="check" className="size-3" />}
-                        </span>
-                        <span className="min-w-0 flex-1">{option.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ))
-            )}
+                        {isSelected && <Icon name="check" className="size-3" />}
+                      </span>
+                      <span className="min-w-0 flex-1">{option.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
           </div>
           {confirm && (
             <div className="flex justify-end gap-2 border-t border-stroke-subtle p-2">

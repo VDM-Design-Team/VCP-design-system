@@ -214,6 +214,18 @@ export const Invalid: Story = {
   },
 };
 
+/** No options: the panel says so, and the empty list is not exposed as a listbox. */
+export const NoOptions: Story = {
+  args: { options: [], emptyText: 'No tags yet' },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Tags' }));
+    await expect(canvas.getByText('No tags yet')).toBeVisible();
+    await expect(canvas.queryByRole('option')).toBeNull();
+  },
+};
+
 /** Disabled: no opening, and the tags lose their ✕. */
 export const Disabled: Story = {
   args: { disabled: true, value: ['bug', 'vcp'] },
