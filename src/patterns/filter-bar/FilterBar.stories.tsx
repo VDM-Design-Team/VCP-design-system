@@ -21,6 +21,13 @@ const TAGS = [
   { value: 'nt', label: 'NT', group: 'Domain-Specific (In-Domain)' },
   { value: 'caf', label: 'CAF', group: 'Domain-Specific (In-Domain)' },
 ];
+const PEOPLE = [
+  { value: 'unassigned', label: 'Unassigned', unassigned: true },
+  { value: 'adam', label: 'Adam' },
+  { value: 'adrian', label: 'Adrian Cruz' },
+  { value: 'amy', label: 'Amy Lee' },
+  { value: 'liam', label: 'Liam Carter' },
+];
 const PRESETS = [
   { label: 'Today', value: '2026-09-15' },
   { label: 'Last 7 days', value: '2026-09-09', rangeEnd: '2026-09-15' },
@@ -58,6 +65,8 @@ function Page(props: FilterBarProps & { initial?: Partial<State> }) {
     status: [],
     priority: '',
     tags: [],
+    assignee: '',
+    initiator: '',
     ...initial,
   });
   const set = (patch: Partial<State>) => setS((prev) => ({ ...prev, ...patch }));
@@ -73,8 +82,14 @@ function Page(props: FilterBarProps & { initial?: Partial<State> }) {
       status={{ options: STATUSES, value: s.status, onChange: (status) => set({ status }) }}
       priority={{ options: PRIORITIES, value: s.priority, onChange: (priority) => set({ priority }) }}
       tags={{ options: TAGS, value: s.tags, onChange: (tags) => set({ tags }) }}
+      users={
+        rest.users ?? [
+          { label: 'Assignee', options: PEOPLE, value: s.assignee, onChange: (assignee) => set({ assignee }) },
+          { label: 'Initiator', options: PEOPLE, value: s.initiator, onChange: (initiator) => set({ initiator }) },
+        ]
+      }
       onReset={() => {
-        set({ search: '', period: {}, status: [], priority: '', tags: [] });
+        set({ search: '', period: {}, status: [], priority: '', tags: [], assignee: '', initiator: '' });
         rest.onReset?.();
       }}
     />
@@ -86,6 +101,8 @@ interface State {
   status: string[];
   priority: string;
   tags: string[];
+  assignee: string;
+  initiator: string;
 }
 
 /** Figma's Filters-shown bar, empty: search at the left, the fields, Reset and Filters at the right. */
@@ -120,12 +137,18 @@ export const Default: Story = {
       expect(canvas.getByRole('button', { name: /Period, 09\/09\/2026-15\/09\/2026/ })).toBeVisible(),
     );
 
+    /* Users: a searchable list that then says who. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(canvas.getByRole('button', { name: 'Assignee' })).toHaveTextContent('Amy Lee');
+
     /* Reset clears every value the page holds. */
     await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();
     await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('Select status');
+    await expect(canvas.getByRole('button', { name: 'Assignee' })).toHaveTextContent('Select assignee');
   },
 };
 
@@ -157,6 +180,8 @@ export const Filled: Story = {
         status: ['In progress'],
         priority: 'normal',
         tags: ['vcp', 'offerpump', 'whu', 'nt', 'caf'],
+        assignee: 'adrian',
+        initiator: 'amy',
       }}
     />
   ),

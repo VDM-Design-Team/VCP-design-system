@@ -7,6 +7,7 @@ import { Select, type SelectOption } from '../../atoms/select';
 import { DatePicker, type DatePickerPreset } from '../../components/date-picker';
 import { MultiSelect, type MultiSelectOption } from '../../components/multi-select';
 import { Popover } from '../../components/popover';
+import { UserSelect, type UserSelectOption } from '../../components/user-select';
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
@@ -35,6 +36,8 @@ import { Popover } from '../../components/popover';
  *   list if "no filter" should be a choice.
  * - **tags** — `MultiSelect` whose picks are removable tags in the field;
  *   give options a `group` for the Global / Domain-Specific headings.
+ * - **users** — one `UserSelect` per entry (Assignee, Initiator…): a searchable
+ *   list of people with avatars. Each is named by its `label`.
  * - **children** — more fields in the same row (an assignee picker, say),
  *   shown and hidden with the others.
  *
@@ -70,6 +73,15 @@ export interface FilterBarMulti {
   placeholder?: string;
 }
 
+export interface FilterBarUser {
+  /** Names the field for assistive tech and builds its placeholder ("Select assignee"). */
+  label: string;
+  options: ReadonlyArray<UserSelectOption>;
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+}
+
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   search?: string;
   onSearchChange?: (value: string) => void;
@@ -78,6 +90,8 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   status?: FilterBarMulti;
   priority?: FilterBarSelect;
   tags?: FilterBarMulti;
+  /** People pickers, after tags: one field per entry. */
+  users?: readonly FilterBarUser[];
   /** Fires when "Reset" is pressed. The button is always shown. */
   onReset?: () => void;
   resetLabel?: string;
@@ -120,6 +134,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     status,
     priority,
     tags,
+    users,
     onReset,
     resetLabel = 'Reset',
     filtersOpen,
@@ -136,7 +151,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
 
-  const hasFields = !!(period || status || priority || tags || children);
+  const hasFields = !!(period || status || priority || tags || users?.length || children);
   const range = period?.value;
   const periodText = range?.start
     ? range.end
@@ -251,6 +266,15 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               className="col-span-2 md:min-w-40 md:max-w-170"
             />
           )}
+          {users?.map(({ label, placeholder, ...rest }) => (
+            <UserSelect
+              key={label}
+              aria-label={label}
+              placeholder={placeholder ?? `Select ${label.toLowerCase()}`}
+              {...rest}
+              className="md:w-44"
+            />
+          ))}
           {children}
         </div>
       )}
