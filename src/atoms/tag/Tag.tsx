@@ -127,9 +127,10 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
           aria-label={removeLabel ?? (typeof children === 'string' ? `Remove ${children}` : 'Remove')}
           onClick={onRemove}
           className={cn(
-            'grid size-5 shrink-0 place-items-center rounded-xs transition-colors',
-            /* currentColor, so the hover wash follows whichever tone this is. */
-            'hover:bg-current/10',
+            'grid size-5 shrink-0 place-items-center rounded-full transition-opacity',
+            /* Textual: no fill behind a glyph this small. It dims on hover, so
+               it follows whichever tone's colour it inherits. */
+            'hover:opacity-70 motion-reduce:transition-none',
             /* Drawn inside the button: the tag clips its overflow. */
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
           )}

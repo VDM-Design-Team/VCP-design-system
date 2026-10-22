@@ -64,7 +64,7 @@ differs between the two:
 | Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
 | Padding | Tailwind numeric scale | `px-2` (8), both sizes |
 | Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |
-| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) hit area, 10 glyph, `pr-1` on the tag; hover wash `bg-current/10` follows the tone |
+| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) round hit area, 10 glyph, `pr-1` on the tag. Textual: no fill; the glyph dims to 70% on hover, in whatever colour the tone gives it |
 | Icon colour | — | Inherited from the tone's content token via `currentColor`, unless the icon sets its own colour (see `TypeTag`/`UrgencyTag`) |
 
 The dark theme comes for free — every colour class is a semantic token that
@@ -97,6 +97,7 @@ same Figma `Tag` node.
 - **Icons are decorative** and rendered `aria-hidden`, so a screen reader
   reads the label once. Pass a plain `Icon` with no `label` — naming both
   double-announces.
+- **The ✕ dims on hover, and stays legible.** On the neutral tonal tag the glyph is 9.45:1 light / 8.40:1 dark at rest and 4.15:1 / 5.06:1 at 70% on hover, against the 3:1 a graphic needs.
 - **Not a control, so no target size — until it has a ✕.** A plain Tag takes no
   focus and handles no events, which is why the 40 minimum does not apply. With
   `onRemove` the ✕ is a real `<button>`, a sibling of the label (never wrapping
