@@ -64,7 +64,7 @@ differs between the two:
 | Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
 | Padding | Tailwind numeric scale | `px-2` (8), both sizes |
 | Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |
-| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) round hit area, 14 glyph, `pr-1` on the tag. Textual: no fill. On a neutral tag that is not `filled` the glyph is `neutral.textual.content` default, hover, pressed; other tones keep their own ink and dim to 70% on hover |
+| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) round hit area, 14 glyph, `pr-1` on the tag, and a negative left margin that cancels the tag's gap so the ✕ sits right against the label (a leading icon keeps its gap). Textual: no fill. On a neutral tag that is not `filled` the glyph is `neutral.textual.content` default, hover, pressed; other tones keep their own ink and dim to 70% on hover |
 | Icon colour | — | Inherited from the tone's content token via `currentColor`, unless the icon sets its own colour (see `TypeTag`/`UrgencyTag`) |
 
 The dark theme comes for free — every colour class is a semantic token that

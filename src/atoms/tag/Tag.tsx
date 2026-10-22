@@ -128,6 +128,10 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
           onClick={onRemove}
           className={cn(
             'grid size-5 shrink-0 place-items-center rounded-full motion-reduce:transition-none',
+            /* Cancels the tag's own gap, so the ✕ sits against the label; a
+               leading icon keeps its gap. The button's own room around the
+               glyph is all that is left between them. */
+            size === 'sm' ? '-ml-1' : '-ml-2',
             /* Textual: no fill behind a glyph this small. On a neutral tag that
                is not solid, it takes `neutral.textual.content` and darkens
                through hover and pressed; any other tone keeps its own ink and
