@@ -11,4 +11,4 @@ The search box and every field are fluid between a minimum and a maximum width i
 
 `FilterBar` also takes `cycle`: a one-pick searchable field whose rows read **C33** (May 25, 2026 - Jun 08, 2026), as in the AV details card, while the field says just the code so it stays narrow. It is built on `SearchSelect`'s new `shortLabel`.
 
-When the filters are folded away, the search box widens (up to 40rem) to use the room the fields leave.
+When the filters are folded away, the search box widens (up to 32rem) to use the room the fields leave.

@@ -207,7 +207,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
         leadingIcon={<Icon name="magnifying-glass" size="sm" />}
         className={cn(
           'order-2 w-full md:order-none md:col-start-1',
-          showFields ? 'md:max-w-96' : 'md:max-w-160',
+          showFields ? 'md:max-w-96' : 'md:max-w-128',
         )}
       />
 
