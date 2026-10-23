@@ -36,6 +36,7 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 |---|---|---|
 | `search` / `onSearchChange` | `string` / `(value) => void` | The search field. `searchPlaceholder` defaults to "Search by title or ID" |
 | `period` | `{ value?: { start?, end? }, onChange?, presets?, placeholder? }` | A field that opens a two-month range calendar. ISO `yyyy-mm-dd` in and out; the field reads `dd/mm/yyyy-dd/mm/yyyy`. `onChange({})` when cleared. `presets` are `DatePicker`'s quick picks |
+| `cycle` | `{ options: Array<{ value, code, start, end }>, value?, onChange?, placeholder? }` | A one-pick `SearchSelect` with search. Each row reads **C33** (May 25, 2026 - Jun 08, 2026), as in the AV details card (`start` and `end` are ISO `yyyy-mm-dd`); search matches the dates as well as the code; the field says just the code (`C33`), so it stays narrow. Placeholder defaults to "Select cycle" |
 | `status` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` (several picks, no search box by default) with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
 | `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable`, `searchPlaceholder` and `rows` (`text`, `avatar`, `icon`, `tag`) can be set on `status` and `tags` |
@@ -51,7 +52,7 @@ pages: the page decides.
 
 | Page | What it passes |
 |---|---|
-| A page with every filter | `period`, `status`, `priority`, `tags` |
+| A page with every filter | `period`, `cycle`, `status`, `priority`, `tags` |
 | A draft page (every row is a draft, so a status filter would filter nothing) | everything but `status` |
 | An admin view that can also filter by person | the above plus `users` (on the user-fields PR) |
 | A regular user's view of the same page | no `users` |
@@ -72,14 +73,16 @@ Filters, then search, then the fields two across (period and tags full width), a
 the calendar takes its touch layout, one month wide.
 
 Fields are 40 tall and fluid between a minimum and a maximum, growing to fill the row before the next
-wraps: status 9rem to 16rem, priority 9.5rem to 16rem, period 14.5rem to 18rem, tags 9.5rem to 42.5rem, search
+wraps: cycle 9rem to 16rem, status 9rem to 16rem, priority 9.5rem to 16rem, period 14.5rem to 18rem, tags 9.5rem to 42.5rem, search
 12rem and up. The minimums are measured, not guessed: each is what its placeholder (or longest value, for
 the period) needs in the real type, so nothing is cut off at the minimum. A dropdown panel is as wide as its
 longest option regardless (see `SearchSelect`), so a narrow field never cuts options off.
 
 **Design target: 1440.** With the expanded sidebar (256) and the page's 32 of padding either side, a 1440
 screen leaves 1120 for the bar, and a page with period, status, priority and tags fits on **one row** there.
-A page that adds both user fields (an admin view) needs a second row at that width; if more filters join, check
+Adding the cycle (the field says just its code, to stay narrow) still fits period, cycle, status and priority
+on the first row, with the tags field wrapping to a second. A page that adds both user fields (an admin
+view) needs another row at that width; if more filters join, check
 the sum of the minimums against 1120 before adding them.
 
 ## Tokens

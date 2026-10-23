@@ -33,6 +33,10 @@ import { Popover } from '../../components/popover';
  * - **period** — a field that opens a range calendar (`DatePicker`, two months
  *   and your `presets`). The value is `{ start, end }` in ISO `yyyy-mm-dd`;
  *   the field reads it as `dd/mm/yyyy-dd/mm/yyyy`, as Figma draws it.
+ * - **cycle** — `SearchSelect` with search, one pick. Each row reads **C33** (May 25,
+ *   2026 - Jun 08, 2026) as in the AV details card; the field says just the code, so
+ *   it stays narrow enough to share a row. Cycles are data: pass `code`, `start` and
+ *   `end` (ISO).
  * - **status** — `SearchSelect` (several picks, no search box) with the Clear all /
  *   Apply footer, shown as a summary ("In progress", "3 selected").
  * - **priority** — `Select`. Put an explicit "All priorities" option in the
@@ -56,6 +60,23 @@ export interface FilterBarPeriod {
   onChange?: (range: { start?: string; end?: string }) => void;
   /** Quick picks beside the calendar ("Last 7 days"…). What they mean is yours. */
   presets?: readonly DatePickerPreset[];
+  placeholder?: string;
+}
+
+export interface FilterBarCycleOption {
+  value: string;
+  /** "C33". */
+  code: string;
+  /** ISO `yyyy-mm-dd`. */
+  start: string;
+  end: string;
+}
+
+export interface FilterBarCycle {
+  options: ReadonlyArray<FilterBarCycleOption>;
+  /** The picked cycle's `value`. `''` shows the placeholder. */
+  value?: string;
+  onChange?: (value: string) => void;
   placeholder?: string;
 }
 
@@ -84,6 +105,7 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   period?: FilterBarPeriod;
+  cycle?: FilterBarCycle;
   status?: FilterBarMulti;
   priority?: FilterBarSelect;
   tags?: FilterBarMulti;
@@ -104,6 +126,14 @@ const display = (iso: string) => {
   const [y, m, d] = iso.split('-');
   return `${pad(Number(d))}/${pad(Number(m))}/${y}`;
 };
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/* ISO yyyy-mm-dd → "Mar 02, 2026", by string split, like the period field: no Date, no time zone. */
+const longDate = (iso: string) => {
+  const [y, m, d] = iso.split('-');
+  return `${MONTHS[Number(m) - 1]} ${pad(Number(d))}, ${y}`;
+};
+const cycleRange = (c: FilterBarCycleOption) => `${longDate(c.start)} - ${longDate(c.end)}`;
 
 /* Below `md` the calendar takes its touch layout, one month wide. */
 function useNarrow() {
@@ -126,6 +156,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     onSearchChange,
     searchPlaceholder = 'Search by title or ID',
     period,
+    cycle,
     status,
     priority,
     tags,
@@ -145,7 +176,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
 
-  const hasFields = !!(period || status || priority || tags || children);
+  const hasFields = !!(period || cycle || status || priority || tags || children);
   const range = period?.value;
   const periodText = range?.start
     ? range.end
@@ -232,6 +263,35 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                   className="shadow-none"
                 />
               }
+            />
+          )}
+          {cycle && (
+            <SearchSelect
+              aria-label="Cycle"
+              placeholder={cycle.placeholder ?? 'Select cycle'}
+              searchPlaceholder="Search cycles"
+              value={cycle.value ?? ''}
+              onChange={cycle.onChange}
+              /* The row says everything (and search matches the dates); the field says the code. */
+              options={cycle.options.map((c) => ({
+                value: c.value,
+                label: `${c.code} (${cycleRange(c)})`,
+                shortLabel: c.code,
+              }))}
+              renderOption={(option) => {
+                const c = cycle.options.find((x) => x.value === option.value);
+                return c ? (
+                  <span className="min-w-0 truncate">
+                    <span className="text-label-sm-bold text-text-primary">{c.code}</span>
+                    {/* The space is its own text node: a leading space inside an inline span is dropped from the accessible name. */}
+                    {' '}
+                    <span className="text-label-sm-regular">{`(${cycleRange(c)})`}</span>
+                  </span>
+                ) : (
+                  option.label
+                );
+              }}
+              className="col-span-2 md:max-w-64 md:min-w-36 md:flex-1"
             />
           )}
           {status && (

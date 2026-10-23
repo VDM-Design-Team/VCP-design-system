@@ -21,6 +21,12 @@ const TAGS = [
   { value: 'nt', label: 'NT', group: 'Domain-Specific (In-Domain)' },
   { value: 'caf', label: 'CAF', group: 'Domain-Specific (In-Domain)' },
 ];
+const CYCLES = [
+  { value: 'c34', code: 'C34', start: '2026-06-09', end: '2026-06-23' },
+  { value: 'c33', code: 'C33', start: '2026-05-25', end: '2026-06-08' },
+  { value: 'c32', code: 'C32', start: '2026-05-11', end: '2026-05-24' },
+  { value: 'c18', code: 'C18', start: '2025-09-20', end: '2026-10-02' },
+];
 const PRESETS = [
   { label: 'Today', value: '2026-09-15' },
   { label: 'Last 7 days', value: '2026-09-09', rangeEnd: '2026-09-15' },
@@ -54,17 +60,18 @@ function Page(
   props: FilterBarProps & {
     initial?: Partial<State>;
     /** Filters this page does not have: it leaves their props out, which is how the bar hides them. */
-    without?: Array<'period' | 'status' | 'priority' | 'tags'>;
+    without?: Array<'period' | 'cycle' | 'status' | 'priority' | 'tags'>;
   },
 ) {
   const { initial, without = [], ...rest } = props;
-  const has = (name: 'period' | 'status' | 'priority' | 'tags') => !without.includes(name);
+  const has = (name: 'period' | 'cycle' | 'status' | 'priority' | 'tags') => !without.includes(name);
   const [s, setS] = React.useState<State>({
     search: '',
     period: {},
     status: [],
     priority: '',
     tags: [],
+    cycle: '',
     ...initial,
   });
   const set = (patch: Partial<State>) => setS((prev) => ({ ...prev, ...patch }));
@@ -77,13 +84,14 @@ function Page(
         rest.onSearchChange?.(search);
       }}
       period={has('period') ? { value: s.period, onChange: (period) => set({ period }), presets: PRESETS } : undefined}
+      cycle={has('cycle') ? { options: CYCLES, value: s.cycle, onChange: (cycle) => set({ cycle }) } : undefined}
       status={has('status') ? { options: STATUSES, value: s.status, onChange: (status) => set({ status }) } : undefined}
       priority={
         has('priority') ? { options: PRIORITIES, value: s.priority, onChange: (priority) => set({ priority }) } : undefined
       }
       tags={has('tags') ? { options: TAGS, value: s.tags, onChange: (tags) => set({ tags }) } : undefined}
       onReset={() => {
-        set({ search: '', period: {}, status: [], priority: '', tags: [] });
+        set({ search: '', period: {}, status: [], priority: '', tags: [], cycle: '' });
         rest.onReset?.();
       }}
     />
@@ -94,6 +102,7 @@ interface State {
   period: { start?: string; end?: string };
   status: string[];
   priority: string;
+  cycle: string;
   tags: string[];
 }
 
@@ -107,6 +116,11 @@ export const Default: Story = {
     await expect(args.onSearchChange).toHaveBeenLastCalledWith('pump');
 
     /* Priority: the native select, with an explicit "All priorities". */
+    /* Cycle: the row says the code and the dates, the field keeps just the code. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Cycle' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'C33 (May 25, 2026 - Jun 08, 2026)' }));
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('C33');
+
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Priority' }), 'high');
     await expect(canvas.getByRole('combobox', { name: 'Priority' })).toHaveValue('high');
 
@@ -136,6 +150,7 @@ export const Default: Story = {
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();
     await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('Select status');
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Select cycle');
   },
 };
 
@@ -166,6 +181,7 @@ export const Filled: Story = {
         period: { start: '2026-02-01', end: '2026-03-01' },
         status: ['In progress'],
         priority: 'normal',
+        cycle: 'c33',
         tags: ['vcp', 'offerpump', 'whu', 'nt', 'caf'],
       }}
     />
