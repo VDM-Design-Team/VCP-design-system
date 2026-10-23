@@ -54,8 +54,9 @@ import { Tag, type TagTone } from '../../atoms/tag';
  *
  * A click inside the panel that lands on nothing does nothing: the field keeps
  * focus and the panel stays open. The panel is positioned inline (absolute,
- * under the field): no flipping, and it clips inside an `overflow: hidden`
- * ancestor.
+ * under the field, as wide as its longest row, at least the field's width and at
+ * most 24rem; a longer label is cut with "…"): no flipping, and it clips inside an
+ * `overflow: hidden` ancestor.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -658,7 +659,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             onMouseDown={(e) => {
               if (!(e.target as HTMLElement).closest('input')) e.preventDefault();
             }}
-            className="absolute inset-x-0 top-full z-50 mt-1.5 overflow-hidden rounded-md border border-stroke-default bg-surface-elevated p-1 shadow-menu"
+            /* As wide as its longest row (never narrower than the field, never wider than 24rem), so a
+               narrow field does not cut its options off. Anchored to the field's left edge. */
+            className="absolute top-full left-0 z-50 mt-1.5 w-max max-w-96 min-w-full overflow-hidden rounded-md border border-stroke-default bg-surface-elevated p-1 shadow-menu"
           >
             {searchable && (
               <div className="p-2">
