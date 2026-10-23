@@ -535,7 +535,10 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             }}
             className={cn(
               'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
-              isInvalid ? 'border-accent-critical-outline-border-default' : 'border-stroke-strong',
+              /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
+              isInvalid
+                ? 'border-accent-critical-outline-border-default'
+                : 'border-stroke-strong focus-within:border-stroke-focused',
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
               disabled && 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle',
             )}
