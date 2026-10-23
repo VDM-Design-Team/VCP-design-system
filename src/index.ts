@@ -54,6 +54,7 @@ export * from './components/tag-editor';
 export * from './components/timeline';
 export * from './components/toast';
 export * from './components/tooltip';
+export * from './components/user-menu';
 export * from './components/type-tag';
 export * from './components/urgency-tag';
 

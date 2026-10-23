@@ -1,0 +1,75 @@
+import * as React from 'react';
+import { cn } from '../../lib/cn';
+import { Avatar } from '../../atoms/avatar';
+import { Icon } from '../../atoms/icon';
+import { Menu, type MenuProps } from '../menu';
+
+/**
+ * UserMenu — the signed-in person and the menu behind them: their avatar and
+ * name with a caret, opening a `Menu` of account links (My Added Values,
+ * Settings, Cycle Settings, Logout).
+ *
+ * Built to Figma's `User_Menu` (`2303:1715`; its trigger is `_User menu`,
+ * `2303:739`). The trigger is the look `TopBar`'s user chip already had after
+ * design review — a 32 avatar, the name in `label-sm-medium`, a `caret-down` —
+ * moved here so the bar and anything else that needs it share one piece. The
+ * menu is the system's `Menu` (its surface, rows and keyboard model), not
+ * Figma's raw 192-wide white box with regular black text.
+ *
+ * **The items are yours.** Pass `items` as `Menu` takes them; what "Logout"
+ * does, and which links an admin sees that a regular user does not, are the
+ * page's. This renders the trigger and the menu and reports `onSelect(key)`.
+ *
+ * The trigger is a real `<button>` named "<name>, account menu"; `Menu` adds
+ * `aria-haspopup="menu"` and `aria-expanded` and moves focus into the list on
+ * open and back on close.
+ *
+ * Every class below resolves to a design token from the VCP Figma variables.
+ * If you need a value that isn't here, add the token in `tokens/` first —
+ * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
+ */
+export interface UserMenuUser {
+  /** What the trigger says: "Francis M." */
+  name: string;
+  /** A photo. Without one the avatar shows initials. */
+  src?: string;
+}
+
+export interface UserMenuProps extends Omit<MenuProps, 'trigger' | 'items' | 'onSelect'> {
+  user: UserMenuUser;
+  /** The menu's rows, as `Menu` takes them. */
+  items: NonNullable<MenuProps['items']>;
+  /** Fires with the activated item's `key`, after that item's own `onClick`. */
+  onSelect?: MenuProps['onSelect'];
+}
+
+export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function UserMenu(
+  { user, items, onSelect, align = 'right', ...props },
+  ref,
+) {
+  return (
+    <Menu
+      ref={ref}
+      items={items}
+      onSelect={onSelect}
+      align={align}
+      trigger={
+        <button
+          type="button"
+          aria-label={`${user.name}, account menu`}
+          className={cn(
+            'flex items-center gap-2 rounded-md p-1 text-left font-sans transition-colors',
+            'hover:bg-surface-neutral-faint',
+            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+          )}
+        >
+          <Avatar name={user.name} src={user.src} size="md" />
+          <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
+          <Icon name="caret-down" size="sm" aria-hidden="true" className="text-text-tertiary" />
+        </button>
+      }
+      {...props}
+    />
+  );
+});
+UserMenu.displayName = 'UserMenu';

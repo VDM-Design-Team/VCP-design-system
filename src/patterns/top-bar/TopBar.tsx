@@ -5,6 +5,8 @@ import { IconButton } from '../../atoms/icon-button';
 import { Avatar } from '../../atoms/avatar';
 import { Logo } from '../../atoms/logo';
 import { Toggle } from '../../atoms/toggle';
+import type { MenuItem } from '../../components/menu';
+import { UserMenu } from '../../components/user-menu';
 
 /**
  * TopBar — the app bar, matching the Figma `Top_NavBar` component set and its
@@ -52,7 +54,15 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
   theme?: 'light' | 'dark';
   onThemeChange?: (theme: 'light' | 'dark') => void;
   user?: TopBarUser;
-  /** Makes the user chip a real button — the future UserMenu's trigger. */
+  /**
+   * The account menu's rows (My Added Values, Settings, Logout…), as `Menu` takes them. Given
+   * with a `user`, the chip becomes a `UserMenu` that opens them; what each does, and which an
+   * admin sees that a regular user does not, is the app's.
+   */
+  userMenuItems?: MenuItem[];
+  /** Fires with the activated account-menu item's `key`. */
+  onUserMenuSelect?: (key?: string) => void;
+  /** Makes the user chip a real button, for an app that opens its own menu. Ignored when `userMenuItems` is given. */
   onUserMenu?: () => void;
 }
 
@@ -67,6 +77,8 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       theme,
       onThemeChange,
       user,
+      userMenuItems,
+      onUserMenuSelect,
       onUserMenu,
       ...props
     },
@@ -140,7 +152,9 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             />
           )}
           {user &&
-            (onUserMenu ? (
+            (userMenuItems ? (
+              <UserMenu user={user} items={userMenuItems} onSelect={onUserMenuSelect} />
+            ) : onUserMenu ? (
               <button
                 type="button"
                 aria-label={`${user.name}, account menu`}
