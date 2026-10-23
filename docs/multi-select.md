@@ -8,6 +8,7 @@ a short summary; the panel is a list of checkbox rows, optionally under group he
 | Piece | Tier |
 |---|---|
 | `Button` | atom |
+| `Checkbox` | atom |
 | `Icon` | atom |
 | `Tag` | atom |
 
@@ -46,7 +47,7 @@ the critical outline when `invalid`, the disabled surface), at least 40 tall and
 wrap. Tags are `Tag size="sm"` (24 tall, `radius.sm`, 8 apart), neutral tonal (`surface.neutral.subtle`, `text.secondary`). The panel is
 `surface.elevated` on `stroke.subtle` with `shadow.menu`; group headings `caption-md-semibold` in
 `text.tertiary` over a `stroke.subtle` rule; the active row `surface.neutral.faint`; ticked boxes
-`action.primary.surface.default`. No new tokens.
+`action.primary.surface.default` (`CheckboxMark`, the checkbox's own box and tick). No new tokens.
 
 ## Accessibility
 
@@ -57,7 +58,7 @@ wrap. Tags are `Tag size="sm"` (24 tall, `radius.sm`, 8 apart), neutral tonal (`
 - Keyboard: ArrowDown or ArrowUp opens, arrows move (skipping disabled rows), Home and End jump,
   Enter or Space ticks the active row (or opens when closed), Escape closes and keeps focus,
   Tab closes. With `confirm`, Escape and clicking away discard the draft.
-- The checkbox squares are decorative — the row is the control and `aria-selected` its state — so
+- The checkbox squares are `CheckboxMark`, decorative — the row is the control and `aria-selected` its state — so
   there is no input nested in an option. Rows tick on a prevented `mousedown`, so a click never
   blurs the field mid-pick.
 - The tags' ✕ buttons are siblings of the combobox, never inside it, each named `Remove <label>`.
