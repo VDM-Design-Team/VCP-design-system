@@ -422,8 +422,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
       const plus = toggleRef.current;
       const plusWidth = plus ? plus.offsetWidth : 0;
-      /* Room for the tags if no "+N" is needed: the row plus the space the placeholder holds. */
-      const roomWithoutPlus = row.clientWidth + (plus ? plusWidth + gap : 0);
+      /* The "+N" sits in the row after the tags, so the row is the room for both. */
+      const roomWithoutPlus = row.clientWidth;
       const widths = tags.map((t) => t.offsetWidth);
       const total = widths.reduce((sum, w, i) => sum + w + (i ? gap : 0), 0);
       if (total <= roomWithoutPlus) {
@@ -561,6 +561,28 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                     {labelOf(v)}
                   </Tag>
                 ))}
+                {!expanded && (hiddenCount > 0 || measuring) && (
+                  <button
+                    ref={(node) => {
+                      toggleRef.current = node;
+                    }}
+                    type="button"
+                    aria-expanded={false}
+                    aria-controls={tagsId}
+                    aria-label={measuring ? undefined : `Show ${hiddenCount} more`}
+                    aria-hidden={measuring || undefined}
+                    tabIndex={measuring ? -1 : undefined}
+                    onClick={() => setOpenedOut(true)}
+                    className={cn(
+                      toggleClass,
+                      'bg-surface-neutral-subtle text-text-secondary hover:bg-surface-neutral-medium',
+                      disabledTag,
+                      measuring && 'invisible',
+                    )}
+                  >
+                    {`+${measuring ? committed.length : hiddenCount}`}
+                  </button>
+                )}
                 {expanded && wrapped && (
                   <button
                     ref={(node) => {
@@ -576,28 +598,6 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   </button>
                 )}
               </div>
-            )}
-            {showTags && !expanded && (hiddenCount > 0 || measuring) && (
-              <button
-                ref={(node) => {
-                  toggleRef.current = node;
-                }}
-                type="button"
-                aria-expanded={false}
-                aria-controls={tagsId}
-                aria-label={measuring ? undefined : `Show ${hiddenCount} more`}
-                aria-hidden={measuring || undefined}
-                tabIndex={measuring ? -1 : undefined}
-                onClick={() => setOpenedOut(true)}
-                className={cn(
-                  toggleClass,
-                  'bg-surface-neutral-subtle text-text-secondary hover:bg-surface-neutral-medium',
-                  disabledTag,
-                  measuring && 'invisible',
-                )}
-              >
-                {`+${measuring ? committed.length : hiddenCount}`}
-              </button>
             )}
             <button
               ref={triggerRef}
