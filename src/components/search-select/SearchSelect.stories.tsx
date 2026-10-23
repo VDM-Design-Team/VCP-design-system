@@ -305,6 +305,138 @@ export const Tags: Story = {
 };
 
 /**
+ * Tags stay on one line: the ones that fit show, "+N" stands for the rest. "+N" opens the field out
+ * so every tag shows and can be removed where it stands; "Show less" (or a click away, Escape, or
+ * Tab out) folds it back.
+ */
+export const TagsOverflow: Story = {
+  args: {
+    options: TAGS,
+    multiple: true,
+    display: 'tags',
+    value: ['bug', 'feature', 'improvement', 'development', 'vcp', 'ops'],
+    placeholder: 'Select tags',
+  },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* Collapsed: the last tag is out of sight, and "+N" says how many. */
+    const more = await canvas.findByRole('button', { name: /Show \d+ more/ });
+    await expect(canvas.queryByRole('button', { name: 'Remove Operations' })).toBeNull();
+    await expect(more).toHaveAttribute('aria-expanded', 'false');
+
+    /* Opened out: every tag shows with its own ✕, and there is a way back. */
+    await userEvent.click(more);
+    await expect(await canvas.findByRole('button', { name: 'Remove Operations' })).toBeVisible();
+    const less = await canvas.findByRole('button', { name: 'Show less' });
+    await expect(less).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(less);
+    await waitFor(() => expect(canvas.queryByRole('button', { name: 'Remove Operations' })).toBeNull());
+  },
+};
+
+/** Removing a tag leaves the field opened out, and focus moves to the neighbouring ✕. */
+export const TagsRemoveKeepsExpanded: Story = {
+  args: {
+    options: TAGS,
+    multiple: true,
+    display: 'tags',
+    value: ['bug', 'feature', 'improvement', 'development', 'vcp', 'ops'],
+  },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(await canvas.findByRole('button', { name: /Show \d+ more/ }));
+    await userEvent.click(await canvas.findByRole('button', { name: 'Remove Improvement' }));
+    /* Still opened out, and the place is kept. */
+    await expect(canvas.queryByRole('button', { name: 'Remove Improvement' })).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Remove Development' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Remove Development' })).toHaveFocus();
+    await expect(canvas.getByRole('button', { name: 'Show less' })).toBeVisible();
+  },
+};
+
+/** A click away, or Escape, folds an opened-out field back. */
+export const TagsFoldBack: Story = {
+  args: {
+    options: TAGS,
+    multiple: true,
+    display: 'tags',
+    value: ['bug', 'feature', 'improvement', 'development', 'vcp', 'ops'],
+  },
+  render: (args) => (
+    <div>
+      <Controlled {...args} aria-label="Tags" />
+      <button type="button">Elsewhere</button>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(await canvas.findByRole('button', { name: /Show \d+ more/ }));
+    await expect(await canvas.findByRole('button', { name: 'Show less' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Elsewhere' }));
+    await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show less' })).toBeNull());
+
+    await userEvent.click(await canvas.findByRole('button', { name: /Show \d+ more/ }));
+    await expect(await canvas.findByRole('button', { name: 'Show less' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(canvas.queryByRole('button', { name: 'Show less' })).toBeNull());
+  },
+};
+
+/** A long label is cut with "…" and its ✕ stays inside the field. */
+export const LongTag: Story = {
+  args: {
+    options: [
+      { value: 'long', label: 'A very long tag name that could never fit on a single line of this field' },
+      { value: 'short', label: 'Short' },
+    ],
+    multiple: true,
+    display: 'tags',
+    value: ['long', 'short'],
+  },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const remove = await canvas.findByRole('button', {
+      name: 'Remove A very long tag name that could never fit on a single line of this field',
+    });
+    await expect(remove).toBeVisible();
+    /* The ✕ sits inside the field's box, not cut off beyond it. */
+    const field = remove.closest('[class*="rounded-md"]') as HTMLElement;
+    await expect(remove.getBoundingClientRect().right).toBeLessThanOrEqual(field.getBoundingClientRect().right);
+  },
+};
+
+/** `error` puts a message under the field in the critical colour, and announces it with the field. */
+export const WithError: Story = {
+  args: { multiple: true, display: 'tags', options: TAGS, error: 'Choose at least one tag.' },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('button', { name: 'Tags' });
+    await expect(canvas.getByText('Choose at least one tag.')).toBeVisible();
+    await expect(field).toHaveAttribute('aria-invalid', 'true');
+    await expect(field).toHaveAccessibleDescription('Choose at least one tag.');
+  },
+};
+
+/** A click inside the panel that lands on nothing does nothing: the panel stays open. */
+export const BlankClickKeepsOpen: Story = {
+  args: { options: TAGS, multiple: true, placeholder: 'Select tags' },
+  render: (args) => <Controlled {...args} aria-label="Tags" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Tags' });
+    await userEvent.click(trigger);
+    await userEvent.click(canvas.getByText('Global (Cross-Domain)'));
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(canvas.getByRole('combobox', { name: 'Search by name' })).toHaveFocus();
+  },
+};
+
+/**
  * Figma's status menu: no search for seven rows, a summary in the field, and ticks that are a
  * draft until Apply. Clear all empties the draft; Escape throws it away.
  */
