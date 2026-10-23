@@ -156,7 +156,7 @@ says so ("Anyone", "Unassigned") — it is then a choice the user can see.
 | Empty | `caption-md-semibold` in `text.tertiary`, outside the list |
 | Apply footer | A `stroke.subtle` rule across the full panel width, then Clear all (secondary) and Apply (primary), small |
 
-The field is `Select`'s shell (`stroke.strong` border, `surface.elevated`, at least 40 tall, growing
+The field is `Input`'s and `Select`'s shell (`stroke.strong` border that turns `stroke.focused` on focus, with the `stroke.focused` ring; the critical border, held through focus, when invalid; `surface.elevated`; at least 40 tall, growing
 as tags wrap) with the picked name in `body-sm-medium` and the placeholder in `text.subtle`. Tags
 are `Tag size="sm"` with `onRemove`. In a **disabled** field the tags would blend into the grey fill, so they take `surface.elevated` with a `stroke.subtle` outline there (the `Tag` itself is unchanged). The "+N" and "Show less" buttons are 24 tall: `surface.neutral.subtle` and `text.secondary`, and `text.brand.strong` for "Show less". No new tokens.
 
