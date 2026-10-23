@@ -107,8 +107,8 @@ export const Default: Story = {
 };
 
 /**
- * `multiple`: a pick toggles and the panel stays open. The field says who, or how many; picked
- * rows carry a check.
+ * `multiple`: a pick toggles and the panel stays open. The field says who, or how many, and each
+ * row leads with a checkbox.
  */
 export const Multiple: Story = {
   args: { multiple: true },

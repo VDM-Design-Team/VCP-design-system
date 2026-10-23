@@ -9,6 +9,7 @@ opens with a search field over avatar rows.
 | Piece | Tier |
 |---|---|
 | `Avatar` | atom |
+| `Checkbox` | atom |
 | `Icon` | atom |
 | `Input` | atom |
 | `Tag` | atom |
@@ -34,7 +35,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onChange` | `(value: string) => void` | `(value: string[]) => void` |
 | The listbox | — | `aria-multiselectable` |
 
-In both, a picked row carries a check.
+How a picked row is marked follows the system's rule: a list that picks **one** has a trailing check (as `SearchSelect`'s); a list that picks **several** has a leading checkbox (`CheckboxMark`, as `MultiSelect`'s and Figma's status menu). Hover and pressed tint the row, so the mark is a separate signal and the states never blur together.
 
 ## Props
 
@@ -65,7 +66,7 @@ Figma's Edit Viewers dropdown (`Detail_Card_Edit_Viewers`, `7457:91275`). Its pa
 |---|---|
 | Panel | `surface.elevated`, 1 `stroke.subtle`, `radius.md`, `shadow.menu`, 4 above and below |
 | Search | The `Input` atom (40 tall) with a `magnifying-glass`, inside 12 of padding on every side. Focus is the Input's ring |
-| Rows | 40 tall, 12 either side, 6 between avatar and name; avatar 24; name `body-sm-medium` in `text.secondary`; full width, no rounded corners |
+| Rows | 40 tall, 12 either side, 6 between the parts; a 16 checkbox first when `multiple`, then the avatar (24); name `body-sm-medium` in `text.secondary`; full width, no rounded corners |
 | Row states | rest `surface.elevated`; hover or keyboard-active `surface.brand.faint`; pressed `surface.brand.subtle` |
 | Empty | `caption-md-semibold` in `text.tertiary`, outside the list |
 
@@ -75,8 +76,8 @@ draw its own; if a second one arrives, the search block is the piece to lift out
 ## Tokens
 
 The field is `Select`'s shell (`stroke.strong` border, `surface.elevated`, at least 40 tall)
-with the picked name in `body-sm-medium` and the placeholder in `text.subtle`. The check is
-`text.brand.strong`. No new tokens.
+with the picked name in `body-sm-medium` and the placeholder in `text.subtle`. The single variant's
+check is `text.brand.strong`; the multiple variant's boxes are `CheckboxMark`'s tokens. No new tokens.
 
 Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 
@@ -104,9 +105,9 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 
 ## Differences from the design
 
-- **Picked rows show a check, not a section.** The viewers dropdown lists assigned people
+- **Picked rows are marked, not sectioned.** The viewers dropdown lists assigned people
   under a "3 Viewers" heading with a red remove button on each, and searches *to add* people.
-  A filter needs everyone visible with their state, so a check marks the picked rows. That
+  A filter needs everyone visible with their state, so a trailing check (single) or a checkbox (multiple) marks the picked rows. That
   feature (assigning watchers) is not built here.
 - **The search field is the `Input` atom.** Figma fills it with an "elevated secondary" surface
   the system has no token for; the Input's `surface.elevated` is used.

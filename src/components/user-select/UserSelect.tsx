@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
+import { CheckboxMark } from '../../atoms/checkbox';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Tag } from '../../atoms/tag';
@@ -18,10 +19,12 @@ import { Tag } from '../../atoms/tag';
  * `brand.subtle` pressed. Any dropdown that gains a search field takes this
  * shape. (The viewers dropdown also lists assigned people under a "3 Viewers"
  * heading with a remove button on each; that feature is not built here, and
- * a picked row is marked with a check instead, so a filter can show everyone.)
+ * a picked row is marked instead, so a filter can show everyone.)
  *
- * - **Single:** a pick closes the panel and the field says who.
- * - **Multiple:** a pick toggles and the panel stays open. The field shows a
+ * - **Single:** a pick closes the panel and the field says who. The picked row
+ *   carries a trailing check.
+ * - **Multiple:** a pick toggles and the panel stays open; each row leads with
+ *   a checkbox (`CheckboxMark`, as `MultiSelect`'s). The field shows a
  *   summary ("Amy Lee", "3 selected") or, with `display="tags"`, a removable
  *   tag per person.
  *
@@ -327,6 +330,8 @@ export const UserSelect = React.forwardRef<HTMLDivElement, UserSelectProps>(
                     'active:bg-surface-brand-subtle',
                   )}
                 >
+                  {/* Several picks: a checkbox says so before anyone clicks. The row is the control. */}
+                  {multiple && <CheckboxMark checked={isSelected} />}
                   {o.unassigned ? (
                     <span
                       aria-hidden="true"
@@ -338,7 +343,8 @@ export const UserSelect = React.forwardRef<HTMLDivElement, UserSelectProps>(
                     <Avatar size="sm" name={o.label} src={o.src} />
                   )}
                   <span className="min-w-0 flex-1 truncate">{o.label}</span>
-                  {isSelected && (
+                  {/* One pick: a trailing check, as SearchSelect's. */}
+                  {!multiple && isSelected && (
                     <Icon
                       name="check"
                       size="sm"
