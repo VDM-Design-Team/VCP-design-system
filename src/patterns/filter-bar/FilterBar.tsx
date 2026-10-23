@@ -5,7 +5,11 @@ import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Select, type SelectOption } from '../../atoms/select';
 import { DatePicker, type DatePickerPreset } from '../../components/date-picker';
-import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
+import {
+  SearchSelect,
+  type SearchSelectOption,
+  type SearchSelectRows,
+} from '../../components/search-select';
 import { Popover } from '../../components/popover';
 
 /**
@@ -71,6 +75,8 @@ export interface FilterBarMulti {
   /** The panel's search box. Status has none by default, tags has one. */
   searchable?: boolean;
   searchPlaceholder?: string;
+  /** What each row looks like: `text` (default), `avatar`, `icon` or `tag`. */
+  rows?: SearchSelectRows;
 }
 
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
