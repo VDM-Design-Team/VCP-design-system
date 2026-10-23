@@ -123,7 +123,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `options` | `Array<string \| { value, label, group?, disabled?, src?, unassigned?, icon?, tone? }>` | `[]` | Strings are shorthand. `label` is a string: the field, tags, search and avatar initials all use it. `group` sections rows under a heading (in order first seen; ungrouped rows lead). Per-preset extras: `src` (a photo) and `unassigned` (the person glyph) for `avatar`; `icon` for `icon`; `tone` for `tag` |
+| `options` | `Array<string \| { value, label, group?, disabled?, src?, unassigned?, icon?, tone? }>` | `[]` | Strings are shorthand. `label` is a string: the row, search and avatar initials use it, and the field and tags too unless `shortLabel` is set (a concise form for the field when the row is long, e.g. a cycle's code for a row that reads "C33 (May 25, 2026 - Jun 08, 2026)"; search still matches the full label). `group` sections rows under a heading (in order first seen; ungrouped rows lead). Per-preset extras: `src` (a photo) and `unassigned` (the person glyph) for `avatar`; `icon` for `icon`; `tone` for `tag` |
 | `multiple` | `boolean` | — | Several picks. Switches `value` and `onChange` to arrays |
 | `value` / `onChange` | `string` / `(value: string) => void`; or with `multiple`, `string[]` / `(value: string[]) => void` | — | Uncontrolled when `value` is omitted. `''` shows the placeholder |
 | `searchable` | `boolean` | `true` | The search box in the panel. Turn it off for a short list |
