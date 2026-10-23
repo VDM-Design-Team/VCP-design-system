@@ -5,14 +5,14 @@ import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Select, type SelectOption } from '../../atoms/select';
 import { DatePicker, type DatePickerPreset } from '../../components/date-picker';
-import { MultiSelect, type MultiSelectOption } from '../../components/multi-select';
-import { Popover } from '../../components/popover';
 import {
-  UserSelect,
-  type UserSelectDisplay,
-  type UserSelectOption,
-  type UserSelectProps,
-} from '../../components/user-select';
+  SearchSelect,
+  type SearchSelectDisplay,
+  type SearchSelectOption,
+  type SearchSelectProps,
+} from '../../components/search-select';
+import { Popover } from '../../components/popover';
+
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
@@ -35,13 +35,13 @@ import {
  * - **period** — a field that opens a range calendar (`DatePicker`, two months
  *   and your `presets`). The value is `{ start, end }` in ISO `yyyy-mm-dd`;
  *   the field reads it as `dd/mm/yyyy-dd/mm/yyyy`, as Figma draws it.
- * - **status** — `MultiSelect` with the Clear all / Apply footer, shown as a
- *   summary ("In progress", "3 selected").
+ * - **status** — `SearchSelect` (several picks, no search box) with the Clear all /
+ *   Apply footer, shown as a summary ("In progress", "3 selected").
  * - **priority** — `Select`. Put an explicit "All priorities" option in the
  *   list if "no filter" should be a choice.
- * - **tags** — `MultiSelect` whose picks are removable tags in the field;
+ * - **tags** — `SearchSelect` with search, whose picks are removable tags in the field;
  *   give options a `group` for the Global / Domain-Specific headings.
- * - **users** — one `UserSelect` per entry (Assignee, Initiator…): a searchable
+ * - **users** — one `SearchSelect` per entry (Assignee, Initiator…): a searchable
  *   list of people with avatars. Each is named by its `label`.
  * - **children** — more fields in the same row (an assignee picker, say),
  *   shown and hidden with the others.
@@ -72,16 +72,19 @@ export interface FilterBarSelect {
 }
 
 export interface FilterBarMulti {
-  options: ReadonlyArray<string | MultiSelectOption>;
+  options: ReadonlyArray<string | SearchSelectOption>;
   value?: readonly string[];
   onChange?: (value: string[]) => void;
   placeholder?: string;
+  /** The panel's search box. Status has none by default, tags has one. */
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 export type FilterBarUser = {
   /** Names the field for assistive tech and builds its placeholder ("Select assignee"). */
   label: string;
-  options: ReadonlyArray<UserSelectOption>;
+  options: ReadonlyArray<SearchSelectOption>;
   placeholder?: string;
 } & (
   | { multiple?: false; value?: string; onChange?: (value: string) => void; display?: never }
@@ -90,7 +93,7 @@ export type FilterBarUser = {
       multiple: true;
       value?: readonly string[];
       onChange?: (value: string[]) => void;
-      display?: UserSelectDisplay;
+      display?: SearchSelectDisplay;
     }
 );
 
@@ -253,9 +256,11 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
             />
           )}
           {status && (
-            <MultiSelect
+            <SearchSelect
+              multiple
               display="summary"
               confirm
+              searchable={false}
               aria-label="Status"
               placeholder="Select status"
               {...status}
@@ -271,7 +276,10 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
             />
           )}
           {tags && (
-            <MultiSelect
+            <SearchSelect
+              multiple
+              display="tags"
+              searchPlaceholder="Search tags"
               aria-label="Tags"
               placeholder="Select tags"
               {...tags}
@@ -279,14 +287,16 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
             />
           )}
           {users?.map(({ label, placeholder, ...rest }) => (
-            <UserSelect
+            <SearchSelect
               key={label}
               {...({
                 'aria-label': label,
                 placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
+                searchPlaceholder: 'Search by name',
+                avatars: true,
                 ...rest,
                 className: 'md:w-44',
-              } as UserSelectProps)}
+              } as SearchSelectProps)}
             />
           ))}
           {children}

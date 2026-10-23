@@ -13,9 +13,8 @@ the fields.
 | `Input` | atom |
 | `Select` | atom |
 | `DatePicker` | component |
-| `MultiSelect` | component |
+| `SearchSelect` | component |
 | `Popover` | component |
-| `UserSelect` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -25,7 +24,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | `FilterBar` | Narrowing a list or table by several things at once |
 | `Tabs` / `SegmentedControl` | One dimension with a few fixed views |
-| `Select` / `MultiSelect` alone | A single filter on a form, not a bar of them |
+| `Select` / `SearchSelect` alone | A single filter on a form, not a bar of them |
 
 ## The filters are yours
 
@@ -37,10 +36,10 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 |---|---|---|
 | `search` / `onSearchChange` | `string` / `(value) => void` | The search field. `searchPlaceholder` defaults to "Search by title or ID" |
 | `period` | `{ value?: { start?, end? }, onChange?, presets?, placeholder? }` | A field that opens a two-month range calendar. ISO `yyyy-mm-dd` in and out; the field reads `dd/mm/yyyy-dd/mm/yyyy`. `onChange({})` when cleared. `presets` are `DatePicker`'s quick picks |
-| `status` | `{ options, value?, onChange?, placeholder? }` | `MultiSelect` with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
+| `status` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` (several picks, no search box by default) with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
-| `tags` | `{ options, value?, onChange?, placeholder? }` | `MultiSelect` with removable tags in the field. Options may carry a `group` |
-| `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `UserSelect` per entry (Assignee, Initiator…): a searchable list of people with avatars, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array |
+| `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable` and `searchPlaceholder` can be set on `status` and `tags` |
+| `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `SearchSelect` per entry (Assignee, Initiator…) with avatars and search, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array. Options may carry `src` (a photo) or `unassigned` |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
 | `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset" |
 | `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show. Uncontrolled (shown) when omitted |
@@ -78,7 +77,7 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 ## Differences from the design
 
-- **Users follow tags.** Figma's bar draws Assignee and Initiator in its "current design" frame, not in `_Filter_Bar`; they are placed after tags, one `UserSelect` each.
+- **Users follow tags.** Figma's bar draws Assignee and Initiator in its "current design" frame, not in `_Filter_Bar`; they are placed after tags, one `SearchSelect` each, with avatars and search.
 - **Field order.** Period, status, priority, tags, as `_Filter_Bar`'s first row draws them.
   Its second row draws a filled version in another order (tags first); that is read as a state,
   not a layout.

@@ -125,7 +125,8 @@ export const Default: Story = {
     await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('In progress');
 
     /* Tags: removable tags in the field. */
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Tags' }));
+    /* Tags has a search box, so its trigger is a button; status has none, so its trigger is the combobox. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Tags' }));
     await userEvent.click(canvas.getByRole('option', { name: 'VCP' }));
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByRole('button', { name: 'Remove VCP' })).toBeVisible();

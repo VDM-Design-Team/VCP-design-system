@@ -39,7 +39,6 @@ export * from './components/empty-state';
 export * from './components/field';
 export * from './components/file-attachment';
 export * from './components/menu';
-export * from './components/multi-select';
 export * from './components/modal';
 export * from './components/page-title';
 export * from './components/pagination';
@@ -55,7 +54,6 @@ export * from './components/tag-editor';
 export * from './components/timeline';
 export * from './components/toast';
 export * from './components/tooltip';
-export * from './components/user-select';
 export * from './components/type-tag';
 export * from './components/urgency-tag';
 
