@@ -10,9 +10,9 @@ import {
   type SearchSelectDisplay,
   type SearchSelectOption,
   type SearchSelectProps,
+  type SearchSelectRows,
 } from '../../components/search-select';
 import { Popover } from '../../components/popover';
-
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
@@ -79,6 +79,8 @@ export interface FilterBarMulti {
   /** The panel's search box. Status has none by default, tags has one. */
   searchable?: boolean;
   searchPlaceholder?: string;
+  /** What each row looks like: `text` (default), `avatar`, `icon` or `tag`. */
+  rows?: SearchSelectRows;
 }
 
 export type FilterBarUser = {
@@ -86,6 +88,8 @@ export type FilterBarUser = {
   label: string;
   options: ReadonlyArray<SearchSelectOption>;
   placeholder?: string;
+  /** Row style. People get avatars (`avatar`) unless you say otherwise. */
+  rows?: SearchSelectRows;
 } & (
   | { multiple?: false; value?: string; onChange?: (value: string) => void; display?: never }
   | {
@@ -293,7 +297,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                 'aria-label': label,
                 placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
                 searchPlaceholder: 'Search by name',
-                avatars: true,
+                rows: 'avatar',
                 ...rest,
                 className: 'md:w-44',
               } as SearchSelectProps)}
