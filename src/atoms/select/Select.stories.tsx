@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, within } from 'storybook/test';
 import { Select } from './Select';
 import { Field } from '../../components/field';
 
@@ -14,7 +15,9 @@ const meta = {
         component:
           'A choice from a fixed list, on the native `<select>` — the popup, keyboard model ' +
           'and mobile pickers come from the platform. The shell is `Input`’s, class for ' +
-          'class, so a form mixes the two seamlessly. Needs search? That’s `SearchSelect`.',
+          'class, so a form mixes the two seamlessly. The field reads like `SearchSelect`’s (a grey ' +
+          'placeholder, a medium-weight value), but the open list is the browser’s: for the styled ' +
+          'panel, or search, use `SearchSelect`.',
       },
     },
   },
@@ -31,13 +34,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Uncontrolled with a placeholder: starts on it, and it can't be re-picked. */
+/**
+ * Uncontrolled with a placeholder: starts on it, and it can't be re-picked. The placeholder is
+ * `text.subtle` in regular weight, and a chosen value is `text.primary` in medium — the same pairing
+ * as `SearchSelect`'s field.
+ */
 export const Default: Story = {
   render: (args) => (
     <div className="w-72">
       <Select {...args} aria-label="Domain" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const select = within(canvasElement).getByRole('combobox', { name: 'Domain' });
+    const placeholder = getComputedStyle(select);
+    const [subtleColor, regularWeight] = [placeholder.color, placeholder.fontWeight];
+
+    await userEvent.selectOptions(select, 'Design');
+    const chosen = getComputedStyle(select);
+    /* Choosing a value darkens the text and sets it in a heavier weight. */
+    await expect(chosen.color).not.toBe(subtleColor);
+    await expect(Number(chosen.fontWeight)).toBeGreaterThan(Number(regularWeight));
+  },
 };
 
 /** Controlled — `onChange` hands you the value, nothing else. */
@@ -62,6 +80,21 @@ export const InAField: Story = {
       </Field>
     </div>
   ),
+};
+
+/** `error` puts a message under the select in the critical colour, as `SearchSelect` does. */
+export const WithError: Story = {
+  render: (args) => (
+    <div className="w-72">
+      <Select {...args} aria-label="Domain" error="Choose a domain before submitting." fullWidth />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const select = within(canvasElement).getByRole('combobox', { name: 'Domain' });
+    await expect(within(canvasElement).getByText('Choose a domain before submitting.')).toBeVisible();
+    await expect(select).toHaveAttribute('aria-invalid', 'true');
+    await expect(select).toHaveAccessibleDescription('Choose a domain before submitting.');
+  },
 };
 
 /** Same treatment as Input: critical border, `aria-invalid`, message from Field. */
