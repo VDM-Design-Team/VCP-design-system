@@ -29,6 +29,19 @@ const TAGS: SearchSelectOption[] = [
   { value: 'ops', label: 'Operations', group: 'Domain-Specific (In-Domain)' },
 ];
 
+const TYPES: SearchSelectOption[] = [
+  { value: 'bug', label: 'Bug', tone: 'danger' },
+  { value: 'feature', label: 'New Feature', tone: 'success' },
+  { value: 'improvement', label: 'Improvement', tone: 'info' },
+  { value: 'chore', label: 'Chore', tone: 'neutral' },
+];
+
+const CHANNELS: SearchSelectOption[] = [
+  { value: 'chat', label: 'Chat', icon: 'chat-dots' },
+  { value: 'announce', label: 'Announcement', icon: 'megaphone' },
+  { value: 'notify', label: 'Notification', icon: 'bell' },
+];
+
 const STATUSES = ['Pending', 'Accepted', 'In progress', 'Design Review', 'Review', 'Rejected', 'Backlog'];
 
 /* The real props are a single-or-multiple union, which Storybook's `Meta` cannot take
@@ -63,7 +76,7 @@ const meta = {
   argTypes: {
     multiple: { control: 'boolean' },
     searchable: { control: 'boolean' },
-    avatars: { control: 'boolean' },
+    rows: { control: 'inline-radio', options: ['text', 'avatar', 'icon', 'tag'] },
     display: { control: 'inline-radio', options: ['summary', 'tags'] },
     confirm: { control: 'boolean' },
     disabled: { control: 'boolean' },
@@ -100,9 +113,71 @@ function Controlled(props: StoryProps) {
   );
 }
 
+/**
+ * `rows` says what a row looks like, from four presets: `text` (the default, plain labels),
+ * `avatar` (people, above), `icon` (a glyph and text) and `tag` (each row drawn as a `Tag`).
+ * Presets only change the row's content; the checkbox or check, the states and the keyboard
+ * are the same in all of them.
+ */
+export const IconRows: Story = {
+  args: { options: CHANNELS, rows: 'icon', searchable: false, placeholder: 'Select channel' },
+  render: (args) => <Controlled {...args} aria-label="Channel" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Channel' }));
+    /* The icon is decoration: the row is still named by its label alone. */
+    await expect(canvas.getByRole('option', { name: 'Announcement' })).toBeVisible();
+    await expect(canvas.getAllByRole('option')).toHaveLength(3);
+  },
+};
+
+/** `rows="tag"`: each row is a `Tag` in its option's `tone`, and the tags in the field wear it too. */
+export const TagRows: Story = {
+  args: { options: TYPES, rows: 'tag', multiple: true, display: 'tags', searchable: false, placeholder: 'Select types' },
+  render: (args) => <Controlled {...args} aria-label="Types" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Types' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'Bug' }));
+    await expect(args.onChange).toHaveBeenLastCalledWith(['bug']);
+    await expect(canvas.getByRole('button', { name: 'Remove Bug' })).toBeVisible();
+  },
+};
+
+/**
+ * `renderOption` draws a row's content when no preset fits — here a name with a second line.
+ * The checkbox, the states, the keyboard and the ARIA stay the component's, so keep it to
+ * content: no buttons or links in there.
+ */
+export const CustomRows: Story = {
+  args: {
+    options: [
+      { value: 'eve', label: 'Eve Kestrel' },
+      { value: 'marvin', label: 'Marvin Ode' },
+    ],
+    searchable: false,
+    placeholder: 'Select owner',
+    renderOption: (option: SearchSelectOption, state: { selected: boolean }) => (
+      <span className="flex min-w-0 flex-col leading-tight">
+        <span className="truncate">{option.label}</span>
+        <span className="truncate text-caption-md-regular text-text-tertiary">
+          {state.selected ? 'Current owner' : `${option.label.split(' ')[0]?.toLowerCase()}@example.com`}
+        </span>
+      </span>
+    ),
+  },
+  render: (args) => <Controlled {...args} aria-label="Owner" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('combobox', { name: 'Owner' }));
+    await userEvent.click(canvas.getByRole('option', { name: /Eve Kestrel/ }));
+    await expect(canvas.getByRole('combobox', { name: 'Owner' })).toHaveTextContent('Eve Kestrel');
+  },
+};
+
 /** One person: open, search, pick. The field then says who, and the picked row carries a check. */
 export const Single: Story = {
-  args: { avatars: true },
+  args: { rows: 'avatar' },
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
@@ -133,7 +208,7 @@ export const Single: Story = {
 
 /** The search box is the combobox: arrows move, Enter picks, Escape closes and returns focus. */
 export const Keyboard: Story = {
-  args: { avatars: true },
+  args: { rows: 'avatar' },
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
@@ -159,7 +234,7 @@ export const Keyboard: Story = {
 
 /** The Unassigned row is a person glyph, not an avatar, and is a choice like any other. */
 export const Unassigned: Story = {
-  args: { avatars: true, value: 'unassigned' },
+  args: { rows: 'avatar', value: 'unassigned' },
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -174,7 +249,7 @@ export const Unassigned: Story = {
  * says who, or how many.
  */
 export const Multiple: Story = {
-  args: { multiple: true, avatars: true },
+  args: { multiple: true, rows: 'avatar' },
   render: (args) => <Controlled {...args} aria-label="Watchers" />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
@@ -327,7 +402,7 @@ export const NoOptions: Story = {
 
 /** Named by a `Field` label: the trigger is a button, so `htmlFor` reaches it. */
 export const InAField: Story = {
-  args: { avatars: true },
+  args: { rows: 'avatar' },
   render: (args) => (
     <Field label="Assignee" helper="Who is doing the work." htmlFor="assignee">
       <Controlled {...args} id="assignee" />
@@ -377,7 +452,7 @@ export const ClosesOnBlur: Story = {
 
 /** Light and dark: the search box, avatars, checkboxes and tags hold in both. */
 export const LightAndDark: Story = {
-  args: { multiple: true, avatars: true, value: ['amy', 'liam'] },
+  args: { multiple: true, rows: 'avatar', value: ['amy', 'liam'] },
   decorators: [],
   render: (args) => (
     <div className="flex flex-col gap-6">
