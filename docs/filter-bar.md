@@ -79,7 +79,7 @@ wraps: cycle 9rem to 16rem, status 9rem to 16rem, priority 9.5rem to 16rem, user
 the period) needs in the real type, so nothing is cut off at the minimum. A dropdown panel is as wide as its
 longest option regardless (see `SearchSelect`), so a narrow field never cuts options off.
 
-**With the filters folded away** (the Filters button pressed, or a page that passes none), the search takes the room the fields leave: it widens from its 24rem cap to 40rem, and Reset and Filters stay at the right edge.
+**With the filters folded away** (the Filters button pressed, or a page that passes none), the search takes the room the fields leave: it widens from its 24rem cap to 32rem, and Reset and Filters stay at the right edge.
 
 **Design target: 1440.** With the expanded sidebar (256) and the page's 32 of padding either side, a 1440
 screen leaves 1120 for the bar, and a page with period, status, priority and tags fits on **one row** there.
