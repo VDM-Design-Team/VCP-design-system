@@ -40,7 +40,7 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 | `status` | `{ options, value?, onChange?, placeholder? }` | `MultiSelect` with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
 | `tags` | `{ options, value?, onChange?, placeholder? }` | `MultiSelect` with removable tags in the field. Options may carry a `group` |
-| `users` | `Array<{ label, options, value?, onChange?, placeholder? }>` | One `UserSelect` per entry (Assignee, Initiator…): a searchable list of people with avatars, named by its `label`; the placeholder defaults to "Select assignee" |
+| `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `UserSelect` per entry (Assignee, Initiator…): a searchable list of people with avatars, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
 | `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset" |
 | `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show. Uncontrolled (shown) when omitted |

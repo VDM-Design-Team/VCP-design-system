@@ -1,7 +1,13 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { UserSelect, type UserSelectOption } from './UserSelect';
+import {
+  UserSelect,
+  type UserSelectDisplay,
+  type UserSelectOption,
+  type UserSelectProps,
+  type UserSelectSingleProps,
+} from './UserSelect';
 import { Field } from '../field';
 
 const PEOPLE: UserSelectOption[] = [
@@ -14,16 +20,27 @@ const PEOPLE: UserSelectOption[] = [
   { value: 'maya', label: 'Maya Bennett' },
 ];
 
+/* The real props are a single-or-multiple union, which Storybook's `Meta` cannot
+   take as args (it reads the union as `never`). The stories use this flat shape. */
+type StoryProps = Omit<UserSelectSingleProps, 'multiple' | 'value' | 'onChange' | 'display'> & {
+  multiple?: boolean;
+  value?: string | readonly string[];
+  onChange?: (value: never) => void;
+  display?: UserSelectDisplay;
+};
+
 const meta = {
   title: 'Components/Forms/UserSelect',
-  component: UserSelect,
+  component: UserSelect as unknown as React.ComponentType<StoryProps>,
   parameters: {
     docs: {
       description: {
         component:
-          'One person from a list you can search: an assignee, an initiator, a filter by user. ' +
-          'The field shows who is picked; the panel opens with a search field over avatar rows. ' +
-          'For several people use `MultiSelect`; for a choice that is not a person, `Select`.',
+          'People from a list you can search: an assignee, an initiator, a filter by user. One ' +
+          'person by default, or several with `multiple`. The field shows who is picked; the panel ' +
+          'opens with a boxed search field over avatar rows, the system\'s dropdown-with-search ' +
+          'look (from Figma\'s Edit Viewers dropdown). For plain values ticked from a list use ' +
+          '`MultiSelect`; for a choice that is not a person, `Select`.',
       },
     },
   },
@@ -36,22 +53,26 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof UserSelect>;
+} satisfies Meta<StoryProps>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** The page owns the value; the story stands in for it. */
-function Controlled(props: React.ComponentProps<typeof UserSelect>) {
-  const [value, setValue] = React.useState(props.value ?? '');
+function Controlled(props: StoryProps) {
+  const [value, setValue] = React.useState<string | readonly string[]>(
+    props.value ?? (props.multiple ? [] : ''),
+  );
   return (
     <UserSelect
-      {...props}
-      value={value}
-      onChange={(next) => {
-        setValue(next);
-        props.onChange?.(next);
-      }}
+      {...({
+        ...props,
+        value,
+        onChange: (next: string | string[]) => {
+          setValue(next);
+          (props.onChange as ((v: string | string[]) => void) | undefined)?.(next);
+        },
+      } as unknown as UserSelectProps)}
     />
   );
 }
@@ -68,7 +89,7 @@ export const Default: Story = {
     await userEvent.click(trigger);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     /* Focus is in the search, ready to type. */
-    const search = canvas.getByRole('combobox', { name: 'Search…' });
+    const search = canvas.getByRole('combobox', { name: 'Search by name' });
     await expect(search).toHaveFocus();
     await expect(canvas.getAllByRole('option')).toHaveLength(7);
 
@@ -85,6 +106,50 @@ export const Default: Story = {
   },
 };
 
+/**
+ * `multiple`: a pick toggles and the panel stays open. The field says who, or how many; picked
+ * rows carry a check.
+ */
+export const Multiple: Story = {
+  args: { multiple: true },
+  render: (args) => <Controlled {...args} aria-label="Watchers" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Watchers' });
+    await userEvent.click(trigger);
+    await expect(canvas.getByRole('listbox')).toHaveAttribute('aria-multiselectable', 'true');
+
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(args.onChange).toHaveBeenLastCalledWith(['amy']);
+    /* Still open, and the field names the one pick. */
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(trigger).toHaveTextContent('Amy Lee');
+    await expect(canvas.getByRole('option', { name: 'Amy Lee' })).toHaveAttribute('aria-selected', 'true');
+
+    await userEvent.click(canvas.getByRole('option', { name: 'Liam Carter' }));
+    await expect(args.onChange).toHaveBeenLastCalledWith(['amy', 'liam']);
+    await expect(trigger).toHaveTextContent('2 selected');
+
+    /* A second click takes a pick back out. */
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(args.onChange).toHaveBeenLastCalledWith(['liam']);
+    await expect(trigger).toHaveTextContent('Liam Carter');
+  },
+};
+
+/** `display="tags"`: a removable tag per person in the field, as `MultiSelect`'s. */
+export const MultipleAsTags: Story = {
+  args: { multiple: true, display: 'tags', value: ['adrian', 'amy'] },
+  render: (args) => <Controlled {...args} aria-label="Watchers" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Remove Adrian Cruz' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove Adrian Cruz' }));
+    await expect(args.onChange).toHaveBeenLastCalledWith(['amy']);
+    await expect(canvas.queryByRole('button', { name: 'Remove Adrian Cruz' })).toBeNull();
+  },
+};
+
 /** Keyboard: the search is the combobox. Arrows move, Enter picks, Escape closes and returns focus. */
 export const Keyboard: Story = {
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
@@ -93,7 +158,7 @@ export const Keyboard: Story = {
     const trigger = canvas.getByRole('button', { name: 'Assignee' });
     trigger.focus();
     await userEvent.keyboard('{Enter}');
-    const search = canvas.getByRole('combobox', { name: 'Search…' });
+    const search = canvas.getByRole('combobox', { name: 'Search by name' });
     await expect(search).toHaveFocus();
 
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
@@ -127,7 +192,7 @@ export const NoMatches: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
-    await userEvent.type(canvas.getByRole('combobox', { name: 'Search…' }), 'zzz');
+    await userEvent.type(canvas.getByRole('combobox', { name: 'Search by name' }), 'zzz');
     await expect(canvas.queryByRole('option')).toBeNull();
     await expect(canvas.getByText('No matches')).toBeVisible();
   },
@@ -181,15 +246,15 @@ export const ClosesOnBlur: Story = {
 
 /** Light and dark: the avatars, the search rule and the selected row hold in both. */
 export const LightAndDark: Story = {
-  args: { value: 'amy' },
+  args: { multiple: true, value: ['amy', 'liam'] },
   decorators: [],
   render: (args) => (
     <div className="flex flex-col gap-6">
-      <div className="h-72 w-60 p-4">
-        <Controlled {...args} aria-label="Assignee (light)" />
+      <div className="h-96 w-60 p-4">
+        <Controlled {...args} aria-label="Watchers (light)" />
       </div>
-      <div className="dark h-72 w-60 bg-surface-base p-4">
-        <Controlled {...args} aria-label="Assignee (dark)" />
+      <div className="dark h-96 w-60 bg-surface-base p-4">
+        <Controlled {...args} aria-label="Watchers (dark)" />
       </div>
     </div>
   ),

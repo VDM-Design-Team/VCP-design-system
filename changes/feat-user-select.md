@@ -1,8 +1,10 @@
 ---
 bump: minor
 ---
-### `UserSelect` — one person from a searchable list; `FilterBar` gets user fields (October 2026)
+### `UserSelect` — people from a searchable list, one or several; `FilterBar` gets user fields (October 2026)
 
-New component, to Figma's `_Filter_User` field and user menu: a field that shows the person picked, over a panel with a search field and avatar rows, plus an "Unassigned" row. Unlike `SearchSelect`, it shows who was chosen. The trigger is a button and focus moves to the search when it opens; arrows, Enter, Escape and Tab all work.
+New component, to Figma's `_Filter_User` field and the Edit Viewers dropdown: a field that shows who is picked, over a panel with a boxed "Search by name" field and 40-tall avatar rows, plus an "Unassigned" row. Unlike `SearchSelect`, it shows who was chosen. **Single** closes on a pick; **`multiple`** toggles and stays open, with the field showing a summary or, with `display="tags"`, a removable tag per person. The trigger is a button and focus moves to the search when it opens; arrows, Enter, Escape and Tab all work.
 
-`FilterBar` takes `users`, one `UserSelect` per entry (Assignee, Initiator…), after tags.
+The panel is the system's dropdown-with-search look; `docs/user-select.md` records its numbers so the next searchable dropdown reuses them.
+
+`FilterBar` takes `users`, one `UserSelect` per entry (Assignee, Initiator…), after tags; an entry can be `multiple`.

@@ -7,7 +7,12 @@ import { Select, type SelectOption } from '../../atoms/select';
 import { DatePicker, type DatePickerPreset } from '../../components/date-picker';
 import { MultiSelect, type MultiSelectOption } from '../../components/multi-select';
 import { Popover } from '../../components/popover';
-import { UserSelect, type UserSelectOption } from '../../components/user-select';
+import {
+  UserSelect,
+  type UserSelectDisplay,
+  type UserSelectOption,
+  type UserSelectProps,
+} from '../../components/user-select';
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
@@ -73,14 +78,21 @@ export interface FilterBarMulti {
   placeholder?: string;
 }
 
-export interface FilterBarUser {
+export type FilterBarUser = {
   /** Names the field for assistive tech and builds its placeholder ("Select assignee"). */
   label: string;
   options: ReadonlyArray<UserSelectOption>;
-  value?: string;
-  onChange?: (value: string) => void;
   placeholder?: string;
-}
+} & (
+  | { multiple?: false; value?: string; onChange?: (value: string) => void; display?: never }
+  | {
+      /** Several people: the panel stays open and the field summarises the picks. */
+      multiple: true;
+      value?: readonly string[];
+      onChange?: (value: string[]) => void;
+      display?: UserSelectDisplay;
+    }
+);
 
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   search?: string;
@@ -269,10 +281,12 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           {users?.map(({ label, placeholder, ...rest }) => (
             <UserSelect
               key={label}
-              aria-label={label}
-              placeholder={placeholder ?? `Select ${label.toLowerCase()}`}
-              {...rest}
-              className="md:w-44"
+              {...({
+                'aria-label': label,
+                placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
+                ...rest,
+                className: 'md:w-44',
+              } as UserSelectProps)}
             />
           ))}
           {children}

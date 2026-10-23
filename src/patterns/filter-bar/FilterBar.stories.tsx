@@ -187,6 +187,30 @@ export const Filled: Story = {
   ),
 };
 
+/** A `users` entry with `multiple`: several people, the panel stays open, the field counts them. */
+export const MultipleUsers: Story = {
+  render: function Render(args) {
+    const [watchers, setWatchers] = React.useState<string[]>([]);
+    return (
+      <FilterBar
+        {...args}
+        users={[
+          { label: 'Watchers', options: PEOPLE, multiple: true, value: watchers, onChange: setWatchers },
+        ]}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('button', { name: 'Watchers' });
+    await expect(field).toHaveTextContent('Select watchers');
+    await userEvent.click(field);
+    await userEvent.click(canvas.getByRole('option', { name: 'Adam' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(field).toHaveTextContent('2 selected');
+  },
+};
+
 /** Just a search field and the two buttons, for a page with nothing to filter by. */
 export const SearchOnly: Story = {
   render: (args) => {
