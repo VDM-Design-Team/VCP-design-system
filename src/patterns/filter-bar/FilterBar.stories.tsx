@@ -188,9 +188,14 @@ export const FiltersHidden: Story = {
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
     await expect(canvas.getByRole('combobox', { name: 'Status' })).toBeVisible();
 
+    const searchWidth = () => canvas.getByRole('searchbox').parentElement!.getBoundingClientRect().width;
+    const withFilters = searchWidth();
+
     await userEvent.click(toggle);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.getByRole('combobox', { name: 'Status', hidden: true })).not.toBeVisible();
+    /* The search takes the room the fields leave. */
+    await expect(searchWidth()).toBeGreaterThan(withFilters);
 
     await userEvent.click(toggle);
     await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('Pending');
