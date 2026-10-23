@@ -64,8 +64,14 @@ import { Tag, type TagTone } from '../../atoms/tag';
  */
 export interface SearchSelectOption {
   value: string;
-  /** A string on purpose: the field, the tags, search and the avatar's initials all use it. */
+  /** A string on purpose: the row, search, and the avatar's initials all use it (and the field too, unless `shortLabel` is set). */
   label: string;
+  /**
+   * What the field, the tags and the announcements say when the row's `label` is too long for them —
+   * "C33" in the field for a row that reads "C33 (May 25, 2026 - Jun 08, 2026)". Search still matches
+   * the full `label`.
+   */
+  shortLabel?: string;
   /** Rows sharing a `group` sit under one heading, in the order first seen; ungrouped rows lead. */
   group?: string;
   disabled?: boolean;
@@ -256,7 +262,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const [announce, setAnnounce] = React.useState('');
 
     const all = options.map(normalize);
-    const labelOf = (v: string) => all.find((o) => o.value === v)?.label ?? v;
+    /* What the field, the tags and the announcements say: the short label when there is one. */
+    const labelOf = (v: string) => {
+      const o = all.find((x) => x.value === v);
+      return o ? (o.shortLabel ?? o.label) : v;
+    };
     const committed: readonly string[] =
       value === undefined ? inner : multiple ? (value as readonly string[]) : value ? [value as string] : [];
     const shown = multiple && confirm && open ? draft : committed;

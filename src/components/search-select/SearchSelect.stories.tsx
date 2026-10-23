@@ -431,6 +431,35 @@ export const LongTag: Story = {
   },
 };
 
+/**
+ * `shortLabel`: the row can be long while the field stays short. Search matches the full label.
+ */
+export const ShortLabelInField: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    options: [
+      { value: 'c33', label: 'C33 (May 25, 2026 - Jun 08, 2026)', shortLabel: 'C33' },
+      { value: 'c34', label: 'C34 (Jun 09, 2026 - Jun 23, 2026)', shortLabel: 'C34' },
+    ],
+    placeholder: 'Select cycle',
+    searchPlaceholder: 'Search cycles',
+  },
+  render: (args) => <Controlled {...args} aria-label="Cycle" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('button', { name: 'Cycle' });
+    await userEvent.click(field);
+    /* The row says everything, and search matches the dates, not just the code. */
+    fireEvent.change(canvas.getByRole('combobox', { name: 'Search cycles' }), { target: { value: 'Jun 09' } });
+    await waitFor(() => expect(canvas.getAllByRole('option')).toHaveLength(1));
+    await userEvent.click(canvas.getByRole('option', { name: 'C34 (Jun 09, 2026 - Jun 23, 2026)' }));
+    /* The field keeps it short. */
+    await expect(field).toHaveTextContent('C34');
+    await expect(field).not.toHaveTextContent('Jun');
+  },
+};
+
 /** A narrow field does not cut its options off: the panel grows to fit its longest row. */
 export const WideOptionsInNarrowField: Story = {
   tags: ['!dev', '!autodocs'],
