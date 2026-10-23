@@ -21,6 +21,13 @@ const TAGS = [
   { value: 'nt', label: 'NT', group: 'Domain-Specific (In-Domain)' },
   { value: 'caf', label: 'CAF', group: 'Domain-Specific (In-Domain)' },
 ];
+const PEOPLE = [
+  { value: 'unassigned', label: 'Unassigned', unassigned: true },
+  { value: 'adam', label: 'Adam' },
+  { value: 'adrian', label: 'Adrian Cruz' },
+  { value: 'amy', label: 'Amy Lee' },
+  { value: 'liam', label: 'Liam Carter' },
+];
 const CYCLES = [
   { value: 'c34', code: 'C34', start: '2026-06-09', end: '2026-06-23' },
   { value: 'c33', code: 'C33', start: '2026-05-25', end: '2026-06-08' },
@@ -60,17 +67,19 @@ function Page(
   props: FilterBarProps & {
     initial?: Partial<State>;
     /** Filters this page does not have: it leaves their props out, which is how the bar hides them. */
-    without?: Array<'period' | 'cycle' | 'status' | 'priority' | 'tags'>;
+    without?: Array<'period' | 'cycle' | 'status' | 'priority' | 'tags' | 'users'>;
   },
 ) {
   const { initial, without = [], ...rest } = props;
-  const has = (name: 'period' | 'cycle' | 'status' | 'priority' | 'tags') => !without.includes(name);
+  const has = (name: 'period' | 'cycle' | 'status' | 'priority' | 'tags' | 'users') => !without.includes(name);
   const [s, setS] = React.useState<State>({
     search: '',
     period: {},
     status: [],
     priority: '',
     tags: [],
+    assignee: '',
+    initiator: '',
     cycle: '',
     ...initial,
   });
@@ -90,8 +99,16 @@ function Page(
         has('priority') ? { options: PRIORITIES, value: s.priority, onChange: (priority) => set({ priority }) } : undefined
       }
       tags={has('tags') ? { options: TAGS, value: s.tags, onChange: (tags) => set({ tags }) } : undefined}
+      users={
+        has('users')
+          ? (rest.users ?? [
+              { label: 'Assignee', options: PEOPLE, value: s.assignee, onChange: (assignee) => set({ assignee }) },
+              { label: 'Initiator', options: PEOPLE, value: s.initiator, onChange: (initiator) => set({ initiator }) },
+            ])
+          : undefined
+      }
       onReset={() => {
-        set({ search: '', period: {}, status: [], priority: '', tags: [], cycle: '' });
+        set({ search: '', period: {}, status: [], priority: '', tags: [], cycle: '', assignee: '', initiator: '' });
         rest.onReset?.();
       }}
     />
@@ -104,6 +121,8 @@ interface State {
   priority: string;
   cycle: string;
   tags: string[];
+  assignee: string;
+  initiator: string;
 }
 
 /** Figma's Filters-shown bar, empty: search at the left, the fields, Reset and Filters at the right. */
@@ -144,12 +163,18 @@ export const Default: Story = {
       expect(canvas.getByRole('button', { name: /Period, 09\/09\/2026-15\/09\/2026/ })).toBeVisible(),
     );
 
+    /* Users: a searchable list that then says who. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(canvas.getByRole('button', { name: 'Assignee' })).toHaveTextContent('Amy Lee');
+
     /* Reset clears every value the page holds. */
     await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();
     await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('Select status');
+    await expect(canvas.getByRole('button', { name: 'Assignee' })).toHaveTextContent('Select assignee');
     await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Select cycle');
   },
 };
@@ -188,9 +213,35 @@ export const Filled: Story = {
         priority: 'normal',
         cycle: 'c33',
         tags: ['vcp', 'offerpump', 'whu', 'nt', 'caf'],
+        assignee: 'adrian',
+        initiator: 'amy',
       }}
     />
   ),
+};
+
+/** A `users` entry with `multiple`: several people, the panel stays open, the field counts them. */
+export const MultipleUsers: Story = {
+  render: function Render(args) {
+    const [watchers, setWatchers] = React.useState<string[]>([]);
+    return (
+      <FilterBar
+        {...args}
+        users={[
+          { label: 'Watchers', options: PEOPLE, multiple: true, value: watchers, onChange: setWatchers },
+        ]}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('button', { name: 'Watchers' });
+    await expect(field).toHaveTextContent('Select watchers');
+    await userEvent.click(field);
+    await userEvent.click(canvas.getByRole('option', { name: 'Adam' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(field).toHaveTextContent('2 selected');
+  },
 };
 
 /**
@@ -205,6 +256,20 @@ export const WithoutStatus: Story = {
     await expect(canvas.queryByRole('combobox', { name: 'Status' })).toBeNull();
     await expect(canvas.getByRole('combobox', { name: 'Priority' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Tags' })).toBeVisible();
+  },
+};
+
+/**
+ * An admin view can also filter by person (`users`); a regular user's view of the same page leaves
+ * `users` out. The default story is the admin view; this is what a regular user sees.
+ */
+export const WithoutUsers: Story = {
+  render: (args) => <Page {...args} without={['users']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: 'Assignee' })).toBeNull();
+    await expect(canvas.queryByRole('button', { name: 'Initiator' })).toBeNull();
+    await expect(canvas.getByRole('combobox', { name: 'Status' })).toBeVisible();
   },
 };
 

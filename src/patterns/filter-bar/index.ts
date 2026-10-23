@@ -6,4 +6,5 @@ export type {
   FilterBarCycleOption,
   FilterBarSelect,
   FilterBarMulti,
+  FilterBarUser,
 } from './FilterBar';
