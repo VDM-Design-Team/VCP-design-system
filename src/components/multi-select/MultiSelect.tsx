@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
+import { CheckboxMark } from '../../atoms/checkbox';
 import { Icon } from '../../atoms/icon';
 import { Tag } from '../../atoms/tag';
 
@@ -336,18 +337,7 @@ export const MultiSelect = React.forwardRef<HTMLDivElement, MultiSelectProps>(
                       )}
                     >
                       {/* Decorative: the row is the control, aria-selected its state. */}
-                      <span
-                        aria-hidden="true"
-                        className={cn(
-                          'grid size-4 shrink-0 place-items-center rounded-xs border text-action-primary-content-default',
-                          isSelected
-                            ? 'border-action-primary-surface-default bg-action-primary-surface-default'
-                            : 'border-stroke-strong bg-surface-base',
-                          option.disabled && 'border-stroke-subtle bg-surface-neutral-faint',
-                        )}
-                      >
-                        {isSelected && <Icon name="check" className="size-3" />}
-                      </span>
+                      <CheckboxMark checked={isSelected} disabled={option.disabled} />
                       <span className="min-w-0 flex-1">{option.label}</span>
                     </div>
                   );
