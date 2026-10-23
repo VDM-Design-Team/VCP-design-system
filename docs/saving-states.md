@@ -72,4 +72,4 @@ lines of assertions.
 | `Toggle` | The knob | this PR |
 
 Candidates, in order: `Checkbox` (when it saves on change rather than on
-submit), `Select`, `SearchSelect`, `RadioGroup`. Tracked in issue #94.
+submit), `Select`, `RadioGroup`. Tracked in issue #94.

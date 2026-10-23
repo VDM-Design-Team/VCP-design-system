@@ -42,7 +42,6 @@ record of when each piece landed.
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
 | component | `TagEditor` ⚠️ *(no Figma source, matches no design — see `docs/tag-editor.md`)*, `RichTextToolbar` | PR #49 |
 | component | `DatePicker` | PR #50 |
-| component | `SearchSelect` | PR #51 |
 | atom | `Logo` | PR #52 |
 | component | `StatusTag` | PR #54 |
 | pattern | `TopBar` | PR #55 |

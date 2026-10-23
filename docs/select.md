@@ -8,14 +8,13 @@ the popup is the platform's.
 | Use | For |
 |---|---|
 | `Select` | A handful to a few dozen known options |
-| `SearchSelect` *(to port)* | Long lists that need typing to filter |
 | `RadioGroup` | ≤5 options worth seeing all at once |
 | `SegmentedControl` | 2–4 options that switch a view in place |
 
 **Native on purpose.** The dropdown, keyboard model, type-ahead and mobile
 pickers come from the platform — correct on every device, zero code. The cost
 is that the open list cannot be styled; that trade reverses only when search
-is needed, which is `SearchSelect`'s job, not a reason to rebuild this.
+is needed. That is a different control's job (a searchable list), not a reason to rebuild this.
 
 ## Props
 
@@ -57,11 +56,11 @@ docs/input.md covers the shared shell.
 
 ## Don't
 
-- **Don't rebuild this as a div-listbox for styling reasons.** The styled
-  path is `SearchSelect`, and only when search is the requirement.
+- **Don't rebuild this as a div-listbox for styling reasons.** A list
+  that needs search or avatars wants a searchable component built for it.
 - **Don't use the placeholder as a "none" value.** It is unpickable once a
   choice is made; give "no selection" a real option.
-- **Don't stuff hundreds of options in.** Past a few dozen, people search —
-  `SearchSelect`.
+- **Don't stuff hundreds of options in.** Past a few dozen, people search,
+  and this control has none.
 - **Don't encode VCP vocabulary in options inside a component** — statuses and
   domains arrive as data from the caller (or a pattern).

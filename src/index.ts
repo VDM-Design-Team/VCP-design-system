@@ -44,7 +44,6 @@ export * from './components/page-title';
 export * from './components/pagination';
 export * from './components/popover';
 export * from './components/rich-text-toolbar';
-export * from './components/search-select';
 export * from './components/stat-card';
 export * from './components/sidebar-item';
 export * from './components/status-tag';

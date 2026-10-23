@@ -6,8 +6,9 @@ import { Icon } from '../icon';
 /**
  * Select — a choice from a fixed list, on the native `<select>`. Native on
  * purpose: the popup, keyboard model, type-ahead, and mobile pickers come from
- * the platform, correct on every device, for free. When the list needs search,
- * that is `SearchSelect` (to port), which pays the custom-listbox tax.
+ * the platform, correct on every device, for free. It has no search: a list that
+ * needs one wants a searchable component built for it, which pays the
+ * custom-listbox tax this one avoids.
  *
  * The shell is `Input`'s, class for class: the same `stroke.strong` border,
  * `focus-within` ring, `invalid` treatment, disabled surface, and the same
