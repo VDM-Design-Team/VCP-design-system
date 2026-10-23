@@ -7,4 +7,4 @@ New pattern, to Figma's `_Filter_Bar`: a search field, then period (a range cale
 
 `DatePickerPreset` and `DatePickerMode` are now exported from `DatePicker`.
 
-The search box and every field are fluid between a minimum and a maximum width instead of fixed, so they stretch with the page and the dropdowns are not cut off. A page chooses which filters show by which props it passes (a draft page leaves `status` out), and the bar closes up around the rest.
+The search box and every field are fluid between a minimum and a maximum width instead of fixed, so they stretch with the page; the minimums are measured so nothing is cut off, and a page with period, status, priority and tags fits one row at 1440 with the expanded sidebar. A page chooses which filters show by which props it passes (a draft page leaves `status` out), and the bar closes up around the rest.
