@@ -157,7 +157,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     <div
       ref={ref}
       className={cn(
-        'flex flex-col gap-2 font-sans md:grid md:grid-cols-[minmax(15rem,1fr)_minmax(0,2fr)_auto] md:items-start',
+        'flex flex-col gap-2 font-sans md:grid md:grid-cols-[minmax(12rem,1fr)_minmax(0,4fr)_auto] md:items-start',
         className,
       )}
       {...props}
@@ -190,7 +190,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               width="auto"
               align="right"
               panelClassName="p-0"
-              className="col-span-2 md:max-w-72 md:min-w-60 md:flex-1"
+              className="col-span-2 md:max-w-72 md:min-w-58 md:flex-1"
               trigger={
                 <button
                   type="button"
@@ -243,7 +243,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               aria-label="Status"
               placeholder="Select status"
               {...status}
-              className="md:max-w-64 md:min-w-44 md:flex-1"
+              className="md:max-w-64 md:min-w-36 md:flex-1"
             />
           )}
           {priority && (
@@ -251,7 +251,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               aria-label="Priority"
               placeholder="Select priority"
               {...priority}
-              className="w-full md:max-w-64 md:min-w-44 md:flex-1"
+              className="w-full md:max-w-64 md:min-w-38 md:flex-1"
             />
           )}
           {tags && (
@@ -262,7 +262,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               aria-label="Tags"
               placeholder="Select tags"
               {...tags}
-              className="col-span-2 md:max-w-170 md:min-w-56 md:flex-1"
+              className="col-span-2 md:max-w-170 md:min-w-38 md:flex-1"
             />
           )}
           {children}

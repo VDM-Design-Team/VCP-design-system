@@ -63,8 +63,8 @@ leaving a prop out is already the switch, and role rules belong to the page that
 ## Layout
 
 From `md` up, three columns — the search at the left, the fields, and Reset and
-Filters at the right. The search and the fields share the width in proportion (one part to two), so both
-stretch and shrink with the page: the search is at least 15rem wide and its box at most 24rem, and each
+Filters at the right. The search and the fields share the width in proportion (one part to four), so both
+stretch and shrink with the page: the search is at least 12rem wide and its box at most 24rem, and each
 field is fluid between a minimum and a maximum (below). The buttons stay at the top right; the fields right-align
 between and wrap onto more lines when they do not fit, so a Tags field holding many
 tags drops under the others. Below `md` it stacks, as Figma's Mobile: Reset and
@@ -72,9 +72,15 @@ Filters, then search, then the fields two across (period and tags full width), a
 the calendar takes its touch layout, one month wide.
 
 Fields are 40 tall and fluid between a minimum and a maximum, growing to fill the row before the next
-wraps: status and priority 11rem to 16rem, period 15rem to 18rem, tags 14rem to 42.5rem. The minimums keep
-the placeholder and the longest chosen value readable; a dropdown panel is as wide as its longest option
-regardless (see `SearchSelect`), so a narrow field never cuts options off.
+wraps: status 9rem to 16rem, priority 9.5rem to 16rem, period 14.5rem to 18rem, tags 9.5rem to 42.5rem, search
+12rem and up. The minimums are measured, not guessed: each is what its placeholder (or longest value, for
+the period) needs in the real type, so nothing is cut off at the minimum. A dropdown panel is as wide as its
+longest option regardless (see `SearchSelect`), so a narrow field never cuts options off.
+
+**Design target: 1440.** With the expanded sidebar (256) and the page's 32 of padding either side, a 1440
+screen leaves 1120 for the bar, and a page with period, status, priority and tags fits on **one row** there.
+A page that adds both user fields (an admin view) needs a second row at that width; if more filters join, check
+the sum of the minimums against 1120 before adding them.
 
 ## Tokens
 
