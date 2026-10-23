@@ -14,8 +14,7 @@ const meta = {
         component:
           'A choice from a fixed list, on the native `<select>` — the popup, keyboard model ' +
           'and mobile pickers come from the platform. The shell is `Input`’s, class for ' +
-          'class, so a form mixes the two seamlessly. Needs search? That’s `SearchSelect` ' +
-          '(to port).',
+          'class, so a form mixes the two seamlessly. Needs search? That’s `SearchSelect`.',
       },
     },
   },
