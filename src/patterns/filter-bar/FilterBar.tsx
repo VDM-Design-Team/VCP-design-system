@@ -177,6 +177,8 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const [periodOpen, setPeriodOpen] = React.useState(false);
 
   const hasFields = !!(period || cycle || status || priority || tags || children);
+  /* With no fields showing (folded away, or none passed) the search takes the room they leave. */
+  const showFields = hasFields && open;
   const range = period?.value;
   const periodText = range?.start
     ? range.end
@@ -188,7 +190,10 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     <div
       ref={ref}
       className={cn(
-        'flex flex-col gap-2 font-sans md:grid md:grid-cols-[minmax(12rem,1fr)_minmax(0,4fr)_auto] md:items-start',
+        'flex flex-col gap-2 font-sans md:grid md:items-start',
+        showFields
+          ? 'md:grid-cols-[minmax(12rem,1fr)_minmax(0,4fr)_auto]'
+          : 'md:grid-cols-[minmax(12rem,1fr)_auto]',
         className,
       )}
       {...props}
@@ -200,7 +205,10 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
         value={search ?? ''}
         onChange={(e) => onSearchChange?.(e.target.value)}
         leadingIcon={<Icon name="magnifying-glass" size="sm" />}
-        className="order-2 w-full md:order-none md:col-start-1 md:max-w-96"
+        className={cn(
+          'order-2 w-full md:order-none md:col-start-1',
+          showFields ? 'md:max-w-96' : 'md:max-w-160',
+        )}
       />
 
       {/* From `md` the bar is three columns — search, fields, buttons — so the
@@ -329,7 +337,12 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
         </div>
       )}
 
-      <div className="order-1 flex items-center justify-end gap-2 md:order-none md:col-start-3">
+      <div
+        className={cn(
+          'order-1 flex items-center justify-end gap-2 md:order-none',
+          showFields ? 'md:col-start-3' : 'md:col-start-2',
+        )}
+      >
         <Button variant="tertiary" onClick={onReset}>
           {resetLabel}
         </Button>
