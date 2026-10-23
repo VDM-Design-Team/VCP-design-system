@@ -160,7 +160,7 @@ export interface CheckboxMarkProps {
 
 /**
  * CheckboxMark — the checkbox's box and tick with no input behind it, for a row
- * that is itself the control (`MultiSelect`'s and `UserSelect`'s options: the
+ * that is itself the control (`SearchSelect`'s options when `multiple`: the
  * row is an `option`, its state is `aria-selected`, and an `<input>` inside one
  * would be invalid). Decorative: `aria-hidden`, no focus, no hover or pressed
  * states of its own — the row owns those.

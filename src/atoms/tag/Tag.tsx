@@ -30,7 +30,7 @@ import {
  *
  * Tag is not a control by default: it takes no focus and fires no events, same
  * as `Badge`. The one exception is **`onRemove`**, which adds a ✕ button at the
- * end — a value picked into a field (`MultiSelect`'s selections, an AV's tags in
+ * end — a value picked into a field (`SearchSelect`'s selections, an AV's tags in
  * edit mode). The button is the only focusable part, a sibling of the label,
  * and the tag itself still never takes a click. A tag that should toggle or
  * open something is a `Chip`.
