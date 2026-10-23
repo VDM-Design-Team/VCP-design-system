@@ -73,7 +73,29 @@ never break accessibility. Do not add a boolean per kind of row (`avatars`, `ico
 grows into a pile of flags that can contradict each other. If a fifth kind of row is needed twice,
 make it a preset; once, use `renderOption`.
 
-### 4. One pick has a trailing check; several picks have checkboxes
+### 4. Tags stay on one line, "+N" opens them out in place
+
+With `display="tags"` the field keeps one line (Figma draws the filled Tags field as a single 40-tall
+row): the tags that fit show, and a "+N" stands for the rest. Pressing "+N" opens the field out so
+**every tag shows and can be removed where it stands**; "Show less", a click away, Escape or Tab out
+fold it back. A long label is cut with "…" and its ✕ stays inside the field.
+
+- **Why not let the field grow?** In a filter bar a field that gets two or three lines tall pushes
+  every other field around, and on a phone it takes over the screen. A fixed height is what the bar
+  is built on.
+- **Why not make "+N" open the dropdown?** Then a hidden tag could only be removed by opening the
+  panel and unticking it. Opening out in place keeps removal one click, and keeps "show me what I
+  picked" separate from "change what I picked" (pressing the field itself).
+- **Why folding back must not follow a removal.** If the field folded after every ✕, a tag that
+  was in the hidden group would disappear into "+N" and the user could not tell what they had
+  removed. So removing a tag leaves the field as it is, and focus moves to the neighbouring ✕ (a
+  polite announcement says what was removed), so keyboard users keep their place. It folds back
+  only when the user leaves (click away, Escape, Tab out) or presses "Show less".
+- **When everything fits** there is no "+N" and no "Show less"; nothing to fold.
+- There is no `wrap` option. A place that wants every tag always visible should use the panel's
+  checkboxes, or show the picks beside the field; do not add a second overflow mode.
+
+### 5. One pick has a trailing check; several picks have checkboxes
 
 - Hover and pressed tint the row (`brand.faint`, `brand.subtle`). A selected *fill* would collide
   with one of them, and selected-by-text-colour alone is too close to the resting text. A separate
@@ -83,13 +105,16 @@ make it a preset; once, use `renderOption`.
 - The checkbox is `CheckboxMark` (the checkbox's own box and tick, no input), because an `<input>`
   inside an `option` is invalid.
 
-### 5. The panel's look is the viewers dropdown's
+### 6. The panel is `Menu`'s dropdown, plus the viewers dropdown's search box
 
-The panel, search box and row sizes are taken from Figma's Edit Viewers dropdown
-(`7457:91275`), so any dropdown with a search box looks the same. The numbers are in
-"The panel" below; reuse them.
+The panel follows `Menu`'s dropdown (the same surface, `stroke.default` edge, `radius.md`,
+`shadow.menu` and 4 of padding; rows built like `Menu`'s items), so a dropdown of options looks the
+same wherever it appears. The boxed search field comes from Figma's Edit Viewers dropdown
+(`7457:91275`), so any dropdown with a search box looks the same. The numbers are in "The panel"
+below; reuse them. A click inside the panel that lands on nothing (a heading, a gap) does
+nothing: the field keeps focus and the panel stays open.
 
-### 6. Why `SearchSelect` was rebuilt rather than removed
+### 7. Why `SearchSelect` was rebuilt rather than removed
 
 It was ported from the Claude Design export, which had no Figma component behind it, and was used
 nowhere. We kept the *name* and replaced the *design*: the old one is not coming back.
@@ -110,7 +135,8 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `applyLabel` / `clearLabel` | `string` | `Apply` / `Clear all` | — |
 | `placeholder` | `string` | `Select…` | Shown in the field while nothing is picked |
 | `emptyText` | `string` | `No matches` | What the panel says when there are no rows |
-| `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message |
+| `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
+| `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
@@ -122,17 +148,17 @@ says so ("Anyone", "Unassigned") — it is then a choice the user can see.
 
 | Part | Spec |
 |---|---|
-| Panel | `surface.elevated`, 1 `stroke.subtle`, `radius.md`, `shadow.menu`, 4 above and below |
-| Search | The `Input` atom (40 tall) with a `magnifying-glass`, inside 12 of padding on every side |
-| Rows | 40 tall, 12 either side; a 16 checkbox first when `multiple`, then the row's content (`text`: the name in `body-sm-medium` / `text.secondary`; `avatar`: a 24 avatar and the name; `icon`: a small glyph and the name; `tag`: a `Tag size="sm"`); a trailing check when single |
-| Row states | rest `surface.elevated`; hover or keyboard-active `surface.brand.faint`; pressed `surface.brand.subtle` |
+| Panel | `surface.elevated`, 1 `stroke.default`, `radius.md`, `shadow.menu`, 4 of padding all round — `Menu`'s |
+| Search | The `Input` atom (40 tall) with a `magnifying-glass`, 8 inside the panel's 4 (12 from the edge) |
+| Rows | `Menu`'s item: at least 40 tall, `radius.sm`, 12 either side, `label-sm-medium`; a 16 checkbox first when `multiple`, then the row's content (`text`: the name in `body-sm-medium` / `text.secondary`; `avatar`: a 24 avatar and the name; `icon`: a small glyph and the name; `tag`: a `Tag size="sm"`); a trailing check when single |
+| Row states | rest transparent in `text.secondary`; hover or keyboard-active `surface.brand.faint` with `text.primary`; pressed `surface.brand.subtle` |
 | Group heading | `caption-md-semibold` in `text.tertiary` over a `stroke.subtle` rule |
 | Empty | `caption-md-semibold` in `text.tertiary`, outside the list |
-| Apply footer | A `stroke.subtle` rule, then Clear all (secondary) and Apply (primary), small |
+| Apply footer | A `stroke.subtle` rule across the full panel width, then Clear all (secondary) and Apply (primary), small |
 
 The field is `Select`'s shell (`stroke.strong` border, `surface.elevated`, at least 40 tall, growing
 as tags wrap) with the picked name in `body-sm-medium` and the placeholder in `text.subtle`. Tags
-are `Tag size="sm"` with `onRemove`. No new tokens.
+are `Tag size="sm"` with `onRemove`. In a **disabled** field the tags would blend into the grey fill, so they take `surface.elevated` with a `stroke.subtle` outline there (the `Tag` itself is unchanged). The "+N" and "Show less" buttons are 24 tall: `surface.neutral.subtle` and `text.secondary`, and `text.brand.strong` for "Show less". No new tokens.
 
 Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 
@@ -155,6 +181,8 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   puts focus back on the trigger; Tab closes; a click away closes. With `confirm`, Escape and a
   click away discard the draft.
 - Rows pick on a prevented `mousedown`, so a click never blurs the field mid-pick.
+- "+N" is a real button (`aria-expanded`, `aria-controls` the tags, named "Show 3 more"); opened out it becomes "Show less". A removed tag is announced politely ("Removed Bug, 4 selected") and focus moves to the neighbouring ✕.
+- With `error`, the message is tied to the field with `aria-describedby`, and the border and text turn critical; colour is never the only signal, because the message says what is wrong.
 - The checkbox squares, avatars and icons are decorative: each row is named by its label alone, and the
   row, not a nested input, is the control.
 - With `display="tags"` each tag's ✕ is a real button named `Remove <label>`, beside the trigger and
@@ -172,6 +200,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 - **The search box is the `Input` atom.** Figma fills it with an "elevated secondary" surface the
   system has no token for; the Input's `surface.elevated` is used.
 - **Group headings do not collapse.** Figma's tags menu draws a caret on them.
+- **The scrollbar is the browser's.** `Menu_Dropdown` in Figma draws a slim custom scrollbar; this panel scrolls with the platform's.
 - **The tags menu's blue highlighted row** (a single-pick look) is replaced by the checkbox,
   because the field now allows several tags.
 - **The panel is not repositioned.** It opens under the field and clips inside an `overflow: hidden`
@@ -181,6 +210,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 
 - **Don't move search into the field.** See Decision 1.
 - **Don't add a second dropdown-with-options component.** Extend this one (Decision 2).
+- **Don't let the tags field grow without limit, or add a `wrap` mode.** See Decision 4.
 - **Don't use it for a handful of plain options** — that is a `Select`.
 - **Don't fetch as you type inside it** — search filters the `options` you pass. Async search means
   the page updates `options`, debounced, until a real `onSearch` exists.
