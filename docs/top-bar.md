@@ -11,8 +11,10 @@ signed-in user on the right.
 | `Logo` | atom | The left side, linked home, when there is no `primaryAction` |
 | `Toggle` | atom | The light/dark mode switch |
 | `IconButton` | atom | The notification bell |
-| `Avatar` | atom | The signed-in user |
-| `Icon` | atom | The user-menu caret |
+| `Avatar` | atom | The signed-in user (plain and `onUserMenu` versions) |
+| `Icon` | atom | The user-menu caret (plain and `onUserMenu` versions) |
+| `UserMenu` | component | The signed-in user and their account menu, when `userMenuItems` is given |
+| `Menu` | component | Only its `MenuItem` type, for `userMenuItems`; the menu itself is drawn by `UserMenu` |
 
 Composed through **slots**: the "Create Added Value" `Button` arrives via
 `primaryAction` — the WithPrimaryAction story shows it.
@@ -43,7 +45,9 @@ title, no `h1`, no back.
 | `onNotifications` | `() => void` | — | The bell's click |
 | `theme` / `onThemeChange` | `'light' \| 'dark'` / `(t) => void` | — | The mode `Toggle`. **Controlled**: it reports the wish; the app owns the theme and the `.dark` class |
 | `user` | `{ name, src? }` | — | Avatar + name + caret, inline — as the design draws it. No role badge (design review, 3 Sep 2026: no design for it) |
-| `onUserMenu` | `() => void` | — | Makes the user chip a real button — the future `UserMenu`'s trigger |
+| `userMenuItems` | `MenuItem[]` | — | The account menu's rows, as `Menu` takes them. Given with `user`, the chip becomes a `UserMenu` that opens them |
+| `onUserMenuSelect` | `(key?) => void` | — | Fires with the activated row's `key` |
+| `onUserMenu` | `() => void` | — | Makes the user chip a real button, for an app that opens its own menu. Ignored when `userMenuItems` is given |
 | `className` | `string` | — | On the `<header>` |
 | `ref` | `Ref<HTMLElement>` | — | The `<header>` |
 
@@ -68,6 +72,7 @@ every visible piece is a composed component wearing its own.
 - The mode switch is the system `Toggle` named "Dark mode" — a real switch
   with real state, not a styled div.
 - The user chip is a `<button>` named "`name`, account menu" only when
+  `userMenuItems` (a `UserMenu`: `aria-haspopup="menu"`, focus into the list and back) or
   `onUserMenu` is given; otherwise a plain group — no dead buttons.
 
 ## Don't

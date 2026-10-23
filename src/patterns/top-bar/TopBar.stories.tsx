@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
@@ -79,6 +80,28 @@ export const LiveThemeToggle: Story = {
 /** No unread: the bell stays, the dot goes, the name says just "Notifications". */
 export const NoUnread: Story = {
   args: { homeHref: '#home', notifications: 0, theme: 'light', onNotifications: () => {} },
+};
+
+/** With `userMenuItems`, the chip is a `UserMenu`: it opens the account menu, and `onUserMenuSelect` hears the row's `key`. */
+export const WithUserMenu: Story = {
+  args: {
+    homeHref: '#home',
+    theme: 'light',
+    onUserMenu: undefined,
+    userMenuItems: [
+      { key: 'values', label: 'My Added Values' },
+      { key: 'settings', label: 'Settings' },
+      { key: 'cycles', label: 'Cycle Settings' },
+      { key: 'logout', label: 'Logout' },
+    ],
+    onUserMenuSelect: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /account menu/ }));
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'Settings' }));
+    await expect(args.onUserMenuSelect).toHaveBeenCalledWith('settings');
+  },
 };
 
 /** Without `onUserMenu`, the chip is a plain group — no dead button. */
