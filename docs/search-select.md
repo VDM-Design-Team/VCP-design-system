@@ -21,7 +21,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `SearchSelect` | A list that needs search, several picks, groups, avatars, or a Clear all / Apply step |
+| `SearchSelect` | A list that needs search, several picks, groups, avatars, icons or tags in the rows, or a Clear all / Apply step |
 | `Select` | One value from a short list — the native popup wins |
 | `RadioGroup` | One of 2 to 5 options worth seeing at once |
 | `TagEditor` | Labels the user invents rather than picks |
@@ -59,9 +59,21 @@ bring a case the reason does not cover.
 component: a field with a panel over rows with a mark. They differed only in search, avatars,
 groups and an Apply footer, all of which are options. Two near-copies means two keyboard models,
 two sets of ARIA fixes and two looks to keep in step. People, tags and statuses are
-configurations: `avatars` for people, `group` for tags, `confirm` for statuses.
+configurations: `rows="avatar"` for people, `group` for tags, `confirm` for statuses.
 
-### 3. One pick has a trailing check; several picks have checkboxes
+### 3. What a row looks like is one prop with four presets, plus an escape hatch
+
+Plain text is the default. A people list is not the default case, so avatars are never on unless
+asked for (`rows="avatar"`). The four presets cover what we draw today: `text`, `avatar`
+(initials or a photo), `icon` (a glyph and text) and `tag` (each row drawn as a `Tag` in the
+option's `tone`, and the tags in the field wear it too). For anything else, `renderOption` draws a
+row's content. The presets and `renderOption` only change the *content*: the checkbox or check, the
+hover and pressed states, the keyboard model and the ARIA stay the component's, so a custom row can
+never break accessibility. Do not add a boolean per kind of row (`avatars`, `icons`, `tags`…): that
+grows into a pile of flags that can contradict each other. If a fifth kind of row is needed twice,
+make it a preset; once, use `renderOption`.
+
+### 4. One pick has a trailing check; several picks have checkboxes
 
 - Hover and pressed tint the row (`brand.faint`, `brand.subtle`). A selected *fill* would collide
   with one of them, and selected-by-text-colour alone is too close to the resting text. A separate
@@ -71,13 +83,13 @@ configurations: `avatars` for people, `group` for tags, `confirm` for statuses.
 - The checkbox is `CheckboxMark` (the checkbox's own box and tick, no input), because an `<input>`
   inside an `option` is invalid.
 
-### 4. The panel's look is the viewers dropdown's
+### 5. The panel's look is the viewers dropdown's
 
 The panel, search box and row sizes are taken from Figma's Edit Viewers dropdown
 (`7457:91275`), so any dropdown with a search box looks the same. The numbers are in
 "The panel" below; reuse them.
 
-### 5. Why `SearchSelect` was rebuilt rather than removed
+### 6. Why `SearchSelect` was rebuilt rather than removed
 
 It was ported from the Claude Design export, which had no Figma component behind it, and was used
 nowhere. We kept the *name* and replaced the *design*: the old one is not coming back.
@@ -86,12 +98,13 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `options` | `Array<string \| { value, label, group?, disabled?, avatar?, src?, unassigned? }>` | `[]` | Strings are shorthand. `label` is a string: the field, tags, search and avatar initials all use it. `group` sections rows under a heading (in order first seen; ungrouped rows lead). `avatar`/`src` lead the row with an avatar or photo; `unassigned` draws the person glyph |
+| `options` | `Array<string \| { value, label, group?, disabled?, src?, unassigned?, icon?, tone? }>` | `[]` | Strings are shorthand. `label` is a string: the field, tags, search and avatar initials all use it. `group` sections rows under a heading (in order first seen; ungrouped rows lead). Per-preset extras: `src` (a photo) and `unassigned` (the person glyph) for `avatar`; `icon` for `icon`; `tone` for `tag` |
 | `multiple` | `boolean` | — | Several picks. Switches `value` and `onChange` to arrays |
 | `value` / `onChange` | `string` / `(value: string) => void`; or with `multiple`, `string[]` / `(value: string[]) => void` | — | Uncontrolled when `value` is omitted. `''` shows the placeholder |
 | `searchable` | `boolean` | `true` | The search box in the panel. Turn it off for a short list |
 | `searchPlaceholder` | `string` | `Search` | Also the search box's accessible name. Say what is searched: "Search by name" |
-| `avatars` | `boolean` | — | Lead every row with an avatar — a list of people. Per-option `avatar` overrides |
+| `rows` | `'text' \| 'avatar' \| 'icon' \| 'tag'` | `text` | What a row looks like: plain labels, an avatar, a glyph, or a `Tag` |
+| `renderOption` | `(option, { selected, active }) => ReactNode` | — | Draws a row's content, replacing what `rows` would. The checkbox or check, states, keyboard and ARIA stay the component's — keep it to content, no buttons or links |
 | `display` | `'summary' \| 'tags'` | `summary` | `multiple` only: "Amy Lee" / "3 selected", or a removable tag per pick |
 | `confirm` | `boolean` | — | `multiple` only: ticks are a draft behind a Clear all / Apply footer. `onChange` fires on Apply; Escape or a click away discards |
 | `applyLabel` / `clearLabel` | `string` | `Apply` / `Clear all` | — |
@@ -111,7 +124,7 @@ says so ("Anyone", "Unassigned") — it is then a choice the user can see.
 |---|---|
 | Panel | `surface.elevated`, 1 `stroke.subtle`, `radius.md`, `shadow.menu`, 4 above and below |
 | Search | The `Input` atom (40 tall) with a `magnifying-glass`, inside 12 of padding on every side |
-| Rows | 40 tall, 12 either side; a 16 checkbox first when `multiple`, then the avatar (24) or nothing, then the name in `body-sm-medium` / `text.secondary`; a trailing check when single |
+| Rows | 40 tall, 12 either side; a 16 checkbox first when `multiple`, then the row's content (`text`: the name in `body-sm-medium` / `text.secondary`; `avatar`: a 24 avatar and the name; `icon`: a small glyph and the name; `tag`: a `Tag size="sm"`); a trailing check when single |
 | Row states | rest `surface.elevated`; hover or keyboard-active `surface.brand.faint`; pressed `surface.brand.subtle` |
 | Group heading | `caption-md-semibold` in `text.tertiary` over a `stroke.subtle` rule |
 | Empty | `caption-md-semibold` in `text.tertiary`, outside the list |
@@ -142,7 +155,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   puts focus back on the trigger; Tab closes; a click away closes. With `confirm`, Escape and a
   click away discard the draft.
 - Rows pick on a prevented `mousedown`, so a click never blurs the field mid-pick.
-- The checkbox squares and avatars are decorative: each row is named by its label alone, and the
+- The checkbox squares, avatars and icons are decorative: each row is named by its label alone, and the
   row, not a nested input, is the control.
 - With `display="tags"` each tag's ✕ is a real button named `Remove <label>`, beside the trigger and
   never inside it. While tags carry the value, the trigger's text says how many are picked.

@@ -5,4 +5,6 @@ export type {
   SearchSelectMultipleProps,
   SearchSelectOption,
   SearchSelectDisplay,
+  SearchSelectRows,
+  SearchSelectRowState,
 } from './SearchSelect';

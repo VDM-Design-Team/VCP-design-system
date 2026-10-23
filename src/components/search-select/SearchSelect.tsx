@@ -3,9 +3,9 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { CheckboxMark } from '../../atoms/checkbox';
-import { Icon } from '../../atoms/icon';
+import { Icon, type IconName } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
-import { Tag } from '../../atoms/tag';
+import { Tag, type TagTone } from '../../atoms/tag';
 
 /**
  * SearchSelect — the system's dropdown for picking from a list that is too long,
@@ -22,9 +22,11 @@ import { Tag } from '../../atoms/tag';
  *   (`searchable={false}` for a short list) and filters the options you pass.
  *   See "Decisions" in docs/search-select.md before changing that: it is the
  *   point of this component.
- * - **Rows** can be grouped under headings (`group`), lead with an avatar
- *   (`avatars`, `avatar`, `src`) or the "Unassigned" glyph (`unassigned`), and
- *   be disabled.
+ * - **Rows** can be grouped under headings (`group`) and disabled, and say what
+ *   they are with `rows`: plain `text` (the default), `avatar` (people),
+ *   `icon` (a glyph and text) or `tag` (each row drawn as a `Tag`). For
+ *   anything else, `renderOption` draws a row's content; the checkbox, the
+ *   check, the states and the ARIA stay the component's.
  * - **`confirm`** (multiple) drafts the ticks behind a Clear all / Apply
  *   footer: `onChange` fires only on Apply, and Escape or a click away throws
  *   the draft out.
@@ -60,12 +62,24 @@ export interface SearchSelectOption {
   /** Rows sharing a `group` sit under one heading, in the order first seen; ungrouped rows lead. */
   group?: string;
   disabled?: boolean;
-  /** `true` leads the row with an avatar (initials), `false` suppresses the one `avatars` turns on. */
-  avatar?: boolean;
-  /** A photo for the avatar. Implies `avatar`. */
+  /** `rows="avatar"`: a photo for the avatar. Without one the avatar shows initials. */
   src?: string;
-  /** The "Unassigned" row: a person glyph instead of an avatar. */
+  /** `rows="avatar"`: the "Unassigned" row, a person glyph instead of an avatar. */
   unassigned?: boolean;
+  /** `rows="icon"`: the glyph before the label. */
+  icon?: IconName;
+  /** `rows="tag"`: the tag's tone. Defaults to `neutral`. */
+  tone?: TagTone;
+}
+
+/** What a row looks like. `text` is plain; the others add one thing to it. */
+export type SearchSelectRows = 'text' | 'avatar' | 'icon' | 'tag';
+
+/** What `renderOption` is told about the row it draws. */
+export interface SearchSelectRowState {
+  selected: boolean;
+  /** The keyboard or pointer is on this row. */
+  active: boolean;
 }
 
 export type SearchSelectDisplay = 'summary' | 'tags';
@@ -82,8 +96,17 @@ interface SearchSelectBase
   searchPlaceholder?: string;
   /** What the panel says when there are no rows. */
   emptyText?: string;
-  /** Lead every row with an avatar — for a list of people. Per-option `avatar` overrides. */
-  avatars?: boolean;
+  /**
+   * What each row looks like: `text` (default), `avatar` (people), `icon` (a glyph and
+   * text) or `tag` (each row drawn as a `Tag`).
+   */
+  rows?: SearchSelectRows;
+  /**
+   * Draws a row's content yourself, replacing what `rows` would. The checkbox or check,
+   * the hover and pressed states, the keyboard and the ARIA are still the component's, so
+   * keep it to content: no buttons or links in there.
+   */
+  renderOption?: (option: SearchSelectOption, state: SearchSelectRowState) => React.ReactNode;
   disabled?: boolean;
   /** Critical border + `aria-invalid`. Pair with a visible message. */
   invalid?: boolean;
@@ -124,6 +147,46 @@ export type SearchSelectProps = SearchSelectSingleProps | SearchSelectMultiplePr
 const normalize = (o: string | SearchSelectOption): SearchSelectOption =>
   typeof o === 'string' ? { value: o, label: o } : o;
 
+/* What the `rows` presets put in a row, between the checkbox and the check. */
+function rowContent(option: SearchSelectOption, rows: SearchSelectRows): React.ReactNode {
+  const label = <span className="min-w-0 truncate">{option.label}</span>;
+  switch (rows) {
+    case 'avatar':
+      return (
+        <>
+          {option.unassigned ? (
+            <span
+              aria-hidden="true"
+              className="grid size-6 shrink-0 place-items-center rounded-full bg-surface-neutral-subtle text-text-secondary"
+            >
+              <Icon name="user" size="sm" />
+            </span>
+          ) : (
+            <Avatar size="sm" name={option.label} src={option.src} />
+          )}
+          {label}
+        </>
+      );
+    case 'icon':
+      return (
+        <>
+          {option.icon && (
+            <Icon name={option.icon} size="sm" aria-hidden="true" className="shrink-0 text-text-secondary" />
+          )}
+          {label}
+        </>
+      );
+    case 'tag':
+      return (
+        <Tag size="sm" tone={option.tone ?? 'neutral'} className="min-w-0">
+          {option.label}
+        </Tag>
+      );
+    default:
+      return label;
+  }
+}
+
 export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
   (
     {
@@ -140,7 +203,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       searchable = true,
       searchPlaceholder = 'Search',
       emptyText = 'No matches',
-      avatars,
+      rows = 'text',
+      renderOption,
       disabled,
       invalid,
       id,
@@ -308,6 +372,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 <Tag
                   key={v}
                   size="sm"
+                  tone={rows === 'tag' ? (all.find((o) => o.value === v)?.tone ?? 'neutral') : 'neutral'}
                   onRemove={disabled ? undefined : () => commit(committed.filter((x) => x !== v))}
                 >
                   {labelOf(v)}
@@ -428,7 +493,6 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 )}
                 {g.rows.map(({ option, index }) => {
                   const isSelected = shown.includes(option.value);
-                  const withAvatar = !option.unassigned && (option.src ? true : (option.avatar ?? avatars));
                   return (
                     <div
                       key={option.value}
@@ -452,17 +516,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                       {/* Several picks: a checkbox says so before anyone clicks. The row is the control. */}
                       {multiple && <CheckboxMark checked={isSelected} disabled={option.disabled} />}
                       <span className="flex min-w-0 flex-1 items-center gap-1.5">
-                        {option.unassigned ? (
-                          <span
-                            aria-hidden="true"
-                            className="grid size-6 shrink-0 place-items-center rounded-full bg-surface-neutral-subtle text-text-secondary"
-                          >
-                            <Icon name="user" size="sm" />
-                          </span>
-                        ) : (
-                          withAvatar && <Avatar size="sm" name={option.label} src={option.src} />
-                        )}
-                        <span className="min-w-0 truncate">{option.label}</span>
+                        {renderOption
+                          ? renderOption(option, { selected: isSelected, active: index === activeIndex })
+                          : rowContent(option, rows)}
                       </span>
                       {/* One pick: a trailing check. */}
                       {!multiple && isSelected && (
