@@ -183,7 +183,7 @@ export const Themes: Story = {
 
 /**
  * `CheckboxMark`: the box and tick with no input, for a row that is itself the control
- * (`MultiSelect`'s options). Beside the real checkbox, so the two can be compared.
+ * (`SearchSelect`'s options when `multiple`). Beside the real checkbox, so the two can be compared.
  */
 export const Mark: Story = {
   render: () => (
