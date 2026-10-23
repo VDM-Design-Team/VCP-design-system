@@ -9,6 +9,7 @@ import {
   type SearchSelectSingleProps,
 } from './SearchSelect';
 import { Field } from '../field';
+import { SegmentedControl } from '../../atoms/segmented-control';
 
 const PEOPLE: SearchSelectOption[] = [
   { value: 'unassigned', label: 'Unassigned', unassigned: true },
@@ -94,6 +95,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/* Stories tagged `!dev !autodocs` (with Chromatic snapshots off) are interaction tests: they run
+   with the suite but stay out of the sidebar, the docs page and Chromatic, so the sidebar shows the
+   handful that document the component. The tags are written out in each story because Storybook
+   reads them statically, so a shared constant would not be seen. */
+
 /** The page owns the value; the story stands in for it. */
 function Controlled(props: StoryProps) {
   const [value, setValue] = React.useState<string | readonly string[]>(
@@ -120,6 +126,8 @@ function Controlled(props: StoryProps) {
  * are the same in all of them.
  */
 export const IconRows: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { options: CHANNELS, rows: 'icon', searchable: false, placeholder: 'Select channel' },
   render: (args) => <Controlled {...args} aria-label="Channel" />,
   play: async ({ canvasElement }) => {
@@ -133,6 +141,8 @@ export const IconRows: Story = {
 
 /** `rows="tag"`: each row is a `Tag` in its option's `tone`, and the tags in the field wear it too. */
 export const TagRows: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { options: TYPES, rows: 'tag', multiple: true, display: 'tags', searchable: false, placeholder: 'Select types' },
   render: (args) => <Controlled {...args} aria-label="Types" />,
   play: async ({ canvasElement, args }) => {
@@ -150,6 +160,8 @@ export const TagRows: Story = {
  * content: no buttons or links in there.
  */
 export const CustomRows: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     options: [
       { value: 'eve', label: 'Eve Kestrel' },
@@ -208,6 +220,8 @@ export const Single: Story = {
 
 /** The search box is the combobox: arrows move, Enter picks, Escape closes and returns focus. */
 export const Keyboard: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { rows: 'avatar' },
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement, args }) => {
@@ -234,6 +248,8 @@ export const Keyboard: Story = {
 
 /** The Unassigned row is a person glyph, not an avatar, and is a choice like any other. */
 export const Unassigned: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { rows: 'avatar', value: 'unassigned' },
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement }) => {
@@ -338,6 +354,8 @@ export const TagsOverflow: Story = {
 
 /** Removing a tag leaves the field opened out, and focus moves to the neighbouring ✕. */
 export const TagsRemoveKeepsExpanded: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     options: TAGS,
     multiple: true,
@@ -359,6 +377,8 @@ export const TagsRemoveKeepsExpanded: Story = {
 
 /** A click away, or Escape, folds an opened-out field back. */
 export const TagsFoldBack: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     options: TAGS,
     multiple: true,
@@ -387,6 +407,8 @@ export const TagsFoldBack: Story = {
 
 /** A long label is cut with "…" and its ✕ stays inside the field. */
 export const LongTag: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     options: [
       { value: 'long', label: 'A very long tag name that could never fit on a single line of this field' },
@@ -409,21 +431,10 @@ export const LongTag: Story = {
   },
 };
 
-/** `error` puts a message under the field in the critical colour, and announces it with the field. */
-export const WithError: Story = {
-  args: { multiple: true, display: 'tags', options: TAGS, error: 'Choose at least one tag.' },
-  render: (args) => <Controlled {...args} aria-label="Tags" />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const field = canvas.getByRole('button', { name: 'Tags' });
-    await expect(canvas.getByText('Choose at least one tag.')).toBeVisible();
-    await expect(field).toHaveAttribute('aria-invalid', 'true');
-    await expect(field).toHaveAccessibleDescription('Choose at least one tag.');
-  },
-};
-
 /** A click inside the panel that lands on nothing does nothing: the panel stays open. */
 export const BlankClickKeepsOpen: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { options: TAGS, multiple: true, placeholder: 'Select tags' },
   render: (args) => <Controlled {...args} aria-label="Tags" />,
   play: async ({ canvasElement }) => {
@@ -480,6 +491,8 @@ export const StatusWithApply: Story = {
 
 /** `searchable={false}`: a short single list, keyboard on the trigger itself. */
 export const SingleWithoutSearch: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { options: ['Low', 'Normal', 'High', 'Urgent'], searchable: false, placeholder: 'Select priority' },
   render: (args) => <Controlled {...args} aria-label="Priority" />,
   play: async ({ canvasElement, args }) => {
@@ -498,6 +511,8 @@ export const SingleWithoutSearch: Story = {
 
 /** No `group` on any option: a plain list, no headings. Group headings are optional. */
 export const FlatList: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { options: ['Design', 'Frontend', 'Backend', 'QA', 'Operations'], multiple: true, searchable: false },
   render: (args) => <Controlled {...args} aria-label="Teams" />,
   play: async ({ canvasElement }) => {
@@ -510,6 +525,8 @@ export const FlatList: Story = {
 
 /** No match, or no options at all: the panel says so, and an empty list is not exposed as a listbox. */
 export const NoMatches: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -522,6 +539,8 @@ export const NoMatches: Story = {
 };
 
 export const NoOptions: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { options: [], searchable: false, emptyText: 'No tags yet' },
   render: (args) => <Controlled {...args} aria-label="Tags" />,
   play: async ({ canvasElement }) => {
@@ -534,6 +553,8 @@ export const NoOptions: Story = {
 
 /** Named by a `Field` label: the trigger is a button, so `htmlFor` reaches it. */
 export const InAField: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { rows: 'avatar' },
   render: (args) => (
     <Field label="Assignee" helper="Who is doing the work." htmlFor="assignee">
@@ -545,27 +566,10 @@ export const InAField: Story = {
   },
 };
 
-export const Invalid: Story = {
-  args: { invalid: true },
-  render: (args) => <Controlled {...args} aria-label="Assignee" />,
-  play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Assignee' })).toHaveAttribute('aria-invalid', 'true');
-  },
-};
-
-/** Disabled: no opening, and the tags lose their ✕. */
-export const Disabled: Story = {
-  args: { disabled: true, multiple: true, display: 'tags', value: ['adam', 'amy'] },
-  render: (args) => <Controlled {...args} aria-label="Watchers" />,
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await expect(canvas.getByRole('button', { name: 'Watchers' })).toBeDisabled();
-    await expect(canvas.queryByRole('button', { name: 'Remove Adam' })).toBeNull();
-  },
-};
-
 /** A click away closes the panel. */
 export const ClosesOnBlur: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => (
     <div>
       <Controlled {...args} aria-label="Assignee" />
@@ -579,6 +583,88 @@ export const ClosesOnBlur: Story = {
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await userEvent.click(canvas.getByRole('button', { name: 'Elsewhere' }));
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+  },
+};
+
+/**
+ * The field's states, side by side: an `error` (the message under it, in the critical colour), a bare
+ * `invalid`, and `disabled` with tags (which take an outline so they do not blend into the grey fill).
+ */
+export const States: Story = {
+  args: { multiple: true, display: 'tags', options: TAGS, placeholder: 'Select tags' },
+  render: (args) => (
+    <div className="flex flex-col gap-6">
+      <Controlled {...args} error="Choose at least one tag." aria-label="With an error" />
+      <Controlled {...args} invalid aria-label="Invalid" />
+      <Controlled {...args} disabled value={['bug', 'vcp']} aria-label="Disabled" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const withError = canvas.getByRole('button', { name: 'With an error' });
+    await expect(canvas.getByText('Choose at least one tag.')).toBeVisible();
+    await expect(withError).toHaveAttribute('aria-invalid', 'true');
+    await expect(withError).toHaveAccessibleDescription('Choose at least one tag.');
+    await expect(canvas.getByRole('button', { name: 'Invalid' })).toHaveAttribute('aria-invalid', 'true');
+
+    const disabled = canvas.getByRole('button', { name: /Disabled/ });
+    await expect(disabled).toBeDisabled();
+    /* Disabled tags lose their ✕ and keep an outline. */
+    await expect(canvas.queryByRole('button', { name: 'Remove Bug' })).toBeNull();
+    const tag = Array.from(canvasElement.querySelectorAll('[data-select-tag]')).find(
+      (t) => t.textContent === 'Bug',
+    );
+    await expect(tag).toHaveClass('border');
+  },
+};
+
+/**
+ * The four `rows` presets and `renderOption`, switchable. Open the field to see how each draws a row.
+ * Everything but the row's content (checkbox, states, keyboard, ARIA) is the same in all of them.
+ */
+export const Rows: Story = {
+  render: function Render() {
+    const [kind, setKind] = React.useState('avatar');
+    const config: Record<string, StoryProps> = {
+      text: { options: STATUSES, rows: 'text', searchable: false, placeholder: 'Select status' },
+      avatar: { options: PEOPLE, rows: 'avatar', searchPlaceholder: 'Search by name', placeholder: 'Select user' },
+      icon: { options: CHANNELS, rows: 'icon', searchable: false, placeholder: 'Select channel' },
+      tag: { options: TYPES, rows: 'tag', searchable: false, placeholder: 'Select type' },
+      custom: {
+        options: [
+          { value: 'eve', label: 'Eve Kestrel' },
+          { value: 'marvin', label: 'Marvin Ode' },
+        ],
+        searchable: false,
+        placeholder: 'Select owner',
+        renderOption: (option: SearchSelectOption) => (
+          <span className="flex min-w-0 flex-col leading-tight">
+            <span className="truncate">{option.label}</span>
+            <span className="truncate text-caption-md-regular text-text-tertiary">
+              {`${option.label.split(' ')[0]?.toLowerCase()}@example.com`}
+            </span>
+          </span>
+        ),
+      },
+    };
+    return (
+      <div className="flex flex-col gap-4">
+        <SegmentedControl
+          aria-label="Row style"
+          size="sm"
+          value={kind}
+          onChange={setKind}
+          options={[
+            { value: 'text', label: 'Text' },
+            { value: 'avatar', label: 'Avatar' },
+            { value: 'icon', label: 'Icon' },
+            { value: 'tag', label: 'Tag' },
+            { value: 'custom', label: 'Custom' },
+          ]}
+        />
+        <Controlled key={kind} {...config[kind]!} aria-label="Rows demo" />
+      </div>
+    );
   },
 };
 
