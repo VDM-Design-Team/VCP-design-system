@@ -57,8 +57,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** A page's filter state, so each story is the real thing: values go in, and come back out. */
-function Page(props: FilterBarProps & { initial?: Partial<State> }) {
-  const { initial, ...rest } = props;
+function Page(
+  props: FilterBarProps & {
+    initial?: Partial<State>;
+    /** Filters this page does not have: it leaves their props out, which is how the bar hides them. */
+    without?: Array<'period' | 'status' | 'priority' | 'tags' | 'users'>;
+  },
+) {
+  const { initial, without = [], ...rest } = props;
+  const has = (name: 'period' | 'status' | 'priority' | 'tags' | 'users') => !without.includes(name);
   const [s, setS] = React.useState<State>({
     search: '',
     period: {},
@@ -78,15 +85,19 @@ function Page(props: FilterBarProps & { initial?: Partial<State> }) {
         set({ search });
         rest.onSearchChange?.(search);
       }}
-      period={{ value: s.period, onChange: (period) => set({ period }), presets: PRESETS }}
-      status={{ options: STATUSES, value: s.status, onChange: (status) => set({ status }) }}
-      priority={{ options: PRIORITIES, value: s.priority, onChange: (priority) => set({ priority }) }}
-      tags={{ options: TAGS, value: s.tags, onChange: (tags) => set({ tags }) }}
+      period={has('period') ? { value: s.period, onChange: (period) => set({ period }), presets: PRESETS } : undefined}
+      status={has('status') ? { options: STATUSES, value: s.status, onChange: (status) => set({ status }) } : undefined}
+      priority={
+        has('priority') ? { options: PRIORITIES, value: s.priority, onChange: (priority) => set({ priority }) } : undefined
+      }
+      tags={has('tags') ? { options: TAGS, value: s.tags, onChange: (tags) => set({ tags }) } : undefined}
       users={
-        rest.users ?? [
-          { label: 'Assignee', options: PEOPLE, value: s.assignee, onChange: (assignee) => set({ assignee }) },
-          { label: 'Initiator', options: PEOPLE, value: s.initiator, onChange: (initiator) => set({ initiator }) },
-        ]
+        has('users')
+          ? (rest.users ?? [
+              { label: 'Assignee', options: PEOPLE, value: s.assignee, onChange: (assignee) => set({ assignee }) },
+              { label: 'Initiator', options: PEOPLE, value: s.initiator, onChange: (initiator) => set({ initiator }) },
+            ])
+          : undefined
       }
       onReset={() => {
         set({ search: '', period: {}, status: [], priority: '', tags: [], assignee: '', initiator: '' });
@@ -209,6 +220,35 @@ export const MultipleUsers: Story = {
     await userEvent.click(canvas.getByRole('option', { name: 'Adam' }));
     await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
     await expect(field).toHaveTextContent('2 selected');
+  },
+};
+
+/**
+ * Which filters show is which props the page passes. A draft page has no status filter (every row is a
+ * draft), so it leaves `status` out and the bar closes up around the rest. A page does the same for
+ * anything its user may not use; the bar knows nothing about roles.
+ */
+export const WithoutStatus: Story = {
+  render: (args) => <Page {...args} without={['status']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('combobox', { name: 'Status' })).toBeNull();
+    await expect(canvas.getByRole('combobox', { name: 'Priority' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Tags' })).toBeVisible();
+  },
+};
+
+/**
+ * An admin view can also filter by person (`users`); a regular user's view of the same page leaves
+ * `users` out. The default story is the admin view; this is what a regular user sees.
+ */
+export const WithoutUsers: Story = {
+  render: (args) => <Page {...args} without={['users']} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: 'Assignee' })).toBeNull();
+    await expect(canvas.queryByRole('button', { name: 'Initiator' })).toBeNull();
+    await expect(canvas.getByRole('combobox', { name: 'Status' })).toBeVisible();
   },
 };
 

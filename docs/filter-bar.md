@@ -38,28 +38,44 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 | `period` | `{ value?: { start?, end? }, onChange?, presets?, placeholder? }` | A field that opens a two-month range calendar. ISO `yyyy-mm-dd` in and out; the field reads `dd/mm/yyyy-dd/mm/yyyy`. `onChange({})` when cleared. `presets` are `DatePicker`'s quick picks |
 | `status` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` (several picks, no search box by default) with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
-<<<<<<< HEAD
-| `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable` and `searchPlaceholder` can be set on `status` and `tags` |
-| `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `SearchSelect` per entry (Assignee, Initiator…) with avatars and search, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array. `rows` defaults to `avatar` here. Options may carry `src` (a photo) or `unassigned` |
-=======
 | `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable`, `searchPlaceholder` and `rows` (`text`, `avatar`, `icon`, `tag`) can be set on `status` and `tags` |
->>>>>>> feat/filter-bar
+| `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `SearchSelect` per entry (Assignee, Initiator…) with avatars and search, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array. `rows` defaults to `avatar` here. Options may carry `src` (a photo) or `unassigned` |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
 | `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset" |
 | `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show. Uncontrolled (shown) when omitted |
 | `className`, `ref`, rest | | On the root |
 
+## Choosing which filters show
+
+The bar draws exactly the filters you pass, and closes up around them. It has no idea about roles or
+pages: the page decides.
+
+| Page | What it passes |
+|---|---|
+| A page with every filter | `period`, `status`, `priority`, `tags` |
+| A draft page (every row is a draft, so a status filter would filter nothing) | everything but `status` |
+| An admin view that can also filter by person | the above plus `users` |
+| A regular user's view of the same page | no `users` |
+| A page with nothing to filter by | only `search` (the Filters button then claims no panel) |
+
+`children` is there for a field no prop covers. Do not add a `hidden` or `visibleFor` prop to the bar:
+leaving a prop out is already the switch, and role rules belong to the page that knows them.
+
 ## Layout
 
-From `md` up, three columns — search (300) at the left, the fields, and Reset and
-Filters at the right. The buttons stay at the top right; the fields right-align
+From `md` up, three columns — the search at the left, the fields, and Reset and
+Filters at the right. The search and the fields share the width in proportion (one part to two), so both
+stretch and shrink with the page: the search is at least 15rem wide and its box at most 24rem, and each
+field is fluid between a minimum and a maximum (below). The buttons stay at the top right; the fields right-align
 between and wrap onto more lines when they do not fit, so a Tags field holding many
 tags drops under the others. Below `md` it stacks, as Figma's Mobile: Reset and
 Filters, then search, then the fields two across (period and tags full width), and
 the calendar takes its touch layout, one month wide.
 
-Fields are 40 tall: status and priority 160, user fields 176, period 240, tags at least 160 and as
-wide as its tags need (up to 680).
+Fields are 40 tall and fluid between a minimum and a maximum, growing to fill the row before the next
+wraps: status, priority and user fields 11rem to 16rem, period 15rem to 18rem, tags 14rem to 42.5rem. The
+minimums keep the placeholder and the longest chosen value readable; a dropdown panel is as wide as its
+longest option regardless (see `SearchSelect`), so a narrow field never cuts options off.
 
 ## Tokens
 

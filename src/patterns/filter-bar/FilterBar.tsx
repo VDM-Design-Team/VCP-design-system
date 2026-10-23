@@ -182,7 +182,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     <div
       ref={ref}
       className={cn(
-        'flex flex-col gap-2 font-sans md:grid md:grid-cols-[auto_1fr_auto] md:items-start',
+        'flex flex-col gap-2 font-sans md:grid md:grid-cols-[minmax(15rem,1fr)_minmax(0,2fr)_auto] md:items-start',
         className,
       )}
       {...props}
@@ -194,7 +194,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
         value={search ?? ''}
         onChange={(e) => onSearchChange?.(e.target.value)}
         leadingIcon={<Icon name="magnifying-glass" size="sm" />}
-        className="order-2 w-full md:order-none md:col-start-1 md:w-75"
+        className="order-2 w-full md:order-none md:col-start-1 md:max-w-96"
       />
 
       {/* From `md` the bar is three columns — search, fields, buttons — so the
@@ -215,7 +215,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               width="auto"
               align="right"
               panelClassName="p-0"
-              className="col-span-2 md:w-60"
+              className="col-span-2 md:max-w-72 md:min-w-60 md:flex-1"
               trigger={
                 <button
                   type="button"
@@ -268,7 +268,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               aria-label="Status"
               placeholder="Select status"
               {...status}
-              className="md:w-40"
+              className="md:max-w-64 md:min-w-44 md:flex-1"
             />
           )}
           {priority && (
@@ -276,7 +276,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               aria-label="Priority"
               placeholder="Select priority"
               {...priority}
-              className="w-full md:w-40"
+              className="w-full md:max-w-64 md:min-w-44 md:flex-1"
             />
           )}
           {tags && (
@@ -287,7 +287,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               aria-label="Tags"
               placeholder="Select tags"
               {...tags}
-              className="col-span-2 md:min-w-40 md:max-w-170"
+              className="col-span-2 md:max-w-170 md:min-w-56 md:flex-1"
             />
           )}
           {users?.map(({ label, placeholder, ...rest }) => (
@@ -299,7 +299,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                 searchPlaceholder: 'Search by name',
                 rows: 'avatar',
                 ...rest,
-                className: 'md:w-44',
+                className: 'md:max-w-64 md:min-w-44 md:flex-1',
               } as SearchSelectProps)}
             />
           ))}

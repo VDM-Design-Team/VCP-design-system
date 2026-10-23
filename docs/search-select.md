@@ -149,6 +149,7 @@ says so ("Anyone", "Unassigned") — it is then a choice the user can see.
 | Part | Spec |
 |---|---|
 | Panel | `surface.elevated`, 1 `stroke.default`, `radius.md`, `shadow.menu`, 4 of padding all round — `Menu`'s |
+| Width | As wide as its longest row: at least the field's width, at most 24rem (`max-w-96`), anchored to the field's left edge. A narrow field does not cut its options off; a longer label is cut with "…" |
 | Search | The `Input` atom (40 tall) with a `magnifying-glass`, 8 inside the panel's 4 (12 from the edge) |
 | Rows | `Menu`'s item: at least 40 tall, `radius.sm`, 12 either side, `label-sm-medium`; a 16 checkbox first when `multiple`, then the row's content (`text`: the name in `body-sm-medium` / `text.secondary`; `avatar`: a 24 avatar and the name; `icon`: a small glyph and the name; `tag`: a `Tag size="sm"`); a trailing check when single |
 | Row states | rest transparent in `text.secondary`; hover or keyboard-active `surface.brand.faint` with `text.primary`; pressed `surface.brand.subtle` |
@@ -203,8 +204,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 - **The scrollbar is the browser's.** `Menu_Dropdown` in Figma draws a slim custom scrollbar; this panel scrolls with the platform's.
 - **The tags menu's blue highlighted row** (a single-pick look) is replaced by the checkbox,
   because the field now allows several tags.
-- **The panel is not repositioned.** It opens under the field and clips inside an `overflow: hidden`
-  ancestor. No flipping, same as `Popover`.
+- **The panel is not repositioned.** It opens under the field, growing to the right if its content is wider than the field, and clips inside an `overflow: hidden` ancestor or the viewport edge. No flipping, same as `Popover`.
 
 ## Don't
 

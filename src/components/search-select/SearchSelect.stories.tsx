@@ -431,6 +431,37 @@ export const LongTag: Story = {
   },
 };
 
+/** A narrow field does not cut its options off: the panel grows to fit its longest row. */
+export const WideOptionsInNarrowField: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    options: ['Pending', 'Design Review', 'Ready for Deploy (For Merging)'],
+    multiple: true,
+    searchable: false,
+    placeholder: 'Select status',
+  },
+  decorators: [
+    (Story) => (
+      <div className="h-96 w-40">
+        <Story />
+      </div>
+    ),
+  ],
+  render: (args) => <Controlled {...args} aria-label="Status" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('combobox', { name: 'Status' });
+    await userEvent.click(field);
+    const row = canvas.getByRole('option', { name: 'Ready for Deploy (For Merging)' });
+    const label = row.querySelector('span.truncate') as HTMLElement;
+    /* The panel is wider than the 10rem field, and the longest label is not cut off. */
+    const panel = row.closest('[class*="w-max"]') as HTMLElement;
+    await expect(panel.getBoundingClientRect().width).toBeGreaterThan(field.getBoundingClientRect().width);
+    await expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth);
+  },
+};
+
 /** A click inside the panel that lands on nothing does nothing: the panel stays open. */
 export const BlankClickKeepsOpen: Story = {
   tags: ['!dev', '!autodocs'],
