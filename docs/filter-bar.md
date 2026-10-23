@@ -13,7 +13,7 @@ the fields.
 | `Input` | atom |
 | `Select` | atom |
 | `DatePicker` | component |
-| `MultiSelect` | component |
+| `SearchSelect` | component |
 | `Popover` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -24,7 +24,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | `FilterBar` | Narrowing a list or table by several things at once |
 | `Tabs` / `SegmentedControl` | One dimension with a few fixed views |
-| `Select` / `MultiSelect` alone | A single filter on a form, not a bar of them |
+| `Select` / `SearchSelect` alone | A single filter on a form, not a bar of them |
 
 ## The filters are yours
 
@@ -36,9 +36,9 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 |---|---|---|
 | `search` / `onSearchChange` | `string` / `(value) => void` | The search field. `searchPlaceholder` defaults to "Search by title or ID" |
 | `period` | `{ value?: { start?, end? }, onChange?, presets?, placeholder? }` | A field that opens a two-month range calendar. ISO `yyyy-mm-dd` in and out; the field reads `dd/mm/yyyy-dd/mm/yyyy`. `onChange({})` when cleared. `presets` are `DatePicker`'s quick picks |
-| `status` | `{ options, value?, onChange?, placeholder? }` | `MultiSelect` with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
+| `status` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` (several picks, no search box by default) with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
-| `tags` | `{ options, value?, onChange?, placeholder? }` | `MultiSelect` with removable tags in the field. Options may carry a `group` |
+| `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable` and `searchPlaceholder` can be set on `status` and `tags` |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
 | `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset" |
 | `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show. Uncontrolled (shown) when omitted |
