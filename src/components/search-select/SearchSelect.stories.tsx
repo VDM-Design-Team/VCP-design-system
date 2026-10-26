@@ -31,7 +31,7 @@ const TAGS: SearchSelectOption[] = [
 ];
 
 const TYPES: SearchSelectOption[] = [
-  { value: 'bug', label: 'Bug', tone: 'danger' },
+  { value: 'bug', label: 'Bug', tone: 'critical' },
   { value: 'feature', label: 'New Feature', tone: 'success' },
   { value: 'improvement', label: 'Improvement', tone: 'info' },
   { value: 'chore', label: 'Chore', tone: 'neutral' },
