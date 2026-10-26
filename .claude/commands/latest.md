@@ -13,7 +13,9 @@ usual ones:
 
 - **Uncommitted changes** — it will not pull over someone's work. Offer to stash
   or commit, and say which files are affected.
-- **Authentication** — `gh auth login`.
+- **Authentication** — `gh auth login` if the pull failed. If `npm install` could not
+  download GDL from GitHub Packages, they need the one-time `npm login` the error
+  prints (a classic GitHub token with `read:packages`) — walk them through it.
 - **Diverged history** — do not force anything. Say an engineer should look.
 
 Once Storybook is running, tell them what changed since they last pulled: read

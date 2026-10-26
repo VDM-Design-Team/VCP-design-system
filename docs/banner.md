@@ -67,6 +67,7 @@ applies to; so is a form error at the top of the whole page.
 | `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical` |
 | `title` | `ReactNode` | — | The headline. One clause |
 | `children` | `ReactNode` | — | The body. Say what happened and what to do |
+| `showIcon` | `boolean` | `true` | Shows the tone glyph. Off, the tint, stroke and words still carry the banner, and the tone word ("Warning: ") is announced from visually hidden text, so assistive tech does not lose it |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
 | `actionLabel` | `string` | — | Renders one action, inline at the end of the row |
 | `onAction` | `() => void` | — | Fired by the action. Required for the action to render |
@@ -153,9 +154,10 @@ The fill barely registers as a shape — 1.03–1.22:1 against the page in light
 1.72–2.06:1 in dark. It is a tint, not a signal. So the tone is carried three
 ways, and colour is the weakest of them:
 
-1. **Shape.** The four glyphs are genuinely different marks — `info`
-   (circle-i), `check-circle`, `warning` (triangle), `x-circle` — not one mark
-   in four colours. They read in greyscale, with a colour vision deficiency, and
+1. **Shape.** The four glyphs are genuinely different marks, all in the `fill`
+   style at 20 × 20 — `info-fill` (circle-i), `check-circle-fill`, `warning-circle-fill`
+   (exclamation in a circle: a *warning*), `warning-fill` (exclamation in a triangle: the
+   *critical* banner, which is more severe) — not one mark in four colours. They read in greyscale, with a colour vision deficiency, and
    in a screenshot.
 2. **Text, in the announcement.** Each glyph carries the tone as its accessible
    name, so a screen reader hears *"Warning, two deliverables are missing
@@ -169,7 +171,7 @@ ways, and colour is the weakest of them:
 ### The rest
 
 - **Contrast.** Text on its own fill clears 4.5:1 in both themes for every tone
-  — see the table. The border clears 3:1 against both page surfaces.
+  — see the table. The border is cosmetic and does not clear 3:1 — see *The border*.
 - **Not a landmark.** The Banner renders a plain `<div>` with no `role` by
   default, so five banners do not add five entries to the landmark list.
 - **The title is a `<p>`, not a heading.** A banner is not a section of the
@@ -199,21 +201,38 @@ above the line. Any move of either token breaks Badge, Banner and Toast at once.
 
 ### The border
 
-A Banner sits on the page, and its fill is nearly invisible against it (1.03:1
-for `warning` in light). The border is what makes its extent legible, so it is
-held to the house 3:1 rule.
+The border is Figma's: `accent.<tone>.outline.border.default`, 1px (design review of
+the banners, October 2026: with the tonal fill carrying the banner, the outline is
+cosmetic). **It is not held to the 3:1 rule** the way the house controls are — against
+the canvas in light it measures 3.60:1 (`info`), 2.12:1 (`success`), **1.83:1**
+(`warning`) and 3.64:1 (`danger`), so two of the four tones have a faint edge. That is
+a decision, not an oversight: the banner is legible by its tint, its glyph shape, and
+its text, none of which depend on the edge.
 
-| Border token | Light, vs `surface.canvas` / `surface.base` | Dark, vs canvas / base |
+Before this it used `outline.content.default`, which cleared 3:1 on both page surfaces
+(floor 3.89:1) — and is one token swap away if the edge ever needs to carry weight again.
+
+### The glyph's colour
+
+The glyph is `accent.<tone>.outline.border.default`, the bright tone colour, as Figma draws
+it (design review: the glyph is not what makes the message understood). **That is below
+3:1 against the tint:**
+
+| Tone | Light | Dark |
 |---|---|---|
-| `accent.info.outline.content.default` | 5.01:1 / 5.25:1 | 4.75:1 / 3.89:1 |
-| `accent.success.outline.content.default` | 4.73:1 / 4.95:1 | 8.05:1 / 6.60:1 |
-| `accent.warning.outline.content.default` | 4.71:1 / 4.93:1 | 9.35:1 / 7.66:1 |
-| `accent.critical.outline.content.default` | 4.56:1 / 4.77:1 | 6.18:1 / 5.06:1 |
+| `info` | 3.08:1 | 1.98:1 |
+| `success` | 2.02:1 | 2.81:1 |
+| `warning` | **1.78:1** | 2.95:1 |
+| `danger` | 3.12:1 | 2.10:1 |
 
-Floor 3.89:1. `outline.**border**.default` — the token whose *name* says border
-— is deliberately not used: against the canvas in light it measures 3.60
-(`info`), 2.12 (`success`), **1.83** (`warning`), 3.64 (`danger`), so two of the
-four tones would give a banner no discernible edge. See *Token gaps*.
+Is that allowed? WCAG 1.4.11 asks 3:1 for a graphic *required to understand the content*.
+Here the glyph is reinforcement: the title and message say what is wrong in words, the
+tint carries the tone, and the glyph is named for assistive tech ("Warning, …"). The repo's
+own rule 5 is about text and UI borders, not decorative or redundant icons. So it is a
+recorded exception, not a violation — but `warning` in light (1.78:1) and `success` (2.02:1)
+are genuinely faint, which is why the title must always work without the colour (see
+*Tone is never carried by colour alone*). Using `outline.content.default` for the glyph would
+clear 3:1 everywhere and is one token swap away.
 
 ### The controls on the fill
 
@@ -250,13 +269,15 @@ focus indicator needs.
 | Radius | `shape.radius.md` | `rounded-md` |
 | Border width | `borderWidth.default` | `border` |
 | Elevation | none | No shadow — a Banner is *in* the page, not above it |
-| Title | `type.label.lg` — Poppins 500, 14/20 | `text-label-sm-medium` |
+| Title | `type.title.sm` — Poppins 600, 16/24 | `text-title-sm-semibold` |
 | Body | `type.body.md` — Poppins 400, 14/20 | `text-body-sm-regular` |
-| Padding | Tailwind numeric scale | `px-3.5 py-3` (14 / 12) |
-| Gap, glyph to text | Tailwind numeric scale | `gap-3` (12) |
-| Gap, title to body | Tailwind numeric scale | `gap-1` (4) |
+| Padding | Tailwind numeric scale | `p-4` (16 all round) |
+| Gap, glyph to text | Tailwind numeric scale | `gap-2` (8) |
+| Gap, title to body | Tailwind numeric scale | `gap-0.5` (2) |
+| Glyph | `Icon` `fill` style | `size="md"` — 20 × 20 |
 | Width | — | `w-full`; the container decides how wide |
-| Glyph colour | — | Inherited from the tone's content token via `currentColor` |
+| Glyph colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
+| Glyph alignment | — | `mt-0.5` with a title: centres the 20 glyph on the title's 24 line |
 
 Dark comes for free: every colour above is a semantic token that
 `tokens/semantic/color.dark.json` overrides under `.dark`.
@@ -268,13 +289,12 @@ Dark comes for free: every colour above is a semantic token that
   declares the pair for a button on top of a tonal message. Both controls reuse
   the triad's hover/pressed states, which holds (4.10:1 floor) but is this
   component's convention rather than a stated pair.
-- **`accent.<tone>.outline.border.default` cannot be used as a container
-  edge.** 1.83:1 (`warning`) and 2.12:1 (`success`) against the canvas in light.
-  The token named `border` is the one you cannot draw a border with. It wants to
-  move a step or two darker, or the family wants a `border.strong`.
-- **No 14/600 in the type ramp.** The export's Banner title was 14px 600. The
-  ramp goes `label-lg` (14/500) → `title-sm` (16/600), with nothing between. The
-  title uses `label-lg`, one weight step light.
+- **`accent.<tone>.outline.border.default` is a weak container edge.** 1.83:1
+  (`warning`) and 2.12:1 (`success`) against the canvas in light. The Banner uses it
+  anyway, as Figma draws it (see *The border*); if an edge that carries weight is ever
+  wanted, the token wants to move a step darker, or the family wants a `border.strong`.
+- **The title is `title-sm` (16/600)**, as Figma's `Title/sm-semibold` — the export's
+  was 14/600, which the ramp has no step for.
 - **No 13/400 in the type ramp.** The export's body was 13px 400; the ramp has
   `body-sm` (12/400) and `label-md` (13/500, wrong weight). The body uses
   `body-md` (14/400), one pixel large.

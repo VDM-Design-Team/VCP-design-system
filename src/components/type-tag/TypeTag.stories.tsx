@@ -11,7 +11,7 @@ const meta = {
         component:
           'An Added Value’s type — the owner of VCP’s type vocabulary and its type → ' +
           'glyph/colour mapping. **Type is a scale and the glyph is the scale**: same caret ' +
-          'family, one more stroke each step, heaviest first. Unlike `StatusPill`’s, the ' +
+          'family, one more stroke each step, heaviest first. Unlike `StatusTag`’s, the ' +
           'vocabulary is closed — the design draws exactly three and the numbering is the ' +
           'meaning.',
       },

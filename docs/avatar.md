@@ -6,9 +6,10 @@ A person, as a photo or as their initials, on the neutral tone by default.
 
 | Size | Diameter | Use for | Notes |
 |---|---|---|---|
-| `sm` | 24 | Dense table rows, inline beside body text, a `sm` `AvatarGroup` | Never a control at this size |
-| `md` | 32 | The default — comment threads, list rows, card headers | The export's own default size |
-| `lg` | 40 | Profile headers, account menus, anything the user can press | The only size that meets the 40 minimum target |
+| `xs` | 16 | Inline with small text, an `xs` `AvatarGroup` | Type 10 (`caption-sm-medium`). Never a control |
+| `sm` | 24 | Dense table rows, inline beside body text, a `sm` `AvatarGroup` | Type 12 (`caption-md-medium`). Never a control at this size |
+| `md` | 32 | The default — comment threads, list rows, card headers | Type 12 (`caption-md-medium`). The export's own default size |
+| `lg` | 36 | Profile headers, account menus | Type 14 (`label-sm-medium`). Under the 40 minimum target — see *Target size* |
 
 Reach for something else when:
 
@@ -26,7 +27,7 @@ Reach for something else when:
 | `name` | `string` | `''` | Drives the initials. Not rendered as text |
 | `initials` | `string` | — | Overrides the derived initials — mononyms, team codes |
 | `src` | `string` | — | Photo URL. On a load failure the initials are drawn instead |
-| `size` | `sm \| md \| lg` | `md` | 24 / 32 / 40. **Not a number** — see "Deviations" |
+| `size` | `xs \| sm \| md \| lg` | `md` | 16 / 24 / 32 / 36. **Not a number** — see "Deviations" |
 | `tone` | `neutral \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing |
 | `ring` | `boolean` | `false` | `surface.elevated` ring, for overlapping stacks. `AvatarGroup` sets it |
 | `standalone` | `boolean` | `false` | The avatar is the only identification of this person — give it a real accessible name |
@@ -53,18 +54,16 @@ via `tone={toneForName(name)}` — see "Deviations" in `Avatar.tsx`.
 | Tone | Surface token | Content token | Contrast, light | Contrast, dark |
 |---|---|---|---|---|
 | `blue` | `accent.blue.faint` | `accent.blue.stronger` | **8.50:1** | **7.23:1** |
-| `green` | `accent.green.faint` | `accent.green.stronger` | **8.24:1** | **4.50:1** ⚠ |
+| `green` | `accent.green.faint` | `accent.green.stronger` | **8.24:1** | **6.49:1** |
 | `red` | `accent.red.faint` | `accent.red.stronger` | **8.22:1** | **6.85:1** |
 | `yellow` | `accent.yellow.faint` | `accent.yellow.stronger` | **8.07:1** | **6.37:1** |
 
 Initials are text and owe 4.5:1, so every figure above is measured, not assumed.
 
-⚠ **`green` in dark is 4.5030:1 — it passes AA with no headroom.** The cause is a
-token bug, not a design choice: `color.green.800` and `color.green.700` are both
-`#008236` in `tokens/core/color.json`, so `accent.green.faint` cannot get any
-darker in dark mode. Give `green.800` its own darker value and this tone moves
-back in line with the other three. Until then, do not lighten
-`accent.green.stronger`.
+`green` in dark was 4.50:1 — AA with no headroom — until October 2026: a token
+bug made `color.green.800` a copy of `green.700` (`#008236`), so
+`accent.green.faint` couldn't get any darker. GDL fixed `green.800`
+(`#016630`), and the tone is back in line with the other three.
 
 The rest:
 
@@ -107,7 +106,8 @@ Nothing was invented here.
   dark. The `ring` is decoration between two avatars, not a boundary that carries
   meaning, so 1.4.11's 3:1 does not apply to it.
 - **Target size.** Avatar is not a control and takes no focus, so the 40 minimum
-  does not apply. If you wrap one in a `Button` or an `<a>`, use `lg` — it is 40.
+  does not apply. **No size is 40 any more** (`lg` is 36): if you wrap one in a
+  `Button` or an `<a>`, give the control its own padding so the hit area reaches 40.
 
 ## Don't
 
@@ -115,7 +115,7 @@ Nothing was invented here.
   a `size` step and a `tone`.
 - Don't use a hashed tone to mean something. It is a hash of the name; `red` is
   not "blocked" and `green` is not "approved". That is `Badge`, or the
-  `StatusPill` pattern.
+  `StatusTag` pattern.
 - Don't hash by default. Leave `tone` unset unless the context genuinely needs
   to tell many people apart at a glance — most avatars should stay `neutral`.
 - Don't set `standalone` on an avatar that already sits beside the person's name —

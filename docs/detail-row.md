@@ -85,5 +85,5 @@ Label `text.tertiary` at `label-md`; its glyph `text.subtle`; value
   affordance and an unreachable one.
 - **Don't use it for two unrelated columns of text.** The 132 column is a label
   column, not a layout grid.
-- **Don't put VCP vocabulary in it** — a status value is a `StatusPill`
+- **Don't put VCP vocabulary in it** — a status value is a `StatusTag`
   (pattern) passed as `children`, never encoded here.

@@ -2,15 +2,8 @@
   "font": {
     "family": {
       "$type": "fontFamily",
-      "sans": { "$value": ["Poppins", "system-ui", "sans-serif"], "$description": "UI type" },
-      "numeric": { "$value": ["Inter", "system-ui", "sans-serif"], "$description": "Dense numerics, micro labels, tabular figures" }
-    },
-    "weight": {
-      "$type": "fontWeight",
-      "regular": { "$value": 400 },
-      "medium": { "$value": 500 },
-      "semibold": { "$value": 600 },
-      "bold": { "$value": 700 }
+      "sans": { "$value": "{font.family.poppins}", "$description": "UI type. Overrides GDL's brand slot; Inter (numeric), the weights and the other families come from GDL" },
+      "emoji": { "$value": ["Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", "sans-serif"], "$description": "Emoji glyphs. Names the colour emoji fonts first, so a platform's text-style fallback (monochrome faces on Linux) can't take the code points before them" }
     }
   }
 }

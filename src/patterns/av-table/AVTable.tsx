@@ -2,14 +2,14 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import {
   DataTable,
+  ColumnHint,
   type DataTableColumn,
   type DataTableSort,
 } from '../../components/data-table';
-import { StatusPill, type StatusPillProps } from '../../components/status-pill';
-import { DueDatePill, type DueDateProximity } from '../../components/due-date-pill';
+import { StatusTag, type StatusTagProps } from '../../components/status-tag';
+import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../components/pagination';
-import { Tooltip } from '../../components/tooltip';
 import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 import { TypeTag, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
@@ -29,8 +29,8 @@ import { Icon } from '../../atoms/icon';
  * Table page, audit batch 5, 11 September 2026.
  *
  * **It owns no mapping.** Every cell that has a vocabulary defers to the piece
- * that owns it: `StatusPill` for status, `UrgencyTag` for urgency, `TypeTag`
- * for type, `DueDatePill` for how near a date is. This file decides *which
+ * that owns it: `StatusTag` for status, `UrgencyTag` for urgency, `TypeTag`
+ * for type, `DueDateTag` for how near a date is. This file decides *which
  * columns exist and in what order*, and that is all — which is the difference
  * between a pattern and a second copy of the system.
  *
@@ -59,12 +59,12 @@ export interface AVTableRow {
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
-  /** The date, already formatted, and how near it is. See `DueDatePill`. */
+  /** The date, already formatted, and how near it is. See `DueDateTag`. */
   due?: { label: string; proximity?: DueDateProximity };
   urgency?: AVUrgency;
   type?: AVType;
   /** `{ status }` for a spine status, `{ custom }` for a domain step. */
-  status?: StatusPillProps;
+  status?: StatusTagProps;
   members?: readonly AvatarGroupEntry[];
   /** "7 days ago". Already formatted — this table does not do relative time. */
   lastUpdated?: string;
@@ -107,26 +107,6 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   hints?: AVTableHints;
   empty?: React.ReactNode;
   caption?: string;
-}
-
-/** The info glyph beside a header label, with the product's own copy on it. */
-function HeaderHint({ text, column }: { text?: string; column: string }) {
-  if (!text) return null;
-  return (
-    <Tooltip content={text} placement="bottom">
-      <button
-        type="button"
-        aria-label={`About ${column}`}
-        className={cn(
-          'grid size-4 shrink-0 place-items-center rounded-sm text-text-tertiary',
-          'hover:text-text-secondary',
-          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-        )}
-      >
-        <Icon name="info" size="sm" />
-      </button>
-    </Tooltip>
-  );
 }
 
 /** A count under the title: glyph, number, and the word only for screen readers. */
@@ -221,13 +201,13 @@ export function AVTable({
       sortable: true,
       render: (row) =>
         row.due ? (
-          <DueDatePill proximity={row.due.proximity}>{row.due.label}</DueDatePill>
+          <DueDateTag proximity={row.due.proximity}>{row.due.label}</DueDateTag>
         ) : null,
     },
     {
       key: 'urgency',
       label: 'Urgency',
-      hint: <HeaderHint text={hints?.urgency} column="urgency" />,
+      hint: <ColumnHint text={hints?.urgency} column="urgency" />,
       /* The tag carries Figma's own 8 of padding, so the cell gives it back to
          keep the column's left edge true. */
       render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
@@ -235,19 +215,19 @@ export function AVTable({
     {
       key: 'type',
       label: 'Type',
-      hint: <HeaderHint text={hints?.type} column="type" />,
+      hint: <ColumnHint text={hints?.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
     },
     {
       key: 'status',
       label: 'Status',
-      hint: <HeaderHint text={hints?.status} column="status" />,
-      render: (row) => (row.status ? <StatusPill size="sm" {...row.status} /> : null),
+      hint: <ColumnHint text={hints?.status} column="status" />,
+      render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
     },
     {
       key: 'members',
       label: 'Members',
-      hint: <HeaderHint text={hints?.members} column="members" />,
+      hint: <ColumnHint text={hints?.members} column="members" />,
       render: (row) =>
         row.members?.length ? (
           <AvatarGroup people={row.members} size="md" max={3} label="Members" />

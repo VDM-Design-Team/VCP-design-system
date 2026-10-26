@@ -21,7 +21,7 @@ import type { IconName } from '../../atoms/icon';
  * type sees is drawn, not configured. That makes it unlike the status chains,
  * where a domain names its own steps and the component had to take them as
  * data (issue #68). Here the list is the design's, so it lives in
- * `NAV_BY_USER_TYPE` — one place, the way `StatusPill` owns status → tone.
+ * `NAV_BY_USER_TYPE` — one place, the way `StatusTag` owns status → tone.
  * `items` overrides it for the cases the design has not drawn.
  *
  * `Status` is in the preset set but in no rail. **Confirmed 8 Sep 2026: not a
@@ -241,8 +241,10 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           </nav>
         </div>
 
-        {/* The design pins one row to the bottom of every rail. */}
-        <div className="flex flex-col px-3">
+        {/* The design pins one row to the bottom of every rail. At least 32
+            above it (`mt-8`), so even a rail with no room to spare shows a gap
+            and the row reads as pinned to the bottom, not as the last nav item. */}
+        <div className="mt-8 flex flex-col px-3">
           {renderItem({ key: 'report', label: 'Report a problem', icon: 'warning' })}
         </div>
 

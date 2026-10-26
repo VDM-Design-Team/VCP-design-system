@@ -5,7 +5,9 @@ components**, and **usage docs**. Design edits it through Claude, engineering
 consumes it as a versioned npm package. Nothing is hand-copied between the two.
 
 ```
-tokens/core/       raw values      — color.brand.500, size.5
+tokens/core/       raw values      — VCP's own: color.vcp-blue.*, color.brand.navy
+                                    (shared scales and the type ramp come from GDL,
+                                    @vdm-design-team/gdl — the parent design system)
 tokens/semantic/   intent          — surface.brand, content.muted, line.default
 dist/              GENERATED       — theme.css, tokens.css, tokens.ts, tokens.flat.json
 src/components/    React + Tailwind components
@@ -135,8 +137,13 @@ First time on a new machine you need [Node 22+](https://nodejs.org) and:
 ```bash
 git clone https://github.com/VDM-Design-Team/VCP-design-system.git
 cd VCP-design-system
+npm login --scope=@vdm-design-team --auth-type=legacy --registry=https://npm.pkg.github.com
 npm run latest
 ```
+
+The `npm login` is once per machine: GDL, the parent design system VCP builds
+on, comes from GitHub Packages. Username: your GitHub username. Password: a
+[classic token with `read:packages`](https://github.com/settings/tokens/new?scopes=read:packages&description=npm%20GitHub%20Packages).
 
 If you use Claude Code in this repo, `/latest` does the same thing and will also
 summarise what changed since you last pulled.
