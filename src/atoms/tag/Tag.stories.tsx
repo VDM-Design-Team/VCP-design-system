@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { Tag } from './Tag';
 import { Icon } from '../icon';
 
@@ -24,7 +25,7 @@ const meta = {
   argTypes: {
     variant: { control: 'radio', options: VARIANTS },
     tone: { control: 'select', options: TONES },
-    size: { control: 'radio', options: ['sm', 'md'] },
+    size: { control: 'radio', options: ['xs', 'sm', 'md', 'lg'] },
     icon: { control: false },
     trailingIcon: { control: false },
   },
@@ -83,13 +84,14 @@ export const Matrix: Story = {
 };
 
 /**
- * `md` (28 tall, 14 type) is the default. `sm` (24 tall, 12 type) is for dense
- * tables and for sitting inline beside body text.
+ * Four sizes: `xs` (20 tall, 10 type), `sm` (24, 12), `md` (28, 14, the
+ * default) and `lg` (32, 16). `sm` is for dense tables and for sitting inline
+ * beside body text; `lg` is for a tag that is the focus of its row.
  */
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">
-      {(['sm', 'md'] as const).map((size) => (
+      {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
         <div key={size} className="flex flex-wrap items-center gap-2">
           <span className="w-8 text-caption-sm-semibold text-text-tertiary">{size}</span>
           {TONES.map((tone) => (
@@ -159,4 +161,48 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/** The glyph steps up with the tag: 12, 16, 20 and 24, as the design draws them. */
+export const IconsBySize: Story = {
+  render: (args) => (
+    <div className="flex flex-wrap items-center gap-2">
+      <Tag {...args} variant="outline" tone="info" size="xs" icon={<Icon name="info" size={12} />}>
+        xs
+      </Tag>
+      <Tag {...args} variant="outline" tone="info" size="sm" icon={<Icon name="info" size="sm" />}>
+        sm
+      </Tag>
+      <Tag {...args} variant="outline" tone="info" size="md" icon={<Icon name="info" size="md" />}>
+        md
+      </Tag>
+      <Tag {...args} variant="outline" tone="info" size="lg" icon={<Icon name="info" size="lg" />}>
+        lg
+      </Tag>
+    </div>
+  ),
+};
+
+/** The heights the design draws for its four sizes: 20, 24, 28 and 32. */
+export const SizeHeights: Story = {
+  parameters: { controls: { disable: true } },
+  render: (args) => (
+    <div className="flex flex-wrap items-center gap-2">
+      {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
+        <Tag {...args} key={size} size={size}>
+          {size}
+        </Tag>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const heights = Object.fromEntries(
+      (['xs', 'sm', 'md', 'lg'] as const).map((size) => [
+        size,
+        Math.round(canvas.getByText(size).parentElement!.getBoundingClientRect().height),
+      ]),
+    );
+    await expect(heights).toEqual({ xs: 20, sm: 24, md: 28, lg: 32 });
+  },
 };
