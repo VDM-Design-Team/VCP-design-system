@@ -135,16 +135,25 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
     const polite = toasts.filter((t) => (t.tone ?? 'info') !== 'danger');
     const assertive = toasts.filter((t) => t.tone === 'danger');
 
+    /* A toast hugs its content, so a short one is narrower than the 384 column
+       it stacks in. Pack the stack against the edge it is anchored to — the right
+       edge, or the middle for the centred positions — or short toasts sit at the
+       column's left and the stack looks ragged. The regions need it too, since
+       they are the toasts' parent. */
+    const align = position?.endsWith('center') ? 'items-center' : 'items-end';
+
     return (
-      <div ref={ref} className={cn(viewport({ position }), className)} {...props}>
+      <div ref={ref} className={cn(viewport({ position }), align, className)} {...props}>
         <ToastRegion
           role="status"
+          align={align}
           label={politeLabel}
           toasts={polite}
           onDismiss={onDismiss}
         />
         <ToastRegion
           role="alert"
+          align={align}
           label={assertiveLabel}
           toasts={assertive}
           onDismiss={onDismiss}
@@ -156,11 +165,13 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
 
 function ToastRegion({
   role,
+  align,
   label,
   toasts,
   onDismiss,
 }: {
   role: 'status' | 'alert';
+  align: string;
   label: string;
   toasts: readonly ToastRecord[];
   onDismiss?: (id: string) => void;
@@ -180,7 +191,7 @@ function ToastRegion({
          region with `display: none` is not in the accessibility tree, so hiding
          it while empty would re-create the exact bug the viewport exists to
          prevent. An empty flex column is zero pixels tall anyway. */
-      className="flex flex-col gap-2"
+      className={cn('flex flex-col gap-2', align)}
     >
       {toasts.map((item) => (
         <Toast

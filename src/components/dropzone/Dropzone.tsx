@@ -201,7 +201,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
             className={cn(
               'font-sans text-caption-md-regular',
               error
-                ? 'text-accent-critical-tonal-content-default'
+                ? 'text-accent-critical-outline-content-default'
                 : disabled
                   ? 'text-text-disabled'
                   : 'text-text-tertiary',

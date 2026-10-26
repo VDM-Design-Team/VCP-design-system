@@ -15,7 +15,7 @@ Follow-up to #126; built to Figma's attachments elements.
 - A remove-only card (`onRemove`, no `onClick`) takes the hover fill, as edit mode draws it.
 
 **`Dropzone`**
-- **2 dashed `stroke.default` border** (was 1 dashed `stroke.field`) on `surface.neutral.faint`
+- **2 dashed `stroke.strong` border** (was 1 dashed `stroke.strong`) on `surface.neutral.faint`
   (was `surface.elevated`); **24 padding, 8 gap**; a **32 `paperclip`** in `text.subtle` (was a 24 cloud).
 - **Copy:** the label defaults to **"Upload a file"** (was "Choose files") and the hint to
   "PNG, JPG, GIF, DOCX, CSV and PDF file up to 10MB"; line one is 14 regular `text.primary`
@@ -27,7 +27,7 @@ Follow-up to #126; built to Figma's attachments elements.
   needs — because the design specifies `stroke.default`. See `docs/dropzone.md`.
 - `HandoffAVModal` takes the new copy by dropping its "Attach Files" override.
 
-Migration: callers that relied on "Choose files" or the 1 `stroke.field` border pass `label` or
+Migration: callers that relied on "Choose files" or the 1 `stroke.strong` border pass `label` or
 restyle; nothing else.
 
 **`Dropzone` border, a deliberate exception:** the resting dashed border is `stroke.strong`, not the design's `stroke.default` (1.42:1), so a control's boundary clears 3:1. The weight, fill and states are the design's.

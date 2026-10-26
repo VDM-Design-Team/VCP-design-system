@@ -27,7 +27,7 @@ Built inside either modal it would be built twice and drift once.
 ## It owns the reason vocabulary
 
 Both sets live here as exported constants, the way `Sidebar` owns its nav
-vocabulary and `StatusPill` owns status → tone. They are **drawn in the design
+vocabulary and `StatusTag` owns status → tone. They are **drawn in the design
 file**, not configured per domain, so there is one place for them:
 
 | Set | Reasons |

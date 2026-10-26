@@ -65,7 +65,7 @@ Three states, each a change of stroke and fill:
 | Drag-over | `stroke.focused` | `surface.brand.subtle` |
 | Error | `accent.critical.outline.border.default` | `surface.neutral.faint` (the same as regular) |
 
-The error message sits in `accent.critical.tonal.content.default` in the hint's place.
+The error message sits in `accent.critical.outline.content.default` in the hint's place (red-600 in light, red-400 in dark) — the same colour `Field` uses for its message. Not the `tonal` content token: that is the text colour for a red *tint*, and it resolves to red-100 in dark, which on the neutral fill reads as plain white text.
 
 **Drag-over covers the vicinity.** A file dragged over the zone or within 16 of it
 counts. While a file is being dragged anywhere on the page, a hit area 16 wider than
@@ -89,6 +89,7 @@ draws about 4-long dashes in Chromium. CSS cannot set it exactly without an SVG 
 | Link on the resting fill | **4.79:1** | **8.22:1** |
 | Link while dragging (line colour) on the drag-over tint | **13.69:1** | **9.04:1** |
 | Line one on the resting fill | **19.28:1** | **17.85:1** |
+| Error message on the resting fill | **4.56:1** | **6.18:1** |
 | Hint on the resting fill | **7.24:1** | **12.02:1** |
 | Paperclip (`text.subtle`) on the resting fill | **4.55:1** | **6.96:1** |
 | Paperclip (`text.subtle`) on the drag-over tint | **3.23:1** | **3.53:1** |

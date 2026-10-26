@@ -44,7 +44,7 @@ record of when each piece landed.
 | component | `DatePicker` | PR #50 |
 | component | `SearchSelect` | PR #51 |
 | atom | `Logo` | PR #52 |
-| component | `StatusPill` | PR #54 |
+| component | `StatusTag` | PR #54 |
 | pattern | `TopBar` | PR #55 |
 | component | `StatusProgression` | PR #58 |
 | pattern | `AVHeader` | PR #58 |
@@ -99,7 +99,7 @@ Dependency notes:
   the pages file draws one; it would be a second slot.
 - **`StatusProgression` re-tiered down to component** when it was built
   (PR #58): it is one `Button` used twice, presenting as one control unit.
-  It owns status → transitions, the way `StatusPill` owns status → tone.
+  It owns status → transitions, the way `StatusTag` owns status → tone.
 - **Seven Figma progression variants are unnamed** (`Status4`, `Status8`,
   `Deploy`, `Review`, `Review (completed 1)`) and are therefore not modelled;
   the `initiator` role offers moves on `Draft` only until design names them.

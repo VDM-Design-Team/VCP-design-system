@@ -134,8 +134,10 @@ Figma `Menu_Item` rows are 40 tall at 14px — matches ours.
 
 ### ✅ Tooltip / Snackbar
 
-Tooltip: 12px text, dark-on-light per the design. Snackbar (our `Toast`):
-white surface, `radius: 6`. Both consistent with what we ship.
+Tooltip: 12px text on a **light** bubble (`surface.elevated`, `text.primary`) per the design. This
+note originally said "consistent with what we ship", but the code shipped the export's dark
+inverted bubble until October 2026 — corrected then. Snackbar (our `Toast`): white surface,
+`radius: 6`.
 
 ---
 

@@ -11,13 +11,13 @@ optionally carrying an avatar or a count.
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
-## When to use Chip, Badge, or StatusPill
+## When to use Chip, Badge, or StatusTag
 
 | Use | For | Interactive? | Vocabulary |
 |---|---|---|---|
 | `Chip` | A value the user can act on: toggle a filter, remove a tag, pick an option | Yes — real buttons, real tab stops | Whatever the caller supplies |
 | `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | No | Generic tones only |
-| `StatusPill` *(component)* | A VCP status: `Accepted`, `For QA`, `Confirmed prod` | No | VCP's status vocabulary |
+| `StatusTag` *(component)* | A VCP status: `Accepted`, `For QA`, `Confirmed prod` | No | VCP's status vocabulary |
 
 **If nothing about it is clickable, it is probably a Badge.** A Chip with neither
 `onClick` nor `onRemove` renders as a plain span; reach for it only when the
@@ -89,7 +89,7 @@ its dark 2.14:1 is accepted, not a defect.
 ## Don't
 
 - **Don't use a Chip as a status indicator.** That is `Badge` (generic) or
-  `StatusPill` (VCP vocabulary).
+  `StatusTag` (VCP vocabulary).
 - **Don't pass a node `label` without `removeLabel`** on a removable chip — the
   ✕ falls back to an anonymous "Remove".
 - **Don't set `selected` without `onClick`.** A chip nobody can toggle should

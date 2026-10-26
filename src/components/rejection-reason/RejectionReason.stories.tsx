@@ -37,7 +37,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /** Nothing chosen: the placeholder, and no explanation to give yet. */
-export const Default: Story = {};
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    /* A control's boundary is `stroke.strong` (slate-500, #64748b) — 4.76:1 on the field. */
+    const shell = canvasElement.querySelector('select')!.closest('[class*="border-stroke-strong"]')!;
+    await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(100, 116, 139)');
+  },
+};
 
 /** A reason chosen. The explanation is the design's own wording for what it covers. */
 export const ReasonChosen: Story = {
