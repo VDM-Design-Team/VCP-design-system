@@ -9,12 +9,19 @@ jobs:
     permissions:
       contents: read
       pull-requests: write   # the visual-review comment below
+      packages: read         # npm ci installs @vdm-design-team/gdl
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }   # Chromatic needs full history for baselines
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with:
+          node-version: 22
+          cache: npm
+          # GDL (@vdm-design-team/gdl), the parent design system, is on GitHub Packages.
+          registry-url: https://npm.pkg.github.com
+          scope: '@vdm-design-team'
       - run: npm ci
+        env: { NODE_AUTH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
       - run: npm run tokens
       - uses: chromaui/action@latest
         id: chromatic
