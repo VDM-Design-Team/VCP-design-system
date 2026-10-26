@@ -62,6 +62,7 @@ carry a label and an action cannot accidentally be a rule.
 | `icon` | `IconName` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
 | `tone` | `default \| danger` | `default` | `danger` is for destructive, irreversible actions. See below |
+| `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
 | `disabled` | `boolean` | `false` | Stays visible and announced, but the keyboard steps over it |
 | `onClick` | `() => void` | — | Runs before `onSelect` |
 | `divider` | `true` | — | Renders a `role="separator"` rule instead of an item. Takes no other props |
@@ -95,6 +96,7 @@ carry a label and an action cannot accidentally be a rule.
 | Danger content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
 | Danger highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover`, `focus-visible:bg-accent-critical-outline-surface-hover` |
 | Disabled content | `text.disabled` | `disabled:text-text-disabled` |
+| Selected check | `text.primary` (`Icon`, `check`) | `text-text-primary` |
 | Shortcut | `type.caption-md-medium` + `text.subtle` | `text-caption-md-medium text-text-subtle` |
 | Separator | `stroke.default`, via `Divider` | `Divider decorative={false}` |
 | Focus ring | `stroke.focused` | `focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused` |
@@ -156,6 +158,10 @@ reopening never lands on a previously-chosen destructive item.
 - `role="menu"` on the panel, `role="menuitem"` on the items, `role="separator"`
   on the dividers. The items are direct children of the menu, which is what the
   roles require.
+- An item that sets `selected` is `role="menuitemradio"` with `aria-checked`, and
+  the chosen one carries a check icon (decorative). A screen reader hears
+  "checked", a sighted user sees the check — never colour alone. The Sidebar's
+  domain selector is the example: the list names the current domain.
 - The trigger carries `aria-haspopup="menu"` and `aria-expanded`, plus
   `aria-controls` pointing at the menu — but only while the menu is in the DOM.
 - The menu takes its accessible name from the trigger via `aria-labelledby`, so
