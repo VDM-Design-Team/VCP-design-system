@@ -19,7 +19,7 @@ const meta = {
   argTypes: {
     value: { control: { type: 'range', min: 0, max: 100 } },
     max: { control: 'number' },
-    tone: { control: 'radio', options: ['brand', 'success', 'warning', 'danger'] },
+    tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     size: { control: 'radio', options: ['sm', 'md'] },
     label: { control: 'text' },
     showValue: { control: 'boolean' },
@@ -46,7 +46,7 @@ export const Tones: Story = {
       <ProgressBar {...args} tone="brand" label="On track" value={40} />
       <ProgressBar {...args} tone="success" label="Delivered" value={100} />
       <ProgressBar {...args} tone="warning" label="Running low" value={78} />
-      <ProgressBar {...args} tone="danger" label="Over budget" value={97} />
+      <ProgressBar {...args} tone="critical" label="Over budget" value={97} />
     </div>
   ),
 };
@@ -97,7 +97,7 @@ export const LightAndDark: Story = {
           <div className="flex flex-col gap-6 bg-surface-canvas p-8">
             <ProgressBar value={40} label="On track" showValue />
             <ProgressBar value={78} tone="warning" label="Running low" showValue />
-            <ProgressBar value={97} tone="danger" label="Over budget" showValue />
+            <ProgressBar value={97} tone="critical" label="Over budget" showValue />
           </div>
         </div>
       ))}

@@ -61,7 +61,11 @@ const panel = cva(
   },
 );
 
-const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
+/* The gap to the body is 12, one fixed value, split so it survives scrolling: 8
+   here (pb-2) and 4 as the body's own top padding. Padding inside a scrolling box
+   scrolls away, and long content then slid up to the header's edge and ran hard
+   against the caption; the header's share stays put. */
+const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5 pb-2', {
   variants: {
     /* With no heading text the close button is the only child, so it hugs the
        right edge rather than sitting alone on the left. */
@@ -69,6 +73,13 @@ const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
   },
   defaultVariants: { hasText: true },
 });
+
+/** Whether a node would draw anything: not absent, not `false`, not a blank string. */
+const hasContent = (node: React.ReactNode): boolean =>
+  node !== undefined &&
+  node !== null &&
+  node !== false &&
+  !(typeof node === 'string' && node.trim() === '');
 
 /* ------------------------------------------------------------------ */
 /* Scroll lock                                                         */
@@ -259,9 +270,17 @@ interface ModalBaseProps
    * click when `dismissible`. The dialog never closes itself — you own `open`.
    */
   onClose: () => void;
-  /** Sub-heading under the title. Wired to `aria-describedby`. */
+  /**
+   * Sub-heading under the title. Wired to `aria-describedby`. Leave it out and
+   * nothing renders for it: an empty string or `false` counts as left out, so no
+   * empty element holds space.
+   */
   description?: React.ReactNode;
-  /** Right-aligned action row at the bottom. Usually two `Button`s. */
+  /**
+   * Right-aligned action row at the bottom. Usually two `Button`s. Left out (or
+   * `false`, or an empty string), no footer renders and the body takes its own
+   * bottom padding.
+   */
   footer?: React.ReactNode;
   /**
    * `alertdialog` for a destructive confirmation the user must answer. It makes
@@ -454,8 +473,10 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
 
   if (!open || !mounted) return null;
 
-  const hasTitle = title !== undefined && title !== null && title !== false;
-  const hasDescription = description !== undefined && description !== null && description !== false;
+  /* Content that is absent, `false`, or an empty string renders nothing — no
+     empty heading, caption or footer holding space. */
+  const hasTitle = hasContent(title);
+  const hasDescription = hasContent(description);
   const hasHeaderText = hasTitle || hasDescription;
 
   return createPortal(
@@ -539,12 +560,19 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           /* Only a tab stop while it actually scrolls — see `scrollable`. */
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-5',
-            /* The footer owns the gap above the actions, so the body must not
-               add to it. It cannot be left to the body in any case: a bottom
-               padding inside a scrolling box scrolls away with the content,
-               which put the last line hard against the buttons. */
-            footer ? 'pb-0' : 'pb-5',
+            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
+            /* The 12 under the header is split: the header's own 8 stays put
+               while the body scrolls, and this 4 scrolls away and doubles as
+               room for a focus ring at the very top. Content scrolls out 8
+               below the header's text instead of against it. 20 when there is
+               no header at all. */
+            hasHeaderText || showClose ? 'pt-1' : 'pt-5',
+            /* The footer owns the gap above the actions, but the body keeps 4 of
+               its own: a focus ring is a 2-wide outline offset by 2, so it reaches 4
+               outside the last control, and the scroll box would clip it at the
+               padding edge. The footer's top padding is 4 shorter to compensate,
+               so the visible gap stays 20. */
+            hasContent(footer) ? 'pb-1' : 'pb-5',
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
             bodyClassName,
           )}
@@ -557,8 +585,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             the same way the header is separated from the body. The padding is
             symmetric, and it is the footer's own, so the gap above the buttons
             is the same 20 whether the body scrolls or not. */}
-        {footer && (
-          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 py-5">
+        {hasContent(footer) && (
+          <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
             {footer}
           </footer>
         )}

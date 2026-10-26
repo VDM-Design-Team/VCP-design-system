@@ -42,8 +42,9 @@ row: `Popover`'s wrapper is `inline-flex`, which would stretch its child, so the
 
 ## Tokens
 
-The trigger is the look `TopBar`'s user chip had after design review, so the two never differ:
-a 32 `Avatar`, the name in `label-sm-medium` and `text.primary` (cut with "…" past 10rem), a
+The trigger is the look `TopBar`'s user chip has after design review, so the two never differ:
+8 of padding at the sides and 4 above and below (so the caret and the avatar sit the same distance from the
+edges, the caret's box pulled 3 into the padding), a 32 `Avatar`, the name in `label-sm-medium` and `text.primary` (cut with "…" past 10rem), a
 `caret-down` in `text.tertiary` that turns 180° while the menu is open (as `SearchSelect`'s does; it reads
 `aria-expanded` and is skipped under reduced motion), a `radius.md` hover wash of `surface.neutral.faint`, and the
 `stroke.focused` ring. The panel and rows are `Menu`'s (`docs/menu.md`). No new tokens.
