@@ -35,10 +35,12 @@ Start → End).
 The glyph is `neutral.outline.content` (default, hover, pressed), with
 `surface.neutral.subtle` on hover and `surface.neutral.medium` pressed. A
 brand-blue bell read as a call to action, so it is neutral, as the design draws
-it. The dot is `accent.critical.outline.border.default`, 10 wide on this 20
-glyph (Figma's 12 is for its 24), 2 above and level with the glyph's right edge.
-Its pulse is a 2.5s cycle, where Tailwind's `ping` is 1s, so the flashes are well
-apart. No new tokens.
+it. The dot is `accent.critical.filled.surface.default` (a filled shape, so a surface
+token, not the outline border), 10 wide on this 20 glyph (Figma's 12 is for its
+24), 2 above and level with the glyph's right edge. It is 4.8:1 on the bar in
+light and 3.7:1 in dark. Its pulse is three 1.5s cycles (4.5s, under WCAG 2.2.2's
+5s), then the dot stays still; it is keyed on the count, so a new notification
+pulses again. No new tokens.
 
 Figma draws the bell's glyph in `neutral.filled.surface` (default, hover, pressed),
 one step lighter than the `neutral.outline.content` steps used here, and with no
@@ -50,6 +52,8 @@ hover fill. The difference is deliberate and recorded in review of the TopBar.
   there are some. The count lives in the **name**; the dot and its pulse are
   `aria-hidden`, so neither colour nor motion carries it alone.
 - 40 target, the system focus ring.
+- The pulse stops by itself after three cycles (WCAG 2.2.2: motion that starts on
+  its own must not run past 5s without a way to stop it).
 - `prefers-reduced-motion`: the pulse is removed and the dot stays.
 
 ## Don't

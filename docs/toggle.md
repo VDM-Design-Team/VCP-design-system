@@ -43,6 +43,7 @@ underlying `<input>`. `ref` points at that `<input>`.
 | Track | on + disabled | `action.primary.surface.disabled` |
 | Track | off + disabled | `surface.neutral.medium` |
 | Knob | all | `surface.elevated` + `shadow.card` |
+| Knob glyph | `knobIcons` | `text.secondary` |
 | Radius | track + knob | `radius.pill` |
 | Label | default | `type.body-sm-regular`, `text.secondary` |
 | Label | disabled | `type.body-sm-regular`, `text.disabled` |

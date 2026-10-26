@@ -59,7 +59,7 @@ export type SkeletonTextStyle =
  */
 /*
  * Each key below picks one weight variant of the new, weight-per-size ramp
- * (`tokens/semantic/type.json`) purely to source a font-size/line-height pair —
+ * (GDL's `tokens/semantic/type.json`) purely to source a font-size/line-height pair —
  * every weight at a given size shares the same two values, so the choice of
  * weight here is arbitrary. Chosen to match the pixel value this step held
  * before the ramp gained weight variants, so existing `textStyle` callers see
