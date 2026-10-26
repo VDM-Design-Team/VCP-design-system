@@ -123,20 +123,20 @@ export const ClickableAndRemovable: Story = {
 export const Initiator: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-3">
-      <Chip size="md" tone="brand" label="Marvin R" avatar={<Avatar name="Marvin R" size="sm" />} />
+      <Chip size="md" tone="brand" label="Marvin R" avatar={<Avatar name="Marvin R" tone="brand" size="sm" />} />
       <Chip
         size="md"
         tone="brand"
         variant="outline"
         label="Marvin R"
-        avatar={<Avatar name="Marvin R" size="sm" />}
+        avatar={<Avatar name="Marvin R" tone="brand" size="sm" />}
       />
       <Chip
         size="md"
         tone="brand"
         variant="outline"
         label="Marvin R"
-        avatar={<Avatar name="Marvin R" size="sm" />}
+        avatar={<Avatar name="Marvin R" tone="brand" size="sm" />}
         onRemove={() => {}}
       />
       <Chip size="md" disabled label="Marvin R" avatar={<Avatar name="Marvin R" size="sm" />} />
@@ -159,7 +159,7 @@ export const Assignee: Story = {
         label="John"
         description="Assignee"
         count={5}
-        avatar={<Avatar name="John Doe" tone="blue" size="sm" />}
+        avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
       />
       <Chip
         size="md"
@@ -168,7 +168,7 @@ export const Assignee: Story = {
         label="John"
         description="Assignee"
         count={5}
-        avatar={<Avatar name="John Doe" tone="blue" size="sm" />}
+        avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
       />
       <Chip
         size="md"
@@ -177,7 +177,7 @@ export const Assignee: Story = {
         label="John"
         description="Assignee"
         count={5}
-        avatar={<Avatar name="John Doe" tone="blue" size="sm" />}
+        avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
         onEdit={() => {}}
         onRemove={() => {}}
       />
@@ -210,7 +210,7 @@ export const ActionsOnHover: Story = {
       label="John"
       description="Assignee"
       count={5}
-      avatar={<Avatar name="John Doe" tone="blue" size="sm" />}
+      avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
       onEdit={args.onEdit}
       onRemove={args.onRemove}
     />
@@ -269,7 +269,7 @@ export const LongPeopleChip: Story = {
         variant="outline"
         label="Bartholomew Featherstonehaugh-Wetherby"
         description="Assignee"
-        avatar={<Avatar name="Bartholomew F" tone="blue" size="sm" />}
+        avatar={<Avatar name="Bartholomew F" tone="brand" size="sm" />}
         onEdit={() => {}}
         onRemove={() => {}}
       />

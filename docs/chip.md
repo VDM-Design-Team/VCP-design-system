@@ -45,7 +45,7 @@ opt-in; with none of them a chip is exactly what it was.
 **Initiator** — an avatar and a name.
 
 ```tsx
-<Chip size="md" tone="brand" avatar={<Avatar name="Marvin R" size="sm" />} label="Marvin R" />           // View
+<Chip size="md" tone="brand" avatar={<Avatar name="Marvin R" tone="brand" size="sm" />} label="Marvin R" />  // View
 <Chip size="md" tone="brand" variant="outline" avatar={…} label="Marvin R" onRemove={remove} />          // Edit
 <Chip size="md" disabled avatar={…} label="Marvin R" />                                                   // Disabled
 ```
@@ -53,7 +53,7 @@ opt-in; with none of them a chip is exactly what it was.
 **Assignee** — an avatar, a name with an "Assignee" line, and a count.
 
 ```tsx
-<Chip size="md" tone="brand" avatar={<Avatar name="John Doe" tone="blue" size="sm" />}
+<Chip size="md" tone="brand" avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
       label="John" description="Assignee" count={5} />                                                     // View
 <Chip size="md" tone="brand" variant="outline" actions="hover" …
       onEdit={edit} onRemove={remove} />                                                                   // Edit (Edit Hover)
@@ -77,12 +77,12 @@ The stories `Initiator` and `Assignee` draw every state side by side.
 | `avatar` | `ReactNode` | — | Leading slot. `<Avatar size="sm" />` fits the 28 pill exactly |
 | `count` | `number` | — | Suffix after a hairline rule, set in the numeric face (`caption-md`) |
 | `variant` | `tonal \| outline` | `tonal` | `outline` is the editing look: a `stroke.brand.strong` border and no fill |
-| `size` | `sm \| md` | `sm` | 28 or 32 tall. `md` takes a 24 avatar with 4 around it, as the people chips draw |
+| `size` | `sm \| md` | `sm` | 28 or 36 tall. `md` takes a 24 avatar with 6 around it (a 6px left edge, and the same 6 after the last button), as the people chips draw |
 | `tone` | `default \| brand` | `default` | `brand` sets the text in `text.brand.strong`; `default` is `text.primary` |
 | `onClick` | `() => void` | — | Makes the main region a real button |
 | `selected` | `boolean` | — | Selected fill + `aria-pressed`. Only meaningful with `onClick` |
-| `onRemove` | `() => void` | — | Renders the ✕ — always its own button and tab stop. In an `outline` chip it is critical-coloured, as the design draws it |
-| `onEdit` / `editLabel` | `() => void` / `string` | — / `Edit ${label}` | Renders a pencil button before the ✕, its own control and tab stop. Name it with `editLabel` when `label` is not a string |
+| `onRemove` | `() => void` | — | Renders the ✕ — always its own button and tab stop. In an `outline` chip it is a critical tonal round button, as the design draws it |
+| `onEdit` / `editLabel` | `() => void` / `string` | — / `Edit ${label}` | Renders a pencil button before the ✕, its own control and tab stop. Name it with `editLabel` when `label` is not a string. In an `outline` chip both buttons are tonal round buttons, with 2 between them |
 | `actions` | `always \| hover` | `always` | `hover` hides the buttons until the pointer is over the chip or focus is inside it, and always shows them on a touch screen |
 | `disabled` | `boolean` | — | Grey border and disabled text; the buttons are not drawn and nothing is clickable |
 | `removeLabel` | `string` | `Remove ${label}` | The ✕'s accessible name. **Required in practice when `label` is not a string** — the fallback is a bare "Remove" |
@@ -118,10 +118,24 @@ its dark 2.14:1 is accepted, not a defect.
 |---|---|---|
 | `tone="brand"` text on the tonal fill | `text.brand.strong` on `surface.brand.faint` (hover: `subtle`) | 11.37 / 8.97 (8.97 / 6.14) |
 | `tone="brand"` text on an outline | `text.brand.strong` on `surface.canvas` | 12.64 / 12.11 |
-| Count on a tonal brand chip | `text.tertiary` on `surface.brand.faint` (as Figma) | 6.51 / 8.91 |
+| Role line under the name (`description`) | `text.tertiary`, `caption-sm-medium`, directly under the name (no gap) | 6.51 / 8.91 on the tonal fill |
+| Count (`md`: 14, `label-sm-medium`, numeric face) | `text.tertiary` on a tonal chip; the chip's own ink on an outline | 6.51 / 8.91 on the tonal fill |
+| Divider before the count | `stroke.default`, 24 tall on `md` (6 above and below), decorative (`aria-hidden`) | — |
 | Outline border | `stroke.brand.strong` on `surface.canvas` | 8.64 / 7.73 |
-| Critical ✕ on an outline | `accent.critical.outline.content` on `surface.canvas` | 4.56 / 6.18 |
-| Disabled border | `stroke.strong` | 4.55 / 6.96 |
+| Disabled | `surface.neutral.subtle` fill, `stroke.subtle` border, `text.disabled` (exempt from the contrast minimum) | — |
+| Remove button, outline chip (tonal round) | `accent.critical.tonal` content on its surface: rest / hover / pressed | 6.85 / 6.90 / 8.42 light; 8.22 / 7.64 / 5.87 dark |
+| Edit button (tonal round) | `text.brand.strong` on `surface.brand.faint` (hover and pressed: `subtle`) | 11.37 / 8.97 rest; 8.97 / 6.14 hover |
+| Avatar in a people chip | `Avatar tone="brand"`: `surface.brand.subtle`, `text.brand.strong` initials | 8.97 / 6.14 |
+
+The buttons are 24 (`md`) or 20 (`sm`) round circles with a 16 (`md`) or 14 (`sm`) glyph, side by side with 2 between them. The
+pencil is Figma's `NotePencil`, the system's `note-pencil`. A pressed edit button keeps the hover fill: the next step up,
+`surface.brand.medium`, would put the pencil at 2.56:1 in dark.
+
+**Spacing on a 36 chip with an avatar.** The avatar has 6 on its left. At rest, with no buttons showing, the right edge is
+**12** (6 left would be even by the numbers but looks cramped on the right); with the buttons showing it is **6**, the same as the
+left, with 6 between the content and the buttons. With `actions="hover"` the chip rests at 12 and tightens to 6 as the buttons
+slide in; the padding, the buttons' width and their fade all run for the same 150ms, so nothing jumps, and the transitions are skipped
+under reduced motion. (The chip is the `group`, so its own padding reacts to its own `hover:` and `focus-within:`, not `group-hover:`.)
 
 Disabled text (`text.disabled`) is exempt from the contrast minimum, as every disabled control's is.
 
@@ -146,13 +160,16 @@ Disabled text (`text.disabled`) is exempt from the contrast minimum, as every di
 
 ## Differences from the design
 
-- **The "Assignee" line is `caption-sm-medium` (10), not Figma's 9.** 9 is not on the type ramp.
-- **The edit and remove buttons are 24 (`md`) or 20 (`sm`) round hit areas** with a 14 pencil and a 12 ✕, the
-  system's sizes, not Figma's raw 24 buttons.
-- **The count is the numeric face (`caption-md-medium`)**, as every chip count is; Figma sets it in 14 Poppins.
-- **The Initiator avatar is the `Avatar` atom** (initials, or a photo through `src`).
-- **Brand text applies to the Edit state's count too** (an outline chip's count wears the chip's ink); only the
-  tonal chip's count is `text.tertiary`, as Figma draws.
+- **`md` is 36 tall, not Figma's 32.** It gives the avatar 6 all round and the name and role room from the edges, and lines up with
+  `Button size="sm"` (36).
+- **The "Assignee" line is `caption-sm-medium` (10), not Figma's 9.** 9 is not on the type ramp. It is `text.tertiary` and sits
+  directly under the name.
+- **The buttons are 24 round circles with a 16 glyph**, where Figma draws a 20 glyph in the 24 button; the 16 keeps a margin
+  inside the tonal fill. They are tonal (a critical and a brand fill), 2 apart.
+- **The count is the numeric face**, 14 on `md` (as Figma) and `caption-md-medium` on `sm`.
+- **The divider is `stroke.default`**, 24 tall on `md`, so it matches the avatar's height; Figma's runs the full chip.
+- **The avatar is the `Avatar` atom with `tone="brand"`** (initials on `surface.brand.subtle`, or a photo through `src`), with no ring.
+- **Disabled follows `Input` and `Select`** (a grey fill and a subtle border), not a transparent chip with a strong border.
 
 ## Don't
 

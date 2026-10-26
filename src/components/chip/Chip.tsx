@@ -104,9 +104,9 @@ const pill = (
 ) =>
   cn(
     'group inline-flex max-w-full items-center rounded-full font-sans text-label-sm-medium transition-colors',
-    size === 'md' ? 'h-8' : 'h-7',
+    size === 'md' ? 'h-9' : 'h-7',
     disabled
-      ? 'border border-stroke-strong bg-transparent text-text-disabled'
+      ? 'border border-stroke-subtle bg-surface-neutral-subtle text-text-disabled'
       : variant === 'outline'
         ? 'border border-stroke-brand-strong bg-transparent'
         : selected
@@ -152,9 +152,12 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
       <>
         {avatar && <span className="inline-flex shrink-0 items-center">{avatar}</span>}
         {description ? (
-          <span className="flex min-w-0 flex-col gap-px text-left leading-none">
+          <span className="flex min-w-0 flex-col text-left leading-none">
             <span className="truncate">{label}</span>
-            <span className="truncate text-caption-sm-medium">{description}</span>
+            {/* Directly under the name, no gap, in text.tertiary (disabled keeps its own colour). */}
+            <span className={cn('-mt-0.5 truncate text-caption-sm-medium', !disabled && 'text-text-tertiary')}>
+              {description}
+            </span>
           </span>
         ) : (
           <span className="min-w-0 truncate">{label}</span>
@@ -163,12 +166,16 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
           <>
             {/* Hairline between label and count — decorative, the count reads
                 on its own. stroke.brand.medium survives both fills. */}
-            <span aria-hidden="true" className="my-1 w-px self-stretch bg-stroke-brand-medium" />
+            <span
+              aria-hidden="true"
+              className={cn('w-px self-stretch bg-stroke-default', size === 'md' ? 'my-1.5' : 'my-1')}
+            />
             {/* font.family.numeric via caption-md — counts are dense numerics. The count is
                 `text.tertiary` on the tonal fill and takes the chip's own ink on an outline. */}
             <span
               className={cn(
-                'shrink-0 font-numeric text-caption-md-medium',
+                'shrink-0 font-numeric',
+                size === 'md' ? 'text-label-sm-medium' : 'text-caption-md-medium',
                 tone === 'brand' && variant === 'tonal' && !disabled && 'text-text-tertiary',
               )}
             >
@@ -181,11 +188,11 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
 
     /* Spacing: 10 side padding, 6 between parts; an avatar sits 2 off the
        curve so its circle follows the pill's (4 off a 32 pill's). */
-    const padding = cn(
-      'gap-1.5',
-      avatar ? (size === 'md' ? 'pl-1' : 'pl-0.5') : 'pl-2.5',
-      hasActions ? 'pr-1' : 'pr-2.5',
-    );
+    const left = cn('gap-1.5', avatar ? (size === 'md' ? 'pl-1.5' : 'pl-0.5') : 'pl-2.5');
+    /* No controls showing. A 36 (`md`) chip with an avatar rests with 12 on the right: 6 left of the
+       avatar and 6 right would be even by the numbers but looks cramped on the right, so the resting
+       right edge is double. Everything else keeps its 10. */
+    const padding = cn(left, size === 'md' && avatar ? 'pr-3' : 'pr-2.5');
 
     /* No controls — the pill itself can be the control. */
     if (!hasActions) {
@@ -227,17 +234,37 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
     const editName = editLabel ?? (plain ? `Edit ${label}` : 'Edit');
     const critical = variant === 'outline';
 
+    /* Round buttons, 20 (`sm`) or 24 (`md`), side by side with no gap. */
     const control = cn(
       'grid size-5 shrink-0 place-items-center rounded-full transition-colors',
       focusRing,
       'focus-visible:outline-offset-0',
       size === 'md' && 'size-6',
     );
+    const glyph = size === 'md' ? 'size-4' : 'size-3.5';
+    /* (The chip is the `group`, and `group-hover:` only styles a group's descendants, so the chip's own
+       padding uses `hover:` and `focus-within:`.) With the buttons showing, the edge after the last one is the same 6 as the avatar's left (`md`), and
+       6 sits between the content and the buttons. With `actions="hover"` they are hidden at rest: the chip
+       rests with the 12 of a chip without buttons, and tightens to 6 as they appear. */
+    const hover = actions === 'hover';
+    const rootRight =
+      hover && size === 'md'
+        ? 'pr-3 hover:pr-1.5 focus-within:pr-1.5 pointer-coarse:pr-1.5 transition-[color,background-color,border-color,padding] motion-reduce:transition-none'
+        : size === 'md'
+          ? 'pr-1.5'
+          : 'pr-1';
+    /* Written out in full: Tailwind only generates classes it can read in the source. */
+    const gapToButtons =
+      'group-hover:pr-1.5 group-focus-within:pr-1.5 pointer-coarse:pr-1.5 transition-[padding] motion-reduce:transition-none';
 
     return (
       <span
         ref={ref as React.Ref<HTMLSpanElement>}
-        className={cn(pill(!!click, !!selected, variant, size, tone, false), 'pr-1', className)}
+        className={cn(
+          pill(!!click, !!selected, variant, size, tone, false),
+          rootRight,
+          className,
+        )}
         {...props}
       >
         {click ? (
@@ -247,8 +274,8 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
             aria-pressed={selected}
             className={cn(
               'inline-flex h-full min-w-0 items-center rounded-full',
-              padding,
-              'pr-1.5',
+              left,
+              hover && size === 'md' ? ['pr-0', gapToButtons].join(' ') : 'pr-1.5',
               focusRing,
               /* The ring hugs the region, not the pill — offset inward so it
                  does not collide with the buttons beside it. */
@@ -258,7 +285,13 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
             {content}
           </button>
         ) : (
-          <span className={cn('inline-flex h-full min-w-0 items-center', padding, 'pr-1.5')}>
+          <span
+            className={cn(
+              'inline-flex h-full min-w-0 items-center',
+              left,
+              hover && size === 'md' ? ['pr-0', gapToButtons].join(' ') : 'pr-1.5',
+            )}
+          >
             {content}
           </span>
         )}
@@ -271,8 +304,9 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
             actions === 'hover' &&
               [
                 'max-w-0 overflow-hidden opacity-0 transition-[max-width,opacity] motion-reduce:transition-none',
-                'group-hover:max-w-24 group-hover:opacity-100 group-focus-within:max-w-24 group-focus-within:opacity-100',
-                'pointer-coarse:max-w-24 pointer-coarse:opacity-100',
+                /* 14 (56) is about the two 24 buttons and their 2 gap, so the width finishes with the padding. */
+                'group-hover:max-w-14 group-hover:opacity-100 group-focus-within:max-w-14 group-focus-within:opacity-100',
+                'pointer-coarse:max-w-14 pointer-coarse:opacity-100',
               ].join(' '),
           )}
         >
@@ -281,9 +315,12 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
               type="button"
               aria-label={editName}
               onClick={edit}
-              className={cn(control, 'text-text-brand-strong hover:bg-surface-brand-subtle')}
+              className={cn(
+                control,
+                'bg-surface-brand-faint text-text-brand-strong hover:bg-surface-brand-subtle active:bg-surface-brand-subtle',
+              )}
             >
-              <Icon name="pencil-simple" className="size-3.5" />
+              <Icon name="note-pencil" className={glyph} />
             </button>
           )}
           {remove && (
@@ -294,13 +331,12 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
               className={cn(
                 control,
                 critical
-                  ? 'text-accent-critical-outline-content-default hover:bg-accent-critical-outline-surface-hover'
-                  : 'text-text-secondary hover:bg-surface-brand-medium hover:text-text-primary',
+                  ? 'bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed'
+                  : 'text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed',
               )}
             >
-              {/* Decorative — the name lives on the button. `size-3` keeps the ✕
-                  lighter than a nav glyph, as the export's small ✕ was. */}
-              <Icon name="x" className="size-3" />
+              {/* Decorative — the name lives on the button. */}
+              <Icon name="x" className={critical ? glyph : 'size-3.5'} />
             </button>
           )}
         </span>

@@ -28,7 +28,7 @@ Reach for something else when:
 | `initials` | `string` | — | Overrides the derived initials — mononyms, team codes |
 | `src` | `string` | — | Photo URL. On a load failure the initials are drawn instead |
 | `size` | `xs \| sm \| md \| lg` | `md` | 16 / 24 / 32 / 36. **Not a number** — see "Deviations" |
-| `tone` | `neutral \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing |
+| `tone` | `neutral \| brand \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing. `brand` is `surface.brand.subtle` with `text.brand.strong` initials (8.97:1 light / 6.14:1 dark), the people chips' avatar; a name never hashes onto it, a caller asks for it |
 | `ring` | `boolean` | `false` | `surface.elevated` ring, for overlapping stacks. `AvatarGroup` sets it |
 | `standalone` | `boolean` | `false` | The avatar is the only identification of this person — give it a real accessible name |
 | `label` | `string` | — | Overrides what is announced, and implies `standalone` |
