@@ -10,7 +10,7 @@ centred caption sitting inside the line.
 | Break up content inside one surface — a card, a list, a menu, a toolbar | `Divider` | A rule is the lightest possible separation. It adds no box and no weight |
 | Separate content that needs its own background, padding or elevation | Two surfaces (`bg-surface-elevated` + a gap) | If the two halves need different treatment, a line is not what is separating them |
 | Set a heading apart from the text under it | Type ramp and spacing | A heading already separates. Adding a rule under every heading is decoration for its own sake |
-| Show the boundary of an interactive control | `border-stroke-field` on the control | A control boundary must clear 3:1 (WCAG 1.4.11). The divider's rule colour does not, and should not be borrowed for one |
+| Show the boundary of an interactive control | `border-stroke-strong` on the control | A control boundary must clear 3:1 (WCAG 1.4.11). The divider's rule colour does not, and should not be borrowed for one |
 
 Two rules stacked with only spacing between them is a sign the layout, not the
 divider, is doing the wrong thing.
@@ -95,7 +95,7 @@ Dark comes for free: every class above is a semantic token that
 
 - Don't hardcode colors or spacing. `className="bg-[#e2e8f0]"` is a bug — add a token instead.
 - Don't use a divider as the boundary of an interactive control. Its colour is
-  decorative and does not meet 3:1; use `border-stroke-field`.
+  decorative and does not meet 3:1; use `border-stroke-strong`.
 - Don't put a vertical divider in a container with no height and expect to see it —
   give the row a height, or let `self-stretch` do its job in a flex row.
 - Don't pass `label` with `orientation="vertical"`. There is nowhere to put it and
