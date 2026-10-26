@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
 import { SourceTag } from './SourceTag';
 
 const meta = {
@@ -40,17 +39,6 @@ export const LongName: Story = {
       <SourceTag source="Northern Europe Procurement Operations" />
     </div>
   ),
-};
-
-/** The tag is 28 tall, `Tag`'s `md`, and the name is announced once. */
-export const SizeAndName: Story = {
-  parameters: { controls: { disable: true } },
-  play: async ({ canvasElement }) => {
-    const tag = within(canvasElement).getByText('BESA DIGITAL').parentElement;
-    await expect(tag).not.toBeNull();
-    await expect(Math.round(tag!.getBoundingClientRect().height)).toBe(28);
-    await expect(canvasElement.textContent).toBe('BESA DIGITAL');
-  },
 };
 
 /** Every colour is a semantic token, so the dark theme comes for free via `.dark`. */

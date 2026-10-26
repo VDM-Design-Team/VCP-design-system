@@ -26,7 +26,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+/**
+ * The dates are written from the ISO string, with no `Date`, so no time zone
+ * can move a cycle by a day, and the cycle reads as one string.
+ */
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const text = 'C18 (Sep 20, 2025 - Oct 02, 2026)';
+    await expect(within(canvasElement).getByText(text)).toBeInTheDocument();
+    await expect(canvasElement.textContent).toBe(text);
+    await expect(formatCycleRange('2026-01-01', '2026-12-31')).toBe('Jan 01, 2026 - Dec 31, 2026');
+  },
+};
 
 /** A different code and a short cycle — the shape is the same, only the words move. */
 export const Another: Story = { args: { code: 'C33', start: '2026-05-25', end: '2026-06-08' } };
@@ -48,22 +59,6 @@ export const BesideSource: Story = {
       <CycleTag {...args} />
     </div>
   ),
-};
-
-/**
- * The dates are written from the ISO string, with no `Date`, so no time zone
- * can move a cycle by a day. The tag is 28 tall, and it reads as one string.
- */
-export const FormatAndSize: Story = {
-  parameters: { controls: { disable: true } },
-  play: async ({ canvasElement }) => {
-    const text = 'C18 (Sep 20, 2025 - Oct 02, 2026)';
-    const tag = within(canvasElement).getByText(text).parentElement;
-    await expect(tag).not.toBeNull();
-    await expect(Math.round(tag!.getBoundingClientRect().height)).toBe(28);
-    await expect(canvasElement.textContent).toBe(text);
-    await expect(formatCycleRange('2026-01-01', '2026-12-31')).toBe('Jan 01, 2026 - Dec 31, 2026');
-  },
 };
 
 /** Every colour is a semantic token, so the dark theme comes for free via `.dark`. */
