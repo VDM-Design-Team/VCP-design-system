@@ -59,6 +59,10 @@ ids and labels from either.
 
 - **`@` opens the list** when it starts the text or follows a space. An `@` inside a word,
   like an email address, opens nothing.
+- **The list sits under the `@`**, not under the whole field: its left edge is the `@`'s,
+  and it opens just below the line being typed on. Where the screen cuts the bottom off it
+  opens **above** the `@` instead, it never goes past the screen's left or right edge, and its
+  height shrinks to the room there is. It follows the `@` as you type, scroll or resize.
 - **Letters after it filter**: names that contain them, case-insensitive, those that
   start with them first, at most eight.
 - **↑ ↓** move through the list, **Enter** or **Tab** choose, **Escape** closes the list
