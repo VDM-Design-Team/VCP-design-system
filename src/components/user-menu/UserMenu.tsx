@@ -22,6 +22,10 @@ import { Menu, type MenuProps } from '../menu';
  * not, are the page's. This renders the trigger and the menu and reports
  * `onSelect(key)`.
  *
+ * The caret turns up while the menu is open, as `SearchSelect`'s does. It reads
+ * `aria-expanded`, which `Menu` sets on the trigger, so there is no state of its
+ * own to keep in step; the turn is skipped under `prefers-reduced-motion`.
+ *
  * It hugs its content: the trigger is as tall as its avatar and name, however
  * tall a flex parent is (a bare `Popover` wrapper is `inline-flex`, so its child
  * would stretch).
@@ -71,14 +75,19 @@ export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function
           type="button"
           aria-label={`${user.name}, account menu`}
           className={cn(
-            'flex items-center gap-2 self-start rounded-md p-1 text-left font-sans transition-colors',
+            'group flex items-center gap-2 self-start rounded-md p-1 text-left font-sans transition-colors',
             'hover:bg-surface-neutral-faint',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
           )}
         >
           <Avatar name={user.name} src={user.src} size="md" />
           <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
-          <Icon name="caret-down" size="sm" aria-hidden="true" className="text-text-tertiary" />
+          <Icon
+            name="caret-down"
+            size="sm"
+            aria-hidden="true"
+            className="text-text-tertiary transition-transform group-aria-expanded:rotate-180 motion-reduce:transition-none"
+          />
         </button>
       }
       {...props}

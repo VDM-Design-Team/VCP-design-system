@@ -56,13 +56,21 @@ export const Open: Story = {
     await expect(trigger).toHaveAttribute('aria-haspopup', 'menu');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
+    /* Tailwind turns it with the CSS `rotate` property, not `transform`. */
+    const caret = trigger.querySelector('svg') as SVGElement;
+    await expect(getComputedStyle(caret).rotate).toBe('none');
+
     await userEvent.click(trigger);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    /* The caret turns up while the menu is open. */
+    await waitFor(() => expect(getComputedStyle(caret).rotate).not.toBe('none'));
     await expect(canvas.getAllByRole('menuitem').map((i) => i.textContent)).toEqual(['Settings', 'Logout']);
 
     await userEvent.click(canvas.getByRole('menuitem', { name: 'Logout' }));
     await expect(args.onSelect).toHaveBeenCalledWith('logout');
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+    /* ...and turns back when it closes. */
+    await waitFor(() => expect(getComputedStyle(caret).rotate).toBe('none'));
   },
 };
 
