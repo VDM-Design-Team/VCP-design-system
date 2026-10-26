@@ -1,7 +1,7 @@
 # UserMenu
 
 The signed-in person and the menu behind them: their avatar and name with a caret,
-opening a `Menu` of account links.
+opening a `Menu` of account links. By default the menu holds just **Settings** and **Logout**.
 
 ## Composed of
 
@@ -26,15 +26,19 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `user` | `{ name, src? }` | — | `name` is what the trigger says ("Francis M."); `src` a photo, else initials |
-| `items` | `MenuItem[]` | — | The menu's rows, exactly as `Menu` takes them: `key`, `label`, optional `icon`, `tone: 'danger'`, `disabled`, `{ divider: true }` |
+| `items` | `MenuItem[]` | Settings, Logout | The menu's rows, exactly as `Menu` takes them: `key`, `label`, optional `icon`, `tone: 'danger'`, `disabled`, `{ divider: true }`. The default is exported as `DEFAULT_USER_MENU_ITEMS` |
 | `onSelect` | `(key?) => void` | — | Fires with the activated row's `key`, after that row's own `onClick` |
 | `align` | `'left' \| 'right'` | `right` | Which edge of the menu lines up with the trigger. The bar sits at the right of the page, so the menu opens leftwards |
 | `open` / `defaultOpen` / `onOpenChange` | | | Controlled or uncontrolled, as `Menu` |
 | `panelClassName`, `className`, `ref` | | | As `Menu` |
 
-**The items are the page's.** The Figma menu lists My Added Values, Settings, Cycle Settings and
-Logout. What Logout does, and which rows an admin sees that a regular user does not, belong to the
-app: pass different `items`. This component renders the trigger and the menu and reports the `key`.
+**The default is Settings and Logout; anything more is the page's.** Figma's menu also lists My Added
+Values and Cycle Settings: pass those (the `CustomItems` story) where a page wants them. What Logout
+does, and which rows an admin sees that a regular user does not, belong to the app: pass different
+`items`. This component renders the trigger and the menu and reports the `key`.
+
+**It hugs its content.** The trigger is as tall as its avatar and name (40), even inside a tall flex
+row: `Popover`'s wrapper is `inline-flex`, which would stretch its child, so the component opts out.
 
 ## Tokens
 

@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { UserMenu } from './UserMenu';
 
-const ITEMS = [
+/* What an app passes when it wants more than the default Settings and Logout: Figma's full list. */
+const FIGMA_ITEMS = [
   { key: 'values', label: 'My Added Values' },
   { key: 'settings', label: 'Settings' },
   { key: 'cycles', label: 'Cycle Settings' },
@@ -17,12 +18,13 @@ const meta = {
       description: {
         component:
           'The signed-in person and the menu behind them: avatar, name and a caret, opening a ' +
-          '`Menu` of account links. The items are the page’s — it decides what Logout does and ' +
-          'which links an admin sees that a regular user does not.',
+          '`Menu` of account links. By default the menu holds Settings and Logout; pass `items` for ' +
+          'anything else. The page decides what Logout does and which links an admin sees that a ' +
+          'regular user does not.',
       },
     },
   },
-  args: { user: { name: 'Francis M.' }, items: ITEMS, onSelect: fn() },
+  args: { user: { name: 'Francis M.' }, onSelect: fn() },
   decorators: [
     (Story) => (
       <div className="flex h-64 w-72 justify-end">
@@ -35,10 +37,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Closed: the avatar (initials until there is a photo), the name and a caret. */
-export const Default: Story = {};
+/**
+ * Closed: the avatar (initials until there is a photo), the name and a caret. It hugs its content: the
+ * decorator here is a tall flex row, and the trigger is still only as tall as its avatar and name.
+ */
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Francis M., account menu' });
+    await expect(trigger.getBoundingClientRect().height).toBeLessThan(64);
+  },
+};
 
-/** Open, pick a row: `onSelect` hears the row's `key`, and the menu closes. */
+/** Open: the default menu is Settings and Logout. Pick a row and `onSelect` hears its `key`, and the menu closes. */
 export const Open: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
@@ -48,12 +58,7 @@ export const Open: Story = {
 
     await userEvent.click(trigger);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    await expect(canvas.getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
-      'My Added Values',
-      'Settings',
-      'Cycle Settings',
-      'Logout',
-    ]);
+    await expect(canvas.getAllByRole('menuitem').map((i) => i.textContent)).toEqual(['Settings', 'Logout']);
 
     await userEvent.click(canvas.getByRole('menuitem', { name: 'Logout' }));
     await expect(args.onSelect).toHaveBeenCalledWith('logout');
@@ -70,13 +75,25 @@ export const Keyboard: Story = {
     const trigger = canvas.getByRole('button', { name: 'Francis M., account menu' });
     trigger.focus();
     await userEvent.keyboard('{Enter}');
-    await expect(canvas.getByRole('menuitem', { name: 'My Added Values' })).toHaveFocus();
-    await userEvent.keyboard('{ArrowDown}{ArrowDown}{Enter}');
-    await expect(args.onSelect).toHaveBeenCalledWith('cycles');
+    await expect(canvas.getByRole('menuitem', { name: 'Settings' })).toHaveFocus();
+    await userEvent.keyboard('{ArrowDown}{Enter}');
+    await expect(args.onSelect).toHaveBeenCalledWith('logout');
 
     await userEvent.keyboard('{Enter}{Escape}');
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
     await expect(trigger).toHaveFocus();
+  },
+};
+
+/** More than the default: pass `items`. Here Figma's full list, as an app might for an admin. */
+export const CustomItems: Story = {
+  args: { items: FIGMA_ITEMS },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Francis M., account menu' }));
+    await expect(canvas.getAllByRole('menuitem')).toHaveLength(4);
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'Cycle Settings' }));
+    await expect(args.onSelect).toHaveBeenCalledWith('cycles');
   },
 };
 

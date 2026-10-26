@@ -82,18 +82,15 @@ export const NoUnread: Story = {
   args: { homeHref: '#home', notifications: 0, theme: 'light', onNotifications: () => {} },
 };
 
-/** With `userMenuItems`, the chip is a `UserMenu`: it opens the account menu, and `onUserMenuSelect` hears the row's `key`. */
+/**
+ * With `onUserMenuSelect` (or `userMenuItems`), the chip is a `UserMenu`: it opens the account menu —
+ * Settings and Logout unless the app passes its own rows — and `onUserMenuSelect` hears the row's `key`.
+ */
 export const WithUserMenu: Story = {
   args: {
     homeHref: '#home',
     theme: 'light',
     onUserMenu: undefined,
-    userMenuItems: [
-      { key: 'values', label: 'My Added Values' },
-      { key: 'settings', label: 'Settings' },
-      { key: 'cycles', label: 'Cycle Settings' },
-      { key: 'logout', label: 'Logout' },
-    ],
     onUserMenuSelect: fn(),
   },
   play: async ({ canvasElement, args }) => {

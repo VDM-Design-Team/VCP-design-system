@@ -16,9 +16,15 @@ import { Menu, type MenuProps } from '../menu';
  * menu is the system's `Menu` (its surface, rows and keyboard model), not
  * Figma's raw 192-wide white box with regular black text.
  *
- * **The items are yours.** Pass `items` as `Menu` takes them; what "Logout"
- * does, and which links an admin sees that a regular user does not, are the
- * page's. This renders the trigger and the menu and reports `onSelect(key)`.
+ * **The default menu is just Settings and Logout.** Pass `items` (as `Menu` takes
+ * them) for anything else — My Added Values, Cycle Settings, a divider — since
+ * what "Logout" does, and which links an admin sees that a regular user does
+ * not, are the page's. This renders the trigger and the menu and reports
+ * `onSelect(key)`.
+ *
+ * It hugs its content: the trigger is as tall as its avatar and name, however
+ * tall a flex parent is (a bare `Popover` wrapper is `inline-flex`, so its child
+ * would stretch).
  *
  * The trigger is a real `<button>` named "<name>, account menu"; `Menu` adds
  * `aria-haspopup="menu"` and `aria-expanded` and moves focus into the list on
@@ -35,16 +41,22 @@ export interface UserMenuUser {
   src?: string;
 }
 
+/** What the menu holds unless you pass `items`. */
+export const DEFAULT_USER_MENU_ITEMS: NonNullable<MenuProps['items']> = [
+  { key: 'settings', label: 'Settings' },
+  { key: 'logout', label: 'Logout' },
+];
+
 export interface UserMenuProps extends Omit<MenuProps, 'trigger' | 'items' | 'onSelect'> {
   user: UserMenuUser;
-  /** The menu's rows, as `Menu` takes them. */
-  items: NonNullable<MenuProps['items']>;
+  /** The menu's rows, as `Menu` takes them. Defaults to Settings and Logout. */
+  items?: NonNullable<MenuProps['items']>;
   /** Fires with the activated item's `key`, after that item's own `onClick`. */
   onSelect?: MenuProps['onSelect'];
 }
 
 export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function UserMenu(
-  { user, items, onSelect, align = 'right', ...props },
+  { user, items = DEFAULT_USER_MENU_ITEMS, onSelect, align = 'right', className, ...props },
   ref,
 ) {
   return (
@@ -53,12 +65,13 @@ export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function
       items={items}
       onSelect={onSelect}
       align={align}
+      className={cn('self-start', className)}
       trigger={
         <button
           type="button"
           aria-label={`${user.name}, account menu`}
           className={cn(
-            'flex items-center gap-2 rounded-md p-1 text-left font-sans transition-colors',
+            'flex items-center gap-2 self-start rounded-md p-1 text-left font-sans transition-colors',
             'hover:bg-surface-neutral-faint',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
           )}

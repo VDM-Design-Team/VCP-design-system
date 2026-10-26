@@ -55,12 +55,12 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
   onThemeChange?: (theme: 'light' | 'dark') => void;
   user?: TopBarUser;
   /**
-   * The account menu's rows (My Added Values, Settings, Logout…), as `Menu` takes them. Given
-   * with a `user`, the chip becomes a `UserMenu` that opens them; what each does, and which an
-   * admin sees that a regular user does not, is the app's.
+   * The account menu's rows, as `Menu` takes them (the default is Settings and Logout). Given with
+   * a `user`, the chip becomes a `UserMenu` that opens them; what each does, and which an admin
+   * sees that a regular user does not, is the app's.
    */
   userMenuItems?: MenuItem[];
-  /** Fires with the activated account-menu item's `key`. */
+  /** Fires with the activated account-menu item's `key`. Given alone, the chip is a `UserMenu` with the default rows. */
   onUserMenuSelect?: (key?: string) => void;
   /** Makes the user chip a real button, for an app that opens its own menu. Ignored when `userMenuItems` is given. */
   onUserMenu?: () => void;
@@ -152,7 +152,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             />
           )}
           {user &&
-            (userMenuItems ? (
+            (userMenuItems || onUserMenuSelect ? (
               <UserMenu user={user} items={userMenuItems} onSelect={onUserMenuSelect} />
             ) : onUserMenu ? (
               <button
