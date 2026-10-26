@@ -5,7 +5,7 @@
  * Written for designers: it refuses rather than guesses, and every failure says
  * what to do next.
  */
-import { execSync, spawn } from 'node:child_process';
+import { execSync, spawn, spawnSync } from 'node:child_process';
 
 const run = (cmd, opts = {}) => execSync(cmd, { stdio: 'pipe', encoding: 'utf8', ...opts }).trim();
 const step = (msg) => console.log(`\n\x1b[1m→ ${msg}\x1b[0m`);
@@ -52,9 +52,21 @@ ok(`main is at ${run('git log -1 --format="%h — %s"')}`);
 /* 3 — dependencies, then tokens. Tokens must be built before Storybook:
    dist/ is generated and is not in git, so a fresh clone has no theme. */
 step('Installing dependencies');
-try {
-  execSync('npm install', { stdio: 'inherit' });
-} catch {
+/* stderr is captured, not streamed, so an install that fails on GDL's registry
+   can be told apart from any other failure and get its own instructions. */
+const install = spawnSync('npm', ['install'], { stdio: ['inherit', 'inherit', 'pipe'], encoding: 'utf8' });
+if (install.stderr) process.stderr.write(install.stderr);
+if (install.status !== 0) {
+  if (/E401|ENEEDAUTH|401 Unauthorized|npm\.pkg\.github\.com/.test(install.stderr ?? '')) {
+    stop(
+      'npm could not download GDL, the parent design system, from GitHub Packages.',
+      'Log in to GitHub Packages once on this machine:\n\n' +
+        '    npm login --scope=@vdm-design-team --auth-type=legacy --registry=https://npm.pkg.github.com\n\n' +
+        '  Username: your GitHub username. Password: a classic token with `read:packages` —\n' +
+        '  https://github.com/settings/tokens/new?scopes=read:packages&description=npm%20GitHub%20Packages\n' +
+        '  Then run this again.',
+    );
+  }
   stop('npm install failed.', 'Try deleting node_modules and running this again.');
 }
 ok('up to date');
