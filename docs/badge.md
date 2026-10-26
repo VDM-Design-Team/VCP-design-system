@@ -20,7 +20,7 @@ one component with a configurable radius. See `docs/tag.md`.
 mixed VCP status names into Badge's `tone` prop (`tone="for qa"`). That mapping is
 owned by exactly one piece — `StatusTag` (a component composing `Tag`) — so it is
 deliberately absent here; if you
-find yourself writing `tone={status === 'rejected' ? 'danger' : …}` at a call site,
+find yourself writing `tone={status === 'rejected' ? 'critical' : …}` at a call site,
 that mapping wants to live in `StatusTag` instead.
 
 **If it needs to be clicked or dismissed, it is not a Badge.** Badge renders a
@@ -32,7 +32,7 @@ that mapping wants to live in `StatusTag` instead.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | Shared with `Tag` — see `docs/tag.md`. `tonal` is the common case |
-| `tone` | `neutral \| brand \| info \| success \| warning \| danger` | `neutral` | Generic tones only. No VCP status names — see above |
+| `tone` | `neutral \| brand \| info \| success \| warning \| critical` | `neutral` | Generic tones only. No VCP status names — see above |
 | `size` | `sm \| md \| lg` | `md` | 24 / 28 / 32 tall, with 10 / 12 / 14 type. `sm` for dense tables and inline-with-body-text; `lg` is the large Badge |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the badge's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
@@ -59,7 +59,7 @@ Contrast is the label on its **own fill**, measured, in both themes. WCAG AA ask
 | `info` | `accent.info.tonal.surface.default` | `accent.info.tonal.content.default` | **5.60:1** | **7.29:1** |
 | `success` | `accent.success.tonal.surface.default` | `accent.success.tonal.content.default` | **8.24:1** | **6.46:1** |
 | `warning` | `accent.warning.tonal.surface.default` | `accent.warning.tonal.content.default` | **4.59:1** | **7.45:1** |
-| `danger` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
+| `critical` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
 
 Every tone passes AA in both themes. **`warning` in light is the floor at 4.59:1** —
 `yellow-700` on `yellow-100`, 0.09 above the line. Any future move of either token
@@ -113,7 +113,7 @@ The dark theme comes for free — every colour class above is a semantic token t
 
 - **The text is the meaning; the colour is not.** Fills sit at 1.07–1.22:1 against
   `surface.base`, so the badge is barely a shape of its own — and tone alone fails
-  1.4.1 regardless. Always ship a label. `<Badge tone="danger" />` with no children
+  1.4.1 regardless. Always ship a label. `<Badge tone="critical" />` with no children
   says nothing to anyone.
 - **Contrast.** Every tone's label clears 4.5:1 on its own fill in both themes — see
   the table. The fill is decorative, not a UI boundary, so 1.4.11's 3:1 does not
@@ -138,7 +138,7 @@ The dark theme comes for free — every colour class above is a semantic token t
   `onClick` is unreachable by keyboard.
 - Don't put an interactive control in `icon`/`trailingIcon` — the slots are
   `aria-hidden` and outside the tab order.
-- Don't use `danger` for emphasis. It means something is wrong, not that something
+- Don't use `critical` for emphasis. It means something is wrong, not that something
   is important.
 - Don't write sentences in a badge. If it needs to truncate, it is not a label.
 - Don't set the type with `font-medium text-sm` or similar. Size and weight come as a

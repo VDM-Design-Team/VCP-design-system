@@ -14,7 +14,7 @@ import { cn } from '../../lib/cn';
  *
  * The export took `height?: number` and free-hex fills; rebuilt as a `size`
  * variant and one token per tone. `tone` is consumption status, not decoration:
- * budget dashboards walk it brand → warning → danger as points run down. The
+ * budget dashboards walk it brand → warning → critical as points run down. The
  * mapping from a number to a tone belongs to the caller (or a future pattern) —
  * thresholds are domain knowledge, and this is `src/components/`.
  *
@@ -30,7 +30,7 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
       /* accent.<x>.filled.surface — the strong fills, same family Banner uses. */
       success: 'bg-accent-success-filled-surface-default',
       warning: 'bg-accent-warning-filled-surface-default',
-      danger: 'bg-accent-critical-filled-surface-default',
+      critical: 'bg-accent-critical-filled-surface-default',
     },
   },
   defaultVariants: { tone: 'brand' },
@@ -39,7 +39,7 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
 const track = cva(
   /* surface.track — added for this component: the quiet grey that keeps every
      tone's fill ≥3.8:1 against it in BOTH themes. No pre-existing token could;
-     the closest (surface.neutral.medium) dropped the danger fill to 1.25:1 in
+     the closest (surface.neutral.medium) dropped the critical fill to 1.25:1 in
      dark. The track whispers, the fill carries the boundary. */
   'w-full overflow-hidden rounded-full bg-surface-track',
   {

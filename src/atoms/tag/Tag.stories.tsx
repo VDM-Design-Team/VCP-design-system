@@ -4,7 +4,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { Tag } from './Tag';
 import { Icon } from '../icon';
 
-const TONES = ['neutral', 'brand', 'info', 'success', 'warning', 'danger'] as const;
+const TONES = ['neutral', 'brand', 'info', 'success', 'warning', 'critical'] as const;
 const VARIANTS = ['textual', 'outline', 'tonal', 'filled'] as const;
 
 const meta = {
@@ -119,7 +119,7 @@ export const WithLeadingIcon: Story = {
       <Tag {...args} variant="outline" tone="warning" icon={<Icon name="clock" size="md" />}>
         Awaiting review
       </Tag>
-      <Tag {...args} variant="outline" tone="danger" icon={<Icon name="warning-circle" size="md" />}>
+      <Tag {...args} variant="outline" tone="critical" icon={<Icon name="warning-circle" size="md" />}>
         Blocked
       </Tag>
     </div>

@@ -39,7 +39,7 @@ originally duplicated an identical shell between them instead of sharing one.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | All four are VCP's own semantics — GDL's Tag primitive doesn't dictate them |
-| `tone` | `neutral \| brand \| info \| success \| warning \| danger` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
+| `tone` | `neutral \| brand \| info \| success \| warning \| critical` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
 | `size` | `sm \| md` | `md` | 24 / 28 tall, with 12 / 14 type. `sm` for dense tables and inline-with-body-text |
 | `onRemove` | `() => void` | — | Renders a ✕ button after the label. The only interactive part of the tag; the tag itself never takes a click |
 | `removeLabel` | `string` | `Remove ${children}` | The ✕'s accessible name. **Required in practice when `children` is not a string** — the fallback is a bare "Remove" |
