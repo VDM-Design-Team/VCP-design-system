@@ -13,7 +13,7 @@ const meta = {
           'The bell that opens notifications, with the red dot that says something is unread. ' +
           'A real `IconButton` underneath, so the focus ring, the 40 target and the name are the ' +
           "system's. The count is in the button's **name** (\"Notifications, 3 unread\"); the dot " +
-          'and its slow pulse are decoration. Reduced motion keeps the dot and drops the pulse.',
+          'and its three-pulse halo are decoration. Reduced motion keeps the dot and drops the pulse.',
       },
     },
   },

@@ -45,11 +45,10 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
    */
   primaryAction?: React.ReactNode;
   /**
-   * Whether the left side is shown. Default `true`. Some screens have nothing
-   * there — an Added Value being edited, say — so `false` leaves the left side
-   * empty, logo included, and the caller can keep passing `primaryAction`.
+   * Whether the left side shows at all. Default `true`. `false` leaves it empty,
+   * with no action and no logo, for screens like the AV editor.
    */
-  showPrimaryAction?: boolean;
+  showLeftSide?: boolean;
   /** Where the logo links when there is no `primaryAction`. */
   homeHref?: string;
   /** Unread count. The bell renders whenever this is a number; `> 0` shows the dot. */
@@ -68,7 +67,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     {
       className,
       primaryAction,
-      showPrimaryAction = true,
+      showLeftSide = true,
       homeHref,
       notifications,
       onNotifications,
@@ -113,7 +112,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             there is somewhere for it to go. An `<a>` without `href` is not a
             link and may not carry a name, so without `homeHref` the logo
             stands alone and names itself. */}
-        {showPrimaryAction &&
+        {showLeftSide &&
           (primaryAction ??
           (homeHref ? (
             <a

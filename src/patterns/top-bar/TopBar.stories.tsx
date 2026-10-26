@@ -16,7 +16,7 @@ const meta = {
           'The app bar, matching the Figma `Top_NavBar` and its two versions: with the ' +
           '“Create Added Value” Button in `primaryAction`, or with the linked Logo when ' +
           'there is none. Right side: bell (unread = the design’s red dot, count in the ' +
-          'accessible name; neutral, with a pulsing 10px dot), a divider, the light/dark mode Toggle (sun and moon in its knob), and the user chip. `showPrimaryAction={false}` empties the left side for screens that show nothing there. The page-level ' +
+          'accessible name; neutral, with a pulsing 10px dot), a divider, the light/dark mode Toggle (sun and moon in its knob), and the user chip. `showLeftSide={false}` empties the left side for screens that show nothing there. The page-level ' +
           'header (back, title, status actions) is `AVHeader` — a separate pattern.',
       },
     },
@@ -27,7 +27,7 @@ const meta = {
   },
   argTypes: {
     notifications: { control: 'number' },
-    showPrimaryAction: { control: 'boolean' },
+    showLeftSide: { control: 'boolean' },
     theme: { control: 'radio', options: ['light', 'dark'] },
   },
 } satisfies Meta<typeof TopBar>;
@@ -47,14 +47,14 @@ export const WithPrimaryAction: Story = {
 
 /**
  * Some screens have nothing on the left — an Added Value being edited, say.
- * `showPrimaryAction={false}` leaves the left side empty, logo included, and the
+ * `showLeftSide={false}` leaves the left side empty, logo included, and the
  * right side stays on the right. The caller can keep passing the `Button` and
  * flip one flag. The play test checks neither the button nor the logo renders.
  */
 export const PrimaryActionHidden: Story = {
   args: {
     primaryAction: <Button>Create Added Value</Button>,
-    showPrimaryAction: false,
+    showLeftSide: false,
     homeHref: '#home',
     theme: 'light',
     onNotifications: () => {},
