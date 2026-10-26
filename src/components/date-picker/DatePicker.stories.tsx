@@ -183,7 +183,7 @@ export const MarkersAndFlags: Story = {
       '2026-09-08': 'success',
       '2026-09-09': 'success',
       '2026-09-15': 'warning',
-      '2026-09-22': 'danger',
+      '2026-09-22': 'critical',
     },
     flagged: ['2026-09-21'],
   },
@@ -279,7 +279,7 @@ export const LightAndDark: Story = {
               value="2026-09-07"
               rangeEnd="2026-09-18"
               flagged={['2026-09-21']}
-              markers={{ '2026-09-22': 'danger' }}
+              markers={{ '2026-09-22': 'critical' }}
             />
             <DatePicker {...args} mode="month" value="2026-09-01" onClear={() => {}} />
           </div>
