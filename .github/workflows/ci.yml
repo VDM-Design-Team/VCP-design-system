@@ -6,17 +6,28 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read   # npm ci installs @vdm-design-team/gdl
     steps:
       - uses: actions/checkout@v4
         # Full history, so lint:changes can compare the branch with main.
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with:
+          node-version: 22
+          cache: npm
+          # GDL (@vdm-design-team/gdl), the parent design system, is on GitHub Packages.
+          registry-url: https://npm.pkg.github.com
+          scope: '@vdm-design-team'
       - run: npm ci
+        env: { NODE_AUTH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
       - run: npm run tokens
       - name: Fail if dist/ is stale
         run: git diff --exit-code dist/ || (echo "::error::dist/ is out of date — run 'npm run tokens' and commit." && exit 1)
       - run: npm run lint:tokens
+      - name: Semantic colours meet GDL's contract
+        run: npm run check:contract
       - name: Changelog entry in changes/, not CHANGELOG.md
         run: npm run lint:changes
       - run: npm run typecheck
