@@ -49,7 +49,7 @@ import { IconButton } from '../../atoms/icon-button';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type DatePickerMarker = 'success' | 'warning' | 'danger';
+export type DatePickerMarker = 'success' | 'warning' | 'critical';
 export type DatePickerMode = 'day' | 'range' | 'month';
 
 export interface DatePickerPreset {
@@ -113,7 +113,7 @@ const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MARKER: Record<DatePickerMarker, string> = {
   success: 'bg-accent-success-filled-surface-default',
   warning: 'bg-accent-warning-filled-surface-default',
-  danger: 'bg-accent-critical-filled-surface-default',
+  critical: 'bg-accent-critical-filled-surface-default',
 };
 
 /* ISO in LOCAL time — new Date().toISOString() shifts east-of-UTC dates. */

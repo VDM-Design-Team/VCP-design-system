@@ -47,7 +47,9 @@ button's accessible name; keep it short and meaningful, not decorative.
 Item: `surface.elevated` on a `stroke.subtle` border, `radius.md`. Header:
 `text.primary` title at `label-lg`, `text.tertiary` meta and caret,
 `surface.neutral.faint` hover, `surface.brand.base` while open. Content:
-`text.secondary` at `body-md`. No new tokens.
+`text.secondary` at `body-sm` (`text-body-sm-regular`), with 12 above and below it
+(`py-3`, the header row's own padding, so the two share one vertical rhythm), 14 on
+the right and 40 on the left to line up under the title. No new tokens.
 
 | Pair | Light | Dark |
 |---|---|---|

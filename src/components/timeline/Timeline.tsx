@@ -11,7 +11,7 @@ import { Avatar } from '../../atoms/avatar';
  * **Generic tones only.** The export's `kind` took VCP lifecycle names —
  * `accepted`, `handoff`, `status` — and each such mapping is owned by exactly
  * one piece, as Badge ruled: `tone` here is neutral/brand/info/success/warning/
- * danger, and the future activity piece owns the event-kind → tone mapping.
+ * critical, and the future activity piece owns the event-kind → tone mapping.
  * (The export's `handoff` amber and `status` indigo also had no ramp — the
  * indigo was a raw literal with no token behind it.)
  *
@@ -25,7 +25,7 @@ import { Avatar } from '../../atoms/avatar';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type TimelineTone = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
+export type TimelineTone = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'critical';
 
 export interface TimelineItem {
   /** Identity across renders. Defaults to the index — fine for static lists. */
@@ -54,7 +54,7 @@ const TONE: Record<TimelineTone, string> = {
     'border-accent-success-outline-content-default text-accent-success-outline-content-default',
   warning:
     'border-accent-warning-outline-content-default text-accent-warning-outline-content-default',
-  danger:
+  critical:
     'border-accent-critical-outline-content-default text-accent-critical-outline-content-default',
 };
 

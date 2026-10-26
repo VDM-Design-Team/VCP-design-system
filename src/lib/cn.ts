@@ -11,7 +11,7 @@ import { extendTailwindMerge } from 'tailwind-merge';
  * earlier one is silently dropped. Declaring the ramp here puts it in the
  * font-size group where it belongs.
  *
- * Keep in step with `tokens/semantic/type.json` — `npm run lint:tokens` fails if
+ * Keep in step with GDL's `tokens/semantic/type.json` — `npm run lint:tokens` fails if
  * this list and the tokens drift apart.
  */
 const TYPE_RAMP = [
