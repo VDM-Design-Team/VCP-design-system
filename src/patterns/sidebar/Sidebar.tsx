@@ -190,14 +190,19 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
 
         <div className="mt-10 flex flex-1 flex-col gap-8 px-3">
           {showDomainSelector && !collapsed && (
-            /* Figma's `_Domain_Selection_Dropdown`: a filled, borderless trigger
-               with an up-down caret, opening the system's `Menu`. Not the native
+            /* Figma's `_Domain_Selection_Dropdown`: a filled trigger with a
+               `neutral.outline.border` stroke and an up-down caret, opening the
+               system's `Menu`, which marks the current domain. Not the native
                `Select`, whose popup cannot be drawn. */
             <Menu
               className="w-full"
               panelClassName="w-full"
               align="left"
-              items={(domains ?? []).map((name) => ({ key: name, label: name }))}
+              items={(domains ?? []).map((name) => ({
+                key: name,
+                label: name,
+                selected: name === domain,
+              }))}
               onSelect={(key) => key && onDomainChange?.(key)}
               trigger={
                 <button
@@ -205,7 +210,8 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
                   disabled={!domains?.length}
                   aria-label={`Domain: ${domain ?? 'none selected'}. Change domain`}
                   className={cn(
-                    'group flex w-full items-center justify-between gap-2.5 rounded-md px-3 py-2',
+                    /* h-10: the 40 minimum target; the 14/20 text centres in it. */
+                    'group flex h-10 w-full items-center justify-between gap-2.5 rounded-md px-3',
                     'bg-surface-neutral-subtle text-left font-sans text-body-sm-medium text-text-secondary',
                     /* The neutral outline family's states, as the outline Button
                        uses: the border steps darker on hover, and stays at the

@@ -79,6 +79,14 @@ export interface MenuActionItem {
   /** Shown right-aligned. Display only — Menu binds no shortcuts itself. */
   shortcut?: string;
   tone?: 'default' | 'danger';
+  /**
+   * Marks the item as the current choice in a list of options (a domain, a
+   * sort order). Any item that sets it — `true` or `false` — renders as
+   * `role="menuitemradio"` with `aria-checked`, and the chosen one gets a
+   * check, so the state is never colour alone. Give every option the flag so
+   * the group is consistent.
+   */
+  selected?: boolean;
   disabled?: boolean;
   onClick?: () => void;
   divider?: false;
@@ -305,6 +313,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
         /* Danger is never colour alone: a critical item always carries a glyph,
            and falls back to `warning` when the caller gave none. */
         const glyph: IconName | undefined = item.icon ?? (danger ? 'warning' : undefined);
+        const isChoice = item.selected !== undefined;
 
         return (
           <button
@@ -313,7 +322,8 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
               itemRefs.current[i] = el;
             }}
             type="button"
-            role="menuitem"
+            role={isChoice ? 'menuitemradio' : 'menuitem'}
+            aria-checked={isChoice ? item.selected : undefined}
             disabled={item.disabled}
             tabIndex={i === activeIndex ? 0 : -1}
             onClick={() => activate(item)}
@@ -324,6 +334,9 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             {/* Colour and the glyph are both invisible to a screen reader, so the
                 tone is stated in the accessible name as well. */}
             {danger && <span className="sr-only">destructive action</span>}
+            {item.selected && (
+              <Icon name="check" size="sm" aria-hidden="true" className="shrink-0 text-text-primary" />
+            )}
             {/* text.subtle is 4.76:1 on the panel but only 4.09:1 once the item is
                 highlighted with surface.brand.faint — the shortcut has to clear AA in
                 the focused state too, so it takes the next step darker. */}
