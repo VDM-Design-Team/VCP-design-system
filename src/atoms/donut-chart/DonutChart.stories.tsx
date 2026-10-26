@@ -17,7 +17,7 @@ const meta = {
   },
   args: { value: 26, max: 40, caption: 'of 40 pts' },
   argTypes: {
-    tone: { control: 'radio', options: ['brand', 'success', 'warning', 'danger'] },
+    tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     half: { control: 'boolean' },
     size: { control: 'number' },
     thickness: { control: 'number' },
@@ -37,7 +37,7 @@ export const Tones: Story = {
       <DonutChart {...args} value={16} tone="brand" caption="on track" />
       <DonutChart {...args} value={40} tone="success" caption="delivered" />
       <DonutChart {...args} value={31} tone="warning" caption="running low" />
-      <DonutChart {...args} value={39} tone="danger" caption="nearly spent" />
+      <DonutChart {...args} value={39} tone="critical" caption="nearly spent" />
     </div>
   ),
 };
@@ -72,7 +72,7 @@ export const LightAndDark: Story = {
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex gap-8 bg-surface-canvas p-8">
             <DonutChart {...args} />
-            <DonutChart {...args} value={39} tone="danger" caption="nearly spent" />
+            <DonutChart {...args} value={39} tone="critical" caption="nearly spent" />
           </div>
         </div>
       ))}
