@@ -35,14 +35,13 @@ export const On: Story = { args: { checked: true } };
 export const DisabledOff: Story = { args: { checked: false, disabled: true } };
 export const DisabledOn: Story = { args: { checked: true, disabled: true } };
 
-/** The label is inside the `<label>`, so clicking the text toggles too. */
 /**
  * The design's switch "with icon": a glyph in the knob for each state. This is
  * the light/dark mode switch — the sun when off (light), the moon when on
  * (dark). The icons are decoration, so the name is still the `aria-label`.
  */
 export const ThemeSwitch: Story = {
-  args: { 'aria-label': 'Dark mode', knobIcons: { on: 'moon-fill', off: 'sun-fill' } },
+  args: { label: undefined, 'aria-label': 'Dark mode', knobIcons: { on: 'moon-fill', off: 'sun-fill' } },
   render: (args) => (
     <div className="flex items-center gap-4">
       <Toggle {...args} checked={false} />
@@ -51,6 +50,7 @@ export const ThemeSwitch: Story = {
   ),
 };
 
+/** The label is inside the `<label>`, so clicking the text toggles too. */
 export const WithLabel: Story = {
   args: { label: 'Share usage data', defaultChecked: true, checked: undefined },
 };

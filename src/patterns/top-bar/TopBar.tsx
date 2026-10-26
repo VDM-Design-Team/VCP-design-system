@@ -45,11 +45,10 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
    */
   primaryAction?: React.ReactNode;
   /**
-   * Whether the left side is shown. Default `true`. Some screens have nothing
-   * there — an Added Value being edited, say — so `false` leaves the left side
-   * empty, logo included, and the caller can keep passing `primaryAction`.
+   * Whether the left side shows at all. Default `true`. `false` leaves it empty,
+   * with no action and no logo, for screens like the AV editor.
    */
-  showPrimaryAction?: boolean;
+  showLeftSide?: boolean;
   /** Where the logo links when there is no `primaryAction`. */
   homeHref?: string;
   /** Unread count. The bell renders whenever this is a number; `> 0` shows the dot. */
@@ -68,7 +67,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     {
       className,
       primaryAction,
-      showPrimaryAction = true,
+      showLeftSide = true,
       homeHref,
       notifications,
       onNotifications,
@@ -113,7 +112,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             there is somewhere for it to go. An `<a>` without `href` is not a
             link and may not carry a name, so without `homeHref` the logo
             stands alone and names itself. */}
-        {showPrimaryAction &&
+        {showLeftSide &&
           (primaryAction ??
           (homeHref ? (
             <a
@@ -149,16 +148,20 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
               />
               {notifications > 0 && (
                 /* The design's red dot, 10 on this 20 glyph (Figma's 12 is for its 24), critical, up and to the right of the
-                   bell's 20 glyph, with a slow pulse behind it — a 2.5s cycle, so the flashes are
-                   spaced well apart. The number
-                   is in the bell's name; the pulse is dropped under reduced
-                   motion and the dot stays. */
+                   bell's 20 glyph. A halo pulses behind it three times, 1.5s
+                   each (4.5s in all, under WCAG 2.2.2's 5s), then stops with
+                   the dot still. Keyed on the count, so a new notification
+                   pulses again. The number is in the bell's name; the pulse
+                   is dropped under reduced motion and the dot stays. */
                 <span
                   aria-hidden="true"
                   className="pointer-events-none absolute right-1.25 top-0.75 size-2.5"
                 >
-                  <span className="absolute inset-0 animate-ping rounded-full bg-accent-critical-outline-border-default opacity-60 [animation-duration:2.5s] motion-reduce:hidden" />
-                  <span className="absolute inset-0 rounded-full bg-accent-critical-outline-border-default" />
+                  <span
+                    key={notifications}
+                    className="absolute inset-0 animate-ping rounded-full bg-accent-critical-filled-surface-default opacity-60 [animation-duration:1.5s] [animation-iteration-count:3] motion-reduce:hidden"
+                  />
+                  <span className="absolute inset-0 rounded-full bg-accent-critical-filled-surface-default" />
                 </span>
               )}
             </span>
