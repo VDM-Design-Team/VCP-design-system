@@ -103,6 +103,17 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
+  /* The heights the design draws for its four sizes. */
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const heights = Object.fromEntries(
+      (['xs', 'sm', 'md', 'lg'] as const).map((size) => [
+        size,
+        Math.round(canvas.getByText(size).nextElementSibling!.getBoundingClientRect().height),
+      ]),
+    );
+    await expect(heights).toEqual({ xs: 20, sm: 24, md: 28, lg: 32 });
+  },
 };
 
 /**
@@ -181,28 +192,4 @@ export const IconsBySize: Story = {
       </Tag>
     </div>
   ),
-};
-
-/** The heights the design draws for its four sizes: 20, 24, 28 and 32. */
-export const SizeHeights: Story = {
-  parameters: { controls: { disable: true } },
-  render: (args) => (
-    <div className="flex flex-wrap items-center gap-2">
-      {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
-        <Tag {...args} key={size} size={size}>
-          {size}
-        </Tag>
-      ))}
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const heights = Object.fromEntries(
-      (['xs', 'sm', 'md', 'lg'] as const).map((size) => [
-        size,
-        Math.round(canvas.getByText(size).parentElement!.getBoundingClientRect().height),
-      ]),
-    );
-    await expect(heights).toEqual({ xs: 20, sm: 24, md: 28, lg: 32 });
-  },
 };
