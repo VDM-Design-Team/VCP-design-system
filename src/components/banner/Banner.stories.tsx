@@ -4,7 +4,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { Banner, type BannerProps, type BannerTone } from './Banner';
 import { Button } from '../../atoms/button';
 
-const TONES: BannerTone[] = ['info', 'success', 'warning', 'danger'];
+const TONES: BannerTone[] = ['info', 'success', 'warning', 'critical'];
 
 /** The Storybook-only switches that add and remove the optional buttons. */
 type PlaygroundArgs = Omit<BannerProps, 'onDismiss' | 'dismissLabel'> & {
@@ -209,7 +209,7 @@ export const Tones: Story = {
     }
     /* A warning is the circle, the critical banner the triangle. */
     const icon = (tone: string) => canvasElement.querySelector(`[data-tone="${tone}"] svg`)!.innerHTML;
-    await expect(icon('warning')).not.toBe(icon('danger'));
+    await expect(icon('warning')).not.toBe(icon('critical'));
   },
   render: () => (
     <div className="flex max-w-2xl flex-col gap-3">
@@ -222,7 +222,7 @@ export const Tones: Story = {
       <Banner tone="warning" title="Two deliverables are missing evidence">
         They cannot move to Confirmed prod until a source is attached.
       </Banner>
-      <Banner tone="danger" title="This workspace is over its seat limit">
+      <Banner tone="critical" title="This workspace is over its seat limit">
         New members cannot be invited until a seat is freed or the plan is upgraded.
       </Banner>
     </div>
@@ -271,7 +271,7 @@ export const WithAction: Story = {
         They cannot move to Confirmed prod until a source is attached.
       </Banner>
       <Banner
-        tone="danger"
+        tone="critical"
         title="This workspace is over its seat limit"
         actionLabel="Manage seats"
         onAction={() => {}}
@@ -298,7 +298,7 @@ export const Dismissible: Story = {
       info: true,
       success: true,
       warning: true,
-      danger: true,
+      critical: true,
     });
     const anyClosed = TONES.some((tone) => !open[tone]);
     return (
@@ -320,7 +320,7 @@ export const Dismissible: Story = {
             size="sm"
             className="self-start"
             onClick={() =>
-              setOpen({ info: true, success: true, warning: true, danger: true })
+              setOpen({ info: true, success: true, warning: true, critical: true })
             }
           >
             Bring them back
@@ -405,7 +405,7 @@ export const AnnouncedOnAppearance: Story = {
           )}
           {state === 'failed' && (
             <Banner
-              tone="danger"
+              tone="critical"
               title="Save failed"
               actionLabel="Try again"
               onAction={() => setState('saved')}
