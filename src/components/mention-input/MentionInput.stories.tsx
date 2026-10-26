@@ -185,3 +185,51 @@ export const LightAndDark: Story = {
     </div>
   ),
 };
+
+/** The box of the `@` in a field: where the list is meant to sit. */
+const boxOfAt = (field: HTMLElement) => {
+  const walker = document.createTreeWalker(field, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const index = (node as Text).data.indexOf('@');
+    if (index !== -1) {
+      const range = document.createRange();
+      range.setStart(node, index);
+      range.setEnd(node, index + 1);
+      return range.getBoundingClientRect();
+    }
+  }
+  throw new Error('no @ in the field');
+};
+
+/**
+ * **Flow:** the list sits just under the `@` it belongs to, and above it when the
+ * screen cuts the bottom off. (It used to hang under the whole field.)
+ */
+export const ListFollowsTheAt: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => (
+    <div className="flex h-dvh flex-col justify-between">
+      <MentionInput {...args} aria-label="Top" />
+      <MentionInput {...args} aria-label="Bottom" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    /* Room below: the list is just under the `@`, level with it. */
+    const top = canvas.getByRole('textbox', { name: 'Top' });
+    await userEvent.type(top, 'Hi @ja');
+    const list = await canvas.findByRole('listbox');
+    const at = boxOfAt(top);
+    const below = list.getBoundingClientRect();
+    await expect(Math.abs(below.top - at.bottom)).toBeLessThanOrEqual(8);
+    await expect(Math.abs(below.left - at.left)).toBeLessThanOrEqual(1);
+
+    /* No room below (the field is at the foot of the screen): it opens above the `@`. */
+    const bottom = canvas.getByRole('textbox', { name: 'Bottom' });
+    await userEvent.type(bottom, '@ja');
+    const above = (await canvas.findByRole('listbox')).getBoundingClientRect();
+    await expect(above.bottom).toBeLessThanOrEqual(boxOfAt(bottom).top);
+  },
+};

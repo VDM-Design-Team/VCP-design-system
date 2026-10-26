@@ -134,6 +134,19 @@ function placeCaretAtEnd(root: HTMLElement) {
   selection?.addRange(range);
 }
 
+/* The list's own limits, in px of layout maths and not styling: its tallest height (the
+   `max-h-64` it used to carry), the gap to the `@`, and how near the screen's edge it may go. */
+const LIST_MAX_HEIGHT = 256;
+const LIST_GAP = 4;
+const LIST_EDGE = 8;
+
+interface ListPlace {
+  left: number;
+  top?: number;
+  bottom?: number;
+  maxHeight: number;
+}
+
 interface Trigger {
   node: Text;
   start: number;
@@ -208,6 +221,59 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
     }, [members, trigger]);
     const open = options.length > 0;
     const optionId = (i: number) => `${listId}-option-${i}`;
+
+    /* Where the list sits: under the `@` it belongs to, or above it when the screen cuts
+       the bottom off, and never past the screen's edges. It is measured from the `@`
+       character's own box, so it follows the word being typed and not the whole field. */
+    const wrapRef = React.useRef<HTMLDivElement | null>(null);
+    const listRef = React.useRef<HTMLUListElement | null>(null);
+    const [place, setPlace] = React.useState<ListPlace | null>(null);
+
+    const position = React.useCallback(() => {
+      const wrap = wrapRef.current;
+      const list = listRef.current;
+      if (!wrap || !list || !trigger) return;
+      const at = document.createRange();
+      try {
+        at.setStart(trigger.node, trigger.start);
+        at.setEnd(trigger.node, trigger.start + 1);
+      } catch {
+        return;
+      }
+      const anchor = at.getBoundingClientRect();
+      const box = wrap.getBoundingClientRect();
+      const wanted = Math.min(list.scrollHeight, LIST_MAX_HEIGHT);
+      const below = window.innerHeight - anchor.bottom - LIST_GAP - LIST_EDGE;
+      const above = anchor.top - LIST_GAP - LIST_EDGE;
+      const flip = wanted > below && above > below;
+      const maxHeight = Math.min(LIST_MAX_HEIGHT, flip ? above : below);
+      const left =
+        Math.min(Math.max(anchor.left, LIST_EDGE), window.innerWidth - list.offsetWidth - LIST_EDGE) -
+        box.left;
+      setPlace(
+        flip
+          ? { left, bottom: box.bottom - anchor.top + LIST_GAP, maxHeight }
+          : { left, top: anchor.bottom - box.top + LIST_GAP, maxHeight },
+      );
+    }, [trigger]);
+
+    React.useLayoutEffect(() => {
+      if (!open) {
+        setPlace(null);
+        return;
+      }
+      position();
+    }, [open, options, position]);
+
+    React.useEffect(() => {
+      if (!open) return;
+      window.addEventListener('resize', position);
+      window.addEventListener('scroll', position, true);
+      return () => {
+        window.removeEventListener('resize', position);
+        window.removeEventListener('scroll', position, true);
+      };
+    }, [open, position]);
 
     /* Write the starting content once, and any later change that did not come from
        typing (a controlled value that moved). Typing already put its own change in the
@@ -308,7 +374,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
     };
 
     return (
-      <div className="relative">
+      <div ref={wrapRef} className="relative">
         <div
           {...props}
           ref={(node) => {
@@ -361,10 +427,17 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
 
         {open && (
           <ul
+            ref={listRef}
             id={listId}
             role="listbox"
             aria-label="Members"
-            className="absolute inset-x-0 top-full z-50 mt-1 max-h-64 overflow-y-auto rounded-md border border-stroke-default bg-surface-elevated p-1 font-sans shadow-menu"
+            /* Placed in `position()`: until it has measured, it sits hidden at the corner. */
+            style={
+              place
+                ? { left: place.left, top: place.top, bottom: place.bottom, maxHeight: place.maxHeight }
+                : { left: 0, top: 0, visibility: 'hidden' }
+            }
+            className="absolute z-50 w-max max-w-72 min-w-48 overflow-y-auto rounded-md border border-stroke-default bg-surface-elevated p-1 font-sans shadow-menu"
           >
             {options.map((member, i) => (
               <li
@@ -385,7 +458,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
                   i === active && 'bg-surface-brand-faint text-text-primary',
                 )}
               >
-                {member.name}
+                <span className="truncate">{member.name}</span>
               </li>
             ))}
           </ul>
