@@ -2,6 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { UserLabel } from './UserLabel';
 
+/* A local stand-in for a profile photo (an inline SVG), so the story never needs the network. */
+const PHOTO =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+      '<rect width="64" height="64" fill="#cbd5e1"/>' +
+      '<circle cx="32" cy="25" r="12" fill="#64748b"/>' +
+      '<path d="M8 64c2-16 14-24 24-24s22 8 24 24z" fill="#475569"/></svg>',
+  );
+
 const meta = {
   title: 'Components/Display/UserLabel',
   component: UserLabel,
@@ -58,7 +68,10 @@ export const WithoutRole: Story = {
 
 /** A photo instead of initials. */
 export const WithPhoto: Story = {
-  args: { src: 'https://i.pravatar.cc/64?img=12' },
+  args: { src: PHOTO },
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('img')?.getAttribute('src')).toBe(PHOTO);
+  },
 };
 
 /** Squeezed, the name and role are cut with "…". */
