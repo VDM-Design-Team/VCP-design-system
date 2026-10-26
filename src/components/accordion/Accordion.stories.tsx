@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { Accordion } from './Accordion';
 import { Badge } from '../../atoms/badge';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
@@ -62,6 +63,16 @@ export const Default: Story = {
 /** `multiple` lets panels accumulate; `defaultOpenKeys` seeds the start. */
 export const Multiple: Story = {
   args: { multiple: true, defaultOpenKeys: ['scope', 'points'] },
+  play: async ({ canvasElement }) => {
+    /* Open content has 12 above and below, the header row's own padding, so the
+       paragraph is as far from the card's bottom edge as from the header. */
+    const regions = within(canvasElement).getAllByRole('region');
+    await expect(regions.length).toBeGreaterThan(0);
+    for (const r of regions) {
+      const cs = getComputedStyle(r);
+      await expect([cs.paddingTop, cs.paddingBottom]).toEqual(['12px', '12px']);
+    }
+  },
   render: (args) => (
     <div className="w-160">
       <Accordion {...args} />

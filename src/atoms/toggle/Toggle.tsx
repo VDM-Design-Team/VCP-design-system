@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { Icon } from '../icon';
+import { Icon, type IconName } from '../icon';
 import type { SavingStatus } from '../../lib/saving';
 
 /**
@@ -128,6 +128,13 @@ export interface ToggleProps
    * error comes from the `Field` around it. See docs/saving-states.md.
    */
   status?: SavingStatus;
+  /**
+   * A glyph in the knob for each state — the design's switch "with icon". A
+   * mode switch uses it for the sun and the moon. Decorative: the state is the
+   * switch's own, so the control still needs its `aria-label`. A save's spinner
+   * or check takes the knob over while one is showing.
+   */
+  knobIcons?: { on: IconName; off: IconName };
   /** Merged onto the `<label>` wrapper, not the hidden `<input>`. */
   className?: string;
   /** Applied to the `<label>` wrapper, matching `className`. */
@@ -143,6 +150,7 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
       disabled = false,
       label,
       status = 'idle',
+      knobIcons,
       className,
       style,
       ...props
@@ -194,6 +202,12 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
             )}
             {status === 'success' && (
               <Icon name="check" className="size-3 text-accent-success-tonal-content-default" />
+            )}
+            {knobIcons && !pending && status !== 'success' && (
+              <Icon
+                name={on ? knobIcons.on : knobIcons.off}
+                className="size-3 text-text-secondary"
+              />
             )}
           </span>
         </span>
