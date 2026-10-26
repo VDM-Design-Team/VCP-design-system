@@ -11,8 +11,9 @@ import { Avatar } from '../../atoms/avatar';
  * Built to Figma's `Profile_Image_Name_Label` (`6185:80437`), whose two sizes
  * are `size="md"` (Figma's Default: a 32 avatar, the name in `body-sm-medium`,
  * the role in `caption-md-medium`) and `size="sm"` (Figma's S: a 24 avatar and
- * one step down in type). The role sits 4 up under the name, as the design
- * stacks it, and is `text.tertiary` against the name's `text.primary`.
+ * one step down in type). The role is pulled up directly under the name so the two
+ * sit close (6 up on `md`, 4 on `sm`; the type's own line heights would leave a gap),
+ * and is `text.tertiary` against the name's `text.primary`.
  *
  * The visible name carries the person, so the avatar beside it is decoration
  * (`aria-hidden`, as `Avatar` does when its name is already on screen). The
@@ -61,9 +62,9 @@ export const UserLabel = React.forwardRef<HTMLSpanElement, UserLabelProps>(funct
         {role && (
           <span
             className={cn(
-              /* Figma stacks the role 4 up under the name. */
-              '-mt-1 truncate text-text-tertiary',
-              small ? 'text-caption-sm-medium' : 'text-caption-md-medium',
+              /* Pulled up under the name so the two sit close, as the Assignee chip's do. */
+              'truncate text-text-tertiary',
+              small ? '-mt-1 text-caption-sm-medium' : '-mt-1.5 text-caption-md-medium',
             )}
           >
             {role}
