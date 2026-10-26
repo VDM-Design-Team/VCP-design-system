@@ -5,6 +5,7 @@ import { IconButton } from '../../atoms/icon-button';
 import { Avatar } from '../../atoms/avatar';
 import { Logo } from '../../atoms/logo';
 import { Toggle } from '../../atoms/toggle';
+import { Divider } from '../../atoms/divider';
 import type { MenuItem } from '../../components/menu';
 import { UserMenu } from '../../components/user-menu';
 
@@ -18,8 +19,8 @@ import { UserMenu } from '../../components/user-menu';
  *   linked home via `homeHref`.
  *
  * The right side is always: notification bell (unread = the design's red
- * dot; the count lives in the bell's accessible name), the light/dark mode
- * `Toggle`, and the signed-in user (avatar + name + caret, inline).
+ * dot; the count lives in the bell's accessible name), a divider, the
+ * light/dark mode `Toggle` (sun and moon in its knob), and the signed-in user (avatar + name + caret, inline).
  *
  * An organism composed entirely from existing pieces — `Logo`, `Toggle`,
  * `IconButton`, `Avatar`, `Icon`, with the caller's `Button` slotting into
@@ -45,6 +46,11 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
    * When present, it replaces the logo on the left (the Figma variant pair).
    */
   primaryAction?: React.ReactNode;
+  /**
+   * Whether the left side shows at all. Default `true`. `false` leaves it empty,
+   * with no action and no logo, for screens like the AV editor.
+   */
+  showLeftSide?: boolean;
   /** Where the logo links when there is no `primaryAction`. */
   homeHref?: string;
   /** Unread count. The bell renders whenever this is a number; `> 0` shows the dot. */
@@ -71,6 +77,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
     {
       className,
       primaryAction,
+      showLeftSide = true,
       homeHref,
       notifications,
       onNotifications,
@@ -89,7 +96,16 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
         <Avatar name={user.name} src={user.src} size="md" />
         <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
         {onUserMenu && (
-          <Icon name="caret-down" size="sm" aria-hidden="true" className="text-text-tertiary" />
+          /* The glyph draws about 3 inside its 16 box, so at the chip's own 4 of
+             padding the caret sat 7 from the right edge against the avatar's 4
+             on the left. Pulling the box 3 into the padding evens them, whatever the
+             chip's own padding (8 each side, 4 top and bottom). */
+          <Icon
+            name="caret-down"
+            size="sm"
+            aria-hidden="true"
+            className="-mr-0.75 text-text-tertiary"
+          />
         )}
       </>
     );
@@ -108,7 +124,8 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             there is somewhere for it to go. An `<a>` without `href` is not a
             link and may not carry a name, so without `homeHref` the logo
             stands alone and names itself. */}
-        {primaryAction ??
+        {showLeftSide &&
+          (primaryAction ??
           (homeHref ? (
             <a
               href={homeHref}
@@ -119,8 +136,8 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             </a>
           ) : (
             <Logo size="md" />
-          ))}
-        <div className="flex shrink-0 items-center gap-4">
+          )))}
+        <div className="ml-auto flex shrink-0 items-center gap-4">
           {notifications != null && (
             <span className="relative">
               <IconButton
@@ -132,44 +149,76 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                     : 'Notifications'
                 }
                 onClick={onNotifications}
+                className={cn(
+                  /* Neutral, as the design draws the bell: a brand-blue bell
+                     read as a call to action. The `neutral.outline` content
+                     steps, the same family the toolbar buttons use. */
+                  'text-neutral-outline-content-default',
+                  'hover:bg-surface-neutral-subtle hover:text-neutral-outline-content-hover',
+                  'active:bg-surface-neutral-medium active:text-neutral-outline-content-pressed',
+                )}
               />
               {notifications > 0 && (
-                /* The design's red dot — the number is in the bell's name. */
+                /* The design's red dot, 10 on this 20 glyph (Figma's 12 is for its 24), critical, up and to the right of the
+                   bell's 20 glyph. A halo pulses behind it three times, 1.5s
+                   each (4.5s in all, under WCAG 2.2.2's 5s), then stops with
+                   the dot still. Keyed on the count, so a new notification
+                   pulses again. The number is in the bell's name; the pulse
+                   is dropped under reduced motion and the dot stays. */
                 <span
                   aria-hidden="true"
-                  className="absolute right-1 top-1 size-2 rounded-full bg-accent-critical-filled-surface-default"
-                />
+                  className="pointer-events-none absolute right-1.25 top-0.75 size-2.5"
+                >
+                  <span
+                    key={notifications}
+                    className="absolute inset-0 animate-ping rounded-full bg-accent-critical-filled-surface-default opacity-60 [animation-duration:1.5s] [animation-iteration-count:3] motion-reduce:hidden"
+                  />
+                  <span className="absolute inset-0 rounded-full bg-accent-critical-filled-surface-default" />
+                </span>
               )}
             </span>
           )}
-          {theme && (
-            /* The design's mode switch, as the system Toggle. It reports the
-               wish; the app owns the theme (and the `.dark` class). */
-            <Toggle
-              aria-label="Dark mode"
-              checked={theme === 'dark'}
-              onChange={(on) => onThemeChange?.(on ? 'dark' : 'light')}
-            />
+          {/* The design's divider between the bell and the mode and user group.
+              Only when there is something on both sides of it. */}
+          {notifications != null && (theme || user) && (
+            <Divider orientation="vertical" className="h-10 min-h-0 self-center" />
           )}
-          {user &&
-            (userMenuItems || onUserMenuSelect ? (
-              <UserMenu user={user} items={userMenuItems} onSelect={onUserMenuSelect} />
-            ) : onUserMenu ? (
-              <button
-                type="button"
-                aria-label={`${user.name}, account menu`}
-                onClick={onUserMenu}
-                className={cn(
-                  'flex items-center gap-2 rounded-md p-1 text-left transition-colors',
-                  'hover:bg-surface-neutral-faint',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                )}
-              >
-                {userChip}
-              </button>
-            ) : (
-              <span className="flex items-center gap-2 p-1">{userChip}</span>
-            ))}
+          {/* The mode switch and the user chip are one group with their own 8
+              gap, closer than the bell and the divider are to each other. */}
+          {(theme || user) && (
+            <div className="flex items-center gap-2">
+              {theme && (
+                /* The design's mode switch, as the system Toggle with the sun and
+                   the moon in its knob. It reports the wish; the app owns the theme
+                   (and the `.dark` class). */
+                <Toggle
+                  aria-label="Dark mode"
+                  knobIcons={{ on: 'moon-fill', off: 'sun-fill' }}
+                  checked={theme === 'dark'}
+                  onChange={(on) => onThemeChange?.(on ? 'dark' : 'light')}
+                />
+              )}
+              {user &&
+                (userMenuItems || onUserMenuSelect ? (
+                  <UserMenu user={user} items={userMenuItems} onSelect={onUserMenuSelect} />
+                ) : onUserMenu ? (
+                  <button
+                    type="button"
+                    aria-label={`${user.name}, account menu`}
+                    onClick={onUserMenu}
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-2 py-1 text-left transition-colors',
+                      'hover:bg-surface-neutral-faint',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                    )}
+                  >
+                    {userChip}
+                  </button>
+                ) : (
+                  <span className="flex items-center gap-2 px-2 py-1">{userChip}</span>
+                ))}
+            </div>
+          )}
         </div>
       </header>
     );

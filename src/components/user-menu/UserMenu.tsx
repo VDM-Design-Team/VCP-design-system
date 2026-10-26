@@ -75,7 +75,7 @@ export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function
           type="button"
           aria-label={`${user.name}, account menu`}
           className={cn(
-            'group flex items-center gap-2 self-start rounded-md p-1 text-left font-sans transition-colors',
+            'group flex items-center gap-2 self-start rounded-md px-2 py-1 text-left font-sans transition-colors',
             'hover:bg-surface-neutral-faint',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
           )}
@@ -86,7 +86,9 @@ export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function
             name="caret-down"
             size="sm"
             aria-hidden="true"
-            className="text-text-tertiary transition-transform group-aria-expanded:rotate-180 motion-reduce:transition-none"
+            /* -mr-0.75: the glyph draws about 3 inside its 16 box, so pulling the box 3 into the
+               padding makes the caret's gap to the edge match the avatar's, as TopBar's chip does. */
+            className="-mr-0.75 text-text-tertiary transition-transform group-aria-expanded:rotate-180 motion-reduce:transition-none"
           />
         </button>
       }
