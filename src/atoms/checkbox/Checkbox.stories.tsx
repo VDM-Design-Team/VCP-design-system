@@ -25,6 +25,7 @@ const meta = {
     indeterminate: { control: 'boolean' },
     disabled: { control: 'boolean' },
     fullWidth: { control: 'boolean' },
+    size: { control: 'radio', options: ['sm', 'md'] },
     label: { control: 'text' },
   },
 } satisfies Meta<typeof Checkbox>;
@@ -47,6 +48,17 @@ export const States: Story = {
       <Checkbox {...args} label="Unchecked" />
       <Checkbox {...args} label="Checked" defaultChecked />
       <Checkbox {...args} label="Mixed" indeterminate />
+    </div>
+  ),
+};
+
+/** The two sizes Figma ships: 16 (`sm`, the default) and 20 (`md`). Both keep a 40 target. */
+export const Sizes: Story = {
+  render: (args) => (
+    <div className="flex flex-col items-start">
+      <Checkbox {...args} size="sm" label="Small, 16" defaultChecked />
+      <Checkbox {...args} size="md" label="Medium, 20" defaultChecked />
+      <Checkbox {...args} size="md" label="Medium, mixed" indeterminate />
     </div>
   ),
 };

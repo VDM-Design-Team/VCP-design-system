@@ -54,18 +54,16 @@ via `tone={toneForName(name)}` — see "Deviations" in `Avatar.tsx`.
 | Tone | Surface token | Content token | Contrast, light | Contrast, dark |
 |---|---|---|---|---|
 | `blue` | `accent.blue.faint` | `accent.blue.stronger` | **8.50:1** | **7.23:1** |
-| `green` | `accent.green.faint` | `accent.green.stronger` | **8.24:1** | **4.50:1** ⚠ |
+| `green` | `accent.green.faint` | `accent.green.stronger` | **8.24:1** | **6.49:1** |
 | `red` | `accent.red.faint` | `accent.red.stronger` | **8.22:1** | **6.85:1** |
 | `yellow` | `accent.yellow.faint` | `accent.yellow.stronger` | **8.07:1** | **6.37:1** |
 
 Initials are text and owe 4.5:1, so every figure above is measured, not assumed.
 
-⚠ **`green` in dark is 4.5030:1 — it passes AA with no headroom.** The cause is a
-token bug, not a design choice: `color.green.800` and `color.green.700` are both
-`#008236` in `tokens/core/color.json`, so `accent.green.faint` cannot get any
-darker in dark mode. Give `green.800` its own darker value and this tone moves
-back in line with the other three. Until then, do not lighten
-`accent.green.stronger`.
+`green` in dark was 4.50:1 — AA with no headroom — until October 2026: a token
+bug made `color.green.800` a copy of `green.700` (`#008236`), so
+`accent.green.faint` couldn't get any darker. GDL fixed `green.800`
+(`#016630`), and the tone is back in line with the other three.
 
 The rest:
 
@@ -117,7 +115,7 @@ Nothing was invented here.
   a `size` step and a `tone`.
 - Don't use a hashed tone to mean something. It is a hash of the name; `red` is
   not "blocked" and `green` is not "approved". That is `Badge`, or the
-  `StatusPill` pattern.
+  `StatusTag` pattern.
 - Don't hash by default. Leave `tone` unset unless the context genuinely needs
   to tell many people apart at a glance — most avatars should stay `neutral`.
 - Don't set `standalone` on an avatar that already sits beside the person's name —

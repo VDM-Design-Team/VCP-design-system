@@ -1,5 +1,12 @@
 # TagEditor
 
+> ⚠️ **No Figma source.** This component was ported from the original Claude-design export, not
+> drawn from a Figma frame, and was never part of a Figma audit. The tag editing the product has is
+> the library's *Tag Management* page (`7463:91717`): cards of rows with **Add New**, edit and delete
+> buttons, and add/delete **modals** — no tone swatches, no coloured tags, no inline add form. So
+> `TagEditor` matches no design. Don't build a screen on it — see `docs/figma-audit.md`, *Source
+> check — October 2026*.
+
 Free-form labels on a thing: the tag list, a tone swatch row, a name field
 and an add button. `editable={false}` is just the list.
 
@@ -49,13 +56,12 @@ remove button — not a `Badge` (deliberately non-interactive) and not a `Chip`
 | Tone (label on its pill) | Light | Dark |
 |---|---|---|
 | `blue` | **8.50:1** | **7.23:1** |
-| `green` | **8.24:1** | **4.50:1** |
+| `green` | **8.24:1** | **6.49:1** |
 | `red` | **8.22:1** | **6.85:1** |
 | `yellow` | **8.07:1** | **6.37:1** |
 
-`green` in dark sits exactly on AA's 4.5:1 — flagged in the token layer's
-own history once already; any darkening of `accent.green.faint` breaks it
-first.
+`green` in dark sat exactly on AA's 4.5:1 until GDL fixed `color.green.800`
+(October 2026); see Avatar's doc.
 
 ## Accessibility
 

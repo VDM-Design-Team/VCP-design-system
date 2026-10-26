@@ -5,7 +5,7 @@ import { Icon } from '../../atoms/icon';
 /**
  * Chip — an interactive pill: a selected filter, a removable tag, a toggleable
  * option. If it only classifies and is never clicked, it is a `Badge`; if it
- * carries a VCP status, it is `StatusPill`. The comparison table
+ * carries a VCP status, it is `StatusTag`. The comparison table
  * lives in docs/badge.md.
  *
  * The export rendered a clickable `<span>` with a `<button>` nested inside it —

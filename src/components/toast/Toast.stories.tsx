@@ -43,7 +43,51 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+/**
+ * Storybook-only switches — **not Toast props**. A Toast shows an action by being
+ * given an `actionLabel` and a dismiss button by being given `onDismiss`; the
+ * story turns these toggles into exactly that, or their absence. A blank `title`
+ * or message (an empty control) leaves nothing behind either.
+ */
+type PlaygroundArgs = React.ComponentProps<typeof Toast> & {
+  withAction?: boolean;
+  withDismiss?: boolean;
+};
+
+export const Default: StoryObj<PlaygroundArgs> = {
+  args: { withAction: false, withDismiss: false, actionLabel: 'Undo' },
+  argTypes: {
+    withAction: { control: 'boolean', name: 'action button', table: { disable: true } },
+    withDismiss: { control: 'boolean', name: 'dismiss button', table: { disable: true } },
+  },
+  render: (storyArgs: PlaygroundArgs) => {
+    const { withAction, withDismiss, actionLabel, ...args } = storyArgs;
+    return (
+      <Toast
+        {...args}
+        actionLabel={withAction ? actionLabel : undefined}
+        onAction={withAction ? () => {} : undefined}
+        onDismiss={withDismiss ? () => {} : undefined}
+      />
+    );
+  },
+};
+
+/**
+ * An empty part renders nothing. A blank `title`, message or `actionLabel` (an
+ * empty string, `false`) leaves no empty line, description box or button holding
+ * space.
+ */
+export const EmptyPartsRenderNothing: Story = {
+  args: { title: 'Only a title', children: '', actionLabel: '' },
+  play: async ({ canvasElement }) => {
+    const toast = canvasElement.querySelector('[data-tone]') as HTMLElement;
+    await expect(toast.querySelectorAll('p')).toHaveLength(1);
+    /* The text block holds just the title: no empty description div under it. */
+    await expect((toast.querySelector('p') as HTMLElement).parentElement?.children).toHaveLength(1);
+    await expect(toast.querySelector('button')).toBeNull();
+  },
+};
 
 /**
  * Four tones, four `accent.*` families — and four different glyph *shapes*, so
@@ -76,9 +120,9 @@ export const Tones: Story = {
  * ignores the timer entirely once `actionLabel` is present — note the absence
  * of `data-duration` on the element.
  *
- * The action is a real `Button` rendered by the component, not a slot: on a
- * tonal fill it needs the tone's own content token to stay above 4.5:1, and a
- * caller passing a plain `<Button>` would not know that.
+ * The action is a real `Button` rendered by the component, not a slot, so its
+ * size and variant stay as the design draws them: small, outlined, top-aligned
+ * beside the close control.
  */
 export const WithAction: Story = {
   args: {
@@ -232,6 +276,83 @@ export const Stacked: Story = {
 };
 
 /**
+ * With a title and no message there is one line of text, so the row is centred:
+ * the glyph, the title, the action and the X share a midline. (Top-aligned, the
+ * title sat at the top with the taller X visibly lower.) With both a title and a
+ * message the controls stay on the first line, as the design draws it.
+ */
+export const TitleOnlyIsCentred: Story = {
+  /* The default args carry a message; this story is about having none. */
+  args: { children: undefined },
+  render: (args) => (
+    <div className="flex flex-col items-start gap-3">
+      <Toast {...args} tone="success" title="Draft saved" onDismiss={() => {}} />
+      <Toast
+        {...args}
+        tone="danger"
+        title="Upload failed"
+        actionLabel="Retry"
+        onAction={() => {}}
+        onDismiss={() => {}}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const mid = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    };
+    for (const toast of Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-tone]'))) {
+      const glyph = toast.querySelector('svg') as SVGElement;
+      const text = toast.querySelector('p') as HTMLElement;
+      const close = toast.querySelector('button[aria-label^="Dismiss"]') as HTMLElement;
+      await expect(Math.abs(mid(glyph) - mid(text))).toBeLessThan(1);
+      await expect(Math.abs(mid(close) - mid(text))).toBeLessThan(1);
+    }
+  },
+};
+
+/**
+ * Toasts hug their content, so a short one is narrower than the column the stack
+ * lives in. The stack packs against the edge it is anchored to — flush right for
+ * the right positions, centred for the centred ones — so mixed widths line up
+ * instead of sitting ragged at the column's left. The play test measures it.
+ */
+export const MixedWidthsAlign: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => {
+    const toasts = [
+      { id: '1', tone: 'success' as const, title: 'Saved' },
+      {
+        id: '2',
+        tone: 'info' as const,
+        title: 'Export queued',
+        description: 'Two files will be ready in a few minutes.',
+      },
+      { id: '3', tone: 'warning' as const, title: 'Out of date' },
+    ];
+    return (
+      <div className="min-h-96 bg-surface-canvas">
+        <div data-testid="right">
+          <ToastViewport position="top-right" toasts={toasts} onDismiss={() => {}} />
+        </div>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const toasts = Array.from(
+      within(canvasElement).getByTestId('right').querySelectorAll<HTMLElement>('[data-tone]'),
+    );
+    await expect(toasts).toHaveLength(3);
+    const rights = toasts.map((t) => Math.round(t.getBoundingClientRect().right));
+    /* Every toast ends at the same x — flush right — though their widths differ. */
+    await expect(new Set(rights).size).toBe(1);
+    const widths = toasts.map((t) => Math.round(t.getBoundingClientRect().width));
+    await expect(new Set(widths).size).toBeGreaterThan(1);
+  },
+};
+
+/**
  * The supported path end to end. `ToastProvider` renders your app, then the
  * viewport — so both live regions are in the page before anything is raised,
  * and the viewport sits *after* the content in the DOM, which is why a keyboard
@@ -293,10 +414,8 @@ function ToastTriggers() {
 }
 
 /**
- * Every colour is a semantic token, so dark comes for free. The tonal fill and
- * content pair is the one Badge already measured; the border is the tone's
- * `outline.content.default`, which clears 3:1 against the page in both themes
- * so a floating toast always has a visible edge.
+ * Every colour is a semantic token, so dark comes for free: the card is
+ * `surface.elevated`, and only the glyph and the timer bar carry the tone.
  */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
@@ -313,7 +432,7 @@ export const LightAndDark: Story = {
                 onDismiss={() => {}}
                 dismissLabel={`Dismiss the ${tone} toast`}
               >
-                The same tonal pair in both themes.
+                The same card in both themes.
               </Toast>
             ))}
             <Toast
