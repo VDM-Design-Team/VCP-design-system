@@ -64,7 +64,7 @@ applies to; so is a form error at the top of the whole page.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical` |
+| `tone` | `info \| success \| warning \| critical` | `info` | `critical` is the `accent.critical` family (it was `danger` before October 2026) |
 | `title` | `ReactNode` | — | The headline. One clause |
 | `children` | `ReactNode` | — | The body. Say what happened and what to do |
 | `showIcon` | `boolean` | `true` | Shows the tone glyph. Off, the tint, stroke and words still carry the banner, and the tone word ("Warning: ") is announced from visually hidden text, so assistive tech does not lose it |
@@ -107,7 +107,7 @@ put the region on the slot that was always there:
 // The wrapper is mounted with the form and never unmounts. This is the region.
 <div role="status" aria-live="polite" aria-atomic="false">
   {error && (
-    <Banner tone="danger" title={error} onDismiss={clear} dismissLabel={`Dismiss: ${error}`} />
+    <Banner tone="critical" title={error} onDismiss={clear} dismissLabel={`Dismiss: ${error}`} />
   )}
 </div>
 ```
@@ -194,7 +194,7 @@ measured, both themes. AA asks 4.5:1.
 | `info` | `accent.info.tonal.surface.default` | `accent.info.tonal.content.default` | **5.60:1** | **7.29:1** |
 | `success` | `accent.success.tonal.surface.default` | `accent.success.tonal.content.default` | **8.24:1** | **6.46:1** |
 | `warning` | `accent.warning.tonal.surface.default` | `accent.warning.tonal.content.default` | **4.59:1** | **7.45:1** |
-| `danger` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
+| `critical` | `accent.critical.tonal.surface.default` | `accent.critical.tonal.content.default` | **6.85:1** | **8.22:1** |
 
 **`warning` in light is the floor at 4.59:1**, exactly as it is for Badge — 0.09
 above the line. Any move of either token breaks Badge, Banner and Toast at once.
@@ -205,7 +205,7 @@ The border is Figma's: `accent.<tone>.outline.border.default`, 1px (design revie
 the banners, October 2026: with the tonal fill carrying the banner, the outline is
 cosmetic). **It is not held to the 3:1 rule** the way the house controls are — against
 the canvas in light it measures 3.60:1 (`info`), 2.12:1 (`success`), **1.83:1**
-(`warning`) and 3.64:1 (`danger`), so two of the four tones have a faint edge. That is
+(`warning`) and 3.64:1 (`critical`), so two of the four tones have a faint edge. That is
 a decision, not an oversight: the banner is legible by its tint, its glyph shape, and
 its text, none of which depend on the edge.
 
@@ -223,7 +223,7 @@ it (design review: the glyph is not what makes the message understood). **That i
 | `info` | 3.08:1 | 1.98:1 |
 | `success` | 2.02:1 | 2.81:1 |
 | `warning` | **1.78:1** | 2.95:1 |
-| `danger` | 3.12:1 | 2.10:1 |
+| `critical` | 3.12:1 | 2.10:1 |
 
 Is that allowed? WCAG 1.4.11 asks 3:1 for a graphic *required to understand the content*.
 Here the glyph is reinforcement: the title and message say what is wrong in words, the
@@ -343,7 +343,7 @@ Dark comes for free: every colour above is a semantic token that
   One per region; if there are genuinely three problems, say so in one banner.
 - **Don't rely on the tint.** The fill is roughly 1.1:1 against the page —
   write a title that works in greyscale.
-- Don't use `danger` for emphasis. It means something is wrong, not that
+- Don't use `critical` for emphasis. It means something is wrong, not that
   something is important.
 - Don't put a form, a link list, or two actions in a Banner. One action, or
   none, and let the body point at where the work happens.
