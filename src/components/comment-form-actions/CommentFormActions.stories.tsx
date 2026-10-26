@@ -10,7 +10,7 @@ const meta = {
       description: {
         component:
           'The buttons under a comment box: the one that sends it and, when there is a way out, ' +
-          '"Cancel". The system’s small `Button` and a ghost Cancel, 4 apart — the one arrangement ' +
+          '"Cancel". The system’s small `Button` and an outlined `secondary` Cancel, 8 apart — the one arrangement ' +
           'a new comment, a reply and an edit all need.',
       },
     },

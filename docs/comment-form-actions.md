@@ -36,16 +36,23 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Tokens
 
-Nothing of its own: it is the system's small `Button` twice, 4 apart.
+Nothing of its own: it is the system's small `Button` twice, 8 apart.
 
 | Part | Is |
 |---|---|
 | Send | `Button` `size="sm"`, `primary`: 36 tall, 12 side padding, `radius.sm`, `action.primary.surface` (default `#1a56db`, disabled `#8caaed`) |
-| Cancel | `Button` `size="sm"`, `tertiary`: `action.tertiary.content.default` text on no fill |
-| Gap | `gap-1` (4) |
+| Cancel | `Button` `size="sm"`, `secondary`: outlined in `action.secondary.border`, `action.secondary.content` text |
+| Gap | `gap-2` (8) |
 
-Two small differences from the Figma frames, both the system's:
-- Cancel is 14 **medium** where Figma draws it regular, because every `Button` is medium.
+Three differences from the Figma frames, all the system's:
+- **Cancel is `secondary`, an outlined button, where Figma draws plain blue text.**
+  Beside a primary button the system's Cancel is `secondary` (`HandoffAVModal`,
+  `RejectPendingAVModal`, `ReviewAVModal`). `docs/button.md` keeps `tertiary` for
+  dense toolbars, icon-only actions and table rows, and the one place it is a Cancel
+  is the lowest step of a three-button ladder. The `_Comment_Controls` frames in
+  Figma should follow, so code and design agree.
+- **The gap is 8, not 4.** Two outlined buttons need more room than a button and a
+  text link, and 8 is a step on the system's scale (modal footers use 12).
 - `loading` shows the system's spinner, where Figma draws an arrows glyph, so every
   button that waits looks the same.
 

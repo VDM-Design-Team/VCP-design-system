@@ -9,10 +9,17 @@ import { Button } from '../../atoms/button';
  * Read off the Figma `_Comment_Controls` (Save, Reply Enabled, Reply Disabled)
  * and `_Comment_Button` (Add Comment, with its loading state). Both are the
  * system's own small `Button`: a primary one with 36 height, 12 side padding and
- * `radius.sm`, and a ghost `tertiary` Cancel beside it, 4 apart. So this is not
- * a new look; it is the one arrangement three screens need — writing a new
+ * `radius.sm`, and a `secondary` Cancel beside it, 8 apart. So this is not a
+ * new look; it is the one arrangement three screens need — writing a new
  * comment (no Cancel), replying, and editing — kept in one place so they
  * cannot drift.
+ *
+ * **Cancel is `secondary`, not the text-only Cancel the Figma frames draw.**
+ * Beside a primary button the system's Cancel is the outlined `secondary`
+ * (`HandoffAVModal`, `RejectPendingAVModal`, `ReviewAVModal`); `tertiary` is for
+ * dense toolbars, icon-only actions and table rows, or the third step of a
+ * three-button ladder. Two outlined buttons need more than the frame's 4 between
+ * them, so the gap is 8, as the system's spacing scale gives.
  *
  * `disabled` is the design's "Reply Disabled": the send button dims while the
  * box is empty, and Cancel stays usable. `loading` is the design's loading
@@ -52,12 +59,12 @@ export const CommentFormActions = React.forwardRef<HTMLDivElement, CommentFormAc
     },
     ref,
   ) => (
-    <div ref={ref} className={cn('flex items-center gap-1', className)} {...props}>
+    <div ref={ref} className={cn('flex items-center gap-2', className)} {...props}>
       <Button size="sm" disabled={disabled} loading={loading} onClick={onSubmit}>
         {submitLabel}
       </Button>
       {onCancel && (
-        <Button size="sm" variant="tertiary" onClick={onCancel}>
+        <Button size="sm" variant="secondary" onClick={onCancel}>
           {cancelLabel}
         </Button>
       )}
