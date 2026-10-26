@@ -39,7 +39,7 @@ export type DueDateProximity = 'default' | 'due-soon' | 'overdue';
 const PROXIMITY: Record<DueDateProximity, NonNullable<TagProps['tone']>> = {
   default: 'neutral',
   'due-soon': 'warning',
-  overdue: 'danger',
+  overdue: 'critical',
 };
 
 export interface DueDateTagProps extends Omit<TagProps, 'tone' | 'variant' | 'children'> {

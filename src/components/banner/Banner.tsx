@@ -5,8 +5,8 @@ import { Button } from '../../atoms/button';
 import { Icon, type IconName } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 
-/** The four accent families a Banner can speak in. `danger` is `accent.critical`. */
-export type BannerTone = 'info' | 'success' | 'warning' | 'danger';
+/** The four accent families a Banner can speak in, named as the `accent.*` token families are. */
+export type BannerTone = 'info' | 'success' | 'warning' | 'critical';
 
 /** How loudly, if at all, the banner announces itself when it appears. */
 export type BannerLive = 'off' | 'polite' | 'assertive';
@@ -21,7 +21,7 @@ const TONE_ICON: Record<BannerTone, IconName> = {
   info: 'info-fill',
   success: 'check-circle-fill',
   warning: 'warning-circle-fill',
-  danger: 'warning-fill',
+  critical: 'warning-fill',
 };
 
 /**
@@ -35,7 +35,7 @@ const TONE_GLYPH: Record<BannerTone, string> = {
   info: 'text-accent-info-outline-border-default',
   success: 'text-accent-success-outline-border-default',
   warning: 'text-accent-warning-outline-border-default',
-  danger: 'text-accent-critical-outline-border-default',
+  critical: 'text-accent-critical-outline-border-default',
 };
 
 /** Tone → the word a screen reader hears. The glyph carries it as its name. */
@@ -43,7 +43,7 @@ const TONE_LABEL: Record<BannerTone, string> = {
   info: 'Information',
   success: 'Success',
   warning: 'Warning',
-  danger: 'Error',
+  critical: 'Error',
 };
 
 /**
@@ -97,7 +97,7 @@ const banner = cva(
           'text-accent-warning-tonal-content-default',
           'border-accent-warning-outline-border-default',
         ],
-        danger: [
+        critical: [
           'bg-accent-critical-tonal-surface-default',
           'text-accent-critical-tonal-content-default',
           'border-accent-critical-outline-border-default',
@@ -129,7 +129,7 @@ const TONE_CONTROL: Record<BannerTone, string> = {
     'hover:bg-accent-warning-tonal-surface-hover hover:text-accent-warning-tonal-content-hover',
     'active:bg-accent-warning-tonal-surface-pressed active:text-accent-warning-tonal-content-pressed',
   ].join(' '),
-  danger: [
+  critical: [
     'text-accent-critical-tonal-content-default',
     'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover',
     'active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed',
@@ -156,7 +156,7 @@ const TONE_ACTION: Record<BannerTone, string> = {
     'hover:bg-accent-warning-tonal-surface-hover hover:text-accent-warning-tonal-content-hover hover:border-accent-warning-tonal-content-hover',
     'active:bg-accent-warning-tonal-surface-pressed active:text-accent-warning-tonal-content-pressed active:border-accent-warning-tonal-content-pressed',
   ].join(' '),
-  danger: [
+  critical: [
     'bg-transparent text-accent-critical-tonal-content-default',
     'border-accent-critical-tonal-content-default',
     'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover hover:border-accent-critical-tonal-content-hover',
@@ -208,7 +208,7 @@ interface BannerBaseProps
    * ```tsx
    * // The wrapper is mounted with the form and never unmounts.
    * <div role="status" aria-live="polite" aria-atomic="false">
-   *   {error && <Banner tone="danger" title={error} />}
+   *   {error && <Banner tone="critical" title={error} />}
    * </div>
    * ```
    */

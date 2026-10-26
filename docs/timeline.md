@@ -40,7 +40,7 @@ is a compile error); `actor` renders an `Avatar size="sm"` and the name;
 
 The export's `kind` took VCP lifecycle names — `accepted`, `handoff`,
 `status`. Same ruling as Badge: **that vocabulary belongs to patterns.**
-`tone` is `neutral | brand | info | success | warning | danger`, and the
+`tone` is `neutral | brand | info | success | warning | critical`, and the
 future activity pattern owns the event-kind → tone/icon mapping. (Two of the
 export's kinds also had no ramp behind them — the indigo and amber were raw
 literals.)
@@ -61,7 +61,7 @@ No new tokens.
 | `info` | **5.25:1** | **3.89:1** |
 | `success` | **4.95:1** | **6.60:1** |
 | `warning` | **4.93:1** | **7.66:1** |
-| `danger` | **4.77:1** | **5.06:1** |
+| `critical` | **4.77:1** | **5.06:1** |
 
 Every tone clears the 3:1 UI-graphic bar in both themes; `info` in dark is
 the floor at 3.89:1.
@@ -78,7 +78,7 @@ the floor at 3.89:1.
 ## Don't
 
 - **Don't map VCP statuses to tones at call sites.** Three screens doing
-  `tone={status === 'rejected' ? 'danger' : …}` is the activity pattern
+  `tone={status === 'rejected' ? 'critical' : …}` is the activity pattern
   asking to be written.
 - **Don't make items clickable by wrapping the `<li>`.** Put a real link in
   `title` or `detail`.
