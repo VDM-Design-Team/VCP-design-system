@@ -8,13 +8,16 @@ import { Tag } from '../../atoms/tag';
  * the one way VCP writes a cycle.
  *
  * Read off the Figma `Cycle_Tag` (`8562:11083`, Tags page): outlined, no fill,
- * 32 tall, 8 radius, 14 medium in `neutral.outline.content.default`. That is
- * `Tag`'s `outline` / `neutral` look with two differences, both the design's:
- * it is taller than `Tag`'s `md` (32, not 28) and rounder (`radius.md`, not
- * `radius.sm`), and its border is `stroke.default`, the everyday decorative
+ * 14 medium in `neutral.outline.content.default`. That is `Tag`'s `outline` /
+ * `neutral` look at its `md` size (28 tall, `radius.sm`) with one difference,
+ * the design's: the border is `stroke.default`, the everyday decorative
  * border, not `neutral.outline.border.default`, which is a step darker. The
  * border is decoration here — the words say everything — so the lighter
  * stroke is fine; see docs/cycle-tag.md.
+ *
+ * The Figma frame is 32 tall, but that is the Figma `Tag`'s extra-large size
+ * left on by mistake: the Tag scale is 20 / 24 / 28 / 32, 28 is the large
+ * size every other tag here uses, and `SourceTag` beside it is 28.
  *
  * Cycles are data: pass `code`, `start` and `end` (ISO `yyyy-mm-dd`). The
  * dates are formatted by splitting the string, with no `Date` and no time
@@ -55,7 +58,7 @@ export const CycleTag = React.forwardRef<HTMLSpanElement, CycleTagProps>(
       ref={ref}
       variant="outline"
       tone="neutral"
-      className={cn('h-8 rounded-md border-stroke-default', className)}
+      className={cn('border-stroke-default', className)}
       {...props}
     >
       {`${code} (${formatCycleRange(start, end)})`}

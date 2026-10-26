@@ -11,7 +11,7 @@ const meta = {
       description: {
         component:
           'The cycle an Added Value belongs to: its code and the dates it runs. An outlined ' +
-          '`Tag`, 32 tall, in the design’s lighter border. Cycles are data — pass the code and ' +
+          '`Tag` at its large size, 28 tall, in the design’s lighter border. Cycles are data — pass the code and ' +
           'the ISO start and end dates; the tag writes them the way VCP does everywhere.',
       },
     },
@@ -52,7 +52,7 @@ export const BesideSource: Story = {
 
 /**
  * The dates are written from the ISO string, with no `Date`, so no time zone
- * can move a cycle by a day. The tag is 32 tall, and it reads as one string.
+ * can move a cycle by a day. The tag is 28 tall, and it reads as one string.
  */
 export const FormatAndSize: Story = {
   parameters: { controls: { disable: true } },
@@ -60,7 +60,7 @@ export const FormatAndSize: Story = {
     const text = 'C18 (Sep 20, 2025 - Oct 02, 2026)';
     const tag = within(canvasElement).getByText(text).parentElement;
     await expect(tag).not.toBeNull();
-    await expect(Math.round(tag!.getBoundingClientRect().height)).toBe(32);
+    await expect(Math.round(tag!.getBoundingClientRect().height)).toBe(28);
     await expect(canvasElement.textContent).toBe(text);
     await expect(formatCycleRange('2026-01-01', '2026-12-31')).toBe('Jan 01, 2026 - Dec 31, 2026');
   },

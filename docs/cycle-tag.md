@@ -46,14 +46,18 @@ value that is not a date is shown as given rather than as "undefined".
 | Text | `neutral.outline.content.default` | from `Tag` `outline` / `neutral` |
 | Fill | none (`neutral.outline.surface.default` is transparent) | from `Tag` |
 | Border | `stroke.default`, 1 | `border-stroke-default` |
-| Height, radius | 32, `radius.md` | `h-8 rounded-md` |
+| Height, radius | 28, `radius.sm` | from `Tag` `md` |
 | Type | `label-sm-medium`, 8 padding | from `Tag` |
 
-**Two differences from `Tag`, both the design's.** The tag is 32 tall with an 8
-radius, where `Tag`'s `md` is 28 with 6 — the cycle's text is longer and sits
-alone, so the design gives it more room. And the border is `stroke.default`, not
+**One difference from `Tag`, the design's.** The border is `stroke.default`, not
 `neutral.outline.border.default`, which is a step darker: the border here is
 decoration and the words carry everything, so the lighter stroke is as drawn.
+
+**The size is `Tag`'s `md`, 28 — not the Figma frame's 32.** `Cycle_Tag` in Figma
+was left at the `Tag` set's extra-large size (the scale is 20 / 24 / 28 / 32 there),
+which is 32 tall with an 8 radius. Every other tag, `SourceTag` beside it
+included, is the large 28, so the Figma component was wrong and not the design.
+It is 28 here, and the Figma frame is to be corrected to match.
 
 Contrast: text **7.58:1** on `surface.elevated` light, **9.85:1** dark. The
 border is 1.48:1 in light and 1.93:1 in dark, which is fine for decoration — it
