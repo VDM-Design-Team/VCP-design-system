@@ -10,6 +10,16 @@ const FIGMA_ITEMS = [
   { key: 'logout', label: 'Logout' },
 ];
 
+/* A local stand-in for a profile photo (an inline SVG), so the story never needs the network. */
+const PHOTO =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+      '<rect width="64" height="64" fill="#cbd5e1"/>' +
+      '<circle cx="32" cy="25" r="12" fill="#64748b"/>' +
+      '<path d="M8 64c2-16 14-24 24-24s22 8 24 24z" fill="#475569"/></svg>',
+  );
+
 const meta = {
   title: 'Components/Overlays/UserMenu',
   component: UserMenu,
@@ -102,6 +112,16 @@ export const CustomItems: Story = {
     await expect(canvas.getAllByRole('menuitem')).toHaveLength(4);
     await userEvent.click(canvas.getByRole('menuitem', { name: 'Cycle Settings' }));
     await expect(args.onSelect).toHaveBeenCalledWith('cycles');
+  },
+};
+
+/** With `user.src` the avatar is a photo; without one (or if it fails to load) it shows initials. */
+export const WithPhoto: Story = {
+  args: { user: { name: 'Francis M.', src: PHOTO } },
+  play: async ({ canvasElement }) => {
+    const img = canvasElement.querySelector('img');
+    await expect(img).not.toBeNull();
+    await expect(img?.getAttribute('src')).toBe(PHOTO);
   },
 };
 

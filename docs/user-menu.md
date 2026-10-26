@@ -25,7 +25,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `user` | `{ name, src? }` | — | `name` is what the trigger says ("Francis M."); `src` a photo, else initials |
+| `user` | `{ name, src? }` | — | `name` is what the trigger says ("Francis M."); `src` is a photo URL shown in the avatar — without one, or if it fails to load, the avatar draws initials (see the `WithPhoto` story) |
 | `items` | `MenuItem[]` | Settings, Logout | The menu's rows, exactly as `Menu` takes them: `key`, `label`, optional `icon`, `tone: 'danger'`, `disabled`, `{ divider: true }`. The default is exported as `DEFAULT_USER_MENU_ITEMS` |
 | `onSelect` | `(key?) => void` | — | Fires with the activated row's `key`, after that row's own `onClick` |
 | `align` | `'left' \| 'right'` | `right` | Which edge of the menu lines up with the trigger. The bar sits at the right of the page, so the menu opens leftwards |
