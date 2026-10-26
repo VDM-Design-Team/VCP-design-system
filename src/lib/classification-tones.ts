@@ -15,7 +15,7 @@
  * an arbitrary value either: "no fill" has no colour to name. ds-lint-ignore
  */
 export type ClassificationVariant = 'textual' | 'outline' | 'tonal' | 'filled';
-export type ClassificationTone = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
+export type ClassificationTone = 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'critical';
 
 export const CLASSIFICATION_STYLE: Record<ClassificationVariant, Record<ClassificationTone, string>> =
   {
@@ -25,7 +25,7 @@ export const CLASSIFICATION_STYLE: Record<ClassificationVariant, Record<Classifi
       info: 'text-accent-info-outline-content-default',
       success: 'text-accent-success-outline-content-default',
       warning: 'text-accent-warning-outline-content-default',
-      danger: 'text-accent-critical-outline-content-default',
+      critical: 'text-accent-critical-outline-content-default',
     },
     outline: {
       neutral:
@@ -36,7 +36,7 @@ export const CLASSIFICATION_STYLE: Record<ClassificationVariant, Record<Classifi
         'border border-accent-success-outline-border-default bg-accent-success-outline-surface-default text-accent-success-outline-content-default',
       warning:
         'border border-accent-warning-outline-border-default bg-accent-warning-outline-surface-default text-accent-warning-outline-content-default',
-      danger:
+      critical:
         'border border-accent-critical-outline-border-default bg-accent-critical-outline-surface-default text-accent-critical-outline-content-default',
     },
     /* No `accent.brand.*`/`accent.neutral.*` triad, so those two are
@@ -47,7 +47,7 @@ export const CLASSIFICATION_STYLE: Record<ClassificationVariant, Record<Classifi
       info: 'bg-accent-info-tonal-surface-default text-accent-info-tonal-content-default',
       success: 'bg-accent-success-tonal-surface-default text-accent-success-tonal-content-default',
       warning: 'bg-accent-warning-tonal-surface-default text-accent-warning-tonal-content-default',
-      danger: 'bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default',
+      critical: 'bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default',
     },
     filled: {
       neutral: 'bg-surface-neutral-stronger text-text-inverted-primary',
@@ -55,6 +55,6 @@ export const CLASSIFICATION_STYLE: Record<ClassificationVariant, Record<Classifi
       info: 'bg-accent-info-filled-surface-default text-accent-info-filled-content-default',
       success: 'bg-accent-success-filled-surface-default text-accent-success-filled-content-default',
       warning: 'bg-accent-warning-filled-surface-default text-accent-warning-filled-content-default',
-      danger: 'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
+      critical: 'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
     },
   };

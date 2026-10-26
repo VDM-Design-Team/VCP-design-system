@@ -101,6 +101,34 @@ export const WithDangerItem: Story = {
   },
 };
 
+/**
+ * A list of options instead of actions: `selected` marks the current choice. The
+ * items become `menuitemradio` with `aria-checked`, and the chosen one carries a
+ * check, so the state is announced and not colour alone.
+ */
+export const WithSelectedItem: Story = {
+  name: 'With a selected item',
+  args: {
+    trigger: <Button variant="secondary">Domain: Procurement</Button>,
+    items: [
+      { key: 'finance', label: 'Finance', selected: false },
+      { key: 'procurement', label: 'Procurement', selected: true },
+      { key: 'logistics', label: 'Logistics', selected: false },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Domain: Procurement' }));
+    await screen.findByRole('menu');
+    const chosen = screen.getByRole('menuitemradio', { name: 'Procurement' });
+    await expect(chosen).toHaveAttribute('aria-checked', 'true');
+    await expect(screen.getByRole('menuitemradio', { name: 'Finance' })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    );
+    await expect(screen.getAllByRole('menuitemradio')).toHaveLength(3);
+  },
+};
+
 /** A disabled item stays visible so the action is discoverable, but the keyboard skips it. */
 export const WithDisabledItem: Story = {
   name: 'With a disabled item',

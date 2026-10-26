@@ -55,7 +55,8 @@ of asking the person to switch to another browser. Never leave them with just a 
 
 - Do not start a second Storybook if 6006 is already serving.
 - It refuses rather than guesses. If it stops: **uncommitted changes** — offer to stash or
-  commit, and name the files; **authentication** — `gh auth login`; **diverged history** —
+  commit, and name the files; **authentication** — `gh auth login` for the pull, or the
+  one-time `npm login` to GitHub Packages that the error prints, for GDL; **diverged history** —
   do not force anything, an engineer looks at it.
 - If they are mid-work on a branch and do not want to move, skip the pull, say you
   skipped it, and open the published Storybook in the app's browser preview instead:

@@ -56,13 +56,12 @@ remove button — not a `Badge` (deliberately non-interactive) and not a `Chip`
 | Tone (label on its pill) | Light | Dark |
 |---|---|---|
 | `blue` | **8.50:1** | **7.23:1** |
-| `green` | **8.24:1** | **4.50:1** |
+| `green` | **8.24:1** | **6.49:1** |
 | `red` | **8.22:1** | **6.85:1** |
 | `yellow` | **8.07:1** | **6.37:1** |
 
-`green` in dark sits exactly on AA's 4.5:1 — flagged in the token layer's
-own history once already; any darkening of `accent.green.faint` breaks it
-first.
+`green` in dark sat exactly on AA's 4.5:1 until GDL fixed `color.green.800`
+(October 2026); see Avatar's doc.
 
 ## Accessibility
 

@@ -60,7 +60,7 @@ controls flip every axis.
 | `onClear` | `() => void` | — | What Clear does. The panel holds no value of its own to reset, so supply this whenever the button is shown |
 | `clearLabel` | `string` | `'Clear'` | Figma labels the range variant's button "Cancel" |
 | `min` / `max` | ISO | — | Inclusive bounds; outside days and months disable, arrows refuse to leave |
-| `markers` | `Record<iso, 'success' \| 'warning' \| 'danger'>` | `{}` | Dot under the day — pair with a legend |
+| `markers` | `Record<iso, 'success' \| 'warning' \| 'critical'>` | `{}` | Dot under the day — pair with a legend |
 | `flagged` | `string[]` | `[]` | Tinted unavailable-but-selectable days; ", flagged" joins the day's name |
 | `today` | ISO | the real today | Drawn semibold, `aria-current="date"`. Stories pin it |
 | `className` | `string` | — | On the panel (the InAPopover story strips its shadow inside the popover) |

@@ -30,7 +30,7 @@ const fill = cva('transition-[stroke-dasharray] duration-500', {
       brand: 'stroke-surface-brand-strong',
       success: 'stroke-accent-success-filled-surface-default',
       warning: 'stroke-accent-warning-filled-surface-default',
-      danger: 'stroke-accent-critical-filled-surface-default',
+      critical: 'stroke-accent-critical-filled-surface-default',
     },
   },
   defaultVariants: { tone: 'brand' },
