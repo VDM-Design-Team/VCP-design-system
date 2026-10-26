@@ -113,20 +113,100 @@ function bodyChildOf(el: HTMLElement): HTMLElement {
  * ------------------------------------------------------------------------- */
 
 /**
+ * Storybook-only switches — **not Modal props**. The component never hears about
+ * them: the story turns them into a real `description` / `footer`, or their
+ * absence. A Modal shows an optional part by being given it, so there is nothing
+ * to switch off on the component itself.
+ */
+type PlaygroundArgs = React.ComponentProps<typeof Modal> & {
+  withDescription?: boolean;
+  withFooter?: boolean;
+};
+
+/**
  * Title, description, body and a footer of actions — the plainest useful dialog,
  * at the default `md` width, over some page content so the backdrop's dim is
- * visible.
+ * visible. The `description` and `footer` controls show and hide those parts.
  */
-export const Default: Story = {
+export const Default: StoryObj<PlaygroundArgs> = {
+  args: {
+    withDescription: true,
+    withFooter: true,
+    description: 'This cannot be undone from the supplier portal.',
+  },
+  argTypes: {
+    withDescription: {
+      control: 'boolean',
+      name: 'description',
+      table: { disable: true },
+    },
+    withFooter: {
+      control: 'boolean',
+      name: 'footer',
+      table: { disable: true },
+    },
+  },
+  render: (storyArgs: PlaygroundArgs) => {
+    const { withDescription, withFooter, description, ...args } = storyArgs;
+    return (
+      <Background>
+        <Modal
+          {...args}
+          description={withDescription ? description : undefined}
+          footer={withFooter ? <ConfirmFooter onClose={args.onClose} /> : undefined}
+        />
+      </Background>
+    );
+  },
+};
+
+/**
+ * An optional part that is empty renders nothing. A blank `description` or
+ * `footer` (an empty string, `false`) leaves no empty caption or action row
+ * holding space, so the title sits straight over the body.
+ */
+export const EmptyPartsRenderNothing: Story = {
+  args: { title: 'Nothing optional', description: '', footer: false },
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    await expect(dialog.querySelector('p[id$="description"]')).toBeNull();
+    await expect(dialog.querySelector('footer')).toBeNull();
+    /* No description means nothing for aria-describedby to point at. */
+    await expect(dialog.hasAttribute('aria-describedby')).toBe(false);
+    /* The gap under the header is the same 12 with a text body and no caption. */
+    const head = dialog.querySelector('header') as HTMLElement;
+    const body = head.nextElementSibling as HTMLElement;
+    await expect(
+      parseFloat(getComputedStyle(head).paddingBottom) + parseFloat(getComputedStyle(body).paddingTop),
+    ).toBe(12);
+  },
+};
+
+/**
+ * The gap under the header is one fixed 12, whatever the body opens with — a
+ * control here, running text in Default. (It is the header's 8 plus the body's own
+ * 4, so it survives scrolling.)
+ */
+export const BodyStartsWithControl: Story = {
+  args: { title: 'Reject this AV?', size: 'sm' },
   render: (args) => (
-    <Background>
-      <Modal
-        {...args}
-        description="This cannot be undone from the supplier portal."
-        footer={<ConfirmFooter onClose={args.onClose} />}
-      />
-    </Background>
+    <Modal {...args} footer={<ConfirmFooter onClose={args.onClose} />}>
+      <Field label="Reason">
+        <Input />
+      </Field>
+    </Modal>
   ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    const body = dialog.querySelector('header')!.nextElementSibling as HTMLElement;
+    /* 12 at rest: the header's 8 below its text plus the body's own 4. */
+    const head = dialog.querySelector('header') as HTMLElement;
+    await expect(
+      parseFloat(getComputedStyle(head).paddingBottom) + parseFloat(getComputedStyle(body).paddingTop),
+    ).toBe(12);
+    /* Room for the last control's focus ring (2px outline + 2px offset). */
+    await expect(parseFloat(getComputedStyle(body).paddingBottom)).toBeGreaterThanOrEqual(4);
+  },
 };
 
 /**
