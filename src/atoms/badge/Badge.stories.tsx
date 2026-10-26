@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Badge } from './Badge';
 import { Icon } from '../icon';
 
-const TONES = ['neutral', 'brand', 'info', 'success', 'warning', 'danger'] as const;
+const TONES = ['neutral', 'brand', 'info', 'success', 'warning', 'critical'] as const;
 
 const meta = {
   title: 'Atoms/Badge',
@@ -103,7 +103,7 @@ export const WithLeadingIcon: Story = {
       <Badge {...args} tone="warning" icon={<Icon name="clock" size="md" />}>
         Awaiting review
       </Badge>
-      <Badge {...args} tone="danger" icon={<Icon name="warning-circle" size="md" />}>
+      <Badge {...args} tone="critical" icon={<Icon name="warning-circle" size="md" />}>
         Blocked
       </Badge>
       <Badge {...args} tone="info" size="sm" icon={<Icon name="info" size="sm" />}>
@@ -166,7 +166,7 @@ export const MixedRow: Story = {
       <Badge tone="success" size="sm" icon={<Icon name="check-circle" size="sm" />}>Passing</Badge>
       <Badge tone="neutral" size="sm">v2.4.1</Badge>
       <Badge tone="warning" size="sm" icon={<Icon name="clock" size="sm" />}>Stale</Badge>
-      <Badge tone="danger" size="sm">2 failures</Badge>
+      <Badge tone="critical" size="sm">2 failures</Badge>
       <Badge tone="info" size="sm">Read-only</Badge>
     </div>
   ),
@@ -195,7 +195,7 @@ export const LightAndDark: Story = {
             ))}
             <div className="flex flex-wrap items-center gap-2">
               <Badge tone="success" icon={<Icon name="check-circle" size="md" />}>Approved</Badge>
-              <Badge tone="danger" trailingIcon={<Icon name="x" size="md" />}>Rejected</Badge>
+              <Badge tone="critical" trailingIcon={<Icon name="x" size="md" />}>Rejected</Badge>
             </div>
           </div>
         </div>

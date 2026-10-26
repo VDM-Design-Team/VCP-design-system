@@ -37,7 +37,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|
 | `default` | `neutral` | `surface.neutral.subtle` on `text.secondary` |
 | `due-soon` | `warning` | `accent.warning.tonal.*` |
-| `overdue` | `danger` | `accent.critical.tonal.*` |
+| `overdue` | `critical` | `accent.critical.tonal.*` |
 
 **Two things this does not own.**
 

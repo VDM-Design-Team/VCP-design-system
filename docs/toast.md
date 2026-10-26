@@ -44,7 +44,7 @@ action never auto-dismisses.
 
 **Never use a Toast for an error the user must fix.** Errors that block a task
 belong next to the thing that is broken — a `Field` error, or a `Banner` at the
-top of the form. `tone="danger"` on a Toast is for something that failed
+top of the form. `tone="critical"` on a Toast is for something that failed
 *behind* the user, like a background save.
 
 ## Parts
@@ -60,7 +60,7 @@ top of the form. `tone="danger"` on a Toast is for something that failed
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `tone` | `info \| success \| warning \| danger` | `info` | `danger` maps to `accent.critical`, and routes to the assertive region |
+| `tone` | `info \| success \| warning \| critical` | `info` | `critical` is the `accent.critical` family (it was `danger` before October 2026), and routes to the assertive region |
 | `title` | `ReactNode` | — | The headline. One clause. Left out, `false` or blank, nothing renders for it |
 | `children` | `ReactNode` | — | Supporting detail. Usually unnecessary. Left out, `false` or blank, no description renders and the row is centred |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
@@ -149,7 +149,7 @@ directions.
   waits for a gap in speech. A "Draft saved" confirmation that cuts a user off
   mid-sentence costs them their place in the page and buys nothing: the save
   already happened, and nothing about it is urgent.
-- **`role="alert"` — assertive — takes `danger` only.** Assertive interrupts
+- **`role="alert"` — assertive — takes `critical` only.** Assertive interrupts
   whatever is being read, immediately. That is only worth its cost when carrying
   on would waste the user's work: a failed save, a dropped connection, an upload
   that did not finish. Route ordinary confirmations here and users learn to tune
@@ -212,12 +212,12 @@ So nothing about the tone rests on colour:
 
 - **The glyphs are four different shapes** — `info-fill` (circle-i),
   `check-circle-fill`, `warning-circle-fill` (circle-exclamation, for warning)
-  and `warning-fill` (triangle, for danger) — which survive greyscale, a colour vision
+  and `warning-fill` (triangle, for critical) — which survive greyscale, a colour vision
   deficiency, and a screenshot.
 - **Each glyph carries the tone as its accessible name**, so the tone survives
   into the announcement as a word: *"Error, Save failed, we could not reach the
   server"*. Override with `toneLabel` to localise; never set it to `''`.
-- **The text always says what happened.** `<Toast tone="danger" />` with no
+- **The text always says what happened.** `<Toast tone="critical" />` with no
   title is a red rectangle that means nothing to anyone.
 
 ## Tokens
@@ -240,7 +240,7 @@ The tone lives in two places, both the accent's own bright colour,
 | `info` | 3.76:1 | 2.79:1 |
 | `success` | **2.22:1** | 4.54:1 |
 | `warning` | **1.91:1** | 4.98:1 |
-| `danger` | 3.81:1 | 3.07:1 |
+| `critical` | 3.81:1 | 3.07:1 |
 
 **Several of these are below 3:1, and that is a deliberate exception, signed off by
 design (October 2026).** It is a weaker case than `Banner`'s: there the tint also

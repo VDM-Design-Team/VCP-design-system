@@ -1,7 +1,9 @@
 # Type tokens — the ramp, and what replaced what
 
 Usage guidance for the semantic typography tokens in
-`tokens/semantic/type.json`, rebuilt 24 September 2026. See
+`tokens/semantic/type.json`, rebuilt 24 September 2026. Since October 2026
+the ramp lives in GDL (`@vdm-design-team/gdl`), the parent design system,
+and VCP takes it unchanged. See
 [Foundations/Tokens](../src/foundations/Foundations.stories.tsx) in Storybook
 for the tokens in context; this doc is the ramp itself and the migration from
 the ramp it replaced.
@@ -83,5 +85,5 @@ same size, or within a pixel of each other.
   API did not change. Don't "helpfully" rename those keys to match the new
   ramp; that would be an unrelated breaking change.
 - If a component needs a size/weight combination the table doesn't list,
-  that's a real gap — add the token to `tokens/semantic/type.json` first
+  that's a real gap — add the token to GDL's `tokens/semantic/type.json` first
   (rule 1 in `CLAUDE.md`), don't approximate with the nearest existing one.
