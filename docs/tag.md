@@ -39,7 +39,7 @@ originally duplicated an identical shell between them instead of sharing one.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | All four are VCP's own semantics — GDL's Tag primitive doesn't dictate them |
-| `tone` | `neutral \| brand \| info \| success \| warning \| danger` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
+| `tone` | `neutral \| brand \| info \| success \| warning \| critical` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
 | `size` | `xs \| sm \| md \| lg` | `md` | 20 / 24 / 28 / 32 tall, with 10 / 12 / 14 / 16 type. `sm` for dense tables and inline-with-body-text. See "Sizes" below |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the tag's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
