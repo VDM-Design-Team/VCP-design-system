@@ -4,7 +4,6 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
-import { expect, within } from 'storybook/test';
 
 const meta = {
   title: 'Patterns/TopBar',
