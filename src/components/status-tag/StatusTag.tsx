@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
- * StatusPill — an Added Value's status, worn as a tag: a `Tag` carrying
+ * StatusTag — an Added Value's status, worn as a tag: a `Tag` carrying
  * VCP's status vocabulary and the status → treatment mapping that
  * docs/tag.md promised would live in exactly one place — this one.
  *
@@ -25,8 +25,8 @@ import { Tag, type TagProps } from '../../atoms/tag';
  *   that `In Progress` used to carry alone.
  *
  * ```tsx
- * <StatusPill status="Draft" />          // spine — its own tone
- * <StatusPill custom={step.label} />     // domain — the shared tone
+ * <StatusTag status="Draft" />          // spine — its own tone
+ * <StatusTag custom={step.label} />     // domain — the shared tone
  * ```
  *
  * The two props are mutually exclusive by type, so a domain label can never
@@ -44,13 +44,13 @@ import { Tag, type TagProps } from '../../atoms/tag';
  * `Status_Tag_General` is `AVStatus`, and `Status_Tag_Design_Only` and
  * `Status_Tag_Development_Only` are those domains' chains.
  *
- * **`Review` has two treatments**, and they are the two Review pills the
+ * **`Review` has two treatments**, and they are the two Review tags the
  * library draws. Tonal is the label style — what a user sees. Filled is the
  * button style, for a viewer who can act on it: an admin, or the AV's
  * initiator. Pass `actionable` for the second. The status is the same either
  * way; only who is looking changes.
  *
- * (The library names its second Review pill `Review No Action`. There is no
+ * (The library names its second Review tag `Review No Action`. There is no
  * such state — confirmed 7 Sep 2026 — and the variant is being renamed.)
  *
  * There is no dot: the Figma tag is text on a fill, and text is what
@@ -138,7 +138,7 @@ const ACTIONABLE_TREATMENT: Partial<Record<AVStatus, Treatment>> = {
  */
 const CUSTOM_TREATMENT: Treatment = { tone: 'info' };
 
-type StatusPillBase = Omit<
+type StatusTagBase = Omit<
   TagProps,
   'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children' | 'status'
 > & {
@@ -150,7 +150,7 @@ type StatusPillBase = Omit<
   actionable?: boolean;
 };
 
-export type StatusPillProps = StatusPillBase &
+export type StatusTagProps = StatusTagBase &
   (
     | {
         /** A spine status. Typo-checked; each has its own treatment. */
@@ -168,7 +168,7 @@ export type StatusPillProps = StatusPillBase &
       }
   );
 
-export const StatusPill = React.forwardRef<HTMLSpanElement, StatusPillProps>(
+export const StatusTag = React.forwardRef<HTMLSpanElement, StatusTagProps>(
   ({ status, custom, actionable, ...props }, ref) => {
     const label = status ?? custom ?? '';
     const { tone, variant } = status
@@ -181,4 +181,4 @@ export const StatusPill = React.forwardRef<HTMLSpanElement, StatusPillProps>(
     );
   },
 );
-StatusPill.displayName = 'StatusPill';
+StatusTag.displayName = 'StatusTag';

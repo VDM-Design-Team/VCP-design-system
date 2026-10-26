@@ -48,7 +48,7 @@ them in.
 The **label** is `neutral.outline.content.default` for all three, same reason
 as `UrgencyTag`: the glyph carries the scale so the column reads as a ranking.
 
-**The vocabulary is closed, unlike `StatusPill`'s.** Statuses have a per-domain
+**The vocabulary is closed, unlike `StatusTag`'s.** Statuses have a per-domain
 middle this repo does not own; types do not — the design draws exactly three
 and the numbering *is* the meaning. A fourth gets a row here, which is a
 deliberate compile error at every call site rather than a silent fall-through.

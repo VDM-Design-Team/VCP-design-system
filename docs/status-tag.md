@@ -1,4 +1,4 @@
-# StatusPill
+# StatusTag
 
 An Added Value's status, worn as a tag — a component composing `Tag`,
 and the owner of VCP's status vocabulary: this file and its `.tsx` are where
@@ -23,11 +23,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `StatusPill` | Any surface showing an AV's status: tables, cards, detail panels |
+| `StatusTag` | Any surface showing an AV's status: tables, cards, detail panels |
 | `Badge` | Generic classification with no VCP vocabulary |
-| The options dropdown *(to port)* | **Changing** a status — this pill only shows one |
+| The options dropdown *(to port)* | **Changing** a status — this tag only shows one |
 
-**The tier rule, demonstrated.** StatusPill composes one atom (`Tag`) into
+**The tier rule, demonstrated.** StatusTag composes one atom (`Tag`) into
 one richer unit — a component, per CLAUDE.md's composition test. The VCP
 vocabulary it carries doesn't change its tier; it changes its *ownership*:
 the status → tone mapping lives here and only here.
@@ -47,8 +47,8 @@ a spine treatment, and a misspelled spine status can never silently fall
 through to the custom one.
 
 ```tsx
-<StatusPill status="Draft" />          // spine — its own tone
-<StatusPill custom={step.label} />     // domain — the shared tone
+<StatusTag status="Draft" />          // spine — its own tone
+<StatusTag custom={step.label} />     // domain — the shared tone
 ```
 
 `AV_STATUSES` exports the spine vocabulary in lifecycle order for pickers,
@@ -76,14 +76,14 @@ token that already carried that exact hex.
 | Reopened | info tonal | `#dbeafe` / `#1447e6` |
 | Backlog | neutral tonal | `#e2e8f0` / `#334155` |
 
-**`Review` is drawn twice**, and both pills are in the library. Tonal is the
+**`Review` is drawn twice**, and both tags are in the library. Tonal is the
 label style — what a user sees. Filled is the button style, for a viewer who
 can act on it: an admin, or the AV's initiator. Same status; only who is
 looking changes.
 
 ```tsx
-<StatusPill status="Review" />              // a user sees a label
-<StatusPill status="Review" actionable />   // an admin sees a call to act
+<StatusTag status="Review" />              // a user sees a label
+<StatusTag status="Review" actionable />   // an admin sees a call to act
 ```
 
 `actionable` on any other status is a no-op. The design draws one treatment
@@ -132,14 +132,14 @@ error. Seven of its eleven members were domain steps, so that guarantee does
 not survive — there is nothing left to extract from. It was the right
 guarantee for a closed vocabulary and there is no equivalent for an open one.
 
-**Answered 7 September.** The library draws two Review pills, and the second
+**Answered 7 September.** The library draws two Review tags, and the second
 is named `Review No Action` — which is not a state and never was. It is one
 status with two treatments: a label for a user, the button style for someone
 who can act. So `Review No Action` is gone from `AVStatus` and `actionable`
 carries the difference. The Figma variant is being renamed.
 
 This also settles the colour-alone worry the earlier note raised: the two
-pills are the same status, so nothing is being distinguished by colour that
+tags are the same status, so nothing is being distinguished by colour that
 the text should be carrying.
 
 ## Accessibility

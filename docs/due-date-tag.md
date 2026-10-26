@@ -1,4 +1,4 @@
-# DueDatePill
+# DueDateTag
 
 An Added Value's due date, worn as a tag that changes colour as the date
 approaches — a component composing `Tag`, and the owner of VCP's due-date →
@@ -19,9 +19,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `DueDatePill` | An AV's due date anywhere it appears with proximity meaning |
+| `DueDateTag` | An AV's due date anywhere it appears with proximity meaning |
 | `Tag` | A date with no urgency to it |
-| `DatePicker` | **Changing** a date — this pill only shows one |
+| `DatePicker` | **Changing** a date — this tag only shows one |
 
 ## Props
 
@@ -43,7 +43,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 *The text.* It takes an already-formatted string. How a date reads —
 "October 1, 2025", "1 Oct", "in 3 days" — is a locale and product decision a
-design-system pill has no business making.
+design-system tag has no business making.
 
 *The threshold.* `dueDateTone` does the comparing, but `soonWithinDays` has no
 default and never will get one here. How many days ahead counts as "soon" is a
@@ -51,9 +51,9 @@ product rule that differs by domain, and a design system that invents one has
 quietly made a product decision on someone else's behalf.
 
 ```tsx
-<DueDatePill proximity={dueDateTone({ due, soonWithinDays: 7 })}>
+<DueDateTag proximity={dueDateTone({ due, soonWithinDays: 7 })}>
   {due.toLocaleDateString('en-US', { dateStyle: 'long' })}
-</DueDatePill>
+</DueDateTag>
 ```
 
 Both dates are floored to local midnight before comparing, so a task due today
@@ -63,7 +63,7 @@ One Figma deviation: Figma's Default row is `neutral.tonal.*` (slate-200 on
 slate-700); `Tag`'s neutral tonal is `surface.neutral.subtle` on
 `text.secondary` — slate-100 on slate-700. One step of slate apart on the fill,
 identical text. The `Tag` tone is used rather than adding a near-duplicate
-token family, so every neutral pill in the system stays one colour. Modelling
+token family, so every neutral tag in the system stays one colour. Modelling
 the full neutral families belongs with issue #103.
 
 ## Accessibility
@@ -71,7 +71,7 @@ the full neutral families belongs with issue #103.
 - Contrast on `surface.elevated`, all three proximities: **≥ 5.6:1** light,
   **≥ 5.1:1** dark. Inherited from `Tag`'s tonal pairs.
 - **Colour is not the only cue** for the reader who needs the fact: the date
-  itself is the text. A pill that said only "Overdue" in red would fail; this
+  itself is the text. A tag that said only "Overdue" in red would fail; this
   one says the date.
 - Not interactive, so the 40px target minimum does not apply.
 

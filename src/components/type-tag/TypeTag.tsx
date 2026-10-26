@@ -17,7 +17,7 @@ import { Tag } from '../../atoms/tag';
  * stroke each step — so the column reads as a ranking rather than three
  * unrelated labels, and it still reads that way in greyscale (WCAG 1.4.1).
  *
- * **The vocabulary is closed, unlike `StatusPill`'s.** Statuses have a
+ * **The vocabulary is closed, unlike `StatusTag`'s.** Statuses have a
  * per-domain middle that this repo does not own; types do not — the design
  * draws exactly three and the numbering is the meaning. If a fourth is ever
  * defined it gets a row here, which is a deliberate compile error at every

@@ -58,7 +58,7 @@ copies that exactly:
 | Bar height inside the row | the ramp step's `font-size` | `h-(--text-<step>)` |
 | Space between bars | the leading, i.e. `line-height − font-size` | falls out of the two above — there is no `gap` utility |
 
-Both variables are emitted into `dist/theme.css` from `tokens/semantic/type.json`,
+Both variables are emitted into `dist/theme.css` from the `type.*` ramp (GDL's `tokens/semantic/type.json`),
 so three `body-md` lines occupy precisely the height of three lines of body-md
 copy and the swap to real text moves nothing. No number appears anywhere in the
 component.

@@ -24,7 +24,7 @@ import {
  * This is the shared shell every contextual tag composes — `TypeTag`,
  * `UrgencyTag`, and whatever comes next — each owning its own vocabulary →
  * tone mapping on top. Introducing a new tag family means composing this,
- * the way `StatusPill`/`DueDatePill` compose it, never a new
+ * the way `StatusTag`/`DueDateTag` compose it, never a new
  * hand-rolled shell.
  *
  * Tag is not a control: it takes no focus and fires no events, same as
