@@ -454,10 +454,15 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
-            <h2 className="font-sans text-title-md-bold text-text-primary">{title}</h2>
+            <h2 className="font-sans text-title-sm-bold text-text-primary">{title}</h2>
             {infoText && (
               <Tooltip content={infoText} placement="bottom">
-                <IconButton icon="info" label="About this chart" size="xs" />
+                <IconButton
+                  icon="info"
+                  label="About this chart"
+                  size="xs"
+                  className="text-text-tertiary hover:text-text-secondary"
+                />
               </Tooltip>
             )}
           </div>
@@ -499,7 +504,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             <div
               key={i}
               className={cn(
-                'flex h-9 items-center justify-center border border-stroke-subtle font-sans text-caption-md-semibold text-text-primary',
+                'flex h-9 items-center justify-center border border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
                 i === 0 && 'rounded-t-md',
               )}
             >
@@ -513,7 +518,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           >
             <span className="text-text-brand-medium">{arrow('previous')}</span>
-            <span className="font-sans text-caption-md-bold text-text-primary" aria-live="polite">
+            <span className="font-sans text-body-sm-semibold text-text-primary" aria-live="polite">
               {period.navLabel}
             </span>
             <span className="text-text-brand-medium">{arrow('next')}</span>
@@ -536,7 +541,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   <div
                     key={`${g.label}-${i}`}
                     style={{ width: g.span * CELL }}
-                    className="flex h-9 items-center justify-center border-r border-stroke-subtle font-sans text-caption-md-semibold text-text-secondary"
+                    className="flex h-9 items-center justify-center border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
                   >
                     {g.label}
                   </div>
@@ -552,7 +557,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   aria-current={isToday(i) ? 'date' : undefined}
                   style={{ width: CELL }}
                   className={cn(
-                    'flex h-16 shrink-0 items-center justify-center border-r border-stroke-subtle font-sans text-body-md-medium text-text-secondary',
+                    'flex h-16 shrink-0 items-center justify-center border-r border-stroke-subtle font-sans text-body-sm-medium text-text-secondary',
                     isToday(i) && cn(todayCell, 'text-text-brand-medium'),
                   )}
                 >
@@ -593,22 +598,18 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 hidden = closed;
                 return (
                   <div key={row.id} className="flex border-b border-stroke-default bg-surface-neutral-subtle">
-                    <div
-                      style={{ width: LABEL }}
-                      className="sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-neutral-subtle"
-                    >
+                    {/* No edge on the right, and the name and count share one line: a long one runs on over the grid rather than wrapping. */}
+                    <div style={{ width: LABEL }} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
                       <button
                         type="button"
                         aria-expanded={!closed}
                         onClick={() => fold(row.id)}
-                        className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
+                        className="flex w-max min-w-full items-center gap-2 whitespace-nowrap px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
                       >
                         <Icon name={closed ? 'caret-right' : 'caret-down'} size={16} className="shrink-0 text-text-secondary" />
-                        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                          <span className="font-sans text-caption-md-bold text-text-primary">{row.project.name}</span>
-                          <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
-                            {cardinal(row.count, 'AV', 'AVs')} | {row.points} pts
-                          </span>
+                        <span className="font-sans text-body-sm-semibold text-text-primary">{row.project.name}</span>
+                        <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
+                          {cardinal(row.count, 'AV', 'AVs')} | {row.points} pts
                         </span>
                       </button>
                     </div>
@@ -659,7 +660,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                       className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
                     >
                       <Icon name={expanded ? 'caret-down' : 'caret-right'} size={16} className="shrink-0 text-text-secondary" />
-                      <span className="min-w-0 flex-1 truncate font-sans text-body-md-semibold text-text-primary">{user.name}</span>
+                      <span className="min-w-0 flex-1 truncate font-sans text-body-sm-semibold text-text-primary">{user.name}</span>
                     </button>
                     {expanded && stats.length > 0 && (
                       <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
@@ -710,7 +711,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             })}
             {rows.length === 0 && (
               <p
-                className="m-0 p-6 text-center font-sans text-body-md-regular text-text-tertiary"
+                className="m-0 p-6 text-center font-sans text-body-sm-regular text-text-tertiary"
                 style={{ marginLeft: LABEL }}
               >
                 Nothing matches these filters.
