@@ -24,7 +24,7 @@ import { cn } from '../../lib/cn';
 semantic `stroke-*` token class — a token class, never a hex.
 
 `size="icon"` is the small decorative one from the table rows: a 20 box with
-the ring 16 across inside it, thin, and no numeral. Any other size goes the same
+the ring 16 across inside it, thin, and never any text. Any other size goes the same
 way with an empty `label` (`null` or `""`): with no numeral and no caption the
 text layer is not rendered at all, just the ring. Either way it is still a
 meter, so give it an `aria-label`.
@@ -56,7 +56,7 @@ export interface DonutChartProps
   value: number;
   /** The whole. The announced value stays in real units. */
   max?: number;
-  /** Outer diameter in SVG units, or `"icon"`: a 20 box around a 16 ring, no numeral. */
+  /** Outer diameter in SVG units, or `"icon"`: a 20 box around a 16 ring, no text. */
   size?: number | 'icon';
   /** Ring thickness in SVG units. Defaults to 16, or 2 for `size="icon"`. */
   thickness?: number;
@@ -72,7 +72,7 @@ export interface DonutChartProps
   /**
    * Replaces the centred percentage. Visual only — the meter announces numbers.
    * Empty (`null` or `""`) removes the numeral; with no caption either, the ring
-   * is drawn alone. `size="icon"` starts empty.
+   * is drawn alone. `size="icon"` never draws text.
    */
   label?: React.ReactNode;
   /** Small line under the number — "of 40 pts". */
@@ -106,7 +106,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
     const box = icon ? 20 : sizeProp;
     const size = icon ? 16 : sizeProp;
     const thickness = thicknessProp ?? (icon ? 2 : 16);
-    const numeral = label === undefined ? (icon ? null : `${Math.round(pct * 100)}%`) : label;
+    const numeral = label === undefined ? `${Math.round(pct * 100)}%` : label;
     const hasNumeral = numeral !== null && numeral !== false && numeral !== '';
 
     const r = (size - thickness) / 2;
@@ -176,7 +176,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             className={cn(fill({ tone }), fillClassName)}
           />
         </svg>
-        {(hasNumeral || caption) && (
+        {!icon && (hasNumeral || caption) && (
           <div
             aria-hidden="true"
             className={cn(

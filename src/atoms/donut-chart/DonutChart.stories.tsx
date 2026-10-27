@@ -20,8 +20,11 @@ const meta = {
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     half: { control: 'boolean' },
     segmented: { control: 'boolean' },
-    size: { control: 'number' },
+    size: { control: 'select', options: ['icon', 72, 140, 200] },
     thickness: { control: 'number' },
+    /* Text, not the inferred object editor: the centre is a string. Empty hides it. */
+    label: { control: 'text' },
+    caption: { control: 'text' },
   },
 } satisfies Meta<typeof DonutChart>;
 
@@ -75,9 +78,9 @@ export const CustomColour: Story = {
 export const Icon: Story = {
   render: (args) => (
     <div className="flex items-center gap-4">
-      <DonutChart {...args} caption={undefined} value={25} max={100} size="icon" aria-label="25% done" />
-      <DonutChart {...args} caption={undefined} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
-      <DonutChart {...args} caption={undefined} value={40} max={100} size={72} thickness={10} label={null} tone="warning" aria-label="40% done" />
+      <DonutChart {...args} value={25} max={100} size="icon" aria-label="25% done" />
+      <DonutChart {...args} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
+      <DonutChart {...args} value={40} max={100} size={72} thickness={10} label={null} caption={undefined} tone="warning" aria-label="40% done" />
     </div>
   ),
 };
