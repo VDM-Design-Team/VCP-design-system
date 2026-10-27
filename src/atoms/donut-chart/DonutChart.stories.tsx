@@ -67,20 +67,9 @@ export const SegmentedGauge: Story = {
   ),
 };
 
-/** The light yellow, and a one-off colour through `fillClassName` (a token class). */
-export const YellowAndCustomColour: Story = {
-  render: (args) => (
-    <div className="flex items-end gap-8">
-      <DonutChart {...args} value={30} max={40} tone="yellow" caption="getting close" />
-      <DonutChart
-        {...args}
-        value={30}
-        max={40}
-        fillClassName="stroke-accent-blue-medium"
-        caption="custom"
-      />
-    </div>
-  ),
+/** A colour no tone covers, through `fillClassName` (a token class). */
+export const CustomColour: Story = {
+  args: { value: 30, max: 40, fillClassName: 'stroke-accent-blue-medium', caption: 'custom' },
 };
 
 /** `size="icon"`: the 20 box with a 16 ring, no numeral. `showValue={false}` does the same at any size. */
@@ -89,7 +78,7 @@ export const Icon: Story = {
     <div className="flex items-center gap-4">
       <DonutChart {...args} value={25} max={100} size="icon" aria-label="25% done" />
       <DonutChart {...args} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
-      <DonutChart {...args} value={40} max={100} size={72} thickness={10} showValue={false} tone="yellow" aria-label="40% done" />
+      <DonutChart {...args} value={40} max={100} size={72} thickness={10} showValue={false} tone="warning" aria-label="40% done" />
     </div>
   ),
 };

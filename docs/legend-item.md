@@ -17,7 +17,7 @@ component itself is an inline `<span>`.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `label` | `string` | required | The word for the colour. The accessible content |
-| `tone` | `brand \| success \| warning \| critical \| info \| yellow` | `brand` | `ProgressBar`'s and `DonutChart`'s tones (plus `info`), on the same tokens — pass the tone the chart draws |
+| `tone` | `brand \| success \| warning \| critical \| info ` | `brand` | `ProgressBar`'s and `DonutChart`'s tones (plus `info`), on the same tokens — pass the tone the chart draws |
 | `size` | `sm \| md` | `md` | `md`: 12 swatch (rounded square) + 12 caption — dashboard charts. `sm`: 8 dot + 10 caption — under a Gantt chart. The gap is half the swatch (4 / 6) |
 | `swatchClassName` | `string` | — | Token `bg-*` class for the swatch; wins over `tone`. For a series no tone covers |
 | `className` | `string` | — | Merged via `cn()` |
@@ -31,7 +31,7 @@ Swatch: the `ProgressBar` fills — `surface.brand.strong` and
 `accent.{success,warning,critical,info}.filled.surface`; their contrast against
 the surface is the figures in `docs/progress-bar.md`. Label
 `text.primary`, `caption-md-medium` / `caption-sm-medium`. Radius `xs` (4) on
-the square, pill on the dot. `yellow` is `accent.yellow.medium`, the light yellow `DonutChart`'s `yellow` draws; it is soft against the surface, which the label beside it covers. No new tokens.
+the square, pill on the dot. No new tokens.
 
 ## Accessibility
 

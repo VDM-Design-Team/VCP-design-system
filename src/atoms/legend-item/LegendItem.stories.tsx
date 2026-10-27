@@ -42,7 +42,6 @@ export const Default: Story = {
 export const CustomSwatch: Story = {
   render: () => (
     <div className="flex gap-4">
-      <LegendItem label="Light yellow" tone="yellow" />
       <LegendItem label="Custom" swatchClassName="bg-accent-blue-medium" />
     </div>
   ),

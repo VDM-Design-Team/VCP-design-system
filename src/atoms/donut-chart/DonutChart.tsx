@@ -21,8 +21,7 @@ import { cn } from '../../lib/cn';
  * darker end. The gap scales with `thickness`. Round-capped rings stay the default.
  *
  * Colour is a `tone` first. For one a tone does not cover, `fillClassName` takes a
-semantic `stroke-*` token class (and `trackClassName` the track's) — a token
-class, never a hex.
+semantic `stroke-*` token class — a token class, never a hex.
 
 `size="icon"` is the small decorative one from the table rows: a 20 box with
 the ring 16 across inside it, thin, and no numeral. `showValue={false}` does the
@@ -45,10 +44,6 @@ const fill = cva('transition-[stroke-dasharray] duration-500', {
       success: 'stroke-accent-success-filled-surface-default',
       warning: 'stroke-accent-warning-filled-surface-default',
       critical: 'stroke-accent-critical-filled-surface-default',
-      /* accent.yellow.medium — the light yellow Figma draws for "getting
-         close". Softer than `warning`, and it does not reach 3:1 on the track,
-         so keep the number beside it (or use `warning`). */
-      yellow: 'stroke-accent-yellow-medium',
     },
   },
   defaultVariants: { tone: 'brand' },
@@ -75,8 +70,6 @@ export interface DonutChartProps
   showValue?: boolean;
   /** Token `stroke-*` class for the filled arc; wins over `tone`. */
   fillClassName?: string;
-  /** Token `stroke-*` class for the track. */
-  trackClassName?: string;
   /** Replaces the centred percentage. Visual only — the meter announces numbers. */
   label?: React.ReactNode;
   /** Small line under the number — "of 40 pts". */
@@ -95,7 +88,6 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       segmented,
       showValue: showValueProp,
       fillClassName,
-      trackClassName,
       label,
       caption,
       tone,
@@ -167,7 +159,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             }
             strokeDashoffset={segmented ? -trackStart : undefined}
             transform={segmented || half ? `rotate(${turn} ${c} ${c})` : undefined}
-            className={cn('stroke-surface-track', trackClassName)}
+            className="stroke-surface-track"
           />
           <circle
             cx={c}

@@ -33,8 +33,6 @@ const swatch = cva('shrink-0', {
       warning: 'bg-accent-warning-filled-surface-default',
       critical: 'bg-accent-critical-filled-surface-default',
       info: 'bg-accent-info-filled-surface-default',
-      /* accent.yellow.medium — the light yellow DonutChart's `yellow` draws. */
-      yellow: 'bg-accent-yellow-medium',
     },
     size: {
       /* 8 — a dot, for dense legends under a chart. ds-lint-ignore */
