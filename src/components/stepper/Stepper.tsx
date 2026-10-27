@@ -36,7 +36,9 @@ const shell = cva(
     'inline-flex items-stretch overflow-hidden',
     'rounded-md border bg-surface-elevated transition-colors',
     'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
-    'has-[:disabled]:cursor-not-allowed has-[:disabled]:bg-surface-neutral-subtle has-[:disabled]:border-stroke-subtle',
+    /* Scoped to the <input>: a nudge button disabling at min/max must not grey
+       the whole field — only a disabled Stepper (which disables the input) does. */
+    'has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-surface-neutral-subtle has-[input:disabled]:border-stroke-subtle',
     'border-stroke-strong focus-within:border-stroke-focused',
   ],
   {

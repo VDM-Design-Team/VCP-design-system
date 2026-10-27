@@ -68,6 +68,10 @@ export const Stacked: Story = {
     await expect(field).toHaveValue('13');
     /* At max the up caret is dead, the down caret is not. */
     await expect(c.getAllByRole('button', { name: 'Increase Capacity points' })[0]).toBeDisabled();
+    /* Hitting the limit disables a caret, not the field: the shell keeps its
+       resting border and the input stays enabled. */
+    await expect(field).toBeEnabled();
+    await expect(getComputedStyle(field.parentElement!).borderTopColor).toBe('rgb(100, 116, 139)');
     await userEvent.type(field, '{ArrowDown}');
     await expect(field).toHaveValue('12');
     /* Carets are a pointer affordance, not extra tab stops. */
