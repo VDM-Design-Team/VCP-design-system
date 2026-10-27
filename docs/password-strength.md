@@ -3,12 +3,20 @@
 A five-step meter that tells someone how strong the password they are typing
 is. It sits directly under a password `Input`.
 
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `ProgressBar` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
 ## When to use
 
 | Use | For |
 |---|---|
 | `PasswordStrength` | Feedback on a *new* password while it is being typed (sign-up, reset, change) |
-| `ProgressBar` | A known fraction of a known whole — budget, upload, capacity |
+| `ProgressBar` | A known fraction of a known whole — budget, upload, capacity. `PasswordStrength` is built on it |
 | `Field`'s `error` | A rule that must pass before submit ("at least 12 characters") |
 
 The meter is advice, not a gate. A rule the server enforces still needs a
@@ -30,32 +38,35 @@ the copy belongs to whoever owns the rule.
 
 ## Levels
 
-| Level | Fill | Colour token |
-|---|---|---|
-| `very-weak` | 20% | `accent.critical.filled.surface` |
-| `weak` | 40% | `accent.critical.filled.surface` |
-| `fair` | 60% | `accent.warning.filled.surface` |
-| `good` | 80% | `accent.info.filled.surface` |
-| `strong` | 100% | `accent.success.filled.surface` |
+| Level | Fill | `ProgressBar` tone | Token |
+|---|---|---|---|
+| `very-weak` | 20% | `critical` | `accent.critical.filled.surface` |
+| `weak` | 40% | `critical` | `accent.critical.filled.surface` |
+| `fair` | 60% | `warning` | `accent.warning.filled.surface` |
+| `good` | 80% | `info` | `accent.info.filled.surface` |
+| `strong` | 100% | `success` | `accent.success.filled.surface` |
 
-Track: `surface.track`, the same quiet grey as `ProgressBar` — the fill carries
-the boundary. Fills are the strong `filled` family `ProgressBar` and `Banner`
-use, so the contrast against the track is the same measured figure.
+The track and the fills are `ProgressBar`'s, so the contrast figures in
+`docs/progress-bar.md` apply. The accessible `filled` shades were chosen over
+the brighter `outline.border` ones the Figma file paints (its Fair amber would
+be about 1.6:1 against the track).
 
 Very Weak and Weak share `critical`: the Figma design painted Weak orange with
-an unbound colour, and no orange token exists. The fill length separates them.
+an unbound colour, and VCP has no orange semantic token yet (GDL's core scale
+has one). The fill length separates them.
 
 ## Accessibility
 
-- `role="meter"` with `aria-valuemin="1"`, `aria-valuemax="5"`, a real
-  `aria-valuenow`, and `aria-valuetext` carrying the word ("Weak"), so a screen
-  reader says the level rather than "2".
+- `ProgressBar` with `role="meter"`: `aria-valuemin="0"`, `aria-valuemax="5"`, a
+  real `aria-valuenow`, and `aria-valuetext` carrying the word ("Weak"), so a
+  screen reader says the level rather than "2".
 - The meter is named by the visible `label` via `aria-labelledby`.
 - Colour is never the only signal: the status word is printed at the right and
   read out as `aria-valuetext`.
 - `message` is `aria-live="polite"`, so a change from "too simple" to nothing is
   not silent. Keep it to one short sentence.
-- The bar's width eases over 300ms; it does not animate from zero on mount.
+- The bar's width eases over 300ms (`ProgressBar`'s); it does not animate from
+  zero on mount.
 
 ## Don't
 

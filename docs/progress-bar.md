@@ -23,10 +23,12 @@ that is a pattern asking to be written.
 |---|---|---|---|
 | `value` | `number` | required | Clamped into `0…max` |
 | `max` | `number` | `100` | The whole. The announced value stays in real units (34 of 40); only the painted width is a percentage |
-| `tone` | `brand \| success \| warning \| critical` | `brand` | See above — status, not decoration |
+| `tone` | `brand \| success \| warning \| critical \| info` | `brand` | See above — status, not decoration. `info` is `accent.info.filled.surface` |
 | `size` | `sm \| md` | `md` | 4 / 8 tall. `sm` for dense table rows |
 | `label` | `string` | — | Visible name above the bar, wired via `aria-labelledby` |
 | `showValue` | `boolean` | — | Rounded percentage at the row's end, in the numeric face |
+| `valueLabel` | `string` | — | Words instead of a percentage ("Strong", "34 of 40 used"): painted at the row's end and announced as `aria-valuetext` |
+| `role` | `progressbar \| meter` | `progressbar` | `meter` for a value within a range that is not progress toward finishing — a capacity, a strength |
 | `className` | `string` | — | Merged via `cn()`; the root is the wrapping `<div>` |
 
 The export's `height?: number` became the `size` variant and its `showLabel`
