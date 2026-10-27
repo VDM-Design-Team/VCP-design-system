@@ -11,7 +11,7 @@ and on focus, `aria-describedby`, Escape, the pointer staying on it — is
 
 | Piece | Tier |
 |---|---|
-| `Icon` | atom |
+| `Icon` | sub-atomic |
 | `Tooltip` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
