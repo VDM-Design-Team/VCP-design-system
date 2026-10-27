@@ -39,6 +39,7 @@ export * from './components/emoji-reaction-picker';
 export * from './components/empty-state';
 export * from './components/field';
 export * from './components/file-attachment';
+export * from './components/gantt-tooltip';
 export * from './components/menu';
 export * from './components/modal';
 export * from './components/page-title';
