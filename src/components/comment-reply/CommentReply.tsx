@@ -24,7 +24,7 @@ import { MentionTag, type MentionMember, type MentionSegment } from '../mention-
  * because the same state decides what `CommentActions` says ("Reply" or "Cancel Reply").
  * Most apps will not wire this up by hand: `CommentSection` does it for a whole list.
  *
- * **The comment is segments.** `body` is what `MentionInput` writes (`NewComment`'s
+ * **The comment is segments.** `body` is what `MentionInput` writes (`CommentComposer`'s
  * `onSubmit` hands it over): text and mentions. Mentions draw as `MentionTag`, the
  * tag the box drew while it was written, so a mention reads the same either side
  * of posting. Line breaks are kept.
@@ -90,7 +90,7 @@ export interface CommentReplyProps
 }
 
 /* The avatar of the design's `Profile_Initials`: the neutral avatar with the everyday border and the
-   tertiary text. The same as `NewComment`'s. */
+   tertiary text. The same as `CommentComposer`'s. */
 const AVATAR = 'border border-stroke-default text-text-tertiary';
 
 export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(

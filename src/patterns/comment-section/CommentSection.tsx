@@ -27,7 +27,8 @@ import type { MentionMember, MentionSegment } from '../../components/mention-inp
  * **What it works out for you:** Edit and Delete appear only on the current user's own
  * comments (`author.id === currentUser.id`); a thread's reply count and toggle follow
  * its replies; the thread line follows the replies; and top-level comments sort by
- * `createdAt` when it is given (replies always read oldest first, as a conversation does).
+ * `createdAt` when it is given, and replies read oldest first, as a conversation does (by
+ * `createdAt` when every reply has it, otherwise in the order you give them).
  *
  * **What stays yours:** the data, the sorting of anything you page in from a server,
  * and confirming a delete (`onDelete` just says "delete this"; ask first if you need to).
@@ -51,7 +52,7 @@ export interface CommentData {
   body: readonly MentionSegment[];
   /** The reaction counts, as `EmojiReactionPicker` takes them. */
   reactions?: readonly EmojiReaction[];
-  /** Its replies, oldest first. A reply can have replies of its own. */
+  /** Its replies. They read oldest first: by `createdAt` when every one has it, otherwise as you give them. A reply can have replies of its own. */
   replies?: readonly CommentData[];
 }
 
@@ -138,6 +139,10 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
 
     const Heading = `h${headingLevel}` as const;
 
+    /* Replies are a conversation: oldest first, by time when they all carry one. */
+    const replies = (list?: readonly CommentData[]) =>
+      list && (list.every((r) => r.createdAt) ? [...list].sort(byTime('oldest')) : list).map(render);
+
     const render = (comment: CommentData): React.ReactNode => {
       const mine = comment.author.id === currentUser.id;
       return (
@@ -160,7 +165,14 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
           link={getLink?.(comment.id)}
           repliesOpen={isOpen(comment.id)}
           onToggleReplies={() => toggle(comment.id)}
-          onEdit={mine && onEdit ? () => setEditing(comment.id) : undefined}
+          onEdit={
+            mine && onEdit
+              ? () => {
+                  setReplyingTo(null);
+                  setEditing(comment.id);
+                }
+              : undefined
+          }
           onDelete={mine && onDelete ? () => onDelete(comment.id) : undefined}
           editing={editing === comment.id}
           onCancelEdit={() => setEditing(null)}
@@ -169,7 +181,14 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
             setEditing(null);
           }}
           replying={replyingTo === comment.id}
-          onReply={onReply ? () => setReplyingTo(comment.id) : undefined}
+          onReply={
+            onReply
+              ? () => {
+                  setEditing(null);
+                  setReplyingTo(comment.id);
+                }
+              : undefined
+          }
           onCancelReply={() => setReplyingTo(null)}
           onSubmitReply={async (body) => {
             await onReply?.(comment.id, body);
@@ -178,7 +197,7 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
             setOpen((o) => ({ ...o, [comment.id]: true }));
           }}
         >
-          {comment.replies?.map(render)}
+          {replies(comment.replies)}
         </CommentReplyThread>
       );
     };

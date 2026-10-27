@@ -299,7 +299,6 @@ first.
 
 - **The four table patterns** — `PlanningTable`, `BudgetTable`, `HolidayTable`,
   `AvailabilityGrid`. `DataTable` shipped; specialise it rather than copying it.
-- **`CommentItem` / `CommentComposer`** — every component they need has shipped.
 - **Flow tests**, [issue #94](https://github.com/VDM-Design-Team/VCP-design-system/issues/94).
   The next group is `Menu` and `Popover` together, since they share the focus
   and Escape contract that `Modal`'s four tests now cover.

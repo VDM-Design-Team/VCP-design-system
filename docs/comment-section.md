@@ -43,7 +43,7 @@ no Delete. Each comment in `comments` looks like this:
   createdAt: '2026-10-27T09:00:00Z',          // ISO; sorts the top level, and is the <time> value
   body: [{ type: 'text', text: 'Hi ' }, { type: 'mention', id: 'u-jane', label: 'Jane Doe' }],
   reactions: [{ emoji: '👍', count: 2, mine: true }],     // optional
-  replies: [ /* more comments of the same shape, oldest first */ ],   // optional
+  replies: [ /* more comments of the same shape */ ],   // optional; read oldest first (by createdAt, if they all have it)
 }
 ```
 
@@ -57,7 +57,7 @@ what you store and what you give back. `mentionedIds(body)` is who to notify.
 | Which threads are open | Edit and Delete only on the current user's own comments (`author.id === currentUser.id`) | The data, and saving it |
 | Which comment has a reply box open, which is being edited (one at a time) | A thread's reply count and its Show / Hide toggle | Sorting anything you page in from a server |
 | The sort order, unless you control it | The thread line, which follows the replies | Confirming a delete: `onDelete` just says "delete this" |
-| A reply that was just sent opens its thread, so it is seen | Top-level order by `createdAt` (replies always read oldest first) | Showing an error when a send fails |
+| A reply that was just sent opens its thread, so it is seen | Top-level order by `createdAt`, and replies oldest first (by `createdAt` when every reply has it, otherwise as you give them) | Showing an error when a send fails |
 
 **Handlers may be async.** Return a promise from `onAddComment`, `onReply` or `onEdit` and the box
 shows its spinner until it settles. It clears when it resolves and **keeps what was typed if it

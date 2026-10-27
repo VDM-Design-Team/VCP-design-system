@@ -229,3 +229,60 @@ export const Flow: Story = {
     await waitFor(() => expect(firstTop()).not.toBe(before));
   },
 };
+
+/** **Flow:** only one reply or edit box is open at a time: opening one closes the other. */
+export const OneBoxAtATime: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: function Render(args) {
+    const demo = useDemo(SEED);
+    return <CommentSection {...args} {...demo} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const articles = () => [...canvasElement.querySelectorAll('article')];
+    const of = (name: string, text: string) =>
+      articles().find((a) => within(a).queryAllByText(name).length > 0 && within(a).queryByText(text))!;
+
+    /* Reply to Jane's comment: a reply box. */
+    await userEvent.click(within(of('Jane Doe', 'Can we move the review to Thursday?')).getByRole('button', { name: 'Reply' }));
+    await canvas.findByRole('textbox', { name: 'Reply to Jane Doe' });
+
+    /* Edit John's own comment: the edit box opens and the reply box closes. */
+    await userEvent.click(within(of('John Smith', 'Test comment here.')).getAllByRole('button', { name: 'Edit' })[0]);
+    await canvas.findByRole('textbox', { name: 'Edit comment' });
+    await expect(canvas.queryByRole('textbox', { name: 'Reply to Jane Doe' })).not.toBeInTheDocument();
+
+    /* Reply again: the reply box opens and the edit box closes. */
+    await userEvent.click(within(of('Jane Doe', 'Can we move the review to Thursday?')).getByRole('button', { name: 'Reply' }));
+    await canvas.findByRole('textbox', { name: 'Reply to Jane Doe' });
+    await expect(canvas.queryByRole('textbox', { name: 'Edit comment' })).not.toBeInTheDocument();
+  },
+};
+
+/** **Flow:** replies read oldest first by `createdAt`, whatever order they were handed over in. */
+export const RepliesReadOldestFirst: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: {
+    defaultRepliesOpen: true,
+    comments: [
+      {
+        id: 'p',
+        author: JANE,
+        time: 'earlier',
+        createdAt: '2026-10-27T08:00:00Z',
+        body: text('The parent.'),
+        replies: [
+          { id: 'r2', author: ANNA, time: 'later', createdAt: '2026-10-27T09:00:00Z', body: text('Second reply.') },
+          { id: 'r1', author: ME, time: 'sooner', createdAt: '2026-10-27T08:30:00Z', body: text('First reply.') },
+        ],
+      },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const order = [...canvasElement.querySelectorAll('[role="listitem"]')].map((li) => li.textContent ?? '');
+    await expect(order[0]).toContain('First reply.');
+    await expect(order[1]).toContain('Second reply.');
+  },
+};
