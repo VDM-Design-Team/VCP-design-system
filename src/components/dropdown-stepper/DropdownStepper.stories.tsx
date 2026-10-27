@@ -94,6 +94,29 @@ export const Sizes: Story = {
   ),
 };
 
+/**
+ * `invalid` alone is the critical border; `error` adds the caption and implies
+ * `invalid`. The caption is announced and tied to the dropdown.
+ */
+export const Invalid: Story = {
+  args: { options: QUARTERS, label: 'Quarter', defaultValue: 'Q1', error: 'Q1 is closed for edits' },
+  render: (args) => (
+    <div className="flex flex-col items-start gap-6">
+      <DropdownStepper {...args} />
+      <DropdownStepper {...args} error={undefined} invalid label="Quarter, border only" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const alert = c.getByRole('alert');
+    await expect(alert).toHaveTextContent('Q1 is closed for edits');
+    const dropdown = c.getByRole('button', { name: 'Quarter: Q1' });
+    await expect(dropdown).toHaveAttribute('aria-describedby', alert.id);
+    /* Critical border, not the resting stroke.strong (#64748b). */
+    await expect(getComputedStyle(dropdown.parentElement!.parentElement!).borderTopColor).not.toBe('rgb(100, 116, 139)');
+  },
+};
+
 export const Disabled: Story = {
   args: { disabled: true },
 };

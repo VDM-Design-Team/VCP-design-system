@@ -21,6 +21,10 @@ import { Menu } from '../menu';
  * region, because after a click on an arrow the focus stays on the arrow and
  * the visible value changing is otherwise silent.
  *
+ * `invalid` draws the critical border and `error` adds a caption below it
+ * (announced, and tied to the dropdown with `aria-describedby`); `Field`'s own
+ * `error` does the same job when the control sits inside one.
+ *
  * The shell is the `Input` family's: `stroke.strong` border, `surface.elevated`,
  * 32/40 tall. It does not clip, because the Menu panel hangs off it; the
  * buttons round their own outer corners instead.
@@ -32,7 +36,7 @@ import { Menu } from '../menu';
 const shell = cva(
   [
     'relative inline-flex items-stretch',
-    'rounded-md border border-stroke-strong bg-surface-elevated font-sans',
+    'rounded-md border bg-surface-elevated font-sans',
   ],
   {
     variants: {
@@ -42,9 +46,14 @@ const shell = cva(
         /* 40 tall — the default, meets the minimum target size. ds-lint-ignore */
         md: 'h-10',
       },
+      invalid: {
+        /* accent.critical.outline — the same critical border `Input` draws. */
+        true: 'border-accent-critical-outline-border-default',
+        false: 'border-stroke-strong',
+      },
       fullWidth: { true: 'flex w-full', false: '' },
     },
-    defaultVariants: { size: 'md', fullWidth: false },
+    defaultVariants: { size: 'md', invalid: false, fullWidth: false },
   },
 );
 
@@ -79,6 +88,15 @@ export interface DropdownStepperProps
    * read "Previous Year" / "Next Year" and the dropdown "Year: 2026".
    */
   label: string;
+  /** Critical border. Implied by `error`. Pair with a visible message. */
+  invalid?: boolean;
+  /**
+   * An optional caption under the control saying what is wrong — "Q1 is
+   * closed". Setting it marks the control invalid, announces it, and ties it to
+   * the dropdown with `aria-describedby`. Inside a `Field`, let the `Field`'s
+   * `error` do this instead.
+   */
+  error?: React.ReactNode;
   /** Step past the last option back to the first, and the reverse. */
   wrap?: boolean;
   disabled?: boolean;
@@ -99,11 +117,16 @@ export const DropdownStepper = React.forwardRef<HTMLDivElement, DropdownStepperP
       onChange,
       label,
       wrap,
+      invalid,
+      error,
       disabled,
       ...props
     },
     ref,
   ) => {
+    const errorId = React.useId();
+    const hasError = error !== undefined && error !== null && error !== false;
+    const isInvalid = Boolean(invalid) || hasError;
     const list = options.map(normalize);
     const [uncontrolled, setUncontrolled] = React.useState(defaultValue ?? list[0]?.value);
     const current = value ?? uncontrolled;
@@ -149,7 +172,12 @@ export const DropdownStepper = React.forwardRef<HTMLDivElement, DropdownStepperP
     };
 
     return (
-      <div ref={ref} className={cn(shell({ size, fullWidth }), className)} {...props}>
+      <div
+        ref={ref}
+        className={cn('inline-flex flex-col gap-1.5', fullWidth && 'w-full', className)}
+        {...props}
+      >
+        <div className={shell({ size, fullWidth, invalid: isInvalid })}>
         {arrow(-1)}
         <Menu
           className="min-w-0 flex-1"
@@ -166,6 +194,7 @@ export const DropdownStepper = React.forwardRef<HTMLDivElement, DropdownStepperP
               type="button"
               disabled={disabled}
               aria-label={`${label}: ${chosen?.label ?? ''}`}
+              aria-describedby={hasError ? errorId : undefined}
               className={cn(
                 part,
                 'h-full w-full min-w-0 grid-flow-col justify-center gap-1 px-2',
@@ -185,6 +214,16 @@ export const DropdownStepper = React.forwardRef<HTMLDivElement, DropdownStepperP
         <span aria-live="polite" className="sr-only">
           {chosen?.label}
         </span>
+        </div>
+        {hasError && (
+          <span
+            id={errorId}
+            role="alert"
+            className="text-caption-md-medium text-accent-critical-outline-content-default"
+          >
+            {error}
+          </span>
+        )}
       </div>
     );
   },

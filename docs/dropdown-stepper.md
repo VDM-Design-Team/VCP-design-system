@@ -36,9 +36,11 @@ should load a different page, that is `Pagination`.
 | `wrap` | `boolean` | `false` | Step past either end to the other. Off, the arrow disables at the end |
 | `size` | `sm \| md` | `md` | 32 / 40 — the `Input` scale. Figma drew 32; 40 is the touch-safe default |
 | `fullWidth` | `boolean` | `false` | Spans the container; the middle takes the slack |
+| `invalid` | `boolean` | `false` | Critical border. Pair with a visible message |
+| `error` | `ReactNode` | — | Optional caption under the control. Implies `invalid`, is announced (`role="alert"`) and wired to the dropdown with `aria-describedby`. Inside a `Field`, use the `Field`'s `error` instead |
 | `disabled` | `boolean` | `false` | Greys all three controls |
-| `className` | `string` | — | On the shell |
-| `ref` | `Ref<HTMLDivElement>` | — | The shell |
+| `className` | `string` | — | On the outer wrapper (the control plus its caption) |
+| `ref` | `Ref<HTMLDivElement>` | — | The outer wrapper |
 
 A disabled option is stepped over by the arrows and shown disabled in the list.
 
@@ -51,6 +53,8 @@ A disabled option is stepped over by the arrows and shown disabled in the list.
 | Hover | `neutral.outline.surface.hover` / `.content.hover` | `hover:bg-neutral-outline-surface-hover` |
 | Pressed | `neutral.outline.surface.pressed` / `.content.pressed` | `active:bg-neutral-outline-surface-pressed` |
 | Value | `text.primary`, `type.body.sm` medium | `text-text-primary text-body-sm-medium` |
+| Border, invalid | `accent.critical.outline.border.default` | `border-accent-critical-outline-border-default` |
+| Error caption | `accent.critical.outline.content.default`, `type.caption.md` medium | `text-accent-critical-outline-content-default text-caption-md-medium` |
 | Disabled | `text.disabled` | `disabled:text-text-disabled` |
 | Focus ring | `stroke.focused`, drawn inward | `focus-visible:outline-2 focus-visible:-outline-offset-2` |
 
@@ -72,6 +76,9 @@ tokens.
   the arrow.
 - The arrow at an end is `disabled`, so the end is felt from the keyboard, not
   only seen. With `wrap` there is no end.
+- `error` is a `role="alert"` caption referenced by the dropdown's
+  `aria-describedby`; the border alone is never the only signal. There is no
+  `aria-invalid` — it is not supported on a button.
 - Arrows are 40 (`md`) / 32 (`sm`) wide; `sm` is the pointer-dense exemption.
 
 ## Don't
