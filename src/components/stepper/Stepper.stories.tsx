@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { Stepper } from './Stepper';
 import { Field } from '../field';
 
@@ -21,6 +21,7 @@ const meta = {
   args: { value: 12, label: 'Capacity points' },
   argTypes: {
     size: { control: 'radio', options: ['sm', 'md'] },
+    variant: { control: 'radio', options: ['sides', 'stacked'] },
     min: { control: 'number' },
     max: { control: 'number' },
     step: { control: 'number' },
@@ -41,6 +42,36 @@ export const Default: Story = {
     /* A control's boundary is `stroke.strong` (slate-500, #64748b) — 4.76:1 on the field. */
     const shell = canvasElement.querySelector('input')!.closest('[class*="border-stroke-strong"]')!;
     await expect(getComputedStyle(shell).borderTopColor).toBe('rgb(100, 116, 139)');
+  },
+};
+
+/**
+ * `variant="stacked"` — the number-input layout: value left, one up/down caret
+ * pair at the end. The carets leave the tab order; Arrow Up/Down is the
+ * keyboard path. Behaviour is the same as `sides`, including the ends.
+ */
+export const Stacked: Story = {
+  args: { variant: 'stacked', value: 12, label: 'Capacity points' },
+  render: (args) => {
+    const [value, setValue] = React.useState(args.value);
+    return (
+      <div className="flex items-center gap-6">
+        <Stepper {...args} value={value} onChange={setValue} max={13} />
+        <Stepper {...args} size="sm" value={value} onChange={setValue} max={13} label="Dense" />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const [field] = c.getAllByRole('textbox');
+    await userEvent.click(c.getAllByRole('button', { name: 'Increase Capacity points' })[0]);
+    await expect(field).toHaveValue('13');
+    /* At max the up caret is dead, the down caret is not. */
+    await expect(c.getAllByRole('button', { name: 'Increase Capacity points' })[0]).toBeDisabled();
+    await userEvent.type(field, '{ArrowDown}');
+    await expect(field).toHaveValue('12');
+    /* Carets are a pointer affordance, not extra tab stops. */
+    await expect(c.getAllByRole('button', { name: 'Decrease Capacity points' })[0]).toHaveAttribute('tabindex', '-1');
   },
 };
 
@@ -100,6 +131,7 @@ export const LightAndDark: Story = {
           <div className="flex gap-6 bg-surface-canvas p-8">
             <Stepper {...args} value={12} suffix="pts" />
             <Stepper {...args} value={12} disabled />
+            <Stepper {...args} variant="stacked" value={12} />
           </div>
         </div>
       ))}

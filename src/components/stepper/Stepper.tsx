@@ -13,6 +13,13 @@ import { Icon } from '../../atoms/icon';
  * `sm`/`md` = 32/40); the nudge buttons are minus/plus rather than the
  * export's left/right chevrons — nudging is arithmetic, not navigation.
  *
+ * `variant="stacked"` is the number-input layout from Figma
+ * (`_Number_Input_Step`): the value sits left-aligned like any `Input`, and
+ * one up/down caret pair is stacked at the end — the browser's spin buttons,
+ * drawn in the system. Same behaviour, same props; only the buttons move. The
+ * carets are a pointer affordance (28 wide, half the field tall each), so they
+ * leave the tab order — Arrow Up/Down in the field is the keyboard path.
+ *
  * Typing is draft-based: while the field has focus you can pass through
  * empty and half-typed states ("", "-", "1" on the way to "15"); the value
  * commits — clamped to `min…max` and snapped to `step` — on blur or Enter.
@@ -40,8 +47,10 @@ const shell = cva(
         /* 40 tall — the default, meets the minimum target size. ds-lint-ignore */
         md: 'h-10',
       },
+      /* Where the nudge buttons sit; the shell itself does not change. */
+      variant: { sides: '', stacked: '' },
     },
-    defaultVariants: { size: 'md' },
+    defaultVariants: { size: 'md', variant: 'sides' },
   },
 );
 
@@ -69,6 +78,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     {
       className,
       size,
+      variant = 'sides',
       value,
       min = 0,
       max = 999,
@@ -101,29 +111,45 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const nudgeButton = (dir: -1 | 1) => {
       const dead = disabled || (dir < 0 ? value <= min : value >= max);
       const name = dir < 0 ? 'Decrease' : 'Increase';
+      const stacked = variant === 'stacked';
       return (
         <button
           type="button"
           aria-label={label ? `${name} ${label}` : name}
           disabled={dead}
+          tabIndex={stacked ? -1 : undefined}
           onClick={() => nudge(dir)}
           className={cn(
-            'grid w-8 shrink-0 place-items-center text-text-secondary transition-colors',
-            'hover:bg-surface-neutral-faint hover:text-text-primary',
-            'disabled:pointer-events-none disabled:text-text-disabled',
+            'grid shrink-0 place-items-center transition-colors',
+            'disabled:pointer-events-none',
             /* The shell clips and carries the shared ring; this ring draws
                inward so it survives the clipping. */
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
+            stacked
+              ? [
+                  'w-full flex-1 text-neutral-textual-content-default',
+                  'hover:bg-neutral-outline-surface-hover hover:text-neutral-textual-content-hover',
+                  'disabled:text-text-disabled',
+                ]
+              : [
+                  'w-8 text-text-secondary',
+                  'hover:bg-surface-neutral-faint hover:text-text-primary',
+                  'disabled:text-text-disabled',
+                ],
           )}
         >
-          <Icon name={dir < 0 ? 'minus' : 'plus'} size="sm" />
+          {stacked ? (
+            <Icon name={dir < 0 ? 'caret-down-fill' : 'caret-up-fill'} size={12} />
+          ) : (
+            <Icon name={dir < 0 ? 'minus' : 'plus'} size="sm" />
+          )}
         </button>
       );
     };
 
     return (
-      <div ref={ref} className={cn(shell({ size }), className)} {...props}>
-        {nudgeButton(-1)}
+      <div ref={ref} className={cn(shell({ size, variant }), className)} {...props}>
+        {variant === 'sides' && nudgeButton(-1)}
         <input
           type="text"
           inputMode="numeric"
@@ -139,7 +165,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           }}
           /* font.family.numeric — this is a number, set as one. */
           className={cn(
-            'w-14 min-w-0 border-0 bg-transparent text-center outline-none',
+            variant === 'stacked' ? 'w-20 flex-1 px-3 text-left' : 'w-14 text-center',
+            'min-w-0 border-0 bg-transparent outline-none',
             'font-numeric text-caption-md-medium text-text-primary',
             'disabled:cursor-not-allowed disabled:text-text-disabled',
           )}
@@ -149,7 +176,14 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             {suffix}
           </span>
         )}
-        {nudgeButton(1)}
+        {variant === 'sides' ? (
+          nudgeButton(1)
+        ) : (
+          <div className="flex w-7 shrink-0 flex-col">
+            {nudgeButton(1)}
+            {nudgeButton(-1)}
+          </div>
+        )}
       </div>
     );
   },

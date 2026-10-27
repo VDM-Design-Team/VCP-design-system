@@ -31,10 +31,25 @@ stepper.
 | `min` / `max` / `step` | `number` | `0` / `999` / `1` | Buttons snap by `step`; typed values clamp but do not snap |
 | `label` | `string` | — | The accessible name — "Capacity points". The buttons fold it in: "Decrease Capacity points" |
 | `suffix` | `ReactNode` | — | Inline unit ('pts'). Decorative, `aria-hidden` |
+| `variant` | `sides \| stacked` | `sides` | Where the nudge buttons sit: minus/plus either side of the value, or one up/down caret pair stacked at the end (the number-input layout) |
 | `size` | `sm \| md` | `md` | 32 / 40 — the Input scale (the export's 36 had no step here) |
 | `disabled` | `boolean` | — | — |
 | `className` | `string` | — | On the shell |
 | `ref` | `Ref<HTMLDivElement>` | — | The shell |
+
+## Variants
+
+| Variant | Layout | Glyphs | Use for |
+|---|---|---|---|
+| `sides` | `[ − ] 12 [ + ]`, value centred | minus / plus | Counts where the nudge is the main gesture |
+| `stacked` | `12 ▴▾`, value left-aligned like an `Input` | `caret-up-fill` / `caret-down-fill` at 12 | A number field in a form or table row that sits beside other inputs |
+
+`stacked` is Figma's `_Number_Input_Step` pair. Same props, same draft-based
+typing, same clamping — only the buttons move. Each caret is 28 wide and half
+the field tall, so it is a pointer affordance: in `stacked` the carets are
+`tabIndex={-1}` and Arrow Up/Down in the field is the keyboard path. Colours
+are `neutral.textual.content` (hover `neutral.textual.content.hover`) on a
+`neutral.outline.surface.hover` wash.
 
 ## Typing is draft-based
 
@@ -60,6 +75,9 @@ hover `surface.neutral.faint`. No new tokens.
 - Both buttons are named, with the field's name folded in, and they disable
   at the ends — state you can feel from the keyboard, not just see.
 - Arrow Up/Down work in the field, matching what number inputs teach.
+- In `stacked`, the carets are out of the tab order (still named, still
+  clickable, still announced to touch screen readers); Arrow Up/Down in the
+  field does the same job from the keyboard.
 - The nudge buttons are 32 wide inside the field — the pointer-dense
   exemption; the keyboard path (type, or arrows) is first-class, not a
   fallback.
