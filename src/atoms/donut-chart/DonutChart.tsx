@@ -15,6 +15,11 @@ import { cn } from '../../lib/cn';
  *   rules on this); the caller sets `tone`, brand by default.
  * - **`tone` no longer takes arbitrary colour strings.** Tokens only.
  *
+ * `segmented` is the flat-ended gauge Figma draws for the Cycle Summary: butt
+ * caps instead of round ones, and a small gap between the filled arc and the
+ * remainder, so a 90% ring reads as two pieces rather than one bar with a
+ * darker end. The gap scales with `thickness`. Round-capped rings stay the default.
+ *
  * `size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
  * measured, not stepped, which is also why the centre numeral scales with the
  * ring instead of sitting on the type ramp. It is set in the numeric face.
@@ -48,6 +53,11 @@ export interface DonutChartProps
   thickness?: number;
   /** Half-donut gauge — the Cycle Summary treatment. */
   half?: boolean;
+  /**
+   * Flat ends and a gap between the filled arc and the remainder, instead of a
+   * round-capped fill over a full track. Pair it with a thin `thickness`.
+   */
+  segmented?: boolean;
   /** Replaces the centred percentage. Visual only — the meter announces numbers. */
   label?: React.ReactNode;
   /** Small line under the number — "of 40 pts". */
@@ -63,6 +73,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       size = 140,
       thickness = 16,
       half,
+      segmented,
       label,
       caption,
       tone,
@@ -78,6 +89,16 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
     const circumference = 2 * Math.PI * r;
     const sweep = half ? circumference / 2 : circumference;
     const height = half ? c + thickness / 2 : size;
+
+    /* Segmented: the fill and the remainder are separate arcs with a gap
+       between them, not a fill laid over a full track. */
+    const gap = thickness / 4;
+    const filled = sweep * pct;
+    const split = segmented && pct > 0 && pct < 1;
+    const fillLength = split ? Math.max(0, filled - gap / 2) : filled;
+    const trackLength = split ? Math.max(0, sweep - filled - gap / 2) : sweep;
+    const trackStart = split ? filled + gap / 2 : 0;
+    const turn = half ? 180 : -90;
 
     return (
       <div
@@ -106,9 +127,16 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             r={r}
             fill="none"
             strokeWidth={thickness}
-            strokeLinecap="round"
-            strokeDasharray={half ? `${sweep} ${circumference}` : undefined}
-            transform={half ? `rotate(180 ${c} ${c})` : undefined}
+            strokeLinecap={segmented ? 'butt' : 'round'}
+            strokeDasharray={
+              segmented
+                ? `${trackLength} ${circumference}`
+                : half
+                  ? `${sweep} ${circumference}`
+                  : undefined
+            }
+            strokeDashoffset={segmented ? -trackStart : undefined}
+            transform={segmented || half ? `rotate(${turn} ${c} ${c})` : undefined}
             className="stroke-surface-track"
           />
           <circle
@@ -117,9 +145,9 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             r={r}
             fill="none"
             strokeWidth={thickness}
-            strokeLinecap="round"
-            strokeDasharray={`${sweep * pct} ${circumference}`}
-            transform={`rotate(${half ? 180 : -90} ${c} ${c})`}
+            strokeLinecap={segmented ? 'butt' : 'round'}
+            strokeDasharray={`${fillLength} ${circumference}`}
+            transform={`rotate(${turn} ${c} ${c})`}
             className={fill({ tone })}
           />
         </svg>

@@ -19,6 +19,7 @@ const meta = {
   argTypes: {
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     half: { control: 'boolean' },
+    segmented: { control: 'boolean' },
     size: { control: 'number' },
     thickness: { control: 'number' },
   },
@@ -48,6 +49,23 @@ export const HalfGauge: Story = {
 };
 
 /** `label` swaps the centred text; the meter still announces the numbers. */
+/**
+ * `segmented` — flat ends and a gap between fill and remainder, thin ring: the
+ * Cycle Summary gauge. The tone is still the caller's call (here: on track,
+ * slipping, behind).
+ */
+export const SegmentedGauge: Story = {
+  args: { half: true, segmented: true, size: 200, thickness: 8, max: 100 },
+  render: (args) => (
+    <div className="flex flex-wrap items-end gap-8">
+      <DonutChart {...args} value={92} tone="success" caption="on track" />
+      <DonutChart {...args} value={74} tone="warning" caption="slipping" />
+      <DonutChart {...args} value={40} tone="critical" caption="behind" />
+      <DonutChart {...args} value={0} tone="critical" caption="not started" />
+    </div>
+  ),
+};
+
 export const CustomLabel: Story = {
   args: { label: '26 / 40', caption: 'points' },
 };

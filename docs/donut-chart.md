@@ -24,6 +24,7 @@ two of these.
 | `tone` | `brand \| success \| warning \| critical` | `brand` | Consumption status — the caller's judgment |
 | `size` / `thickness` | `number` | `140` / `16` | SVG geometry — a chart is measured, not stepped |
 | `half` | `boolean` | — | The half-donut gauge (Cycle Summary treatment) |
+| `segmented` | `boolean` | — | Flat ends and a gap between the filled arc and the remainder (the gap is a quarter of `thickness`), instead of a round-capped fill over a full track. Pair with a thin `thickness` (8 on a 200 gauge) |
 | `label` | `ReactNode` | derived `%` | Replaces the centred text. Visual only |
 | `caption` | `ReactNode` | — | Line under the number — "of 40 pts". A string doubles as `aria-label` |
 | `className` | `string` | — | On the wrapper |
