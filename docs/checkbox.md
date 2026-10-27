@@ -20,6 +20,15 @@ Rules of thumb:
   clicking a mixed parent selects all children or clears them — it never cycles
   back to mixed.
 
+## CheckboxMark
+
+The box and tick with no input behind it, for a row that is itself the control — the
+options in a `multiple` `SearchSelect`, where the row is an `option` named by
+`aria-selected` and an `<input>` inside one would be invalid. Same box, tokens and tick as
+`Checkbox`, so the two never drift. Props: `checked`, `disabled`, `size` (`sm` 16, `md` 20),
+`className`. It is `aria-hidden`, takes no focus and has no hover or pressed states: the row
+owns those. For a form, use `Checkbox`.
+
 ## Props
 
 | Prop | Type | Default | Notes |

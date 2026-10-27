@@ -1,7 +1,7 @@
 # Tag
 
-A small, non-interactive, rounded-rectangle label that classifies the thing
-beside it.
+A small, rounded-rectangle label that classifies the thing beside it. Passive by
+default; with `onRemove` it gets a ✕ button, for a value picked into a field.
 
 ## Composed of
 
@@ -16,9 +16,9 @@ Nothing — Tag is the shared shell, not a composition. `TypeTag` and
 
 | Use | For | Shape | Interactive? | Vocabulary |
 |---|---|---|---|---|
-| `Tag` | Generic classification that needs one of the four Figma styles, or is the base for a new contextual tag | Rounded-rectangle (`shape.radius.sm`) | No | Generic tones only |
+| `Tag` | Generic classification that needs one of the four Figma styles, or is the base for a new contextual tag; with `onRemove`, a value picked into a field | Rounded-rectangle (`shape.radius.sm`) | Only the ✕, when `onRemove` is given | Generic tones only |
 | `Badge` | Generic classification, the common case | Pill (`shape.radius.pill`) | No | Generic tones only |
-| `Chip` | A value the user can act on: a selected filter, a removable tag | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
+| `Chip` | A value the user can act on: toggle a filter, open something | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
 | `StatusTag` *(component)* | A VCP status | Tag's rounded-rectangle | No | VCP's status vocabulary |
 | `DueDateTag` *(component)* | An AV's due date | Tag's rounded-rectangle | No | Proximity → tone |
 | `TypeTag` / `UrgencyTag` *(components)* | An AV's type or urgency | Tag's rounded-rectangle, `textual` | No | VCP's type/urgency vocabulary |
@@ -41,6 +41,8 @@ originally duplicated an identical shell between them instead of sharing one.
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | All four are VCP's own semantics — GDL's Tag primitive doesn't dictate them |
 | `tone` | `neutral \| brand \| info \| success \| warning \| critical` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
 | `size` | `sm \| md` | `md` | 24 / 28 tall, with 12 / 14 type. `sm` for dense tables and inline-with-body-text |
+| `onRemove` | `() => void` | — | Renders a ✕ button after the label. The only interactive part of the tag; the tag itself never takes a click |
+| `removeLabel` | `string` | `Remove ${children}` | The ✕'s accessible name. **Required in practice when `children` is not a string** — the fallback is a bare "Remove" |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the tag's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
 | `className` | `string` | — | Merged via `cn()` |
@@ -62,6 +64,7 @@ differs between the two:
 | Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
 | Padding | Tailwind numeric scale | `px-2` (8), both sizes |
 | Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |
+| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) round hit area, 14 glyph, `pr-1` on the tag, and a negative left margin that cancels the tag's gap so the ✕ sits right against the label (a leading icon keeps its gap). Textual: no fill. On a neutral tag that is not `filled` the glyph is `neutral.textual.content` default, hover, pressed; other tones keep their own ink and dim to 70% on hover |
 | Icon colour | — | Inherited from the tone's content token via `currentColor`, unless the icon sets its own colour (see `TypeTag`/`UrgencyTag`) |
 
 The dark theme comes for free — every colour class is a semantic token that
@@ -94,9 +97,15 @@ same Figma `Tag` node.
 - **Icons are decorative** and rendered `aria-hidden`, so a screen reader
   reads the label once. Pass a plain `Icon` with no `label` — naming both
   double-announces.
-- **Not a control, so no target size.** Tag takes no focus and handles no
-  events, which is why the 40 minimum does not apply. The moment it becomes
-  clickable that stops being true — use `Chip`.
+- **The ✕ stays legible through its states.** On the neutral tonal tag it is 6.92:1 light / 6.97:1 dark at rest, 9.45:1 / 8.40:1 on hover and 13.35:1 / 9.45:1 pressed, against the 3:1 a graphic needs. Other tones dim to 70% on hover instead; a grey ✕ would clash with their ink.
+- **Not a control, so no target size — until it has a ✕.** A plain Tag takes no
+  focus and handles no events, which is why the 40 minimum does not apply. With
+  `onRemove` the ✕ is a real `<button>`, a sibling of the label (never wrapping
+  it), named `Remove <label>`, with a visible focus ring drawn inside it (the tag
+  clips its overflow). At 20 it is under the 40 target, the same pointer-dense
+  exemption `Chip`'s ✕ takes: do not make removing a tag the only way to change a
+  value on a touch-first screen. A tag that should toggle or open something is
+  a `Chip`.
 - **Truncation keeps the full text out of reach.** Shorten the label; do not
   lean on `title` to recover it.
 
@@ -107,9 +116,9 @@ same Figma `Tag` node.
 - Don't put a VCP status in a bare Tag. That is a composing piece's job —
   `StatusTag` for statuses, or a new `*Tag` composing this for anything else.
 - Don't build a new hand-rolled shell for a new contextual tag. Compose `Tag`.
-- Don't make a Tag clickable or dismissible without becoming a `Chip`-shaped
-  wrapper around it — a bare `<span>` with an `onClick` is unreachable by
-  keyboard.
+- Don't put an `onClick` on a Tag — a bare `<span>` with a click handler is
+  unreachable by keyboard. `onRemove` is the one supported interaction; anything
+  that toggles or opens is a `Chip`.
 - Don't reach for `Tag` expecting `Badge`'s pill, or vice versa — they are
   separate Figma components with separate shapes, not one component with a
   configurable radius.
