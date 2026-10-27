@@ -23,7 +23,7 @@ that is a pattern asking to be written.
 |---|---|---|---|
 | `value` | `number` | required | Clamped into `0…max` |
 | `max` | `number` | `100` | The whole. The announced value stays in real units (34 of 40); only the painted width is a percentage |
-| `tone` | `brand \| success \| warning \| critical \| info \| pending \| caution` | `brand` | See above — status, not decoration. `info` is `accent.info.filled.surface`, `pending` `accent.pending.filled.surface` (orange). `caution` is the bright amber (`accent.warning.outline.border`) and **fails 3:1 on the light track** — only beside a written value |
+| `tone` | `brand \| success \| warning \| critical \| info \| pending \| caution` | `brand` | See above — status, not decoration. `info` is `accent.info.filled.surface`, `pending` and `caution` are the bright orange and amber outline-border shades (`accent.pending.outline.border`, `accent.warning.outline.border`) and **fail 3:1 on the light track** — only beside a written value |
 | `size` | `sm \| md` | `md` | 4 / 8 tall. `sm` for dense table rows |
 | `label` | `string` | — | Visible name above the bar, wired via `aria-labelledby` |
 | `showValue` | `boolean` | — | Rounded percentage at the row's end, in the numeric face |
@@ -52,7 +52,7 @@ Fill against track, measured (3:1 is the bar for meaningful graphics):
 | `warning` | **4.00:1** | **7.66:1** |
 | `critical` | **3.87:1** | **3.84:1** |
 | `info` | — | — |
-| `pending` | **4.20:1** | **5.22:1** |
+| `pending` | **2.27:1** ⚠ | **4.11:1** |
 | `caution` | **1.55:1** ⚠ | **4.98:1** |
 
 The trade: the track itself whispers against surfaces (1.23:1 light on base,

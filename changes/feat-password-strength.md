@@ -15,7 +15,7 @@ item and built on `ProgressBar`. The caller scores the password and may pass a
 one-line `message`.
 
 **`ProgressBar`** grows additive pieces so it can carry this: `tone="info"`,
-`tone="pending"` (`accent.pending.filled.surface`), `tone="caution"` (the bright
-`accent.warning.outline.border` — **1.55:1 on the light track**, documented as only
-for use beside a written value), a `valueLabel` that paints and announces words in
+`tone="pending"` and `tone="caution"` (the bright `accent.pending.outline.border`
+and `accent.warning.outline.border` — **2.27:1 and 1.55:1 on the light track**,
+documented as only for use beside a written value), a `valueLabel` that paints and announces words in
 place of the percentage, and `role="meter"`. Existing bars are unchanged.

@@ -41,7 +41,7 @@ the copy belongs to whoever owns the rule.
 | Level | Fill | `ProgressBar` tone | Token |
 |---|---|---|---|
 | `very-weak` | 20% | `critical` | `accent.critical.filled.surface` |
-| `weak` | 40% | `pending` | `accent.pending.filled.surface` |
+| `weak` | 40% | `pending` | `accent.pending.outline.border` |
 | `fair` | 60% | `caution` | `accent.warning.outline.border` |
 | `good` | 80% | `info` | `accent.info.filled.surface` |
 | `strong` | 100% | `success` | `accent.success.filled.surface` |
@@ -49,15 +49,17 @@ the copy belongs to whoever owns the rule.
 The track and the other fills are `ProgressBar`'s, so the contrast figures in
 `docs/progress-bar.md` apply.
 
-**Fair is the one that does not pass.** Its bright amber
-(`accent.warning.outline.border.default`, the colour Figma paints) is **1.55:1**
-against the light track — under the 3:1 a meaningful graphic should reach
-(dark is 4.98:1). It is kept deliberately: the level is printed at the end of
-the label row and read out as `aria-valuetext`, so the fill's colour is never
-the only signal. Don't copy this choice to a bar that has no words beside it.
+**Weak and Fair do not pass on the light track.** Both use the bright
+`outline.border` shades the Figma file paints — Weak
+`accent.pending.outline.border.default` (**2.27:1** light, 4.11:1 dark) and Fair
+`accent.warning.outline.border.default` (**1.55:1** light, 4.98:1 dark) — under
+the 3:1 a meaningful graphic should reach. That is kept deliberately: the level
+is printed at the end of the label row and read out as `aria-valuetext`, so the
+fill's colour is never the only signal. Don't copy this choice to a bar that has
+no words beside it.
 
-`pending` is the new orange status family (`accent.pending.*`, built from
-GDL's core orange scale), at 4.20:1 light / 5.22:1 dark.
+`pending` is the new orange status family (`accent.pending.*`, built from GDL's
+core orange scale).
 
 ## Accessibility
 

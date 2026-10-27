@@ -31,9 +31,11 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
       success: 'bg-accent-success-filled-surface-default',
       warning: 'bg-accent-warning-filled-surface-default',
       critical: 'bg-accent-critical-filled-surface-default',
-      /* accent.pending.filled.surface — the orange status family, a step more
-         urgent than warning: password strength's Weak. */
-      pending: 'bg-accent-pending-filled-surface-default',
+      /* accent.pending.outline.border — the orange status family, a step more
+         urgent than warning: password strength's Weak. The bright border shade,
+         like `caution`: 2.27:1 on the light track, so only beside a written
+         value. */
+      pending: 'bg-accent-pending-outline-border-default',
       /* accent.warning.outline.border — the bright amber. A deliberate exception
          to the filled family: 1.55:1 on the light track, so use it only where the
          value is also written out (valueLabel), never as the only signal. */

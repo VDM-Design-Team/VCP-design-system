@@ -19,11 +19,11 @@ import { ProgressBar } from '../../atoms/progress-bar';
  * same: the copy ("Your password is too simple") belongs to whoever owns the
  * rule.
  *
- * Weak is the orange `pending` tone and Fair the bright amber `caution` tone,
- * as the Figma design paints them. Fair's amber is 1.55:1 against the light
- * track — below the 3:1 a graphic should reach — and is kept on purpose: the
- * level is always written out beside the bar, so the colour never carries the
- * meaning alone.
+ * Weak is the orange `pending` tone and Fair the bright amber `caution` tone —
+ * both the bright outline-border shades, which sit below the 3:1 a graphic
+ * should reach against the light track (2.27:1 and 1.55:1). That is kept on
+ * purpose: the level is always written out beside the bar, so the colour never
+ * carries the meaning alone.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
