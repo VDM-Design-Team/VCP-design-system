@@ -19,20 +19,20 @@ const meta = {
     docs: {
       description: {
         component:
-          'A person, named in place: avatar, name and, under it, a role. For a table cell, a card ' +
+          'A person, named in place: avatar, name and, under it, a description. For a table cell, a card ' +
           'header or a line in a list. Two sizes, Figma’s Default (`md`) and S (`sm`). When the ' +
           'person is something to press or remove, use `Chip`.',
       },
     },
   },
-  args: { name: 'John', role: 'Assignee', fullName: 'John Doe' },
+  args: { name: 'John', description: 'Assignee', fullName: 'John Doe' },
   argTypes: { size: { control: 'inline-radio', options: ['md', 'sm'] } },
 } satisfies Meta<typeof UserLabel>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Figma's Default: a 32 avatar, the name in `body-sm-medium`, the role under it in `text.tertiary`. */
+/** Figma's Default: a 32 avatar, the name in `body-sm-medium`, the description under it in `text.tertiary`. */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -46,21 +46,21 @@ export const Default: Story = {
 /** Figma's S: a 24 avatar and one step down in type. */
 export const Small: Story = { args: { size: 'sm' } };
 
-/** Both sizes, with and without a role. */
+/** Both sizes, with and without a description. */
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col items-start gap-4">
       <UserLabel {...args} />
-      <UserLabel {...args} role={undefined} />
+      <UserLabel {...args} description={undefined} />
       <UserLabel {...args} size="sm" />
-      <UserLabel {...args} size="sm" role={undefined} />
+      <UserLabel {...args} size="sm" description={undefined} />
     </div>
   ),
 };
 
-/** Without a role the label is just avatar and name. */
+/** Without a description the label is just avatar and name. */
 export const WithoutRole: Story = {
-  args: { role: undefined },
+  args: { description: undefined },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).queryByText('Assignee')).toBeNull();
   },
@@ -74,11 +74,11 @@ export const WithPhoto: Story = {
   },
 };
 
-/** Squeezed, the name and role are cut with "…". */
+/** Squeezed, the name and description are cut with "…". */
 export const Truncates: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { name: 'Bartholomew Featherstonehaugh-Wetherby', role: 'Senior assignee, procurement' },
+  args: { name: 'Bartholomew Featherstonehaugh-Wetherby', description: 'Senior assignee, procurement' },
   render: (args) => (
     <div className="w-48">
       <UserLabel {...args} />
