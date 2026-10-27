@@ -24,9 +24,10 @@ import { cn } from '../../lib/cn';
 semantic `stroke-*` token class — a token class, never a hex.
 
 `size="icon"` is the small decorative one from the table rows: a 20 box with
-the ring 16 across inside it, thin, and no numeral. `showValue={false}` does the
-same for any other size — the ring drawn alone, no numeral, no caption. Either
-way it is still a meter, so give it an `aria-label`.
+the ring 16 across inside it, thin, and no numeral. Any other size goes the same
+way with an empty `label` (`null` or `""`): with no numeral and no caption the
+text layer is not rendered at all, just the ring. Either way it is still a
+meter, so give it an `aria-label`.
 
 `size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
  * measured, not stepped, which is also why the centre numeral scales with the
@@ -66,11 +67,13 @@ export interface DonutChartProps
    * round-capped fill over a full track. Pair it with a thin `thickness`.
    */
   segmented?: boolean;
-  /** Draw the ring alone: hides the centred number and the caption. Off for `size="icon"`. */
-  showValue?: boolean;
   /** Token `stroke-*` class for the filled arc; wins over `tone`. */
   fillClassName?: string;
-  /** Replaces the centred percentage. Visual only — the meter announces numbers. */
+  /**
+   * Replaces the centred percentage. Visual only — the meter announces numbers.
+   * Empty (`null` or `""`) removes the numeral; with no caption either, the ring
+   * is drawn alone. `size="icon"` starts empty.
+   */
   label?: React.ReactNode;
   /** Small line under the number — "of 40 pts". */
   caption?: React.ReactNode;
@@ -86,7 +89,6 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       thickness: thicknessProp,
       half,
       segmented,
-      showValue: showValueProp,
       fillClassName,
       label,
       caption,
@@ -104,7 +106,8 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
     const box = icon ? 20 : sizeProp;
     const size = icon ? 16 : sizeProp;
     const thickness = thicknessProp ?? (icon ? 2 : 16);
-    const showValue = showValueProp ?? !icon;
+    const numeral = label === undefined ? (icon ? null : `${Math.round(pct * 100)}%`) : label;
+    const hasNumeral = numeral !== null && numeral !== false && numeral !== '';
 
     const r = (size - thickness) / 2;
     const c = box / 2;
@@ -173,7 +176,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             className={cn(fill({ tone }), fillClassName)}
           />
         </svg>
-        {showValue && (
+        {(hasNumeral || caption) && (
           <div
             aria-hidden="true"
             className={cn(
@@ -181,13 +184,15 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
               half ? 'justify-end pb-1' : 'justify-center',
             )}
           >
-            <span
-              className="font-numeric font-semibold text-text-primary"
-              /* Scales with the ring — geometry, not the type ramp. */
-              style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
-            >
-              {label ?? `${Math.round(pct * 100)}%`}
-            </span>
+            {hasNumeral && (
+              <span
+                className="font-numeric font-semibold text-text-primary"
+                /* Scales with the ring — geometry, not the type ramp. */
+                style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
+              >
+                {numeral}
+              </span>
+            )}
             {caption && (
               <span className="mt-1 font-sans text-caption-md-medium text-text-tertiary">{caption}</span>
             )}

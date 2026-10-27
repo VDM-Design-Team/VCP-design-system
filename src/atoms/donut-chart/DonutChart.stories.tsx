@@ -17,7 +17,6 @@ const meta = {
   },
   args: { value: 26, max: 40, caption: 'of 40 pts' },
   argTypes: {
-    showValue: { control: 'boolean' },
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     half: { control: 'boolean' },
     segmented: { control: 'boolean' },
@@ -72,13 +71,13 @@ export const CustomColour: Story = {
   args: { value: 30, max: 40, fillClassName: 'stroke-accent-blue-medium', caption: 'custom' },
 };
 
-/** `size="icon"`: the 20 box with a 16 ring, no numeral. `showValue={false}` does the same at any size. */
+/** `size="icon"`: the 20 box with a 16 ring, no numeral. An empty `label` does the same at any size. */
 export const Icon: Story = {
   render: (args) => (
     <div className="flex items-center gap-4">
-      <DonutChart {...args} value={25} max={100} size="icon" aria-label="25% done" />
-      <DonutChart {...args} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
-      <DonutChart {...args} value={40} max={100} size={72} thickness={10} showValue={false} tone="warning" aria-label="40% done" />
+      <DonutChart {...args} caption={undefined} value={25} max={100} size="icon" aria-label="25% done" />
+      <DonutChart {...args} caption={undefined} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
+      <DonutChart {...args} caption={undefined} value={40} max={100} size={72} thickness={10} label={null} tone="warning" aria-label="40% done" />
     </div>
   ),
 };
