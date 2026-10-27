@@ -21,10 +21,13 @@ two of these.
 |---|---|---|---|
 | `value` | `number` | required | Clamped into `0…max`; announced in real units |
 | `max` | `number` | `100` | — |
-| `tone` | `brand \| success \| warning \| critical` | `brand` | Consumption status — the caller's judgment |
+| `tone` | `brand \| success \| warning \| critical \| yellow` | `brand` | Consumption status — the caller's judgment. `yellow` is `accent.yellow.medium`, a light yellow softer than `warning`; it does not reach 3:1 on the track, so keep the number beside it |
 | `size` / `thickness` | `number` | `140` / `16` | SVG geometry — a chart is measured, not stepped |
 | `half` | `boolean` | — | The half-donut gauge (Cycle Summary treatment) |
 | `segmented` | `boolean` | — | Flat ends and a gap between the filled arc and the remainder (the gap is a quarter of `thickness`), instead of a round-capped fill over a full track. Pair with a thin `thickness` (8 on a 200 gauge) |
+| `showValue` | `boolean` | `true` | `false` draws the ring alone — no numeral, no caption — for a small status glyph in a table row (`size` 16, `thickness` 3). It is still a meter: pass `aria-label` |
+| `fillClassName` | `string` | — | Token `stroke-*` class for the filled arc; wins over `tone`. A token class, never a hex |
+| `trackClassName` | `string` | — | Token `stroke-*` class for the track |
 | `label` | `ReactNode` | derived `%` | Replaces the centred text. Visual only |
 | `caption` | `ReactNode` | — | Line under the number — "of 40 pts". A string doubles as `aria-label` |
 | `className` | `string` | — | On the wrapper |

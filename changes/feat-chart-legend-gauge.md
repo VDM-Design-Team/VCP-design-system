@@ -10,5 +10,10 @@ from its chart. The swatch is `aria-hidden`; the label is the item.
 
 `DonutChart` gains `segmented`: flat ends and a gap between the filled arc and
 the remainder (a quarter of `thickness`) instead of a round-capped fill over a
-full track — the flat Cycle Summary gauge. Existing rings are unchanged. No new
-tokens.
+full track — the flat Cycle Summary gauge. Existing rings are unchanged.
+
+`DonutChart` also gains a light-yellow `yellow` tone (`accent.yellow.medium`),
+`fillClassName` / `trackClassName` for one-off token colours, and
+`showValue={false}` to draw the ring alone (a 16-size status glyph). `LegendItem`
+gets the same `yellow` tone and `swatchClassName`, and its gap now scales with
+the swatch (4 on `sm`, 6 on `md`). No new tokens.

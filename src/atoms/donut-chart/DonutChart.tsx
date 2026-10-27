@@ -20,7 +20,15 @@ import { cn } from '../../lib/cn';
  * remainder, so a 90% ring reads as two pieces rather than one bar with a
  * darker end. The gap scales with `thickness`. Round-capped rings stay the default.
  *
- * `size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
+ * Colour is a `tone` first. For one a tone does not cover, `fillClassName` takes a
+semantic `stroke-*` token class (and `trackClassName` the track's) — a token
+class, never a hex.
+
+With `showValue={false}` the ring is drawn alone — no numeral, no caption — for
+the small status glyph in a table row (try `size={16}` `thickness={3}`). It is
+still a meter, so give it an `aria-label`.
+
+`size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
  * measured, not stepped, which is also why the centre numeral scales with the
  * ring instead of sitting on the type ramp. It is set in the numeric face.
  *
@@ -36,6 +44,10 @@ const fill = cva('transition-[stroke-dasharray] duration-500', {
       success: 'stroke-accent-success-filled-surface-default',
       warning: 'stroke-accent-warning-filled-surface-default',
       critical: 'stroke-accent-critical-filled-surface-default',
+      /* accent.yellow.medium — the light yellow Figma draws for "getting
+         close". Softer than `warning`, and it does not reach 3:1 on the track,
+         so keep the number beside it (or use `warning`). */
+      yellow: 'stroke-accent-yellow-medium',
     },
   },
   defaultVariants: { tone: 'brand' },
@@ -58,6 +70,12 @@ export interface DonutChartProps
    * round-capped fill over a full track. Pair it with a thin `thickness`.
    */
   segmented?: boolean;
+  /** Draw the ring alone: hides the centred number and the caption. */
+  showValue?: boolean;
+  /** Token `stroke-*` class for the filled arc; wins over `tone`. */
+  fillClassName?: string;
+  /** Token `stroke-*` class for the track. */
+  trackClassName?: string;
   /** Replaces the centred percentage. Visual only — the meter announces numbers. */
   label?: React.ReactNode;
   /** Small line under the number — "of 40 pts". */
@@ -74,6 +92,9 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       thickness = 16,
       half,
       segmented,
+      showValue = true,
+      fillClassName,
+      trackClassName,
       label,
       caption,
       tone,
@@ -137,7 +158,7 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             }
             strokeDashoffset={segmented ? -trackStart : undefined}
             transform={segmented || half ? `rotate(${turn} ${c} ${c})` : undefined}
-            className="stroke-surface-track"
+            className={cn('stroke-surface-track', trackClassName)}
           />
           <circle
             cx={c}
@@ -148,27 +169,29 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             strokeLinecap={segmented ? 'butt' : 'round'}
             strokeDasharray={`${fillLength} ${circumference}`}
             transform={`rotate(${turn} ${c} ${c})`}
-            className={fill({ tone })}
+            className={cn(fill({ tone }), fillClassName)}
           />
         </svg>
-        <div
-          aria-hidden="true"
-          className={cn(
-            'pointer-events-none absolute inset-0 flex flex-col items-center',
-            half ? 'justify-end pb-1' : 'justify-center',
-          )}
-        >
-          <span
-            className="font-numeric font-semibold text-text-primary"
-            /* Scales with the ring — geometry, not the type ramp. */
-            style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
+        {showValue && (
+          <div
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none absolute inset-0 flex flex-col items-center',
+              half ? 'justify-end pb-1' : 'justify-center',
+            )}
           >
-            {label ?? `${Math.round(pct * 100)}%`}
-          </span>
-          {caption && (
-            <span className="mt-1 font-sans text-caption-md-medium text-text-tertiary">{caption}</span>
-          )}
-        </div>
+            <span
+              className="font-numeric font-semibold text-text-primary"
+              /* Scales with the ring — geometry, not the type ramp. */
+              style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
+            >
+              {label ?? `${Math.round(pct * 100)}%`}
+            </span>
+            {caption && (
+              <span className="mt-1 font-sans text-caption-md-medium text-text-tertiary">{caption}</span>
+            )}
+          </div>
+        )}
       </div>
     );
   },

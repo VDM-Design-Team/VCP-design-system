@@ -17,6 +17,7 @@ const meta = {
   },
   args: { value: 26, max: 40, caption: 'of 40 pts' },
   argTypes: {
+    showValue: { control: 'boolean' },
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     half: { control: 'boolean' },
     segmented: { control: 'boolean' },
@@ -62,6 +63,33 @@ export const SegmentedGauge: Story = {
       <DonutChart {...args} value={74} tone="warning" caption="slipping" />
       <DonutChart {...args} value={40} tone="critical" caption="behind" />
       <DonutChart {...args} value={0} tone="critical" caption="not started" />
+    </div>
+  ),
+};
+
+/** The light yellow, and a one-off colour through `fillClassName` (a token class). */
+export const YellowAndCustomColour: Story = {
+  render: (args) => (
+    <div className="flex items-end gap-8">
+      <DonutChart {...args} value={30} max={40} tone="yellow" caption="getting close" />
+      <DonutChart
+        {...args}
+        value={30}
+        max={40}
+        fillClassName="stroke-accent-blue-medium"
+        caption="custom"
+      />
+    </div>
+  ),
+};
+
+/** `showValue={false}`: the ring alone, for a table row. Still a meter, so it is named. */
+export const RingOnly: Story = {
+  render: (args) => (
+    <div className="flex items-center gap-4">
+      <DonutChart {...args} value={25} max={100} size={16} thickness={3} showValue={false} aria-label="25% done" />
+      <DonutChart {...args} value={70} max={100} size={24} thickness={4} showValue={false} tone="success" aria-label="70% done" />
+      <DonutChart {...args} value={40} max={100} size={72} thickness={10} showValue={false} tone="yellow" aria-label="40% done" />
     </div>
   ),
 };

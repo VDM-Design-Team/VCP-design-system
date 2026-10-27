@@ -17,7 +17,8 @@ import { cn } from '../../lib/cn';
  *
  * Two sizes, from the two legends in Figma: `md` is the dashboard charts'
  * 12 swatch with the 12 caption; `sm` is the Gantt chart's 8 dot with the
- * 10 caption. A legend is a row of these — wrap them in a list.
+ * 10 caption. The gap scales with the swatch (half its size). A legend is a row of these —
+ * wrap them in a list.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -32,6 +33,8 @@ const swatch = cva('shrink-0', {
       warning: 'bg-accent-warning-filled-surface-default',
       critical: 'bg-accent-critical-filled-surface-default',
       info: 'bg-accent-info-filled-surface-default',
+      /* accent.yellow.medium — the light yellow DonutChart's `yellow` draws. */
+      yellow: 'bg-accent-yellow-medium',
     },
     size: {
       /* 8 — a dot, for dense legends under a chart. ds-lint-ignore */
@@ -55,16 +58,18 @@ export interface LegendItemProps
     VariantProps<typeof swatch> {
   /** The word for the colour. It is the accessible content. */
   label: string;
+  /** Token `bg-*` class for the swatch; wins over `tone`. For a series no tone covers. */
+  swatchClassName?: string;
 }
 
 export const LegendItem = React.forwardRef<HTMLSpanElement, LegendItemProps>(
-  ({ className, tone, size, label: text, ...props }, ref) => (
+  ({ className, tone, size, label: text, swatchClassName, ...props }, ref) => (
     <span
       ref={ref}
-      className={cn('inline-flex items-center', size === 'sm' ? 'gap-1.5' : 'gap-1', className)}
+      className={cn('inline-flex items-center', size === 'sm' ? 'gap-1' : 'gap-1.5', className)}
       {...props}
     >
-      <span aria-hidden="true" className={swatch({ tone, size })} />
+      <span aria-hidden="true" className={cn(swatch({ tone, size }), swatchClassName)} />
       <span className={label({ size })}>{text}</span>
     </span>
   ),

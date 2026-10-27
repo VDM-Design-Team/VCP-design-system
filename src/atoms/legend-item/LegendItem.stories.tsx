@@ -38,6 +38,16 @@ export const Default: Story = {
   },
 };
 
+/** A series no tone covers: `swatchClassName` takes a token `bg-*` class. */
+export const CustomSwatch: Story = {
+  render: () => (
+    <div className="flex gap-4">
+      <LegendItem label="Light yellow" tone="yellow" />
+      <LegendItem label="Custom" swatchClassName="bg-accent-blue-medium" />
+    </div>
+  ),
+};
+
 /** A legend is a row of items; wrap them in a list. `md` for dashboards, `sm` under a Gantt. */
 export const InALegend: Story = {
   render: () => (
