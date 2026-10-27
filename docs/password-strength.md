@@ -46,7 +46,8 @@ the copy belongs to whoever owns the rule.
 | `good` | 80% | `info` | `accent.info.filled.surface` |
 | `strong` | 100% | `success` | `accent.success.filled.surface` |
 
-The track and the other fills are `ProgressBar`'s, so the contrast figures in
+The label row is `ProgressBar`'s `labelSize="md"` (14px, as Figma draws it); the
+message under it stays 12px. The track and the other fills are `ProgressBar`'s, so the contrast figures in
 `docs/progress-bar.md` apply.
 
 **Weak and Fair do not pass on the light track.** Both use the bright

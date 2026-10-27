@@ -76,6 +76,12 @@ export interface ProgressBarProps
    * Without it the bar is bare — supply `aria-label` instead.
    */
   label?: string;
+  /**
+   * Type size of the label row: `sm` is the 12px caption (default, dense rows);
+   * `md` is the 14px label, for when the words are the main signal — a level
+   * written out beside a bar that may not pass contrast on its own.
+   */
+  labelSize?: 'sm' | 'md';
   /** Paints the rounded percentage after the label row, in the numeric face. */
   showValue?: boolean;
   /**
@@ -100,6 +106,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
       tone,
       size,
       label,
+      labelSize = 'sm',
       showValue,
       valueLabel,
       role = 'progressbar',
@@ -116,7 +123,12 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     return (
       <div ref={ref} className={cn('flex w-full flex-col gap-1.5', className)} {...props}>
         {(label || showValue || valueLabel) && (
-          <div className="flex items-baseline justify-between gap-2 font-sans text-caption-md-regular text-text-tertiary">
+          <div
+            className={cn(
+              'flex items-baseline justify-between gap-2 font-sans text-text-tertiary',
+              labelSize === 'md' ? 'text-label-sm-regular' : 'text-caption-md-regular',
+            )}
+          >
             {/* The span renders (empty) even without a label so a lone
                 percentage still right-aligns. */}
             <span id={label ? labelId : undefined}>{label}</span>
@@ -124,7 +136,14 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
               <span aria-hidden="true">{valueLabel}</span>
             ) : (
               showValue && (
-                <span className="font-numeric text-caption-md-medium">{Math.round(pct)}%</span>
+                <span
+                  className={cn(
+                    'font-numeric',
+                    labelSize === 'md' ? 'text-label-sm-medium' : 'text-caption-md-medium',
+                  )}
+                >
+                  {Math.round(pct)}%
+                </span>
               )
             )}
           </div>

@@ -25,6 +25,7 @@ that is a pattern asking to be written.
 | `max` | `number` | `100` | The whole. The announced value stays in real units (34 of 40); only the painted width is a percentage |
 | `tone` | `brand \| success \| warning \| critical \| info \| pending \| caution` | `brand` | See above — status, not decoration. `info` is `accent.info.filled.surface`, `pending` and `caution` are the bright orange and amber outline-border shades (`accent.pending.outline.border`, `accent.warning.outline.border`) and **fail 3:1 on the light track** — only beside a written value |
 | `size` | `sm \| md` | `md` | 4 / 8 tall. `sm` for dense table rows |
+| `labelSize` | `sm \| md` | `sm` | Type size of the label row: 12px caption, or 14px label (`md`) when the words are the main signal. Independent of `size` |
 | `label` | `string` | — | Visible name above the bar, wired via `aria-labelledby` |
 | `showValue` | `boolean` | — | Rounded percentage at the row's end, in the numeric face |
 | `valueLabel` | `string` | — | Words instead of a percentage ("Strong", "34 of 40 used"): painted at the row's end and announced as `aria-valuetext` |

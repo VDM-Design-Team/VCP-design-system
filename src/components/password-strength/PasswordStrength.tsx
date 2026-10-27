@@ -11,7 +11,9 @@ import { ProgressBar } from '../../atoms/progress-bar';
  * level → tone mapping, and one line of advice under the bar. The bar itself —
  * track, fill, label row, `role="meter"` with real `aria-value*` — is
  * `ProgressBar`'s, and the level is read out by name ("Very Weak") through its
- * `valueLabel`, so the fill length and the colour are never the only signal.
+ * `valueLabel`, so the fill length and the colour are never the only signal. The
+ * words are the main signal (the bright fills can fall under 3:1), so the row is
+ * `labelSize="md"`, the 14px label.
  *
  * **Scoring is not in here.** What makes a password "Fair" — length, character
  * classes, a breach list — is product policy and changes without a design
@@ -63,6 +65,7 @@ export const PasswordStrength = React.forwardRef<HTMLDivElement, PasswordStrengt
         <ProgressBar
           role="meter"
           label={label}
+          labelSize="md"
           valueLabel={level.text}
           value={level.step}
           max={STEPS}

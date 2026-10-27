@@ -18,4 +18,4 @@ one-line `message`.
 `tone="pending"` and `tone="caution"` (the bright `accent.pending.outline.border`
 and `accent.warning.outline.border` — **2.27:1 and 1.55:1 on the light track**,
 documented as only for use beside a written value), a `valueLabel` that paints and announces words in
-place of the percentage, and `role="meter"`. Existing bars are unchanged.
+place of the percentage, `role="meter"`, and a `labelSize` (`sm` 12px default, `md` 14px). Existing bars are unchanged.
