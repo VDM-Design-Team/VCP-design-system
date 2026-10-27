@@ -21,7 +21,7 @@ const meta = {
   args: { value: 12, label: 'Capacity points' },
   argTypes: {
     size: { control: 'radio', options: ['sm', 'md'] },
-    variant: { control: 'radio', options: ['sides', 'stacked'] },
+    variant: { control: 'radio', options: ['plus-minus', 'up-down'] },
     min: { control: 'number' },
     max: { control: 'number' },
     step: { control: 'number' },
@@ -46,12 +46,12 @@ export const Default: Story = {
 };
 
 /**
- * `variant="stacked"` — the number-input layout: value left, one up/down caret
+ * `variant="up-down"` — the number-input layout: value left, one up/down caret
  * pair at the end. The carets leave the tab order; Arrow Up/Down is the
- * keyboard path. Behaviour is the same as `sides`, including the ends.
+ * keyboard path. Behaviour is the same as `plus-minus`, including the ends.
  */
-export const Stacked: Story = {
-  args: { variant: 'stacked', value: 12, label: 'Capacity points' },
+export const UpDown: Story = {
+  args: { variant: 'up-down', value: 12, label: 'Capacity points' },
   render: (args) => {
     const [value, setValue] = React.useState(args.value);
     return (
@@ -121,6 +121,34 @@ export const InAField: Story = {
   },
 };
 
+/**
+ * `invalid` alone is the critical border; `error` adds the caption and implies
+ * `invalid`. Either variant. The caption is announced and tied to the input.
+ */
+export const Invalid: Story = {
+  args: { value: 45, label: 'Capacity points' },
+  render: (args) => (
+    <div className="flex items-start gap-8">
+      <Stepper {...args} error="Max 40 points" />
+      <Stepper {...args} variant="up-down" error="Max 40 points" label="Capacity points, up-down" />
+      <Stepper {...args} variant="up-down" invalid label="Capacity points, border only" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const [first] = c.getAllByRole('textbox');
+    const alert = c.getAllByRole('alert')[0];
+    await expect(alert).toHaveTextContent('Max 40 points');
+    await expect(first).toHaveAttribute('aria-invalid', 'true');
+    await expect(first).toHaveAttribute('aria-describedby', alert.id);
+    /* accent.critical.outline.border.default, not the resting stroke.strong. */
+    await expect(getComputedStyle(first.parentElement!).borderTopColor).not.toBe('rgb(100, 116, 139)');
+    /* Border-only: invalid with no caption has nothing to point at. */
+    await expect(c.getAllByRole('alert')).toHaveLength(2);
+    await expect(c.getAllByRole('textbox')[2]).not.toHaveAttribute('aria-describedby');
+  },
+};
+
 export const Disabled: Story = {
   args: { disabled: true },
 };
@@ -135,7 +163,7 @@ export const LightAndDark: Story = {
           <div className="flex gap-6 bg-surface-canvas p-8">
             <Stepper {...args} value={12} suffix="pts" />
             <Stepper {...args} value={12} disabled />
-            <Stepper {...args} variant="stacked" value={12} />
+            <Stepper {...args} variant="up-down" value={12} />
           </div>
         </div>
       ))}

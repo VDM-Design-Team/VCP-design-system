@@ -13,7 +13,7 @@ import { Icon } from '../../atoms/icon';
  * `sm`/`md` = 32/40); the nudge buttons are minus/plus rather than the
  * export's left/right chevrons — nudging is arithmetic, not navigation.
  *
- * `variant="stacked"` is the number-input layout from Figma
+ * `variant="up-down"` is the number-input layout from Figma
  * (`_Number_Input_Step`): the value sits left-aligned like any `Input`, and
  * one up/down caret pair is stacked at the end — the browser's spin buttons,
  * drawn in the system. Same behaviour, same props; only the buttons move. The
@@ -39,7 +39,6 @@ const shell = cva(
     /* Scoped to the <input>: a nudge button disabling at min/max must not grey
        the whole field — only a disabled Stepper (which disables the input) does. */
     'has-[input:disabled]:cursor-not-allowed has-[input:disabled]:bg-surface-neutral-subtle has-[input:disabled]:border-stroke-subtle',
-    'border-stroke-strong focus-within:border-stroke-focused',
   ],
   {
     variants: {
@@ -49,10 +48,16 @@ const shell = cva(
         /* 40 tall — the default, meets the minimum target size. ds-lint-ignore */
         md: 'h-10',
       },
-      /* Where the nudge buttons sit; the shell itself does not change. */
-      variant: { sides: '', stacked: '' },
+      invalid: {
+        /* accent.critical.outline — held through focus so the error stays legible. */
+        true: 'border-accent-critical-outline-border-default',
+        false: 'border-stroke-strong focus-within:border-stroke-focused',
+      },
+      /* Where the nudge buttons sit: `plus-minus` either side of the value, `up-down` as
+         one caret pair at the end. The shell itself does not change. */
+      variant: { 'plus-minus': '', 'up-down': '' },
     },
-    defaultVariants: { size: 'md', variant: 'sides' },
+    defaultVariants: { size: 'md', variant: 'plus-minus', invalid: false },
   },
 );
 
@@ -72,6 +77,15 @@ export interface StepperProps
    * own names ("Decrease Capacity points").
    */
   label?: string;
+  /** Critical border + `aria-invalid`. Implied by `error`. */
+  invalid?: boolean;
+  /**
+   * An optional caption under the field saying what is wrong — "Max 40 points".
+   * Setting it marks the field invalid, announces it, and ties it to the input
+   * with `aria-describedby`. Inside a `Field`, let the `Field`'s `error` do this
+   * instead.
+   */
+  error?: React.ReactNode;
   disabled?: boolean;
 }
 
@@ -80,7 +94,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     {
       className,
       size,
-      variant = 'sides',
+      variant = 'plus-minus',
       value,
       min = 0,
       max = 999,
@@ -88,11 +102,17 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       onChange,
       suffix,
       label,
+      invalid,
+      error,
       disabled,
       ...props
     },
     ref,
   ) => {
+    const errorId = React.useId();
+    const hasError = error !== undefined && error !== null && error !== false;
+    const isInvalid = Boolean(invalid) || hasError;
+
     /* While focused, the field holds a draft string; the number commits on
        blur/Enter. null = not editing, render the real value. */
     const [draft, setDraft] = React.useState<string | null>(null);
@@ -113,13 +133,13 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const nudgeButton = (dir: -1 | 1) => {
       const dead = disabled || (dir < 0 ? value <= min : value >= max);
       const name = dir < 0 ? 'Decrease' : 'Increase';
-      const stacked = variant === 'stacked';
+      const upDown = variant === 'up-down';
       return (
         <button
           type="button"
           aria-label={label ? `${name} ${label}` : name}
           disabled={dead}
-          tabIndex={stacked ? -1 : undefined}
+          tabIndex={upDown ? -1 : undefined}
           onClick={() => nudge(dir)}
           className={cn(
             'grid shrink-0 place-items-center transition-colors',
@@ -127,7 +147,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             /* The shell clips and carries the shared ring; this ring draws
                inward so it survives the clipping. */
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
-            stacked
+            upDown
               ? [
                   'w-full flex-1 text-neutral-textual-content-default',
                   'hover:bg-neutral-outline-surface-hover hover:text-neutral-textual-content-hover',
@@ -140,7 +160,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
                 ],
           )}
         >
-          {stacked ? (
+          {upDown ? (
             <Icon name={dir < 0 ? 'caret-down-fill' : 'caret-up-fill'} size={12} />
           ) : (
             <Icon name={dir < 0 ? 'minus' : 'plus'} size="sm" />
@@ -150,12 +170,15 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     };
 
     return (
-      <div ref={ref} className={cn(shell({ size, variant }), className)} {...props}>
-        {variant === 'sides' && nudgeButton(-1)}
+      <div ref={ref} className={cn('inline-flex flex-col gap-1.5', className)} {...props}>
+        <div className={shell({ size, variant, invalid: isInvalid })}>
+        {variant === 'plus-minus' && nudgeButton(-1)}
         <input
           type="text"
           inputMode="numeric"
           aria-label={label}
+          aria-invalid={isInvalid || undefined}
+          aria-describedby={hasError ? errorId : undefined}
           value={draft ?? String(value)}
           disabled={disabled}
           onChange={(e) => setDraft(e.target.value)}
@@ -167,7 +190,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           }}
           /* font.family.numeric — this is a number, set as one. */
           className={cn(
-            variant === 'stacked' ? 'w-20 flex-1 px-3 text-left' : 'w-14 text-center',
+            variant === 'up-down' ? 'w-20 flex-1 px-3 text-left' : 'w-14 text-center',
             'min-w-0 border-0 bg-transparent outline-none',
             'font-numeric text-caption-md-medium text-text-primary',
             'disabled:cursor-not-allowed disabled:text-text-disabled',
@@ -178,13 +201,23 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             {suffix}
           </span>
         )}
-        {variant === 'sides' ? (
+        {variant === 'plus-minus' ? (
           nudgeButton(1)
         ) : (
           <div className="flex w-7 shrink-0 flex-col">
             {nudgeButton(1)}
             {nudgeButton(-1)}
           </div>
+        )}
+        </div>
+        {hasError && (
+          <span
+            id={errorId}
+            role="alert"
+            className="font-sans text-caption-md-medium text-accent-critical-outline-content-default"
+          >
+            {error}
+          </span>
         )}
       </div>
     );
