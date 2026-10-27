@@ -147,10 +147,14 @@ Disabled text (`text.disabled`) is exempt from the contrast minimum, as every di
   the visual echo, not the only signal.
 - The ✕ is named `Remove ${label}` (or `removeLabel`). It stops nothing —
   removal and selection are independent controls.
-- **28 tall is below the 40 minimum touch target** — the same exemption as
+- **28 tall (and 36) is below the 40 minimum touch target** — the same exemption as
   `IconButton size="sm"`, and the same condition: pointer-dense surfaces only
   (filter bars, tag editors, table cells). Do not make a chip the only path to
   an action on a touch-first screen.
+- **The people chips' edit and remove buttons are 24 round**, also under the 40 minimum. It is
+  the same pointer-dense exemption, and fine for the AV details card on a desktop screen. With
+  `actions="hover"` they are always shown on a touch screen, but they stay 24, so do not put the
+  people chips on a screen that is only used by touch.
 
 - **Hover-revealed buttons stay reachable.** With `actions="hover"` the buttons are only visually hidden
   (clear and zero-wide): they stay in the tab order, and focus inside the chip reveals them, so a keyboard user

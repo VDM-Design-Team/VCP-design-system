@@ -23,7 +23,7 @@ import { Icon } from '../../atoms/icon';
  *
  * **People chips.** Figma's Initiator and Assignee chips (`_User_Chip_Initiator`,
  * `_User_Chip_Assignee`) are this same pill with a few more options, not a second
- * component: `size="md"` (32), `tone="brand"` (brand-coloured text), `variant="outline"`
+ * component: `size="md"` (36), `tone="brand"` (brand-coloured text), `variant="outline"`
  * (the editing look: a brand border and no fill), `description` (the "Assignee"
  * line under the name), `onEdit` beside `onRemove`, `actions="hover"` (the edit and
  * remove buttons appear on hover or focus, as the design's "Edit Hover"), and
@@ -49,13 +49,13 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onCl
   label: React.ReactNode;
   /** A second, smaller line under the label — the "Assignee" under a name. */
   description?: React.ReactNode;
-  /** Leading node — an `<Avatar size="sm" />` fits the 28 pill exactly, and the 32 (`md`) one with 4 around it. */
+  /** Leading node — an `<Avatar size="sm" />` fits the 28 pill exactly, and the 32 (`md`) one sits in the 36 pill with 2 above and below. */
   avatar?: React.ReactNode;
   /** Numeric suffix after a hairline rule — a result count, a member count. */
   count?: number;
   /** `tonal` (default) is the brand-tinted pill; `outline` is the editing look: a brand border, no fill. */
   variant?: ChipVariant;
-  /** 28 (`sm`, default) or 32 (`md`) tall. */
+  /** 28 (`sm`, default) or 36 (`md`) tall. */
   size?: ChipSize;
   /** `brand` sets the text in `text.brand.strong`, as the people chips draw it; `default` is `text.primary`. */
   tone?: ChipTone;
@@ -165,12 +165,13 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
         {count != null && (
           <>
             {/* Hairline between label and count — decorative, the count reads
-                on its own. stroke.brand.medium survives both fills. */}
+                on its own. stroke.default, which reads on both the tonal and the outline chip. */}
             <span
               aria-hidden="true"
               className={cn('w-px self-stretch bg-stroke-default', size === 'md' ? 'my-1.5' : 'my-1')}
             />
-            {/* font.family.numeric via caption-md — counts are dense numerics. The count is
+            {/* font.family.numeric — counts are dense numerics: label-sm-medium on the 36 chip and
+                caption-md-medium on the 28 one. The count is
                 `text.tertiary` on the tonal fill and takes the chip's own ink on an outline. */}
             <span
               className={cn(
@@ -186,8 +187,9 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
       </>
     );
 
-    /* Spacing: 10 side padding, 6 between parts; an avatar sits 2 off the
-       curve so its circle follows the pill's (4 off a 32 pill's). */
+    /* Spacing: 10 side padding, 6 between parts. An avatar sits 2 from the left on the 28
+       pill, so its circle follows the pill's curve, and 6 from the left on the 36 pill,
+       as the design draws it (2 above and below on both). */
     const left = cn('gap-1.5', avatar ? (size === 'md' ? 'pl-1.5' : 'pl-0.5') : 'pl-2.5');
     /* No controls showing. A 36 (`md`) chip with an avatar rests with 12 on the right: 6 left of the
        avatar and 6 right would be even by the numbers but looks cramped on the right, so the resting
