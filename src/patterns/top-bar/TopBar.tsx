@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
-import { Avatar } from '../../atoms/avatar';
 import { Logo } from '../../atoms/logo';
 import { Toggle } from '../../atoms/toggle';
 import { Divider } from '../../atoms/divider';
+import type { MenuItem } from '../../components/menu';
+import { UserChip, UserMenu, UserMenuTrigger } from '../../components/user-menu';
 
 /**
  * TopBar — the app bar, matching the Figma `Top_NavBar` component set and its
@@ -21,7 +21,8 @@ import { Divider } from '../../atoms/divider';
  * light/dark mode `Toggle` (sun and moon in its knob), and the signed-in user (avatar + name + caret, inline).
  *
  * An organism composed entirely from existing pieces — `Logo`, `Toggle`,
- * `IconButton`, `Avatar`, `Icon`, with the caller's `Button` slotting into
+ * `IconButton`, `Divider`, and `UserMenu` (which also draws the user chip when the
+ * app opens its own menu or there is none), with the caller's `Button` slotting into
  * `primaryAction`. The page-level header (back, title, status actions) is a
  * different Figma component (`AV_Header`) and is its own pattern, `AVHeader`.
  *
@@ -58,7 +59,15 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
   theme?: 'light' | 'dark';
   onThemeChange?: (theme: 'light' | 'dark') => void;
   user?: TopBarUser;
-  /** Makes the user chip a real button — the future UserMenu's trigger. */
+  /**
+   * The account menu's rows, as `Menu` takes them (the default is Settings and Logout). Given with
+   * a `user`, the chip becomes a `UserMenu` that opens them; what each does, and which an admin
+   * sees that a regular user does not, is the app's.
+   */
+  userMenuItems?: MenuItem[];
+  /** Fires with the activated account-menu item's `key`. Given alone, the chip is a `UserMenu` with the default rows. */
+  onUserMenuSelect?: (key?: string) => void;
+  /** Makes the user chip a real button, for an app that opens its own menu. Ignored when `userMenuItems` is given. */
   onUserMenu?: () => void;
 }
 
@@ -74,30 +83,13 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       theme,
       onThemeChange,
       user,
+      userMenuItems,
+      onUserMenuSelect,
       onUserMenu,
       ...props
     },
     ref,
   ) => {
-    const userChip = user && (
-      <>
-        <Avatar name={user.name} src={user.src} size="md" />
-        <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
-        {onUserMenu && (
-          /* The glyph draws about 3 inside its 16 box, so at the chip's own 4 of
-             padding the caret sat 7 from the right edge against the avatar's 4
-             on the left. Pulling the box 3 into the padding evens them, whatever the
-             chip's own padding (8 each side, 4 top and bottom). */
-          <Icon
-            name="caret-down"
-            size="sm"
-            aria-hidden="true"
-            className="-mr-0.75 text-text-tertiary"
-          />
-        )}
-      </>
-    );
-
     return (
       /* h-16 — the Figma bar rows are 64 tall. */
       <header
@@ -187,21 +179,12 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
                 />
               )}
               {user &&
-                (onUserMenu ? (
-                  <button
-                    type="button"
-                    aria-label={`${user.name}, account menu`}
-                    onClick={onUserMenu}
-                    className={cn(
-                      'flex items-center gap-2 rounded-md px-2 py-1 text-left transition-colors',
-                      'hover:bg-surface-neutral-faint',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                    )}
-                  >
-                    {userChip}
-                  </button>
+                (userMenuItems || onUserMenuSelect ? (
+                  <UserMenu user={user} items={userMenuItems} onSelect={onUserMenuSelect} />
+                ) : onUserMenu ? (
+                  <UserMenuTrigger user={user} onClick={onUserMenu} />
                 ) : (
-                  <span className="flex items-center gap-2 px-2 py-1">{userChip}</span>
+                  <UserChip user={user} />
                 ))}
             </div>
           )}
