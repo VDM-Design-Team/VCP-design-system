@@ -144,28 +144,36 @@ because a list of actions with no keyboard entry point is a mouse feature.
 - **The panel is focusable as a container** (`tabIndex={-1}`, never in the tab
   order) so a click on dead space inside it does not drop focus to the body.
 
-### Positioning — the honest limits
+### Positioning — what it does and does not do
 
 The panel is absolutely positioned inside a relatively positioned wrapper:
-`top` or `bottom`, flush to the trigger's `left` or `right` edge. There is no
-positioning library in this system and this component does not pretend to be one.
+`top` or `bottom`, flush to the trigger's `left` or `right` edge. `placement` and
+`align` are what you *prefer*. When the panel is opened it is measured, and:
 
-**What that means, concretely:**
+- **It flips vertically** when the preferred side is cut off and the other side has
+  more room: a `bottom` popover near the foot of the screen opens above its trigger,
+  and a `top` one near the head opens below.
+- **It flips its edge** when it would run off the screen: left-flush becomes
+  right-flush if that is the one that fits (and the other way round).
+- **It scrolls when neither side fits.** The panel keeps the roomier side and its
+  height gives way (`max-height`, scrolling inside), rather than leaving the screen.
+- It is measured again when the window or the panel is resized. It does **not**
+  re-measure while the page scrolls, so an open panel never jumps to the other side
+  under the reader's hands.
 
-- **No collision detection and no flipping.** A `bottom` popover near the bottom
-  of the viewport opens off-screen. You choose the placement; nothing corrects it.
-- **No shifting.** A panel wider than the space beside its trigger overflows
-  rather than sliding to fit.
+**What it still does not do:**
+
+- **No shifting.** A panel wider than the space on both sides overflows rather than
+  sliding to fit. Keep panels to the width variants.
 - **No portal.** The panel is a child of the trigger's wrapper, so any ancestor
-  with `overflow: hidden`, `overflow: auto` or a transform will clip or move it.
-  A Popover inside a scrolling table cell is the usual way this bites.
-- **No repositioning on scroll or resize**, because it is anchored in normal
-  layout rather than measured.
+  with `overflow: hidden`, `overflow: auto` or a transform will clip or move it. It
+  measures against the *screen*, not that ancestor: a Popover inside a scrolling table
+  cell is the usual way this bites.
+- **No collision with other floating things**, only with the screen's edges.
 
-If you need any of those, the fix is a positioning dependency and a rewrite of
-the placement layer — not a workaround in a feature. Until then: pick the
-placement that fits where the trigger actually sits, keep panels small, and use
-`Modal` when the content is too big to sit beside anything.
+There is no positioning library in this system and this component does not
+pretend to be one. Keep panels small, and use `Modal` when the content is too big
+to sit beside anything.
 
 ## Don't
 
@@ -184,5 +192,5 @@ placement that fits where the trigger actually sits, keep panels small, and use
 - Don't put a `role="dialog"` on the panel and then expect Modal behaviour. This
   component does not trap focus, does not render inert background, and does not
   lock scroll.
-- Don't place one near the edge of a scrolling container and assume it will
-  flip. It will not.
+- Don't place one inside a clipping container (`overflow: hidden`) and expect the
+  panel to escape it. It flips for the screen's edges, not the container's.
