@@ -65,7 +65,7 @@ Nothing of its own; the layout is the frame's.
 | Avatar and text | `gap-4` (16); the avatar is `Avatar` `md` with `border-stroke-default` and `text-text-tertiary` (the frame's `Profile_Initials`) |
 | Author | `type.label-sm-medium`, `text.primary`; the time `type.body-sm-regular`, `text.tertiary`; 8 apart |
 | Body | `type.body-sm-regular`, `text.primary`; mentions `MentionTag` |
-| Thread line | 1 wide, `stroke.default`, at 16 (the middle of the avatar), from 4 under the avatar; the hook turns right 32 at its foot |
+| Thread line | 1 wide, `stroke.default`, at 16 (the middle of the avatar), from 4 under the avatar; the hook turns right 32 at its foot, with a corner of radius 8 (`radius.md`) |
 
 Differences from the frame, each settled elsewhere in the system:
 - **The mention tag is `MentionTag`**, the one the box draws, where the frame's posted

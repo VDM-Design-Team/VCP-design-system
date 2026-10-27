@@ -41,7 +41,7 @@ controls (`aria-controls`), so the toggle and the list are connected.
 ## The thread line
 
 The comment's line runs from its avatar down into the replies, and **each reply takes a
-corner off it** to its own avatar, 32 across; the line goes on past every reply but the
+corner off it** to its own avatar, 32 across, with a corner of radius 8 (`radius.md`); the line goes on past every reply but the
 last and stops at the last one's corner. The design draws one hook at the foot of the
 comment: with a single reply that is the same picture, and with several the line has to
 reach each of them, so that is how it is generalised here.

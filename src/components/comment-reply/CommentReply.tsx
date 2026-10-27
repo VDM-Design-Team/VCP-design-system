@@ -190,13 +190,18 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
           {thread !== 'none' && (
             <span
               aria-hidden="true"
-              /* With the hook it ends at the corner, so there is no tail past it. */
-              className={cn('absolute top-9 left-4 w-px bg-stroke-default', thread === 'hook' ? 'bottom-2' : 'bottom-0')}
+              /* With the hook it stops where the hook's own corner begins (8 up from the foot, and the
+                 hook is 24 tall), so the two meet and there is no tail past the corner. */
+              className={cn('absolute top-9 left-4 w-px bg-stroke-default', thread === 'hook' ? 'bottom-8' : 'bottom-0')}
             />
           )}
           {thread === 'hook' && (
-            /* The design's hook: the line turns right at its foot, 32 to the reply's avatar. */
-            <span aria-hidden="true" className="absolute bottom-2 left-4 h-px w-8 bg-stroke-default" />
+            /* The design's hook: the line turns right at its foot, 32 to the reply's avatar, with a corner of
+               radius 8 (`radius.md`). The Figma export drew it square; the design has it rounded. */
+            <span
+              aria-hidden="true"
+              className="absolute bottom-2 left-4 h-6 w-8 rounded-bl-md border-b border-l border-stroke-default"
+            />
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">

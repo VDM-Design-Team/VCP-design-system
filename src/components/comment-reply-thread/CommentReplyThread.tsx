@@ -12,8 +12,9 @@ import { CommentReply, type CommentReplyProps } from '../comment-reply';
  * and a reply that has replies of its own is a `CommentReplyThread` in the slot.
  *
  * **The thread line is drawn here.** The comment's line runs from its avatar down into
- * the replies, and each reply takes a corner off it to its own avatar, 32 across: the
- * line keeps going past every reply but the last and stops at the last one's corner.
+ * the replies, and each reply takes a corner off it to its own avatar, 32 across with a
+ * radius of 8: the line keeps going past every reply but the last and stops at the last
+ * one's corner.
  * The design draws one hook at the foot of the comment; with a single reply that is
  * the same picture, and with several the line has to reach each of them. With no
  * replies showing, a comment being replied to ends its line in the hook (`CommentReply`'s
@@ -33,13 +34,14 @@ export interface CommentReplyThreadProps extends Omit<CommentReplyProps, 'thread
   children?: React.ReactNode;
 }
 
-/* A corner off the line to the reply's avatar. The line is at 16 (the middle of the 32 avatar); a reply
-   is indented 48, so the corner is 32 across, and the avatar's middle is 24 down (8 of padding and 16).
-   Every reply draws its own length of line: all of its height, or down to its corner if it is the last. */
+/* A corner off the line to the reply's avatar, with the design's radius of 8 (`radius.md`). The line is
+   at 16 (the middle of the 32 avatar); a reply is indented 48, so the corner is 32 across, and the
+   avatar's middle is 24 down (8 of padding and 16). Every reply draws the corner (`after`); every
+   reply but the last also draws the straight line on down to the next one (`before`). */
 const REPLY =
-  'relative pl-12 before:absolute before:top-0 before:bottom-0 before:left-4 before:w-px before:bg-stroke-default ' +
-  'after:absolute after:top-6 after:left-4 after:h-px after:w-8 after:bg-stroke-default ' +
-  'last:before:bottom-auto last:before:h-6';
+  'relative pl-12 before:absolute before:inset-y-0 before:left-4 before:w-px before:bg-stroke-default ' +
+  'after:absolute after:top-0 after:left-4 after:h-6 after:w-8 after:rounded-bl-md after:border-b after:border-l after:border-stroke-default ' +
+  'last:before:hidden';
 
 /* The replies as a flat list: `<>…</>` around several is one child to React, and a thread would count it as one. */
 const flatten = (nodes: React.ReactNode): React.ReactNode[] =>
