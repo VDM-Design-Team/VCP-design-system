@@ -59,6 +59,70 @@ export interface UserMenuProps extends Omit<MenuProps, 'trigger' | 'items' | 'on
   onSelect?: MenuProps['onSelect'];
 }
 
+/* The one place the chip is drawn: a 32 avatar and the name, 8 apart, 8 of padding at the sides and 4
+   above and below (as `TopBar`'s chip has after design review). `UserMenuTrigger` and `UserChip` both
+   come from here, so a change to the look is made once. */
+const CHIP = 'flex items-center gap-2 rounded-md px-2 py-1 text-left font-sans';
+
+function Face({ user }: { user: UserMenuUser }) {
+  return (
+    <>
+      <Avatar name={user.name} src={user.src} size="md" />
+      <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
+    </>
+  );
+}
+
+export interface UserMenuTriggerProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+  user: UserMenuUser;
+}
+
+/**
+ * The chip as a button: avatar, name and a caret. It is `UserMenu`'s trigger, and what `TopBar`
+ * draws when the app opens its own menu (`onUserMenu`). It forwards its ref and every prop to the
+ * `<button>`, so `Menu` can wire `aria-expanded` and the open keys onto it; the caret turns up
+ * with `aria-expanded`.
+ */
+export const UserMenuTrigger = React.forwardRef<HTMLButtonElement, UserMenuTriggerProps>(
+  function UserMenuTrigger({ user, className, ...props }, ref) {
+    return (
+      <button
+        ref={ref}
+        type="button"
+        aria-label={`${user.name}, account menu`}
+        className={cn(
+          'group self-start transition-colors',
+          CHIP,
+          'hover:bg-surface-neutral-faint',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+          className,
+        )}
+        {...props}
+      >
+        <Face user={user} />
+        <Icon
+          name="caret-down"
+          size="sm"
+          aria-hidden="true"
+          /* -mr-0.75: the glyph draws about 3 inside its 16 box, so pulling the box 3 into the
+             padding makes the caret's gap to the edge match the avatar's. */
+          className="-mr-0.75 text-text-tertiary transition-transform group-aria-expanded:rotate-180 motion-reduce:transition-none"
+        />
+      </button>
+    );
+  },
+);
+
+/** The same chip when it opens nothing: no button, no caret, nothing to press. */
+export function UserChip({ user, className }: { user: UserMenuUser; className?: string }) {
+  return (
+    <span className={cn(CHIP, className)}>
+      <Face user={user} />
+    </span>
+  );
+}
+
 export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function UserMenu(
   { user, items = DEFAULT_USER_MENU_ITEMS, onSelect, align = 'right', className, ...props },
   ref,
@@ -70,28 +134,7 @@ export const UserMenu = React.forwardRef<HTMLDivElement, UserMenuProps>(function
       onSelect={onSelect}
       align={align}
       className={cn('self-start', className)}
-      trigger={
-        <button
-          type="button"
-          aria-label={`${user.name}, account menu`}
-          className={cn(
-            'group flex items-center gap-2 self-start rounded-md px-2 py-1 text-left font-sans transition-colors',
-            'hover:bg-surface-neutral-faint',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-          )}
-        >
-          <Avatar name={user.name} src={user.src} size="md" />
-          <span className="max-w-40 truncate text-label-sm-medium text-text-primary">{user.name}</span>
-          <Icon
-            name="caret-down"
-            size="sm"
-            aria-hidden="true"
-            /* -mr-0.75: the glyph draws about 3 inside its 16 box, so pulling the box 3 into the
-               padding makes the caret's gap to the edge match the avatar's, as TopBar's chip does. */
-            className="-mr-0.75 text-text-tertiary transition-transform group-aria-expanded:rotate-180 motion-reduce:transition-none"
-          />
-        </button>
-      }
+      trigger={<UserMenuTrigger user={user} />}
       {...props}
     />
   );

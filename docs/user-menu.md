@@ -42,7 +42,9 @@ row: `Popover`'s wrapper is `inline-flex`, which would stretch its child, so the
 
 ## Tokens
 
-The trigger is the look `TopBar`'s user chip has after design review, so the two never differ:
+The trigger is the look `TopBar`'s user chip has after design review, and it is drawn **once**, here: `UserMenuTrigger`
+(the button, with the caret) is what `UserMenu` uses and what `TopBar` draws when the app opens its own menu, and `UserChip`
+(the same face with no button and no caret) is what `TopBar` shows when there is nothing to open. So the two never differ:
 8 of padding at the sides and 4 above and below (so the caret and the avatar sit the same distance from the
 edges, the caret's box pulled 3 into the padding), a 32 `Avatar`, the name in `label-sm-medium` and `text.primary` (cut with "…" past 10rem), a
 `caret-down` in `text.tertiary` that turns 180° while the menu is open (as `SearchSelect`'s does; it reads
