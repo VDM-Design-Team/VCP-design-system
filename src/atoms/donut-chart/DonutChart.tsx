@@ -24,9 +24,10 @@ import { cn } from '../../lib/cn';
 semantic `stroke-*` token class (and `trackClassName` the track's) — a token
 class, never a hex.
 
-With `showValue={false}` the ring is drawn alone — no numeral, no caption — for
-the small status glyph in a table row (try `size={16}` `thickness={3}`). It is
-still a meter, so give it an `aria-label`.
+`size="icon"` is the small decorative one from the table rows: a 20 box with
+the ring 16 across inside it, thin, and no numeral. `showValue={false}` does the
+same for any other size — the ring drawn alone, no numeral, no caption. Either
+way it is still a meter, so give it an `aria-label`.
 
 `size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
  * measured, not stepped, which is also why the centre numeral scales with the
@@ -59,9 +60,9 @@ export interface DonutChartProps
   value: number;
   /** The whole. The announced value stays in real units. */
   max?: number;
-  /** Outer diameter in SVG units. */
-  size?: number;
-  /** Ring thickness in SVG units. */
+  /** Outer diameter in SVG units, or `"icon"`: a 20 box around a 16 ring, no numeral. */
+  size?: number | 'icon';
+  /** Ring thickness in SVG units. Defaults to 16, or 2 for `size="icon"`. */
   thickness?: number;
   /** Half-donut gauge — the Cycle Summary treatment. */
   half?: boolean;
@@ -70,7 +71,7 @@ export interface DonutChartProps
    * round-capped fill over a full track. Pair it with a thin `thickness`.
    */
   segmented?: boolean;
-  /** Draw the ring alone: hides the centred number and the caption. */
+  /** Draw the ring alone: hides the centred number and the caption. Off for `size="icon"`. */
   showValue?: boolean;
   /** Token `stroke-*` class for the filled arc; wins over `tone`. */
   fillClassName?: string;
@@ -88,11 +89,11 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       className,
       value,
       max = 100,
-      size = 140,
-      thickness = 16,
+      size: sizeProp = 140,
+      thickness: thicknessProp,
       half,
       segmented,
-      showValue = true,
+      showValue: showValueProp,
       fillClassName,
       trackClassName,
       label,
@@ -105,11 +106,19 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
     const clamped = Math.max(0, Math.min(max, value));
     const pct = max > 0 ? clamped / max : 0;
 
+    const icon = sizeProp === 'icon';
+    /* The icon is a 20 box with the ring 16 across inside it; every other
+       size is the ring itself. */
+    const box = icon ? 20 : sizeProp;
+    const size = icon ? 16 : sizeProp;
+    const thickness = thicknessProp ?? (icon ? 2 : 16);
+    const showValue = showValueProp ?? !icon;
+
     const r = (size - thickness) / 2;
-    const c = size / 2;
+    const c = box / 2;
     const circumference = 2 * Math.PI * r;
     const sweep = half ? circumference / 2 : circumference;
-    const height = half ? c + thickness / 2 : size;
+    const height = half ? c + thickness / 2 : box;
 
     /* Segmented: the fill and the remainder are separate arcs with a gap
        between them, not a fill laid over a full track. */
@@ -135,9 +144,9 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
         {...props}
       >
         <svg
-          width={size}
+          width={box}
           height={height}
-          viewBox={`0 0 ${size} ${height}`}
+          viewBox={`0 0 ${box} ${height}`}
           aria-hidden="true"
           className="block"
         >

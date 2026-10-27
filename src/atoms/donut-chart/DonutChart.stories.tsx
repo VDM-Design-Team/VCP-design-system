@@ -83,12 +83,12 @@ export const YellowAndCustomColour: Story = {
   ),
 };
 
-/** `showValue={false}`: the ring alone, for a table row. Still a meter, so it is named. */
-export const RingOnly: Story = {
+/** `size="icon"`: the 20 box with a 16 ring, no numeral. `showValue={false}` does the same at any size. */
+export const Icon: Story = {
   render: (args) => (
     <div className="flex items-center gap-4">
-      <DonutChart {...args} value={25} max={100} size={16} thickness={3} showValue={false} aria-label="25% done" />
-      <DonutChart {...args} value={70} max={100} size={24} thickness={4} showValue={false} tone="success" aria-label="70% done" />
+      <DonutChart {...args} value={25} max={100} size="icon" aria-label="25% done" />
+      <DonutChart {...args} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
       <DonutChart {...args} value={40} max={100} size={72} thickness={10} showValue={false} tone="yellow" aria-label="40% done" />
     </div>
   ),
