@@ -19,8 +19,11 @@ import { ProgressBar } from '../../atoms/progress-bar';
  * same: the copy ("Your password is too simple") belongs to whoever owns the
  * rule.
  *
- * Very Weak and Weak share the `critical` tone and differ by length (20% and
- * 40%); there is no orange semantic token in VCP yet.
+ * Weak is the orange `pending` tone and Fair the bright amber `caution` tone,
+ * as the Figma design paints them. Fair's amber is 1.55:1 against the light
+ * track — below the 3:1 a graphic should reach — and is kept on purpose: the
+ * level is always written out beside the bar, so the colour never carries the
+ * meaning alone.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -30,8 +33,8 @@ export type PasswordStrengthLevel = 'very-weak' | 'weak' | 'fair' | 'good' | 'st
 
 const LEVELS = {
   'very-weak': { text: 'Very Weak', step: 1, tone: 'critical', weak: true },
-  weak: { text: 'Weak', step: 2, tone: 'critical', weak: true },
-  fair: { text: 'Fair', step: 3, tone: 'warning', weak: false },
+  weak: { text: 'Weak', step: 2, tone: 'pending', weak: true },
+  fair: { text: 'Fair', step: 3, tone: 'caution', weak: false },
   good: { text: 'Good', step: 4, tone: 'info', weak: false },
   strong: { text: 'Strong', step: 5, tone: 'success', weak: false },
 } as const;

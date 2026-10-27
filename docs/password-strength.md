@@ -41,19 +41,23 @@ the copy belongs to whoever owns the rule.
 | Level | Fill | `ProgressBar` tone | Token |
 |---|---|---|---|
 | `very-weak` | 20% | `critical` | `accent.critical.filled.surface` |
-| `weak` | 40% | `critical` | `accent.critical.filled.surface` |
-| `fair` | 60% | `warning` | `accent.warning.filled.surface` |
+| `weak` | 40% | `pending` | `accent.pending.filled.surface` |
+| `fair` | 60% | `caution` | `accent.warning.outline.border` |
 | `good` | 80% | `info` | `accent.info.filled.surface` |
 | `strong` | 100% | `success` | `accent.success.filled.surface` |
 
-The track and the fills are `ProgressBar`'s, so the contrast figures in
-`docs/progress-bar.md` apply. The accessible `filled` shades were chosen over
-the brighter `outline.border` ones the Figma file paints (its Fair amber would
-be about 1.6:1 against the track).
+The track and the other fills are `ProgressBar`'s, so the contrast figures in
+`docs/progress-bar.md` apply.
 
-Very Weak and Weak share `critical`: the Figma design painted Weak orange with
-an unbound colour, and VCP has no orange semantic token yet (GDL's core scale
-has one). The fill length separates them.
+**Fair is the one that does not pass.** Its bright amber
+(`accent.warning.outline.border.default`, the colour Figma paints) is **1.55:1**
+against the light track — under the 3:1 a meaningful graphic should reach
+(dark is 4.98:1). It is kept deliberately: the level is printed at the end of
+the label row and read out as `aria-valuetext`, so the fill's colour is never
+the only signal. Don't copy this choice to a bar that has no words beside it.
+
+`pending` is the new orange status family (`accent.pending.*`, built from
+GDL's core orange scale), at 4.20:1 light / 5.22:1 dark.
 
 ## Accessibility
 

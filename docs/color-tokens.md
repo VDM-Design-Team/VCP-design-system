@@ -167,10 +167,13 @@ border color of visually-equivalent elements without a reason.
 
 Two different things live under `accent.*` and they are not interchangeable:
 
-- **Semantic status**: `critical`, `success`, `warning`, `info` — each with
-  `filled` / `outline` / `tonal` styles and interaction states. Use these
-  because the *meaning* applies (an error, a success confirmation, a caution,
-  an informational note) — never because a hue happens to look right.
+- **Semantic status**: `critical`, `success`, `warning`, `info`, `pending` —
+  each with `filled` / `outline` / `tonal` styles and interaction states. Use
+  these because the *meaning* applies (an error, a success confirmation, a
+  caution, an informational note, something waiting or a step more urgent than
+  a caution) — never because a hue happens to look right. `pending` is orange,
+  GDL's name for the fifth status family; it first appears as `PasswordStrength`'s
+  Weak.
 - **Hue families for tone-hashing**: `blue`, `green`, `red`, `yellow` — used
   by components like `Avatar` to assign a consistent, decorative color per
   person/entity (see `docs/avatar.md`). These carry no status meaning at all;
