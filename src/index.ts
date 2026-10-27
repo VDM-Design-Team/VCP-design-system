@@ -11,6 +11,7 @@ export * from './atoms/icon-button';
 export * from './atoms/input';
 export * from './atoms/logo';
 export * from './atoms/pagination-dots';
+export * from './atoms/password-strength';
 export * from './atoms/progress-bar';
 export * from './atoms/radio-group';
 export * from './atoms/segmented-control';
