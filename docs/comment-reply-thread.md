@@ -48,9 +48,10 @@ reach each of them, so that is how it is generalised here.
 
 | State | Line |
 |---|---|
-| Replies hidden, nobody replying | none |
+| Replies hidden | none |
 | Replies showing | `line` on the comment, a corner on each reply |
-| Replying, with no replies showing | `hook`: the line turns right at its foot, where the reply will go |
+| Writing a new reply, no replies showing | none: there is no reply yet for the line to lead to |
+| Editing, or writing a reply, with replies showing | `line` stays, running down past the box to meet the replies |
 
 It is drawn with the line's own `stroke.default`, 1 wide, at 16 (the middle of the avatar),
 so the comment's line and the replies' corners land on the same pixel. A reply is indented 48

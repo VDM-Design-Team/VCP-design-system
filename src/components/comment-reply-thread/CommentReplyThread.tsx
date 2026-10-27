@@ -14,11 +14,13 @@ import { CommentReply, type CommentReplyProps } from '../comment-reply';
  * **The thread line is drawn here.** The comment's line runs from its avatar down into
  * the replies, and each reply takes a corner off it to its own avatar, 32 across with a
  * radius of 8: the line keeps going past every reply but the last and stops at the last
- * one's corner.
- * The design draws one hook at the foot of the comment; with a single reply that is
- * the same picture, and with several the line has to reach each of them. With no
- * replies showing, a comment being replied to ends its line in the hook (`CommentReply`'s
- * `thread="hook"`) and an ordinary one draws no line.
+ * one's corner. The design draws one hook at the foot of the comment; with a single reply
+ * that is the same picture, and with several the line has to reach each of them.
+ *
+ * **The line follows the replies and nothing else.** With no replies showing there is no
+ * line, including while a new reply is being written (there is no reply yet for the line
+ * to lead to). While a comment with replies is being edited or replied to, its line stays,
+ * running down past the box to meet the replies, so it stays connected.
  *
  * **It takes `CommentReply`'s props, and `children` for the replies.** `replyCount`
  * defaults to the number of `children`. `repliesOpen` says whether they show (the
@@ -57,7 +59,7 @@ export const CommentReplyThread = React.forwardRef<HTMLElement, CommentReplyThre
     const items = flatten(children);
     const count = replyCount ?? items.length;
     const showing = repliesOpen && items.length > 0;
-    const thread = showing ? 'line' : replying ? 'hook' : 'none';
+    const thread = showing ? 'line' : 'none';
 
     return (
       <div className={cn('flex flex-col', className)}>

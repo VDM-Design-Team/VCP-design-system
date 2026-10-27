@@ -35,16 +35,17 @@ import {
  * tag the box drew while it was written, so a mention reads the same either side
  * of posting. Line breaks are kept.
  *
- * **The thread line is `thread`.** `line` runs it down the avatar to the foot of the
- * row, for a comment whose replies show below; `hook` ends it in the corner the
- * design draws, for a comment about to get its first reply. `CommentReplyThread` sets
- * this for you.
+ * **The thread line is `thread`.** `line` runs it down from the avatar to the foot of
+ * the row, for a comment whose replies show below. It is the replies that call for a
+ * line: a reply being *written* draws none (there is no reply yet for it to lead to),
+ * and a comment being *edited* keeps its line, with the box in the row it still runs the
+ * whole height and meets the replies below. `CommentReplyThread` sets this for you.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type CommentThreadLine = 'none' | 'line' | 'hook';
+export type CommentThreadLine = 'none' | 'line';
 
 export interface CommentReplyProps
   extends Omit<React.HTMLAttributes<HTMLElement>, 'children' | 'onSubmit'> {
@@ -181,27 +182,14 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
   ) => (
     <article ref={ref} className={cn('flex flex-col gap-2 py-2 font-sans', className)} {...props}>
       <div className="flex items-start gap-4">
-        {/* The rail: the avatar, and under it the thread line. Stretches the row's height, and
-            reaches 8 past it so the line meets the replies below, whatever is between. The line and the
-            hook are placed at 16, the middle of the avatar, so they land on the same pixel as the
-            replies' corners (`CommentReplyThread`). */}
+        {/* The rail: the avatar, and under it the thread line. Stretches the row's height (the box, when
+            there is one, is part of it), and reaches 8 past it so the line meets the replies below,
+            whatever is between. The line is placed at 16, the middle of the avatar, so it lands on the
+            same pixel as the replies' corners (`CommentReplyThread`). */}
         <div className={cn('relative w-8 shrink-0 self-stretch', thread !== 'none' && '-mb-2')}>
           <Avatar size="md" name={author.name} src={author.src} className={AVATAR} />
           {thread !== 'none' && (
-            <span
-              aria-hidden="true"
-              /* With the hook it stops where the hook's own corner begins (8 up from the foot, and the
-                 hook is 24 tall), so the two meet and there is no tail past the corner. */
-              className={cn('absolute top-9 left-4 w-px bg-stroke-default', thread === 'hook' ? 'bottom-8' : 'bottom-0')}
-            />
-          )}
-          {thread === 'hook' && (
-            /* The design's hook: the line turns right at its foot, 32 to the reply's avatar, with a corner of
-               radius 8 (`radius.md`). The Figma export drew it square; the design has it rounded. */
-            <span
-              aria-hidden="true"
-              className="absolute bottom-2 left-4 h-6 w-8 rounded-bl-md border-b border-l border-stroke-default"
-            />
+            <span aria-hidden="true" className="absolute top-9 bottom-0 left-4 w-px bg-stroke-default" />
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-2">

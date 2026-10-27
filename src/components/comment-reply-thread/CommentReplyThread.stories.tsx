@@ -122,6 +122,20 @@ export const Nested: Story = {
   ),
 };
 
+/** Writing a new reply to a comment with no replies yet: no thread line, because there is no reply for it to lead to. */
+export const Replying: Story = {
+  render: (args) => <CommentReplyThread {...args} replying onCancelReply={() => {}} onSubmitReply={() => {}} />,
+};
+
+/** Editing a comment that has replies: its line stays, running down past the box to meet the replies. */
+export const EditingWithReplies: Story = {
+  render: (args) => (
+    <Toggleable {...args} repliesOpen editing onCancelEdit={() => {}} onSubmitEdit={() => {}}>
+      {replies}
+    </Toggleable>
+  ),
+};
+
 /** Every colour is a semantic token, so the dark theme comes for free via `.dark`. */
 export const LightAndDark: Story = {
   name: 'Light and dark',
@@ -163,5 +177,38 @@ export const ShowsAndHidesReplies: Story = {
 
     await userEvent.click(hide);
     await expect(canvas.queryByRole('list')).not.toBeInTheDocument();
+  },
+};
+
+/**
+ * **Flow:** the thread line follows the replies. A new reply being written draws none; a comment being
+ * edited keeps its line, and it runs all the way down to the first reply.
+ */
+export const LineFollowsTheReplies: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => (
+    <div className="flex flex-col gap-8">
+      <CommentReplyThread {...args} author={{ name: 'Writing Reply' }} replying onCancelReply={() => {}} onSubmitReply={() => {}} />
+      <Toggleable {...args} author={{ name: 'Editing Parent' }} repliesOpen editing onCancelEdit={() => {}} onSubmitEdit={() => {}}>
+        {replies}
+      </Toggleable>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const articles = [...canvasElement.querySelectorAll('article')];
+    const rail = (article: Element) => article.querySelector('span.w-px.bg-stroke-default');
+
+    /* Writing a new reply, nothing below it: no line at all. */
+    await expect(rail(articles[0])).toBeNull();
+
+    /* Editing a comment with replies: the line is there, and reaches the first reply's row. */
+    const editing = articles[1];
+    const line = rail(editing) as HTMLElement;
+    await expect(line).not.toBeNull();
+    const firstReply = canvasElement.querySelector('[role="listitem"]') as HTMLElement;
+    await expect(Math.round(line.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(
+      Math.round(firstReply.getBoundingClientRect().top),
+    );
   },
 };

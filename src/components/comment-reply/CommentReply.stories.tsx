@@ -70,9 +70,9 @@ export const Default: Story = { args: { replyCount: 1, onToggleReplies: () => {}
 /** Someone else's comment: no Edit and no Delete, because no handler was given. */
 export const OthersComment: Story = { args: { onEdit: undefined, onDelete: undefined } };
 
-/** The reply box is open under the actions, with the thread line ending in the design's hook. */
+/** The reply box is open under the actions. No thread line: there is no reply yet for it to lead to. */
 export const Replying: Story = {
-  args: { replying: true, thread: 'hook', onCancelReply: () => {}, onSubmitReply: () => {} },
+  args: { replying: true, onCancelReply: () => {}, onSubmitReply: () => {} },
 };
 
 /** Editing: the box takes the comment's place, filled with it, and the actions step aside. */
@@ -86,7 +86,7 @@ export const WithThreadLine: Story = { args: { thread: 'line', replyCount: 2, re
 /** Every colour is a semantic token, so the dark theme comes for free via `.dark`. */
 export const LightAndDark: Story = {
   name: 'Light and dark',
-  args: { replying: true, thread: 'hook', onCancelReply: () => {}, onSubmitReply: () => {} },
+  args: { replying: true, onCancelReply: () => {}, onSubmitReply: () => {} },
   render: (args) => {
     const set = (
       <div className="bg-surface-canvas p-8">

@@ -44,7 +44,7 @@ The reaction buttons in the actions row are an `EmojiReactionPicker`, passed in 
 | `onSubmitReply` / `replyLoading` | `(value) => void` / `boolean` | — | Sends the reply with its segments. The box is yours to close |
 | `editing` | `boolean` | `false` | The box takes the comment's place, filled with it |
 | `onSubmitEdit` / `onCancelEdit` / `editLoading` | | | Save sends the new segments. The box is yours to close |
-| `thread` | `none \| line \| hook` | `none` | The thread line under the avatar. `CommentReplyThread` sets it |
+| `thread` | `none \| line` | `none` | The thread line under the avatar. `CommentReplyThread` sets it |
 | `className`, `ref`, rest | | | On the `<article>` |
 
 **The mode is yours to control.** `replying` and `editing` are props, not internal state,
@@ -65,7 +65,7 @@ Nothing of its own; the layout is the frame's.
 | Avatar and text | `gap-4` (16); the avatar is `Avatar` `md` with `border-stroke-default` and `text-text-tertiary` (the frame's `Profile_Initials`) |
 | Author | `type.label-sm-medium`, `text.primary`; the time `type.body-sm-regular`, `text.tertiary`; 8 apart |
 | Body | `type.body-sm-regular`, `text.primary`; mentions `MentionTag` |
-| Thread line | 1 wide, `stroke.default`, at 16 (the middle of the avatar), from 4 under the avatar; the hook turns right 32 at its foot, with a corner of radius 8 (`radius.md`) |
+| Thread line | 1 wide, `stroke.default`, at 16 (the middle of the avatar), from 4 under the avatar, down to the foot of the row (the replies' corners are `CommentReplyThread`'s) |
 
 Differences from the frame, each settled elsewhere in the system:
 - **The mention tag is `MentionTag`**, the one the box draws, where the frame's posted
