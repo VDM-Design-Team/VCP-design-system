@@ -1,14 +1,13 @@
 # GanttChart
 
-People (or projects) down the side, time across the top, and each Added Value
-drawn as a bar from its start to its due date. Three views of the same data — one
-cycle by the day, a month by the day, a year by the cycle — with a Today column,
-a legend, a tooltip on every bar, and open/closed rows.
+Each Added Value drawn as a bar from its start to its due date, against people
+down the side and time across the top. Three views of the same data — one cycle by
+the day, a month by the day, a year by the cycle — with a Today column, a legend, a
+tooltip on every bar, and rows that open to show their bars.
 
-It draws what it is given. **The caller owns the data and the filters**: `rows`
-is rendered as passed, and the view, the period on screen and every filter are
-controlled props the chart only reports changes to. It never fetches, sorts or
-filters.
+It takes the data the way a backend sends it: flat `tasks`, the `users` with their
+availability figures, the `projects` and the `cycles`. It does the one thing the
+page design dictates — the layout below — and never fetches, pages or sorts.
 
 ## Composed of
 
@@ -33,23 +32,54 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `ProgressBar` / `DonutChart` | How much of one known whole is used or done |
 | `AVTable` | A sortable list of Added Values, when *when* matters less than *what* |
 
+## The data
+
+```ts
+tasks:    { id, title, userId, projectId, status, statusLabel?, initiator?,
+            points, start, end, href? }[]          // dates are YYYY-MM-DD, end inclusive
+users:    { id, name, wip?, planned?, ead?, eadTd? }[]
+projects: { id, name }[]
+cycles:   { id, label, short?, start, end }[]      // "Cycle 44" / "C44", a fortnight each
+```
+
+- **`status`** is the bar's colour and legend entry (see below). **`statusLabel`**
+  is the Added Value's own workflow status — "AB Testing", "Ready for Deploy" —
+  which the tooltip prints as "Status".
+- **A user's figures** fill the panel under their name when their row is open:
+  `wip` and `planned` are counts, `ead` is the earliest date they are available
+  (printed `dd.mm`), `eadTd` the days until then. Each line shows only if given.
+- **A cycle is the company's delivery period**, not something the calendar gives, so
+  `cycles` is an input. Dates are whole days in UTC, so a time zone never moves a
+  bar by a column. A cycle belongs to the year it starts in.
+
+## What it shows
+
+| Filters | Rows |
+|---|---|
+| None | One row per user, in the order given, with their tasks from every project |
+| Projects | One group per selected project — a header with its count and points, and under it only the people who have tasks in it, showing only that project's tasks. The same person can sit under two projects |
+| Users | Only those people, in whichever layout the row above gives |
+
+Only tasks inside the period are drawn; a task that runs past the edge is cut at it.
+A project with nothing in the period keeps its header.
+
 ## Props
 
 | Prop | Type | Notes |
 |---|---|---|
+| `tasks`, `users`, `projects`, `cycles` | | The data above |
 | `view`, `onViewChange` | `'cycle' \| 'month' \| 'year'` | Controlled. The view menu calls `onViewChange` |
 | `date`, `onDateChange` | `YYYY-MM-DD` | Any day inside the period on screen. The navigator's arrows call `onDateChange` with the day to move to |
-| `cycles` | `GanttCycle[]` | `{ id, label, short?, start, end }`. A cycle is the company's delivery period, so it is passed in. The cycle view shows one; the month view names them over the days; the year view makes one column of each |
 | `today` | `YYYY-MM-DD` | Which column is Today. Defaults to the system date; pass it for a stable chart or story |
-| `rows` | `GanttRow[]` | `{ id, name, kind?, badge?, stats?, bars }`. `kind="project"` puts the row on the quiet surface with a count badge |
-| `rows[].bars` | `GanttBar[]` | `{ id, title, status, start, end, points?, project?, details?, href? }` |
-| `rows[].stats` | `GanttStat[]` | The panel under the name while a person is open: `{ label, value, tone? }` |
-| `expandedIds`, `defaultExpandedIds`, `onExpandedChange` | `string[]` | Which rows are open. Controlled or not |
-| `projectOptions`, `projectIds`, `onProjectIdsChange` | | The projects filter, a multi-select. It appears when `projectOptions` is given |
-| `userOptions`, `userIds`, `onUserIdsChange` | | The users filter, likewise |
-| `onResetFilters` | `() => void` | Shows "Reset Filters" |
-| `onBarSelect` | `(bar) => void` | A bar without an `href` was activated |
+| `projectIds`, `onProjectIdsChange` | `string[]` | The selected projects. Empty means all |
+| `userIds`, `onUserIdsChange` | `string[]` | The selected users. Empty means all |
+| `expandedIds`, `defaultExpandedIds`, `onExpandedChange` | `string[]` | Which user rows are open, controlled or not. A row's id is the user's id, or `projectId:userId` under a project |
+| `onTaskSelect` | `(task) => void` | A task without an `href` was activated |
 | `title`, `infoText` | `string` | The heading, and the (i) beside it with its tooltip |
+
+**Reset Filters** is the filter bar's own button — the ghost, brand-coloured small
+`Button` — and clears both the projects and the users. It leaves the view and the
+period alone.
 
 ### Statuses
 
@@ -67,13 +97,15 @@ legend entry:
 
 ## Behaviour
 
-- **A closed row** draws one summary bar — how many Added Values, how many
-  points, over what span. **An open row** draws each bar on its own line.
-- **A bar one column wide** has no room for words, so it keeps its points only.
+- **A closed row** draws one summary bar — how many Added Values, how many points,
+  over what span. **An open row** draws each task, and tasks that do not overlap
+  share a line; only genuinely concurrent ones stack.
+- **A task one column wide** has no room for words, so it keeps its points only.
+- **Project groups** open and fold from their header, and start open.
 - **Today** is a hatched column through the header and every row, labelled, and
   scrolled into view when the period changes.
-- **Bars outside the period** are not drawn; a bar that runs past its edge is cut
-  at it.
+- **Scrolling sideways** cuts the dates and bars off at the edge of the name column;
+  they never slide under the empty corner above it.
 - **Tooltips** are `GanttTooltip`: the first row's open below its bar, the rest
   above. They are positioned statically, so a bar far wider than the screen puts
   its card at the bar's middle.
@@ -102,7 +134,7 @@ widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
 
 ## Don't
 
-- **Don't filter or sort inside the chart.** Pass the rows you want shown.
+- **Don't pre-filter the tasks to fake a layout.** Pass the filters; the chart groups.
 - **Don't invent a status colour.** Add a status here, with its token.
 - **Don't put the only copy of a fact in the tooltip.** Touch users never see it.
 - **Don't use it for a handful of dates** — a list or a timeline is simpler.

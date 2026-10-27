@@ -1,94 +1,175 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
-import { GanttChart, type GanttBar, type GanttCycle, type GanttRow, type GanttView } from './GanttChart';
+import {
+  GanttChart,
+  type GanttCycle,
+  type GanttProject,
+  type GanttStatus,
+  type GanttTask,
+  type GanttUser,
+  type GanttView,
+} from './GanttChart';
 
-const TODAY = '2026-07-25';
+/* ---- Fixtures: the payload a backend would send --------------------------
+   A fortnightly cycle count that puts today (Thursday 29 October 2026) in
+   Cycle 44, which runs 27 October to 9 November — so the cycle view crosses a
+   month boundary, and the year view has a full year of cycles behind and ahead.
+   Every task, and every user's availability figures, is derived from one seeded
+   generator, so the numbers on screen agree with each other. */
 
-/* Cycle 37 starts on 21 July 2026 and every cycle is a fortnight, so the
-   earlier and later ones can be counted out from there. */
+const TODAY = '2026-10-29';
 const DAY = 86_400_000;
-const iso = (ms: number) => new Date(ms).toISOString().slice(0, 10);
-const C37 = Date.UTC(2026, 6, 21);
-const CYCLES: GanttCycle[] = Array.from({ length: 27 }, (_, i) => {
-  const n = 23 + i;
-  const start = C37 + (n - 37) * 14 * DAY;
-  return { id: `c${n}`, label: `Cycle ${n}`, short: `C${n}`, start: iso(start), end: iso(start + 13 * DAY) };
+const day = (iso: string) => Math.round(Date.parse(`${iso}T00:00:00Z`) / DAY);
+const iso = (d: number) => new Date(d * DAY).toISOString().slice(0, 10);
+
+/* Cycle 37 began on 21 July 2026; every cycle is a fortnight. */
+const CYCLES: GanttCycle[] = Array.from({ length: 32 }, (_, i) => {
+  const n = 21 + i;
+  const start = day('2026-07-21') + (n - 37) * 14;
+  return { id: `c${n}`, label: `Cycle ${n}`, short: `C${n}`, start: iso(start), end: iso(start + 13) };
 });
 
-const bar = (b: GanttBar): GanttBar => b;
-
-const ROWS: GanttRow[] = [
-  {
-    id: 'john',
-    name: 'John Mason Smith',
-    stats: [
-      { label: 'WIP', value: 1, tone: 'warning' },
-      { label: 'Planned', value: 1, tone: 'brand' },
-      { label: 'EAD', value: '03.02' },
-      { label: 'EAD TD', value: '7 Days' },
-    ],
-    bars: [
-      bar({
-        id: 'a1',
-        title: '(Part 18/24) Brand Name',
-        status: 'in-progress',
-        start: '2026-07-21',
-        end: '2026-07-27',
-        points: 2,
-        project: 'Project Alpha',
-        details: [
-          { label: 'Status', value: 'AB Testing' },
-          { label: 'Initiator', value: 'User 1' },
-          { label: 'Est. Due Date', value: '27/07/2026' },
-        ],
-      }),
-      bar({ id: 'a2', title: '(Part 19/24) Brand Name', status: 'completed', start: '2026-07-21', end: '2026-07-25', points: 2 }),
-      bar({ id: 'a3', title: 'Checkout redesign', status: 'planned', start: '2026-07-28', end: '2026-08-12', points: 5 }),
-    ],
-  },
-  {
-    id: 'priya',
-    name: 'Priya Raman',
-    stats: [
-      { label: 'WIP', value: 0, tone: 'warning' },
-      { label: 'Planned', value: 2, tone: 'brand' },
-      { label: 'EAD', value: '04.11' },
-      { label: 'EAD TD', value: '9 Days' },
-    ],
-    bars: [
-      bar({ id: 'b1', title: 'Onboarding emails', status: 'planned', start: '2026-07-24', end: '2026-08-03', points: 3 }),
-      bar({ id: 'b2', title: 'Invoice export', status: 'overdue', start: '2026-07-14', end: '2026-07-22', points: 2 }),
-      bar({ id: 'b3', title: 'Supplier scorecard', status: 'pre-delivered', start: '2026-07-22', end: '2026-07-30', points: 1 }),
-    ],
-  },
-  {
-    id: 'brand',
-    name: 'Brand Refresh',
-    kind: 'project',
-    bars: [
-      bar({ id: 'c1', title: 'Logo lockups', status: 'completed', start: '2026-07-06', end: '2026-07-16', points: 4 }),
-      bar({ id: 'c2', title: 'Colour audit', status: 'in-progress', start: '2026-07-20', end: '2026-07-31', points: 6 }),
-      bar({ id: 'c3', title: 'Launch checklist', status: 'planned', start: '2026-08-04', end: '2026-08-14', points: 3 }),
-    ],
-  },
-  {
-    id: 'marvin',
-    name: 'Marvin Ode',
-    bars: [bar({ id: 'd1', title: 'Warehouse feed', status: 'planned', start: '2026-07-27', end: '2026-08-28', points: 12 })],
-  },
+const PROJECTS: GanttProject[] = [
+  { id: 'vcp', name: 'VCP' },
+  { id: 'offerpump', name: 'OfferPump' },
+  { id: 'whu', name: 'WHU' },
+  { id: 'nt', name: 'NT' },
 ];
 
-const USERS = ['John Mason Smith', 'Priya Raman', 'Marvin Ode'];
-const PROJECTS = ['Project Alpha', 'Brand Refresh', 'Warehouse'];
+const PEOPLE = [
+  'John Mason Smith',
+  'Alice Carter',
+  'Jack Morgan',
+  'Lena Novak',
+  'Adam Reyes',
+  'Noah Foster',
+  'Maya Bennett',
+  'Marvin Ode',
+];
 
-function Demo({ initialView = 'cycle', rows = ROWS }: { initialView?: GanttView; rows?: GanttRow[] }) {
+const TITLES: Record<string, string[]> = {
+  vcp: ['Collapsible sidebar for improved tables', 'Planning list filters', 'Holiday registry export', 'Task log trail'],
+  offerpump: ['Offer template editor', 'Supplier scorecard', 'Bulk offer upload', 'Price break rules'],
+  whu: ['Warehouse feed sync', 'Pallet label printing', 'Dock scheduling', 'Returns intake form'],
+  nt: ['Invoice export', 'Credit note matching', 'Payment run report', 'Ledger reconciliation'],
+};
+
+const WORKFLOW: Record<GanttStatus, string[]> = {
+  planned: ['Accepted', 'Backlog'],
+  'in-progress': ['In Progress', 'Design Review', 'AB Testing'],
+  'pre-delivered': ['Ready for Deploy'],
+  completed: ['Completed'],
+  overdue: ['In Progress', 'For Review'],
+};
+
+function seeded(seed: number) {
+  let a = seed;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function build() {
+  const rand = seeded(2026);
+  const pick = <T,>(list: T[]) => list[Math.floor(rand() * list.length)];
+  const today = day(TODAY);
+  const tasks: GanttTask[] = [];
+  PEOPLE.forEach((name, u) => {
+    const userId = `u${u + 1}`;
+    let cursor = day('2026-01-05') + Math.floor(rand() * 6);
+    let n = 0;
+    while (cursor < day('2026-12-31')) {
+      const length = 4 + Math.floor(rand() * 8);
+      const start = cursor;
+      const end = start + length - 1;
+      const project = pick(PROJECTS);
+      const status: GanttStatus =
+        end < today
+          ? rand() < 0.88
+            ? 'completed'
+            : 'overdue'
+          : start > today
+            ? 'planned'
+            : rand() < 0.2
+              ? 'pre-delivered'
+              : 'in-progress';
+      tasks.push({
+        id: `t-${userId}-${n++}`,
+        title: `${rand() < 0.3 ? `(Part ${1 + Math.floor(rand() * 5)}/6) ` : ''}${pick(TITLES[project.id])}`,
+        userId,
+        projectId: project.id,
+        status,
+        statusLabel: pick(WORKFLOW[status]),
+        initiator: pick(PEOPLE.filter((p) => p !== name)),
+        points: 1 + Math.floor(rand() * 8),
+        start: iso(start),
+        end: iso(end),
+      });
+      /* Now and then a second task runs alongside, so rows have more than one line. */
+      if (rand() < 0.25) {
+        const s2 = start + 2;
+        const e2 = s2 + 3 + Math.floor(rand() * 5);
+        const p2 = pick(PROJECTS);
+        const st2: GanttStatus = e2 < today ? 'completed' : s2 > today ? 'planned' : 'in-progress';
+        tasks.push({
+          id: `t-${userId}-${n++}`,
+          title: pick(TITLES[p2.id]),
+          userId,
+          projectId: p2.id,
+          status: st2,
+          statusLabel: pick(WORKFLOW[st2]),
+          initiator: pick(PEOPLE.filter((p) => p !== name)),
+          points: 1 + Math.floor(rand() * 5),
+          start: iso(s2),
+          end: iso(e2),
+        });
+      }
+      cursor = end + 1 + Math.floor(rand() * 4);
+    }
+  });
+
+  /* Availability, from the same tasks: what is open now, and when the person is next free. */
+  const users: GanttUser[] = PEOPLE.map((name, u) => {
+    const id = `u${u + 1}`;
+    const mine = tasks.filter((t) => t.userId === id);
+    const open = mine.filter((t) => t.status !== 'completed');
+    const free = Math.max(today, ...open.map((t) => day(t.end) + 1));
+    return {
+      id,
+      name,
+      wip: mine.filter((t) => t.status === 'in-progress').length,
+      planned: mine.filter((t) => t.status === 'planned').length,
+      ead: iso(free),
+      eadTd: free - today,
+    };
+  });
+  return { tasks, users };
+}
+
+const { tasks: TASKS, users: USERS } = build();
+
+function Demo({
+  initialView = 'cycle',
+  initialDate = TODAY,
+  initialProjects = [],
+  initialUsers = [],
+  tasks = TASKS,
+}: {
+  initialView?: GanttView;
+  initialDate?: string;
+  initialProjects?: string[];
+  initialUsers?: string[];
+  tasks?: GanttTask[];
+}) {
   const [view, setView] = React.useState<GanttView>(initialView);
-  const [date, setDate] = React.useState(TODAY);
-  const [users, setUsers] = React.useState<string[]>([]);
-  const [projects, setProjects] = React.useState<string[]>([]);
-  const [selected, setSelected] = React.useState<string>('');
-  const visible = users.length ? rows.filter((r) => users.includes(r.name) || r.kind === 'project') : rows;
+  const [date, setDate] = React.useState(initialDate);
+  const [projectIds, setProjectIds] = React.useState<string[]>(initialProjects);
+  const [userIds, setUserIds] = React.useState<string[]>(initialUsers);
+  const [opened, setOpened] = React.useState('');
   return (
     <div className="flex flex-col gap-3">
       <GanttChart
@@ -99,34 +180,36 @@ function Demo({ initialView = 'cycle', rows = ROWS }: { initialView?: GanttView;
         onDateChange={setDate}
         cycles={CYCLES}
         today={TODAY}
-        rows={visible}
-        defaultExpandedIds={['john']}
-        projectOptions={PROJECTS.map((p) => ({ value: p, label: p }))}
-        projectIds={projects}
-        onProjectIdsChange={setProjects}
-        userOptions={USERS.map((u) => ({ value: u, label: u }))}
-        userIds={users}
-        onUserIdsChange={setUsers}
-        onResetFilters={() => {
-          setUsers([]);
-          setProjects([]);
-        }}
-        onBarSelect={(b) => setSelected(b.title)}
+        tasks={tasks}
+        users={USERS}
+        projects={PROJECTS}
+        projectIds={projectIds}
+        onProjectIdsChange={setProjectIds}
+        userIds={userIds}
+        onUserIdsChange={setUserIds}
+        defaultExpandedIds={['u1']}
+        onTaskSelect={(t) => setOpened(t.title)}
       />
-      <output className="text-caption-md-regular text-text-tertiary">{selected && `Opened: ${selected}`}</output>
+      <output className="text-caption-md-regular text-text-tertiary">{opened && `Opened: ${opened}`}</output>
     </div>
   );
 }
 
 const noop = () => {};
-/* Controlled props the chart needs; every story renders the wrapper instead. */
+/* Required props; every story renders the wrapper above instead. */
 const required: React.ComponentProps<typeof GanttChart> = {
   view: 'cycle',
   onViewChange: noop,
   date: TODAY,
   onDateChange: noop,
   cycles: CYCLES,
-  rows: [],
+  tasks: [],
+  users: [],
+  projects: [],
+  projectIds: [],
+  onProjectIdsChange: noop,
+  userIds: [],
+  onUserIdsChange: noop,
 };
 
 const meta = {
@@ -138,10 +221,11 @@ const meta = {
     docs: {
       description: {
         component:
-          'People or projects down the side, time across the top, each Added Value a bar from its start ' +
-          'to its due date. Cycle, month and year views of the same data; a Today column; a legend; ' +
-          'a tooltip on every bar. The caller owns the data and the filters — `rows`, `view`, `date` and ' +
-          'the filter values are all controlled props.',
+          'Each Added Value as a bar from its start to its due date, against people down the side and ' +
+          'time across the top. Cycle, month and year views of the same data; a Today column; a legend; ' +
+          'a tooltip on every bar. Give it flat `tasks`, `users`, `projects` and `cycles`, as a backend ' +
+          'would send them: with no project filter it lists people, with one it groups by project and ' +
+          'then person. The view, the period and the filters are controlled props.',
       },
     },
   },
@@ -150,36 +234,48 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** One cycle by the day. John Mason Smith is open: the stats panel and one bar per Added Value. */
+/** Cycle 44, 27 October to 9 November. John Mason Smith is open: his figures, and one line per concurrent task. */
 export const Cycle: Story = {
   render: () => <Demo initialView="cycle" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Cycle 37')).toBeVisible();
+    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    await expect(canvas.getByText('October – November')).toBeVisible();
     await expect(canvas.getByText('TODAY')).toBeVisible();
-    /* An open row draws each bar; a closed one draws a summary. */
-    await expect(canvas.getByRole('button', { name: /Brand Name, Work In Progress/ })).toBeVisible();
-    await expect(canvas.getByText('3 Added Values')).toBeVisible();
+    /* Every person has their availability figures when open. */
+    await expect(canvas.getByText('EAD TD')).toBeVisible();
   },
 };
 
-/** A month by the day, with each day's cycle named above it. */
+/** October 2026, by the day, with each day's cycle named above it. */
 export const Month: Story = {
   render: () => <Demo initialView="month" />,
 };
 
-/** A year by the cycle, with the months spanning them. Bars one column wide keep only their points. */
+/** 2026 by the cycle, with the months spanning them. Tasks inside one cycle keep only their points. */
 export const Year: Story = {
   render: () => <Demo initialView="year" />,
 };
 
+/** Two projects selected: the chart groups by project, then person, and each person shows only that project's tasks. */
+export const ByProject: Story = {
+  render: () => <Demo initialView="cycle" initialProjects={['offerpump', 'whu']} />,
+};
+
+/** Two people selected, across all projects. */
+export const ByUser: Story = {
+  render: () => <Demo initialView="cycle" initialUsers={['u1', 'u4']} />,
+};
+
+/** A period with nothing in it. */
 export const Empty: Story = {
-  render: () => <Demo initialView="cycle" rows={[]} />,
+  render: () => <Demo initialView="cycle" tasks={[]} initialUsers={['u9']} />,
 };
 
 /**
- * **Flow:** the arrows move the period, a closed row opens to show its bars,
- * the view menu switches the columns, and a bar answers hover with its card.
+ * **Flow:** the arrows move the period, a closed row opens to show its bars and
+ * figures, filtering by project regroups the chart, the view menu switches the
+ * columns, and a bar answers hover with its card.
  */
 export const Flow: Story = {
   tags: ['!dev', '!autodocs'],
@@ -189,25 +285,38 @@ export const Flow: Story = {
     const canvas = within(canvasElement);
 
     await userEvent.click(canvas.getByRole('button', { name: 'Next period' }));
-    await expect(canvas.getByText('Cycle 38')).toBeVisible();
+    await expect(canvas.getByText('Cycle 45')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Previous period' }));
-    await expect(canvas.getByText('Cycle 37')).toBeVisible();
+    await expect(canvas.getByText('Cycle 44')).toBeVisible();
 
-    const priya = canvas.getByRole('button', { name: /Priya Raman/ });
-    await expect(priya).toHaveAttribute('aria-expanded', 'false');
-    await userEvent.click(priya);
-    await expect(priya).toHaveAttribute('aria-expanded', 'true');
-    const bar = canvas.getByRole('button', { name: /Onboarding emails, Planned/ });
+    const alice = canvas.getByRole('button', { name: /Alice Carter/ });
+    await expect(alice).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(alice);
+    await expect(alice).toHaveAttribute('aria-expanded', 'true');
 
-    await userEvent.hover(bar);
-    const card = () => document.getElementById(bar.getAttribute('aria-describedby')!.split(' ').pop()!)!;
+    /* Open row → real bars, each a button named with its facts; hover shows the card. */
+    const bar = within(canvasElement.querySelector('section')!)
+      .getAllByRole('button', { name: /points,/ })
+      .find((b) => alice.closest('div.flex')?.contains(b));
+    await expect(bar).toBeDefined();
+    await userEvent.hover(bar!);
+    const card = () => document.getElementById(bar!.getAttribute('aria-describedby')!.split(' ').pop()!)!;
     await waitFor(() => expect(card().parentElement).toHaveClass('opacity-100'), { timeout: 2000 });
-    /* The card fades in, so wait for it to be seen, not just classed open. */
-    await waitFor(() => expect(within(card()).getByText('Onboarding emails')).toBeVisible());
+    await waitFor(() => expect(within(card()).getByText('Est. Due Date:')).toBeVisible());
+
+    /* Filtering by project turns the people into groups under project headers. */
+    const projects = canvas.getByPlaceholderText('Select Projects');
+    await userEvent.click(projects);
+    await userEvent.click(canvas.getByRole('option', { name: 'OfferPump' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'WHU' }));
+    await expect(canvas.getAllByText(/AVs? \|/)).toHaveLength(2);
+    await expect(canvas.getByRole('button', { name: /OfferPump/, expanded: true })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset Filters' }));
+    await waitFor(() => expect(canvas.queryByRole('button', { name: /OfferPump/, expanded: true })).toBeNull());
 
     await userEvent.selectOptions(canvas.getByLabelText('View'), 'year');
-    await expect(canvas.getByText('C37')).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: /Next period/ }));
+    await expect(canvas.getByText('C44')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Next period' }));
     await expect(canvas.getByText('2027')).toBeVisible();
   },
 };

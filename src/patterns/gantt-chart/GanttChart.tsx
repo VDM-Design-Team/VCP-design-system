@@ -6,45 +6,59 @@ import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { LegendItem, type LegendItemProps } from '../../atoms/legend-item';
 import { Select } from '../../atoms/select';
-import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
+import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
 import { Tooltip } from '../../components/tooltip';
 import {
   buildPeriod,
   columnIndex,
+  packLanes,
   place,
   toDay,
+  type GanttColumn,
   type GanttCycle,
-  type GanttPeriod,
   type GanttView,
+  type Placement,
 } from './timeline';
 
 export type { GanttCycle, GanttView } from './timeline';
 
 /**
- * GanttChart — who is working on what, and when: people (or projects) down the
- * side, time across the top, and each Added Value drawn as a bar from its start
- * to its due date. Three views of the same data — one cycle by the day, a month
- * by the day, a year by the cycle — a Today column, a legend, and a tooltip on
- * every bar.
+ * GanttChart — who is working on what, and when: each Added Value drawn as a bar
+ * from its start to its due date, against people down the side and time across
+ * the top. Three views of the same data — one cycle by the day, a month by the
+ * day, a year by the cycle — with a Today column, a legend, a tooltip on every
+ * bar, and rows that open to show their bars.
  *
- * **The caller owns the data and the filters.** `rows` is drawn as given: the
- * chart never fetches, sorts or filters, so what "Select Users" means is the
- * page's business. The filters are controlled props (`projectIds`, `userIds`,
- * `view`, `date`) and the chart only says when one changes. Likewise the cycles:
- * a cycle is the company's delivery period, not something a calendar can give,
- * so they are passed in.
+ * **The data is what a backend would send:** flat `tasks` (each knows its
+ * `userId` and `projectId`), the `users` with their availability figures, the
+ * `projects`, and the `cycles`. The chart does the one thing the page design
+ * dictates and nothing else, so every page that shows a Gantt chart behaves the
+ * same way:
+ *
+ * - **No project filter:** one row per user, in the order given, each with their
+ *   tasks from every project.
+ * - **Projects filtered:** the chart groups by project. Each selected project is a
+ *   header row (with its count and points) and under it only the users who have
+ *   tasks in it, showing only that project's tasks. The same person can appear
+ *   under two projects.
+ * - **Users filtered:** only those users, in whichever layout the above gives.
+ *
+ * It never fetches and never pages. A closed row draws one summary bar (how many
+ * Added Values, how many points); an open row draws each task, packing tasks that
+ * do not overlap onto the same line. The view, the period and the filters are
+ * controlled props: the chart says when one changes.
  *
  * **Statuses are this pattern's vocabulary and live here once.** `planned`,
  * `in-progress`, `pre-delivered`, `completed`, `overdue` each map to one colour,
- * for the bar and for its legend entry, so they cannot drift apart. The colours
- * are the accessible `filled` tones the rest of the charts use (`ProgressBar`,
- * `DonutChart`) with their own content token, not the bright fills Figma
- * draws, whose white text would fail contrast.
+ * for the bar and its legend entry, so they cannot drift apart. The colours are
+ * the accessible `filled` tones the other charts use (`ProgressBar`,
+ * `DonutChart`) with their own content token, not the bright fills Figma draws,
+ * whose white text would fail contrast.
  *
- * Geometry is measured, not stepped: a column is `CELL` wide and a bar is
- * placed by column, the same way `DonutChart`'s ring is sized in numbers rather
- * than on the spacing scale. Everything else is tokens.
+ * Geometry is measured, not stepped: a column is `CELL` wide and a bar is placed
+ * by column, the way `DonutChart`'s ring is sized in numbers rather than on the
+ * spacing scale. Everything else is tokens.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -95,42 +109,43 @@ const LEGEND_ORDER: GanttStatus[] = ['planned', 'in-progress', 'pre-delivered', 
 const CELL = 90;
 const LABEL = 164;
 
-export interface GanttBar {
+export interface GanttUser {
   id: string;
-  /** The work item's name — drawn in the bar and the tooltip's title. */
+  name: string;
+  /** Tasks the person has in progress — the "WIP" line of their panel. */
+  wip?: number;
+  /** Tasks they have planned. */
+  planned?: number;
+  /** Earliest availability date, `YYYY-MM-DD` — "EAD". */
+  ead?: string;
+  /** Days from today until `ead` — "EAD TD". */
+  eadTd?: number;
+}
+
+export interface GanttProject {
+  id: string;
+  name: string;
+}
+
+export interface GanttTask {
+  id: string;
+  /** The Added Value's title — drawn in the bar and as the tooltip's heading. */
   title: string;
+  userId: string;
+  projectId: string;
+  /** Which colour and legend entry the bar takes. */
   status: GanttStatus;
+  /** The Added Value's own workflow status, shown in the tooltip ("AB Testing"). Defaults to the bar's status. */
+  statusLabel?: string;
+  /** Who raised it, for the tooltip. */
+  initiator?: string;
+  /** Capacity points, drawn as a pill at the bar's end. */
+  points: number;
   /** First and last day, `YYYY-MM-DD`, inclusive. */
   start: string;
   end: string;
-  /** Points, drawn as a pill at the bar's end. */
-  points?: number;
-  /** The project's name, as a small pill before the title. */
-  project?: string;
-  /** The tooltip's lines. Defaults to the status, the project and the due date. */
-  details?: GanttTooltipDetail[];
-  /** Makes the bar a link. Without it the bar is a button that calls `onBarSelect`. */
+  /** Makes the bar a link to the Added Value. Without it the bar is a button that calls `onTaskSelect`. */
   href?: string;
-}
-
-export interface GanttStat {
-  label: string;
-  value: React.ReactNode;
-  /** Colours the number — "WIP" in the warning colour, "Planned" in brand. */
-  tone?: 'brand' | 'success' | 'warning' | 'critical';
-}
-
-export interface GanttRow {
-  id: string;
-  /** A person or a project. */
-  name: string;
-  /** `project` rows sit on the quiet surface and carry a count badge. */
-  kind?: 'user' | 'project';
-  /** The pill after a project's name. Defaults to "N AVs | M pts" from the bars. */
-  badge?: string;
-  /** The panel shown under the name while the row is open. */
-  stats?: GanttStat[];
-  bars: GanttBar[];
 }
 
 export interface GanttChartProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title' | 'onChange'> {
@@ -143,24 +158,24 @@ export interface GanttChartProps extends Omit<React.HTMLAttributes<HTMLElement>,
   date: string;
   /** Called with the day to move to when the navigator's arrows are used. */
   onDateChange: (date: string) => void;
+  /** The delivery periods. A cycle is the company's, not the calendar's, so they are passed in. */
   cycles: GanttCycle[];
   /** Today, `YYYY-MM-DD`. Defaults to the system date; pass it for a stable chart. */
   today?: string;
-  rows: GanttRow[];
-  /** Controlled open rows; otherwise `defaultExpandedIds`. */
+  tasks: GanttTask[];
+  users: GanttUser[];
+  projects: GanttProject[];
+  /** Selected projects and users — empty means all. */
+  projectIds: string[];
+  onProjectIdsChange: (ids: string[]) => void;
+  userIds: string[];
+  onUserIdsChange: (ids: string[]) => void;
+  /** Controlled open user rows; otherwise `defaultExpandedIds`. Row ids are the user's id, or `projectId:userId` under a project. */
   expandedIds?: string[];
   defaultExpandedIds?: string[];
   onExpandedChange?: (ids: string[]) => void;
-  /** The filter menus appear when their options are given. */
-  projectOptions?: SearchSelectOption[];
-  projectIds?: string[];
-  onProjectIdsChange?: (ids: string[]) => void;
-  userOptions?: SearchSelectOption[];
-  userIds?: string[];
-  onUserIdsChange?: (ids: string[]) => void;
-  onResetFilters?: () => void;
-  /** A bar without an `href` was activated. */
-  onBarSelect?: (bar: GanttBar) => void;
+  /** A task without an `href` was activated. */
+  onTaskSelect?: (task: GanttTask) => void;
 }
 
 const VIEW_OPTIONS = [
@@ -174,9 +189,7 @@ const statTone = cva('font-numeric text-caption-md-semibold', {
     tone: {
       none: 'text-text-primary',
       brand: 'text-text-brand-medium',
-      success: 'text-accent-success-outline-content-default',
       warning: 'text-accent-warning-outline-content-default',
-      critical: 'text-accent-critical-outline-content-default',
     },
   },
   defaultVariants: { tone: 'none' },
@@ -184,18 +197,63 @@ const statTone = cva('font-numeric text-caption-md-semibold', {
 
 const cardinal = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-/** The summary bar a closed row draws: how many items, how many points, over what span. */
-function summarise(bars: GanttBar[], columns: GanttPeriod['columns']) {
-  const placed = bars
-    .map((bar) => ({ bar, at: place(columns, bar.start, bar.end) }))
-    .filter((p): p is { bar: GanttBar; at: NonNullable<typeof p.at> } => p.at !== null);
-  if (placed.length === 0) return null;
-  return {
-    count: placed.length,
-    points: placed.reduce((sum, p) => sum + (p.bar.points ?? 0), 0),
-    from: Math.min(...placed.map((p) => p.at.from)),
-    to: Math.max(...placed.map((p) => p.at.to)),
-  };
+const dateFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+const shortFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+const formatDate = (iso: string) => dateFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
+/** "03.02" — the availability date as the stats panel writes it. */
+const formatShort = (iso: string) => shortFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`)).replace('/', '.');
+
+interface PlacedTask {
+  task: GanttTask;
+  at: Placement;
+}
+
+type RowModel =
+  | { kind: 'project'; id: string; project: GanttProject; count: number; points: number }
+  | { kind: 'user'; id: string; user: GanttUser; placed: PlacedTask[] };
+
+/** The layout the page design prescribes: by user, or by project and then user. See the component note. */
+function buildRows(
+  tasks: GanttTask[],
+  users: GanttUser[],
+  projects: GanttProject[],
+  projectIds: string[],
+  userIds: string[],
+  columns: GanttColumn[],
+): RowModel[] {
+  const placed: PlacedTask[] = tasks
+    .map((task) => ({ task, at: place(columns, task.start, task.end) }))
+    .filter((p): p is PlacedTask => p.at !== null);
+  const wantedUsers = users.filter((u) => userIds.length === 0 || userIds.includes(u.id));
+
+  if (projectIds.length === 0) {
+    return wantedUsers.map((user) => ({
+      kind: 'user',
+      id: user.id,
+      user,
+      placed: placed.filter((p) => p.task.userId === user.id),
+    }));
+  }
+
+  const rows: RowModel[] = [];
+  for (const project of projects.filter((p) => projectIds.includes(p.id))) {
+    const inProject = placed.filter((p) => p.task.projectId === project.id);
+    const people = wantedUsers
+      .map((user) => ({ user, placed: inProject.filter((p) => p.task.userId === user.id) }))
+      .filter((p) => p.placed.length > 0);
+    const shown = people.flatMap((p) => p.placed);
+    rows.push({
+      kind: 'project',
+      id: `project:${project.id}`,
+      project,
+      count: shown.length,
+      points: shown.reduce((sum, p) => sum + p.task.points, 0),
+    });
+    for (const person of people) {
+      rows.push({ kind: 'user', id: `${project.id}:${person.user.id}`, user: person.user, placed: person.placed });
+    }
+  }
+  return rows;
 }
 
 /** A bar one column wide has no room for words: it keeps its points and loses the rest. */
@@ -207,56 +265,56 @@ const barShell =
 const pointsPill =
   'shrink-0 rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-semibold text-text-primary';
 
-function BarItem({
-  bar,
+function TaskBar({
+  task,
+  project,
   span,
-  line,
+  lane,
   from,
   placement,
   onSelect,
 }: {
-  bar: GanttBar;
+  task: GanttTask;
+  project?: GanttProject;
   span: number;
-  line: number;
+  lane: number;
   from: number;
   placement: 'top' | 'bottom';
-  onSelect?: (bar: GanttBar) => void;
+  onSelect?: (task: GanttTask) => void;
 }) {
   const minimised = span <= MINIMISED_SPAN;
-  const label = `${bar.title}, ${STATUS[bar.status].label}, ${bar.start} to ${bar.end}`;
-  const details: GanttTooltipDetail[] = bar.details ?? [
-    { label: 'Status', value: STATUS[bar.status].label },
-    ...(bar.project ? [{ label: 'Project', value: bar.project }] : []),
-    { label: 'Est. Due Date', value: bar.end },
+  const label = `${task.title}, ${STATUS[task.status].label}, ${task.points} points, ${formatDate(task.start)} to ${formatDate(task.end)}`;
+  const details: GanttTooltipDetail[] = [
+    { label: 'Status', value: task.statusLabel ?? STATUS[task.status].label },
+    ...(task.initiator ? [{ label: 'Initiator', value: task.initiator }] : []),
+    { label: 'Est. Due Date', value: formatDate(task.end) },
   ];
-  const className = cn(barShell, STATUS[bar.status].bar, minimised && 'justify-center px-1');
+  const className = cn(barShell, STATUS[task.status].bar, minimised && 'justify-center px-1');
   const content = (
     <>
-      {!minimised && bar.project && (
+      {!minimised && project && (
         <span className="max-w-24 shrink-0 truncate rounded-pill bg-surface-neutral-subtle px-2 py-0.5 text-caption-md-medium text-text-secondary">
-          {bar.project}
+          {project.name}
         </span>
       )}
-      {!minimised && <span className="min-w-0 flex-1 truncate">{bar.title}</span>}
-      {bar.points !== undefined && (
-        <span className={pointsPill}>{minimised ? bar.points : `${bar.points} pts`}</span>
-      )}
+      {!minimised && <span className="min-w-0 flex-1 truncate">{task.title}</span>}
+      <span className={pointsPill}>{minimised ? task.points : `${task.points} pts`}</span>
     </>
   );
   return (
     <GanttTooltip
-      title={bar.title}
+      title={task.title}
       details={details}
       placement={placement}
       className="flex min-w-0"
-      style={{ gridColumn: `${from + 1} / span ${span}`, gridRow: line }}
+      style={{ gridColumn: `${from + 1} / span ${span}`, gridRow: lane + 1 }}
     >
-      {bar.href ? (
-        <a href={bar.href} aria-label={label} className={className}>
+      {task.href ? (
+        <a href={task.href} aria-label={label} className={className}>
           {content}
         </a>
       ) : (
-        <button type="button" aria-label={label} className={className} onClick={() => onSelect?.(bar)}>
+        <button type="button" aria-label={label} className={className} onClick={() => onSelect?.(task)}>
           {content}
         </button>
       )}
@@ -277,8 +335,7 @@ function Hatch({ id }: { id: string }) {
   );
 }
 
-const todayCell =
-  'relative bg-surface-brand-faint border-x border-stroke-brand-medium';
+const todayCell = 'relative bg-surface-brand-faint border-x border-stroke-brand-medium';
 
 function TodayFill({ hatch }: { hatch: string }) {
   return (
@@ -287,6 +344,19 @@ function TodayFill({ hatch }: { hatch: string }) {
     </svg>
   );
 }
+
+/**
+ * The name column's cell in a header row: opaque and stuck to the left, so the
+ * dates scrolling sideways are cut off where the names begin instead of sliding
+ * underneath the empty corner.
+ */
+const Corner = ({ className }: { className?: string }) => (
+  <div
+    aria-hidden="true"
+    style={{ width: LABEL }}
+    className={cn('sticky left-0 z-20 shrink-0 bg-surface-elevated', className)}
+  />
+);
 
 export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
   (
@@ -300,18 +370,17 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       onDateChange,
       cycles,
       today,
-      rows,
+      tasks,
+      users,
+      projects,
+      projectIds,
+      onProjectIdsChange,
+      userIds,
+      onUserIdsChange,
       expandedIds,
       defaultExpandedIds = [],
       onExpandedChange,
-      projectOptions,
-      projectIds = [],
-      onProjectIdsChange,
-      userOptions,
-      userIds = [],
-      onUserIdsChange,
-      onResetFilters,
-      onBarSelect,
+      onTaskSelect,
       ...props
     },
     ref,
@@ -324,6 +393,12 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     const isToday = (i: number) =>
       columns[i] !== undefined && columns[i].start <= todayDay && todayDay <= columns[i].end;
 
+    const rows = React.useMemo(
+      () => buildRows(tasks, users, projects, projectIds, userIds, columns),
+      [tasks, users, projects, projectIds, userIds, columns],
+    );
+    const projectById = React.useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
+
     const [openState, setOpenState] = React.useState<string[]>(defaultExpandedIds);
     const open = expandedIds ?? openState;
     const toggle = (id: string) => {
@@ -331,6 +406,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       if (expandedIds === undefined) setOpenState(next);
       onExpandedChange?.(next);
     };
+    /* Project groups start open; this is the ones the user has folded away. */
+    const [folded, setFolded] = React.useState<string[]>([]);
+    const fold = (id: string) => setFolded((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
 
     /* Bring Today into view when the period changes. */
     const scroller = React.useRef<HTMLDivElement | null>(null);
@@ -357,7 +435,13 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       );
     };
 
-    const hasFilters = projectOptions || userOptions;
+    const reset = () => {
+      onProjectIdsChange([]);
+      onUserIdsChange([]);
+    };
+
+    let hidden = false; // inside a folded project group
+    let firstUser = true;
 
     return (
       <section
@@ -378,38 +462,27 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {onResetFilters && (
-              <Button variant="link" onClick={onResetFilters}>
-                Reset Filters
-              </Button>
-            )}
-            {hasFilters && (
-              <>
-                {projectOptions && (
-                  <SearchSelect
-                    className="w-52"
-                    aria-label="Projects"
-                    multiple
-                    avatars={false}
-                    placeholder="Select Projects"
-                    options={projectOptions}
-                    value={projectIds}
-                    onChange={(v) => onProjectIdsChange?.(v as unknown as string[])}
-                  />
-                )}
-                {userOptions && (
-                  <SearchSelect
-                    className="w-52"
-                    aria-label="Users"
-                    multiple
-                    placeholder="Select Users"
-                    options={userOptions}
-                    value={userIds}
-                    onChange={(v) => onUserIdsChange?.(v as unknown as string[])}
-                  />
-                )}
-              </>
-            )}
+            {/* The filter bar's own Reset: the ghost, brand-coloured small button. */}
+            <Button variant="tertiary" size="sm" onClick={reset}>
+              Reset Filters
+            </Button>
+            <SearchSelect
+              className="w-52"
+              multiple
+              avatars={false}
+              placeholder="Select Projects"
+              options={projects.map((p) => ({ value: p.id, label: p.name }))}
+              value={projectIds}
+              onChange={(v) => onProjectIdsChange(v as unknown as string[])}
+            />
+            <SearchSelect
+              className="w-52"
+              multiple
+              placeholder="Select Users"
+              options={users.map((u) => ({ value: u.id, label: u.name }))}
+              value={userIds}
+              onChange={(v) => onUserIdsChange(v as unknown as string[])}
+            />
             <Select
               aria-label="View"
               options={VIEW_OPTIONS}
@@ -424,7 +497,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
         <div className="flex flex-col" style={{ paddingLeft: LABEL }}>
           {period.heading.map((text, i) => (
             <div
-              key={text}
+              key={i}
               className={cn(
                 'flex h-9 items-center justify-center border border-stroke-subtle font-sans text-caption-md-semibold text-text-primary',
                 i === 0 && 'rounded-t-md',
@@ -447,11 +520,18 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
         </div>
 
-        <div ref={scroller} tabIndex={0} aria-label={`${title}, scrolls sideways`} role="region" className="min-h-56 overflow-x-auto">
+        <div
+          ref={scroller}
+          tabIndex={0}
+          aria-label={`${title}, scrolls sideways`}
+          role="region"
+          className="min-h-56 overflow-x-auto"
+        >
           <div className="flex flex-col" style={{ width: LABEL + trackWidth }}>
             {/* Group row: cycles over the days, months over the cycles. */}
             {period.groups.length > 0 && (
-              <div className="flex" style={{ paddingLeft: LABEL }}>
+              <div className="flex">
+                <Corner />
                 {period.groups.map((g, i) => (
                   <div
                     key={`${g.label}-${i}`}
@@ -464,7 +544,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               </div>
             )}
             {/* Column headings, with Today picked out. */}
-            <div className="flex" style={{ paddingLeft: LABEL }}>
+            <div className="flex">
+              <Corner />
               {columns.map((c, i) => (
                 <div
                   key={c.key}
@@ -487,82 +568,124 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 </div>
               ))}
             </div>
-            <div aria-hidden="true" className="h-1 bg-surface-brand-strong" style={{ marginLeft: LABEL }} />
+            <div className="flex">
+              <Corner />
+              <div aria-hidden="true" className="h-1 bg-surface-brand-strong" style={{ width: trackWidth }} />
+            </div>
 
-            {rows.map((row, rowIndex) => {
+            {rows.map((row) => {
+              const columnsLayer = (
+                <div aria-hidden="true" className="absolute inset-0 flex">
+                  {columns.map((c, i) => (
+                    <div
+                      key={c.key}
+                      style={{ width: CELL }}
+                      className={cn('h-full shrink-0 border-r border-stroke-subtle', isToday(i) && todayCell)}
+                    >
+                      {isToday(i) && <TodayFill hatch={hatch} />}
+                    </div>
+                  ))}
+                </div>
+              );
+
+              if (row.kind === 'project') {
+                const closed = folded.includes(row.id);
+                hidden = closed;
+                return (
+                  <div key={row.id} className="flex border-b border-stroke-default bg-surface-neutral-subtle">
+                    <div
+                      style={{ width: LABEL }}
+                      className="sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-neutral-subtle"
+                    >
+                      <button
+                        type="button"
+                        aria-expanded={!closed}
+                        onClick={() => fold(row.id)}
+                        className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
+                      >
+                        <Icon name={closed ? 'caret-right' : 'caret-down'} size={16} className="shrink-0 text-text-secondary" />
+                        <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-sans text-caption-md-bold text-text-primary">{row.project.name}</span>
+                          <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
+                            {cardinal(row.count, 'AV', 'AVs')} | {row.points} pts
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                    <div className="relative" style={{ width: trackWidth }}>
+                      {columnsLayer}
+                    </div>
+                  </div>
+                );
+              }
+
+              if (hidden) return null;
               const expanded = open.includes(row.id);
-              const isProject = row.kind === 'project';
-              const summary = summarise(row.bars, columns);
-              const placed = row.bars
-                .map((bar) => ({ bar, at: place(columns, bar.start, bar.end) }))
-                .filter((p): p is { bar: GanttBar; at: NonNullable<typeof p.at> } => p.at !== null);
-              const badge =
-                row.badge ??
-                (isProject
-                  ? `${cardinal(row.bars.length, 'AV', 'AVs')} | ${row.bars.reduce((s, b) => s + (b.points ?? 0), 0)} pts`
-                  : undefined);
-              const panelId = `${hatch}-${row.id}`;
+              const { user, placed } = row;
+              const lanes = packLanes(placed.map((p) => p.at));
+              const stats = [
+                user.wip !== undefined && { label: 'WIP', value: user.wip, tone: 'warning' as const },
+                user.planned !== undefined && { label: 'Planned', value: user.planned, tone: 'brand' as const },
+                user.ead !== undefined && { label: 'EAD', value: formatShort(user.ead), tone: 'none' as const },
+                user.eadTd !== undefined && { label: 'EAD TD', value: `${user.eadTd} Days`, tone: 'none' as const },
+              ].filter(Boolean) as { label: string; value: React.ReactNode; tone: 'none' | 'brand' | 'warning' }[];
+              const panelId = `${hatch}-${row.id.replace(/[^a-z0-9]/gi, '')}`;
+              const summary =
+                placed.length === 0
+                  ? null
+                  : {
+                      count: placed.length,
+                      points: placed.reduce((sum, p) => sum + p.task.points, 0),
+                      from: Math.min(...placed.map((p) => p.at.from)),
+                      to: Math.max(...placed.map((p) => p.at.to)),
+                    };
+              /* The first row's tooltips open below their bar, the rest above, so neither runs into the chart's edge. */
+              const placement = firstUser ? 'bottom' : 'top';
+              firstUser = false;
               return (
-                <div key={row.id} className={cn('flex border-b border-stroke-default', isProject && 'bg-surface-neutral-subtle')}>
+                <div key={row.id} className="flex border-b border-stroke-default">
                   <div
                     style={{ width: LABEL }}
                     className={cn(
                       'sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-elevated',
-                      isProject && 'bg-surface-neutral-subtle',
-                      expanded && !isProject && 'border-l-4 border-l-stroke-focused',
+                      expanded && 'border-l-4 border-l-stroke-focused',
                     )}
                   >
                     <button
                       type="button"
                       aria-expanded={expanded}
-                      aria-controls={row.stats ? panelId : undefined}
+                      aria-controls={stats.length > 0 ? panelId : undefined}
                       onClick={() => toggle(row.id)}
                       className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
                     >
                       <Icon name={expanded ? 'caret-down' : 'caret-right'} size={16} className="shrink-0 text-text-secondary" />
-                      <span className="flex min-w-0 flex-1 flex-col items-start gap-1">
-                        <span className="w-full truncate font-sans text-body-md-semibold text-text-primary">{row.name}</span>
-                        {badge && (
-                          <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
-                            {badge}
-                          </span>
-                        )}
-                      </span>
+                      <span className="min-w-0 flex-1 truncate font-sans text-body-md-semibold text-text-primary">{user.name}</span>
                     </button>
-                    {expanded && row.stats && (
+                    {expanded && stats.length > 0 && (
                       <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
-                        {row.stats.map((s) => (
+                        {stats.map((s) => (
                           <div key={s.label} className="flex items-center justify-between gap-2">
                             <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
-                            <dd className={cn('m-0', statTone({ tone: s.tone ?? 'none' }))}>{s.value}</dd>
+                            <dd className={cn('m-0', statTone({ tone: s.tone }))}>{s.value}</dd>
                           </div>
                         ))}
                       </dl>
                     )}
                   </div>
                   <div className="relative" style={{ width: trackWidth }}>
-                    <div aria-hidden="true" className="absolute inset-0 flex">
-                      {columns.map((c, i) => (
-                        <div
-                          key={c.key}
-                          style={{ width: CELL }}
-                          className={cn('h-full shrink-0 border-r border-stroke-subtle', isToday(i) && todayCell)}
-                        >
-                          {isToday(i) && <TodayFill hatch={hatch} />}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="relative grid gap-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
+                    {columnsLayer}
+                    <div className="relative grid auto-rows-min gap-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                       {expanded
-                        ? placed.map(({ bar, at }, line) => (
-                            <BarItem
-                              key={bar.id}
-                              bar={bar}
+                        ? placed.map(({ task, at }, i) => (
+                            <TaskBar
+                              key={task.id}
+                              task={task}
+                              project={projectIds.length === 0 ? projectById.get(task.projectId) : undefined}
                               from={at.from}
                               span={at.to - at.from + 1}
-                              line={line + 1}
-                              placement={rowIndex === 0 ? 'bottom' : 'top'}
-                              onSelect={onBarSelect}
+                              lane={lanes[i]}
+                              placement={placement}
+                              onSelect={onTaskSelect}
                             />
                           ))
                         : summary && (
@@ -570,7 +693,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                               className={cn(barShell, STATUS.planned.bar, 'hover:bg-surface-brand-strong')}
                               style={{ gridColumn: `${summary.from + 1} / span ${summary.to - summary.from + 1}`, gridRow: 1 }}
                             >
-                              {summary.to === summary.from ? null : (
+                              {summary.to !== summary.from && (
                                 <span className="min-w-0 flex-1 truncate">
                                   {cardinal(summary.count, 'Added Value', 'Added Values')}
                                 </span>
@@ -586,8 +709,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               );
             })}
             {rows.length === 0 && (
-              <p className="m-0 p-6 text-center font-sans text-body-md-regular text-text-tertiary" style={{ marginLeft: LABEL }}>
-                Nothing planned for this period.
+              <p
+                className="m-0 p-6 text-center font-sans text-body-md-regular text-text-tertiary"
+                style={{ marginLeft: LABEL }}
+              >
+                Nothing matches these filters.
               </p>
             )}
           </div>

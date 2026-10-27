@@ -111,9 +111,18 @@ export function buildPeriod(view: GanttView, date: string, cycles: GanttCycle[])
     for (let d = start; d <= end; d += 1) {
       columns.push({ key: toIso(d), label: String(parts(d).date), start: d, end: d });
     }
+    /* A cycle can straddle months, even years: name every one it touches. */
+    const span = (of: (d: number) => string) => {
+      const seen: string[] = [];
+      for (const c of columns) {
+        const label = of(c.start);
+        if (seen[seen.length - 1] !== label) seen.push(label);
+      }
+      return seen.join(' – ');
+    };
     return {
       columns,
-      heading: [String(parts(start).year), monthName(start)],
+      heading: [span((d) => String(parts(d).year)), span(monthName)],
       navLabel: cycle?.label ?? 'Cycle',
       groups: [],
       previous: cycle && index > 0 ? toIso(list[index - 1].s) : undefined,
@@ -184,4 +193,23 @@ export function place(columns: GanttColumn[], start: string, end: string): Place
   const to = columnIndex(columns, Math.min(e, columns[columns.length - 1].end), 'end');
   if (from === -1 || to === -1 || to < from) return null;
   return { from, to };
+}
+
+/**
+ * Lanes for bars in one open row: each bar goes on the first line where it does
+ * not overlap one already there, so tasks that follow each other share a line and
+ * only genuinely concurrent ones stack. Returns the lane (0-based) of each input,
+ * in the order given.
+ */
+export function packLanes(spans: Placement[]): number[] {
+  const order = spans.map((_, i) => i).sort((a, b) => spans[a].from - spans[b].from || spans[a].to - spans[b].to);
+  const laneEnds: number[] = [];
+  const lanes = new Array<number>(spans.length).fill(0);
+  for (const i of order) {
+    const lane = laneEnds.findIndex((end) => end < spans[i].from);
+    const chosen = lane === -1 ? laneEnds.length : lane;
+    laneEnds[chosen] = spans[i].to;
+    lanes[i] = chosen;
+  }
+  return lanes;
 }

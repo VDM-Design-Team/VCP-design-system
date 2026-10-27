@@ -1,9 +1,9 @@
 export { GanttChart } from './GanttChart';
 export type {
   GanttChartProps,
-  GanttBar,
-  GanttRow,
-  GanttStat,
+  GanttTask,
+  GanttUser,
+  GanttProject,
   GanttStatus,
   GanttCycle,
   GanttView,
