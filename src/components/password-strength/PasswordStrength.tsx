@@ -13,7 +13,7 @@ import { ProgressBar } from '../../atoms/progress-bar';
  * `ProgressBar`'s, and the level is read out by name ("Very Weak") through its
  * `valueLabel`, so the fill length and the colour are never the only signal. The
  * words are the main signal (the bright fills can fall under 3:1), so the row is
- * `labelSize="md"`, the 14px label.
+ * `labelSize="md"`, the label size.
  *
  * **Scoring is not in here.** What makes a password "Fair" — length, character
  * classes, a breach list — is product policy and changes without a design

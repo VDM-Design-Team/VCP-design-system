@@ -77,8 +77,8 @@ export interface ProgressBarProps
    */
   label?: string;
   /**
-   * Type size of the label row: `sm` is the 12px caption (default, dense rows);
-   * `md` is the 14px label, for when the words are the main signal — a level
+   * Type size of the label row: `sm` is the caption size (default, dense rows);
+   * `md` is the label size, for when the words are the main signal — a level
    * written out beside a bar that may not pass contrast on its own.
    */
   labelSize?: 'sm' | 'md';
