@@ -11,13 +11,16 @@ Read off the Figma `Comment_Reply` (`2886:6586`, Comment Component section).
 |---|---|
 | `Avatar` | atom |
 | `CommentActions` | component |
-| `CommentFormActions` | component |
+| `CommentComposer` | component |
+| `MentionInput` | component |
 | `MentionInput` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
 The reaction buttons in the actions row are an `EmojiReactionPicker`, passed in as the
-`reactions` slot.
+`reactions` slot. `MentionInput` is here for `MentionTag`, the posted mention.
+
+> Building a comment list? Use [`CommentSection`](comment-section.md): this is one of its parts.
 
 ## When to use
 
@@ -25,7 +28,8 @@ The reaction buttons in the actions row are an `EmojiReactionPicker`, passed in 
 |---|---|
 | `CommentReply` | A posted comment or reply, on its own or as a reply inside a thread |
 | [`CommentReplyThread`](comment-reply-thread.md) | A comment *with* replies under it |
-| [`NewComment`](new-comment.md) | The box to write a new, top-level comment |
+| [`CommentSection`](comment-section.md) | A whole comment list. **Almost always what you want**: it holds the open threads and the reply and edit boxes for you |
+| [`CommentComposer`](comment-composer.md) | The box to write a comment in |
 
 ## Props
 
@@ -33,7 +37,7 @@ The reaction buttons in the actions row are an `EmojiReactionPicker`, passed in 
 |---|---|---|---|
 | `author` | `{ name, src? }` | required | Drives the avatar's initials, or a photo with `src` |
 | `time` / `dateTime` | `string` | required / — | "an hour ago", and the exact time for the `<time>` element |
-| `body` | `MentionSegment[]` | required | What `MentionInput` writes; `NewComment`'s `onSubmit` hands it over |
+| `body` | `MentionSegment[]` | required | What `MentionInput` writes; `CommentComposer`'s `onSubmit` hands it over |
 | `members` | `{ id, name }[]` | required | Who can be mentioned in the reply and edit boxes |
 | `replyCount` / `repliesOpen` / `onToggleReplies` / `repliesId` | | | The "Show / Hide N Replies" toggle, as `CommentActions` |
 | `onEdit`, `onDelete` | `() => void` | — | **Only for the author.** No handler, no button |

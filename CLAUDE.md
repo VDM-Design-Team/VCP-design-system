@@ -61,7 +61,7 @@ component — `DataTable` and `DatePicker` are components, not patterns.
 
 **`src/patterns/` — patterns.** Organisms: **two or more components composed
 into a distinct page section.** `TopBar` (Logo + Menu + Avatar + bell),
-`FilterBar`, `CommentItem`, the planning tables built on `DataTable`.
+`FilterBar`, `CommentSection`, the planning tables built on `DataTable`.
 
 **`src/templates/` — templates.** Page-level layouts that arrange patterns
 into whole screens: `AppShell`, `EmailLayout`.

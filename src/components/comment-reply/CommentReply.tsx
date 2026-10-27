@@ -2,14 +2,8 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { CommentActions } from '../comment-actions';
-import { CommentFormActions } from '../comment-form-actions';
-import {
-  MentionInput,
-  MentionTag,
-  plainText,
-  type MentionMember,
-  type MentionSegment,
-} from '../mention-input';
+import { CommentComposer } from '../comment-composer';
+import { MentionTag, type MentionMember, type MentionSegment } from '../mention-input';
 
 /**
  * CommentReply — one posted comment: who wrote it and when, what it says, the
@@ -23,12 +17,12 @@ import {
  * avatar and the text 16 apart, 8 of padding above and below.
  *
  * **It is made of the system's own pieces.** The actions are `CommentActions`, the
- * box is `MentionInput` with `CommentFormActions` under it, and the avatar is
- * `Avatar`. This piece adds the layout and the two modes: **replying** (the box opens
- * under the actions, Reply and Cancel) and **editing** (the box takes the comment's
- * place, filled with it, Save and Cancel). Both open focused, and both are
- * controlled by you (`replying`, `editing`), because the same state decides what
- * `CommentActions` says ("Reply" or "Cancel Reply").
+ * box is `CommentComposer` (without its avatar), and the avatar is `Avatar`. This piece adds
+ * the layout and the two modes: **replying** (the box opens under the actions, Reply and
+ * Cancel) and **editing** (the box takes the comment's place, filled with it, Save and
+ * Cancel). Both open focused, and both are controlled by you (`replying`, `editing`),
+ * because the same state decides what `CommentActions` says ("Reply" or "Cancel Reply").
+ * Most apps will not wire this up by hand: `CommentSection` does it for a whole list.
  *
  * **The comment is segments.** `body` is what `MentionInput` writes (`NewComment`'s
  * `onSubmit` hands it over): text and mentions. Mentions draw as `MentionTag`, the
@@ -80,14 +74,14 @@ export interface CommentReplyProps
   replying?: boolean;
   onReply?: () => void;
   onCancelReply?: () => void;
-  /** Sends the reply, with its segments. The box is yours to close (`replying`). */
-  onSubmitReply?: (value: MentionSegment[]) => void;
+  /** Sends the reply, with its segments. May return a promise: the box waits, and keeps the text if it rejects. The box is yours to close (`replying`). */
+  onSubmitReply?: (value: MentionSegment[]) => void | Promise<void>;
   replyLoading?: boolean;
 
   /** The comment is being edited: its place is taken by the box, filled with it. */
   editing?: boolean;
-  /** Saves the edit, with the new segments. The box is yours to close (`editing`). */
-  onSubmitEdit?: (value: MentionSegment[]) => void;
+  /** Saves the edit, with the new segments. May return a promise, as `onSubmitReply`. The box is yours to close (`editing`). */
+  onSubmitEdit?: (value: MentionSegment[]) => void | Promise<void>;
   onCancelEdit?: () => void;
   editLoading?: boolean;
 
@@ -98,55 +92,6 @@ export interface CommentReplyProps
 /* The avatar of the design's `Profile_Initials`: the neutral avatar with the everyday border and the
    tertiary text. The same as `NewComment`'s. */
 const AVATAR = 'border border-stroke-default text-text-tertiary';
-
-/**
- * The box under a comment: the mention field with its buttons. It holds its own draft, opens focused,
- * and its send button is dim while there is nothing to send. Private: what it adds to `MentionInput`
- * and `CommentFormActions` is only that arrangement.
- */
-function Box({
-  members,
-  label,
-  submitLabel,
-  defaultValue = [],
-  loading,
-  onSubmit,
-  onCancel,
-}: {
-  members: readonly MentionMember[];
-  label: string;
-  submitLabel: string;
-  defaultValue?: readonly MentionSegment[];
-  loading?: boolean;
-  onSubmit?: (value: MentionSegment[]) => void;
-  onCancel?: () => void;
-}) {
-  const [value, setValue] = React.useState<readonly MentionSegment[]>(defaultValue);
-  const empty = plainText(value).trim() === '' && !value.some((s) => s.type === 'mention');
-  const submit = () => {
-    if (empty || loading) return;
-    onSubmit?.([...value]);
-  };
-  return (
-    <div className="flex flex-col gap-4">
-      <MentionInput
-        aria-label={label}
-        members={members}
-        value={value}
-        onChange={setValue}
-        onSubmit={submit}
-        autoFocus
-      />
-      <CommentFormActions
-        submitLabel={submitLabel}
-        onSubmit={submit}
-        disabled={empty}
-        loading={loading}
-        onCancel={onCancel}
-      />
-    </div>
-  );
-}
 
 export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
   (
@@ -201,14 +146,15 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
               </time>
             </div>
             {editing ? (
-              <Box
+              <CommentComposer
                 members={members}
-                label="Edit comment"
+                inputLabel="Edit comment"
                 submitLabel="Save"
                 defaultValue={body}
                 loading={editLoading}
                 onSubmit={onSubmitEdit}
                 onCancel={onCancelEdit}
+                autoFocus
               />
             ) : (
               <p className="m-0 text-body-sm-regular break-words whitespace-pre-wrap text-text-primary">
@@ -239,13 +185,14 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
             />
           )}
           {replying && !editing && (
-            <Box
+            <CommentComposer
               members={members}
-              label={`Reply to ${author.name}`}
+              inputLabel={`Reply to ${author.name}`}
               submitLabel="Reply"
               loading={replyLoading}
               onSubmit={onSubmitReply}
               onCancel={onCancelReply}
+              autoFocus
             />
           )}
         </div>
