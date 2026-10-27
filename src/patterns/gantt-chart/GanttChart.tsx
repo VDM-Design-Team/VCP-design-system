@@ -467,26 +467,28 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* The filter bar's own Reset: the ghost, brand-coloured small button. */}
-            <Button variant="tertiary" size="sm" onClick={reset}>
+            {/* The filter bar's own Reset: the same ghost, brand-coloured button. */}
+            <Button variant="tertiary" onClick={reset}>
               Reset Filters
             </Button>
             <SearchSelect
-              className="w-52"
               multiple
-              avatars={false}
+              aria-label="Projects"
+              className="w-52"
               placeholder="Select Projects"
               options={projects.map((p) => ({ value: p.id, label: p.name }))}
               value={projectIds}
-              onChange={(v) => onProjectIdsChange(v as unknown as string[])}
+              onChange={onProjectIdsChange}
             />
             <SearchSelect
-              className="w-52"
               multiple
+              aria-label="Users"
+              className="w-52"
+              rows="avatar"
               placeholder="Select Users"
               options={users.map((u) => ({ value: u.id, label: u.name }))}
               value={userIds}
-              onChange={(v) => onUserIdsChange(v as unknown as string[])}
+              onChange={onUserIdsChange}
             />
             <Select
               aria-label="View"

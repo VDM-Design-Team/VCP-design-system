@@ -20,7 +20,7 @@ lays them out as the page design does: one row per user, or — with projects
 selected — a header per project with the people who have tasks in it. It has a
 Today column, a legend built from `LegendItem`, a `GanttTooltip` on every bar, open
 and closed rows (a closed row draws a summary bar, an open one packs tasks onto
-shared lines), and the view, period and filters as controlled props. Reset Filters
-is the filter bar's own ghost button. Status colours are the accessible `filled`
+shared lines), and the view, period and filters as controlled props. The filters are the new `SearchSelect`
+(`multiple`, avatars for users) and Reset Filters is the filter bar's own button. Status colours are the accessible `filled`
 tones, with `accent.blue.medium` standing in for Pre-Delivered until a cyan token
 exists. No new tokens.

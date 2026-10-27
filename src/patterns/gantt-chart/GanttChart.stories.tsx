@@ -305,7 +305,7 @@ export const Flow: Story = {
     await waitFor(() => expect(within(card()).getByText('Est. Due Date:')).toBeVisible());
 
     /* Filtering by project turns the people into groups under project headers. */
-    const projects = canvas.getByPlaceholderText('Select Projects');
+    const projects = canvas.getByRole('button', { name: /Projects/ });
     await userEvent.click(projects);
     await userEvent.click(canvas.getByRole('option', { name: 'OfferPump' }));
     await userEvent.click(canvas.getByRole('option', { name: 'WHU' }));

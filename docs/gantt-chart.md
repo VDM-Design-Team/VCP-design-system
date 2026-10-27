@@ -77,9 +77,11 @@ A project with nothing in the period keeps its header.
 | `onTaskSelect` | `(task) => void` | A task without an `href` was activated |
 | `title`, `infoText` | `string` | The heading, and the (i) beside it with its tooltip |
 
-**Reset Filters** is the filter bar's own button — the ghost, brand-coloured small
-`Button` — and clears both the projects and the users. It leaves the view and the
-period alone.
+**The filters** are `SearchSelect` with `multiple`, as the filter bar draws them: the
+field shows "3 selected", the panel has the search and the rows (people with avatars
+for Users). **Reset Filters** is the filter bar's own Reset — `Button
+variant="tertiary"` — and clears both the projects and the users. It leaves the view
+and the period alone.
 
 ### Statuses
 
