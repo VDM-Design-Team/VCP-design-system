@@ -126,6 +126,42 @@ export const WithUserMenu: Story = {
   },
 };
 
+/**
+ * **Flow:** the user chip is drawn in one place (`UserMenu`'s `UserMenuTrigger` and `UserChip`), so the
+ * three ways `TopBar` shows it — nothing to open, the app's own menu, and the built-in menu — measure the same.
+ */
+export const ChipLooksTheSame: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { ...SIDE_BY_SIDE, chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => {
+    const user = { name: 'Francis M.' };
+    return (
+      <div className="flex flex-col gap-4">
+        <TopBar user={user} />
+        <TopBar user={user} onUserMenu={() => {}} />
+        <TopBar user={user} onUserMenuSelect={() => {}} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const names = within(canvasElement).getAllByText('Francis M.');
+    await expect(names).toHaveLength(3);
+    const looks = names.map((name) => {
+      const chip = name.parentElement as HTMLElement;
+      const style = getComputedStyle(chip);
+      return [
+        style.paddingLeft,
+        style.paddingTop,
+        style.columnGap,
+        style.borderRadius,
+        Math.round(chip.getBoundingClientRect().height),
+      ];
+    });
+    await expect(looks[1]).toEqual(looks[0]);
+    await expect(looks[2]).toEqual(looks[0]);
+  },
+};
+
 /** Without `onUserMenu`, the chip is a plain group — no dead button. */
 export const ReadOnlyUser: Story = {
   args: { homeHref: '#home', theme: 'light', onUserMenu: undefined },

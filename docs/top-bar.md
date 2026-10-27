@@ -12,9 +12,7 @@ signed-in user on the right.
 | `Toggle` | atom | The light/dark mode switch, with the sun and moon in its knob (`knobIcons`) |
 | `Divider` | atom | The vertical rule between the bell and the mode and user group |
 | `IconButton` | atom | The notification bell |
-| `Avatar` | atom | The signed-in user (plain and `onUserMenu` versions) |
-| `Icon` | atom | The user-menu caret (plain and `onUserMenu` versions) |
-| `UserMenu` | component | The signed-in user and their account menu, when `userMenuItems` is given |
+| `UserMenu` | component | The signed-in user: the account menu when `userMenuItems` or `onUserMenuSelect` is given, and the chip itself (`UserMenuTrigger` as a button for `onUserMenu`, `UserChip` as plain content) otherwise. The chip is drawn there, once |
 | `Menu` | component | Only its `MenuItem` type, for `userMenuItems`; the menu itself is drawn by `UserMenu` |
 
 Composed through **slots**: the "Create Added Value" `Button` arrives via
@@ -81,8 +79,8 @@ every visible piece is a composed component wearing its own.
   with real state, not a styled div. The sun and moon are decoration; the
   knob's position and the switch state carry it.
 - The user chip is a `<button>` named "`name`, account menu" only when
-  `userMenuItems` (a `UserMenu`: `aria-haspopup="menu"`, focus into the list and back) or
-  `onUserMenu` is given; otherwise a plain group — no dead buttons.
+  `userMenuItems` or `onUserMenuSelect` (a `UserMenu`: `aria-haspopup="menu"`, focus into the list
+  and back) or `onUserMenu` is given; otherwise plain content — no dead buttons.
 
 ## Don't
 
