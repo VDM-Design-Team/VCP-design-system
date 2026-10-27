@@ -23,8 +23,6 @@ Follow-up to #126; built to Figma's attachments elements.
 - **States:** drag-over is `stroke.focused` on `surface.brand.subtle` (was `brand.base`), and a
   drag **within 16 of the zone** counts; error keeps the **regular fill** with a critical
   stroke (was a red-tinted fill and a warning glyph).
-- **Known soft spot:** the resting border is 1.42:1 (light) — under the 3:1 a control boundary
-  needs — because the design specifies `stroke.default`. See `docs/dropzone.md`.
 - `HandoffAVModal` takes the new copy by dropping its "Attach Files" override.
 
 Migration: callers that relied on "Choose files" or the 1 `stroke.strong` border pass `label` or
