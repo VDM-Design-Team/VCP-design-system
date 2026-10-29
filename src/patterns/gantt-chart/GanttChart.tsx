@@ -138,6 +138,8 @@ export interface GanttTask {
   status: GanttStatus;
   /** The Added Value's own workflow status, shown in the tooltip ("AB Testing"). Defaults to the bar's status. */
   statusLabel?: string;
+  /** Who raised it, for the tooltip. */
+  initiator?: string;
   /** Capacity points, drawn as a pill at the bar's end. */
   points: number;
   /** First and last day, `YYYY-MM-DD`, inclusive. */
@@ -217,42 +219,6 @@ const formatDate = (iso: string) => dateFormat.format(new Date(`${iso.slice(0, 1
 /** "03.02" — the availability date as the stats panel writes it. */
 const formatShort = (iso: string) => shortFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`)).replace('/', '.');
 
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-
-/** "27/10 – 09/11/2026"; both years when they differ. */
-function formatRange(start: string, end: string) {
-  const sameYear = start.slice(0, 4) === end.slice(0, 4);
-  return `${sameYear ? shortFormat.format(new Date(`${start.slice(0, 10)}T00:00:00Z`)) : formatDate(start)} – ${formatDate(end)}`;
-}
-
-/** Where a task stands against today, in the words the chart's reader wants: due in, overdue by, starts in. */
-function timing(task: GanttTask, todayDay: number): string | undefined {
-  if (task.status === 'completed') return undefined;
-  const end = toDay(task.end);
-  const start = toDay(task.start);
-  if (end < todayDay) return `Overdue by ${plural(todayDay - end, 'day')}`;
-  if (start > todayDay) return `Starts in ${plural(start - todayDay, 'day')}`;
-  if (end === todayDay) return 'Due today';
-  return `Due in ${plural(end - todayDay, 'day')}`;
-}
-
-/** A closed row's tooltip: how much the person has in this period, over what span, and in what states. */
-function summaryDetails(placed: { task: GanttTask }[]): GanttTooltipDetail[] {
-  const tasks = placed.map((p) => p.task);
-  const start = tasks.reduce((min, t) => (t.start < min ? t.start : min), tasks[0].start);
-  const end = tasks.reduce((max, t) => (t.end > max ? t.end : max), tasks[0].end);
-  const byStatus = LEGEND_ORDER.map((status) => ({ status, n: tasks.filter((t) => t.status === status).length }))
-    .filter((x) => x.n > 0)
-    .map((x) => `${x.n} ${STATUS[x.status].label}`)
-    .join(', ');
-  return [
-    { label: 'Added Values', value: tasks.length },
-    { label: 'Capacity', value: `${tasks.reduce((sum, t) => sum + t.points, 0)} pts` },
-    { label: 'Span', value: formatRange(start, end) },
-    { label: 'Status', value: byStatus },
-  ];
-}
-
 interface PlacedTask {
   task: GanttTask;
   at: Placement;
@@ -317,9 +283,6 @@ const pointsPill =
 
 function TaskBar({
   task,
-  assignee,
-  todayDay,
-  projectName,
   project,
   span,
   lane,
@@ -328,10 +291,6 @@ function TaskBar({
   onSelect,
 }: {
   task: GanttTask;
-  assignee?: string;
-  todayDay: number;
-  /** The project's name for the tooltip — always known, unlike `project`, which is only passed when the pill should show. */
-  projectName?: string;
   project?: GanttProject;
   span: number;
   lane: number;
@@ -341,18 +300,10 @@ function TaskBar({
 }) {
   const minimised = span <= MINIMISED_SPAN;
   const label = `${task.title}, ${STATUS[task.status].label}, ${task.points} points, ${formatDate(task.start)} to ${formatDate(task.end)}`;
-  /* What the chart can say about a bar: what it is, who has it, when it runs, how big, and how it stands against today. */
-  const standing = timing(task, todayDay);
   const details: GanttTooltipDetail[] = [
     { label: 'Status', value: task.statusLabel ?? STATUS[task.status].label },
-    ...(projectName ? [{ label: 'Project', value: projectName }] : []),
-    ...(assignee ? [{ label: 'Assignee', value: assignee }] : []),
-    { label: 'Dates', value: formatRange(task.start, task.end) },
-    {
-      label: 'Capacity',
-      value: `${task.points} pts over ${plural(toDay(task.end) - toDay(task.start) + 1, 'day')}`,
-    },
-    ...(standing ? [{ label: 'Timing', value: standing }] : []),
+    ...(task.initiator ? [{ label: 'Initiator', value: task.initiator }] : []),
+    { label: 'Est. Due Date', value: formatDate(task.end) },
   ];
   const className = cn(barShell, STATUS[task.status].bar, minimised && 'justify-center px-1');
   const content = (
@@ -782,9 +733,6 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                             <TaskBar
                               key={task.id}
                               task={task}
-                              assignee={user.name}
-                              todayDay={todayDay}
-                              projectName={projectById.get(task.projectId)?.name}
                               project={projectIds.length === 0 ? projectById.get(task.projectId) : undefined}
                               from={at.from}
                               span={at.to - at.from + 1}
@@ -794,27 +742,19 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                             />
                           ))
                         : summary && (
-                            <GanttTooltip
-                              title={user.name}
-                              details={summaryDetails(placed)}
-                              placement={placement}
-                              className="flex min-w-0"
+                            <div
+                              className={cn(barShell, STATUS.planned.bar, 'hover:bg-surface-brand-strong')}
                               style={{ gridColumn: `${summary.from + 1} / span ${summary.to - summary.from + 1}`, gridRow: 1 }}
                             >
-                              <button
-                                type="button"
-                                aria-label={`${user.name}: ${plural(summary.count, 'Added Value')}, ${summary.points} points. Show them`}
-                                onClick={() => toggle(row.id)}
-                                className={cn(barShell, STATUS.planned.bar)}
-                              >
-                                {summary.to !== summary.from && (
-                                  <span className="min-w-0 flex-1 truncate">{plural(summary.count, 'Added Value')}</span>
-                                )}
-                                <span className={pointsPill}>
-                                  {summary.to === summary.from ? summary.points : `${summary.points} pts`}
+                              {summary.to !== summary.from && (
+                                <span className="min-w-0 flex-1 truncate">
+                                  {cardinal(summary.count, 'Added Value', 'Added Values')}
                                 </span>
-                              </button>
-                            </GanttTooltip>
+                              )}
+                              <span className={pointsPill}>
+                                {summary.to === summary.from ? summary.points : `${summary.points} pts`}
+                              </span>
+                            </div>
                           )}
                     </div>
                   </div>
