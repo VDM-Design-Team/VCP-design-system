@@ -580,7 +580,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   <div
                     key={`${g.label}-${i}`}
                     style={{ width: g.span * CELL }}
-                    className="flex h-9 items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
+                    className="flex h-11 items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
                   >
                     {g.label}
                   </div>
