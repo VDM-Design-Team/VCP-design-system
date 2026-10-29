@@ -728,7 +728,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               'sticky left-0 z-10 shrink-0 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated',
               /* On a phone an open person's block is half-opaque, so the figures read cleanly while the grid lines still show faintly; a closed one lets them through fully. */
               expanded && 'bg-surface-elevated/50',
-              expanded && 'border-l-4 border-l-stroke-focused',
+              expanded && 'border-l-4 border-l-stroke-default',
             )}
           >
             <button
@@ -918,7 +918,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 </div>
               )}
               {/* Column headings, with Today picked out. */}
-              <div className="flex border-b border-stroke-default min-[30rem]:border-b-0">
+              <div className="flex">
                 {columns.map((c, i) => (
                   <div
                     key={c.key}
@@ -941,7 +941,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   </div>
                 ))}
               </div>
-              <div aria-hidden="true" className="hidden h-1 bg-surface-brand-strong min-[30rem]:block" />
+              <div aria-hidden="true" className="h-1 bg-surface-brand-strong" />
             </div>
           </div>
         </div>

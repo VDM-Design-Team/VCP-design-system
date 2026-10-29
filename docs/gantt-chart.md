@@ -118,6 +118,7 @@ legend entry:
   years the cycles cover; in **Month** view the month opens a month calendar
   (`DatePicker`). **Today** returns to the period holding today and scrolls the Today
   column into view; inside that period it just scrolls to it.
+- **The blue line** under the headings runs from the period's first column to its last, in every view (days of a cycle or month, cycles of a year) and on a phone too: it marks the stretch of time the bars can sit in. An open person's cell has a grey left edge.
 - **The headings stay put.** The cycles or months over the days, and the days
   themselves, are held at the top of the screen as the page scrolls, and slide with the
   bars when they scroll sideways, so a row far down is never lost.
