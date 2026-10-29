@@ -114,6 +114,20 @@ const LEGEND_ORDER: GanttStatus[] = ['planned', 'in-progress', 'pre-delivered', 
 const CELL = 90;
 const LABEL = 164;
 
+/** Under the `md` breakpoint (48rem): the name column becomes a header above each row. */
+function useNarrow() {
+  const [narrow, setNarrow] = React.useState(false);
+  React.useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const query = window.matchMedia('(max-width: 47.99rem)');
+    const sync = () => setNarrow(query.matches);
+    sync();
+    query.addEventListener('change', sync);
+    return () => query.removeEventListener('change', sync);
+  }, []);
+  return narrow;
+}
+
 export interface GanttUser {
   id: string;
   name: string;
@@ -410,10 +424,10 @@ function Show({ open, children }: { open: boolean; children: React.ReactNode }) 
   return <div className={open ? 'block' : 'hidden'}>{children}</div>;
 }
 
-const Corner = ({ className }: { className?: string }) => (
+const Corner = ({ className, width }: { className?: string; width: number }) => (
   <div
     aria-hidden="true"
-    style={{ width: LABEL }}
+    style={{ width }}
     className={cn('sticky left-0 z-20 shrink-0 bg-surface-elevated', className)}
   />
 );
@@ -476,13 +490,27 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
 
     /* Whenever the view, the period or a filter changes, start again from the left edge. */
     const scroller = React.useRef<HTMLDivElement | null>(null);
+    /* On a phone each person's name and figures sit above their bars, as wide as the screen and held at the left edge while the bars scroll sideways. */
+    const narrow = useNarrow();
+    const gutter = narrow ? 0 : LABEL;
+    const [viewWidth, setViewWidth] = React.useState(0);
+    React.useEffect(() => {
+      const el = scroller.current;
+      if (!el || typeof ResizeObserver === 'undefined') return;
+      const sync = () => setViewWidth(el.clientWidth);
+      sync();
+      const observer = new ResizeObserver(sync);
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, []);
+    const nameStyle: React.CSSProperties = narrow ? { width: viewWidth || undefined, maxWidth: '100vw' } : { width: LABEL };
     const scrollKey = [view, date, projectIds.join(), userIds.join()].join('|');
     /* Today asked for from another period: wait for that period to render, then bring the column into view. */
     const wantToday = React.useRef(false);
     const scrollToToday = () => {
       const el = scroller.current;
       if (!el || todayIndex < 0) return;
-      const room = el.clientWidth - LABEL - CELL;
+      const room = el.clientWidth - gutter - CELL;
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       el.scrollTo({ left: Math.max(0, todayIndex * CELL - room / 2), behavior: reduce ? 'auto' : 'smooth' });
     };
@@ -643,9 +671,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       if (row.kind === 'project') {
         const closed = folded.includes(row.id);
         return (
-          <div key={row.id} className="flex border-b border-stroke-default bg-surface-neutral-subtle">
+          <div key={row.id} className="flex flex-col border-b border-stroke-default bg-surface-neutral-subtle md:flex-row">
             {/* No edge on the right, and the name and count share one line: a long one runs on over the grid rather than wrapping. */}
-            <div style={{ width: LABEL }} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
+            <div style={nameStyle} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
               <button
                 type="button"
                 aria-expanded={!closed}
@@ -659,7 +687,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 </span>
               </button>
             </div>
-            <div className="relative" style={{ width: trackWidth }}>
+            <div className="relative hidden md:block" style={{ width: trackWidth }}>
               {columnsLayer}
             </div>
           </div>
@@ -689,11 +717,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       const placement = firstUser ? 'bottom' : 'top';
       firstUser = false;
       return (
-        <div key={row.id} className="flex border-b border-stroke-default">
+        <div key={row.id} className="flex flex-col border-b border-stroke-default md:flex-row">
           <div
-            style={{ width: LABEL }}
+            style={nameStyle}
             className={cn(
-              'sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-elevated',
+              'sticky left-0 z-10 shrink-0 bg-surface-elevated md:border-r md:border-stroke-default',
               expanded && 'border-l-4 border-l-stroke-focused',
             )}
           >
@@ -709,7 +737,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             </button>
             {stats.length > 0 && (
               <Slide open={expanded}>
-                <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
+                <dl id={panelId} className="m-0 grid grid-cols-2 gap-x-6 gap-y-1 px-3 pb-4 md:flex md:flex-col">
                   {stats.map((s) => (
                     <div key={s.label} className="flex items-center justify-between gap-2">
                       <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
@@ -872,11 +900,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           role="region"
           className="-mt-3 min-h-56 overflow-x-auto"
         >
-          <div className="flex flex-col" style={{ width: LABEL + trackWidth }}>
+          <div className="flex flex-col" style={{ width: gutter + trackWidth }}>
             {/* Group row: cycles over the days, months over the cycles. */}
             {period.groups.length > 0 && (
               <div className="flex">
-                <Corner />
+                <Corner width={gutter} />
                 {period.groups.map((g, i) => (
                   <div
                     key={`${g.label}-${i}`}
@@ -890,7 +918,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
             {/* Column headings, with Today picked out. */}
             <div className="flex">
-              <Corner />
+              <Corner width={gutter} />
               {columns.map((c, i) => (
                 <div
                   key={c.key}
@@ -914,16 +942,16 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               ))}
             </div>
             <div className="flex">
-              <Corner />
+              <Corner width={gutter} />
               <div aria-hidden="true" className="h-1 bg-surface-brand-strong" style={{ width: trackWidth }} />
             </div>
 
             {loading &&
               SKELETON_ROWS.map((bars, i) => (
-                <div key={i} className="flex border-b border-stroke-default">
+                <div key={i} className="flex flex-col border-b border-stroke-default md:flex-row">
                   <div
-                    style={{ width: LABEL }}
-                    className="sticky left-0 z-10 flex shrink-0 items-center border-r border-stroke-default bg-surface-elevated py-4 pl-8 pr-4"
+                    style={nameStyle}
+                    className="sticky left-0 z-10 flex shrink-0 items-center bg-surface-elevated py-4 pl-8 pr-4 md:border-r md:border-stroke-default"
                   >
                     <Skeleton width={i % 2 === 0 ? 96 : 72} textStyle="body-sm" />
                   </div>
@@ -959,7 +987,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             {!loading && rows.length === 0 && (
               <p
                 className="m-0 p-6 text-center font-sans text-body-sm-regular text-text-tertiary"
-                style={{ marginLeft: LABEL }}
+                style={{ marginLeft: gutter }}
               >
                 Nothing matches these filters.
               </p>
