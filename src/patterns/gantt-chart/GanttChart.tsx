@@ -726,8 +726,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             style={nameStyle}
             className={cn(
               'sticky left-0 z-10 shrink-0 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated',
-              /* On a phone an open person's block is solid, so the figures read cleanly; a closed one lets the grid lines through. */
-              expanded && 'bg-surface-elevated',
+              /* On a phone an open person's block is half-opaque, so the figures read cleanly while the grid lines still show faintly; a closed one lets them through fully. */
+              expanded && 'bg-surface-elevated/50',
               expanded && 'border-l-4 border-l-stroke-focused',
             )}
           >

@@ -125,7 +125,7 @@ legend entry:
   regular layout, name column and all) the name column becomes a header above each
   person's bars: the name and, when open, their figures stacked, as wide as the screen and
   held at the left edge while the bars scroll sideways; project headers stack the same
-  way. The grid lines and the Today column run unbroken behind the name blocks. The dates
+  way. The grid lines and the Today column run unbroken behind the name blocks (an open person's block is half-opaque, so the figures stay readable). The dates
   start at the left edge, the period bar (year, month, arrows and the quick pick) spans the
   full width, and the cycle list opens from the bar's left edge so it stays on screen.
 - **Today** is a hatched column through the header and every row, labelled.
