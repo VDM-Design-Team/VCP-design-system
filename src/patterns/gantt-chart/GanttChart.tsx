@@ -602,7 +602,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   {isToday(i) && (
                     <>
                       <TodayFill hatch={hatch} />
-                      <span className="absolute left-0 top-0 rounded-br-sm bg-surface-brand-strong px-1.5 py-1 font-sans text-caption-sm-bold text-text-inverted-primary">
+                      <span className="absolute left-0 top-0 rounded-br-sm bg-surface-brand-strong px-1.5 pb-0.5 pt-1 font-sans text-caption-sm-semibold text-text-inverted-primary">
                         TODAY
                       </span>
                     </>
