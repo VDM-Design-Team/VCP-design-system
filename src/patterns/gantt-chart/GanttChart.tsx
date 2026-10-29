@@ -113,6 +113,9 @@ const LEGEND_ORDER: GanttStatus[] = ['planned', 'in-progress', 'pre-delivered', 
 /** A column is this wide, and the name column beside them is `LABEL` wide. Chart geometry, not tokens. */
 const CELL = 90;
 const LABEL = 164;
+/** Room kept above the period bar when it is held at the top of a phone's screen, plus the device's own safe area (a notch, a camera). */
+const TOP_GAP = 8;
+const ROW = 36;
 
 /** Under 30rem — a phone held upright, and only that: the name column becomes a header above each row. Everything wider keeps the regular layout. */
 function useNarrow() {
@@ -887,7 +890,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
         </div>
 
         {/* The period's own header — year, month, and the arrows that move it. Over the dates (past the 164 name column) on a wide screen; the full width on a phone, where the dates are too narrow to hold it, and held at the top of the screen there as the page scrolls. */}
-        <div className="sticky top-0 z-40 flex flex-col bg-surface-elevated min-[30rem]:static min-[30rem]:pl-41">
+        <div
+          className="sticky top-0 z-40 flex flex-col bg-surface-elevated min-[30rem]:static min-[30rem]:pl-41"
+          /* The padding is cancelled by the negative margin, so nothing moves at rest; it is the gap that shows once the bar is held. */
+          style={narrow ? { paddingTop: `calc(env(safe-area-inset-top) + ${TOP_GAP}px)`, marginTop: -TOP_GAP } : undefined}
+        >
           {period.heading.map((text, i) => (
             <div
               key={i}
@@ -914,8 +921,12 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
         {/* The timeline's own headings — months or cycles over the days — held at the top of the screen as the page scrolls, so a row far down is never lost. They are outside the sideways scroller (a scroller cannot stick to the page), and slid along with it. -mt-3 takes back the card's gap, so the column lines start at the period bar instead of floating below it. */}
         <div
           className="sticky z-30 -mt-3 flex bg-surface-elevated"
-          /* On a phone the period bar above is held at the top too, so these sit just under it: one 36 row each for the year, the month and the arrows. */
-          style={{ top: narrow ? (period.heading.length + 1) * 36 : 0 }}
+          /* On a phone the period bar above is held at the top too, so these sit just under it: one row each for the year, the month and the arrows, and the gap kept above them. */
+          style={{
+            top: narrow
+              ? `calc(env(safe-area-inset-top) + ${TOP_GAP + (period.heading.length + 1) * ROW}px)`
+              : 0,
+          }}
         >
           {gutter > 0 && <Corner width={gutter} />}
           <div className="min-w-0 flex-1 overflow-hidden">
