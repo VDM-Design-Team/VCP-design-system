@@ -564,7 +564,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             );
           }}
           inline
-          className="w-max"
+          /* On a phone the field spans the whole bar, so its panel opens from the bar's left edge and stays on screen; on a wide screen it hugs the value and the panel opens under it. */
+          className="absolute inset-0 grid content-center md:static md:block md:w-max"
         />
       ) : view === 'month' ? (
         <Popover
@@ -838,8 +839,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
         </div>
 
-        {/* The period's own header — year, month, and the arrows that move it. */}
-        <div className="flex flex-col" style={{ paddingLeft: LABEL }}>
+        {/* The period's own header — year, month, and the arrows that move it. Over the dates (past the 164 name column) on a wide screen; the full width on a phone, where the dates are too narrow to hold it. */}
+        <div className="flex flex-col md:pl-41">
           {period.heading.map((text, i) => (
             <div
               key={i}
@@ -853,13 +854,13 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           ))}
           <div
             className={cn(
-              'flex h-9 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
+              'relative flex h-9 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
               period.heading.length === 0 && 'rounded-t-md',
             )}
           >
-            <span className="text-text-brand-medium">{arrow('previous')}</span>
+            <span className="relative z-10 text-text-brand-medium">{arrow('previous')}</span>
             {jump}
-            <span className="text-text-brand-medium">{arrow('next')}</span>
+            <span className="relative z-10 text-text-brand-medium">{arrow('next')}</span>
           </div>
         </div>
 

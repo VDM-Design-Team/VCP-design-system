@@ -138,7 +138,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
 | `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
-| `inline` | `boolean` | — | Draws the button as plain text in a bar instead of a bordered field: no border or fill, the value semibold with a brand caret, a tint on hover. The panel is unchanged. For a picker inside another control's toolbar (the Gantt chart's period bar); give it `w-max` to hug the value |
+| `inline` | `boolean` | — | Draws the button as plain text in a bar instead of a bordered field: no border or fill, the value semibold with a brand caret, a tint on hover. The panel is unchanged. For a picker inside another control's toolbar (the Gantt chart's period bar); the field hugs its value and centres in the width you give the control, and the panel opens from that width's left edge |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
 

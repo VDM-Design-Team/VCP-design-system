@@ -125,7 +125,7 @@ interface SearchSelectBase
    * Draws the field as plain text inside a bar rather than as a bordered input: no
    * border or fill, the value semibold with a brand caret, a tint on hover. For a
    * picker that lives in another control's toolbar (the Gantt chart's period bar), where
-   * a boxed field would fight the bar. One line, one pick; give it `w-max` to hug the value.
+   * a boxed field would fight the bar. One line, one pick. The field hugs its value and centres in the width you give the control, and the panel opens from that width's left edge.
    */
   inline?: boolean;
   /** Critical border + `aria-invalid`. Pair with a visible message (or use `error`). */
@@ -554,7 +554,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             }}
             className={cn(
               inline
-                ? 'flex h-7 items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
+                ? 'mx-auto flex h-7 w-max max-w-full items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
                 : 'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
               !inline &&
