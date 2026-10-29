@@ -554,7 +554,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             }}
             className={cn(
               inline
-                ? 'flex h-8 items-center gap-1 rounded-sm border border-transparent py-0 pr-1 pl-2 transition-colors hover:bg-surface-brand-subtle'
+                ? 'flex h-7 items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
                 : 'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
               !inline &&
@@ -647,7 +647,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 open ? closePanel() : openPanel();
               }}
               className={cn(
-                'flex h-8 items-center justify-between gap-2 rounded-sm text-left outline-none',
+                'flex items-center justify-between rounded-sm text-left outline-none',
+                inline ? 'h-7 gap-1' : 'h-8 gap-2',
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
                   ? inline
