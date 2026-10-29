@@ -108,8 +108,8 @@ legend entry:
   share a line; only genuinely concurrent ones stack.
 - **A task one column wide** has no room for words, so it keeps its points only.
 - **Project groups** open and fold from their header, and start open. Folding, and
-  opening a row, is a short height transition (none under reduced motion); a folded
-  group stays mounted but out of reach of the pointer, keyboard and assistive tech.
+  opening a row, is a quick dissolve of what appears (none under reduced motion); what folds
+  is out of the layout, and out of reach of the pointer, keyboard and assistive tech.
 - **Getting around.** The arrows step one period. The period label opens a
   `DatePicker`: pick a day to land on the cycle holding it (Cycle view), or a month
   to land on that month (Month view) or its year (Year view). **Today** returns to the

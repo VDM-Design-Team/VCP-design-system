@@ -243,7 +243,7 @@ export const Cycle: Story = {
     await expect(canvas.getByText('October – November')).toBeVisible();
     await expect(canvas.getByText('TODAY')).toBeVisible();
     /* Every person has their availability figures when open. */
-    await expect(canvas.getAllByText('EAD TD')[0]).toBeVisible();
+    await waitFor(() => expect(canvas.getAllByText('EAD TD')[0]).toBeVisible());
   },
 };
 

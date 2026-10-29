@@ -370,24 +370,20 @@ function TodayFill({ hatch }: { hatch: string }) {
  * underneath the empty corner.
  */
 /**
- * Folds its children away and back with a short height transition. They stay
- * mounted, so the fold can animate; `invisible` (which waits out the transition)
- * and `inert` keep a folded one out of the way of the pointer, the tab order and
- * assistive tech. `overflow-clip` rather than `hidden`, so the sticky name column
- * inside keeps working.
+ * Opens its children with a quick dissolve. A folded one is `display: none`, so it
+ * takes no room and is out of reach of the pointer, the keyboard and assistive
+ * tech; it goes at once, and what takes its place fades in, so nothing jumps as
+ * the two trade places. No height transition and no clipping, so a bar's tooltip
+ * is never cut off by the wrapper.
  */
 function Collapse({ open, children }: { open: boolean; children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        'grid transition-all duration-200 ease-out motion-reduce:transition-none',
-        !open && 'invisible',
+        open ? 'block opacity-100 transition-opacity duration-150 ease-out starting:opacity-0 motion-reduce:transition-none' : 'hidden',
       )}
-      style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
     >
-      <div className="min-h-0 overflow-clip" inert={!open}>
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
