@@ -114,12 +114,12 @@ const LEGEND_ORDER: GanttStatus[] = ['planned', 'in-progress', 'pre-delivered', 
 const CELL = 90;
 const LABEL = 164;
 
-/** Under the `md` breakpoint (48rem): the name column becomes a header above each row. */
+/** Under 30rem — a phone held upright, and only that: the name column becomes a header above each row. Everything wider keeps the regular layout. */
 function useNarrow() {
   const [narrow, setNarrow] = React.useState(false);
   React.useEffect(() => {
     if (typeof window.matchMedia !== 'function') return;
-    const query = window.matchMedia('(max-width: 47.99rem)');
+    const query = window.matchMedia('(max-width: 29.99rem)');
     const sync = () => setNarrow(query.matches);
     sync();
     query.addEventListener('change', sync);
@@ -490,6 +490,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
 
     /* Whenever the view, the period or a filter changes, start again from the left edge. */
     const scroller = React.useRef<HTMLDivElement | null>(null);
+    const headerTrack = React.useRef<HTMLDivElement | null>(null);
     /* On a phone each person's name and figures sit above their bars, as wide as the screen and held at the left edge while the bars scroll sideways. */
     const narrow = useNarrow();
     const gutter = narrow ? 0 : LABEL;
@@ -593,7 +594,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           }}
           inline
           /* On a phone the field spans the whole bar, so its panel opens from the bar's left edge and stays on screen; on a wide screen it hugs the value and the panel opens under it. */
-          className="absolute inset-0 grid content-center md:static md:block md:w-max"
+          className="absolute inset-0 grid content-center min-[30rem]:static min-[30rem]:block min-[30rem]:w-max"
         />
       ) : view === 'month' ? (
         <Popover
@@ -651,8 +652,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       onUserIdsChange([]);
     };
 
-    const columnsLayer = (
-      <div aria-hidden="true" className="absolute inset-0 flex">
+    /* The grid lines and the Today column. On a phone they run behind the whole row, name block included, so the lines stay unbroken; on a wide screen they sit in the track beside the name column. */
+    const columnsLayer = (className?: string) => (
+      <div aria-hidden="true" className={cn('absolute inset-0 flex', className)}>
         {columns.map((c, i) => (
           <div
             key={c.key}
@@ -671,9 +673,10 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       if (row.kind === 'project') {
         const closed = folded.includes(row.id);
         return (
-          <div key={row.id} className="flex flex-col border-b border-stroke-default bg-surface-neutral-subtle md:flex-row">
+          <div key={row.id} className="relative flex flex-col border-b border-stroke-default bg-surface-neutral-subtle min-[30rem]:flex-row">
+            {columnsLayer('min-[30rem]:hidden')}
             {/* No edge on the right, and the name and count share one line: a long one runs on over the grid rather than wrapping. */}
-            <div style={nameStyle} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
+            <div style={nameStyle} className="sticky left-0 z-10 shrink-0 min-[30rem]:bg-surface-neutral-subtle">
               <button
                 type="button"
                 aria-expanded={!closed}
@@ -687,8 +690,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 </span>
               </button>
             </div>
-            <div className="relative hidden md:block" style={{ width: trackWidth }}>
-              {columnsLayer}
+            <div className="relative hidden min-[30rem]:block" style={{ width: trackWidth }}>
+              {columnsLayer('hidden min-[30rem]:flex')}
             </div>
           </div>
         );
@@ -717,11 +720,12 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       const placement = firstUser ? 'bottom' : 'top';
       firstUser = false;
       return (
-        <div key={row.id} className="flex flex-col border-b border-stroke-default md:flex-row">
+        <div key={row.id} className="relative flex flex-col border-b border-stroke-default min-[30rem]:flex-row">
+          {columnsLayer('min-[30rem]:hidden')}
           <div
             style={nameStyle}
             className={cn(
-              'sticky left-0 z-10 shrink-0 bg-surface-elevated md:border-r md:border-stroke-default',
+              'sticky left-0 z-10 shrink-0 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated',
               expanded && 'border-l-4 border-l-stroke-focused',
             )}
           >
@@ -737,7 +741,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             </button>
             {stats.length > 0 && (
               <Slide open={expanded}>
-                <dl id={panelId} className="m-0 grid grid-cols-2 gap-x-6 gap-y-1 px-3 pb-4 md:flex md:flex-col">
+                <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
                   {stats.map((s) => (
                     <div key={s.label} className="flex items-center justify-between gap-2">
                       <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
@@ -749,7 +753,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           </div>
           <div className="relative" style={{ width: trackWidth }}>
-            {columnsLayer}
+            {columnsLayer('hidden min-[30rem]:flex')}
             {/* The summary bar and the full set of bars trade places: one folds away as the other opens. */}
             <Show open={!expanded}>
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
@@ -868,7 +872,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
         </div>
 
         {/* The period's own header — year, month, and the arrows that move it. Over the dates (past the 164 name column) on a wide screen; the full width on a phone, where the dates are too narrow to hold it. */}
-        <div className="flex flex-col md:pl-41">
+        <div className="flex flex-col min-[30rem]:pl-41">
           {period.heading.map((text, i) => (
             <div
               key={i}
@@ -892,71 +896,77 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
         </div>
 
-        {/* -mt-3 takes back the card's gap, so the column lines start at the period header instead of floating below it. */}
+        {/* The timeline's own headings — months or cycles over the days — held at the top of the screen as the page scrolls, so a row far down is never lost. They are outside the sideways scroller (a scroller cannot stick to the page), and slid along with it. -mt-3 takes back the card's gap, so the column lines start at the period bar instead of floating below it. */}
+        <div className="sticky top-0 z-30 -mt-3 flex bg-surface-elevated">
+          {gutter > 0 && <Corner width={gutter} />}
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div ref={headerTrack} className="flex flex-col" style={{ width: trackWidth }}>
+              {/* Group row: cycles over the days, months over the cycles. */}
+              {period.groups.length > 0 && (
+                <div className="flex">
+                  {period.groups.map((g, i) => (
+                    <div
+                      key={`${g.label}-${i}`}
+                      style={{ width: g.span * CELL }}
+                      className="flex h-11 items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
+                    >
+                      {g.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Column headings, with Today picked out. */}
+              <div className="flex border-b border-stroke-default min-[30rem]:border-b-0">
+                {columns.map((c, i) => (
+                  <div
+                    key={c.key}
+                    aria-current={isToday(i) ? 'date' : undefined}
+                    style={{ width: CELL }}
+                    className={cn(
+                      'flex h-16 shrink-0 items-center justify-center border-r border-stroke-subtle font-sans text-body-sm-medium text-text-secondary',
+                      isToday(i) && cn(todayCell, 'text-text-brand-medium'),
+                    )}
+                  >
+                    {isToday(i) && (
+                      <>
+                        <TodayFill hatch={hatch} />
+                        <span className="absolute left-0 top-0 rounded-br-sm bg-surface-brand-strong px-1.5 pb-0.5 pt-1 font-sans text-caption-sm-semibold text-text-inverted-primary">
+                          TODAY
+                        </span>
+                      </>
+                    )}
+                    <span className="relative">{c.label}</span>
+                  </div>
+                ))}
+              </div>
+              <div aria-hidden="true" className="hidden h-1 bg-surface-brand-strong min-[30rem]:block" />
+            </div>
+          </div>
+        </div>
+
         <div
           ref={scroller}
           tabIndex={0}
           aria-label={`${title}, scrolls sideways`}
           role="region"
+          onScroll={(e) => {
+            if (headerTrack.current) headerTrack.current.style.transform = `translateX(${-e.currentTarget.scrollLeft}px)`;
+          }}
           className="-mt-3 min-h-56 overflow-x-auto"
         >
           <div className="flex flex-col" style={{ width: gutter + trackWidth }}>
-            {/* Group row: cycles over the days, months over the cycles. */}
-            {period.groups.length > 0 && (
-              <div className="flex">
-                <Corner width={gutter} />
-                {period.groups.map((g, i) => (
-                  <div
-                    key={`${g.label}-${i}`}
-                    style={{ width: g.span * CELL }}
-                    className="flex h-11 items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
-                  >
-                    {g.label}
-                  </div>
-                ))}
-              </div>
-            )}
-            {/* Column headings, with Today picked out. */}
-            <div className="flex">
-              <Corner width={gutter} />
-              {columns.map((c, i) => (
-                <div
-                  key={c.key}
-                  aria-current={isToday(i) ? 'date' : undefined}
-                  style={{ width: CELL }}
-                  className={cn(
-                    'flex h-16 shrink-0 items-center justify-center border-r border-stroke-subtle font-sans text-body-sm-medium text-text-secondary',
-                    isToday(i) && cn(todayCell, 'text-text-brand-medium'),
-                  )}
-                >
-                  {isToday(i) && (
-                    <>
-                      <TodayFill hatch={hatch} />
-                      <span className="absolute left-0 top-0 rounded-br-sm bg-surface-brand-strong px-1.5 pb-0.5 pt-1 font-sans text-caption-sm-semibold text-text-inverted-primary">
-                        TODAY
-                      </span>
-                    </>
-                  )}
-                  <span className="relative">{c.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex">
-              <Corner width={gutter} />
-              <div aria-hidden="true" className="h-1 bg-surface-brand-strong" style={{ width: trackWidth }} />
-            </div>
-
             {loading &&
               SKELETON_ROWS.map((bars, i) => (
-                <div key={i} className="flex flex-col border-b border-stroke-default md:flex-row">
+                <div key={i} className="relative flex flex-col border-b border-stroke-default min-[30rem]:flex-row">
+                  {columnsLayer('min-[30rem]:hidden')}
                   <div
                     style={nameStyle}
-                    className="sticky left-0 z-10 flex shrink-0 items-center bg-surface-elevated py-4 pl-8 pr-4 md:border-r md:border-stroke-default"
+                    className="sticky left-0 z-10 flex shrink-0 items-center py-4 pl-8 pr-4 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated"
                   >
                     <Skeleton width={i % 2 === 0 ? 96 : 72} textStyle="body-sm" />
                   </div>
                   <div className="relative" style={{ width: trackWidth }}>
-                    {columnsLayer}
+                    {columnsLayer('hidden min-[30rem]:flex')}
                     <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                       {bars.map(([start, span], j) => {
                         const from = start % Math.max(columns.length, 1);

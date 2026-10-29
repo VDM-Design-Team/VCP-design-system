@@ -118,12 +118,16 @@ legend entry:
   years the cycles cover; in **Month** view the month opens a month calendar
   (`DatePicker`). **Today** returns to the period holding today and scrolls the Today
   column into view; inside that period it just scrolls to it.
-- **On a phone** (under the `md` breakpoint) the name column becomes a header above each
-  person's bars: the name and, when open, their figures in two columns, as wide as the
-  screen and held at the left edge while the bars scroll sideways; project headers stack
-  the same way. The dates start at the left edge, the period bar (year, month, arrows and the
-  quick pick) spans the full width, and the cycle list opens from the bar's left edge so it
-  stays on screen.
+- **The headings stay put.** The cycles or months over the days, and the days
+  themselves, are held at the top of the screen as the page scrolls, and slide with the
+  bars when they scroll sideways, so a row far down is never lost.
+- **On a phone held upright** (under 30rem, and only then: everything wider keeps the
+  regular layout, name column and all) the name column becomes a header above each
+  person's bars: the name and, when open, their figures stacked, as wide as the screen and
+  held at the left edge while the bars scroll sideways; project headers stack the same
+  way. The grid lines and the Today column run unbroken behind the name blocks. The dates
+  start at the left edge, the period bar (year, month, arrows and the quick pick) spans the
+  full width, and the cycle list opens from the bar's left edge so it stays on screen.
 - **Today** is a hatched column through the header and every row, labelled.
 - **The chart starts at its left edge** — scrolled back to the beginning — whenever
   the view, the period or a filter changes.
