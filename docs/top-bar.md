@@ -12,8 +12,8 @@ signed-in user on the right.
 | `Toggle` | atom | The light/dark mode switch, with the sun and moon in its knob (`knobIcons`) |
 | `Divider` | atom | The vertical rule between the bell and the mode and user group |
 | `NotificationBell` | component | The notification bell and its unread dot |
-| `Avatar` | atom | The signed-in user |
-| `Icon` | atom | The user-menu caret |
+| `UserMenu` | component | The signed-in user: the account menu when `userMenuItems` or `onUserMenuSelect` is given, and the chip itself (`UserMenuTrigger` as a button for `onUserMenu`, `UserChip` as plain content) otherwise. The chip is drawn there, once |
+| `Menu` | component | Only its `MenuItem` type, for `userMenuItems`; the menu itself is drawn by `UserMenu` |
 
 Composed through **slots**: the "Create Added Value" `Button` arrives via
 `primaryAction` — the WithPrimaryAction story shows it.
@@ -44,7 +44,9 @@ title, no `h1`, no back.
 | `onNotifications` | `() => void` | — | The bell's click |
 | `theme` / `onThemeChange` | `'light' \| 'dark'` / `(t) => void` | — | The mode `Toggle`. **Controlled**: it reports the wish; the app owns the theme and the `.dark` class |
 | `user` | `{ name, src? }` | — | Avatar + name + caret, inline — as the design draws it. No role badge (design review, 3 Sep 2026: no design for it) |
-| `onUserMenu` | `() => void` | — | Makes the user chip a real button — the future `UserMenu`'s trigger |
+| `userMenuItems` | `MenuItem[]` | Settings, Logout | The account menu's rows, as `Menu` takes them. Given with `user`, the chip becomes a `UserMenu` that opens them |
+| `onUserMenuSelect` | `(key?) => void` | — | Fires with the activated row's `key`. Given alone, the chip is a `UserMenu` with the default rows |
+| `onUserMenu` | `() => void` | — | Makes the user chip a real button, for an app that opens its own menu. Ignored when `userMenuItems` is given |
 | `className` | `string` | — | On the `<header>` |
 | `ref` | `Ref<HTMLElement>` | — | The `<header>` |
 
@@ -73,7 +75,8 @@ component wearing its own.
   with real state, not a styled div. The sun and moon are decoration; the
   knob's position and the switch state carry it.
 - The user chip is a `<button>` named "`name`, account menu" only when
-  `onUserMenu` is given; otherwise a plain group — no dead buttons.
+  `userMenuItems` or `onUserMenuSelect` (a `UserMenu`: `aria-haspopup="menu"`, focus into the list
+  and back) or `onUserMenu` is given; otherwise plain content — no dead buttons.
 
 ## Don't
 
