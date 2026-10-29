@@ -720,12 +720,14 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       const placement = firstUser ? 'bottom' : 'top';
       firstUser = false;
       return (
-        <div key={row.id} className="relative flex flex-col border-b border-stroke-default min-[30rem]:flex-row">
+        <div key={row.id} className="relative flex flex-col border-b border-stroke-default pb-3 min-[30rem]:flex-row min-[30rem]:pb-0">
           {columnsLayer('min-[30rem]:hidden')}
           <div
             style={nameStyle}
             className={cn(
               'sticky left-0 z-10 shrink-0 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated',
+              /* On a phone an open person's block is solid, so the figures read cleanly; a closed one lets the grid lines through. */
+              expanded && 'bg-surface-elevated',
               expanded && 'border-l-4 border-l-stroke-focused',
             )}
           >
@@ -743,7 +745,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               <Slide open={expanded}>
                 <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
                   {stats.map((s) => (
-                    <div key={s.label} className="flex items-center justify-between gap-2">
+                    <div key={s.label} className="flex items-center gap-2 min-[30rem]:justify-between">
                       <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
                       <dd className={cn('m-0', statTone({ tone: s.tone }))}>{s.value}</dd>
                     </div>
