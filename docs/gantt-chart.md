@@ -19,7 +19,9 @@ page design dictates — the layout below — and never fetches, pages or sorts.
 | `LegendItem` | atom |
 | `Select` | atom |
 | `Skeleton` | atom |
+| `DatePicker` | component |
 | `GanttTooltip` | component |
+| `Popover` | component |
 | `SearchSelect` | component |
 | `Tooltip` | component |
 
@@ -105,7 +107,14 @@ legend entry:
   over what span. **An open row** draws each task, and tasks that do not overlap
   share a line; only genuinely concurrent ones stack.
 - **A task one column wide** has no room for words, so it keeps its points only.
-- **Project groups** open and fold from their header, and start open.
+- **Project groups** open and fold from their header, and start open. Folding, and
+  opening a row, is a short height transition (none under reduced motion); a folded
+  group stays mounted but out of reach of the pointer, keyboard and assistive tech.
+- **Getting around.** The arrows step one period. The period label opens a
+  `DatePicker`: pick a day to land on the cycle holding it (Cycle view), or a month
+  to land on that month (Month view) or its year (Year view). **Today** returns to the
+  period holding today and scrolls the Today column into view; inside that period it
+  just scrolls to it.
 - **Today** is a hatched column through the header and every row, labelled.
 - **The chart starts at its left edge** — scrolled back to the beginning — whenever
   the view, the period or a filter changes.

@@ -7,6 +7,8 @@ import { IconButton } from '../../atoms/icon-button';
 import { LegendItem, type LegendItemProps } from '../../atoms/legend-item';
 import { Select } from '../../atoms/select';
 import { Skeleton } from '../../atoms/skeleton';
+import { DatePicker } from '../../components/date-picker';
+import { Popover } from '../../components/popover';
 import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
 import { Tooltip } from '../../components/tooltip';
@@ -16,6 +18,7 @@ import {
   packLanes,
   place,
   toDay,
+  toIso,
   type GanttColumn,
   type GanttCycle,
   type GanttView,
@@ -366,6 +369,29 @@ function TodayFill({ hatch }: { hatch: string }) {
  * dates scrolling sideways are cut off where the names begin instead of sliding
  * underneath the empty corner.
  */
+/**
+ * Folds its children away and back with a short height transition. They stay
+ * mounted, so the fold can animate; `invisible` (which waits out the transition)
+ * and `inert` keep a folded one out of the way of the pointer, the tab order and
+ * assistive tech. `overflow-clip` rather than `hidden`, so the sticky name column
+ * inside keeps working.
+ */
+function Collapse({ open, children }: { open: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className={cn(
+        'grid transition-all duration-200 ease-out motion-reduce:transition-none',
+        !open && 'invisible',
+      )}
+      style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+    >
+      <div className="min-h-0 overflow-clip" inert={!open}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 const Corner = ({ className }: { className?: string }) => (
   <div
     aria-hidden="true"
@@ -410,6 +436,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     const isToday = (i: number) =>
       columns[i] !== undefined && columns[i].start <= todayDay && todayDay <= columns[i].end;
 
+    const todayIso = toIso(todayDay);
+    const [jumpOpen, setJumpOpen] = React.useState(false);
+
     const rows = React.useMemo(
       () => (loading ? [] : buildRows(tasks, users, projects, projectIds, userIds, columns)),
       [loading, tasks, users, projects, projectIds, userIds, columns],
@@ -430,9 +459,31 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     /* Whenever the view, the period or a filter changes, start again from the left edge. */
     const scroller = React.useRef<HTMLDivElement | null>(null);
     const scrollKey = [view, date, projectIds.join(), userIds.join()].join('|');
+    /* Today asked for from another period: wait for that period to render, then bring the column into view. */
+    const wantToday = React.useRef(false);
+    const scrollToToday = () => {
+      const el = scroller.current;
+      if (!el || todayIndex < 0) return;
+      const room = el.clientWidth - LABEL - CELL;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollTo({ left: Math.max(0, todayIndex * CELL - room / 2), behavior: reduce ? 'auto' : 'smooth' });
+    };
     React.useEffect(() => {
       if (scroller.current) scroller.current.scrollLeft = 0;
+      if (wantToday.current) {
+        wantToday.current = false;
+        scrollToToday();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [scrollKey]);
+    const goToday = () => {
+      if (columns.some((_, i) => isToday(i))) {
+        scrollToToday();
+      } else {
+        wantToday.current = true;
+        onDateChange(todayIso);
+      }
+    };
 
     const trackWidth = columns.length * CELL;
     const gridColumns = `repeat(${columns.length}, ${CELL}px)`; // ds-lint-ignore
@@ -469,8 +520,140 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       </div>
     );
 
-    let hidden = false; // inside a folded project group
     let firstUser = true;
+
+    const renderRow = (row: RowModel) => {
+      if (row.kind === 'project') {
+        const closed = folded.includes(row.id);
+        return (
+          <div key={row.id} className="flex border-b border-stroke-default bg-surface-neutral-subtle">
+            {/* No edge on the right, and the name and count share one line: a long one runs on over the grid rather than wrapping. */}
+            <div style={{ width: LABEL }} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
+              <button
+                type="button"
+                aria-expanded={!closed}
+                onClick={() => fold(row.id)}
+                className="flex w-max min-w-full items-center gap-2 whitespace-nowrap px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
+              >
+                <Icon name={closed ? 'caret-right' : 'caret-down'} size={16} className="shrink-0 text-text-secondary" />
+                <span className="font-sans text-body-sm-semibold text-text-primary">{row.project.name}</span>
+                <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
+                  {cardinal(row.count, 'AV', 'AVs')} | {row.points} pts
+                </span>
+              </button>
+            </div>
+            <div className="relative" style={{ width: trackWidth }}>
+              {columnsLayer}
+            </div>
+          </div>
+        );
+      }
+
+      const expanded = open.includes(row.id);
+      const { user, placed } = row;
+      const lanes = packLanes(placed.map((p) => p.at));
+      const stats = [
+        user.wip !== undefined && { label: 'WIP', value: user.wip, tone: 'warning' as const },
+        user.planned !== undefined && { label: 'Planned', value: user.planned, tone: 'brand' as const },
+        user.ead !== undefined && { label: 'EAD', value: formatShort(user.ead), tone: 'none' as const },
+        user.eadTd !== undefined && { label: 'EAD TD', value: `${user.eadTd} Days`, tone: 'none' as const },
+      ].filter(Boolean) as { label: string; value: React.ReactNode; tone: 'none' | 'brand' | 'warning' }[];
+      const panelId = `${hatch}-${row.id.replace(/[^a-z0-9]/gi, '')}`;
+      const summary =
+        placed.length === 0
+          ? null
+          : {
+              count: placed.length,
+              points: placed.reduce((sum, p) => sum + p.task.points, 0),
+              from: Math.min(...placed.map((p) => p.at.from)),
+              to: Math.max(...placed.map((p) => p.at.to)),
+            };
+      /* The first row's tooltips open below their bar, the rest above, so neither runs into the chart's edge. */
+      const placement = firstUser ? 'bottom' : 'top';
+      firstUser = false;
+      return (
+        <div key={row.id} className="flex border-b border-stroke-default">
+          <div
+            style={{ width: LABEL }}
+            className={cn(
+              'sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-elevated',
+              expanded && 'border-l-4 border-l-stroke-focused',
+            )}
+          >
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-controls={stats.length > 0 ? panelId : undefined}
+              onClick={() => toggle(row.id)}
+              className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
+            >
+              <Icon name={expanded ? 'caret-down' : 'caret-right'} size={16} className="shrink-0 text-text-secondary" />
+              <span className="min-w-0 flex-1 truncate font-sans text-body-sm-semibold text-text-primary">{user.name}</span>
+            </button>
+            {stats.length > 0 && (
+              <Collapse open={expanded}>
+                <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
+                  {stats.map((s) => (
+                    <div key={s.label} className="flex items-center justify-between gap-2">
+                      <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
+                      <dd className={cn('m-0', statTone({ tone: s.tone }))}>{s.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Collapse>
+            )}
+          </div>
+          <div className="relative" style={{ width: trackWidth }}>
+            {columnsLayer}
+            {/* The summary bar and the full set of bars trade places: one folds away as the other opens. */}
+            <Collapse open={!expanded}>
+              <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
+                {summary && (
+                  <div
+                    className={cn(barShell, STATUS.planned.bar, 'hover:bg-surface-brand-strong')}
+                    style={{ gridColumn: `${summary.from + 1} / span ${summary.to - summary.from + 1}`, gridRow: 1 }}
+                  >
+                    {summary.to !== summary.from && (
+                      <span className="min-w-0 flex-1 truncate">
+                        {cardinal(summary.count, 'Added Value', 'Added Values')}
+                      </span>
+                    )}
+                    <span className={pointsPill}>
+                      {summary.to === summary.from ? summary.points : `${summary.points} pts`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </Collapse>
+            <Collapse open={expanded}>
+              <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
+                {placed.map(({ task, at }, i) => (
+                  <TaskBar
+                    key={task.id}
+                    task={task}
+                    project={projectIds.length === 0 ? projectById.get(task.projectId) : undefined}
+                    from={at.from}
+                    span={at.to - at.from + 1}
+                    lane={lanes[i]}
+                    placement={placement}
+                    onSelect={onTaskSelect}
+                  />
+                ))}
+              </div>
+            </Collapse>
+          </div>
+        </div>
+      );
+    };
+
+    /* A project header and the people under it fold together; with no project filter there are no headers. */
+    const blocks: { id: string; header?: React.ReactNode; users: React.ReactNode[] }[] = [];
+    for (const row of rows) {
+      const node = renderRow(row);
+      if (row.kind === 'project') blocks.push({ id: row.id, header: node, users: [] });
+      else if (blocks.length > 0) blocks[blocks.length - 1].users.push(node);
+      else blocks.push({ id: row.id, users: [node] });
+    }
 
     return (
       <section
@@ -533,6 +716,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               onChange={(v) => onViewChange(v as GanttView)}
               className="w-40"
             />
+            <Button variant="secondary" size="sm" disabled={loading} onClick={goToday}>
+              Today
+            </Button>
           </div>
         </div>
 
@@ -556,9 +742,38 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           >
             <span className="text-text-brand-medium">{arrow('previous')}</span>
-            <span className="font-sans text-body-sm-semibold text-text-primary" aria-live="polite">
-              {period.navLabel}
-            </span>
+            {/* The label opens a picker: any day takes the chart to the cycle holding it, any month to that month (or its year). */}
+            <Popover
+              open={jumpOpen}
+              onOpenChange={setJumpOpen}
+              width="auto"
+              panelRole="dialog"
+              label="Jump to"
+              autoFocus
+              panelClassName="left-1/2 -translate-x-1/2 border-0 bg-transparent p-0 shadow-none"
+              trigger={
+                <button
+                  type="button"
+                  disabled={loading}
+                  className="flex items-center gap-1 rounded-sm px-2 py-1 font-sans text-body-sm-semibold text-text-primary outline-offset-2 hover:bg-surface-brand-subtle focus-visible:outline-2 focus-visible:outline-stroke-focused disabled:opacity-60"
+                >
+                  <span aria-live="polite">{period.navLabel}</span>
+                  <Icon name="caret-down" size={16} className="text-text-brand-medium" />
+                </button>
+              }
+              content={
+                <DatePicker
+                  mode={view === 'cycle' ? 'day' : 'month'}
+                  value={date}
+                  today={todayIso}
+                  clearable={false}
+                  onChange={(iso) => {
+                    onDateChange(iso);
+                    setJumpOpen(false);
+                  }}
+                />
+              }
+            />
             <span className="text-text-brand-medium">{arrow('next')}</span>
           </div>
         </div>
@@ -645,123 +860,16 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   </div>
                 </div>
               ))}
-            {rows.map((row) => {
-              if (row.kind === 'project') {
-                const closed = folded.includes(row.id);
-                hidden = closed;
-                return (
-                  <div key={row.id} className="flex border-b border-stroke-default bg-surface-neutral-subtle">
-                    {/* No edge on the right, and the name and count share one line: a long one runs on over the grid rather than wrapping. */}
-                    <div style={{ width: LABEL }} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
-                      <button
-                        type="button"
-                        aria-expanded={!closed}
-                        onClick={() => fold(row.id)}
-                        className="flex w-max min-w-full items-center gap-2 whitespace-nowrap px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
-                      >
-                        <Icon name={closed ? 'caret-right' : 'caret-down'} size={16} className="shrink-0 text-text-secondary" />
-                        <span className="font-sans text-body-sm-semibold text-text-primary">{row.project.name}</span>
-                        <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
-                          {cardinal(row.count, 'AV', 'AVs')} | {row.points} pts
-                        </span>
-                      </button>
-                    </div>
-                    <div className="relative" style={{ width: trackWidth }}>
-                      {columnsLayer}
-                    </div>
-                  </div>
-                );
-              }
-
-              if (hidden) return null;
-              const expanded = open.includes(row.id);
-              const { user, placed } = row;
-              const lanes = packLanes(placed.map((p) => p.at));
-              const stats = [
-                user.wip !== undefined && { label: 'WIP', value: user.wip, tone: 'warning' as const },
-                user.planned !== undefined && { label: 'Planned', value: user.planned, tone: 'brand' as const },
-                user.ead !== undefined && { label: 'EAD', value: formatShort(user.ead), tone: 'none' as const },
-                user.eadTd !== undefined && { label: 'EAD TD', value: `${user.eadTd} Days`, tone: 'none' as const },
-              ].filter(Boolean) as { label: string; value: React.ReactNode; tone: 'none' | 'brand' | 'warning' }[];
-              const panelId = `${hatch}-${row.id.replace(/[^a-z0-9]/gi, '')}`;
-              const summary =
-                placed.length === 0
-                  ? null
-                  : {
-                      count: placed.length,
-                      points: placed.reduce((sum, p) => sum + p.task.points, 0),
-                      from: Math.min(...placed.map((p) => p.at.from)),
-                      to: Math.max(...placed.map((p) => p.at.to)),
-                    };
-              /* The first row's tooltips open below their bar, the rest above, so neither runs into the chart's edge. */
-              const placement = firstUser ? 'bottom' : 'top';
-              firstUser = false;
-              return (
-                <div key={row.id} className="flex border-b border-stroke-default">
-                  <div
-                    style={{ width: LABEL }}
-                    className={cn(
-                      'sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-elevated',
-                      expanded && 'border-l-4 border-l-stroke-focused',
-                    )}
-                  >
-                    <button
-                      type="button"
-                      aria-expanded={expanded}
-                      aria-controls={stats.length > 0 ? panelId : undefined}
-                      onClick={() => toggle(row.id)}
-                      className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
-                    >
-                      <Icon name={expanded ? 'caret-down' : 'caret-right'} size={16} className="shrink-0 text-text-secondary" />
-                      <span className="min-w-0 flex-1 truncate font-sans text-body-sm-semibold text-text-primary">{user.name}</span>
-                    </button>
-                    {expanded && stats.length > 0 && (
-                      <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
-                        {stats.map((s) => (
-                          <div key={s.label} className="flex items-center justify-between gap-2">
-                            <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
-                            <dd className={cn('m-0', statTone({ tone: s.tone }))}>{s.value}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    )}
-                  </div>
-                  <div className="relative" style={{ width: trackWidth }}>
-                    {columnsLayer}
-                    <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
-                      {expanded
-                        ? placed.map(({ task, at }, i) => (
-                            <TaskBar
-                              key={task.id}
-                              task={task}
-                              project={projectIds.length === 0 ? projectById.get(task.projectId) : undefined}
-                              from={at.from}
-                              span={at.to - at.from + 1}
-                              lane={lanes[i]}
-                              placement={placement}
-                              onSelect={onTaskSelect}
-                            />
-                          ))
-                        : summary && (
-                            <div
-                              className={cn(barShell, STATUS.planned.bar, 'hover:bg-surface-brand-strong')}
-                              style={{ gridColumn: `${summary.from + 1} / span ${summary.to - summary.from + 1}`, gridRow: 1 }}
-                            >
-                              {summary.to !== summary.from && (
-                                <span className="min-w-0 flex-1 truncate">
-                                  {cardinal(summary.count, 'Added Value', 'Added Values')}
-                                </span>
-                              )}
-                              <span className={pointsPill}>
-                                {summary.to === summary.from ? summary.points : `${summary.points} pts`}
-                              </span>
-                            </div>
-                          )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {blocks.map((block) =>
+              block.header ? (
+                <React.Fragment key={block.id}>
+                  {block.header}
+                  <Collapse open={!folded.includes(block.id)}>{block.users}</Collapse>
+                </React.Fragment>
+              ) : (
+                <React.Fragment key={block.id}>{block.users}</React.Fragment>
+              ),
+            )}
             {!loading && rows.length === 0 && (
               <p
                 className="m-0 p-6 text-center font-sans text-body-sm-regular text-text-tertiary"

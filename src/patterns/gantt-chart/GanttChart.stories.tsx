@@ -243,7 +243,7 @@ export const Cycle: Story = {
     await expect(canvas.getByText('October – November')).toBeVisible();
     await expect(canvas.getByText('TODAY')).toBeVisible();
     /* Every person has their availability figures when open. */
-    await expect(canvas.getByText('EAD TD')).toBeVisible();
+    await expect(canvas.getAllByText('EAD TD')[0]).toBeVisible();
   },
 };
 
@@ -316,16 +316,30 @@ export const Flow: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Previous period' }));
     await expect(canvas.getByText('Cycle 44')).toBeVisible();
 
+    /* Today brings the chart back from another period; the period label opens a picker to jump anywhere. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Next period' }));
+    await expect(canvas.getByText('Cycle 45')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
+    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: /Cycle 44/ }));
+    await expect(await canvas.findByRole('dialog', { name: 'Jump to' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(canvas.queryByRole('dialog', { name: 'Jump to' })).toBeNull());
+
     const alice = canvas.getByRole('button', { name: /Alice Carter/ });
     await expect(alice).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(alice);
     await expect(alice).toHaveAttribute('aria-expanded', 'true');
 
     /* Open row → real bars, each a button named with its facts; hover shows the card. */
-    const bar = within(canvasElement.querySelector('section')!)
-      .getAllByRole('button', { name: /points,/ })
-      .find((b) => alice.closest('div.flex')?.contains(b));
-    await expect(bar).toBeDefined();
+    let bar: HTMLElement | undefined;
+    /* The bars fade into reach as the row opens. */
+    await waitFor(() => {
+      bar = within(canvasElement.querySelector('section')!)
+        .getAllByRole('button', { name: /points,/ })
+        .find((b) => alice.closest('div.flex')?.contains(b));
+      expect(bar).toBeDefined();
+    });
     await userEvent.hover(bar!);
     const card = () => document.getElementById(bar!.getAttribute('aria-describedby')!.split(' ').pop()!)!;
     await waitFor(() => expect(card().parentElement).toHaveClass('opacity-100'), { timeout: 2000 });
