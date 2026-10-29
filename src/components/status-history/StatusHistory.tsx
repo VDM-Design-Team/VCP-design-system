@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { Avatar } from '../../atoms/avatar';
 import { Icon } from '../../atoms/icon';
+import { Tag } from '../../atoms/tag';
+import { AV_STATUSES, StatusTag, type AVStatus } from '../status-tag';
 
 /**
  * StatusHistory — the collapsible bar on an Added Value that holds its status
@@ -8,6 +11,11 @@ import { Icon } from '../../atoms/icon';
  * Read off the Figma `Status_History` set (Closed and Open). The Figma set draws
  * only the bar; what lies under it when it is open is the caller's (the task log
  * trail), passed as `children`.
+ *
+ * What lies under the bar is, usually, the log: pass `entries` and each one reads as the
+ * live app draws it, an avatar, "Ali H. changed status from [Accepted] → [Initiated]" and
+ * how long ago. The statuses are `StatusTag`s (the owner of the status mapping), the old
+ * one in a quiet neutral tag. Anything else the panel should hold goes in `children`.
  *
  * It is a disclosure, so it is wired as one: the title is a real heading, the bar is
  * the `<button>` inside it with `aria-expanded` and `aria-controls`, and the open
@@ -22,11 +30,33 @@ import { Icon } from '../../atoms/icon';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
+export interface StatusHistoryEntry {
+  /** Identity across renders. Defaults to the index. */
+  id?: string;
+  /** Who changed it: "Ali H." */
+  actor: string;
+  /** A photo for the avatar; without one the initials are drawn. */
+  actorSrc?: string;
+  /** The status it was. A spine status, or a domain's own step by name. */
+  from: string;
+  /** The status it became. */
+  to: string;
+  /** When, already worded: "a month ago". How a date reads is the caller's. */
+  when: React.ReactNode;
+}
+
+const statusTag = (value: string) =>
+  (AV_STATUSES as readonly string[]).includes(value) ? (
+    <StatusTag status={value as AVStatus} size="sm" />
+  ) : (
+    <StatusTag custom={value} size="sm" />
+  );
+
 export interface StatusHistoryProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
   /** The bar's title. Defaults to "Status History". */
   title?: React.ReactNode;
-  /** How many entries are in the log; shown as "(3)" after the title. Omit for none. */
+  /** How many entries are in the log; shown as "(3)" after the title. Defaults to `entries.length`. */
   count?: number;
   /** Controlled open state. Pair with `onOpenChange`. */
   open?: boolean;
@@ -35,7 +65,9 @@ export interface StatusHistoryProps
   onOpenChange?: (open: boolean) => void;
   /** Heading level of the title. Default `3`. */
   headingLevel?: 2 | 3 | 4;
-  /** What shows while it is open — the status log. Only mounted while open. */
+  /** The log. Each entry reads "{actor} changed status from {from} → {to}" with its time. */
+  entries?: readonly StatusHistoryEntry[];
+  /** Anything else for the open panel, under the entries. Only mounted while open. */
   children?: React.ReactNode;
 }
 
@@ -49,6 +81,7 @@ export const StatusHistory = React.forwardRef<HTMLDivElement, StatusHistoryProps
       defaultOpen = false,
       onOpenChange,
       headingLevel = 3,
+      entries,
       children,
       ...props
     },
@@ -59,6 +92,7 @@ export const StatusHistory = React.forwardRef<HTMLDivElement, StatusHistoryProps
     const controlled = open !== undefined;
     const isOpen = controlled ? open : inner;
     const Heading = `h${headingLevel}` as const;
+    const shown = count ?? entries?.length;
     const headerId = `${idBase}-h`;
     const panelId = `${idBase}-p`;
 
@@ -90,7 +124,7 @@ export const StatusHistory = React.forwardRef<HTMLDivElement, StatusHistoryProps
               <Icon name="clock-fill" size={20} className="shrink-0 text-text-tertiary" />
               <span className="min-w-0 truncate text-title-sm-semibold text-text-primary">
                 {title}
-                {count != null && ` (${count})`}
+                {shown != null && ` (${shown})`}
               </span>
             </span>
             <Icon
@@ -105,9 +139,32 @@ export const StatusHistory = React.forwardRef<HTMLDivElement, StatusHistoryProps
             role="region"
             id={panelId}
             aria-labelledby={headerId}
-            className="px-4 pb-4 text-body-sm-regular text-text-secondary"
+            className="text-body-sm-regular text-text-secondary"
           >
-            {children}
+            {entries && entries.length > 0 && (
+              <ul className="m-0 flex list-none flex-col p-0">
+                {entries.map((entry, i) => (
+                  <li
+                    key={entry.id ?? i}
+                    className="flex items-start gap-3 border-b border-stroke-subtle px-4 py-3 last:border-b-0"
+                  >
+                    <Avatar name={entry.actor} src={entry.actorSrc} size="md" />
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-label-sm-bold text-text-primary">{entry.actor}</span>
+                        <span>changed status from</span>
+                        <Tag size="sm">{entry.from}</Tag>
+                        <Icon name="arrow-right" size={16} className="shrink-0 text-text-tertiary" />
+                        <span className="sr-only">to</span>
+                        {statusTag(entry.to)}
+                      </p>
+                      <span className="text-caption-md-regular text-text-tertiary">{entry.when}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {children != null && <div className="px-4 pb-4">{children}</div>}
           </div>
         )}
       </div>

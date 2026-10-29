@@ -54,6 +54,28 @@ export const Open: Story = {
   args: { defaultOpen: true, children: LOG },
 };
 
+const ENTRIES = [
+  { actor: 'Ali H.', from: 'Accepted', to: 'Initiated', when: 'a month ago' },
+  { actor: 'Ali H.', from: 'Pending', to: 'Accepted', when: 'a month ago' },
+  { actor: 'Marion Kiho', from: 'Draft', to: 'Pending', when: 'a month ago' },
+  { actor: 'Marion Kiho', from: 'Pending', to: 'Draft', when: 'a month ago' },
+  { actor: 'Eve', from: 'Draft', to: 'Pending', when: 'a month ago' },
+  { actor: 'Eve', from: 'Initial Creation', to: 'Draft', when: '2 months ago' },
+];
+
+/** The log, as the live app draws it: who, from which status to which, and how long ago. The count follows the entries. */
+export const WithEntries: Story = {
+  args: { count: undefined, defaultOpen: true, entries: ENTRIES },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Status History (6)' })).toBeVisible();
+    await expect(canvas.getAllByRole('listitem')).toHaveLength(6);
+    await expect(canvas.getAllByText('changed status from')).toHaveLength(6);
+    /* "Initial Creation" is a domain's own step, not a spine status: it still reads. */
+    await expect(canvas.getByText('Initial Creation')).toBeVisible();
+  },
+};
+
 /** Controlled: the page owns the state, here with a button outside the bar. */
 export const Controlled: Story = {
   render: (args) => {

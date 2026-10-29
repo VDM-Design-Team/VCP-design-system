@@ -1,2 +1,2 @@
 export { StatusHistory } from './StatusHistory';
-export type { StatusHistoryProps } from './StatusHistory';
+export type { StatusHistoryProps, StatusHistoryEntry } from './StatusHistory';

@@ -28,7 +28,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `options` | `{ value, name, disabled? }[]` | — | **Required.** The domains it can go to. `name` fills "Initiate to {name} assignment" |
-| `value` / `onChange` | `string[]` / `(value) => void` | — | Controlled: the ticked values, in the order of `options` |
+| `value` | `string[]` | — | Controlled: the ticked values |
+| `onChange` | `(value: string[], change: { value, checked }) => void` | — | Fires on every tick or untick with all ticked values (in the order of `options`) **and the one that changed**. Ticking a domain usually opens a section for it: read `change.checked`, or derive the section from `value` |
 | `defaultValue` | `string[]` | `[]` | Uncontrolled: ticked to begin with |
 | `title` | `ReactNode` | `Duplicate to other Domains` | The card's title |
 | `disabled` | `boolean` | — | Disables every option |

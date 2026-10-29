@@ -1,17 +1,20 @@
 # StatusHistory
 
 The collapsible bar on an Added Value that holds its status log: a clock, "Status
-History (n)" and a caret that shows which way it opens. A disclosure; what lies
-under the bar when it is open is the caller's.
+History (n)" and a caret that shows which way it opens. A disclosure; open, it shows
+the log: who changed the status, from which to which, and how long ago.
 
-Read off the Figma `Status_History` set (`6594:68135`), Closed and Open. The set draws
-only the bar, so the open panel is a slot.
+Read off the Figma `Status_History` set (`6594:68135`), Closed and Open, and the live
+app's log for the open panel (the set draws only the bar).
 
 ## Composed of
 
 | Piece | Tier |
 |---|---|
+| `Avatar` | atom |
 | `Icon` | sub-atomic |
+| `Tag` | atom |
+| `StatusTag` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -28,11 +31,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `title` | `ReactNode` | `Status History` | The bar's title |
-| `count` | `number` | — | Shown as "(3)" after the title; omit for none |
+| `count` | `number` | `entries.length` | Shown as "(3)" after the title; omit both for none |
+| `entries` | `StatusHistoryEntry[]` | — | The log: `{ actor, actorSrc?, from, to, when, id? }`. `when` is already worded ("a month ago") |
 | `open` / `onOpenChange` | `boolean` / `(open) => void` | — | Controlled state |
 | `defaultOpen` | `boolean` | `false` | Uncontrolled: starts open |
 | `headingLevel` | `2 \| 3 \| 4` | `3` | The title's heading level |
-| `children` | `ReactNode` | — | The log. Mounted only while open |
+| `children` | `ReactNode` | — | Anything else for the panel, under the entries. Mounted only while open |
 | `className` | `string` | — | Merged via `cn()` |
 
 ## Tokens
@@ -43,6 +47,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Padding, gap | Tailwind numeric scale | `p-4` (16), `gap-1.5` (clock to title) |
 | Title | `text.primary`, `type.title-sm-semibold` | `text-title-sm-semibold text-text-primary` |
 | Clock, caret | `text.tertiary`, 20 | `text-text-tertiary`, `size={20}` |
+| Entry row | `stroke.subtle` between rows, `p` 16 / 12 | `border-b border-stroke-subtle px-4 py-3` |
+| Avatar | `Avatar` `md` (32), neutral | initials, or the photo |
+| Actor, sentence, time | `type.label-sm-bold` / `body-sm-regular` / `caption-md-regular` | `text-text-primary` / `text-text-secondary` / `text-text-tertiary` |
+| Old status | `Tag` `sm`, neutral | quiet |
+| New status | `StatusTag` `sm` | the system's own status colour |
 | Open panel | `text.secondary`, `type.body-sm-regular` | `text-text-secondary text-body-sm-regular` |
 | Focus ring | `stroke.focused` | Drawn inward: the card clips |
 
@@ -52,7 +61,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
   `aria-expanded` and, while open, `aria-controls` pointing at the panel.
 - The open panel is a `region` named by the bar.
 - The glyphs are decorative; the count is part of the title text, so it is read.
+- The log is a list. Each entry reads "Ali H. changed status from Accepted to Initiated, a month ago": the arrow is decorative and a hidden "to" stands in for it.
 - The whole bar is the target, well over 40 tall.
+
+**The new status wears its own colour.** The live app draws every new status in one purple
+tag; here it is a `StatusTag`, so it takes the status's colour from the one mapping that owns
+them. There is no purple in the tag tones.
 
 ## Don't
 

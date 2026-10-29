@@ -43,7 +43,7 @@ export const Default: Story = {
     await expect(canvas.getAllByRole('checkbox')).toHaveLength(5);
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Initiate to Content assignment' }));
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Initiate to Partners assignment' }));
-    await expect(args.onChange).toHaveBeenLastCalledWith(['content', 'partners']);
+    await expect(args.onChange).toHaveBeenLastCalledWith(['content', 'partners'], { value: 'partners', checked: true });
     await expect(canvas.getByRole('checkbox', { name: 'Initiate to Content assignment' })).toBeChecked();
   },
 };
@@ -69,6 +69,35 @@ export const Controlled: Story = {
         <p className="m-0 text-body-sm-regular text-text-secondary">Chosen: {value.join(', ') || 'none'}</p>
       </div>
     );
+  },
+};
+
+/** Ticking a domain opens a section for it: the page reads which one changed. */
+export const OpensASection: Story = {
+  render: (args) => {
+    const [open, setOpen] = React.useState<string[]>([]);
+    return (
+      <div className="flex flex-col gap-3">
+        <DuplicateToOtherDomain
+          {...args}
+          onChange={(_, { value, checked }) =>
+            setOpen((cur) => (checked ? [...cur, value] : cur.filter((v) => v !== value)))
+          }
+        />
+        {open.map((v) => (
+          <section key={v} aria-label={`${v} assignment`} className="rounded-md bg-surface-elevated p-4 text-body-sm-regular text-text-secondary">
+            Assignment details for {v}
+          </section>
+        ))}
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Initiate to Governance assignment' }));
+    await expect(canvas.getByRole('region', { name: 'governance assignment' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Initiate to Governance assignment' }));
+    await expect(canvas.queryByRole('region', { name: 'governance assignment' })).toBeNull();
   },
 };
 

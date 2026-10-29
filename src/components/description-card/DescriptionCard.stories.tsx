@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import * as React from 'react';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { DescriptionCard } from './DescriptionCard';
 
 const meta = {
-  title: 'Atoms/DescriptionCard',
+  title: 'Components/Forms/DescriptionCard',
   component: DescriptionCard,
   parameters: {
     docs: {
@@ -11,7 +12,8 @@ const meta = {
         component:
           'One numbered entry in an Added Value’s description: a coloured number block and the ' +
           'paragraph beside it. The colour is the type — problem, solution, deliverable, desired ' +
-          'outcome. The list is the caller’s.',
+          'outcome. Read it, or edit it: the paragraph becomes a text field that grows with what is ' +
+          'typed. The list, the section’s title and the add button are the caller’s.',
       },
     },
   },
@@ -51,6 +53,57 @@ export const Types: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getAllByText('1')).toHaveLength(4);
     await expect(canvas.getByText('Show a supplier scorecard on the planning page.')).toBeVisible();
+  },
+};
+
+/** Editing: the panel is a text field. Type, and it grows; the remove button only reports. */
+export const Editing: Story = {
+  args: { editing: true, defaultValue: 'Some paragraph here', onRemove: fn(), onChange: fn(), removeLabel: 'Remove problem 1' },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('textbox', { name: 'Problem 1' });
+    await expect(field).toHaveValue('Some paragraph here');
+    await userEvent.type(field, '!');
+    await expect(args.onChange).toHaveBeenLastCalledWith('Some paragraph here!');
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove problem 1' }));
+    await expect(args.onRemove).toHaveBeenCalled();
+  },
+};
+
+/** Empty with a placeholder, and the invalid state (the critical border). */
+export const EditingEmptyAndInvalid: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <DescriptionCard type="solution" position={1} editing placeholder="Describe the solution" />
+      <DescriptionCard type="solution" position={2} editing invalid defaultValue="" placeholder="Required" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('textbox', { name: 'Solution 2' })).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+/** Controlled: the page owns the text and the list of cards. */
+export const EditableList: Story = {
+  render: () => {
+    const [items, setItems] = React.useState(['First problem', 'Second problem']);
+    return (
+      <div className="flex flex-col gap-4">
+        {items.map((text, i) => (
+          <DescriptionCard
+            key={i}
+            type="problem"
+            position={i + 1}
+            editing
+            value={text}
+            onChange={(v) => setItems((all) => all.map((t, j) => (j === i ? v : t)))}
+            onRemove={() => setItems((all) => all.filter((_, j) => j !== i))}
+            removeLabel={`Remove problem ${i + 1}`}
+          />
+        ))}
+      </div>
+    );
   },
 };
 

@@ -15,7 +15,8 @@ import { Checkbox } from '../../atoms/checkbox';
  *
  * A group of checkboxes is a `fieldset`, and the title is its `legend`, so a screen
  * reader says "Duplicate to other Domains, group" before the first option. The set of
- * chosen values works both ways: pass `value` (+ `onChange`), or leave it uncontrolled.
+ * chosen values works both ways: pass `value` (+ `onChange`), or leave it uncontrolled. `onChange`
+ * also says which option just changed, because ticking one usually opens a section for that domain.
  *
  * The rows are tighter in Figma (16 apart) than `Checkbox`'s 40 minimum touch target allows,
  * so they sit edge to edge: each option is a full-height target and there is no gap between.
@@ -40,8 +41,12 @@ export interface DuplicateToOtherDomainProps
   value?: readonly string[];
   /** Uncontrolled: which are ticked to begin with. */
   defaultValue?: readonly string[];
-  /** Fires with every ticked value, in the order of `options`. */
-  onChange?: (value: string[]) => void;
+  /**
+   * Fires on every tick or untick, with every ticked value (in the order of `options`) and the
+   * one that just changed. Ticking a domain usually opens a section for it: read `change.checked`
+   * to open or close that section, or derive it from `value`.
+   */
+  onChange?: (value: string[], change: { value: string; checked: boolean }) => void;
   /** The card's title. Defaults to "Duplicate to other Domains". */
   title?: React.ReactNode;
 }
@@ -56,7 +61,7 @@ export const DuplicateToOtherDomain = React.forwardRef<HTMLFieldSetElement, Dupl
         .map((o) => o.value)
         .filter((v) => (v === domain ? on : chosen.includes(v)));
       if (value === undefined) setInner(next);
-      onChange?.(next);
+      onChange?.(next, { value: domain, checked: on });
     };
 
     return (
