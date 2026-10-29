@@ -393,22 +393,12 @@ function Slide({ open, children }: { open: boolean; children: React.ReactNode })
 }
 
 /**
- * Opens its children with a dissolve. A folded one is `display: none`, so it
- * takes no room and is out of reach of the pointer, the keyboard and assistive
- * tech; it goes at once, and what takes its place fades in, so nothing jumps as
- * the two trade places. No height transition and no clipping, so a bar's tooltip
- * is never cut off by the wrapper.
+ * Shows or hides its children outright. A hidden one is `display: none`, so it takes
+ * no room and is out of reach of the pointer, the keyboard and assistive tech. No
+ * transition and no clipping, so a bar's tooltip is never cut off by the wrapper.
  */
-function Fade({ open, children }: { open: boolean; children: React.ReactNode }) {
-  return (
-    <div
-      className={cn(
-        open ? 'block opacity-100 transition-opacity duration-250 ease-out starting:opacity-0 motion-reduce:transition-none' : 'hidden',
-      )}
-    >
-      {children}
-    </div>
-  );
+function Show({ open, children }: { open: boolean; children: React.ReactNode }) {
+  return <div className={open ? 'block' : 'hidden'}>{children}</div>;
 }
 
 const Corner = ({ className }: { className?: string }) => (
@@ -625,7 +615,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           <div className="relative" style={{ width: trackWidth }}>
             {columnsLayer}
             {/* The summary bar and the full set of bars trade places: one folds away as the other opens. */}
-            <Fade open={!expanded}>
+            <Show open={!expanded}>
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                 {summary && (
                   <div
@@ -643,8 +633,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   </div>
                 )}
               </div>
-            </Fade>
-            <Fade open={expanded}>
+            </Show>
+            <Show open={expanded}>
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                 {placed.map(({ task, at }, i) => (
                   <TaskBar
@@ -659,7 +649,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   />
                 ))}
               </div>
-            </Fade>
+            </Show>
           </div>
         </div>
       );
@@ -883,7 +873,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               block.header ? (
                 <React.Fragment key={block.id}>
                   {block.header}
-                  <Fade open={!folded.includes(block.id)}>{block.users}</Fade>
+                  <Show open={!folded.includes(block.id)}>{block.users}</Show>
                 </React.Fragment>
               ) : (
                 <React.Fragment key={block.id}>{block.users}</React.Fragment>
