@@ -9,6 +9,8 @@ Date). It is `Tooltip` with the content filled in, so the hover and focus
 behaviour, `aria-describedby` and Escape all come from `Tooltip`; the title
 truncates so every card is one width and the lines are a description list.
 
+`Tooltip` gains `followPointer`: the bubble opens under the pointer, kept inside the viewport, for a trigger far wider than the bubble. `GanttTooltip` uses it, so a bar's card is always on screen. Nothing changes for existing tooltips.
+
 `Icon` gains the Phosphor `link-simple-horizontal` glyph (regular and fill),
 which the card's title row uses. It has a `loading` state: the header, Today column and legend stay and the rows become `Skeleton` placeholders, announced as busy. No new tokens.
 

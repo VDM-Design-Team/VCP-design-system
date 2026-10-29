@@ -25,6 +25,12 @@ import { cn } from '../../lib/cn';
  * Positioning is static: the four placements are CSS offsets off the trigger,
  * with no collision detection and no flipping. See `docs/tooltip.md`.
  *
+ * `followPointer` is for a trigger much wider than the bubble — a bar across a
+ * chart. The bubble keeps its `top`/`bottom` side but takes its horizontal
+ * position from where the pointer entered, clamped to the viewport, so it opens
+ * under the cursor and never off the screen. It stays put once it is open, so the
+ * pointer can still travel onto it.
+ *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -116,6 +122,12 @@ export interface TooltipProps
    * link, an input. It is cloned to receive `aria-describedby`.
    */
   children: React.ReactElement;
+  /**
+   * Open under the pointer (horizontally) instead of at the middle of the trigger,
+   * kept inside the viewport. For a trigger far wider than the bubble. Only for
+   * `top` and `bottom`; keyboard focus still opens it at the trigger's middle.
+   */
+  followPointer?: boolean;
   /** Hover open delay in ms. Focus is always immediate. */
   openDelay?: number;
   /**
@@ -136,8 +148,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       openDelay = DEFAULT_OPEN_DELAY,
       defaultOpen = false,
       tooltipId,
+      followPointer = false,
       className,
       onMouseEnter,
+      onMouseMove,
       onMouseLeave,
       onFocus,
       onBlur,
@@ -150,6 +164,9 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const id = tooltipId ?? `tooltip-${generatedId}`;
 
     const wrapperRef = React.useRef<HTMLSpanElement | null>(null);
+    const positionerRef = React.useRef<HTMLSpanElement | null>(null);
+    /* Where the bubble's left edge sits, relative to the trigger, when it follows the pointer. */
+    const [pointerLeft, setPointerLeft] = React.useState<number | null>(null);
     const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const clearTimer = React.useCallback(() => {
@@ -192,14 +209,35 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       return () => document.removeEventListener('keydown', onKeyDown, true);
     }, [open, close]);
 
+    /* Centre the bubble on the pointer, then pull it back inside the viewport. Only
+       while it is closed: once open it holds still, so the pointer can reach it. */
+    const track = (event: React.MouseEvent<HTMLSpanElement>) => {
+      const wrapper = wrapperRef.current;
+      const bubbleBox = positionerRef.current;
+      if (!followPointer || open || !wrapper || !bubbleBox) return;
+      if (bubbleBox.contains(event.target as Node)) return;
+      const margin = 8;
+      const width = bubbleBox.offsetWidth;
+      const min = margin;
+      const max = Math.max(min, window.innerWidth - margin - width);
+      const left = Math.min(Math.max(event.clientX - width / 2, min), max);
+      setPointerLeft(left - wrapper.getBoundingClientRect().left);
+    };
+
     const handleMouseEnter = (event: React.MouseEvent<HTMLSpanElement>) => {
       onMouseEnter?.(event);
+      track(event);
       clearTimer();
       if (openDelay <= 0) {
         setOpen(true);
         return;
       }
       timer.current = setTimeout(() => setOpen(true), openDelay);
+    };
+
+    const handleMouseMove = (event: React.MouseEvent<HTMLSpanElement>) => {
+      onMouseMove?.(event);
+      track(event);
     };
 
     const handleMouseLeave = (event: React.MouseEvent<HTMLSpanElement>) => {
@@ -224,7 +262,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       } catch {
         keyboardish = true;
       }
-      if (keyboardish) setOpen(true);
+      if (keyboardish) {
+        setPointerLeft(null);
+        setOpen(true);
+      }
     };
 
     const handleBlur = (event: React.FocusEvent<HTMLSpanElement>) => {
@@ -246,6 +287,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         }}
         className={cn('relative inline-flex', className)}
         onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         /* React's onFocus/onBlur are focusin/focusout — they bubble from the
            trigger, so the handlers can live on the wrapper. */
@@ -254,7 +296,11 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         {...props}
       >
         {React.cloneElement(child, { 'aria-describedby': describedBy })}
-        <span className={positioner({ placement, open })}>
+        <span
+          ref={positionerRef}
+          className={positioner({ placement, open })}
+          style={followPointer && pointerLeft !== null ? { left: pointerLeft, translate: 'none' } : undefined}
+        >
           {/* The described element: `role="tooltip"` *and* the id that
               `aria-describedby` resolves to. One without the other announces
               nothing. */}

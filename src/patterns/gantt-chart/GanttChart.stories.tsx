@@ -173,7 +173,7 @@ function Demo({
   return (
     <div className="flex flex-col gap-3">
       <GanttChart
-        infoText="Each bar is an Added Value, from its start to its due date, with its points at the end. Closed rows show a person's whole load; open one to see the bars. Pick projects to group by project. The hatched column is today."
+        infoText="Each bar is an Added Value, from start to due date. Open a row to see its bars."
         view={view}
         onViewChange={setView}
         date={date}

@@ -112,8 +112,8 @@ legend entry:
 - **Scrolling sideways** cuts the dates and bars off at the edge of the name column;
   they never slide under the empty corner above it.
 - **Tooltips** are `GanttTooltip`: the first row's open below its bar, the rest
-  above. They are positioned statically, so a bar far wider than the screen puts
-  its card at the bar's middle.
+  above. The card opens under the cursor, kept inside the screen, so a bar far wider
+  than the screen still shows it.
 
 ## Loading
 

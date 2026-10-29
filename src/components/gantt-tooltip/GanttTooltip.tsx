@@ -14,6 +14,9 @@ import { Tooltip, type TooltipProps } from '../tooltip';
  * decoration: it tells a sighted user the bar opens the item, and the bar
  * itself — the trigger — is the link.
  *
+ * It opens under the pointer rather than at the middle of the bar (`followPointer`),
+ * since a bar can be far wider than the card and run off the screen.
+ *
  * The title truncates rather than wrapping, as Figma's does, so every card is
  * the same width; the lines are a description list, label bold and value
  * regular.
@@ -60,6 +63,8 @@ export const GanttTooltip = React.forwardRef<HTMLSpanElement, GanttTooltipProps>
           </dl>
         </span>
       }
+      /* A bar can be far wider than the card: open it under the cursor, on screen. */
+      followPointer
       {...props}
     >
       {children}
