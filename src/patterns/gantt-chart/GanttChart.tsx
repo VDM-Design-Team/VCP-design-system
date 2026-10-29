@@ -225,7 +225,8 @@ const statTone = cva('font-numeric text-caption-md-semibold', {
   variants: {
     tone: {
       none: 'text-text-primary',
-      brand: 'text-text-brand-medium',
+      /* brand.strong, not medium: medium is under 4.5 against the dark theme's cards. */
+      brand: 'text-text-brand-strong',
       warning: 'text-accent-warning-outline-content-default',
     },
   },
@@ -954,7 +955,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                     style={{ width: CELL }}
                     className={cn(
                       'flex h-16 shrink-0 items-center justify-center border-r border-stroke-subtle font-sans text-body-sm-medium text-text-secondary',
-                      isToday(i) && cn(todayCell, 'text-text-brand-medium'),
+                      isToday(i) && cn(todayCell, 'text-text-brand-strong'),
                     )}
                   >
                     {isToday(i) && (
@@ -991,7 +992,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           onScroll={(e) => {
             if (headerTrack.current) headerTrack.current.style.transform = `translateX(${-e.currentTarget.scrollLeft}px)`;
           }}
-          className="-mt-3 min-h-56 overflow-x-auto"
+          className="-mt-3 min-h-56 overflow-x-auto outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
         >
           <div className="flex flex-col" style={{ width: gutter + trackWidth }}>
             {loading &&
