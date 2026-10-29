@@ -104,7 +104,6 @@ function build() {
         projectId: project.id,
         status,
         statusLabel: pick(WORKFLOW[status]),
-        initiator: pick(PEOPLE.filter((p) => p !== name)),
         points: 1 + Math.floor(rand() * 8),
         start: iso(start),
         end: iso(end),
@@ -122,8 +121,7 @@ function build() {
           projectId: p2.id,
           status: st2,
           statusLabel: pick(WORKFLOW[st2]),
-          initiator: pick(PEOPLE.filter((p) => p !== name)),
-          points: 1 + Math.floor(rand() * 5),
+            points: 1 + Math.floor(rand() * 5),
           start: iso(s2),
           end: iso(e2),
         });
@@ -289,7 +287,7 @@ export const Flow: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Previous period' }));
     await expect(canvas.getByText('Cycle 44')).toBeVisible();
 
-    const alice = canvas.getByRole('button', { name: /Alice Carter/ });
+    const alice = canvas.getByRole('button', { name: 'Alice Carter' });
     await expect(alice).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(alice);
     await expect(alice).toHaveAttribute('aria-expanded', 'true');
@@ -302,7 +300,7 @@ export const Flow: Story = {
     await userEvent.hover(bar!);
     const card = () => document.getElementById(bar!.getAttribute('aria-describedby')!.split(' ').pop()!)!;
     await waitFor(() => expect(card().parentElement).toHaveClass('opacity-100'), { timeout: 2000 });
-    await waitFor(() => expect(within(card()).getByText('Est. Due Date:')).toBeVisible());
+    await waitFor(() => expect(within(card()).getByText('Dates:')).toBeVisible());
 
     /* Filtering by project turns the people into groups under project headers. */
     const projects = canvas.getByRole('button', { name: /Projects/ });

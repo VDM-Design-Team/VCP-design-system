@@ -35,7 +35,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## The data
 
 ```ts
-tasks:    { id, title, userId, projectId, status, statusLabel?, initiator?,
+tasks:    { id, title, userId, projectId, status, statusLabel?,
             points, start, end, href? }[]          // dates are YYYY-MM-DD, end inclusive
 users:    { id, name, wip?, planned?, ead?, eadTd? }[]
 projects: { id, name }[]
@@ -108,8 +108,12 @@ legend entry:
   scrolled into view when the period changes.
 - **Scrolling sideways** cuts the dates and bars off at the edge of the name column;
   they never slide under the empty corner above it.
-- **Tooltips** are `GanttTooltip`: the first row's open below its bar, the rest
-  above. They are positioned statically, so a bar far wider than the screen puts
+- **Tooltips** are `GanttTooltip`, and say what the chart can: a task's status,
+  project, assignee, dates, capacity ("5 pts over 14 days") and how it stands
+  against today ("Due in 3 days", "Overdue by 2 days", "Starts in 4 days"); a closed
+  row's summary bar says how many Added Values, the points, the span and the
+  breakdown by status. The summary bar is a button that opens the row. The first
+  row's tooltips open below their bar, the rest above. They are positioned statically, so a bar far wider than the screen puts
   its card at the bar's middle.
 
 ## Tokens
