@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Chip } from './Chip';
 import { Avatar } from '../../atoms/avatar';
 
@@ -111,6 +112,174 @@ export const ClickableAndRemovable: Story = {
         onRemove={() => {}}
       />
     );
+  },
+};
+
+/**
+ * **Initiator** — Figma's `_User_Chip_Initiator`: an avatar and a name. View is the tonal pill in brand
+ * text; Edit is the outline (a brand border, no fill) with a remove button; Disabled is greyed and inert.
+ * Same chip, three options: `size="md"`, `tone="brand"` and `variant="outline"`.
+ */
+export const Initiator: Story = {
+  render: () => (
+    <div className="flex flex-col items-start gap-3">
+      <Chip size="md" tone="brand" label="Marvin R" avatar={<Avatar name="Marvin R" tone="brand" size="sm" />} />
+      <Chip
+        size="md"
+        tone="brand"
+        variant="outline"
+        label="Marvin R"
+        avatar={<Avatar name="Marvin R" tone="brand" size="sm" />}
+      />
+      <Chip
+        size="md"
+        tone="brand"
+        variant="outline"
+        label="Marvin R"
+        avatar={<Avatar name="Marvin R" tone="brand" size="sm" />}
+        onRemove={() => {}}
+      />
+      <Chip size="md" disabled label="Marvin R" avatar={<Avatar name="Marvin R" size="sm" />} />
+    </div>
+  ),
+};
+
+/**
+ * **Assignee** — Figma's `_User_Chip_Assignee`: an avatar, a name with an "Assignee" line under it, and a
+ * count after a hairline. View is tonal; Edit is the outline, and its edit and remove buttons show on hover
+ * or focus (`actions="hover"`, the design's "Edit Hover"). Here the buttons are forced on so they can be
+ * seen; the next story shows them appear.
+ */
+export const Assignee: Story = {
+  render: () => (
+    <div className="flex flex-col items-start gap-3">
+      <Chip
+        size="md"
+        tone="brand"
+        label="John"
+        description="Assignee"
+        count={5}
+        avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
+      />
+      <Chip
+        size="md"
+        tone="brand"
+        variant="outline"
+        label="John"
+        description="Assignee"
+        count={5}
+        avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
+      />
+      <Chip
+        size="md"
+        tone="brand"
+        variant="outline"
+        label="John"
+        description="Assignee"
+        count={5}
+        avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
+        onEdit={() => {}}
+        onRemove={() => {}}
+      />
+      <Chip
+        size="md"
+        disabled
+        label="John"
+        description="Assignee"
+        count={5}
+        avatar={<Avatar name="John Doe" size="sm" />}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `actions="hover"`: the edit and remove buttons are hidden until the pointer is over the chip or focus is
+ * inside it — Tab reveals them — and are always shown on a touch screen. They stay in the tab order.
+ */
+export const ActionsOnHover: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { onEdit: fn(), onRemove: fn() },
+  render: (args) => (
+    <Chip
+      size="md"
+      tone="brand"
+      variant="outline"
+      actions="hover"
+      label="John"
+      description="Assignee"
+      count={5}
+      avatar={<Avatar name="John Doe" tone="brand" size="sm" />}
+      onEdit={args.onEdit}
+      onRemove={args.onRemove}
+    />
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const edit = canvas.getByRole('button', { name: 'Edit John' });
+    const actions = edit.parentElement as HTMLElement;
+    /* Hidden at rest... */
+    await expect(getComputedStyle(actions).opacity).toBe('0');
+    /* ...revealed when focus lands inside (Tab goes to the edit button first). */
+    await userEvent.tab();
+    await expect(edit).toHaveFocus();
+    await waitFor(() => expect(getComputedStyle(actions).opacity).toBe('1'));
+
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onEdit).toHaveBeenCalledTimes(1);
+    await userEvent.tab();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onRemove).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** Disabled is inert: the buttons are not drawn, a click does nothing, and the text reads as disabled. */
+export const Disabled: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { onEdit: fn(), onRemove: fn(), onClick: fn() },
+  render: (args) => (
+    <Chip
+      size="md"
+      disabled
+      label="John"
+      count={5}
+      avatar={<Avatar name="John Doe" size="sm" />}
+      onEdit={args.onEdit}
+      onRemove={args.onRemove}
+      onClick={args.onClick}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button')).toBeNull();
+  },
+};
+
+/** A long label is cut with "…" and the buttons stay. */
+export const LongPeopleChip: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div className="w-56">
+      <Chip
+        size="md"
+        tone="brand"
+        variant="outline"
+        label="Bartholomew Featherstonehaugh-Wetherby"
+        description="Assignee"
+        avatar={<Avatar name="Bartholomew F" tone="brand" size="sm" />}
+        onEdit={() => {}}
+        onRemove={() => {}}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const remove = canvas.getByRole('button', { name: /^Remove / });
+    const chip = remove.closest('[class*="rounded-full"]') as HTMLElement;
+    await expect(remove.getBoundingClientRect().right).toBeLessThanOrEqual(chip.getBoundingClientRect().right);
   },
 };
 

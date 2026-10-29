@@ -56,8 +56,10 @@ export * from './components/tag-editor';
 export * from './components/timeline';
 export * from './components/toast';
 export * from './components/tooltip';
+export * from './components/user-menu';
 export * from './components/type-tag';
 export * from './components/urgency-tag';
+export * from './components/user-label';
 
 /* Patterns — 2+ components forming a page section. Templates — page layouts. */
 export * from './patterns';
