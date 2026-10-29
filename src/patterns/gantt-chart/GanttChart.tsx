@@ -886,8 +886,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
         </div>
 
-        {/* The period's own header — year, month, and the arrows that move it. Over the dates (past the 164 name column) on a wide screen; the full width on a phone, where the dates are too narrow to hold it. */}
-        <div className="flex flex-col min-[30rem]:pl-41">
+        {/* The period's own header — year, month, and the arrows that move it. Over the dates (past the 164 name column) on a wide screen; the full width on a phone, where the dates are too narrow to hold it, and held at the top of the screen there as the page scrolls. */}
+        <div className="sticky top-0 z-40 flex flex-col bg-surface-elevated min-[30rem]:static min-[30rem]:pl-41">
           {period.heading.map((text, i) => (
             <div
               key={i}
@@ -912,7 +912,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
         </div>
 
         {/* The timeline's own headings — months or cycles over the days — held at the top of the screen as the page scrolls, so a row far down is never lost. They are outside the sideways scroller (a scroller cannot stick to the page), and slid along with it. -mt-3 takes back the card's gap, so the column lines start at the period bar instead of floating below it. */}
-        <div className="sticky top-0 z-30 -mt-3 flex bg-surface-elevated">
+        <div
+          className="sticky z-30 -mt-3 flex bg-surface-elevated"
+          /* On a phone the period bar above is held at the top too, so these sit just under it: one 36 row each for the year, the month and the arrows. */
+          style={{ top: narrow ? (period.heading.length + 1) * 36 : 0 }}
+        >
           {gutter > 0 && <Corner width={gutter} />}
           <div className="min-w-0 flex-1 overflow-hidden">
             <div ref={headerTrack} className="flex flex-col" style={{ width: trackWidth }}>

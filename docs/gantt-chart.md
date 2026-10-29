@@ -132,7 +132,7 @@ legend entry:
   held at the left edge while the bars scroll sideways, with a little space under an open one
   before the bars; project headers stack the same way. The grid lines and the Today column run unbroken behind the name blocks (an open person's block is half-opaque, so the figures stay readable). The dates
   start at the left edge, the period bar (year, month, arrows and the quick pick) spans the
-  full width, and the cycle list opens from the bar's left edge so it stays on screen.
+  full width, and the cycle list opens from the bar's left edge so it stays on screen. On a phone the period bar and its labels above (year, month, arrows) are held at the top of the screen too, with the headings just under them.
 - **Today** is a hatched column through the header and every row, labelled.
 - **The chart starts at its left edge** — scrolled back to the beginning — whenever
   the view, the period or a filter changes.
