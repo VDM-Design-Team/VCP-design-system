@@ -563,12 +563,13 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
         </div>
 
+        {/* -mt-3 takes back the card's gap, so the column lines start at the period header instead of floating below it. */}
         <div
           ref={scroller}
           tabIndex={0}
           aria-label={`${title}, scrolls sideways`}
           role="region"
-          className="min-h-56 overflow-x-auto"
+          className="-mt-3 min-h-56 overflow-x-auto"
         >
           <div className="flex flex-col" style={{ width: LABEL + trackWidth }}>
             {/* Group row: cycles over the days, months over the cycles. */}
@@ -579,7 +580,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   <div
                     key={`${g.label}-${i}`}
                     style={{ width: g.span * CELL }}
-                    className="flex h-9 items-center justify-center border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
+                    className="flex h-9 items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
                   >
                     {g.label}
                   </div>
