@@ -954,10 +954,12 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   </div>
                 ))}
               </div>
-              <div aria-hidden="true" className="h-1">
+              {/* The grey rule runs the whole width, so the headings are always separated from the rows; the blue line sits on it only where there are Added Values. */}
+              <div aria-hidden="true" className="relative h-1">
+                <div className="absolute inset-x-0 bottom-0 h-px bg-stroke-default" />
                 {extent && (
                   <div
-                    className="h-full bg-surface-brand-strong"
+                    className="relative h-full bg-surface-brand-strong"
                     style={{ marginLeft: extent.first * CELL, width: (extent.last - extent.first + 1) * CELL }}
                   />
                 )}

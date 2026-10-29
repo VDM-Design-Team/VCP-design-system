@@ -121,7 +121,8 @@ legend entry:
 - **The blue line** under the headings marks where the Added Values are: it starts at the
   first column any bar starts in and ends at the last column any bar ends in, across every
   row on show, in every view and on a phone too. With no bars in the period there is no line,
-  and a bar-free day at either end is left out. An open person's cell has a grey left edge.
+  and a bar-free day at either end is left out; the usual grey rule runs the whole width
+  under the headings so they are always separated from the rows. An open person's cell has a grey left edge.
 - **The headings stay put.** The cycles or months over the days, and the days
   themselves, are held at the top of the screen as the page scrolls, and slide with the
   bars when they scroll sideways, so a row far down is never lost.
