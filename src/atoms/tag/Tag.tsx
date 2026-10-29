@@ -49,10 +49,14 @@ const tag = cva(
   {
     variants: {
       size: {
+        /* 20 tall, 10 type — the smallest, for very dense lists and counts. */
+        xs: 'h-5 gap-1 px-1.5 text-caption-sm-medium',
         /* 24 tall, 12 type — dense tables, inline beside body text. */
-        sm: 'h-6 gap-1 px-2 text-caption-md-medium',
+        sm: 'h-6 gap-1 px-1.5 text-caption-md-medium',
         /* 28 tall, 14 type — the default, and what TypeTag/UrgencyTag already ship at. */
-        md: 'h-7 gap-2 px-2 text-label-sm-medium',
+        md: 'h-7 gap-1.5 px-2 text-label-sm-medium',
+        /* 32 tall, 16 type — the largest, for a tag that is the focus of its row. */
+        lg: 'h-8 gap-1.5 px-2 text-label-md-medium',
       },
     },
     defaultVariants: { size: 'md' },
@@ -70,9 +74,10 @@ export interface TagProps
   /** Which of the six generic tones to render. */
   tone?: TagTone;
   /**
-   * Decorative glyph before the label. Pass an `Icon` at `size="sm"` next to
-   * a `sm` tag and `size="md"` next to an `md` one. Rendered `aria-hidden` —
-   * the text is what carries the meaning.
+   * Decorative glyph before the label. Pass an `Icon` at the size the design
+   * draws for the tag: 12 on `xs`, 16 (`sm`) on `sm`, 20 (`md`) on `md`, 24
+   * (`lg`) on `lg`. Rendered `aria-hidden` — the text is what carries the
+   * meaning.
    */
   icon?: React.ReactNode;
   /** Decorative glyph after the label. Same rules as `icon`. */
@@ -131,7 +136,7 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
             /* Cancels the tag's own gap, so the ✕ sits against the label; a
                leading icon keeps its gap. The button's own room around the
                glyph is all that is left between them. */
-            size === 'sm' ? '-ml-1' : '-ml-2',
+            size === 'xs' || size === 'sm' ? '-ml-1' : '-ml-1.5',
             /* Textual: no fill behind a glyph this small. On a neutral tag that
                is not solid, it takes `neutral.textual.content` and darkens
                through hover and pressed; any other tone keeps its own ink and
