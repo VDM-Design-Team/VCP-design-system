@@ -6,6 +6,7 @@ import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { LegendItem, type LegendItemProps } from '../../atoms/legend-item';
 import { Select } from '../../atoms/select';
+import { Skeleton } from '../../atoms/skeleton';
 import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
 import { Tooltip } from '../../components/tooltip';
@@ -174,7 +175,22 @@ export interface GanttChartProps extends Omit<React.HTMLAttributes<HTMLElement>,
   onExpandedChange?: (ids: string[]) => void;
   /** A task without an `href` was activated. */
   onTaskSelect?: (task: GanttTask) => void;
+  /**
+   * The data is on its way: the header, the Today column and the legend stay, and the
+   * rows become placeholders. Pass the real lists (or empty ones) as they arrive; the
+   * filters are off until `loading` ends.
+   */
+  loading?: boolean;
 }
+
+/** Where the placeholder bars sit in each placeholder row: a first column and a width, in columns. */
+const SKELETON_ROWS: [number, number][][] = [
+  [[0, 5], [6, 4]],
+  [[2, 7]],
+  [[1, 4], [7, 5]],
+  [[0, 9]],
+  [[3, 6]],
+];
 
 const VIEW_OPTIONS = [
   { value: 'cycle', label: 'Cycle' },
@@ -430,6 +446,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       defaultExpandedIds = [],
       onExpandedChange,
       onTaskSelect,
+      loading,
       ...props
     },
     ref,
@@ -443,8 +460,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       columns[i] !== undefined && columns[i].start <= todayDay && todayDay <= columns[i].end;
 
     const rows = React.useMemo(
-      () => buildRows(tasks, users, projects, projectIds, userIds, columns),
-      [tasks, users, projects, projectIds, userIds, columns],
+      () => (loading ? [] : buildRows(tasks, users, projects, projectIds, userIds, columns)),
+      [loading, tasks, users, projects, projectIds, userIds, columns],
     );
     const projectById = React.useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
 
@@ -487,6 +504,20 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       onUserIdsChange([]);
     };
 
+    const columnsLayer = (
+      <div aria-hidden="true" className="absolute inset-0 flex">
+        {columns.map((c, i) => (
+          <div
+            key={c.key}
+            style={{ width: CELL }}
+            className={cn('h-full shrink-0 border-r border-stroke-subtle', isToday(i) && todayCell)}
+          >
+            {isToday(i) && <TodayFill hatch={hatch} />}
+          </div>
+        ))}
+      </div>
+    );
+
     let hidden = false; // inside a folded project group
     let firstUser = true;
 
@@ -494,10 +525,15 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       <section
         ref={ref}
         aria-label={title}
+        aria-busy={loading || undefined}
         className={cn('flex flex-col gap-3 rounded-md bg-surface-elevated p-6', className)}
         {...props}
       >
         <Hatch id={hatch} />
+        {/* The placeholders are hidden from assistive tech, so the wait is announced here. */}
+        <p role="status" className="sr-only">
+          {loading ? `Loading ${title}…` : ''}
+        </p>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
@@ -515,12 +551,13 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {/* The filter bar's own Reset: the same ghost, brand-coloured button. */}
-            <Button variant="tertiary" onClick={reset}>
+            <Button variant="tertiary" disabled={loading} onClick={reset}>
               Reset Filters
             </Button>
             <SearchSelect
               multiple
               aria-label="Projects"
+              disabled={loading}
               className="w-52"
               placeholder="Select Projects"
               options={projects.map((p) => ({ value: p.id, label: p.name }))}
@@ -530,6 +567,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             <SearchSelect
               multiple
               aria-label="Users"
+              disabled={loading}
               className="w-52"
               rows="avatar"
               placeholder="Select Users"
@@ -627,21 +665,35 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               <div aria-hidden="true" className="h-1 bg-surface-brand-strong" style={{ width: trackWidth }} />
             </div>
 
-            {rows.map((row) => {
-              const columnsLayer = (
-                <div aria-hidden="true" className="absolute inset-0 flex">
-                  {columns.map((c, i) => (
-                    <div
-                      key={c.key}
-                      style={{ width: CELL }}
-                      className={cn('h-full shrink-0 border-r border-stroke-subtle', isToday(i) && todayCell)}
-                    >
-                      {isToday(i) && <TodayFill hatch={hatch} />}
+            {loading &&
+              SKELETON_ROWS.map((bars, i) => (
+                <div key={i} className="flex border-b border-stroke-default">
+                  <div
+                    style={{ width: LABEL }}
+                    className="sticky left-0 z-10 flex shrink-0 items-center border-r border-stroke-default bg-surface-elevated py-4 pl-8 pr-4"
+                  >
+                    <Skeleton width={i % 2 === 0 ? 96 : 72} textStyle="body-sm" />
+                  </div>
+                  <div className="relative" style={{ width: trackWidth }}>
+                    {columnsLayer}
+                    <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
+                      {bars.map(([start, span], j) => {
+                        const from = start % Math.max(columns.length, 1);
+                        return (
+                          <div
+                            key={j}
+                            className="flex min-w-0"
+                            style={{ gridColumn: `${from + 1} / span ${Math.min(span, columns.length - from)}`, gridRow: 1 }}
+                          >
+                            <Skeleton radius="md" height={36} />
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              );
-
+              ))}
+            {rows.map((row) => {
               if (row.kind === 'project') {
                 const closed = folded.includes(row.id);
                 hidden = closed;
@@ -769,7 +821,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 </div>
               );
             })}
-            {rows.length === 0 && (
+            {!loading && rows.length === 0 && (
               <p
                 className="m-0 p-6 text-center font-sans text-body-sm-regular text-text-tertiary"
                 style={{ marginLeft: LABEL }}

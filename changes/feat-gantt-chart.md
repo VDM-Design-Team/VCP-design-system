@@ -10,7 +10,7 @@ behaviour, `aria-describedby` and Escape all come from `Tooltip`; the title
 truncates so every card is one width and the lines are a description list.
 
 `Icon` gains the Phosphor `link-simple-horizontal` glyph (regular and fill),
-which the card's title row uses. No new tokens.
+which the card's title row uses. It has a `loading` state: the header, Today column and legend stay and the rows become `Skeleton` placeholders, announced as busy. No new tokens.
 
 `GanttChart` is the Gantt pattern: each Added Value a bar from start to due date,
 against people down the side and time across the top, in three views (one cycle by
@@ -23,4 +23,4 @@ and closed rows (a closed row draws a summary bar, an open one packs tasks onto
 shared lines), and the view, period and filters as controlled props. The filters are the new `SearchSelect`
 (`multiple`, avatars for users) and Reset Filters is the filter bar's own button. Status colours are the accessible `filled`
 tones, with `accent.blue.medium` standing in for Pre-Delivered until a cyan token
-exists. No new tokens.
+exists. It has a `loading` state: the header, Today column and legend stay and the rows become `Skeleton` placeholders, announced as busy. No new tokens.

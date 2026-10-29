@@ -265,6 +265,29 @@ export const ByUser: Story = {
   render: () => <Demo initialView="cycle" initialUsers={['u1', 'u4']} />,
 };
 
+/** The data is on its way: the header, Today column and legend stay, the rows are placeholders. */
+export const Loading: Story = {
+  render: () => (
+    <GanttChart
+      {...required}
+      loading
+      today={TODAY}
+      users={USERS}
+      projects={PROJECTS}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const chart = canvas.getByRole('region', { name: 'Gantt Chart' });
+    await expect(chart).toHaveAttribute('aria-busy', 'true');
+    await expect(canvas.getByRole('status')).toHaveTextContent('Loading Gantt Chart');
+    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    /* No rows, no empty message, and the filters are off. */
+    await expect(canvas.queryByText('Nothing matches these filters.')).toBeNull();
+    await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeDisabled();
+  },
+};
+
 /** A period with nothing in it. */
 export const Empty: Story = {
   render: () => <Demo initialView="cycle" tasks={[]} initialUsers={['u9']} />,

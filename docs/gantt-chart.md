@@ -18,6 +18,7 @@ page design dictates — the layout below — and never fetches, pages or sorts.
 | `IconButton` | atom |
 | `LegendItem` | atom |
 | `Select` | atom |
+| `Skeleton` | atom |
 | `GanttTooltip` | component |
 | `SearchSelect` | component |
 | `Tooltip` | component |
@@ -75,6 +76,7 @@ A project with nothing in the period keeps its header.
 | `userIds`, `onUserIdsChange` | `string[]` | The selected users. Empty means all |
 | `expandedIds`, `defaultExpandedIds`, `onExpandedChange` | `string[]` | Which user rows are open, controlled or not. A row's id is the user's id, or `projectId:userId` under a project |
 | `onTaskSelect` | `(task) => void` | A task without an `href` was activated |
+| `loading` | `boolean` | The data is on its way: the rows become placeholders and the filters switch off. See Loading below |
 | `title`, `infoText` | `string` | The heading, and the (i) beside it with its tooltip |
 
 **The filters** are `SearchSelect` with `multiple`, as the filter bar draws them: the
@@ -116,6 +118,17 @@ legend entry:
   breakdown by status. The summary bar is a button that opens the row. The first
   row's tooltips open below their bar, the rest above. They are positioned statically, so a bar far wider than the screen puts
   its card at the bar's middle.
+
+## Loading
+
+`loading` keeps everything that does not depend on the data — the title, the
+navigator, the column headings, the Today column and the legend — and swaps the rows
+for five placeholder rows (a name and a couple of bars each, built from `Skeleton`).
+The filters and Reset are disabled until it ends. The placeholders are hidden from
+assistive tech, so the section is marked `aria-busy` and a visually hidden "Loading
+Gantt Chart…" status says so; both clear when `loading` is false. Pass `loading` while
+the first request is in flight; once it ends, pass the real lists, or empty ones for
+the honest "Nothing matches these filters".
 
 ## Tokens
 
