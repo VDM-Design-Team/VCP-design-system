@@ -21,6 +21,7 @@ page design dictates — the layout below — and never fetches, pages or sorts.
 | `Skeleton` | atom |
 | `DatePicker` | component |
 | `GanttTooltip` | component |
+| `Menu` | component |
 | `Popover` | component |
 | `SearchSelect` | component |
 | `Tooltip` | component |
@@ -111,11 +112,12 @@ legend entry:
   figures slide open and shut (not under reduced motion); their bars and a project's
   people appear and go at once, out of the layout and out of reach of the pointer,
   keyboard and assistive tech when hidden.
-- **Getting around.** The arrows step one period. The period label opens a
-  `DatePicker`: pick a day to land on the cycle holding it (Cycle view), or a month
-  to land on that month (Month view) or its year (Year view). **Today** returns to the
-  period holding today and scrolls the Today column into view; inside that period it
-  just scrolls to it.
+- **Getting around.** The arrows step one period. The period label opens the quick
+  pick for the view: in **Cycle** view a list of the cycles (with their dates, the
+  current one ticked), in **Year** view a list of the years the cycles cover, in
+  **Month** view a month calendar (`DatePicker`). **Today** returns to the period
+  holding today and scrolls the Today column into view; inside that period it just
+  scrolls to it.
 - **Today** is a hatched column through the header and every row, labelled.
 - **The chart starts at its left edge** — scrolled back to the beginning — whenever
   the view, the period or a filter changes.

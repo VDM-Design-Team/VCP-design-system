@@ -322,9 +322,10 @@ export const Flow: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
     await expect(canvas.getByText('Cycle 44')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: /Cycle 44/ }));
-    await expect(await canvas.findByRole('dialog', { name: 'Jump to' })).toBeVisible();
-    await userEvent.keyboard('{Escape}');
-    await waitFor(() => expect(canvas.queryByRole('dialog', { name: 'Jump to' })).toBeNull());
+    await userEvent.click(await canvas.findByRole('menuitemradio', { name: /Cycle 43/ }));
+    await expect(canvas.getByText('Cycle 43')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
+    await expect(canvas.getByText('Cycle 44')).toBeVisible();
 
     const alice = canvas.getByRole('button', { name: /Alice Carter/ });
     await expect(alice).toHaveAttribute('aria-expanded', 'false');

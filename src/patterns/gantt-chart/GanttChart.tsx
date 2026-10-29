@@ -8,6 +8,7 @@ import { LegendItem, type LegendItemProps } from '../../atoms/legend-item';
 import { Select } from '../../atoms/select';
 import { Skeleton } from '../../atoms/skeleton';
 import { DatePicker } from '../../components/date-picker';
+import { Menu, type MenuItem } from '../../components/menu';
 import { Popover } from '../../components/popover';
 import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
@@ -497,6 +498,86 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     const trackWidth = columns.length * CELL;
     const gridColumns = `repeat(${columns.length}, ${CELL}px)`; // ds-lint-ignore
 
+    /* The period label opens the quickest way to pick another one: the cycles themselves, the years, or a calendar of months. */
+    const label = (
+      <button
+        type="button"
+        disabled={loading}
+        className="flex items-center gap-1 rounded-sm px-2 py-1 font-sans text-body-sm-semibold text-text-primary outline-offset-2 hover:bg-surface-brand-subtle focus-visible:outline-2 focus-visible:outline-stroke-focused disabled:opacity-60"
+      >
+        <span aria-live="polite">{period.navLabel}</span>
+        <Icon name="caret-down" size={16} className="text-text-brand-medium" />
+      </button>
+    );
+    const dateDay = toDay(date);
+    const listed = [...cycles].sort((a, b) => toDay(a.start) - toDay(b.start));
+    const currentCycle = listed.find((c) => toDay(c.start) <= dateDay && dateDay <= toDay(c.end));
+    const years = Array.from(
+      new Set([...listed.map((c) => Number(c.start.slice(0, 4))), Number(date.slice(0, 4))]),
+    ).sort((a, b) => a - b);
+    const jumpItems: MenuItem[] =
+      view === 'cycle'
+        ? listed.map((c) => ({
+            key: c.id,
+            label: (
+              <span className="flex items-baseline gap-2">
+                {c.label}
+                <span className="text-caption-md-regular text-text-tertiary">{formatShort(c.start)} – {formatShort(c.end)}</span>
+              </span>
+            ),
+            selected: c.id === currentCycle?.id,
+          }))
+        : years.map((y) => ({ key: String(y), label: String(y), selected: y === Number(date.slice(0, 4)) }));
+    const jumpRoot = React.useRef<HTMLSpanElement | null>(null);
+    const centreChoice = () => {
+      const choice = jumpRoot.current?.querySelector<HTMLElement>('[aria-checked="true"]');
+      const panel = choice?.closest<HTMLElement>('[role="menu"]');
+      if (!choice || !panel) return;
+      const offset = choice.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+      panel.scrollTop += offset - (panel.clientHeight - choice.offsetHeight) / 2;
+    };
+    const jump =
+      view === 'month' ? (
+        <Popover
+          open={jumpOpen}
+          onOpenChange={setJumpOpen}
+          width="auto"
+          panelRole="dialog"
+          label="Jump to"
+          autoFocus
+          panelClassName="left-1/2 -translate-x-1/2 border-0 bg-transparent p-0 shadow-none"
+          trigger={label}
+          content={
+            <DatePicker
+              mode="month"
+              value={date}
+              today={todayIso}
+              clearable={false}
+              onChange={(iso) => {
+                onDateChange(iso);
+                setJumpOpen(false);
+              }}
+            />
+          }
+        />
+      ) : (
+        <span ref={jumpRoot} className="inline-flex">
+          <Menu
+            trigger={label}
+            items={jumpItems}
+            panelClassName="left-1/2 max-h-72 min-w-64 -translate-x-1/2 overflow-y-auto"
+            onOpenChange={(isOpen) => {
+              /* A long list opens on the current choice, not at its top. */
+              if (isOpen) window.setTimeout(centreChoice, 50);
+            }}
+            onSelect={(key) => {
+              const cycle = listed.find((c) => c.id === key);
+              onDateChange(view === 'cycle' ? (cycle?.start ?? date) : `${key}-01-01`);
+            }}
+          />
+        </span>
+      );
+
     const arrow = (direction: 'previous' | 'next') => {
       const target = period[direction];
       return (
@@ -751,38 +832,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           >
             <span className="text-text-brand-medium">{arrow('previous')}</span>
-            {/* The label opens a picker: any day takes the chart to the cycle holding it, any month to that month (or its year). */}
-            <Popover
-              open={jumpOpen}
-              onOpenChange={setJumpOpen}
-              width="auto"
-              panelRole="dialog"
-              label="Jump to"
-              autoFocus
-              panelClassName="left-1/2 -translate-x-1/2 border-0 bg-transparent p-0 shadow-none"
-              trigger={
-                <button
-                  type="button"
-                  disabled={loading}
-                  className="flex items-center gap-1 rounded-sm px-2 py-1 font-sans text-body-sm-semibold text-text-primary outline-offset-2 hover:bg-surface-brand-subtle focus-visible:outline-2 focus-visible:outline-stroke-focused disabled:opacity-60"
-                >
-                  <span aria-live="polite">{period.navLabel}</span>
-                  <Icon name="caret-down" size={16} className="text-text-brand-medium" />
-                </button>
-              }
-              content={
-                <DatePicker
-                  mode={view === 'cycle' ? 'day' : 'month'}
-                  value={date}
-                  today={todayIso}
-                  clearable={false}
-                  onChange={(iso) => {
-                    onDateChange(iso);
-                    setJumpOpen(false);
-                  }}
-                />
-              }
-            />
+            {jump}
             <span className="text-text-brand-medium">{arrow('next')}</span>
           </div>
         </div>
