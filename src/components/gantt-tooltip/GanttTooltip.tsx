@@ -18,8 +18,8 @@ import { Tooltip, type TooltipProps } from '../tooltip';
  * since a bar can be far wider than the card and run off the screen.
  *
  * The title truncates rather than wrapping, as Figma's does, so every card is
- * the same width; the lines are a description list, label bold and value
- * regular.
+ * the same width; the lines are a description list, label medium and value
+ * regular, both 12.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -53,10 +53,10 @@ export const GanttTooltip = React.forwardRef<HTMLSpanElement, GanttTooltipProps>
             {/* Decorative: the bar is the link, this just says so. */}
             <Icon name="link-simple-horizontal" size={16} className="shrink-0 text-text-brand-medium" />
           </span>
-          <dl className="m-0 font-sans text-caption-sm-regular text-text-primary">
+          <dl className="m-0 font-sans text-caption-md-regular text-text-primary">
             {details.map(({ label, value }) => (
               <div key={label}>
-                <dt className="inline text-caption-sm-semibold">{label}:</dt>{' '}
+                <dt className="inline text-caption-md-medium">{label}:</dt>{' '}
                 <dd className="m-0 inline">{value}</dd>
               </div>
             ))}

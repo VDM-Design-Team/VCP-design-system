@@ -45,7 +45,7 @@ only decoration.
 | Card | `Tooltip`'s: `surface.elevated`, `stroke.default`, `shadow.menu`, radius `sm`, padding 12 / 8 | — |
 | Title | `text.primary`, `type.caption-md-bold` | `text-text-primary text-caption-md-bold` |
 | Link glyph | `text.brand.medium`, 16 | `text-text-brand-medium` |
-| Lines | `text.primary`; label `type.caption-sm-semibold`, value `type.caption-sm-regular` | `text-caption-sm-semibold` / `text-caption-sm-regular` |
+| Lines | `text.primary`; label `type.caption-md-medium`, value `type.caption-md-regular` | `text-caption-md-medium` / `text-caption-md-regular` |
 | Width | Tailwind numeric scale | `w-56` content + the bubble's side padding = 248 |
 
 No new tokens. Contrast is `Tooltip`'s: `text.primary` on `surface.elevated`,
