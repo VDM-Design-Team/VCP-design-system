@@ -284,10 +284,13 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     };
 
     /* Escape closes wherever it is pressed. Focus goes back to the trigger only
-       if it was inside — see `focusWasInside`. */
+       if it was inside — see `focusWasInside`. `preventDefault()` marks the key
+       as used, so a Modal around the popover stays open; an Escape something
+       inside the panel already used is left alone. See "Escape and the popups
+       inside" in docs/modal.md. */
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.stopPropagation();
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      event.preventDefault();
       setOpen(false);
     };
 

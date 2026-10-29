@@ -101,7 +101,7 @@ The dark theme comes for free — every colour above is a semantic token that
 | Key | Where | What happens |
 |---|---|---|
 | `Enter` / `Space` | trigger | Toggles the panel (native button activation) |
-| `Escape` | anywhere while open | Closes. Focus returns to the trigger **if focus was inside the popover**; if the user had already moved on, their place is left alone |
+| `Escape` | anywhere while open | Closes. Focus returns to the trigger **if focus was inside the popover**; if the user had already moved on, their place is left alone. Inside a `Modal`, only the popover closes: it marks the key as used with `preventDefault()`, and the dialog skips a used Escape — see [Modal: Escape and the popups inside](modal.md#escape-and-the-popups-inside) |
 | `Tab` / `Shift+Tab` | in the panel | Moves through the panel's own controls in DOM order. Leaving the popover closes it — the panel sits immediately after the trigger in the DOM, so this is ordinary reading order, not a trap |
 | pointer outside | anywhere | Closes, and does **not** pull focus back to the trigger — the user is already where they wanted to be |
 
