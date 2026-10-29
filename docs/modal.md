@@ -43,7 +43,7 @@ Rules of thumb:
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `open` | `boolean` | — | **Required.** Nothing is portalled while `false`. You own this state; the dialog never closes itself |
-| `onClose` | `() => void` | — | **Required.** Fires on Escape, on the close button, and on a backdrop click when `dismissible` |
+| `onClose` | `() => void` | — | **Required.** Fires on Escape (once no popup inside is open — see [Escape and the popups inside](#escape-and-the-popups-inside)), on the close button, and on a backdrop click when `dismissible` |
 | `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. One of the three naming props |
 | `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
 | `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
@@ -213,14 +213,15 @@ it accounts for the awkward cases: disabled controls, `hidden`, zero-size and
 than one per radio. If a dialog somehow contains nothing focusable, Tab keeps
 focus on the panel rather than letting it escape.
 
-The handler is bound to `document` in the capture phase, not to the panel. A
+The Tab handler is bound to `document` in the capture phase, not to the panel. A
 listener on the panel never fires once focus has left the panel — which is
-precisely the moment a trap has to work.
+precisely the moment a trap has to work. Escape is handled the opposite way, last
+rather than first — see [Escape and the popups inside](#escape-and-the-popups-inside).
 
 **A dialog inside a dialog: only the innermost one answers the keyboard.**
 Every open dialog is on a module-level stack, and a dialog that is not on top
-stands down. Without that, both traps are on `document` in the capture phase
-and the *outer* one — registered first — answered for both: Escape closed the
+stands down. Without that, both dialogs listen on the same node and the
+*outer* one — registered first — answered for both: Escape closed the
 outer dialog and left the inner one orphaned over a page that was no longer
 inert, and Tab died on the outer trap's `preventDefault`, because its own panel
 is inert by then so it found nothing to focus and blocked the event for
@@ -233,6 +234,8 @@ that opens a rejection dialog on top of itself.
 accidental gesture. Escape is deliberate, it is what WAI-ARIA requires of every
 dialog, and taking it away is how keyboard users get sealed in. If a decision is
 so important that Escape must not dismiss it, it is not a dialog — it is a page.
+A popup open inside the dialog takes the first Escape, but the second one still
+closes it — see the next section.
 
 **On close — the background comes back, then focus returns to the trigger.**
 Whatever had focus when the dialog opened is remembered and refocused, so the
@@ -243,6 +246,59 @@ matters, and the cleanup does it in this order: the trap is unbound, the scroll
 lock is released, the background stops being inert, and only then is the trigger
 focused — a trigger inside an inert subtree cannot take focus. If the trigger has
 since unmounted, pass `returnFocusRef` to name a replacement.
+
+### Escape and the popups inside
+
+**The innermost open thing closes first.** With a select panel, a suggestion
+list, a `Popover` or a `Menu` open inside the dialog, the first Escape closes
+that popup and the dialog stays. Only an Escape that nothing inside used closes
+the dialog. Until 29 October 2026 the dialog closed on the first Escape and took
+the popup with it: a user who only meant to close a list lost the whole dialog.
+The `EscapeClosesPopupFirst` story is the regression test.
+
+**How: the dialog listens last, and a used Escape is marked with
+`preventDefault()`.** The dialog's Escape listener sits on `window` in the
+bubble phase — the last stop an event makes — so every field, popup and
+document-level listener inside the dialog hears the key first. That is the
+opposite of the Tab trap, which has to run first. The contract for anything
+that opens a popup:
+
+1. **When your popup is open and Escape closes it, call
+   `event.preventDefault()`.** That marks the key as used, and the dialog
+   skips a used Escape.
+2. **When your popup is closed, leave the event alone.** Then the Escape is
+   the dialog's.
+3. **Skip an Escape that is already `defaultPrevented`.** Something nested
+   inside your popup used it.
+
+It works the same whether you handle the key on the element in React or with a
+listener on `document`:
+
+```tsx
+onKeyDown={(event) => {
+  if (event.key === 'Escape' && open && !event.defaultPrevented) {
+    event.preventDefault();
+    close();
+  }
+}}
+```
+
+`stopPropagation()` is not the signal. It does keep the key from the dialog,
+but it also hides it from every other listener on the way out, and it cannot
+stop another listener on the same node, so nothing else can tell the key was
+used. Call `preventDefault()` whether or not you also stop propagation.
+
+On `main` today, `Popover` (and so `Menu`, which is built on it) and
+`InlineEdit` follow the contract. `Tooltip` stops propagation when the Escape
+came from its own trigger, which keeps that key from the dialog too.
+
+**Why not something else.**
+
+| Option | Why not |
+|---|---|
+| Close the dialog unless focus is inside an open popup | A `Popover` keeps focus on its trigger by default, a combobox keeps it in its input, and a popup's Escape works wherever it is pressed. Focus is not a reliable sign that a popup is open |
+| A registry of open popups the dialog checks | Every popup would have to import from `Modal`, and an atom cannot import a component — imports only flow downward. `preventDefault()` is a signal every DOM event already carries |
+| Keep the dialog first and have popups `stopPropagation()` | A capture listener on `document` runs before anything inside it can stop the event, so this is what failed |
 
 ### The background
 
@@ -275,7 +331,7 @@ since unmounted, pass `returnFocusRef` to name a replacement.
 
 ### Proved by tests, not by this document
 
-Four `play` stories run in a real browser under `npm test` and assert the
+Six `play` stories run in a real browser under `npm test` and assert the
 clauses above rather than describing them:
 
 | Story | What it proves |
@@ -284,6 +340,8 @@ clauses above rather than describing them:
 | `BackgroundIsInert` | The page carries `inert` while open and loses it on close; the dialog's own portal never gets it |
 | `BackdropClickCloses` | A click on the backdrop closes it, and a press that starts on the panel and ends on the backdrop does not |
 | `NotDismissible` | `dismissible={false}` survives a backdrop click and puts focus back on the panel, Escape still closes, there is no close button, and the first Tab is Cancel rather than Delete |
+| `NestedDialog` | With a dialog open over a dialog, the outer one is inert, Tab cycles in the inner one, and Escape closes the inner one first, then the outer |
+| `EscapeClosesPopupFirst` | With a `Popover` open inside the dialog, the first Escape closes the popover, returns focus to its trigger and leaves the dialog open; the second closes the dialog and returns focus to the dialog's trigger |
 
 **The other stories render already open**, which is the only way the dialog
 reaches a Chromatic snapshot or an axe check. Until 11 September 2026 every
@@ -325,6 +383,9 @@ stories are where the behaviour lives.
   for exactly that reason.
 - **Don't remove Escape.** `dismissible={false}` is for the backdrop, not the
   keyboard. There is no prop to disable Escape and there should not be.
+- **Don't `preventDefault()` an Escape you did not use.** A field that marks
+  every Escape as used, open popup or not, seals the dialog shut from the
+  keyboard. Mark it only when it closed something.
 - **Don't put initial focus on a destructive action.** `initialFocusRef` points at
   the thing the user came to do, never at "Delete".
 - **Don't ship a dialog without a name.** The type system will stop you, but do
