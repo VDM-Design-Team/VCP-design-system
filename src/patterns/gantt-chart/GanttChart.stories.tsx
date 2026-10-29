@@ -239,7 +239,7 @@ export const Cycle: Story = {
   render: () => <Demo initialView="cycle" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 44');
     await expect(canvas.getByText('October – November')).toBeVisible();
     await expect(canvas.getByText('TODAY')).toBeVisible();
     /* Every person has their availability figures when open. */
@@ -283,7 +283,7 @@ export const Loading: Story = {
     const chart = canvas.getByRole('region', { name: 'Gantt Chart' });
     await expect(chart).toHaveAttribute('aria-busy', 'true');
     await expect(canvas.getByRole('status')).toHaveTextContent('Loading Gantt Chart');
-    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 44');
     /* No rows, no empty message, and the filters are off. */
     await expect(canvas.queryByText('Nothing matches these filters.')).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeDisabled();
@@ -311,21 +311,21 @@ export const Flow: Story = {
     const scroller = canvas.getByRole('region', { name: /scrolls sideways/ });
     scroller.scrollLeft = 300;
     await userEvent.click(canvas.getByRole('button', { name: 'Next period' }));
-    await expect(canvas.getByText('Cycle 45')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 45');
     await waitFor(() => expect(scroller.scrollLeft).toBe(0));
     await userEvent.click(canvas.getByRole('button', { name: 'Previous period' }));
-    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 44');
 
     /* Today brings the chart back from another period; the period label opens a picker to jump anywhere. */
     await userEvent.click(canvas.getByRole('button', { name: 'Next period' }));
-    await expect(canvas.getByText('Cycle 45')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 45');
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
-    await expect(canvas.getByText('Cycle 44')).toBeVisible();
-    await userEvent.click(canvas.getByRole('button', { name: /Cycle 44/ }));
-    await userEvent.click(await canvas.findByRole('menuitemradio', { name: /Cycle 43/ }));
-    await expect(canvas.getByText('Cycle 43')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 44');
+    await userEvent.click(canvas.getByRole('button', { name: 'Cycle' }));
+    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 43 (Oct 13, 2026 - Oct 26, 2026)' }));
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 43');
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
-    await expect(canvas.getByText('Cycle 44')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 44');
 
     const alice = canvas.getByRole('button', { name: /Alice Carter/ });
     await expect(alice).toHaveAttribute('aria-expanded', 'false');

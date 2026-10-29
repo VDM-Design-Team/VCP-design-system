@@ -220,6 +220,14 @@ const cardinal = (n: number, one: string, many: string) => `${n} ${n === 1 ? one
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 const shortFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
 const formatDate = (iso: string) => dateFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "Oct 27, 2026" — a cycle's dates as the filter bar's cycle field writes them, by string split: no Date, no time zone. */
+const longDate = (iso: string) => {
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return `${MONTHS[Number(m) - 1]} ${d}, ${y}`;
+};
+const cycleRange = (c: { start: string; end: string }) => `${longDate(c.start)} - ${longDate(c.end)}`;
+
 /** "03.02" — the availability date as the stats panel writes it. */
 const formatShort = (iso: string) => shortFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`)).replace('/', '.');
 
@@ -515,19 +523,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     const years = Array.from(
       new Set([...listed.map((c) => Number(c.start.slice(0, 4))), Number(date.slice(0, 4))]),
     ).sort((a, b) => a - b);
-    const jumpItems: MenuItem[] =
-      view === 'cycle'
-        ? listed.map((c) => ({
-            key: c.id,
-            label: (
-              <span className="flex items-baseline gap-2">
-                {c.label}
-                <span className="text-caption-md-regular text-text-tertiary">{formatShort(c.start)} – {formatShort(c.end)}</span>
-              </span>
-            ),
-            selected: c.id === currentCycle?.id,
-          }))
-        : years.map((y) => ({ key: String(y), label: String(y), selected: y === Number(date.slice(0, 4)) }));
+    const jumpItems: MenuItem[] = years.map((y) => ({
+      key: String(y),
+      label: String(y),
+      selected: y === Number(date.slice(0, 4)),
+    }));
     const jumpRoot = React.useRef<HTMLSpanElement | null>(null);
     const centreChoice = () => {
       const choice = jumpRoot.current?.querySelector<HTMLElement>('[aria-checked="true"]');
@@ -537,7 +537,35 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       panel.scrollTop += offset - (panel.clientHeight - choice.offsetHeight) / 2;
     };
     const jump =
-      view === 'month' ? (
+      view === 'cycle' ? (
+        /* The cycle field as the filter bar draws it: a search, one pick, each row naming the cycle and its dates. */
+        <SearchSelect
+          aria-label="Cycle"
+          placeholder="Select cycle"
+          searchPlaceholder="Search cycles"
+          disabled={loading}
+          value={currentCycle?.id ?? ''}
+          onChange={(id) => {
+            const picked = listed.find((c) => c.id === id);
+            if (picked) onDateChange(picked.start);
+          }}
+          options={listed.map((c) => ({ value: c.id, label: `${c.label} (${cycleRange(c)})`, shortLabel: c.label }))}
+          renderOption={(option) => {
+            const c = listed.find((x) => x.id === option.value);
+            return c ? (
+              <span className="min-w-0 truncate">
+                <span className="text-label-sm-bold text-text-primary">{c.label}</span>
+                {/* The space is its own text node: a leading space inside an inline span is dropped from the accessible name. */}
+                {' '}
+                <span className="text-label-sm-regular">{`(${cycleRange(c)})`}</span>
+              </span>
+            ) : (
+              option.label
+            );
+          }}
+          className="w-80 min-w-0 shrink shadow-none"
+        />
+      ) : view === 'month' ? (
         <Popover
           open={jumpOpen}
           onOpenChange={setJumpOpen}
@@ -570,10 +598,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               /* A long list opens on the current choice, not at its top. */
               if (isOpen) window.setTimeout(centreChoice, 50);
             }}
-            onSelect={(key) => {
-              const cycle = listed.find((c) => c.id === key);
-              onDateChange(view === 'cycle' ? (cycle?.start ?? date) : `${key}-01-01`);
-            }}
+            onSelect={(key) => onDateChange(`${key}-01-01`)}
           />
         </span>
       );
@@ -827,7 +852,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           ))}
           <div
             className={cn(
-              'flex h-9 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
+              'flex h-12 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
               period.heading.length === 0 && 'rounded-t-md',
             )}
           >

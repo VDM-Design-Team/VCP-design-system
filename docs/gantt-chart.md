@@ -112,12 +112,12 @@ legend entry:
   figures slide open and shut (not under reduced motion); their bars and a project's
   people appear and go at once, out of the layout and out of reach of the pointer,
   keyboard and assistive tech when hidden.
-- **Getting around.** The arrows step one period. The period label opens the quick
-  pick for the view: in **Cycle** view a list of the cycles (with their dates, the
-  current one ticked), in **Year** view a list of the years the cycles cover, in
-  **Month** view a month calendar (`DatePicker`). **Today** returns to the period
-  holding today and scrolls the Today column into view; inside that period it just
-  scrolls to it.
+- **Getting around.** The arrows step one period. In **Cycle** view the middle of the
+  bar is the same cycle field the filter bar has (`SearchSelect`: a search, one pick, each
+  row naming the cycle and its dates); in **Year** view the year opens a list of the
+  years the cycles cover; in **Month** view the month opens a month calendar
+  (`DatePicker`). **Today** returns to the period holding today and scrolls the Today
+  column into view; inside that period it just scrolls to it.
 - **Today** is a hatched column through the header and every row, labelled.
 - **The chart starts at its left edge** — scrolled back to the beginning — whenever
   the view, the period or a filter changes.
