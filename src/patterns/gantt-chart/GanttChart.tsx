@@ -370,17 +370,40 @@ function TodayFill({ hatch }: { hatch: string }) {
  * underneath the empty corner.
  */
 /**
- * Opens its children with a quick dissolve. A folded one is `display: none`, so it
+ * Slides its children open and shut — a height transition, for the name cell's
+ * figures. They stay mounted so it can animate; `invisible` (which waits out the
+ * transition) and `inert` keep a shut one out of reach. `overflow-clip` rather than
+ * `hidden`, so a sticky parent keeps working. Only for content with nothing that
+ * sticks out of it: a tooltip would be cut off.
+ */
+function Slide({ open, children }: { open: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className={cn(
+        'grid transition-all duration-200 ease-out motion-reduce:transition-none',
+        !open && 'invisible',
+      )}
+      style={{ gridTemplateRows: open ? '1fr' : '0fr' }}
+    >
+      <div className="min-h-0 overflow-clip" inert={!open}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Opens its children with a dissolve. A folded one is `display: none`, so it
  * takes no room and is out of reach of the pointer, the keyboard and assistive
  * tech; it goes at once, and what takes its place fades in, so nothing jumps as
  * the two trade places. No height transition and no clipping, so a bar's tooltip
  * is never cut off by the wrapper.
  */
-function Collapse({ open, children }: { open: boolean; children: React.ReactNode }) {
+function Fade({ open, children }: { open: boolean; children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        open ? 'block opacity-100 transition-opacity duration-150 ease-out starting:opacity-0 motion-reduce:transition-none' : 'hidden',
+        open ? 'block opacity-100 transition-opacity duration-250 ease-out starting:opacity-0 motion-reduce:transition-none' : 'hidden',
       )}
     >
       {children}
@@ -587,7 +610,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               <span className="min-w-0 flex-1 truncate font-sans text-body-sm-semibold text-text-primary">{user.name}</span>
             </button>
             {stats.length > 0 && (
-              <Collapse open={expanded}>
+              <Slide open={expanded}>
                 <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
                   {stats.map((s) => (
                     <div key={s.label} className="flex items-center justify-between gap-2">
@@ -596,13 +619,13 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                     </div>
                   ))}
                 </dl>
-              </Collapse>
+              </Slide>
             )}
           </div>
           <div className="relative" style={{ width: trackWidth }}>
             {columnsLayer}
             {/* The summary bar and the full set of bars trade places: one folds away as the other opens. */}
-            <Collapse open={!expanded}>
+            <Fade open={!expanded}>
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                 {summary && (
                   <div
@@ -620,8 +643,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   </div>
                 )}
               </div>
-            </Collapse>
-            <Collapse open={expanded}>
+            </Fade>
+            <Fade open={expanded}>
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                 {placed.map(({ task, at }, i) => (
                   <TaskBar
@@ -636,7 +659,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   />
                 ))}
               </div>
-            </Collapse>
+            </Fade>
           </div>
         </div>
       );
@@ -860,7 +883,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               block.header ? (
                 <React.Fragment key={block.id}>
                   {block.header}
-                  <Collapse open={!folded.includes(block.id)}>{block.users}</Collapse>
+                  <Fade open={!folded.includes(block.id)}>{block.users}</Fade>
                 </React.Fragment>
               ) : (
                 <React.Fragment key={block.id}>{block.users}</React.Fragment>
