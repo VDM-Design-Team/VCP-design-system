@@ -118,15 +118,18 @@ legend entry:
   years the cycles cover; in **Month** view the month opens a month calendar
   (`DatePicker`). **Today** returns to the period holding today and scrolls the Today
   column into view; inside that period it just scrolls to it.
-- **The blue line** under the headings runs from the period's first column to its last, in every view (days of a cycle or month, cycles of a year) and on a phone too: it marks the stretch of time the bars can sit in. An open person's cell has a grey left edge.
+- **The blue line** under the headings marks where the Added Values are: it starts at the
+  first column any bar starts in and ends at the last column any bar ends in, across every
+  row on show, in every view and on a phone too. With no bars in the period there is no line,
+  and a bar-free day at either end is left out. An open person's cell has a grey left edge.
 - **The headings stay put.** The cycles or months over the days, and the days
   themselves, are held at the top of the screen as the page scrolls, and slide with the
   bars when they scroll sideways, so a row far down is never lost.
 - **On a phone held upright** (under 30rem, and only then: everything wider keeps the
   regular layout, name column and all) the name column becomes a header above each
   person's bars: the name and, when open, their figures stacked, as wide as the screen and
-  held at the left edge while the bars scroll sideways; project headers stack the same
-  way. The grid lines and the Today column run unbroken behind the name blocks (an open person's block is half-opaque, so the figures stay readable). The dates
+  held at the left edge while the bars scroll sideways, with a little space under an open one
+  before the bars; project headers stack the same way. The grid lines and the Today column run unbroken behind the name blocks (an open person's block is half-opaque, so the figures stay readable). The dates
   start at the left edge, the period bar (year, month, arrows and the quick pick) spans the
   full width, and the cycle list opens from the bar's left edge so it stays on screen.
 - **Today** is a hatched column through the header and every row, labelled.

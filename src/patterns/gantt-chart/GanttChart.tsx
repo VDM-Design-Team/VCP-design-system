@@ -475,6 +475,19 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       () => (loading ? [] : buildRows(tasks, users, projects, projectIds, userIds, columns)),
       [loading, tasks, users, projects, projectIds, userIds, columns],
     );
+    /* Where the Added Values are: from the first column any bar starts in to the last one any ends in. The line under the headings marks it, and is absent when there are none. */
+    const extent = React.useMemo(() => {
+      let first = Infinity;
+      let last = -1;
+      for (const row of rows) {
+        if (row.kind !== 'user') continue;
+        for (const { at } of row.placed) {
+          first = Math.min(first, at.from);
+          last = Math.max(last, at.to);
+        }
+      }
+      return last < 0 ? null : { first, last };
+    }, [rows]);
     const projectById = React.useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects]);
 
     const [openState, setOpenState] = React.useState<string[]>(defaultExpandedIds);
@@ -728,7 +741,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               'sticky left-0 z-10 shrink-0 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated',
               /* On a phone an open person's block is half-opaque, so the figures read cleanly while the grid lines still show faintly; a closed one lets them through fully. */
               expanded && 'bg-surface-elevated/50',
-              expanded && 'border-l-4 border-l-stroke-default',
+              expanded && 'mb-3 border-l-4 border-l-stroke-default min-[30rem]:mb-0',
             )}
           >
             <button
@@ -941,7 +954,14 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                   </div>
                 ))}
               </div>
-              <div aria-hidden="true" className="h-1 bg-surface-brand-strong" />
+              <div aria-hidden="true" className="h-1">
+                {extent && (
+                  <div
+                    className="h-full bg-surface-brand-strong"
+                    style={{ marginLeft: extent.first * CELL, width: (extent.last - extent.first + 1) * CELL }}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
