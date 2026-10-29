@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, within, waitFor } from 'storybook/test';
 import { GanttTooltip } from './GanttTooltip';
 import { Button } from '../../atoms/button';
 
@@ -52,9 +52,10 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole('button', { name: 'Bar' });
-    const tip = canvasElement.querySelector('[role="tooltip"]') as HTMLElement;
-    await expect(trigger.getAttribute('aria-describedby')).toContain(tip.id);
-    await expect(within(tip).getByText('VCP: Added Value Title Name Here')).toBeVisible();
+    /* The bubble is drawn in a portal, outside the canvas: find it by the id the trigger points at. */
+    const tip = document.getElementById(trigger.getAttribute('aria-describedby')!.split(' ').pop()!) as HTMLElement;
+    await expect(tip).toHaveAttribute('role', 'tooltip');
+    await waitFor(() => expect(within(tip).getByText('VCP: Added Value Title Name Here')).toBeVisible());
     await expect(tip.querySelectorAll('dt')).toHaveLength(3);
     await expect(within(tip).getByText('Status:')).toBeVisible();
   },
