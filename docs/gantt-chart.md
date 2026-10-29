@@ -104,8 +104,9 @@ legend entry:
   share a line; only genuinely concurrent ones stack.
 - **A task one column wide** has no room for words, so it keeps its points only.
 - **Project groups** open and fold from their header, and start open.
-- **Today** is a hatched column through the header and every row, labelled, and
-  scrolled into view when the period changes.
+- **Today** is a hatched column through the header and every row, labelled.
+- **The chart starts at its left edge** — scrolled back to the beginning — whenever
+  the view, the period or a filter changes.
 - **Scrolling sideways** cuts the dates and bars off at the edge of the name column;
   they never slide under the empty corner above it.
 - **Tooltips** are `GanttTooltip`, and say what the chart can: a task's status,

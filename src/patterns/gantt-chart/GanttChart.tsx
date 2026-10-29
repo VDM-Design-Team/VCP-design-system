@@ -459,14 +459,12 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     const [folded, setFolded] = React.useState<string[]>([]);
     const fold = (id: string) => setFolded((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
 
-    /* Bring Today into view when the period changes. */
+    /* Whenever the view, the period or a filter changes, start again from the left edge. */
     const scroller = React.useRef<HTMLDivElement | null>(null);
+    const scrollKey = [view, date, projectIds.join(), userIds.join()].join('|');
     React.useEffect(() => {
-      const el = scroller.current;
-      if (!el || todayIndex === -1 || !isToday(todayIndex)) return;
-      el.scrollLeft = Math.max(0, LABEL + todayIndex * CELL - el.clientWidth / 2);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [view, date]);
+      if (scroller.current) scroller.current.scrollLeft = 0;
+    }, [scrollKey]);
 
     const trackWidth = columns.length * CELL;
     const gridColumns = `repeat(${columns.length}, ${CELL}px)`; // ds-lint-ignore

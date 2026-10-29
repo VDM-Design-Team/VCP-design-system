@@ -282,8 +282,12 @@ export const Flow: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
+    /* A change of period starts again from the left edge, however far along the user had scrolled. */
+    const scroller = canvas.getByRole('region', { name: /scrolls sideways/ });
+    scroller.scrollLeft = 300;
     await userEvent.click(canvas.getByRole('button', { name: 'Next period' }));
     await expect(canvas.getByText('Cycle 45')).toBeVisible();
+    await waitFor(() => expect(scroller.scrollLeft).toBe(0));
     await userEvent.click(canvas.getByRole('button', { name: 'Previous period' }));
     await expect(canvas.getByText('Cycle 44')).toBeVisible();
 
