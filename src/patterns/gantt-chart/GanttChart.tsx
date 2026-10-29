@@ -563,7 +563,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               option.label
             );
           }}
-          className="w-80 min-w-0 shrink shadow-none"
+          inline
+          className="w-max"
         />
       ) : view === 'month' ? (
         <Popover
@@ -852,7 +853,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           ))}
           <div
             className={cn(
-              'flex h-12 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
+              'flex h-9 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
               period.heading.length === 0 && 'rounded-t-md',
             )}
           >

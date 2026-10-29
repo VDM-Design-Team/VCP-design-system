@@ -9,6 +9,8 @@ Date). It is `Tooltip` with the content filled in, so the hover and focus
 behaviour, `aria-describedby` and Escape all come from `Tooltip`; the title
 truncates so every card is one width and the lines are a description list.
 
+`SearchSelect` gains `inline`: the button drawn as plain text in a bar, without the bordered field (the panel is unchanged), for a picker inside another control's toolbar. Off by default; nothing changes for existing fields.
+
 `Tooltip` gains `followPointer`: the bubble opens under the pointer, kept inside the viewport, for a trigger far wider than the bubble. `GanttTooltip` uses it, so a bar's card is always on screen. Nothing changes for existing tooltips.
 
 `Icon` gains the Phosphor `link-simple-horizontal` glyph (regular and fill),
