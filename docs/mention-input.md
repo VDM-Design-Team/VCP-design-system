@@ -1,4 +1,4 @@
-# MentionInput *(component)*
+# MentionInput *(atom)*
 
 A text field where typing `@` opens a list of members, typing more letters filters
 it, and choosing one turns the text into a tag inside the field, as in the comments.
@@ -10,9 +10,9 @@ behaviour in the system's own look.
 
 ## Composed of
 
-Nothing from the system. The field and its list render their own markup, and take
-their look from tokens. `npm test` fails if that changes without this section
-changing.
+Nothing from the system: an atom. The field and its list render their own markup, and take
+their look from tokens, so it sits beside `Textarea`. `npm test` fails if that changes
+without this section changing.
 
 ## When to use
 
@@ -84,22 +84,25 @@ ids and labels from either.
 ## Tokens
 
 Field: `surface.elevated`, `radius.sm`, a 1 `stroke.strong` border (the control boundary,
-as `Input` uses; Figma's `stroke.subtle` is under 3:1), 16 padding, 100 tall at least,
+as `Input` uses), 16 padding, 100 tall at least,
 `body-sm-regular` `text.primary`; the placeholder `text.subtle`; focus is a 2
-`stroke.focused` outline. The tag: `surface.brand.faint` with `text.brand.strong`, 14
+`stroke.focused` outline. Disabled is Textarea's: `surface.neutral.faint`, `stroke.subtle`,
+`text.disabled`. The tag: `surface.brand.faint` with `text.brand.strong`, 14
 medium, `radius.sm`. The list: `surface.elevated`, `stroke.default`, `radius.md`,
 `shadow.menu`, rows `label-sm-medium` with the `surface.brand.faint` highlight, as `Menu`.
 No new tokens.
 
 ## Accessibility
 
-- A `role="textbox"` (multiline) with `aria-activedescendant` and `aria-controls` while the
-  list is open, and a listbox of options: focus never leaves the field, so a screen reader
+- **A multiline `role="textbox"`, not a `combobox`**: that role is for single-line fields, and a
+  textbox with `aria-activedescendant` is how mention fields are built elsewhere. It carries
+  `aria-activedescendant` and `aria-controls` while the list is open, and a listbox of options: focus never leaves the field, so a screen reader
   keeps reading what is being typed. The list opening is announced by a polite status
   ("Members list. Use the up and down arrow keys."), since `aria-expanded` is not allowed on a
   textbox. The text does not change with the count, so it is not re-read on every keystroke.
-- **Labelling:** `Field`'s `<label for>` cannot label a `div`, so pass `aria-label` or
-  `aria-labelledby` on the field itself, as the props table says.
+- **Labelling:** a `<label for>` cannot name a `div`. Inside a `Field` the field takes the label
+  as `aria-labelledby` (Field passes it), and clicking the label focuses the field. On its own,
+  pass `aria-label` or `aria-labelledby`, as the props table says.
 - The tag is `contenteditable="false"`, so it is read as text, "@Jane Doe", and moved over
   as one unit.
 - **Escape closes only the list.** Inside a `Modal` or `Popover` that listens for Escape on

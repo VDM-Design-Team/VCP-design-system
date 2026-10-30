@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
+import { Field } from '../../components/field';
 import { MentionInput, mentionedIds, plainText, type MentionSegment } from './MentionInput';
 
 const MEMBERS = [
@@ -11,7 +12,7 @@ const MEMBERS = [
 ];
 
 const meta = {
-  title: 'Components/Forms/MentionInput',
+  title: 'Atoms/MentionInput',
   component: MentionInput,
   parameters: {
     layout: 'centered',
@@ -21,7 +22,7 @@ const meta = {
           'A text field where typing `@` opens a list of members, more letters filter it, and choosing ' +
           'one turns the text into a tag inside the field, as in comments. Plain text and tags only; ' +
           'a paste is always plain text. The value is segments (text, or a mention with its `id` and ' +
-          '`label`): `mentionedIds(value)` is who to notify. The list is a combobox listbox: focus ' +
+          '`label`): `mentionedIds(value)` is who to notify. The list is a listbox popup on a textbox: focus ' +
           'stays in the field, ↑ ↓ move, Enter or Tab choose, Escape closes.',
       },
     },
@@ -336,7 +337,7 @@ const MANY = Array.from({ length: 8 }, (_, i) => ({ id: String(i), name: `Member
 export const ListInAScrollingParent: Story = {
   args: { members: MANY },
   /* axe asks a scrolling region to be focusable. This list is reached through the field's
-     `aria-activedescendant` (focus never leaves the field), which is the combobox pattern; making
+     `aria-activedescendant` (focus never leaves the field), which is the pattern for a list beside a field; making
      the list tabbable would break it. */
   parameters: {
     a11y: { config: { rules: [{ id: 'scrollable-region-focusable', enabled: false }] } },
@@ -366,5 +367,21 @@ export const ListInAScrollingParent: Story = {
       expect(row.top).toBeGreaterThanOrEqual(box.top);
       expect(row.bottom).toBeLessThanOrEqual(box.bottom);
     });
+  },
+};
+
+/** In a `Field`: the label names the field (`aria-labelledby`), and clicking it focuses the field. */
+export const InAField: Story = {
+  args: { 'aria-label': undefined },
+  render: (args) => (
+    <Field label="Reply">
+      <MentionInput {...args} />
+    </Field>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('textbox', { name: 'Reply' });
+    await userEvent.click(canvas.getByText('Reply'));
+    await expect(field).toHaveFocus();
   },
 };

@@ -17,8 +17,9 @@ import { cn } from '../../lib/cn';
  * the same markup TipTap's mention extension writes, so an app on TipTap reads the same
  * ids and the same labels.
  *
- * **The list is a combobox listbox.** Focus stays in the field; ↑ ↓ move through the
- * options (`aria-activedescendant`), Enter or Tab choose, Escape closes. It draws like
+ * **The list is a listbox popup on a multiline `textbox`**, not a `combobox` (that role is for
+ * single-line fields). Focus stays in the field; ↑ ↓ move through the options
+ * (`aria-activedescendant`), Enter or Tab choose, Escape closes. It draws like
  * `Menu` (the system's menu look) but is its own list, because a `Menu` takes focus.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
@@ -579,7 +580,9 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
             /* The placeholder: an empty field has no children, so `:empty` matches. */
             'empty:before:pointer-events-none empty:before:text-text-subtle',
             'empty:before:content-[attr(data-placeholder)]',
-            disabled && 'cursor-not-allowed bg-surface-neutral-subtle text-text-disabled',
+            /* As Textarea's disabled look. */
+            disabled &&
+              'cursor-not-allowed border-stroke-subtle bg-surface-neutral-faint text-text-disabled',
             className,
           )}
         />
