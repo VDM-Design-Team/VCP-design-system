@@ -11,7 +11,7 @@ import { Tooltip } from '../tooltip';
  *
  * Read off Figma's `Notification_Item` (`2428:4412`): Default, Hover and Focused,
  * each with or without a comment preview. The message is Figma's
- * `_Message_Content`, eleven kinds of event, which **this component owns** — the
+ * `_Message_Content`, thirteen kinds of event, which **this component owns** — the
  * way `StatusTag` owns status → tone — so no call site writes "John moved … to
  * the backlog" itself, and the bold and regular runs are the same everywhere.
  *
@@ -28,6 +28,7 @@ export type NotificationKind =
   | 'commented'
   | 'mention'
   | 'moved'
+  | 'pending'
   | 'accepted'
   | 'updated'
   | 'rejected'
@@ -35,6 +36,7 @@ export type NotificationKind =
   | 'assigned'
   | 'backlog'
   | 'handoff'
+  | 'completed'
   | 'viewer';
 
 /**
@@ -49,14 +51,16 @@ const NOTIFICATION_PHRASES: Record<
 > = {
   commented: { verb: 'commented on' },
   mention: { verb: 'mentioned you in a comment on' },
-  moved: { verb: 'moved', trail: (s) => `to ${s ?? '[Status]'}` },
-  accepted: { verb: 'accepts' },
+  moved: { verb: 'moved', trail: (s) => `to ${s}` },
+  pending: { verb: 'submitted', trail: () => 'for approval. Pending' },
+  accepted: { verb: 'accepted' },
   updated: { verb: 'made an update to' },
   rejected: { verb: 'rejected' },
   'rejected-feedback': { verb: 'rejected', trail: () => 'with feedback' },
   assigned: { verb: 'assigned you' },
   backlog: { verb: 'moved', trail: () => 'to the backlog' },
-  handoff: { verb: 'completes', trail: () => '. Ready for review' },
+  handoff: { verb: 'handed off', trail: () => '. Ready for Review' },
+  completed: { verb: 'accepted & completed' },
   viewer: { verb: 'added you as a viewer to' },
 };
 
@@ -66,16 +70,12 @@ export interface NotificationActor {
   src?: string;
 }
 
-export interface NotificationItemProps
+export interface NotificationItemBaseProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'onSelect'> {
-  /** What happened. Picks the sentence. */
-  kind: NotificationKind;
   /** Who did it. */
   actor: NotificationActor;
   /** The Added Value it happened to — its title. */
   subject: string;
-  /** For `moved`: the status it moved to ("to Confirmed prod"). */
-  status?: string;
   /** When, already formatted: "5 minutes ago". */
   time: string;
   /** Not yet read. Draws the dot and names the row "Unread". */
@@ -91,9 +91,17 @@ export interface NotificationItemProps
   onSelect?: () => void;
   /** The comment, when the event is about one. Drawn as the design's preview card. */
   preview?: string;
-  /** Below the preview — the reply and reaction controls, which the caller owns. */
-  previewActions?: React.ReactNode;
 }
+
+/**
+ * What happened picks the sentence. `moved` is the one that needs more: the status
+ * it moved to ("to Confirmed prod"), which is required there and nowhere else.
+ */
+export type NotificationItemProps = NotificationItemBaseProps &
+  (
+    | { kind: Exclude<NotificationKind, 'moved'>; status?: never }
+    | { kind: 'moved'; status: string }
+  );
 
 export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationItemProps>(
   function NotificationItem(
@@ -109,13 +117,13 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       href,
       onSelect,
       preview,
-      previewActions,
       ...props
     },
     ref,
   ) {
     const phrase = NOTIFICATION_PHRASES[kind];
     const trail = phrase.trail?.(status);
+    const markLabel = `${unread ? 'Mark as read' : 'Mark as unread'}: ${subject}`;
     const interactive = Boolean(href || onSelect);
 
     /* The spaces are text nodes of their own: a space at the start of an inline
@@ -149,7 +157,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         ref={ref}
         data-unread={unread || undefined}
         className={cn(
-          'group relative flex flex-col gap-2 bg-surface-elevated p-4 font-sans',
+          'group/notification relative flex flex-col gap-2 bg-surface-elevated p-4 font-sans',
           'transition-colors duration-200 ease-out motion-reduce:transition-none',
           interactive && [
             'hover:bg-neutral-outline-surface-hover',
@@ -177,29 +185,31 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             <p className="min-w-0 flex-1 text-body-sm-regular text-text-primary">{message}</p>
           )}
 
-          {/* The trailing slot, one 24 box so the row never shifts. Unread: the dot
-              at rest, which dissolves into an outlined check-circle (mark as read)
-              on hover and focus. Read: empty at rest; on hover and focus a filled
+          {/* The trailing slot: one 40 box, so the click area is a comfortable
+              target, pulled back by 8 on every side (`-m-2`) so the text and the
+              icon sit where a 24 box would put them. The dot and the check share
+              the box's centre, so they swap in place. Unread: the dot at rest,
+              which dissolves into an outlined check-circle (mark as read) when the
+              row is hovered or the button focused. Read: empty at rest; a filled
               check-circle (mark as unread) dissolves in. Every change is a
-              dissolve, not a jump. */}
-          <span className="relative flex size-6 shrink-0 items-center justify-center">
+              dissolve, not a jump. With no `onToggleRead` the dot just stays. */}
+          <span className="relative -m-2 flex size-10 shrink-0 items-center justify-center">
             {unread && (
               <span
                 aria-hidden="true"
+                data-unread-dot
                 className={cn(
                   'size-2 rounded-full bg-surface-brand-strong',
                   'transition-opacity duration-200 ease-out motion-reduce:transition-none',
-                  'group-hover:opacity-0 group-has-[button:focus-visible]:opacity-0',
+                  onToggleRead &&
+                    'group-hover/notification:opacity-0 group-has-[[data-mark]:focus-visible]/notification:opacity-0',
                 )}
               />
             )}
             {onToggleRead && (
-              /* After a half-second rest, the design's tooltip names the action.
-                 The wrapper fills the 24 box, over the dot, so the button inside
-                 keeps the box's whole area. It opens to the left: the button sits on
-                 the row's right edge, so a bubble above it would hang past the edge
-                 (and widen any scrolling list the row is in), and the top row's would
-                 be cut off by the list's top. */
+              /* After a half-second rest, the design's tooltip names the action. The
+                 wrapper fills the box, over the dot, so the button keeps its whole
+                 area. */
               <Tooltip
                 content={unread ? 'Mark as read' : 'Mark as unread'}
                 openDelay={500}
@@ -208,14 +218,15 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
               >
                 <button
                   type="button"
+                  data-mark
                   onClick={onToggleRead}
-                  aria-label={unread ? 'Mark as read' : 'Mark as unread'}
+                  aria-label={markLabel}
                   className={cn(
                     'flex size-full items-center justify-center rounded-pill',
                     'text-stroke-focused hover:text-text-brand-strong',
-                    'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                    'opacity-0 group-hover/notification:opacity-100 focus-visible:opacity-100',
                     'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                    'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
                   )}
                 >
                   <Icon name={unread ? 'check-circle' : 'check-circle-fill'} size="md" />
@@ -226,9 +237,10 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         </div>
 
         {preview && (
+          /* Above the row's stretched link on purpose: a click anywhere on the
+             preview does not open the item. Only Show more / less respond. */
           <div className="relative z-10 flex flex-col gap-1 pr-6 pl-13">
             <CommentPreview text={preview} />
-            {previewActions}
           </div>
         )}
       </div>
