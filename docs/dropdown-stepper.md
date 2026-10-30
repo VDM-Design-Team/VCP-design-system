@@ -38,7 +38,7 @@ should load a different page, that is `Pagination`.
 | `fullWidth` | `boolean` | `false` | Spans the container; the middle takes the slack |
 | `invalid` | `boolean` | `false` | Critical border. Pair with a visible message |
 | `error` | `ReactNode` | — | Optional caption under the control. Implies `invalid`, is announced (`role="alert"`) and wired to the dropdown with `aria-describedby`. Inside a `Field`, use the `Field`'s `error` instead |
-| `disabled` | `boolean` | `false` | Greys all three controls |
+| `disabled` | `boolean` | `false` | Disables all three controls and gives the shell the Input family's disabled look, the same as a disabled `Stepper`. An arrow that dies at the end of the list does not |
 | `className` | `string` | — | On the outer wrapper (the control plus its caption) |
 | `ref` | `Ref<HTMLDivElement>` | — | The outer wrapper |
 
@@ -55,7 +55,8 @@ A disabled option is stepped over by the arrows and shown disabled in the list.
 | Value | `text.primary`, `type.body.sm` medium | `text-text-primary text-body-sm-medium` |
 | Border, invalid | `accent.critical.outline.border.default` | `border-accent-critical-outline-border-default` |
 | Error caption | `accent.critical.outline.content.default`, `type.caption.md` medium | `text-accent-critical-outline-content-default text-caption-md-medium` |
-| Disabled | `text.disabled` | `disabled:text-text-disabled` |
+| Disabled, text and glyphs | `text.disabled` | `disabled:text-text-disabled` |
+| Disabled, shell (the `disabled` prop only) | `surface.neutral.subtle`, `stroke.subtle` | `bg-surface-neutral-subtle border-stroke-subtle cursor-not-allowed` |
 | Focus ring | `stroke.focused`, drawn inward | `focus-visible:outline-2 focus-visible:-outline-offset-2` |
 
 Figma draws the border `stroke.default`; the repo's rule is that a control's
