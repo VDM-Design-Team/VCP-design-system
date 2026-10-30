@@ -58,7 +58,7 @@ when the numbering matters to a screen reader.
 | Reading panel | `surface.neutral.subtle`, `stroke.subtle` | `bg-surface-neutral-subtle border-stroke-subtle` |
 | Editing field | `Textarea`'s: `surface.elevated`, `stroke.strong` (no change on hover; focus changes it), invalid `accent.critical.outline.border` | squared on the number's side: `rounded-l-none border-l-0` |
 | Paragraph | `text.primary`, `type.body-sm-regular` | `text-text-primary text-body-sm-regular` |
-| Remove | the `RemoveButton` atom, `plain` (the glyph alone, 20, in `accent.critical.outline.content` through its states; no fill), `top-3.5 right-3`, a 40 target; the card reveals it |
+| Remove | the `RemoveButton` atom, `tonal` (a ✕ on a 20 disc, `accent.critical.outline.content` on `accent.critical.tonal.surface`, through its states; Figma draws a bare ring ✕ here, and the disc is a proposal to match the file attachment), `top-3.5 right-3`, a 40 target; the card reveals it |
 | Error message | `accent.critical.outline.content.default`, `type.caption-md-medium` | `mt-1.5` under the card |
 | Radius | `shape.radius.sm` | `rounded-sm` |
 | Padding, min height | Tailwind numeric scale | `p-3` (panel), `px-1 py-2` (number), `min-h-12`, `min-w-5`; `pr-12` on the field when there is a remove button |

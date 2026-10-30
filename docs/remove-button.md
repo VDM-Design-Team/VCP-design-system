@@ -3,9 +3,8 @@
 The small critical ✕ that takes one item out of a list: a card in a description, a file in a
 gallery. Icon only, so it has a required name.
 
-Two looks, one family. `plain` is the glyph alone, a ✕ in a ring, for an item on a plain surface.
-`tonal` is a ✕ on a filled disc, for an item that sits on a picture, where a bare glyph could vanish
-into the image. Both take their colour from `accent.critical.outline.content` (default, hover,
+Two looks, one family. `plain` is the glyph alone, the system's plain ✕. `tonal` is a ✕ on a filled disc,
+which also works over a picture, where a bare glyph could vanish into the image. Both take their colour from `accent.critical.outline.content` (default, hover,
 pressed).
 
 ## Composed of
@@ -22,8 +21,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `RemoveButton`, `plain` | Removing a card or row that sits on a plain surface (`DescriptionCard`) |
-| `RemoveButton`, `tonal` | Removing something that sits on an image (`FileAttachment`) |
+| `RemoveButton`, `tonal` | Removing a card or a file: `DescriptionCard` and `FileAttachment` |
+| `RemoveButton`, `plain` | A bare ✕ on a plain surface, where the disc is too much |
 | `IconButton` `danger` | A destructive action that is not "take this item out of the list": delete a record, discard a draft |
 | `Tag`'s `onRemove` | A value picked into a field, inside the tag |
 
@@ -46,7 +45,7 @@ and the tab order and hide it with opacity, so a keyboard can reach it.
 | Glyph | `accent.critical.outline.content` default, hover, pressed, disabled | `text-accent-critical-outline-content-default hover:text-… active:text-…` |
 | `tonal` fill | `accent.critical.tonal.surface` default, hover, pressed | `bg-accent-critical-tonal-surface-default hover:bg-… active:bg-…` |
 | Size | Tailwind numeric scale | `size-5` (20) for both looks |
-| Glyph | `Icon` | `x-circle` 20 (`plain`), `x` 12 on the 20 disc (`tonal`) |
+| Glyph | `Icon` | `x` in both: 16 (`plain`), 14 on the disc (`tonal`) |
 | Target | | `before:-inset-2.5`: 10 past the button on every side, so 40. The click area is invisible padding, much bigger than the drawing |
 | Focus | `stroke.focused` | 2 outline, 2 offset |
 
@@ -54,8 +53,17 @@ and the tab order and hide it with opacity, so a keyboard can reach it.
 
 - A real `<button>` with a required `aria-label`; the glyph is decorative.
 - The 40 target is invisible padding around a 20 button.
-- The glyph holds 3:1 against its surface; see `docs/file-attachment.md` for the measured pairs on
-  the tonal disc.
+- **Contrast at rest holds 3:1 (WCAG 1.4.11) in both themes**, and a story measures it. Plain against the
+  surface: 4.77 light, 5.06 dark. Tonal against its disc: 3.91 light, 3.47 dark. Hover and pressed are
+  higher (plain 6.4 / 8.4 light, 7.6 / 10.1 dark; tonal 4.4 / 4.4 light, 4.4 / 4.4 dark).
+
+## Design note
+
+The description card's remove button in Figma is a ring ✕ (`x-circle`) with no fill, while the file
+attachment's is a ✕ on a filled disc, which is the system's other ✕ controls' glyph (`Chip`, `Tag`,
+`TagEditor` all use the plain `x`). **Both now use the `tonal` look**, with the plain ✕ at 14 on the disc, as
+a proposal for design to review rather than two conflicting styles. If design keeps the ring, only
+`DescriptionCard` changes; `plain` stays for a bare ✕ on a plain surface.
 
 ## Don't
 

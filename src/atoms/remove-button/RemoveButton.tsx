@@ -7,7 +7,7 @@ import { Icon } from '../icon';
  * RemoveButton — the small critical ✕ that takes one item out of a list: a card in a
  * description, a file in a gallery. Icon only, so it has a required name.
  *
- * Two looks, one family. `plain` is just the glyph, a ✕ in a ring, changing colour through its
+ * Two looks, one family. `plain` is just the glyph, the system's plain ✕, changing colour through its
  * states: for an item on a plain surface. `tonal` is a ✕ on a filled disc: for an item that
  * sits on top of a picture, where a bare glyph could vanish into the image. Both use the
  * critical outline content colour (default, hover, pressed); `tonal` adds the critical tonal fill.
@@ -64,11 +64,8 @@ export const RemoveButton = React.forwardRef<HTMLButtonElement, RemoveButtonProp
       className={cn(removeButton({ tone }), className)}
       {...props}
     >
-      {tone === 'tonal' ? (
-        <Icon name="x" aria-hidden="true" className="size-3" />
-      ) : (
-        <Icon name="x-circle" size="md" aria-hidden="true" />
-      )}
+      {/* Smaller on the disc, so there is room around it. */}
+      <Icon name="x" aria-hidden="true" className={tone === 'tonal' ? 'size-3.5' : 'size-4'} />
     </button>
   ),
 );

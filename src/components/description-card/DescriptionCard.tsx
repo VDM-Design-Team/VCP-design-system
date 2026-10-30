@@ -220,6 +220,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
                reveal it, so a keyboard can reach it and typing keeps it on screen. A touch
                screen has no hover, so there it is always shown. The `before` is the 40 target. */
             <RemoveButton
+              tone="tonal"
               label={removeLabel}
               onClick={onRemove}
               className={cn(

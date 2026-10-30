@@ -20,7 +20,7 @@ with one `Checkbox` per domain, "Initiate to {name} assignment". The domains are
 never include the current one; controlled or uncontrolled. `onChange` reports which option just
 changed as well as the whole set, because ticking one usually opens a section.
 
-**`RemoveButton`** (atom): the small critical ✕ that takes an item out of a list. `plain` is the glyph alone (`DescriptionCard`), `tonal` is the glyph on a filled disc for an item over an image (`FileAttachment`, whose remove button now uses it, unchanged to look at). Icon only, with a required name and a 40 target.
+**`RemoveButton`** (atom): the small critical ✕ that takes an item out of a list. `tonal` is the glyph on a filled disc, used by `DescriptionCard` and `FileAttachment` (whose remove button now uses it) so the two match; `plain` is the bare glyph. Icon only, with a required name and a 40 target.
 
 No new tokens. `DescriptionCard`'s `deliverable` type uses `accent.info` and `desired-outcome` uses
 `surface.neutral.stronger` as stand-ins: the design's cyan is on no ramp and the darkest slate has no
