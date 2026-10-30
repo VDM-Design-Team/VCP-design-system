@@ -131,6 +131,13 @@ interface SearchSelectBase
    * the panel says "Loading…" in place of the rows.
    */
   loading?: boolean;
+  /**
+   * Search happens on your server: called with the text on every change in the search box (and
+   * with `''` when the panel opens), and the component then stops filtering `options` itself, so
+   * you pass what matches. Debounce it on your side; pair it with `loading` while the request runs.
+   * Picked values that are not in the current `options` still show, by their value.
+   */
+  onSearch?: (query: string) => void;
   /** What the panel says while `loading`. */
   loadingText?: string;
   /** Critical border + `aria-invalid`. Pair with a visible message (or use `error`). */
@@ -239,6 +246,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       size = 'md',
       fullWidth = false,
       loading,
+      onSearch,
       loadingText = 'Loading…',
       invalid,
       error,
@@ -303,7 +311,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     };
     const arranged = arrange(all);
     const list = arrange(
-      searchable && query ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase())) : all,
+      searchable && query && !onSearch
+        ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+        : all,
     );
     const firstEnabled = (rows: SearchSelectOption[]) => Math.max(0, rows.findIndex((o) => !o.disabled));
     const activeIndex = Math.min(active, list.length - 1);
@@ -320,6 +330,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const openPanel = () => {
       if (disabled) return;
       setQuery('');
+      onSearch?.('');
       setDraft(committed);
       const at = arranged.findIndex((o) => committed.includes(o.value));
       setActive(at >= 0 ? at : firstEnabled(arranged));
@@ -762,6 +773,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   onChange={(e) => {
                     setQuery(e.target.value);
                     setActive(0);
+                    onSearch?.(e.target.value);
                   }}
                   onKeyDown={(e) => onKeyDown(e, true)}
                 />

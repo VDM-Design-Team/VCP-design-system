@@ -142,6 +142,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
 | `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
 | `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |
+| `onSearch` | `(query: string) => void` | — | Search is on your server: called with the text on every change (and `''` when the panel opens), and the component stops filtering `options` itself, so you pass what matches. Debounce on your side and pair it with `loading` while the request runs. Picked values missing from the current `options` still show, by their value |
 | `loadingText` | `string` | `Loading…` | What the panel says while `loading` |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
@@ -219,7 +220,6 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 - **Don't add a second dropdown-with-options component.** Extend this one (Decision 2).
 - **Don't let the tags field grow without limit, or add a `wrap` mode.** See Decision 4.
 - **Don't use it for a handful of plain options** — that is a `Select`.
-- **Don't fetch as you type inside it** — search filters the `options` you pass, and nothing yet
-  hands the page the search text. A people list that is too large to load whole needs an
-  `onSearch(query)` that this component does not have: not built until a real server-side list needs it.
+- **Don't fetch inside it.** Without `onSearch`, search filters the `options` you pass. For a list too
+  large to load whole, use `onSearch` and `loading`: the page fetches (debounced) and passes the matches.
 - **Don't put who-may-be-picked rules in here** — eligibility is the page's business.

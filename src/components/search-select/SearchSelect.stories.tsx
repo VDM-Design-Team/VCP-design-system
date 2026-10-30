@@ -890,3 +890,34 @@ export const Loading: Story = {
     await expect(canvasElement.querySelector('[aria-busy="true"]')).not.toBeNull();
   },
 };
+
+/** `onSearch`: the page gets the text and passes what matches; the component does not filter. */
+export const ServerSearch: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => {
+    const [shown, setShown] = React.useState<SearchSelectOption[]>(PEOPLE.slice(0, 2));
+    return (
+      <Controlled
+        {...args}
+        aria-label="Assignee"
+        options={shown}
+        onSearch={(query) => {
+          args.onSearch?.(query);
+          setShown(query ? PEOPLE.filter((o) => o.value.startsWith('c')) : PEOPLE.slice(0, 2));
+        }}
+      />
+    );
+  },
+  args: { onSearch: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await expect(args.onSearch).toHaveBeenLastCalledWith('');
+    await expect(canvas.getAllByRole('option')).toHaveLength(2);
+    /* "zz" matches nothing by label, but the page decides what matches: the component shows its answer. */
+    fireEvent.change(canvas.getByRole('combobox', { name: 'Search by name' }), { target: { value: 'zz' } });
+    await waitFor(() => expect(args.onSearch).toHaveBeenLastCalledWith('zz'));
+    await waitFor(() => expect(canvas.getByRole('option', { name: 'Carl Baker' })).toBeVisible());
+  },
+};
