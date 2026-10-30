@@ -54,7 +54,7 @@ export type NotificationKind =
 /**
  * Kind → the sentence, in two parts: the `verb` that follows the actor's name
  * ("commented on"), and an optional `trail` after the subject ("to the
- * backlog"). The strings are the design's; localise by passing your own through a
+ * backlog"). Every sentence ends in a full stop, added here. The strings are the design's; localise by passing your own through a
  * wrapper, not by editing call sites.
  */
 const NOTIFICATION_PHRASES: Record<
@@ -192,11 +192,11 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       <>
         {unread && <span className="sr-only">Unread: </span>}
         <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>{' '}
-        <span className="text-body-sm-regular">{subject}</span>
+        <span className="text-body-sm-regular">{trail ? subject : `${subject}.`}</span>
         {trail && (
           <>
             {!trail.startsWith('.') && ' '}
-            <span className="text-body-sm-bold">{trail}</span>
+            <span className="text-body-sm-bold">{`${trail}.`}</span>
           </>
         )}{' '}
         <span className="text-caption-md-regular text-text-tertiary">{time}</span>

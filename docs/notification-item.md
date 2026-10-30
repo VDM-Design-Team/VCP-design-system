@@ -34,21 +34,21 @@ the subject is regular.
 
 | `kind` | Reads as |
 |---|---|
-| `commented` | **John commented on** *Title* |
-| `mention` | **John mentioned you in a comment on** *Title* |
-| `moved` | **John moved** *Title* **to Status** (`status`) |
-| `pending` | **John submitted** *Title* **for approval. Pending** |
-| `accepted` | **John accepted** *Title* |
-| `updated` | **John made an update to** *Title* |
-| `rejected` | **John rejected** *Title* |
-| `rejected-feedback` | **John rejected** *Title* **with feedback** |
-| `assigned` | **John assigned you** *Title* |
-| `backlog` | **John moved** *Title* **to the backlog** |
-| `handoff` | **John handed off** *Title***. Ready for Review** |
-| `completed` | **John accepted & completed** *Title* |
-| `viewer` | **John added you as a viewer to** *Title* |
+| `commented` | **John commented on** *Title*. |
+| `mention` | **John mentioned you in a comment on** *Title*. |
+| `moved` | **John moved** *Title* **to Status.** (`status`) |
+| `pending` | **John submitted** *Title* **for approval. Pending.** |
+| `accepted` | **John accepted** *Title*. |
+| `updated` | **John made an update to** *Title*. |
+| `rejected` | **John rejected** *Title*. |
+| `rejected-feedback` | **John rejected** *Title* **with feedback.** |
+| `assigned` | **John assigned you** *Title*. |
+| `backlog` | **John moved** *Title* **to the backlog.** |
+| `handoff` | **John handed off** *Title***. Ready for Review.** |
+| `completed` | **John accepted & completed** *Title*. |
+| `viewer` | **John added you as a viewer to** *Title*. |
 
-None of the sentences ends in a full stop, so a one-sentence line and a two-sentence one end the same way.
+Every sentence ends in a full stop, the component adds it, so a one-sentence line and a two-sentence one end the same way.
 
 Then the time, 12 regular `text.tertiary`, at the end of the same line. The text is
 English; to localise, wrap the component and pass your own sentence, not edit call
@@ -56,17 +56,26 @@ sites.
 
 ### Who gets it
 
-Which kinds notify whom is the product's rule, not the component's: the component only draws the row
-it is given. For the kinds the design has specified:
+Which kinds notify whom is the product's rule (BESA in-app communication), not the component's:
+the component only draws the row it is given. **No one is notified of a status change they caused
+themselves.**
 
 | `kind` | Sent to | Red dot | Prior status | Why |
 |---|---|---|---|---|
-| `pending` | Admin(s) | Yes | Draft | Admins know an Added Value in Pending is waiting to be accepted or rejected |
-| `handoff` (Ready for Review) | Initiator(s), Assignee(s), Admin(s) | Yes | Design Review | The Added Value moved to Review: the Initiator(s) (not the assignee) or an Admin can accept or reject it. Assignees are informed but have no review action |
-| `completed` | Initiator(s), Assignee(s), Admin(s) | Yes, except for Admin(s) | Review | The Added Value was accepted and copied over to the Dev domain |
-| `viewer` | Anyone added as a viewer | Yes | — | Tells them they can now see it |
+| `pending` | Admin(s) | Yes | Draft | An Added Value in Pending is waiting to be accepted or rejected |
+| `accepted` | Initiator(s) | Yes | Pending | Their Added Value is accepted and ready to be designed |
+| `rejected` (from Pending) | Initiator(s) | Yes | Pending | Their pending Added Value was rejected. A reason is required; it shows as a banner at the top of the Added Value page or as a tooltip there |
+| `moved` (In progress, Design Review) | Initiator(s), Assignee(s) | No | Accepted → In progress; In progress → Design Review | The status moved. Design Review usually coincides with the Design Review meeting |
+| `handoff` (Ready for Review) | Initiator(s), Assignee(s), Admin(s) | Yes | Design Review | Moved to Review: the Initiator(s) (who is not also an assignee) or an Admin can accept or reject. Assignees who did not cause the change are informed but cannot accept or reject |
+| `completed` | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Completed. It is copied over to the Dev domain |
+| `rejected` (from Review) | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Rejected; the reason shows as a banner on the Added Value page or a tooltip in the table |
+| `backlog` | Initiator(s), Assignee(s), Admin(s); only Initiator(s) if it was in Draft or Pending | Yes, except Admin(s) | Any: Backlog can be applied at any point | Moved to the backlog |
+| `assigned` | The user who was assigned | Yes | — | It was assigned to them and they should work on it |
+| `commented` | Initiator(s), Assignee(s) | Yes | — | A comment was added to an Added Value they initiated or are assigned to |
+| `mention` | Anyone mentioned | Yes | — | They were mentioned in a comment with @ |
+| `viewer` | Anyone added as a viewer | Yes | — | They were added as a viewer |
 
-The other kinds are not specified yet.
+`updated` and `rejected-feedback` are not in that document.
 
 ## Props
 
