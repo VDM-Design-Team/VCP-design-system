@@ -369,5 +369,10 @@ export const ScrollsWhenNeitherSideFits: Story = {
     const box = panel.getBoundingClientRect();
     await expect(box.top).toBeGreaterThanOrEqual(0);
     await expect(box.bottom).toBeLessThanOrEqual(window.innerHeight);
+
+    /* A keyboard user can reach it, and sees where focus went. */
+    await userEvent.tab();
+    await expect(panel).toHaveFocus();
+    await expect(getComputedStyle(panel).outlineStyle).not.toBe('none');
   },
 };

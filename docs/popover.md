@@ -144,8 +144,9 @@ because a list of actions with no keyboard entry point is a mouse feature.
 - **The panel is focusable as a container** (`tabIndex={-1}`, never in the tab
   order) so a click on dead space inside it does not drop focus to the body.
   **The one exception is a panel that scrolls** because neither side has room:
-  then it takes `tabIndex={0}`, so a keyboard user can Tab into it and scroll it
-  with the arrow keys even when nothing inside is focusable.
+  then it takes `tabIndex={0}` and the standard focus ring (`stroke.focused`), so a
+  keyboard user can Tab into it, see where focus went, and scroll it with the arrow
+  keys even when nothing inside is focusable.
 
 ### Positioning — what it does and does not do
 

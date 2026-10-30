@@ -49,9 +49,7 @@ const popoverPanel = cva(
        token set reserves for exactly this — `shadow.menu`. */
     'rounded-md border border-stroke-default bg-surface-elevated shadow-menu',
     'p-4 font-sans text-body-sm-regular text-text-secondary',
-    /* Focusable as a container only so a click on dead space inside the panel
-       does not drop focus to the body. Never in the tab order. */
-    'focus:outline-none',
+    /* Focus styling depends on whether the panel scrolls; see `className` below. */
   ],
   {
     variants: {
@@ -363,6 +361,12 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
           style={fit?.maxHeight !== undefined ? { maxHeight: fit.maxHeight, overflowY: 'auto' } : undefined}
           className={cn(
             popoverPanel({ placement: fit?.placement ?? placement, align: fit?.align ?? align, width }),
+            /* A scrolling panel is a Tab stop, so it shows the focus ring like any other.
+               Otherwise it is focusable only so a click on dead space inside it does not
+               drop focus to the body, and draws no outline. */
+            fit?.maxHeight !== undefined
+              ? 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused'
+              : 'focus:outline-none',
             panelClassName,
             panelProps?.className,
           )}
