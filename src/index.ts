@@ -32,6 +32,7 @@ export * from './components/chip';
 export * from './components/comment-actions';
 export * from './components/comment-form-actions';
 export * from './components/comment-sort-chip';
+export * from './components/cycle-tag';
 export * from './components/data-table';
 export * from './components/date-picker';
 export * from './components/detail-row';
@@ -49,6 +50,7 @@ export * from './components/pagination';
 export * from './components/popover';
 export * from './components/rich-text-toolbar';
 export * from './components/search-select';
+export * from './components/source-tag';
 export * from './components/stat-card';
 export * from './components/sidebar-item';
 export * from './components/status-tag';
@@ -58,8 +60,10 @@ export * from './components/tag-editor';
 export * from './components/timeline';
 export * from './components/toast';
 export * from './components/tooltip';
+export * from './components/user-menu';
 export * from './components/type-tag';
 export * from './components/urgency-tag';
+export * from './components/user-label';
 
 /* Patterns — 2+ components forming a page section. Templates — page layouts. */
 export * from './patterns';

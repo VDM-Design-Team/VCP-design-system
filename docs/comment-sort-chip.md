@@ -1,15 +1,18 @@
 # CommentSortChip
 
 The comments' sort switch: "Newest First" or "Oldest First", with a glyph that
-points the way. One click flips it to the other. A component.
+points the way. One click flips it to the other. A component, **built on `Chip`**.
 
-Read off the Figma `_Comment_Filter_chip` (Sort = Newest, Oldest).
+Read off the Figma `_Comment_Filter_chip` (Sort = Newest, Oldest). The frame draws a
+squarer neutral rectangle; that is an older look, and the chip family's rounded pill is
+used. The words are fixed, not props: the only choice is which order it is in.
 
 ## Composed of
 
 | Piece | Tier |
 |---|---|
-| `Icon` | atom |
+| `Chip` | component |
+| `Icon` | sub-atomic |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -18,7 +21,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `CommentSortChip` | The header of a comment list, to switch between newest and oldest first |
-| `Chip` | A filter that selects, or a tag that can be removed. A rounded pill; this is a rectangle |
+| `Chip` | A filter that selects, or a tag that can be removed. The sort chip is a `Chip` with the order and its glyph filled in |
 | `Select` / `Menu` | A sort with more than two orders |
 
 ## Props
@@ -28,37 +31,24 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `sort` | `newest \| oldest` | — | The current order, controlled |
 | `defaultSort` | `newest \| oldest` | `newest` | The uncontrolled starting order |
 | `onSortChange` | `(sort) => void` | — | Fires with the order the click switches **to** |
-| `className`, `ref`, rest | | | On the `<button>` |
+| `size`, `tone` | as `Chip` | `sm`, `default` | The chip's own size (28 or 36) and text tone |
+| `className`, `ref`, rest | | | On the chip's `<button>` |
 
 ## Tokens
 
-| Part | Token | Utility |
-|---|---|---|
-| Fill | `neutral.tonal.surface.default` / `.hover` / `.pressed` | `bg-neutral-tonal-surface-*` |
-| Text | `neutral.tonal.content.default` / `.hover` / `.pressed` | `text-neutral-tonal-content-*` |
-| Type | `type.label-sm-medium`, 14 | `text-label-sm-medium` |
-| Shape | 32 tall, `radius.sm`, 16 left and 8 right padding, 8 gap | `h-8 rounded-sm pl-4 pr-2 gap-2` |
-| Glyph | `sort-descending` (newest) / `sort-ascending` (oldest), 20 | `Icon size="md"` |
+Nothing of its own: it is a `Chip`, so its fill, hover step, text colour, shape and focus
+ring are the chip's. The glyph is `sort-descending` (newest) or `sort-ascending` (oldest),
+16, in the label.
 
 Phosphor names the glyphs by the order of the bars: `sort-descending` is the one whose
-arrow points up, which is what the design draws for Newest First. The design's glyph
-box is 18; the Icon set draws 16 or 20, and 20 is the closer.
-
-Contrast of the text on its fill, light: **8.4:1** default, **9.85:1** hover, **6.96:1**
-pressed.
-
-**Token gap, for design:** in dark the hover and pressed fills are *lighter* than the
-default while the text stays light, so hover is **3.86:1** and pressed **2.34:1**, under
-the 4.5:1 text needs. The family's own hover and pressed text tokens are used, and they
-do not fix it in dark; the dark `neutral.tonal.surface` hover and pressed steps need to
-go the other way.
+arrow points up, which is what the design draws for Newest First.
 
 ## Accessibility
 
-- A real `<button>`. It shows the **current** order, as drawn, so its name spells out
+- A real `<button>` (the chip's own). It shows the **current** order, as drawn, so its name spells out
   what it is: "Sort comments: Newest First", which still contains the visible words.
 - The glyph is `aria-hidden`.
-- 32 tall by default and 40 on a coarse pointer.
+- 28 tall by default (`size="md"` is 36) and 40 on a coarse pointer.
 
 ## Don't
 

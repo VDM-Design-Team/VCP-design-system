@@ -1,7 +1,8 @@
 # CommentFormActions
 
 The buttons under a comment box: the one that sends it ("Add Comment", "Reply",
-"Save") and, when there is a way out, "Cancel". A component.
+"Save") and, for a reply or an edit, "Cancel". A component. The only choice is the
+`variant`; the words are fixed copy.
 
 Read off the Figma `_Comment_Controls` (Save, Reply Enabled, Reply Disabled) and
 `_Comment_Button` (Add Comment, with its loading state).
@@ -26,12 +27,13 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `submitLabel` | `string` | `Add Comment` | "Add Comment", "Reply" or "Save" |
+| `variant` | `'comment' \| 'reply' \| 'save'` | `comment` | Which comment box it is. It fixes the words — "Add Comment", "Reply", "Save" — and whether there is a Cancel. The words are not props |
 | `onSubmit` | `() => void` | — | |
+| `type` | `'button' \| 'submit'` | `button` | The send button's type. `submit` makes it the surrounding form's submit: leave `onSubmit` off then, or it sends twice |
+| `form` | `string` | — | The id of the form the send button belongs to, when it sits outside it |
 | `disabled` | `boolean` | `false` | The design's "Reply Disabled": the send button dims, Cancel stays usable |
-| `loading` | `boolean` | `false` | The send is in flight: a spinner, `aria-busy`, and no second click |
-| `onCancel` | `() => void` | — | Draws Cancel. Leave it off for a new comment, which has nothing to cancel |
-| `cancelLabel` | `string` | `Cancel` | |
+| `loading` | `boolean` | `false` | The send is in flight: a spinner, `aria-busy`, and no second click. In the product today only Add Comment waits (reply and save refresh the section), and it has no Cancel |
+| `onCancel` | `() => void` | — | Fires when Cancel is clicked. **Required for `reply` and `save`** (they draw a Cancel); not allowed for `comment`, which has nothing to cancel |
 | `className`, `ref`, rest | | | On the wrapper |
 
 ## Tokens
@@ -58,6 +60,9 @@ Three differences from the Figma frames, all the system's:
 
 ## Accessibility
 
+- Inside a `<form>`, Cancel never submits (it is `type="button"`), and the send button only
+  does when you set `type="submit"`.
+- Both buttons are 36 tall, and 40 on a coarse pointer, as `CommentActions` is.
 - Real buttons, with text names. `loading` sets `aria-busy` and disables the send
   button, so a second click cannot send twice.
 - A disabled send button is out of the tab order, as any disabled button is. If the

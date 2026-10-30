@@ -40,7 +40,7 @@ originally duplicated an identical shell between them instead of sharing one.
 |---|---|---|---|
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | All four are VCP's own semantics — GDL's Tag primitive doesn't dictate them |
 | `tone` | `neutral \| brand \| info \| success \| warning \| critical` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
-| `size` | `sm \| md` | `md` | 24 / 28 tall, with 12 / 14 type. `sm` for dense tables and inline-with-body-text |
+| `size` | `xs \| sm \| md \| lg` | `md` | 20 / 24 / 28 / 32 tall, with 10 / 12 / 14 / 16 type. `sm` for dense tables and inline-with-body-text. See "Sizes" below |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the tag's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
 | `className` | `string` | — | Merged via `cn()` |
@@ -57,15 +57,46 @@ differs between the two:
 | Part | Token | Utility |
 |---|---|---|
 | Radius | `shape.radius.sm` | `rounded-sm` |
+| Type ramp, `lg` | Poppins 500, 16 | `text-label-md-medium` |
 | Type ramp, `md` | Poppins 500, 14 | `text-label-sm-medium` |
 | Type ramp, `sm` | Poppins 500, 12 | `text-caption-md-medium` |
-| Height | Tailwind numeric scale | `h-7` (`md`, 28) / `h-6` (`sm`, 24) |
-| Padding | Tailwind numeric scale | `px-2` (8), both sizes |
-| Gap | Tailwind numeric scale | `gap-2` (`md`, 8) / `gap-1` (`sm`, 4) |
+| Type ramp, `xs` | Poppins 500, 10 | `text-caption-sm-medium` |
+| Height | Tailwind numeric scale | `h-8` (`lg`, 32) / `h-7` (`md`, 28) / `h-6` (`sm`, 24) / `h-5` (`xs`, 20) |
+| Padding | Tailwind numeric scale | `px-2` (`lg`, `md`, 8) / `px-1.5` (`sm`, `xs`, 6) |
+| Gap | Tailwind numeric scale | `gap-1.5` (`lg`, `md`, 6) / `gap-1` (`sm`, `xs`, 4) |
 | Icon colour | — | Inherited from the tone's content token via `currentColor`, unless the icon sets its own colour (see `TypeTag`/`UrgencyTag`) |
 
 The dark theme comes for free — every colour class is a semantic token that
 `tokens/semantic/color.dark.json` overrides under `.dark`.
+
+### Sizes
+
+Four sizes, read off GDL's `Tag` (`Size=` Small, Medium, Large, Extra Large —
+20, 24, 28 and 32 tall; the padding, gap and type steps 10, 12, 14, 16 are all
+as drawn there):
+
+| `size` | Height | Type | Side padding | Gap | Icon | GDL's name |
+|---|---|---|---|---|---|---|
+| `xs` | 20 | 10 | 6 | 4 | 12 | Small |
+| `sm` | 24 | 12 | 6 | 4 | 16 (`sm`) | Medium |
+| `md` | 28 | 14 | 8 | 6 | 20 (`md`) | Large |
+| `lg` | 32 | 16 | 8 | 6 | 24 (`lg`) | Extra Large |
+
+The height is fixed and the label centred in it, which is what GDL's 4 of
+vertical padding gives at every size. The two small sizes take 6 at the sides and
+the two large ones 8; the gap between a glyph and the label is 4 on the small pair
+and 6 on the large pair (it was 8 on `md` before GDL's spacing was updated).
+
+**The names are this repo's, not GDL's.** The system names sizes `xs | sm | md | lg
+| xl` (`Avatar`, `IconButton`, `SegmentedControl`), and `Badge`'s `sm | md | lg` are
+the same 24 / 28 / 32 heights, so the four tag sizes take the first four steps in
+order. That is why GDL's "Medium" is `sm` here and its "Large" is `md`: the heights
+and the type match, the words do not. `sm` and `md` were already these two
+sizes, so adding `xs` and `lg` renamed nothing. Read a size off the height, never
+off GDL's word.
+
+**`md` stays the default** (28, GDL's Large), which is what every composing tag
+(`StatusTag`, `TypeTag`, `UrgencyTag`) already ships.
 
 ### Radius: VCP's own measured value, not GDL's
 

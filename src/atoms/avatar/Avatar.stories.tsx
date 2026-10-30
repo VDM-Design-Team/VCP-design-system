@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { Avatar, AVATAR_TONES, toneForName } from './Avatar';
 
 /**
@@ -146,6 +147,19 @@ export const Ring: Story = {
       </div>
     </div>
   ),
+};
+
+/**
+ * `tone="brand"`: initials on `surface.brand.subtle` in `text.brand.strong` — the people chips' avatar. Not
+ * part of the colour-by-name range: a name never hashes onto it, a caller asks for it.
+ */
+export const Brand: Story = {
+  args: { name: 'John Doe', tone: 'brand' },
+  play: async ({ canvasElement }) => {
+    const avatar = canvasElement.querySelector('span') as HTMLElement;
+    await expect(avatar.className).toContain('bg-surface-brand-subtle');
+    await expect(within(canvasElement).getByText('JD')).toBeVisible();
+  },
 };
 
 /**
