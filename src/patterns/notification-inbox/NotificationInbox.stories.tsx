@@ -124,7 +124,7 @@ export const Empty: Story = {
   },
 };
 
-/** Without `onMarkAllRead` the button is still there; it just reports nothing. */
+/** Without `onMarkAllRead` there is no "Mark all as read": a button that does nothing is never drawn. */
 export const WithoutMarkAllHandler: Story = {
   args: { onMarkAllRead: undefined },
   render: (args) => (
@@ -133,6 +133,9 @@ export const WithoutMarkAllHandler: Story = {
     </NotificationInbox>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: 'Mark all as read' })).toBeVisible();
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: 'Mark all as read' })).toBeNull();
+    /* The switch stays: it is the caller's filter either way. */
+    await expect(canvas.getByRole('switch', { name: 'Show unread only' })).toBeVisible();
   },
 };
