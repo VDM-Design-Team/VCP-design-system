@@ -9,7 +9,7 @@ import {
   plainText,
   type MentionMember,
   type MentionSegment,
-} from '../mention-input';
+} from '../../atoms/mention-input';
 
 /**
  * CommentReply — one posted comment: who wrote it and when, what it says, the

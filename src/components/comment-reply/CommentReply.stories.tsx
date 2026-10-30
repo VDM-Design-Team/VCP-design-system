@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { CommentReply } from './CommentReply';
 import { EmojiReactionPicker } from '../emoji-reaction-picker';
-import type { MentionSegment } from '../mention-input';
+import { typeText } from '../../lib/story-typing';
+import type { MentionSegment } from '../../atoms/mention-input';
 
 const MEMBERS = [
   { id: '182', name: 'Anna Berg' },
@@ -141,7 +142,7 @@ export const Flow: Story = {
     await waitFor(() => expect(box).toHaveFocus());
     const send = canvas.getByRole('button', { name: 'Reply' });
     await expect(send).toBeDisabled();
-    await userEvent.type(box, 'On it');
+    await typeText(box, 'On it');
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     await expect(args.onSubmitReply).toHaveBeenCalledWith([{ type: 'text', text: 'On it' }]);
@@ -150,7 +151,7 @@ export const Flow: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Edit' }));
     const edit = await canvas.findByRole('textbox', { name: 'Edit comment' });
     await expect(edit).toHaveTextContent('@Jane Doe Test comment here.');
-    await userEvent.type(edit, ' Thanks.');
+    await typeText(edit, ' Thanks.');
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
     await expect(args.onSubmitEdit).toHaveBeenCalledTimes(1);
   },
