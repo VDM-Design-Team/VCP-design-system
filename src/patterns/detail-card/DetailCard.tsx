@@ -374,7 +374,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.capacityPoints}
       />
     ) : value.capacityPoints !== undefined ? (
-      <Badge size="md" tone="neutral">{String(value.capacityPoints)}</Badge>
+      <Badge size="lg" tone="neutral">{String(value.capacityPoints)}</Badge>
     ) : null;
 
     const hasViewers = viewerCount !== undefined && !editing;
