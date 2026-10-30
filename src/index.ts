@@ -32,6 +32,8 @@ export * from './components/carousel';
 export * from './components/chip';
 export * from './components/comment-actions';
 export * from './components/comment-form-actions';
+export * from './components/comment-reply';
+export * from './components/comment-reply-thread';
 export * from './components/comment-sort-chip';
 export * from './components/cycle-tag';
 export * from './components/data-table';
