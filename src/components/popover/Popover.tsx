@@ -49,9 +49,7 @@ const popoverPanel = cva(
        token set reserves for exactly this — `shadow.menu`. */
     'rounded-md border border-stroke-default bg-surface-elevated shadow-menu',
     'p-4 font-sans text-body-sm-regular text-text-secondary',
-    /* Focusable as a container only so a click on dead space inside the panel
-       does not drop focus to the body. Never in the tab order. */
-    'focus:outline-none',
+    /* Focus styling depends on whether the panel scrolls; see `className` below. */
   ],
   {
     variants: {
@@ -218,7 +216,11 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     const panel = panelRef.current;
     if (!wrapper || !panel) return;
     const trigger = wrapper.getBoundingClientRect();
-    const need = panel.offsetHeight + PANEL_GAP;
+    /* The panel's full height, not the height it has now: once `max-height` has
+       shortened it, `offsetHeight` says it fits, the limit comes off, it grows back
+       and no longer fits — a flicker every frame. `scrollHeight` is the content's
+       height whatever the limit; the difference adds the border back. */
+    const need = panel.scrollHeight + (panel.offsetHeight - panel.clientHeight) + PANEL_GAP;
     const wide = panel.offsetWidth;
 
     const roomBelow = window.innerHeight - trigger.bottom - SCREEN_EDGE;
@@ -352,11 +354,19 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
              trigger's — "More actions" names the menu it opens. */
           aria-label={panelRole && label ? label : undefined}
           aria-labelledby={panelRole && !label ? triggerId : undefined}
-          tabIndex={panelProps?.tabIndex ?? -1}
+          /* In the tab order only while it scrolls: a scrolling panel with nothing
+             focusable inside could not otherwise be scrolled from the keyboard. */
+          tabIndex={panelProps?.tabIndex ?? (fit?.maxHeight !== undefined ? 0 : -1)}
           /* Only when neither side has room, so a tall panel scrolls instead of leaving the screen. */
           style={fit?.maxHeight !== undefined ? { maxHeight: fit.maxHeight, overflowY: 'auto' } : undefined}
           className={cn(
             popoverPanel({ placement: fit?.placement ?? placement, align: fit?.align ?? align, width }),
+            /* A scrolling panel is a Tab stop, so it shows the focus ring like any other.
+               Otherwise it is focusable only so a click on dead space inside it does not
+               drop focus to the body, and draws no outline. */
+            fit?.maxHeight !== undefined
+              ? 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused'
+              : 'focus:outline-none',
             panelClassName,
             panelProps?.className,
           )}

@@ -143,6 +143,10 @@ because a list of actions with no keyboard entry point is a mouse feature.
   trigger's own accessible name via `aria-labelledby`.
 - **The panel is focusable as a container** (`tabIndex={-1}`, never in the tab
   order) so a click on dead space inside it does not drop focus to the body.
+  **The one exception is a panel that scrolls** because neither side has room:
+  then it takes `tabIndex={0}` and the standard focus ring (`stroke.focused`), so a
+  keyboard user can Tab into it, see where focus went, and scroll it with the arrow
+  keys even when nothing inside is focusable.
 
 ### Positioning — what it does and does not do
 
@@ -157,6 +161,9 @@ The panel is absolutely positioned inside a relatively positioned wrapper:
   right-flush if that is the one that fits (and the other way round).
 - **It scrolls when neither side fits.** The panel keeps the roomier side and its
   height gives way (`max-height`, scrolling inside), rather than leaving the screen.
+  It is measured by its full content height, not its shortened one, so it settles
+  once and stays put (until 30 October 2026 it flickered between the two heights
+  every frame). The `ScrollsWhenNeitherSideFits` story is the regression test.
 - It is measured again when the window or the panel is resized. It does **not**
   re-measure while the page scrolls, so an open panel never jumps to the other side
   under the reader's hands.
