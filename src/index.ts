@@ -33,6 +33,7 @@ export * from './components/cycle-tag';
 export * from './components/data-table';
 export * from './components/date-picker';
 export * from './components/detail-row';
+export * from './components/dropdown-stepper';
 export * from './components/dropzone';
 export * from './components/due-date-tag';
 export * from './components/emoji-reaction-picker';
