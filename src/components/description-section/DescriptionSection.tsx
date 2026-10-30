@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 
 /**
@@ -9,9 +8,9 @@ import { IconButton } from '../../atoms/icon-button';
  * `DescriptionCard`s under it, and the files attached to it with a paperclip to attach more.
  * Read off the Figma `Description_Card_Content`, in its edit and view variants.
  *
- * **It can fold.** With `collapsible` the title becomes a disclosure: the whole header is one
- * button with a caret at the right (down when folded, up when open), and the body (the cards and
- * the files) is hidden, not unmounted, so what was typed is still there when it opens again.
+ * **It always folds.** A caret button at the right of the header (down when folded, up when
+ * open) hides the cards and the files, which are hidden, not unmounted, so what was typed is
+ * still there when it opens again. Only that button is the toggle; the title is plain text.
  * Controlled with `open` and `onOpenChange`, or uncontrolled with `defaultOpen`.
  *
  * **It is the frame, not the content.** The cards are `children` (the caller owns the list, and
@@ -29,9 +28,7 @@ export interface DescriptionSectionProps extends Omit<React.HTMLAttributes<HTMLE
   title: string;
   /** The heading level to draw the title as. Default `h2`: a section sits directly under the page's own `h1`. */
   headingLevel?: 'h2' | 'h3' | 'h4';
-  /** Makes the header a disclosure that folds the cards and files away. */
-  collapsible?: boolean;
-  /** Controlled: whether the body is showing. Only with `collapsible`. */
+  /** Controlled: whether the cards and files are showing. */
   open?: boolean;
   /** Uncontrolled: whether it starts open. Default `true`. */
   defaultOpen?: boolean;
@@ -57,7 +54,6 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
       className,
       title,
       headingLevel: Heading = 'h2',
-      collapsible,
       open: openProp,
       defaultOpen = true,
       onOpenChange,
@@ -74,7 +70,7 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
     const headingId = React.useId();
     const bodyId = React.useId();
     const [innerOpen, setInnerOpen] = React.useState(defaultOpen);
-    const open = !collapsible || (openProp ?? innerOpen);
+    const open = openProp ?? innerOpen;
     const toggle = () => {
       if (openProp === undefined) setInnerOpen(!open);
       onOpenChange?.(!open);
@@ -89,27 +85,9 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
         className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
-        {/* The header. With `collapsible` the whole row is the toggle, through a stretched
-            target on the title's button, so the add button can sit in the row above it
-            without being nested in the button. */}
-        <div className="relative flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <Heading id={headingId} className="text-title-sm-bold text-text-primary">
-            {collapsible ? (
-              <button
-                type="button"
-                aria-expanded={open}
-                aria-controls={bodyId}
-                onClick={toggle}
-                className={cn(
-                  'text-left outline-none after:absolute after:inset-0 after:rounded-sm',
-                  'focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-stroke-focused',
-                )}
-              >
-                {title}
-              </button>
-            ) : (
-              title
-            )}
+            {title}
           </Heading>
           {onAdd && (
             <IconButton
@@ -119,17 +97,19 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
               label={addLabel ?? `Add ${title}`}
               onClick={onAdd}
               /* 24 to look at, 40 to press: the target reaches 8 past the circle on every side. */
-              className="relative z-10 before:absolute before:-inset-2"
+              className="relative before:absolute before:-inset-2"
             />
           )}
-          {collapsible && (
-            <Icon
-              name={open ? 'caret-up' : 'caret-down'}
-              size="md"
-              aria-hidden="true"
-              className="ml-auto shrink-0 text-text-secondary"
-            />
-          )}
+          {/* The fold button: its name says what pressing it does, and which section. */}
+          <IconButton
+            icon={open ? 'caret-up' : 'caret-down'}
+            variant="tertiary"
+            size="md"
+            label={`${open ? 'Collapse' : 'Expand'} ${title}`}
+            aria-controls={bodyId}
+            onClick={toggle}
+            className="ml-auto -my-2 -mr-2 text-text-secondary"
+          />
         </div>
 
         <div id={bodyId} hidden={!open} className="flex flex-col gap-4">

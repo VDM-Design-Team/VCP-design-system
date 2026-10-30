@@ -30,9 +30,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `title` | `string` | required | The section's name. It is the heading, and names the region |
 | `headingLevel` | `'h2' \| 'h3' \| 'h4'` | `h2` | The level to draw the title as. A screen reader user jumps between headings, so it has to fit the page's outline: `h2` directly under the page's `h1`, `h3` inside a modal whose title is an `h2` |
-| `collapsible` | `boolean` | — | The header becomes a disclosure with a caret at the right (down folded, up open). The body is hidden, not unmounted, so typed text survives folding |
-| `open` / `onOpenChange` | `boolean` / `(open) => void` | — | Collapsible, controlled |
-| `defaultOpen` | `boolean` | `true` | Collapsible, uncontrolled: whether it starts open |
+| `open` / `onOpenChange` | `boolean` / `(open) => void` | — | Controlled: whether the cards and files are showing. Every section folds; this is the toggle's state |
+| `defaultOpen` | `boolean` | `true` | Uncontrolled: whether it starts open |
 | `onAdd` / `addLabel` | `() => void` / `string` | — / "Add {title}" | Renders the round add button after the title. Leave it off for a section with one card (Desired Outcome) or for a view |
 | `onAttach` / `attachLabel` | `() => void` / `string` | — / `Attach files` | Renders the paperclip under the cards and reports the press. It does not open anything: the page opens the file picker, or the attachment modal with a `Dropzone`. Leave it off for a view |
 | `attachments` | `ReactNode` | — | The attached files, as `FileAttachment`s (an image shows its own thumbnail through `thumb`), to the left of the paperclip. Opening one leads to `AttachmentPreview` |
@@ -46,7 +45,7 @@ exist, so one component is both the editor (pass `onAdd`, `onAttach`) and the vi
 ## Tokens
 
 `surface.elevated`, `radius.md`, 24 padding (as the Detail card), 16 between the title row, the cards and the
-attachments row, 16 between cards. The caret is a 20 `caret-down` / `caret-up` in `text.secondary`. The title is `title-sm-bold` (16/700) `text.primary`. The add button is
+attachments row, 16 between cards. The fold button is a `tertiary` `IconButton` (40) with a 20 `caret-down` / `caret-up` in `text.secondary`, pulled in 8 so the caret sits on the padding's edge. The title is `title-sm-bold` (16/700) `text.primary`. The add button is
 an `IconButton` `primary`, `xs` (24) with a 40 target; the paperclip is `tertiary`, `md` (40), its glyph in the `neutral.outline.content` palette (default, hover, pressed). No
 new tokens.
 
@@ -54,7 +53,7 @@ new tokens.
 
 - A `<section>` named by its heading (`aria-labelledby`), so each is a region a screen reader can
   jump to. The cards are an `ol`, so "item 2 of 3" is announced; the number block is decorative.
-- With `collapsible` the heading holds one button (`aria-expanded`, `aria-controls` the body) whose target stretches over the whole header, so the add button sits above it as its own control and pressing it does not fold the section. The caret is decorative.
+- **The fold button** is an icon button at the right of the header, named for what it does and to which section ("Collapse Problems" / "Expand Problems"), with `aria-controls` the body. Only it is the toggle; the title is plain text. The body is hidden, not unmounted, so typed text survives folding.
 - The add button's default name is "Add Problems", so a page with several sections has distinct
   buttons. The paperclip is "Attach files".
 - The add button is 24 to look at and 40 to press (its target reaches 8 past the circle).
@@ -65,4 +64,4 @@ new tokens.
   card's and the caller's.
 - **Don't offer attachments on Desired Outcome.** It has none in the design: pass neither `onAttach` nor `attachments`.
 - **Don't add a second heading inside.** The title is the heading.
-- **Don't show the add button or the paperclip in a view.** Pass neither handler.
+- **Don't show the add button or the paperclip in a view.** Pass neither handler (the fold button stays).

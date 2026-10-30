@@ -8,7 +8,7 @@ block and the paragraph beside it. Four types: `problem`, `solution`, `deliverab
 `desired-outcome`. Reading, or `editing`: the paragraph becomes a text field that grows with what is
 typed, with an `error` (the critical border and a message under the card) and an optional remove button inside the card's right edge, which appears on hover and while the card has focus (always on a touch screen).
 
-**`DescriptionSection`** (component): the frame around a block of the description, a title with an optional round add button, the numbered cards as an ordered list, and the attached files with a paperclip to attach more. The cards are its children and the files its `attachments`; pass `onAdd` and `onAttach` for an editor and neither for a view. With `collapsible` the header folds the section, with a caret.
+**`DescriptionSection`** (component): the frame around a block of the description, a title with an optional round add button, the numbered cards as an ordered list, and the attached files with a paperclip to attach more. The cards are its children and the files its `attachments`; pass `onAdd` and `onAttach` for an editor and neither for a view. Every section folds: a caret button at the right of the header hides the cards and files (hidden, not unmounted).
 
 **`StatusHistory`** (component): the collapsible bar that holds the status log, a clock,
 "Status History (n)" and a caret. A disclosure wired as one (heading, button with

@@ -76,7 +76,8 @@ export const Viewing: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.queryByRole('button')).toBeNull();
+    /* No add and no paperclip: the fold button is the only control. */
+    await expect(canvas.getAllByRole('button')).toHaveLength(1);
     await expect(canvas.getAllByRole('listitem')).toHaveLength(3);
   },
 };
@@ -121,41 +122,37 @@ export const SingleCard: Story = {
 };
 
 /**
- * `collapsible`: the whole header is the toggle, with a caret at the right. Folded, only the header
+ * Every section folds: the caret button at the right of the header is the toggle (the title is not). Folded, only the header
  * shows; the body is hidden, not unmounted, so what was typed is there when it opens again.
  */
 export const Collapsible: Story = {
-  args: { title: 'Acceptance Criteria / Deliverables', collapsible: true, defaultOpen: false },
+  args: { title: 'Acceptance Criteria / Deliverables', defaultOpen: false },
   render: (args) => (
     <div className="flex flex-col gap-4">
       <DescriptionSection {...args}>
         <DescriptionCard type="deliverable" position={1}>Some paragraph here</DescriptionCard>
       </DescriptionSection>
-      <DescriptionSection title="Desired outcome" collapsible defaultOpen>
+      <DescriptionSection title="Desired outcome" defaultOpen>
         <DescriptionCard type="desired-outcome" editing position={1} />
       </DescriptionSection>
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const folded = canvas.getByRole('button', { name: 'Acceptance Criteria / Deliverables' });
-    await expect(folded).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.queryByText('Some paragraph here')).not.toBeVisible();
-    await userEvent.click(folded);
-    await expect(folded).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.click(canvas.getByRole('button', { name: 'Expand Acceptance Criteria / Deliverables' }));
     await expect(canvas.getByText('Some paragraph here')).toBeVisible();
-    const open = canvas.getByRole('button', { name: 'Desired outcome' });
-    await expect(open).toHaveAttribute('aria-expanded', 'true');
-    await userEvent.click(open);
-    await expect(open).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.getByRole('button', { name: 'Collapse Acceptance Criteria / Deliverables' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Collapse Desired outcome' }));
+    await expect(canvas.getByRole('button', { name: 'Expand Desired outcome' })).toBeVisible();
   },
 };
 
-/** An add button in a collapsible header is its own control: pressing it does not fold the section. */
+/** The add button and the fold button are separate controls: pressing add does not fold the section. */
 export const AddInACollapsibleHeader: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { title: 'Problems', collapsible: true, onAdd: fn() },
+  args: { title: 'Problems', onAdd: fn() },
   render: (args) => (
     <DescriptionSection {...args}>
       <DescriptionCard editing position={1} />
@@ -165,7 +162,7 @@ export const AddInACollapsibleHeader: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Add Problems' }));
     await expect(args.onAdd).toHaveBeenCalledTimes(1);
-    await expect(canvas.getByRole('button', { name: 'Problems' })).toHaveAttribute('aria-expanded', 'true');
+    await expect(canvas.getByRole('button', { name: 'Collapse Problems' })).toBeVisible();
   },
 };
 
