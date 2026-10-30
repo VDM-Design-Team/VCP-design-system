@@ -205,7 +205,7 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
             label={`Remove ${name}`}
             onClick={onRemove}
             className={cn(
-              'absolute right-0.5 top-0.5',
+              'absolute right-1 top-1',
               /* In the tab order always; visible on card hover or any focus —
                  never mounted-by-hover, which no keyboard can trigger. Hidden
                  while the card itself is pressed, per Figma's note. */

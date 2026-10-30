@@ -68,7 +68,7 @@ states frame draws it. A card without `onClick` has no hover or pressed state
 — Figma notes the hover state isn't available in view mode.
 
 The ✕ is the `RemoveButton` atom in its `tonal` look (Figma's `_File_Attachment_Remove_Button`): an `x`
-in `accent.critical.outline.content` on `accent.critical.tonal.surface`, 28, in the card's top-right
+in `accent.critical.outline.content` on `accent.critical.tonal.surface`, a 20 disc, in the card's top-right
 corner, with a 40 target. The card positions it and reveals it.
 
 `domain` is Figma's `_Domain_Label`, shown when an AV is handed from one domain to
@@ -117,8 +117,8 @@ A remove-only card (`onRemove` without `onClick`) still takes the hover fill and
   "Remove ${name}" — ten tiles, ten distinct names.
 - A `thumb` image is `alt=""` — the name below is the caption; announcing
   the filename twice is noise.
-- The ✕ is 28 in the card's corner, 2 in from the top and right edges —
-  pointer-dense exemption; the card itself is the big target.
+- The ✕ is a 20 disc in the card's corner, 4 in from the top and right edges, with a 40
+  click area (invisible padding around it); the card itself is the big target.
 - The domain badge is `aria-hidden`; the domain is repeated as visually-hidden
   text ("Design domain.") in the card instead of being silently dropped.
 - Keyboard focus gets the standard `stroke.focused` ring on the card and on

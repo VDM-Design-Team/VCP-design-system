@@ -223,7 +223,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               label={removeLabel}
               onClick={onRemove}
               className={cn(
-                'absolute top-3 right-3',
+                'absolute top-3.5 right-3',
                 'opacity-0 transition-[opacity,color] duration-150',
                 !otherFocused && 'group-hover/card:opacity-100',
                 'group-focus-within/card:opacity-100 pointer-coarse:opacity-100',

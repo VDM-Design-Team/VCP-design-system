@@ -13,8 +13,8 @@ import { Icon } from '../icon';
  * critical outline content colour (default, hover, pressed); `tonal` adds the critical tonal fill.
  *
  * It does not decide when it shows. Whoever places it positions it and reveals it (on hover or
- * focus of the item, always on a touch screen): pass those classes in `className`. It is 24 or 28
- * to look at and 40 to press: the target reaches 8 past the button on every side.
+ * focus of the item, always on a touch screen): pass those classes in `className`. Both looks are 20
+ * to look at and 40 to press: the click area is invisible padding, much bigger than the drawing.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -26,19 +26,19 @@ const removeButton = cva(
     'transition-colors motion-reduce:transition-none',
     'text-accent-critical-outline-content-default',
     'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
-    /* The 40 target. */
-    'before:absolute before:-inset-2',
+    /* The 40 target: 10 past the 20 button on every side. */
+    'before:absolute before:-inset-2.5',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
     'disabled:pointer-events-none disabled:text-accent-critical-outline-content-disabled',
   ],
   {
     variants: {
       tone: {
-        /* The glyph alone: 24. */
-        plain: 'size-6',
-        /* On a filled disc: 28, for use over an image. */
+        /* The glyph alone: 20. */
+        plain: 'size-5',
+        /* On a filled disc, also 20: for use over an image. */
         tonal: [
-          'size-7',
+          'size-5',
           'bg-accent-critical-tonal-surface-default',
           'hover:bg-accent-critical-tonal-surface-hover active:bg-accent-critical-tonal-surface-pressed',
         ],
@@ -65,7 +65,7 @@ export const RemoveButton = React.forwardRef<HTMLButtonElement, RemoveButtonProp
       {...props}
     >
       {tone === 'tonal' ? (
-        <Icon name="x" size="sm" aria-hidden="true" />
+        <Icon name="x" aria-hidden="true" className="size-3" />
       ) : (
         <Icon name="x-circle" size="md" aria-hidden="true" />
       )}
