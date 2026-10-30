@@ -1,7 +1,7 @@
 ---
 bump: major
 ---
-### `SearchSelect` — rebuilt as the one searchable select; `Tag` can be removable; `CheckboxMark` (October 2026)
+### `SearchSelect` — rebuilt as the one searchable select (October 2026)
 
 `SearchSelect` is now the system's single dropdown for picking from a list that is too long or too rich for `Select`: a field that shows the value and a panel with an optional search box over the rows, in the look of Figma's Edit Viewers dropdown. **Search lives in the panel, never in the field**; the reasons are recorded in `docs/search-select.md` so they are not reversed by accident.
 
@@ -17,6 +17,4 @@ bump: major
 
 Migration: the old `SearchSelect` was a text input that searched in the field. Its `placeholder` now labels the field (the search box takes `searchPlaceholder`); `renderOption` now receives `(option, { selected, active })` and draws only a row's content; the `avatars` prop and the option's `avatar` field are gone (avatars used to be on by default): pass `rows="avatar"` for a list of people, with `src` or `unassigned` on the option; `onChange` receives a `string` for a single pick and a `string[]` with `multiple` (the old `string & string[]` hybrid is gone). Nothing in this repository imported it.
 
-`Tag` gains `onRemove` and `removeLabel`: a ✕ button after the label, for a value picked into a field (also an AV's tags in edit mode). The ✕ is the only interactive part; a Tag without `onRemove` is unchanged. A tag that toggles or opens something is still a `Chip`.
-
-`Checkbox` gains a `CheckboxMark` export: the box and tick with no input behind it, for rows that are themselves the control. Same box, tokens and tick as `Checkbox`.
+Builds on the removable `Tag` (`onRemove`) and `CheckboxMark`, which are in their own PR (#210).
