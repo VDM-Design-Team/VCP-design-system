@@ -48,7 +48,7 @@ the subject is regular.
 
 Every sentence ends in a full stop, the component adds it, so a one-sentence line and a two-sentence one end the same way.
 
-Then the time, 12 regular `text.tertiary`, at the end of the same line. The text is
+Then the time, 12 regular `text.tertiary`, at the end of the same line. It follows the full stop, so its first letter is shown capitalised ("A few seconds ago") whatever the caller passes; the accessible name keeps the text as given. The text is
 English; to localise, wrap the component and pass your own sentence, not edit call
 sites.
 
@@ -111,7 +111,7 @@ close; with no button the text keeps its 8.
 ## Accessibility
 
 - **The whole row is one target**, a real `<a>` or `<button>` named from the
-  sentence: "Unread: John commented on *Title* a few seconds ago". The unread state
+  sentence: "Unread: John commented on *Title*. a few seconds ago". The unread state
   is in the name as text, not only as a dot.
 - **The mark-read button is a separate control**, named "Mark as read: *Title*" or "Mark
   as unread: *Title*" (so a list of them is not a list of identical names), reachable by Tab even when it is not visible. On an unread row it

@@ -140,7 +140,11 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             <span className="text-body-sm-bold">{`${trail}.`}</span>
           </>
         )}{' '}
-        <span className="text-caption-md-regular text-text-tertiary">{time}</span>
+        {/* Capitalised for display: it follows the sentence's full stop, so it starts a
+            sentence of its own. `first-letter` needs a block-level box. */}
+        <span className="inline-block text-caption-md-regular text-text-tertiary first-letter:uppercase">
+          {time}
+        </span>
       </>
     );
 
