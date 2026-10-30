@@ -549,6 +549,40 @@ export const StatusWithApply: Story = {
   },
 };
 
+/**
+ * `inline`: the button is plain text with a caret, for a picker that lives inside another
+ * control's bar (the Gantt chart's period bar). Only the button changes; the panel is the same.
+ */
+export const Inline: Story = {
+  render: () => {
+    const [value, setValue] = React.useState('c44');
+    return (
+      <div className="flex w-96 items-center justify-center rounded-sm border border-stroke-brand-medium bg-surface-brand-faint">
+        <SearchSelect
+          inline
+          aria-label="Cycle"
+          searchPlaceholder="Search cycles"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: 'c43', label: 'Cycle 43 (Oct 13, 2026 - Oct 26, 2026)', shortLabel: 'Cycle 43' },
+            { value: 'c44', label: 'Cycle 44 (Oct 27, 2026 - Nov 09, 2026)', shortLabel: 'Cycle 44' },
+            { value: 'c45', label: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)', shortLabel: 'Cycle 45' },
+          ]}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Cycle' });
+    await expect(button).toHaveTextContent('Cycle 44');
+    await userEvent.click(button);
+    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)' }));
+    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 45');
+  },
+};
+
 /** `searchable={false}`: a short single list, keyboard on the trigger itself. */
 export const SingleWithoutSearch: Story = {
   tags: ['!dev', '!autodocs'],

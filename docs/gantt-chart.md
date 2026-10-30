@@ -157,15 +157,18 @@ the honest "Nothing matches these filters".
 
 No new tokens. Surfaces `surface.elevated`, `surface.neutral.subtle` (project
 rows), `surface.brand.faint` / `.subtle` / `.strong` (Today, navigator, rule);
-lines `stroke.default`, `stroke.subtle`, `stroke.brand.medium`, `stroke.focused`
-(the open-row bar); bars as in the table above; text `text.primary`,
-`text.secondary`, `text.tertiary`, `text.brand.medium`. Column and name-column
+lines `stroke.default` (rules, and an open person's left edge), `stroke.subtle`,
+`stroke.brand.medium`, `stroke.focused` (focus rings); bars as in the table above;
+text `text.primary`, `text.secondary`, `text.tertiary`, `text.brand.medium` (the arrows
+and carets) and `text.brand.strong` (the Planned figure and the Today heading, which need
+the stronger tone to keep 4.5:1 on the dark theme's cards). Column and name-column
 widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
 
 ## Accessibility
 
-- Every bar is a real `<a>` or `<button>` named with its title, status and dates,
-  so it is reachable by keyboard, and its tooltip opens on focus as well as hover.
+- Every task bar is a real `<a>` or `<button>` named with its title, status and dates,
+  so it is reachable by keyboard, and its tooltip opens on focus as well as hover. A
+  closed row's summary bar is not interactive: the row's own button opens it.
 - Rows open with a button that carries `aria-expanded`.
 - The scrolling area is a labelled, focusable region so the keyboard can scroll it.
 - Today's heading is `aria-current="date"`; the hatching and the column
@@ -173,7 +176,11 @@ widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
 - **Colour is never the only signal.** Each bar says what it is in its name and its
   tooltip; the legend is a key, not the source of meaning.
 - The accessible `filled` tones keep white text on every bar at 4.7:1 or better
-  (`pre-delivered` uses dark text instead), unlike the bright fills Figma draws.
+  (`pre-delivered` uses dark text instead), unlike the bright fills Figma draws. Every
+  text style in the chart is at 4.5:1 or better in both themes.
+- **Known limit:** the light-blue `pre-delivered` fill is 2.64:1 against the white card in
+  the light theme, under the 3:1 a shape's edge wants. Its text passes, and its name and
+  the legend say what it is.
 
 ## Don't
 

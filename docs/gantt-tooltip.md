@@ -5,7 +5,9 @@ a link glyph, then a few label/value lines — Status, Initiator, Est. Due Date.
 
 It is `Tooltip` with the content filled in. All the behaviour — opens on hover
 and on focus, `aria-describedby`, Escape, the pointer staying on it — is
-`Tooltip`'s; this piece only supplies the card.
+`Tooltip`'s; this piece only supplies the card, and turns on `followPointer`: a bar can
+be far wider than the card, so the card opens under the cursor, kept inside the screen,
+rather than at the bar's middle.
 
 ## Composed of
 
