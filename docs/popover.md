@@ -101,7 +101,7 @@ The dark theme comes for free — every colour above is a semantic token that
 | Key | Where | What happens |
 |---|---|---|
 | `Enter` / `Space` | trigger | Toggles the panel (native button activation) |
-| `Escape` | anywhere while open | Closes. Focus returns to the trigger **if focus was inside the popover**; if the user had already moved on, their place is left alone |
+| `Escape` | anywhere while open | Closes. Focus returns to the trigger **if focus was inside the popover**; if the user had already moved on, their place is left alone. Inside a `Modal`, only the popover closes: it marks the key as used with `preventDefault()`, and the dialog skips a used Escape — see [Modal: Escape and the popups inside](modal.md#escape-and-the-popups-inside) |
 | `Tab` / `Shift+Tab` | in the panel | Moves through the panel's own controls in DOM order. Leaving the popover closes it — the panel sits immediately after the trigger in the DOM, so this is ordinary reading order, not a trap |
 | pointer outside | anywhere | Closes, and does **not** pull focus back to the trigger — the user is already where they wanted to be |
 
@@ -143,29 +143,44 @@ because a list of actions with no keyboard entry point is a mouse feature.
   trigger's own accessible name via `aria-labelledby`.
 - **The panel is focusable as a container** (`tabIndex={-1}`, never in the tab
   order) so a click on dead space inside it does not drop focus to the body.
+  **The one exception is a panel that scrolls** because neither side has room:
+  then it takes `tabIndex={0}` and the standard focus ring (`stroke.focused`), so a
+  keyboard user can Tab into it, see where focus went, and scroll it with the arrow
+  keys even when nothing inside is focusable.
 
-### Positioning — the honest limits
+### Positioning — what it does and does not do
 
 The panel is absolutely positioned inside a relatively positioned wrapper:
-`top` or `bottom`, flush to the trigger's `left` or `right` edge. There is no
-positioning library in this system and this component does not pretend to be one.
+`top` or `bottom`, flush to the trigger's `left` or `right` edge. `placement` and
+`align` are what you *prefer*. When the panel is opened it is measured, and:
 
-**What that means, concretely:**
+- **It flips vertically** when the preferred side is cut off and the other side has
+  more room: a `bottom` popover near the foot of the screen opens above its trigger,
+  and a `top` one near the head opens below.
+- **It flips its edge** when it would run off the screen: left-flush becomes
+  right-flush if that is the one that fits (and the other way round).
+- **It scrolls when neither side fits.** The panel keeps the roomier side and its
+  height gives way (`max-height`, scrolling inside), rather than leaving the screen.
+  It is measured by its full content height, not its shortened one, so it settles
+  once and stays put (until 30 October 2026 it flickered between the two heights
+  every frame). The `ScrollsWhenNeitherSideFits` story is the regression test.
+- It is measured again when the window or the panel is resized. It does **not**
+  re-measure while the page scrolls, so an open panel never jumps to the other side
+  under the reader's hands.
 
-- **No collision detection and no flipping.** A `bottom` popover near the bottom
-  of the viewport opens off-screen. You choose the placement; nothing corrects it.
-- **No shifting.** A panel wider than the space beside its trigger overflows
-  rather than sliding to fit.
+**What it still does not do:**
+
+- **No shifting.** A panel wider than the space on both sides overflows rather than
+  sliding to fit. Keep panels to the width variants.
 - **No portal.** The panel is a child of the trigger's wrapper, so any ancestor
-  with `overflow: hidden`, `overflow: auto` or a transform will clip or move it.
-  A Popover inside a scrolling table cell is the usual way this bites.
-- **No repositioning on scroll or resize**, because it is anchored in normal
-  layout rather than measured.
+  with `overflow: hidden`, `overflow: auto` or a transform will clip or move it. It
+  measures against the *screen*, not that ancestor: a Popover inside a scrolling table
+  cell is the usual way this bites.
+- **No collision with other floating things**, only with the screen's edges.
 
-If you need any of those, the fix is a positioning dependency and a rewrite of
-the placement layer — not a workaround in a feature. Until then: pick the
-placement that fits where the trigger actually sits, keep panels small, and use
-`Modal` when the content is too big to sit beside anything.
+There is no positioning library in this system and this component does not
+pretend to be one. Keep panels small, and use `Modal` when the content is too big
+to sit beside anything.
 
 ## Don't
 
@@ -184,5 +199,5 @@ placement that fits where the trigger actually sits, keep panels small, and use
 - Don't put a `role="dialog"` on the panel and then expect Modal behaviour. This
   component does not trap focus, does not render inert background, and does not
   lock scroll.
-- Don't place one near the edge of a scrolling container and assume it will
-  flip. It will not.
+- Don't place one inside a clipping container (`overflow: hidden`) and expect the
+  panel to escape it. It flips for the screen's edges, not the container's.
