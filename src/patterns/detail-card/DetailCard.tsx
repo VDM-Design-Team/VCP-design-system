@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
+import { Badge } from '../../atoms/badge';
+import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Tag } from '../../atoms/tag';
@@ -27,8 +29,11 @@ import { AV_URGENCIES, UrgencyTag, type AVUrgency } from '../../components/urgen
  * Type, Urgency). `domain` then trims it: **Design has no Cycle**; Development has every field.
  *
  * Values go in as `value` and come out through `onChange` (editing), and the options for the
- * dropdowns as `options`. The page owns the data, the people pickers (the + beside Initiator and
- * Assignee only report) and the viewers list (a placeholder pill for now).
+ * dropdowns as `options`. **People are added, edited and removed in the card**, as the design's flow
+ * draws it: the + beside Initiator or Assignee opens a small form under the chips (a user, for an
+ * assignee a role and capacity points, then Cancel and Add); a chip's pencil turns that chip into
+ * the same form (Cancel and Save); its ✕ removes it. The Initiator has no pencil. The page owns the
+ * data and the viewers list (a placeholder pill for now).
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -86,6 +91,10 @@ export interface DetailCardCycle {
 }
 
 export interface DetailCardOptions {
+  /** Who can be added as Initiator or Assignee. */
+  people?: readonly DetailCardPerson[];
+  /** The roles an Assignee can be given. Default just "Assignee". */
+  roles?: readonly string[];
   cycles?: readonly DetailCardCycle[];
   projects?: ReadonlyArray<string | SearchSelectOption>;
   categories?: ReadonlyArray<string | SearchSelectOption>;
@@ -158,9 +167,6 @@ export interface DetailCardProps
   options?: DetailCardOptions;
   /** Editing and new: a message under a field, which also marks it invalid. */
   errors?: Partial<Record<DetailCardField, string>>;
-  /** Editing: the + beside Initiator and Assignee. The page opens its people picker. */
-  onAddInitiator?: () => void;
-  onAddAssignee?: () => void;
   /** The viewers pill, a placeholder until Edit Viewers is built: shows the count and reports a press. */
   viewerCount?: number;
   onViewers?: () => void;
@@ -180,8 +186,6 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       onChange,
       options,
       errors,
-      onAddInitiator,
-      onAddAssignee,
       viewerCount,
       onViewers,
       dueSoonWithinDays = 3,
@@ -203,9 +207,9 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       (list ?? []).map((p) => (
         <Chip
           key={p.name}
-          variant={editing ? 'outline' : 'tonal'}
-          size="sm"
-          avatar={<Avatar name={p.name} src={p.src} size="sm" />}
+          size="md"
+          tone="brand"
+          avatar={<Avatar name={p.name} src={p.src} tone="brand" size="sm" />}
           label={p.name}
           description={p.description ?? role}
           count={p.points}
@@ -214,18 +218,19 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
 
     const body: Partial<Record<DetailCardField, React.ReactNode>> = {};
 
-    body.initiator = <div className="flex gap-2">{people(value.initiator ? [value.initiator] : [])}</div>;
+    body.initiator = <div className="flex flex-wrap gap-2">{people(value.initiator ? [value.initiator] : [])}</div>;
     body.assignees = <div className="flex flex-wrap gap-2">{people(value.assignees, 'Assignee')}</div>;
 
     body.startDate = editing ? (
       <DateField label="Start Date" value={value.startDate} onChange={(v) => set({ startDate: v })} error={errors?.startDate} />
     ) : value.startDate ? (
-      <Tag tone="neutral">{longDate(value.startDate)}</Tag>
+      <Tag size="lg" tone="neutral">{longDate(value.startDate)}</Tag>
     ) : null;
     body.dueDate = editing ? (
       <DateField label="Due Date" value={value.dueDate} onChange={(v) => set({ dueDate: v })} error={errors?.dueDate} />
     ) : value.dueDate ? (
       <DueDateTag
+        size="lg"
         proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })}
       >
         {longDate(value.dueDate)}
@@ -245,14 +250,14 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.cycle}
       />
     ) : cycle ? (
-      <CycleTag code={cycle.code} start={cycle.start} end={cycle.end} />
+      <CycleTag size="lg" code={cycle.code} start={cycle.start} end={cycle.end} />
     ) : null;
 
     body.status = value.status ? (
       (AV_STATUSES as readonly string[]).includes(value.status) ? (
-        <StatusTag status={value.status as AVStatus} />
+        <StatusTag size="lg" status={value.status as AVStatus} />
       ) : (
-        <StatusTag custom={value.status} />
+        <StatusTag size="lg" custom={value.status} />
       )
     ) : null;
     body.duplicates = (
@@ -285,7 +290,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.urgency}
       />
     ) : value.urgency ? (
-      <UrgencyTag urgency={value.urgency} />
+      <UrgencyTag size="lg" variant="tonal" urgency={value.urgency} />
     ) : null;
     body.type = editing ? (
       <SearchSelect
@@ -299,13 +304,13 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.type}
       />
     ) : value.type ? (
-      <TypeTag type={value.type} />
+      <TypeTag size="lg" variant="outline" info type={value.type} />
     ) : null;
 
     const tagList = (items: readonly string[] | undefined, tone: 'brand' | 'neutral') => (
       <div className="flex flex-wrap gap-2">
         {(items ?? []).map((t) => (
-          <Tag key={t} tone={tone}>
+          <Tag key={t} size="lg" tone={tone}>
             {t}
           </Tag>
         ))}
@@ -339,7 +344,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.category}
       />
     ) : value.category ? (
-      <Tag tone="neutral">{value.category}</Tag>
+      <Tag size="lg" tone="neutral">{value.category}</Tag>
     ) : null;
     body.tags = editing ? (
       <SearchSelect
@@ -368,7 +373,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         }
       />
     ) : value.capacityPoints !== undefined ? (
-      <Tag tone="neutral">{String(value.capacityPoints)}</Tag>
+      <Badge size="lg" tone="neutral">{String(value.capacityPoints)}</Badge>
     ) : null;
 
     const hasViewers = viewerCount !== undefined && !editing;
@@ -400,15 +405,27 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
               </div>
             );
           }
+          if (editing && (field === 'initiator' || field === 'assignees')) {
+            const isInitiator = field === 'initiator';
+            return (
+              <PeopleField
+                key={field}
+                kind={isInitiator ? 'initiator' : 'assignee'}
+                label={LABEL[field] ?? field}
+                people={isInitiator ? (value.initiator ? [value.initiator] : []) : (value.assignees ?? [])}
+                directory={options?.people ?? []}
+                roles={options?.roles ?? ['Assignee']}
+                onChange={(list) => (isInitiator ? set({ initiator: list[0] }) : set({ assignees: list }))}
+                aside={isInitiator && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
+              />
+            );
+          }
           const node = body[field];
           if (node === null || node === undefined) return null;
-          const addAction =
-            editing && field === 'initiator' ? onAddInitiator : editing && field === 'assignees' ? onAddAssignee : undefined;
           return (
             <Item
               key={field}
               label={LABEL[field] ?? field}
-              onAdd={addAction}
               aside={field === 'initiator' && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
             >
               {node}
@@ -425,11 +442,14 @@ DetailCard.displayName = 'DetailCard';
 function Item({
   label,
   onAdd,
+  addDisabled,
   aside,
   children,
 }: {
   label: string;
   onAdd?: () => void;
+  /** The + is dimmed and does nothing while a form is open. */
+  addDisabled?: boolean;
   aside?: React.ReactNode;
   children: React.ReactNode;
 }) {
@@ -445,7 +465,9 @@ function Item({
             type="button"
             aria-label={`Add ${label.toLowerCase()}`}
             onClick={onAdd}
+            disabled={addDisabled}
             className={cn(
+              'disabled:pointer-events-none disabled:bg-action-primary-surface-disabled',
               'relative grid size-5 place-items-center rounded-full bg-action-primary-surface-default text-action-primary-content-default',
               'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed before:absolute before:-inset-2.5',
               'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
@@ -546,5 +568,163 @@ function DateField({
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * Initiator or Assignee while editing: the chips, each with a pencil (an assignee) and a ✕ on hover or
+ * focus, and the + that opens the form for a new person under them. A chip being edited turns into the
+ * form in its place. While a form is open the + is dimmed. The Initiator has no pencil: it is removed
+ * and added again.
+ */
+function PeopleField({
+  kind,
+  label,
+  people,
+  directory,
+  roles,
+  onChange,
+  aside,
+}: {
+  kind: 'initiator' | 'assignee';
+  label: string;
+  people: readonly DetailCardPerson[];
+  directory: readonly DetailCardPerson[];
+  roles: readonly string[];
+  onChange: (people: DetailCardPerson[]) => void;
+  aside?: React.ReactNode;
+}) {
+  const [mode, setMode] = React.useState<{ type: 'add' } | { type: 'edit'; index: number } | null>(null);
+  const done = () => setMode(null);
+
+  const form = (initial: DetailCardPerson | undefined, submitLabel: string, commit: (p: DetailCardPerson) => void) => (
+    <PersonForm
+      kind={kind}
+      initial={initial}
+      directory={directory}
+      roles={roles}
+      submitLabel={submitLabel}
+      onCancel={done}
+      onSubmit={(person) => {
+        commit(person);
+        done();
+      }}
+    />
+  );
+
+  return (
+    <Item
+      label={label}
+      onAdd={() => setMode({ type: 'add' })}
+      addDisabled={mode !== null}
+      aside={aside}
+    >
+      <div className="flex w-full flex-col items-start gap-2">
+        <div className="flex flex-wrap gap-2">
+          {people.map((p, index) =>
+            mode?.type === 'edit' && mode.index === index ? null : (
+              <Chip
+                key={p.name}
+                size="md"
+                tone="brand"
+                variant="outline"
+                actions="hover"
+                avatar={<Avatar name={p.name} src={p.src} tone="brand" size="sm" />}
+                label={p.name}
+                description={kind === 'assignee' ? (p.description ?? 'Assignee') : undefined}
+                count={p.points}
+                onEdit={kind === 'assignee' ? () => setMode({ type: 'edit', index }) : undefined}
+                onRemove={() => onChange(people.filter((_, i) => i !== index))}
+              />
+            ),
+          )}
+        </div>
+        {mode?.type === 'edit' &&
+          form(people[mode.index], 'Save', (person) =>
+            onChange(people.map((existing, i) => (i === mode.index ? person : existing))),
+          )}
+        {mode?.type === 'add' &&
+          form(undefined, 'Add', (person) => onChange(kind === 'initiator' ? [person] : [...people, person]))}
+      </div>
+    </Item>
+  );
+}
+
+/** The form under the chips: a user, for an assignee a role and capacity points, then Cancel and Add / Save. */
+function PersonForm({
+  kind,
+  initial,
+  directory,
+  roles,
+  submitLabel,
+  onCancel,
+  onSubmit,
+}: {
+  kind: 'initiator' | 'assignee';
+  initial?: DetailCardPerson;
+  directory: readonly DetailCardPerson[];
+  roles: readonly string[];
+  submitLabel: string;
+  onCancel: () => void;
+  onSubmit: (person: DetailCardPerson) => void;
+}) {
+  const [name, setName] = React.useState(initial?.name ?? '');
+  const [role, setRole] = React.useState(initial?.description ?? roles[0] ?? 'Assignee');
+  const [points, setPoints] = React.useState(initial?.points !== undefined ? String(initial.points) : '');
+  const known = directory.find((p) => p.name === name);
+
+  return (
+    <form
+      className="flex w-full flex-col gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!name) return;
+        onSubmit({
+          ...(known ?? { name }),
+          name,
+          description: kind === 'assignee' ? role : undefined,
+          points: kind === 'assignee' && points !== '' ? Number(points) : undefined,
+        });
+      }}
+    >
+      <SearchSelect
+        aria-label={kind === 'initiator' ? 'Initiator' : 'User'}
+        fullWidth
+        placeholder="Select user"
+        searchPlaceholder="Search by name"
+        options={directory.map((p) => ({ value: p.name, label: p.name }))}
+        value={name}
+        onChange={(v: string) => setName(v)}
+      />
+      {kind === 'assignee' && (
+        <div className="flex gap-2">
+          <SearchSelect
+            aria-label="Role"
+            searchable={false}
+            options={[...roles]}
+            value={role}
+            onChange={(v: string) => setRole(v)}
+          />
+          <div className="min-w-0 flex-1">
+            <Input
+              type="number"
+              aria-label="Capacity points"
+              placeholder="Points"
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+              fullWidth
+            />
+          </div>
+        </div>
+      )}
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" size="sm" disabled={!name}>
+          {submitLabel}
+        </Button>
+      </div>
+    </form>
   );
 }

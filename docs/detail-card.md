@@ -11,6 +11,8 @@ Read off Figma's `Detail_Card` (`6499:48858`: four types) and its `_Detail_Card_
 | Piece | Tier |
 |---|---|
 | `Avatar` | atom |
+| `Badge` | atom |
+| `Button` | atom |
 | `Icon` | atom |
 | `Input` | atom |
 | `Tag` | atom |
@@ -59,7 +61,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 **`domain`** trims it: **Design has no Cycle**; Development has every field. A field with no value is
 left out of a read card.
 
-Not built here, and tracked for later PRs: **UI Changes** (the Modify / New UI / No UI section),
+Not built here, and tracked for later PRs: **the person's role list** (the form's role dropdown has one option until design says which roles exist), **UI Changes** (the Modify / New UI / No UI section),
 **Estimated Duration** (drawn, but placed in no card), and **Edit Viewers** (the pill is a placeholder
 that shows a count and reports a press).
 
@@ -71,12 +73,31 @@ that shows a count and reports a press).
 | `domain` | `'design' \| 'development'` | `development` | Design has no Cycle |
 | `value` | `DetailCardValue` | required | Every field optional; the card draws the ones its type has. Dates are ISO `yyyy-mm-dd` |
 | `onChange` | `(value) => void` | — | Editing and new: the whole value, changed |
-| `options` | `{ cycles, projects, categories, tags }` | — | The dropdowns' choices. A cycle carries its code and dates, so the read card draws a `CycleTag` |
+| `options` | `{ people, roles, cycles, projects, categories, tags }` | — | The dropdowns' choices. `people` and `roles` feed the add / edit form (roles default to just "Assignee"). A cycle carries its code and dates, so the read card draws a `CycleTag` |
 | `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid |
-| `onAddInitiator`, `onAddAssignee` | `() => void` | — | The + beside Initiator and Assignee while editing. The page opens its people picker |
 | `viewerCount`, `onViewers` | `number`, `() => void` | — | The viewers pill (placeholder) on the read cards |
 | `dueSoonWithinDays` | `number` | `3` | Due dates this near or nearer read as due soon |
 | `className`, `ref`, rest | | | On the `<section>` |
+
+## People: add, edit, remove
+
+As the design's flow draws it, inside the card:
+
+- **Add:** the + beside Initiator or Assignee opens a small form under the chips: a user, for an assignee a role
+  and capacity points, then Cancel and Add. The + is dimmed while a form is open.
+- **Edit:** hovering a chip shows a pencil and a ✕ (they are also there for a keyboard). The pencil turns that chip
+  into the same form in its place, with Cancel and Save.
+- **Remove:** the ✕ takes the chip out.
+- **The Initiator** has no pencil: it is removed and added again. Adding replaces it.
+
+The chips are `Chip`'s people recipes (`tone="brand"`; `variant="outline"` with `actions="hover"` while editing). The
+changes come out through `onChange` as the whole `value`; the form's users come from `options.people`.
+
+## Tag sizes
+
+Every tag in the card is **large** (32 tall): the date and cycle tags, status, urgency, type, projects, category
+and tags. The people chips are their own size. Urgency is drawn tonal (a pale fill) and type outlined with the ⓘ, as the
+Detail card does in Figma. Capacity Points is a `Badge`, a round pill, not a tag.
 
 ## Tokens
 
@@ -91,7 +112,7 @@ Everything else is the composed pieces' own. No new tokens.
 - Editing fields are real controls with names (`SearchSelect`, `Input`, the date button), and a field
   with an `errors` entry is `aria-invalid` with the message tied to it.
 - The + beside Initiator and Assignee is 20 to look at and 40 to press, named "Add initiator" and
-  "Add assignee".
+  "Add assignee". The chips' pencil and ✕ are real buttons in the tab order, shown on hover or focus.
 - Dates read as words ("October 1, 2025"); the due date's colour (soon, overdue) is also in `DueDateTag`'s
   own text.
 

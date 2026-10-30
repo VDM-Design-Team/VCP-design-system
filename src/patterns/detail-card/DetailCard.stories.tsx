@@ -4,7 +4,11 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { DetailCard, type DetailCardValue } from './DetailCard';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
+const PEOPLE = [{ name: 'Marvin R' }, { name: 'John Kestrel' }, { name: 'Jane Doe' }, { name: 'Amy Lee' }];
+
 const OPTIONS = {
+  people: PEOPLE,
+  roles: ['Assignee'],
   cycles: [
     { value: 'c18', code: 'C18', start: '2025-09-20', end: '2026-10-02' },
     { value: 'c19', code: 'C19', start: '2026-10-03', end: '2026-10-16' },
@@ -80,7 +84,7 @@ export const Viewing: Story = {
 
 /** Editing: the same fields as inputs, with a + beside Initiator and Assignee. Changes come out through `onChange`. */
 export const Editing: Story = {
-  args: { type: 'editing', viewerCount: undefined, onAddInitiator: fn(), onAddAssignee: fn() },
+  args: { type: 'editing', viewerCount: undefined, onChange: fn() },
   render: (args) => {
     const [value, setValue] = React.useState<DetailCardValue>(args.value);
     return <DetailCard {...args} value={value} onChange={(next) => { setValue(next); args.onChange?.(next); }} />;
@@ -88,12 +92,46 @@ export const Editing: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('group', { name: 'Status' })).toBeNull();
-    await userEvent.click(canvas.getByRole('button', { name: 'Add assignee' }));
-    await expect(args.onAddAssignee).toHaveBeenCalledTimes(1);
     const points = canvas.getByRole('spinbutton', { name: 'Capacity Points' });
     await userEvent.clear(points);
     await userEvent.type(points, '8');
     await expect(points).toHaveValue(8);
+  },
+};
+
+/**
+ * People are added, edited and removed in the card, as the design's flow draws it: the + opens a form under the
+ * chips (a user, a role, capacity points, then Cancel and Add), a chip's pencil turns it into that form (Save), its ✕
+ * removes it. The + is dimmed while a form is open.
+ */
+export const EditingPeople: Story = {
+  args: { type: 'editing', viewerCount: undefined, onChange: fn() },
+  render: (args) => {
+    const [value, setValue] = React.useState<DetailCardValue>(args.value);
+    return <DetailCard {...args} value={value} onChange={(next) => { setValue(next); args.onChange?.(next); }} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const assignees = within(canvas.getByRole('group', { name: 'Assignee' }));
+    /* Add: the + opens the form and is dimmed meanwhile. */
+    await userEvent.click(assignees.getByRole('button', { name: 'Add assignee' }));
+    await expect(assignees.getByRole('button', { name: 'Add assignee' })).toBeDisabled();
+    await userEvent.click(assignees.getByRole('button', { name: /^User/ }));
+    await userEvent.click(within(canvasElement).getByRole('option', { name: 'Amy Lee' }));
+    await userEvent.click(assignees.getByRole('button', { name: 'Add' }));
+    await expect(assignees.getByText('Amy Lee')).toBeVisible();
+    /* Remove: the ✕ takes a chip out. */
+    await userEvent.click(assignees.getByRole('button', { name: 'Remove Amy Lee' }));
+    await expect(assignees.queryByText('Amy Lee')).toBeNull();
+    /* Edit: the pencil turns a chip into the form, with Save. */
+    await userEvent.click(assignees.getByRole('button', { name: 'Edit Jane Doe' }));
+    await expect(assignees.getByRole('button', { name: 'Save' })).toBeVisible();
+    await userEvent.click(assignees.getByRole('button', { name: 'Cancel' }));
+    await expect(assignees.getByText('Jane Doe')).toBeVisible();
+    /* The Initiator has no pencil. */
+    const initiator = within(canvas.getByRole('group', { name: 'Initiator' }));
+    await expect(initiator.queryByRole('button', { name: /^Edit/ })).toBeNull();
+    await expect(initiator.getByRole('button', { name: 'Remove Marvin R' })).toBeInTheDocument();
   },
 };
 

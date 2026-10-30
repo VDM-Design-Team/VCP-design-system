@@ -28,6 +28,11 @@ moves it down a tier, per CLAUDE.md's composition rule.
 | `UrgencyTag` | An AV's *urgency*, which is a different scale with its own glyphs |
 | `Badge` | Generic classification with no VCP vocabulary |
 
+## Variants
+
+`variant` is `textual` (the default: the glyph and word alone), `tonal` (a pale fill in the glyph's hue family) or `outline` (a bordered pill, same hue), as the Figma set draws them. The label stays neutral on a fill or a border; the glyph carries the colour. `size` takes `Tag`'s.
+`info` adds the ⓘ the design draws after the word on the filled and bordered looks; it is decorative, and the page provides the explanation.
+
 ## Props
 
 | Prop | Type | Default | Notes |

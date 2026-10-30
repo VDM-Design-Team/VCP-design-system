@@ -54,8 +54,10 @@ domain step (For QA, In QA…) is a status like any other.
 
 ## Tokens
 
-The button is an `IconButton` `neutral` (the outlined grey), a `dots-three-outline-vertical` glyph,
-32 to look at as Figma draws it (40 on a touch screen). The menu is `Menu`'s: `surface.elevated`,
+The button is an `IconButton` `neutral` (the outlined grey) with `shape="square"` (`radius.sm`), a
+`dots-three-outline-vertical-fill` glyph (the filled dots), 32 to look at as Figma draws it (40 on a touch screen). The list has
+no icons, as the design draws it; Delete turns its warning glyph off (`icon: false`) and keeps the critical colour and the
+"destructive action" qualifier for a screen reader. The menu is `Menu`'s: `surface.elevated`,
 `shadow.menu`, rows `label-sm-medium`, Delete in `accent.critical.outline.content`. No new tokens.
 
 ## Accessibility

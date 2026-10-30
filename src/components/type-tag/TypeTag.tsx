@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
-import { Tag } from '../../atoms/tag';
+import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
  * TypeTag — an Added Value's type, as a glyph and a word. The owner of VCP's
@@ -52,21 +52,37 @@ const TYPE: Record<AVType, { icon: IconName; className: string }> = {
   'Type 3': { icon: 'caret-up', className: 'text-text-brand-medium' },
 };
 
-export interface TypeTagProps extends React.HTMLAttributes<HTMLSpanElement> {
+/** How the tag is drawn: the glyph and word alone (the default), on a pale fill, or in a bordered pill. */
+export type TypeTagVariant = 'textual' | 'tonal' | 'outline';
+
+/* The hue each type wears when the tag has a fill or a border, the glyph's own family. */
+const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
+  'Type 1': 'critical',
+  'Type 2': 'warning',
+  'Type 3': 'info',
+};
+
+export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   type: AVType;
+  /** `textual` (default), `tonal` (a pale fill) or `outline` (a bordered pill), as the design's Type_Tag set draws them. */
+  variant?: TypeTagVariant;
+  /** The ⓘ after the word, which the design draws on the filled and bordered looks. Decorative: it marks that the type has an explanation, which the page provides. */
+  info?: boolean;
 }
 
 export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, variant = 'textual', info, ...props }, ref) => {
     const { icon, className: tone } = TYPE[type];
     return (
       <Tag
         ref={ref}
-        variant="textual"
-        tone="neutral"
+        variant={variant}
+        tone={variant === 'textual' ? 'neutral' : TYPE_TONE[type]}
         /* Decorative: the word beside it already says which type this is. */
         icon={<Icon name={icon} size="lg" className={cn('shrink-0', tone)} />}
-        className={className}
+        trailingIcon={info ? <Icon name="info" size="md" className="shrink-0 text-text-tertiary" /> : undefined}
+        /* The label stays neutral on a fill or a border; the glyph carries the colour. */
+        className={cn(variant !== 'textual' && 'text-text-secondary', className)}
         {...props}
       >
         {type}

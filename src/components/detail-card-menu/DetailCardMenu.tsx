@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '../../lib/cn';
 import { IconButton } from '../../atoms/icon-button';
 import { Menu, type MenuItem } from '../menu';
 
@@ -20,7 +21,7 @@ import { Menu, type MenuItem } from '../menu';
  * | admin | Backlog | Move to Pending, Move to Draft · Edit · Delete |
  * | admin | any other | Edit · Delete |
  *
- * The moves sit above a divider, then Edit, then Delete in the critical colour. It only reports:
+ * The moves sit above a divider, then Edit, then Delete in the critical colour. No icons: the design's menu is words only. It only reports:
  * each action's handler is the page's.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
@@ -75,19 +76,21 @@ export const DetailCardMenu = React.forwardRef<HTMLDivElement, DetailCardMenuPro
       ...moves.map((move) => ({ key: move, label: labels[move], onClick: handlers[move] })),
       ...(moves.length > 0 ? [{ divider: true as const, key: 'divider' }] : []),
       { key: 'edit', label: 'Edit', onClick: onEdit },
-      { key: 'delete', label: 'Delete', tone: 'danger' as const, onClick: onDelete },
+      { key: 'delete', label: 'Delete', tone: 'danger' as const, icon: false as const, onClick: onDelete },
     ];
 
     return (
       <Menu
         ref={ref}
-        className={className}
+        /* Hugs the button, even in a flex row that would stretch it: the list hangs off its bottom edge. */
+        className={cn('self-start', className)}
         items={items}
         align="right"
         trigger={
           <IconButton
-            icon="dots-three-outline-vertical"
+            icon="dots-three-outline-vertical-fill"
             variant="neutral"
+            shape="square"
             size="sm"
             label={label}
             /* 32 to look at, as Figma draws it; a touch screen gets 40. */
