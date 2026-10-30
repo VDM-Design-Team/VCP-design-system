@@ -136,7 +136,8 @@ export const TooltipStaysOnTheButton: Story = {
     const canvas = within(canvasElement);
     const body = within(canvasElement.ownerDocument.body);
     const trigger = canvas.getByRole('button', { name: 'Add reaction' });
-    const bubble = () => canvas.getByText('Add reaction', { selector: '[role="tooltip"]' });
+    /* The bubble is drawn in a portal on the page body, outside the story canvas. */
+    const bubble = () => body.getByText('Add reaction', { selector: '[role="tooltip"]' });
     const isOpen = () => bubble().parentElement?.classList.contains('opacity-100');
 
     /* On the button it opens, after the hover delay. */
