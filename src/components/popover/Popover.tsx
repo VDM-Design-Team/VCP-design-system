@@ -210,6 +210,11 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
 
   /* The side and edge the panel really took. `null` until measured, and the preferred ones until then. */
   const [fit, setFit] = React.useState<Fit | null>(null);
+  /* Read by `measure`, which runs from observers, so it sees the fit now on screen. */
+  const fitRef = React.useRef(fit);
+  fitRef.current = fit;
+  /* The panel's full height, kept from the last time it was measured unshortened. */
+  const naturalHeight = React.useRef(0);
 
   const measure = React.useCallback(() => {
     const wrapper = wrapperRef.current;
@@ -219,8 +224,13 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     /* The panel's full height, not the height it has now: once `max-height` has
        shortened it, `offsetHeight` says it fits, the limit comes off, it grows back
        and no longer fits — a flicker every frame. `scrollHeight` is the content's
-       height whatever the limit; the difference adds the border back. */
-    const need = panel.scrollHeight + (panel.offsetHeight - panel.clientHeight) + PANEL_GAP;
+       height whatever the limit (the difference adds the border back) — unless the
+       content shrinks to fit, as a panel whose header and footer stay while its list
+       gives way does. So while shortened, it also remembers the height it had before. */
+    const ownHeight = panel.scrollHeight + (panel.offsetHeight - panel.clientHeight);
+    const shortened = fitRef.current?.maxHeight !== undefined;
+    if (!shortened) naturalHeight.current = ownHeight;
+    const need = (shortened ? Math.max(ownHeight, naturalHeight.current) : ownHeight) + PANEL_GAP;
     const wide = panel.offsetWidth;
 
     const roomBelow = window.innerHeight - trigger.bottom - SCREEN_EDGE;
@@ -246,6 +256,7 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
   React.useLayoutEffect(() => {
     if (!isOpen) {
       setFit(null);
+      naturalHeight.current = 0;
       return;
     }
     measure();

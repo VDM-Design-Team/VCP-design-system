@@ -14,7 +14,15 @@ const ITEMS = [
   { id: '5', kind: 'accepted', time: '8 hours ago', unread: false },
 ] as const;
 
-function Items({ unreadOnly, filter }: { unreadOnly: boolean; filter: NotificationFilter }) {
+function Items({
+  unreadOnly,
+  filter,
+  allRead = false,
+}: {
+  unreadOnly: boolean;
+  filter: NotificationFilter;
+  allRead?: boolean;
+}) {
   return (
     <>
       {ITEMS.filter((i) => (!unreadOnly || i.unread) && (filter === 'all' || i.kind === 'mention')).map(
@@ -26,7 +34,7 @@ function Items({ unreadOnly, filter }: { unreadOnly: boolean; filter: Notificati
             subject={SUBJECT}
             status={'status' in i ? i.status : undefined}
             time={i.time}
-            unread={i.unread}
+            unread={i.unread && !allRead}
             href={`#av-${i.id}`}
             onToggleRead={() => {}}
           />
@@ -140,14 +148,24 @@ export const Open: Story = {
   },
 };
 
-/** The overflow menu's one action. */
+/** The overflow menu's one action. The list is the caller's, so this story marks its own rows read. */
 export const MarkAllRead: Story = {
   args: { defaultOpen: true },
-  render: (args) => (
-    <NotificationPopover {...args}>
-      <Items unreadOnly={false} filter="all" />
-    </NotificationPopover>
-  ),
+  render: function Render(args) {
+    const [allRead, setAllRead] = React.useState(false);
+    return (
+      <NotificationPopover
+        {...args}
+        count={allRead ? 0 : args.count}
+        onMarkAllRead={() => {
+          setAllRead(true);
+          args.onMarkAllRead?.();
+        }}
+      >
+        <Items unreadOnly={false} filter="all" allRead={allRead} />
+      </NotificationPopover>
+    );
+  },
   play: async ({ args }) => {
     const panel = await screen.findByRole('dialog', { name: 'Notifications' });
     await userEvent.click(within(panel).getByRole('button', { name: 'More notification actions' }));
@@ -190,10 +208,13 @@ export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   decorators: [],
   render: (args) => (
-    <div className="grid grid-cols-2">
+    /* One theme above the other, each tall enough for its open panel (40 bell, 8 gap,
+       448 panel, the padding): side by side, two 528-wide panels overlap at most
+       canvas widths. */
+    <div className="grid grid-cols-1">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex min-h-[28rem] items-start justify-end bg-surface-canvas p-8">
+          <div className="flex min-h-140 items-start justify-end bg-surface-canvas p-8">
             <NotificationPopover {...args} defaultOpen>
               <Items unreadOnly={false} filter="all" />
             </NotificationPopover>
@@ -202,4 +223,46 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/**
+ * **Flow:** the bell in the middle of the screen, so the full 448 panel fits neither below
+ * nor above it. `Popover` shortens the panel; the header and the inbox link stay, the
+ * list gives way and scrolls, and the panel itself never scrolls. It used to scroll as a
+ * whole, with the list scrolling inside it and the inbox link pushed out of view.
+ */
+export const ShortWindow: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: { defaultOpen: true },
+  render: (args) => (
+    <div className="fixed inset-0 flex items-center justify-end p-4">
+      <NotificationPopover {...args}>
+        <Items unreadOnly={false} filter="all" />
+      </NotificationPopover>
+    </div>
+  ),
+  play: async () => {
+    const panel = await screen.findByRole('dialog', { name: 'Notifications' });
+    const link = within(panel).getByRole('link', { name: 'View notifications inbox' });
+
+    /* Ten frames at one height: shortened once, and settled. */
+    const heights = await new Promise<number[]>((resolve) => {
+      const seen: number[] = [];
+      const tick = () => {
+        seen.push(Math.round(panel.getBoundingClientRect().height));
+        if (seen.length < 10) requestAnimationFrame(tick);
+        else resolve(seen);
+      };
+      requestAnimationFrame(tick);
+    });
+    await expect(new Set(heights).size).toBe(1);
+
+    /* One scrolling area — the list — and the panel all on the screen with its link. */
+    await expect(panel.scrollHeight).toBeLessThanOrEqual(panel.clientHeight + 1);
+    const list = within(panel).getByRole('list').parentElement!;
+    await expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
+    await expect(panel.getBoundingClientRect().top).toBeGreaterThanOrEqual(0);
+    await expect(link.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight);
+  },
 };
