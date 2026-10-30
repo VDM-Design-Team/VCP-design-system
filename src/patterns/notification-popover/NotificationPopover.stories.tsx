@@ -210,8 +210,9 @@ export const LightAndDark: Story = {
   render: (args) => (
     /* One theme above the other, each tall enough for its open panel (40 bell, 8 gap,
        448 panel, the padding): side by side, two 528-wide panels overlap at most
-       canvas widths. */
-    <div className="grid grid-cols-1">
+       canvas widths. Full width, because the meta's decorator (a right-aligned row)
+       still wraps it and would otherwise shrink it to the bell. */
+    <div className="grid w-full grid-cols-1">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex min-h-140 items-start justify-end bg-surface-canvas p-8">
