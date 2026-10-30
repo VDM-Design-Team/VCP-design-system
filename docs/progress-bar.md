@@ -23,10 +23,13 @@ that is a pattern asking to be written.
 |---|---|---|---|
 | `value` | `number` | required | Clamped into `0…max` |
 | `max` | `number` | `100` | The whole. The announced value stays in real units (34 of 40); only the painted width is a percentage |
-| `tone` | `brand \| success \| warning \| critical` | `brand` | See above — status, not decoration |
+| `tone` | `brand \| success \| warning \| critical \| info \| pending \| caution` | `brand` | See above — status, not decoration. `info` is `accent.info.filled.surface`, `pending` and `caution` are the bright orange and amber outline-border shades (`accent.pending.outline.border`, `accent.warning.outline.border`) and **fail 3:1 on the light track** — only beside a written value |
 | `size` | `sm \| md` | `md` | 4 / 8 tall. `sm` for dense table rows |
+| `labelSize` | `sm \| md` | `sm` | Type size of the label row: 12px caption, or 14px label (`md`) when the words are the main signal. Independent of `size` |
 | `label` | `string` | — | Visible name above the bar, wired via `aria-labelledby` |
 | `showValue` | `boolean` | — | Rounded percentage at the row's end, in the numeric face |
+| `valueLabel` | `string` | — | Words instead of a percentage ("Strong", "34 of 40 used"): painted at the row's end and announced as `aria-valuetext` |
+| `role` | `progressbar \| meter` | `progressbar` | `meter` for a value within a range that is not progress toward finishing — a capacity, a strength |
 | `className` | `string` | — | Merged via `cn()`; the root is the wrapping `<div>` |
 
 The export's `height?: number` became the `size` variant and its `showLabel`
@@ -49,6 +52,9 @@ Fill against track, measured (3:1 is the bar for meaningful graphics):
 | `success` | **4.01:1** | **4.54:1** |
 | `warning` | **4.00:1** | **7.66:1** |
 | `critical` | **3.87:1** | **3.84:1** |
+| `info` | — | — |
+| `pending` | **2.27:1** ⚠ | **4.11:1** |
+| `caution` | **1.55:1** ⚠ | **4.98:1** |
 
 The trade: the track itself whispers against surfaces (1.23:1 light on base,
 and in dark it matches `surface.base` exactly). That is deliberate — the

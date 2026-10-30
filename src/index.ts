@@ -36,6 +36,7 @@ export * from './components/date-picker';
 export * from './components/detail-row';
 export * from './components/dropdown-stepper';
 export * from './components/dropzone';
+export * from './components/password-strength';
 export * from './components/due-date-tag';
 export * from './components/emoji-reaction-picker';
 export * from './components/empty-state';
