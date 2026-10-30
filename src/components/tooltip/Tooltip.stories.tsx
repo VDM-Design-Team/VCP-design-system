@@ -198,6 +198,39 @@ export const Hoverable: Story = {
 };
 
 /**
+ * `followPointer`: for a trigger far wider than the bubble (a chart bar). The bubble opens
+ * under the pointer, not at the middle of the trigger, and is pulled back so it stays
+ * inside the viewport. It holds still once open, so the pointer can still reach it.
+ */
+export const FollowPointer: Story = {
+  render: (args) => (
+    <div className="p-16">
+      <Tooltip {...args} followPointer placement="bottom" openDelay={0} content="Opens where the pointer entered">
+        <Button variant="secondary" fullWidth>
+          A trigger much wider than its tooltip: hover anywhere along it
+        </Button>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button');
+    const box = trigger.getBoundingClientRect();
+    const x = Math.round(box.left + box.width * 0.75);
+    await userEvent.pointer({ target: trigger, coords: { clientX: x, clientY: box.top + box.height / 2 } });
+    const tip = await waitFor(() => {
+      const t = document.getElementById(trigger.getAttribute('aria-describedby')!.split(' ').pop()!) as HTMLElement;
+      expect(t.parentElement).toHaveClass('opacity-100');
+      return t;
+    });
+    const r = tip.getBoundingClientRect();
+    /* Centred on the pointer (give or take a pixel), not on the middle of the trigger. */
+    await expect(Math.abs((r.left + r.right) / 2 - x)).toBeLessThan(2);
+    await expect(r.left).toBeGreaterThanOrEqual(0);
+    await expect(r.right).toBeLessThanOrEqual(window.innerWidth);
+  },
+};
+
+/**
  * The hover delay, side by side. `openDelay={0}` fires on contact and turns a
  * sweep across a toolbar into a strobe; the 300ms default waits for a pause that
  * reads as intent. Neither applies to focus.
@@ -258,6 +291,9 @@ const bubbleOf = (trigger: HTMLElement) => {
   if (!bubble) throw new Error('The trigger is not described by a tooltip');
   return bubble;
 };
+/* The bubble mounts in a portal once the host is found, a beat after first
+   render — wait for it before asking whether it is open. */
+const described = (trigger: HTMLElement) => waitFor(() => bubbleOf(trigger));
 const isOpen = (trigger: HTMLElement) => bubbleOf(trigger).parentElement?.classList.contains('opacity-100');
 
 /**
@@ -283,6 +319,7 @@ export const RevealsOnFocus: Story = {
     const first = canvas.getByRole('button', { name: 'Last reconciliation' });
     const second = canvas.getByRole('button', { name: 'About reconciliation' });
 
+    await described(first);
     await expect(isOpen(first)).toBe(false);
 
     /* Focus opens it — immediately, with no hover delay to wait out. */
@@ -340,6 +377,7 @@ export const RevealsOnHover: Story = {
   play: async ({ canvasElement }) => {
     const trigger = within(canvasElement).getByRole('button', { name: 'Hover me' });
 
+    await described(trigger);
     await userEvent.hover(trigger);
     /* Not on contact: the default 300ms delay waits for intent. */
     await expect(isOpen(trigger)).toBe(false);
@@ -352,5 +390,39 @@ export const RevealsOnHover: Story = {
     /* Away — closed. */
     await userEvent.unhover(bubbleOf(trigger));
     await waitFor(() => expect(isOpen(trigger)).toBe(false));
+  },
+};
+
+/**
+ * Inside a scrolling list. The bubble floats above the page, so it is not cut off by the list and
+ * does not make the list scroll sideways, even for a trigger on the list's right edge with the
+ * bubble opening to the right.
+ */
+export const InsideAScrollingList: Story = {
+  render: (args) => (
+    <div
+      data-testid="list"
+      className="h-24 w-64 overflow-auto rounded-md border border-stroke-default bg-surface-elevated p-2"
+    >
+      <div className="flex justify-end">
+        <Tooltip {...args} placement="right" content="A tooltip on the list's right edge">
+          <Button variant="secondary">Right edge</Button>
+        </Tooltip>
+      </div>
+      <div className="h-32" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const list = within(canvasElement).getByTestId('list');
+    const trigger = within(canvasElement).getByRole('button', { name: 'Right edge' });
+    await userEvent.tab();
+    await expect(trigger).toHaveFocus();
+    await described(trigger);
+    const bubble = bubbleOf(trigger);
+    await waitFor(() => expect(isOpen(trigger)).toBe(true));
+    /* No sideways scrolling in the list... */
+    await expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
+    /* ...and the bubble is not clipped: it extends past the list's right edge. */
+    await expect(bubble.getBoundingClientRect().right).toBeGreaterThan(list.getBoundingClientRect().right);
   },
 };

@@ -121,6 +121,13 @@ interface SearchSelectBase
    */
   renderOption?: (option: SearchSelectOption, state: SearchSelectRowState) => React.ReactNode;
   disabled?: boolean;
+  /**
+   * Draws the field as plain text inside a bar rather than as a bordered input: no
+   * border or fill, the value semibold with a brand caret, a tint on hover. For a
+   * picker that lives in another control's toolbar (the Gantt chart's period bar), where
+   * a boxed field would fight the bar. One line, one pick. The field hugs its value and centres in the width you give the control, and the panel opens from that width's left edge.
+   */
+  inline?: boolean;
   /** Critical border + `aria-invalid`. Pair with a visible message (or use `error`). */
   invalid?: boolean;
   /**
@@ -224,6 +231,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       rows = 'text',
       renderOption,
       disabled,
+      inline,
       invalid,
       error,
       id,
@@ -545,13 +553,16 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               }
             }}
             className={cn(
-              'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
+              inline
+                ? 'mx-auto flex h-7 w-max max-w-full items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
+                : 'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
-              isInvalid
-                ? 'border-accent-critical-outline-border-default'
-                : 'border-stroke-strong focus-within:border-stroke-focused',
+              !inline &&
+                (isInvalid
+                  ? 'border-accent-critical-outline-border-default'
+                  : 'border-stroke-strong focus-within:border-stroke-focused'),
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
-              disabled && 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle',
+              disabled && (inline ? 'cursor-not-allowed' : 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'),
             )}
           >
             {showTags && (
@@ -636,10 +647,13 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 open ? closePanel() : openPanel();
               }}
               className={cn(
-                'flex h-8 items-center justify-between gap-2 rounded-sm text-left outline-none',
+                'flex items-center justify-between rounded-sm text-left outline-none',
+                inline ? 'h-7 gap-1' : 'h-8 gap-2',
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
-                  ? 'text-body-sm-medium text-text-primary'
+                  ? inline
+                    ? 'text-body-sm-semibold text-text-primary'
+                    : 'text-body-sm-medium text-text-primary'
                   : 'text-body-sm-regular text-text-subtle',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',
               )}
@@ -655,7 +669,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 size="sm"
                 aria-hidden="true"
                 className={cn(
-                  'shrink-0 text-text-tertiary transition-transform motion-reduce:transition-none',
+                  'shrink-0 transition-transform motion-reduce:transition-none',
+                  inline ? 'text-text-brand-medium' : 'text-text-tertiary',
                   open && 'rotate-180',
                 )}
               />
