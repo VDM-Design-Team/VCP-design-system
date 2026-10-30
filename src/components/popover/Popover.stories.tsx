@@ -17,8 +17,8 @@ const meta = {
           'A floating panel anchored to a trigger. The trigger carries `aria-expanded` and, ' +
           'while open, `aria-controls`. Escape closes and returns focus to the trigger; a click ' +
           'outside closes; moving focus out of the popover closes. It does **not** trap focus — ' +
-          'that is Modal’s job — and it does **not** flip or shift to stay on screen: ' +
-          'placement is exactly `top` or `bottom`, aligned to one edge. See docs/popover.md.',
+          'that is Modal’s job — and it does **not** shift. `placement` and `align` are what you prefer: ' +
+          'it opens on the other side (above, or right-flush) when its own would leave the screen. See docs/popover.md.',
       },
     },
   },
@@ -268,5 +268,111 @@ export const FocusMovesInAndOut: Story = {
     await userEvent.tab();
     await expect(canvas.getByRole('button', { name: 'Next on the page' })).toHaveFocus();
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+  },
+};
+
+/**
+ * **Flow:** the panel opens on the side that has room. At the foot of the screen a `bottom` popover opens
+ * above; at the head a `top` one opens below; and at the right edge a left-flush panel turns right-flush.
+ */
+export const FlipsWhenCutOff: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => (
+    <div className="fixed inset-0 flex flex-col justify-between">
+      <div className="flex justify-between p-2">
+        <Popover trigger={<Button>Top left</Button>} placement="top" width="sm" content="Opens below" />
+        <Popover trigger={<Button>Top right</Button>} width="sm" content="Opens below" />
+      </div>
+      <div className="flex justify-between p-2">
+        <Popover trigger={<Button>Bottom left</Button>} width="sm" content="Opens above" />
+        <Popover trigger={<Button>Bottom right</Button>} width="sm" content="Opens above, flush right" />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const panelOf = (name: string) => {
+      const trigger = canvas.getByRole('button', { name });
+      return { trigger, panel: () => document.getElementById(trigger.getAttribute('aria-controls') as string) as HTMLElement };
+    };
+
+    /* No room above: a `top` popover opens below. */
+    const topLeft = panelOf('Top left');
+    await userEvent.click(topLeft.trigger);
+    await waitFor(() => expect(topLeft.panel()).not.toBeNull());
+    await expect(topLeft.panel().getBoundingClientRect().top).toBeGreaterThanOrEqual(topLeft.trigger.getBoundingClientRect().bottom);
+    await userEvent.keyboard('{Escape}');
+
+    /* No room below: a `bottom` popover opens above. */
+    const bottomLeft = panelOf('Bottom left');
+    await userEvent.click(bottomLeft.trigger);
+    await waitFor(() => expect(bottomLeft.panel()).not.toBeNull());
+    await expect(bottomLeft.panel().getBoundingClientRect().bottom).toBeLessThanOrEqual(bottomLeft.trigger.getBoundingClientRect().top);
+    await userEvent.keyboard('{Escape}');
+
+    /* At the right edge a left-flush panel would leave the screen: it turns right-flush and stays in. */
+    const bottomRight = panelOf('Bottom right');
+    await userEvent.click(bottomRight.trigger);
+    await waitFor(() => expect(bottomRight.panel()).not.toBeNull());
+    const box = bottomRight.panel().getBoundingClientRect();
+    await expect(box.right).toBeLessThanOrEqual(window.innerWidth);
+    await expect(box.right).toBeCloseTo(bottomRight.trigger.getBoundingClientRect().right, 0);
+  },
+};
+
+/**
+ * **Flow:** a panel taller than the room on either side keeps the roomier side, scrolls inside, and
+ * stays put. It used to flicker between its full and its shortened height on every frame.
+ */
+export const ScrollsWhenNeitherSideFits: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => (
+    <div className="fixed inset-0 flex items-center p-2">
+      <Popover
+        trigger={<Button>Checklist</Button>}
+        width="sm"
+        content={
+          <ul className="flex flex-col gap-1">
+            {Array.from({ length: 60 }, (_, i) => (
+              <li key={i}>Checklist item {i + 1}</li>
+            ))}
+          </ul>
+        }
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Checklist' });
+    await userEvent.click(trigger);
+    const panel = await waitFor(() => {
+      const el = document.getElementById(trigger.getAttribute('aria-controls') as string);
+      if (!el) throw new Error('The panel has not opened');
+      return el;
+    });
+
+    /* Ten frames in a row at one height: it settled, it is not flickering. */
+    const heights = await new Promise<number[]>((resolve) => {
+      const seen: number[] = [];
+      const tick = () => {
+        seen.push(Math.round(panel.getBoundingClientRect().height));
+        if (seen.length < 10) requestAnimationFrame(tick);
+        else resolve(seen);
+      };
+      requestAnimationFrame(tick);
+    });
+    await expect(new Set(heights).size).toBe(1);
+
+    /* It scrolls inside, and it is all on the screen. */
+    await expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight);
+    const box = panel.getBoundingClientRect();
+    await expect(box.top).toBeGreaterThanOrEqual(0);
+    await expect(box.bottom).toBeLessThanOrEqual(window.innerHeight);
+
+    /* A keyboard user can reach it, and sees where focus went. */
+    await userEvent.tab();
+    await expect(panel).toHaveFocus();
+    await expect(getComputedStyle(panel).outlineStyle).not.toBe('none');
   },
 };
