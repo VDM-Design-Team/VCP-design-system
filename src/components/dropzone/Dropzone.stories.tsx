@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { within } from 'storybook/test';
 import { Dropzone } from './Dropzone';
 import { Field } from '../field';
 
@@ -17,7 +18,7 @@ const meta = {
       },
     },
   },
-  args: { hint: 'PDF or PNG, up to 10 MB' },
+  args: {},
   argTypes: {
     label: { control: 'text' },
     hint: { control: 'text' },
@@ -49,6 +50,29 @@ export const Default: Story = {
   },
 };
 
+/**
+ * The drag-over state, held for review: `stroke.focused` over `surface.brand.subtle`.
+ * A play function raises a file drag over the zone, the way a real one would — the
+ * state otherwise only exists while a file is mid-drag. A drag within 16 of the zone
+ * counts too.
+ */
+export const DragOver: Story = {
+  render: (args) => (
+    <div className="w-96">
+      <Dropzone {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const zone = within(canvasElement).getByText('Upload a file').closest('label') as HTMLElement;
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['x'], 'evidence.pdf', { type: 'application/pdf' }));
+    const fire = (target: EventTarget, type: string) =>
+      target.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: transfer }));
+    fire(window, 'dragenter');
+    fire(zone, 'dragover');
+  },
+};
+
 /** `accept` filters the browse dialog — dropped files still arrive unfiltered; validate them. */
 export const SingleImage: Story = {
   args: { label: 'Choose an image', hint: 'PNG or JPG', accept: 'image/*', multiple: false },
@@ -71,9 +95,10 @@ export const InAField: Story = {
 };
 
 /**
- * The design's Error state: critical border and message, the warning glyph,
- * and the zone still usable so the next attempt costs nothing. `error`
- * replaces `hint` and is wired to the input with `aria-describedby`.
+ * The design's Error state: the default fill with a critical border, the
+ * message in critical text, and the zone still usable so the next attempt
+ * costs nothing. `error` replaces `hint` and is wired to the input with
+ * `aria-describedby`.
  */
 export const WithError: Story = {
   args: {
