@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { CommentActions } from '../comment-actions';
 import { CommentComposer } from '../comment-composer';
-import { MentionTag, type MentionMember, type MentionSegment } from '../mention-input';
+import { MentionTag, type MentionMember, type MentionSegment } from '../../atoms/mention-input';
 
 /**
  * CommentReply — one posted comment: who wrote it and when, what it says, the

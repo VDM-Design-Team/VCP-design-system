@@ -7,7 +7,7 @@ import {
   plainText,
   type MentionMember,
   type MentionSegment,
-} from '../mention-input';
+} from '../../atoms/mention-input';
 
 /**
  * CommentComposer — the box a comment is written in: an optional avatar, the mention

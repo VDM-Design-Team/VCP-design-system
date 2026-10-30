@@ -2,7 +2,8 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { CommentSection, type CommentData } from './CommentSection';
-import type { MentionSegment } from '../../components/mention-input';
+import { typeText } from '../../lib/story-typing';
+import type { MentionSegment } from '../../atoms/mention-input';
 
 const ME = { id: 'u-john', name: 'John Smith' };
 const JANE = { id: 'u-jane', name: 'Jane Doe' };
@@ -194,7 +195,7 @@ export const Flow: Story = {
     const canvas = within(canvasElement);
 
     /* Add a new comment. */
-    await userEvent.type(canvas.getByRole('textbox', { name: 'Add a comment' }), 'A brand new comment');
+    await typeText(canvas.getByRole('textbox', { name: 'Add a comment' }), 'A brand new comment');
     await userEvent.click(canvas.getByRole('button', { name: 'Add Comment' }));
     await canvas.findByText('A brand new comment');
 
@@ -212,7 +213,7 @@ export const Flow: Story = {
     const mine = articles().find((a) => within(a).queryByText('Test comment here.'))!;
     await userEvent.click(within(mine).getAllByRole('button', { name: 'Edit' })[0]);
     const edit = await canvas.findByRole('textbox', { name: 'Edit comment' });
-    await userEvent.type(edit, ' Edited.');
+    await typeText(edit, ' Edited.');
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(canvas.queryByRole('textbox', { name: 'Edit comment' })).not.toBeInTheDocument());
     await canvas.findByText(/Edited\./);

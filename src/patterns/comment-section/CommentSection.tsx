@@ -4,7 +4,7 @@ import { CommentComposer } from '../../components/comment-composer';
 import { CommentReplyThread } from '../../components/comment-reply-thread';
 import { CommentSortChip, type CommentSort } from '../../components/comment-sort-chip';
 import { EmojiReactionPicker, type EmojiReaction } from '../../components/emoji-reaction-picker';
-import type { MentionMember, MentionSegment } from '../../components/mention-input';
+import type { MentionMember, MentionSegment } from '../../atoms/mention-input';
 
 /**
  * CommentSection — a whole comment list, the way an Added Value page has one: the

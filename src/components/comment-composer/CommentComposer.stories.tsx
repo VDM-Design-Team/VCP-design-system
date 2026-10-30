@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { CommentComposer } from './CommentComposer';
-import type { MentionSegment } from '../mention-input';
+import { typeText } from '../../lib/story-typing';
+import type { MentionSegment } from '../../atoms/mention-input';
 
 const MEMBERS = [
   { id: '182', name: 'Anna Berg' },
@@ -96,7 +97,7 @@ export const Flow: Story = {
     const send = canvas.getByRole('button', { name: 'Add Comment' });
 
     await expect(send).toBeDisabled();
-    await userEvent.type(box, 'Hello team');
+    await typeText(box, 'Hello team');
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     await expect(args.onSubmit).toHaveBeenCalledWith([{ type: 'text', text: 'Hello team' }]);
@@ -117,7 +118,7 @@ export const KeepsTheTextWhenASendFails: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const box = canvas.getByRole('textbox', { name: 'Add a comment' });
-    await userEvent.type(box, 'Do not lose me');
+    await typeText(box, 'Do not lose me');
     await userEvent.click(canvas.getByRole('button', { name: 'Add Comment' }));
     await waitFor(() => expect(canvas.getByRole('button', { name: 'Add Comment' })).toBeEnabled());
     await expect(box).toHaveTextContent('Do not lose me');

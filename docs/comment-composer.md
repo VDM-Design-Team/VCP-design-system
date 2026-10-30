@@ -15,7 +15,7 @@ one box to learn, not three.
 |---|---|
 | `Avatar` | atom |
 | `CommentFormActions` | component |
-| `MentionInput` | component |
+| `MentionInput` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

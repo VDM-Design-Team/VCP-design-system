@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { CommentReplyThread } from './CommentReplyThread';
 import { CommentReply } from '../comment-reply';
-import type { MentionSegment } from '../mention-input';
+import type { MentionSegment } from '../../atoms/mention-input';
 
 const MEMBERS = [
   { id: '182', name: 'Anna Berg' },

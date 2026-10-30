@@ -12,8 +12,7 @@ Read off the Figma `Comment_Reply` (`2886:6586`, Comment Component section).
 | `Avatar` | atom |
 | `CommentActions` | component |
 | `CommentComposer` | component |
-| `MentionInput` | component |
-| `MentionInput` | component |
+| `MentionInput` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

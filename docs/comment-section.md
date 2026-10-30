@@ -91,7 +91,7 @@ to lose the text.
 | `CommentReplyThread` | component |
 | `CommentSortChip` | component |
 | `EmojiReactionPicker` | component |
-| `MentionInput` | component |
+| `MentionInput` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
