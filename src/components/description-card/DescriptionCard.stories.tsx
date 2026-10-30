@@ -75,6 +75,8 @@ export const Editing: Story = {
  * keyboard can reach it, and typing keeps it on screen. (A touch screen shows it always.)
  */
 export const RemoveAppearsWithFocus: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { editing: true, defaultValue: 'Some paragraph here', onRemove: fn(), removeLabel: 'Remove problem 1' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -95,6 +97,8 @@ export const RemoveAppearsWithFocus: Story = {
  * border of the focused field is the focused blue even while the pointer is over it.
  */
 export const OnlyTheFocusedCardOffersRemove: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => (
     <div className="flex flex-col gap-4">
       <DescriptionCard editing position={1} defaultValue="First" onRemove={fn()} removeLabel="Remove 1" />
@@ -120,6 +124,8 @@ export const OnlyTheFocusedCardOffersRemove: Story = {
 
 /** Empty with a placeholder, and the error state: the critical border and the message under the card. */
 export const EditingEmptyAndInvalid: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => (
     <div className="flex flex-col gap-4">
       <DescriptionCard type="solution" position={1} editing placeholder="Describe the solution" />
@@ -143,6 +149,8 @@ export const EditingEmptyAndInvalid: Story = {
 
 /** Controlled: the page owns the text and the list of cards. */
 export const EditableList: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const [items, setItems] = React.useState(['First problem', 'Second problem']);
     return (
@@ -166,6 +174,8 @@ export const EditableList: Story = {
 
 /** A long paragraph wraps inside the panel and the number block keeps its width. */
 export const LongParagraph: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     position: 12,
     children:
