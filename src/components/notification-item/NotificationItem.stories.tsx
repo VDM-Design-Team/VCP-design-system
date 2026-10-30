@@ -113,6 +113,16 @@ const realPointer = async () => {
     return null;
   }
 };
+/* The real pointer stays wherever the last test left it, which can be over this story's
+   row: then the row is already hovered and the dot already gone before the test starts.
+   Park it on a spot in the screen's corner first. */
+const parkPointer = async (pointer: NonNullable<Awaited<ReturnType<typeof realPointer>>>) => {
+  const spot = document.createElement('div');
+  spot.className = 'fixed right-0 bottom-0 size-1';
+  document.body.append(spot);
+  await pointer.hover(spot);
+  spot.remove();
+};
 
 /** Unread, a link, with the mark-read button waiting for hover or focus. */
 export const Unread: Story = {
@@ -342,6 +352,8 @@ export const DotMakesWayForMarkRead: Story = {
     const dot = dotIn(canvasElement)!;
     const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
     const mark = canvas.getByRole('button', { name: 'Mark as read' });
+    const pointer = await realPointer();
+    if (pointer) await parkPointer(pointer);
     await expect(await opacityOf(dot)).toBe('1');
     /* The row's own focus: the dot stays, and the button stays hidden. */
     await userEvent.tab();
@@ -358,7 +370,6 @@ export const DotMakesWayForMarkRead: Story = {
     await expect(canvas.getByRole('button', { name: 'Show more' })).toHaveFocus();
     await expect(await opacityOf(dot)).toBe('1');
     /* Hover: the dot makes way for the button. */
-    const pointer = await realPointer();
     if (pointer) {
       await pointer.hover(row);
       await expect(await opacityOf(dot)).toBe('0');
@@ -376,10 +387,11 @@ export const DotStaysWithoutMarkRead: Story = {
     const dot = dotIn(canvasElement)!;
     const row = canvas.getByRole('link', { name: /^Unread: John Kestrel commented on/ });
     await expect(canvas.queryByRole('button')).toBeNull();
+    const pointer = await realPointer();
+    if (pointer) await parkPointer(pointer);
     await userEvent.tab();
     await expect(row).toHaveFocus();
     await expect(await opacityOf(dot)).toBe('1');
-    const pointer = await realPointer();
     if (pointer) {
       await pointer.hover(row);
       await expect(await opacityOf(dot)).toBe('1');
