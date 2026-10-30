@@ -3,6 +3,12 @@ import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from '../../atoms/button';
 import { NotificationItem, type NotificationKind } from './NotificationItem';
+import { AV_STATUSES } from '../status-tag';
+
+/* What `moved` can move to: the ten spine statuses every domain shares, then each domain's own steps
+   (Design has one, Development five). The domain steps are the domain's data, not the system's, so
+   these are the ones the library draws; `status` takes any label a domain defines. */
+const DOMAIN_STEPS = ['Design Review', 'For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'];
 
 const SUBJECT = 'Change the notification layout for testing';
 
@@ -53,6 +59,7 @@ const meta = {
         'commented',
         'mention',
         'moved',
+        'pending',
         'accepted',
         'updated',
         'rejected',
@@ -60,8 +67,14 @@ const meta = {
         'assigned',
         'backlog',
         'handoff',
+        'completed',
         'viewer',
       ] satisfies NotificationKind[],
+    },
+    status: {
+      control: 'select',
+      options: [...AV_STATUSES, ...DOMAIN_STEPS],
+      description: 'For `moved` only: the status it moved to. Any label a domain defines works.',
     },
     unread: { control: 'boolean' },
     onToggleRead: { control: false },
@@ -130,10 +143,10 @@ export const Unread: Story = {
     const canvas = within(canvasElement);
     /* The row is named from its message, and says it is unread. */
     const row = canvas.getByRole('link', {
-      name: 'Unread: John Kestrel commented on Change the notification layout for testing a few seconds ago',
+      name: 'Unread: John Kestrel commented on Change the notification layout for testing. a few seconds ago',
     });
     await expect(row).toHaveAttribute('href', '#av-1');
-    const mark = canvas.getByRole('button', { name: 'Mark as read' });
+    const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     await userEvent.click(mark);
     await expect(args.onToggleRead).toHaveBeenCalledTimes(1);
   },
@@ -142,7 +155,7 @@ export const Unread: Story = {
 /** The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. */
 export const MarkReadTooltip: Story = {
   play: async ({ canvasElement }) => {
-    const mark = within(canvasElement).getByRole('button', { name: 'Mark as read' });
+    const mark = within(canvasElement).getByRole('button', { name: /^Mark as read/ });
     await described(mark);
     await expect(isOpen(mark)).toBe(false);
     /* Tab to the row, then to the button: focus opens it at once. */
@@ -167,10 +180,10 @@ export const Read: Story = {
   args: { unread: false, kind: 'accepted', time: '8 hours ago' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('link', { name: /^John Kestrel accepts/ })).toBeVisible();
+    await expect(canvas.getByRole('link', { name: /^John Kestrel accepted/ })).toBeVisible();
     /* Read: empty on the right at rest. The mark-unread button is there for the
        keyboard, but invisible until the row is hovered or focused. */
-    const mark = canvas.getByRole('button', { name: 'Mark as unread' });
+    const mark = canvas.getByRole('button', { name: /^Mark as unread/ });
     await expect(mark).toBeInTheDocument();
     await expect(getComputedStyle(mark).opacity).toBe('0');
     /* Tab to the row, then to the button: focus brings it in. */
@@ -190,13 +203,15 @@ export const Kinds: Story = {
       { kind: 'commented', time: 'a few seconds ago', expect: /commented on/ },
       { kind: 'mention', time: 'a few seconds ago', expect: /mentioned you in a comment on/ },
       { kind: 'moved', status: 'Confirmed prod', time: '5 minutes ago', expect: /moved .* to Confirmed prod/ },
-      { kind: 'accepted', time: '8 hours ago', expect: /accepts/ },
+      { kind: 'pending', time: '3 hours ago', expect: /submitted .* for approval\. Pending/ },
+      { kind: 'accepted', time: '8 hours ago', expect: /accepted/ },
       { kind: 'updated', time: '38 minutes ago', expect: /made an update to/ },
       { kind: 'rejected', time: '38 minutes ago', expect: /rejected/ },
       { kind: 'rejected-feedback', time: '2 hours ago', expect: /rejected .* with feedback/ },
       { kind: 'assigned', time: '3 hours ago', expect: /assigned you/ },
       { kind: 'backlog', time: '3 hours ago', expect: /moved .* to the backlog/ },
-      { kind: 'handoff', time: '3 hours ago', expect: /completes .*\. Ready for review/ },
+      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review/ },
+      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
@@ -211,9 +226,10 @@ export const Kinds: Story = {
   },
   play: async ({ canvasElement }) => {
     const links = within(canvasElement).getAllByRole('link');
-    await expect(links).toHaveLength(11);
-    await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod');
-    await expect(links[9]).toHaveTextContent(/completes .*testing\. Ready for review/);
+    await expect(links).toHaveLength(13);
+    await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod.');
+    await expect(links[10]).toHaveTextContent(/handed off .*testing\. Ready for Review\./);
+    await expect(links[11]).toHaveTextContent(/accepted & completed .*testing\./);
   },
 };
 
@@ -236,9 +252,9 @@ export const Static: Story = {
     await expect(canvas.queryByRole('link')).toBeNull();
     await expect(canvas.queryByRole('button')).toBeNull();
     /* The sentence is a plain paragraph, with no "Unread:" on a read row. */
-    const message = canvas.getByText(SUBJECT).closest('p') as HTMLElement;
+    const message = canvas.getByText(`${SUBJECT}.`).closest('p') as HTMLElement;
     await expect(message).toHaveTextContent(
-      /^John Kestrel commented on Change the notification layout for testing a few seconds ago$/,
+      /^John Kestrel commented on Change the notification layout for testing. a few seconds ago$/,
     );
     /* Read with nothing to press: nothing on the right at all, the box is empty. */
     await expect(message.nextElementSibling).toBeEmptyDOMElement();
@@ -258,7 +274,7 @@ export const MovedWithoutStatus: Story = {
     void (() => <NotificationItem kind="moved" actor={{ name: 'J' }} subject="S" time="now" />);
     const row = within(canvasElement).getByRole('link');
     await expect(row).toHaveAccessibleName(
-      'John Kestrel moved Change the notification layout for testing a few seconds ago',
+      'John Kestrel moved Change the notification layout for testing. a few seconds ago',
     );
     await expect(row).not.toHaveTextContent(/\[Status\]| to /);
   },
@@ -333,7 +349,7 @@ export const CommentOpensTheItem: Story = {
     await expect(args.onSelect).toHaveBeenCalledTimes(1);
     /* And the keyboard reaches each in turn: row, mark-read, Show less, Reply. */
     (document.activeElement as HTMLElement | null)?.blur();
-    for (const control of [row, canvas.getByRole('button', { name: 'Mark as read' }), less, reply]) {
+    for (const control of [row, canvas.getByRole('button', { name: /^Mark as read/ }), less, reply]) {
       await userEvent.tab();
       await expect(control).toHaveFocus();
     }
@@ -351,7 +367,7 @@ export const DotMakesWayForMarkRead: Story = {
     const canvas = within(canvasElement);
     const dot = dotIn(canvasElement)!;
     const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
-    const mark = canvas.getByRole('button', { name: 'Mark as read' });
+    const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     const pointer = await realPointer();
     if (pointer) await parkPointer(pointer);
     await expect(await opacityOf(dot)).toBe('1');

@@ -11,7 +11,7 @@ import { Tooltip } from '../tooltip';
  *
  * Read off Figma's `Notification_Item` (`2428:4412`): Default, Hover and Focused,
  * each with or without a comment preview. The message is Figma's
- * `_Message_Content`, eleven kinds of event, which **this component owns** — the
+ * `_Message_Content`, thirteen kinds of event, which **this component owns** — the
  * way `StatusTag` owns status → tone — so no call site writes "John moved … to
  * the backlog" itself, and the bold and regular runs are the same everywhere.
  *
@@ -30,6 +30,7 @@ export type NotificationKind =
   | 'commented'
   | 'mention'
   | 'moved'
+  | 'pending'
   | 'accepted'
   | 'updated'
   | 'rejected'
@@ -37,12 +38,13 @@ export type NotificationKind =
   | 'assigned'
   | 'backlog'
   | 'handoff'
+  | 'completed'
   | 'viewer';
 
 /**
  * Kind → the sentence, in two parts: the `verb` that follows the actor's name
  * ("commented on"), and an optional `trail` after the subject ("to the
- * backlog"). The strings are the design's; localise by passing your own through a
+ * backlog"). Every sentence ends in a full stop, added here. The strings are the design's; localise by passing your own through a
  * wrapper, not by editing call sites.
  */
 const NOTIFICATION_PHRASES: Record<
@@ -54,13 +56,15 @@ const NOTIFICATION_PHRASES: Record<
   /* With no status the sentence stops at the subject. The types ask for one, but
      a placeholder ("to [Status]") must never reach a user. */
   moved: { verb: 'moved', trail: (s) => (s ? `to ${s}` : undefined) },
-  accepted: { verb: 'accepts' },
+  pending: { verb: 'submitted', trail: () => 'for approval. Pending' },
+  accepted: { verb: 'accepted' },
   updated: { verb: 'made an update to' },
   rejected: { verb: 'rejected' },
   'rejected-feedback': { verb: 'rejected', trail: () => 'with feedback' },
   assigned: { verb: 'assigned you' },
   backlog: { verb: 'moved', trail: () => 'to the backlog' },
-  handoff: { verb: 'completes', trail: () => '. Ready for review' },
+  handoff: { verb: 'handed off', trail: () => '. Ready for Review' },
+  completed: { verb: 'accepted & completed' },
   viewer: { verb: 'added you as a viewer to' },
 };
 
@@ -140,6 +144,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
     const phrase = NOTIFICATION_PHRASES[kind];
     const trail = phrase.trail?.(status);
     const interactive = Boolean(href || onSelect);
+    const markLabel = `${unread ? 'Mark as read' : 'Mark as unread'}: ${subject}`;
 
     /* The spaces are text nodes of their own: a space at the start of an inline
        `<span>` is dropped when the accessible name is computed, which ran the
@@ -148,14 +153,18 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       <>
         {unread && <span className="sr-only">Unread: </span>}
         <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>{' '}
-        <span className="text-body-sm-regular">{subject}</span>
+        <span className="text-body-sm-regular">{trail ? subject : `${subject}.`}</span>
         {trail && (
           <>
             {!trail.startsWith('.') && ' '}
-            <span className="text-body-sm-bold">{trail}</span>
+            <span className="text-body-sm-bold">{`${trail}.`}</span>
           </>
         )}{' '}
-        <span className="text-caption-md-regular text-text-tertiary">{time}</span>
+        {/* Capitalised for display: it follows the sentence's full stop, so it starts a
+            sentence of its own. `first-letter` needs a block-level box. */}
+        <span className="inline-block text-caption-md-regular text-text-tertiary first-letter:uppercase">
+          {time}
+        </span>
       </>
     );
 
@@ -202,12 +211,15 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             <p className="min-w-0 flex-1 text-body-sm-regular text-text-primary">{message}</p>
           )}
 
-          {/* The trailing slot, one 24 box so the row never shifts. Unread: the dot
+          {/* The trailing slot: one 40 box, so the click area is a comfortable target,
+              pulled back by 8 on every side (`-m-2`) so the text and the icon sit where a
+              24 box would put them. The dot and the check share its centre, so they swap
+              in place. Unread: the dot
               at rest, which dissolves into an outlined check-circle (mark as read)
               when the row is hovered or that button is focused. Read: empty at
               rest; on hover and focus a filled check-circle (mark as unread)
               dissolves in. Every change is a dissolve, not a jump. */}
-          <span className="relative flex size-6 shrink-0 items-center justify-center">
+          <span className="relative -m-2 flex size-10 shrink-0 items-center justify-center">
             {unread && (
               <span
                 aria-hidden="true"
@@ -224,7 +236,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             )}
             {onToggleRead && (
               /* After a half-second rest, the design's tooltip names the action.
-                 The wrapper fills the 24 box, over the dot, so the button inside
+                 The wrapper fills the box, over the dot, so the button inside
                  keeps the box's whole area. It opens to the left: the button sits on
                  the row's right edge (and the popover the rows live in on the
                  screen's), and Tooltip does not flip, so a bubble centred above it
@@ -240,13 +252,13 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                   data-read-mark
                   type="button"
                   onClick={onToggleRead}
-                  aria-label={unread ? 'Mark as read' : 'Mark as unread'}
+                  aria-label={markLabel}
                   className={cn(
                     'flex size-full items-center justify-center rounded-pill',
                     'text-stroke-focused hover:text-text-brand-strong',
                     'opacity-0 group-hover/notification:opacity-100 focus-visible:opacity-100',
                     'transition-[opacity,color] duration-200 ease-out motion-reduce:transition-none',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                    'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
                   )}
                 >
                   <Icon name={unread ? 'check-circle' : 'check-circle-fill'} size="md" />

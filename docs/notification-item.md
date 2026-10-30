@@ -5,7 +5,7 @@ whether it has been read.
 
 Read off Figma's `Notification_Item` (`2428:4412`): Default, Hover and Focused,
 each with and without a comment preview. The message is `_Message_Content`, its
-eleven kinds of event; `_Alert_Dot` is the unread dot and `_Mark_Read_Unread` the
+thirteen kinds of event; `_Alert_Dot` is the unread dot and `_Mark_Read_Unread` the
 hover button.
 
 ## Composed of
@@ -25,7 +25,7 @@ hover button.
 | `Toast` | A transient message about something the user just did. A notification is a record that stays until read |
 | The same `NotificationItem`, in a page-length list | A full inbox: the page the popover's footer link (`inboxHref`) goes to. The system has no inbox page of its own yet; build one from these rows |
 
-## The eleven kinds
+## The thirteen kinds
 
 **The component owns the sentence**, the way `StatusTag` owns status → tone, so no
 call site writes "John moved … to the backlog" itself. Bold is the design's 700;
@@ -33,21 +33,48 @@ the subject is regular.
 
 | `kind` | Reads as |
 |---|---|
-| `commented` | **John commented on** *Title* |
-| `mention` | **John mentioned you in a comment on** *Title* |
-| `moved` | **John moved** *Title* **to Status** (`status`, required for this kind) |
-| `accepted` | **John accepts** *Title* |
-| `updated` | **John made an update to** *Title* |
-| `rejected` | **John rejected** *Title* |
-| `rejected-feedback` | **John rejected** *Title* **with feedback** |
-| `assigned` | **John assigned you** *Title* |
-| `backlog` | **John moved** *Title* **to the backlog** |
-| `handoff` | **John completes** *Title***. Ready for review** |
-| `viewer` | **John added you as a viewer to** *Title* |
+| `commented` | **John commented on** *Title*. |
+| `mention` | **John mentioned you in a comment on** *Title*. |
+| `moved` | **John moved** *Title* **to Status.** (`status`, required for this kind) |
+| `pending` | **John submitted** *Title* **for approval. Pending.** |
+| `accepted` | **John accepted** *Title*. |
+| `updated` | **John made an update to** *Title*. |
+| `rejected` | **John rejected** *Title*. |
+| `rejected-feedback` | **John rejected** *Title* **with feedback.** |
+| `assigned` | **John assigned you** *Title*. |
+| `backlog` | **John moved** *Title* **to the backlog.** |
+| `handoff` | **John handed off** *Title***. Ready for Review.** |
+| `completed` | **John accepted & completed** *Title*. |
+| `viewer` | **John added you as a viewer to** *Title*. |
 
-Then the time, 12 regular `text.tertiary`, at the end of the same line. The text is
+Every sentence ends in a full stop, the component adds it, so a one-sentence line and a two-sentence one end the same way.
+
+Then the time, 12 regular `text.tertiary`, at the end of the same line. It follows the full stop, so its first letter is shown capitalised ("A few seconds ago") whatever the caller passes; the accessible name keeps the text as given. The text is
 English; to localise, wrap the component and pass your own sentence, not edit call
 sites.
+
+### Who gets it
+
+Which kinds notify whom is the product's rule (BESA in-app communication), not the component's:
+the component only draws the row it is given. **No one is notified of a status change they caused
+themselves.**
+
+| `kind` | Sent to | Red dot | Prior status | Why |
+|---|---|---|---|---|
+| `pending` | Admin(s) | Yes | Draft | An Added Value in Pending is waiting to be accepted or rejected |
+| `accepted` | Initiator(s) | Yes | Pending | Their Added Value is accepted and ready to be designed |
+| `rejected` (from Pending) | Initiator(s) | Yes | Pending | Their pending Added Value was rejected. A reason is required; it shows as a banner at the top of the Added Value page or as a tooltip there |
+| `moved` (In progress, Design Review) | Initiator(s), Assignee(s) | No | Accepted → In progress; In progress → Design Review | The status moved. Design Review usually coincides with the Design Review meeting |
+| `handoff` (Ready for Review) | Initiator(s), Assignee(s), Admin(s) | Yes | Design Review | Moved to Review: the Initiator(s) (who is not also an assignee) or an Admin can accept or reject. Assignees who did not cause the change are informed but cannot accept or reject |
+| `completed` | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Completed. It is copied over to the Dev domain |
+| `rejected` (from Review) | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Rejected; the reason shows as a banner on the Added Value page or a tooltip in the table |
+| `backlog` | Initiator(s), Assignee(s), Admin(s); only Initiator(s) if it was in Draft or Pending | Yes, except Admin(s) | Any: Backlog can be applied at any point | Moved to the backlog |
+| `assigned` | The user who was assigned | Yes | — | It was assigned to them and they should work on it |
+| `commented` | Initiator(s), Assignee(s) | Yes | — | A comment was added to an Added Value they initiated or are assigned to |
+| `mention` | Anyone mentioned | Yes | — | They were mentioned in a comment with @ |
+| `viewer` | Anyone added as a viewer | Yes | — | They were added as a viewer |
+
+Both `rejected` rows use the same sentence for now. `updated` and `rejected-feedback` are not in that document.
 
 ## Props
 
@@ -56,7 +83,7 @@ sites.
 | `kind` | `NotificationKind` | required | Picks the sentence. The props are a union on `kind`: `moved` needs `status` |
 | `actor` | `{ name, src? }` | required | Who did it. The avatar is decorative; the name is in the sentence |
 | `subject` | `string` | required | The Added Value's title |
-| `status` | `string` | — | For `moved`: the status it moved to. **Required with `moved`**: leaving it off is a type error. It is typed `string \| undefined`, so a row built from data (`status={event.status}`) type-checks; if it is undefined at runtime the sentence ends at the title, with no "to …" and never a placeholder. Ignored on the other kinds |
+| `status` | `string` | — | For `moved`: the status it moved to. **Required with `moved`**: leaving it off is a type error. It is typed `string \| undefined`, so a row built from data (`status={event.status}`) type-checks; if it is undefined at runtime the sentence ends at the title, with no "to …" and never a placeholder. Ignored on the other kinds. Any status label works: one of the ten shared statuses (`AVStatus`) or a step the Added Value's domain defines (Design Review, For QA, Confirmed prod …), which is the domain's data, so the type is `string` |
 | `time` | `string` | required | Already formatted: "5 minutes ago" |
 | `unread` | `boolean` | `false` | The dot, and "Unread:" in the row's name |
 | `onToggleRead` | `() => void` | — | Renders the mark-read / mark-unread button. Omit for a list that cannot be marked |
@@ -73,7 +100,7 @@ Row `surface.elevated`; hover `neutral.outline.surface.hover`, focused
 sentence is `body-sm-bold` for the bold runs and `body-sm-regular` for the subject,
 `text.primary`; the time is `caption-md-regular` `text.tertiary`. The unread dot is
 8, `surface.brand.strong` (Figma binds `text.brand.medium`, the same blue). The
-trailing 24 box holds a 20 check-circle in `stroke.focused`, `text.brand.strong` on
+trailing 40 box (pulled back 8 on every side, so the icon sits where a 24 box would put it) holds a 20 check-circle in `stroke.focused`, `text.brand.strong` on
 hover (a darker blue in light, a lighter one in dark): **outlined** on an unread row (the mark-read button, which the dot dissolves
 into on hover and on the button's focus) and **filled** on a read row (the mark-unread button, which
 dissolves in on hover and focus; the box is empty at rest), as `_Mark_Read_Unread` draws
@@ -86,15 +113,15 @@ close; with no button the text keeps its 8.
 ## Accessibility
 
 - **The whole row is one target**, a real `<a>` or `<button>` named from the
-  sentence: "Unread: John commented on *Title* a few seconds ago". The unread state
+  sentence: "Unread: John commented on *Title*. a few seconds ago". The unread state
   is in the name as text, not only as a dot.
 - **The comment preview is part of that target.** A click on the comment card opens
   the item like a click anywhere else on the row. Only "Show more" and the controls in
   `previewActions` take the pointer back, and they stay in the tab order after the row
   and its mark-read button. On a row with neither `href` nor `onSelect` the preview is
   ordinary text.
-- **The mark-read button is a separate control**, named "Mark as read" or "Mark as
-  unread", reachable by Tab even when it is not visible. On an unread row it
+- **The mark-read button is a separate control**, named "Mark as read: *Title*" or "Mark as
+  unread: *Title*" (so a list of them is not a list of identical names), reachable by Tab even when it is not visible. On an unread row it
   dissolves in where the dot was when the row is hovered or the button itself is
   focused; on a read row it dissolves in as the filled check. The right side is empty
   at rest on a read row. The row never shifts.
@@ -110,9 +137,10 @@ close; with no button the text keeps its 8.
   light it is darker than Figma's default, which is the cost.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
-- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus) says what the button's own name says. It opens to the left. Tooltip draws its bubble in a portal now, so it can no longer widen or be clipped by the list. But the button sits on the row's right edge, the popover sits on the screen's right edge, and Tooltip does not flip, so a bubble centred above the button could run off the screen. To the left it covers only its own row, not the row or the header above. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
-- The mark-read target is 24, not 40. It sits inside a row that is itself the large
-  target, and 24 is the WCAG 2.5.8 floor: a recorded exception, like the table cells.
+- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus, opening to the left of the button) says the action in short: "Mark as read". It opens to the left because the button sits on the row's right edge, the popover on the screen's, and Tooltip does not flip; to the left it covers only its own row. The button's own name is longer (it adds the title), so the description is not a repeat.
+- The mark-read target is 40, the system's touch minimum, with the 20 icon centred in it. On a
+  touch screen there is no hover, so the button is invisible until focused but still tappable;
+  the unread dot is what shows there.
 - **The preview's** "Show more" is a real button with `aria-expanded` and
   `aria-controls`. It appears only when the comment really overflows three lines.
 - Put items in a `<ul>` / `<li>`; the root is a `<div>` so it works in either.
