@@ -23,7 +23,7 @@ hover button.
 |---|---|
 | `NotificationItem` | A row in the notification popover, or in any list of events about Added Values |
 | `Toast` | A transient message about something the user just did. A notification is a record that stays until read |
-| The inbox page (`NotificationInbox`) | The same row, in the full list |
+| The same `NotificationItem`, in a page-length list | A full inbox: the page the popover's footer link (`inboxHref`) goes to. The system has no inbox page of its own yet; build one from these rows |
 
 ## The eleven kinds
 
@@ -35,7 +35,7 @@ the subject is regular.
 |---|---|
 | `commented` | **John commented on** *Title* |
 | `mention` | **John mentioned you in a comment on** *Title* |
-| `moved` | **John moved** *Title* **to Status** (`status`) |
+| `moved` | **John moved** *Title* **to Status** (`status`, required for this kind) |
 | `accepted` | **John accepts** *Title* |
 | `updated` | **John made an update to** *Title* |
 | `rejected` | **John rejected** *Title* |
@@ -53,10 +53,10 @@ sites.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `kind` | `NotificationKind` | required | Picks the sentence |
+| `kind` | `NotificationKind` | required | Picks the sentence. The props are a union on `kind`: `moved` needs `status` |
 | `actor` | `{ name, src? }` | required | Who did it. The avatar is decorative; the name is in the sentence |
 | `subject` | `string` | required | The Added Value's title |
-| `status` | `string` | `[Status]` | For `moved`: the status it moved to |
+| `status` | `string` | — | For `moved`: the status it moved to. **Required with `moved`**: leaving it off is a type error. It is typed `string \| undefined`, so a row built from data (`status={event.status}`) type-checks; if it is undefined at runtime the sentence ends at the title, with no "to …" and never a placeholder. Ignored on the other kinds |
 | `time` | `string` | required | Already formatted: "5 minutes ago" |
 | `unread` | `boolean` | `false` | The dot, and "Unread:" in the row's name |
 | `onToggleRead` | `() => void` | — | Renders the mark-read / mark-unread button. Omit for a list that cannot be marked |
@@ -75,7 +75,7 @@ sentence is `body-sm-bold` for the bold runs and `body-sm-regular` for the subje
 8, `surface.brand.strong` (Figma binds `text.brand.medium`, the same blue). The
 trailing 24 box holds a 20 check-circle in `stroke.focused`, `text.brand.strong` on
 hover (a darker blue in light, a lighter one in dark): **outlined** on an unread row (the mark-read button, which the dot dissolves
-into on hover and focus) and **filled** on a read row (the mark-unread button, which
+into on hover and on the button's focus) and **filled** on a read row (the mark-unread button, which
 dissolves in on hover and focus; the box is empty at rest), as `_Mark_Read_Unread` draws
 it. Every change in that box, and the row's fill, is a 200ms dissolve (none under
 reduced motion). The preview is `surface.elevated` with a 1 `stroke.default` border, `radius.md`, 12 / 8 padding, `body-sm-regular`
@@ -86,12 +86,22 @@ close; with no button the text keeps its 8.
 ## Accessibility
 
 - **The whole row is one target**, a real `<a>` or `<button>` named from the
-  sentence: "Unread: John commented on *Title*, a few seconds ago". The unread state
+  sentence: "Unread: John commented on *Title* a few seconds ago". The unread state
   is in the name as text, not only as a dot.
+- **The comment preview is part of that target.** A click on the comment card opens
+  the item like a click anywhere else on the row. Only "Show more" and the controls in
+  `previewActions` take the pointer back, and they stay in the tab order after the row
+  and its mark-read button. On a row with neither `href` nor `onSelect` the preview is
+  ordinary text.
 - **The mark-read button is a separate control**, named "Mark as read" or "Mark as
   unread", reachable by Tab even when it is not visible. On an unread row it
-  dissolves in on hover and focus where the dot was; on a read row it dissolves in as the filled
-  check. The right side is empty at rest on a read row. The row never shifts.
+  dissolves in where the dot was when the row is hovered or the button itself is
+  focused; on a read row it dissolves in as the filled check. The right side is empty
+  at rest on a read row. The row never shifts.
+- **The dot only makes way for that button.** Focus on the row, on "Show more" or on a
+  `previewActions` control leaves the dot where it is, and so does hover on a row
+  with no `onToggleRead`: with no button to take its place, it never disappears into
+  nothing.
 - **The check and the dot clear 3:1 in both themes**, against the row at rest and against
   its hover and pressed fills (`stroke.focused` 6.18 / 5.64 / 5.01 in light, 6.33 / 4.48 /
   3.28 in dark; the dot is the same blue). Figma binds the check to `stroke.brand.medium`,
@@ -100,7 +110,7 @@ close; with no button the text keeps its 8.
   light it is darker than Figma's default, which is the cost.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
-- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus, opening to the left so it stays inside the row and a scrolling list) says what the button's own name says. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
+- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus) says what the button's own name says. It opens to the left. Tooltip draws its bubble in a portal now, so it can no longer widen or be clipped by the list. But the button sits on the row's right edge, the popover sits on the screen's right edge, and Tooltip does not flip, so a bubble centred above the button could run off the screen. To the left it covers only its own row, not the row or the header above. Screen readers get the name from `aria-label` and the same words as the description; the repetition is the price of the design's tooltip.
 - The mark-read target is 24, not 40. It sits inside a row that is itself the large
   target, and 24 is the WCAG 2.5.8 floor: a recorded exception, like the table cells.
 - **The preview's** "Show more" is a real button with `aria-expanded` and
@@ -120,3 +130,5 @@ the system does not have yet. `previewActions` is where they will go.
 - **Don't carry unread by colour alone.** The dot is decoration; the name says it.
 - **Don't nest your own link or button in the row.** The row is the target; put
   extra controls in `previewActions`.
+- **Don't send a `moved` row without its `status`.** The types ask for it; without
+  one the sentence stops at the title.
