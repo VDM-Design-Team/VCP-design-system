@@ -33,6 +33,7 @@ export * from './components/chip';
 export * from './components/cycle-tag';
 export * from './components/data-table';
 export * from './components/date-picker';
+export * from './components/detail-card-menu';
 export * from './components/detail-row';
 export * from './components/dropdown-stepper';
 export * from './components/dropzone';

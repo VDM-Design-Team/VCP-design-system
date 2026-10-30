@@ -1,0 +1,101 @@
+import * as React from 'react';
+import { IconButton } from '../../atoms/icon-button';
+import { Menu, type MenuItem } from '../menu';
+
+/**
+ * DetailCardMenu — the ⋮ button at the head of an Added Value page, and the menu it opens:
+ * Edit and Delete for everyone, with the moves between Draft, Pending and Backlog that the
+ * person's role and the AV's status allow. Read off Figma's `Detail_Card_Menu` (the button) and
+ * `AV_Options_Dropdown` (the five menus).
+ *
+ * **The component owns which actions are offered**, the way `StatusTag` owns status → tone, so no
+ * page decides it again:
+ *
+ * | Role | Status | Menu |
+ * |---|---|---|
+ * | user | Draft | Move to Backlog · Edit · Delete |
+ * | user | any other | Edit · Delete |
+ * | admin | Draft | Move to Backlog · Edit · Delete |
+ * | admin | Pending | Move to Backlog, Move to Draft · Edit · Delete |
+ * | admin | Backlog | Move to Pending, Move to Draft · Edit · Delete |
+ * | admin | any other | Edit · Delete |
+ *
+ * The moves sit above a divider, then Edit, then Delete in the critical colour. It only reports:
+ * each action's handler is the page's.
+ *
+ * Every class below resolves to a design token from the VCP Figma variables.
+ * If you need a value that isn't here, add the token in `tokens/` first —
+ * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
+ */
+export type DetailCardMenuRole = 'user' | 'admin';
+
+export interface DetailCardMenuProps {
+  /** Who is looking. Admins can move an AV between Draft, Pending and Backlog. */
+  role?: DetailCardMenuRole;
+  /** The AV's status. Only Draft, Pending and Backlog change the menu; any other (a domain step too) gets Edit and Delete. */
+  status?: string;
+  onMoveToBacklog?: () => void;
+  onMoveToDraft?: () => void;
+  onMoveToPending?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  /** The button's accessible name. Default "AV options". */
+  label?: string;
+  className?: string;
+}
+
+/** THE mapping — role and status → the moves on offer, in order. */
+function movesFor(role: DetailCardMenuRole, status?: string): Array<'backlog' | 'draft' | 'pending'> {
+  if (status === 'Draft') return ['backlog'];
+  if (role === 'admin' && status === 'Pending') return ['backlog', 'draft'];
+  if (role === 'admin' && status === 'Backlog') return ['pending', 'draft'];
+  return [];
+}
+
+export const DetailCardMenu = React.forwardRef<HTMLDivElement, DetailCardMenuProps>(
+  (
+    {
+      role = 'user',
+      status,
+      onMoveToBacklog,
+      onMoveToDraft,
+      onMoveToPending,
+      onEdit,
+      onDelete,
+      label = 'AV options',
+      className,
+    },
+    ref,
+  ) => {
+    const handlers = { backlog: onMoveToBacklog, draft: onMoveToDraft, pending: onMoveToPending };
+    const labels = { backlog: 'Move to Backlog', draft: 'Move to Draft', pending: 'Move to Pending' };
+    const moves = movesFor(role, status);
+
+    const items: MenuItem[] = [
+      ...moves.map((move) => ({ key: move, label: labels[move], onClick: handlers[move] })),
+      ...(moves.length > 0 ? [{ divider: true as const, key: 'divider' }] : []),
+      { key: 'edit', label: 'Edit', onClick: onEdit },
+      { key: 'delete', label: 'Delete', tone: 'danger' as const, onClick: onDelete },
+    ];
+
+    return (
+      <Menu
+        ref={ref}
+        className={className}
+        items={items}
+        align="right"
+        trigger={
+          <IconButton
+            icon="dots-three-outline-vertical"
+            variant="neutral"
+            size="sm"
+            label={label}
+            /* 32 to look at, as Figma draws it; a touch screen gets 40. */
+            className="size-8 pointer-coarse:size-10"
+          />
+        }
+      />
+    );
+  },
+);
+DetailCardMenu.displayName = 'DetailCardMenu';
