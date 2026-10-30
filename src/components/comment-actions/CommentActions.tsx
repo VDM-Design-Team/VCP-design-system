@@ -155,7 +155,8 @@ export const CommentActions = React.forwardRef<HTMLDivElement, CommentActionsPro
         {showReplies && (
           <Action
             icon={repliesOpen ? 'caret-up' : 'caret-down'}
-            aria-controls={repliesId}
+            /* Only while the list is there: a button with no `aria-expanded` may not point at nothing. */
+            aria-controls={repliesOpen ? repliesId : undefined}
             aria-label={named(`${repliesOpen ? 'Hide' : 'Show'} ${replyCount} ${replyCount === 1 ? 'Reply' : 'Replies'} to {}`)}
             onClick={onToggleReplies}
           >
