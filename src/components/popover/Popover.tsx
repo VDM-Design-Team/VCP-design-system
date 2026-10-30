@@ -15,9 +15,13 @@ import { cn } from '../../lib/cn';
  * page stays reachable and operable. If the content must be finished before the
  * user does anything else, that is a Modal, not this.
  *
- * **Positioning is deliberately dumb.** The panel is absolutely positioned inside
- * a relatively positioned wrapper: above or below the trigger, flush to its left
- * or right edge. There is no collision detection, no flipping, no shifting, no
+ * **Positioning is modest.** The panel is absolutely positioned inside a
+ * relatively positioned wrapper: above or below the trigger, flush to its left
+ * or right edge. `placement` and `align` are what you *prefer*: when the panel
+ * would run off the screen it opens on the other side (above instead of below,
+ * right-flush instead of left-flush) if that fits better, and if neither side
+ * has room for it its height gives way and it scrolls. It is measured when it
+ * opens and when the window or the panel is resized. There is no shifting, no
  * portal — this system carries no positioning library and this component does not
  * pretend to be one. See docs/popover.md for what that costs you.
  *
@@ -25,6 +29,19 @@ import { cn } from '../../lib/cn';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, raw pixel value, or arbitrary Tailwind class. ds-lint-ignore
  */
+/* Layout maths, not styling: the gap `mt-2`/`mb-2` puts between trigger and panel, and how near the
+   screen's edge the panel may come. */
+const PANEL_GAP = 8;
+const SCREEN_EDGE = 8;
+
+/** Where the panel went, when the room on the screen made it go somewhere other than asked. */
+interface Fit {
+  placement: 'top' | 'bottom';
+  align: 'left' | 'right';
+  /** Set only when neither side has room for the whole panel: it scrolls inside this. */
+  maxHeight?: number;
+}
+
 const popoverPanel = cva(
   [
     'absolute z-50',
@@ -106,9 +123,9 @@ export interface PopoverProps
   /** Uncontrolled starting state. */
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Above or below the trigger. No flipping — see docs/popover.md. */
+  /** Above or below the trigger: the side you prefer. It opens on the other if this one is cut off and that one fits better. */
   placement?: PopoverPlacement;
-  /** Which edge the panel is flush with. */
+  /** Which edge the panel is flush with: the one you prefer. It takes the other if it would run off the screen. */
   align?: PopoverAlign;
   /**
    * Panel width. A variant, not a number: the raw `width` of the source export
@@ -192,6 +209,53 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
   const wrapperRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRef = React.useRef<HTMLElement | null>(null);
   const panelRef = React.useRef<HTMLDivElement | null>(null);
+
+  /* The side and edge the panel really took. `null` until measured, and the preferred ones until then. */
+  const [fit, setFit] = React.useState<Fit | null>(null);
+
+  const measure = React.useCallback(() => {
+    const wrapper = wrapperRef.current;
+    const panel = panelRef.current;
+    if (!wrapper || !panel) return;
+    const trigger = wrapper.getBoundingClientRect();
+    const need = panel.offsetHeight + PANEL_GAP;
+    const wide = panel.offsetWidth;
+
+    const roomBelow = window.innerHeight - trigger.bottom - SCREEN_EDGE;
+    const roomAbove = trigger.top - SCREEN_EDGE;
+    const room = (side: 'top' | 'bottom') => (side === 'bottom' ? roomBelow : roomAbove);
+    const other = placement === 'bottom' ? 'top' : 'bottom';
+    const side = room(placement) >= need || room(placement) >= room(other) ? placement : other;
+    /* Neither side holds it: keep the roomier one and let the panel scroll inside it. */
+    const maxHeight = room(side) < need ? Math.max(room(side) - PANEL_GAP, 0) : undefined;
+
+    const fitsLeft = trigger.left + wide <= window.innerWidth - SCREEN_EDGE;
+    const fitsRight = trigger.right - wide >= SCREEN_EDGE;
+    const edge = align === 'left' ? (fitsLeft || !fitsRight ? 'left' : 'right') : fitsRight || !fitsLeft ? 'right' : 'left';
+
+    setFit((prev) =>
+      prev && prev.placement === side && prev.align === edge && prev.maxHeight === maxHeight
+        ? prev
+        : { placement: side, align: edge, maxHeight },
+    );
+  }, [placement, align]);
+
+  /* Measured before the first paint of the open panel, and again if the window or the panel changes size. */
+  React.useLayoutEffect(() => {
+    if (!isOpen) {
+      setFit(null);
+      return;
+    }
+    measure();
+    const panel = panelRef.current;
+    const observer = panel && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    if (panel) observer?.observe(panel);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [isOpen, measure]);
 
   /* Was focus inside the popover at the moment it closed? That is the only
      thing that decides whether closing restores focus to the trigger. Closing
@@ -289,8 +353,10 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
           aria-label={panelRole && label ? label : undefined}
           aria-labelledby={panelRole && !label ? triggerId : undefined}
           tabIndex={panelProps?.tabIndex ?? -1}
+          /* Only when neither side has room, so a tall panel scrolls instead of leaving the screen. */
+          style={fit?.maxHeight !== undefined ? { maxHeight: fit.maxHeight, overflowY: 'auto' } : undefined}
           className={cn(
-            popoverPanel({ placement, align, width }),
+            popoverPanel({ placement: fit?.placement ?? placement, align: fit?.align ?? align, width }),
             panelClassName,
             panelProps?.className,
           )}
