@@ -70,8 +70,6 @@ export interface NewCommentProps
   placeholder?: string;
   /** The box's accessible name. Default "Add a comment". */
   inputLabel?: string;
-  /** The send button's words. Default "Add Comment". */
-  submitLabel?: string;
 }
 
 export const NewComment = React.forwardRef<HTMLElement, NewCommentProps>(
@@ -91,7 +89,6 @@ export const NewComment = React.forwardRef<HTMLElement, NewCommentProps>(
       loading,
       placeholder,
       inputLabel = 'Add a comment',
-      submitLabel = 'Add Comment',
       ...props
     },
     ref,
@@ -149,7 +146,7 @@ export const NewComment = React.forwardRef<HTMLElement, NewCommentProps>(
               placeholder={placeholder}
             />
             <CommentFormActions
-              submitLabel={submitLabel}
+              variant="comment"
               onSubmit={submit}
               disabled={empty}
               loading={loading}
