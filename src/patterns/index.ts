@@ -11,6 +11,7 @@ export * from './av-table';
 export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
 export * from './handoff-av-modal';
+export * from './new-comment';
 export * from './report-problem-modal';
 export * from './reject-pending-av-modal';
 export * from './review-av-modal';
