@@ -6,12 +6,18 @@ import {
   type NotificationItemBaseProps,
   type NotificationKind,
 } from './NotificationItem';
+import { AV_STATUSES } from '../status-tag';
 
 /* The component's props are a union (`moved` requires `status`), which Storybook's `args` typing
    cannot hold, so the stories take the loose shape. The requirement itself is the component's. */
 const Item = NotificationItem as unknown as React.ComponentType<
   NotificationItemBaseProps & { kind: NotificationKind; status?: string }
 >;
+
+/* What `moved` can move to: the ten spine statuses every domain shares, then each domain's own steps
+   (Design has one, Development five). The domain steps are the domain's data, not the system's, so
+   these are the ones the library draws; `status` takes any label a domain defines. */
+const DOMAIN_STEPS = ['Design Review', 'For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'];
 
 const SUBJECT = 'Change the notification layout for testing';
 
@@ -41,6 +47,7 @@ const meta = {
     kind: 'commented',
     actor: { name: 'John Kestrel' },
     subject: SUBJECT,
+    status: 'Confirmed prod',
     time: 'a few seconds ago',
     unread: true,
     href: '#av-1',
@@ -64,6 +71,11 @@ const meta = {
         'completed',
         'viewer',
       ] satisfies NotificationKind[],
+    },
+    status: {
+      control: 'select',
+      options: [...AV_STATUSES, ...DOMAIN_STEPS],
+      description: 'For `moved` only: the status it moved to. Any label a domain defines works.',
     },
     unread: { control: 'boolean' },
     onToggleRead: { control: false },
