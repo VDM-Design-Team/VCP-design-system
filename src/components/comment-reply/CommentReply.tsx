@@ -107,7 +107,7 @@ const AVATAR = 'border border-stroke-default text-text-tertiary';
 function Box({
   members,
   label,
-  submitLabel,
+  variant,
   defaultValue = [],
   loading,
   onSubmit,
@@ -115,7 +115,7 @@ function Box({
 }: {
   members: readonly MentionMember[];
   label: string;
-  submitLabel: string;
+  variant: 'reply' | 'save';
   defaultValue?: readonly MentionSegment[];
   loading?: boolean;
   onSubmit?: (value: MentionSegment[]) => void;
@@ -137,12 +137,13 @@ function Box({
         onSubmit={submit}
         autoFocus
       />
+      {/* A reply and an edit always have a Cancel; the page owns what closing the box means. */}
       <CommentFormActions
-        submitLabel={submitLabel}
+        variant={variant}
         onSubmit={submit}
         disabled={empty}
         loading={loading}
-        onCancel={onCancel}
+        onCancel={onCancel ?? (() => {})}
       />
     </div>
   );
@@ -204,7 +205,7 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
               <Box
                 members={members}
                 label="Edit comment"
-                submitLabel="Save"
+                variant="save"
                 defaultValue={body}
                 loading={editLoading}
                 onSubmit={onSubmitEdit}
@@ -242,7 +243,7 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
             <Box
               members={members}
               label={`Reply to ${author.name}`}
-              submitLabel="Reply"
+              variant="reply"
               loading={replyLoading}
               onSubmit={onSubmitReply}
               onCancel={onCancelReply}
