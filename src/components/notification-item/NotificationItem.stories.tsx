@@ -7,8 +7,9 @@ import {
   type NotificationKind,
   type NotificationReply,
 } from './NotificationItem';
+import { typeText } from '../../lib/story-typing';
 import type { EmojiReaction } from '../emoji-reaction-picker';
-import type { MentionSegment } from '../mention-input';
+import type { MentionSegment } from '../../atoms/mention-input';
 import { AV_STATUSES } from '../status-tag';
 
 /* The component's props are a union (`moved` requires `status`), which Storybook's `args` typing
@@ -328,9 +329,9 @@ export const ReplyFlow: Story = {
     /* The row (and its reactions) give way to the composer. */
     await expect(canvas.queryByRole('button', { name: /React with/ })).toBeNull();
     const field = canvas.getByRole('textbox', { name: 'Write a reply' });
-    await userEvent.type(field, 'Thanks @jane');
+    await typeText(field, 'Thanks @jane');
     await userEvent.keyboard('{Enter}');
-    await userEvent.type(field, 'will review');
+    await typeText(field, 'will review');
     await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
 
     /* Posted, and hidden by default. */
@@ -345,7 +346,7 @@ export const ReplyFlow: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Edit' }));
     const editor = canvas.getByRole('textbox', { name: 'Write a reply' });
     await expect(editor).toHaveTextContent('Thanks @Jane Doe will review');
-    await userEvent.type(editor, ' soon');
+    await typeText(editor, ' soon');
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
     await expect(await canvas.findByText(/will review soon/)).toBeVisible();
 

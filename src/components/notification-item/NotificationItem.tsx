@@ -4,7 +4,7 @@ import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { EmojiReactionPicker, type EmojiReaction } from '../emoji-reaction-picker';
-import type { MentionMember, MentionSegment } from '../mention-input';
+import type { MentionMember, MentionSegment } from '../../atoms/mention-input';
 import { Tooltip } from '../tooltip';
 import { ReplyCard, ReplyComposer, ReplyControl } from './NotificationReply';
 

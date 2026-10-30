@@ -16,7 +16,7 @@ hover button.
 | `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`), and Reply / Save / Cancel in the composer |
 | `Tooltip` | component | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
 | `EmojiReactionPicker` | component | The reactions row: thumbs-up, the palette and the pills |
-| `MentionInput` | component | The field a reply is written in, with @-mentions, and the `MentionTag` a posted reply draws |
+| `MentionInput` | atom | The field a reply is written in, with @-mentions, and the `MentionTag` a posted reply draws |
 | `Icon` | atom | The check-circle in the mark-read button |
 
 ## When to use

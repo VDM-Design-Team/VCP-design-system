@@ -10,7 +10,7 @@ import {
   plainText,
   type MentionMember,
   type MentionSegment,
-} from '../mention-input';
+} from '../../atoms/mention-input';
 
 /**
  * The reply parts of a notification: the small control under a comment ("Reply", "Show
