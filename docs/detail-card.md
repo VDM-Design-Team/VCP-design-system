@@ -22,6 +22,7 @@ Read off Figma's `Detail_Card` (`6499:48858`: four types) and its `_Detail_Card_
 | `DueDateTag` | component |
 | `Popover` | component |
 | `SearchSelect` | component |
+| `Stepper` | component |
 | `StatusTag` | component |
 | `TypeTag` | component |
 | `UrgencyTag` | component |
@@ -95,9 +96,9 @@ changes come out through `onChange` as the whole `value`; the form's users come 
 
 ## Tag sizes
 
-Every tag in the card is **large** (32 tall): the date and cycle tags, status, urgency, type, projects, category
-and tags. The people chips are their own size. Urgency is drawn tonal (a pale fill) and type outlined with the ⓘ, as the
-Detail card does in Figma. Capacity Points is a `Badge`, a round pill, not a tag.
+Every tag in the card is **large** (28 tall: GDL's Large, our `md`, the default): the date and cycle tags, status, urgency, type, projects, category
+and tags. The people chips are their own size. Urgency is drawn tonal (a pale fill) and type in the grey bordered pill with the ⓘ, as the
+Detail card does in Figma. Capacity Points is a `Badge` when read and a `Stepper` (`variant="up-down"`, the stacked caret pair, full width) when edited; dates are an `Input` with a calendar icon and a `DatePicker`. No field is new: each is an existing piece.
 
 ## Tokens
 

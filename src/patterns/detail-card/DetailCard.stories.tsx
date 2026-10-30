@@ -60,7 +60,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-96 max-w-full bg-surface-canvas p-4">
+      <div className="w-116 max-w-full bg-surface-canvas p-4">
         <Story />
       </div>
     ),
@@ -92,10 +92,10 @@ export const Editing: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('group', { name: 'Status' })).toBeNull();
-    const points = canvas.getByRole('spinbutton', { name: 'Capacity Points' });
-    await userEvent.clear(points);
-    await userEvent.type(points, '8');
-    await expect(points).toHaveValue(8);
+    /* Capacity points is a Stepper: nudge it up. */
+    const points = canvas.getByRole('textbox', { name: 'Capacity Points' });
+    await userEvent.click(canvas.getByRole('button', { name: 'Increase Capacity Points' }));
+    await expect(points).toHaveValue('11');
   },
 };
 

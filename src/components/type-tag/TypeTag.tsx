@@ -52,8 +52,8 @@ const TYPE: Record<AVType, { icon: IconName; className: string }> = {
   'Type 3': { icon: 'caret-up', className: 'text-text-brand-medium' },
 };
 
-/** How the tag is drawn: the glyph and word alone (the default), on a pale fill, or in a bordered pill. */
-export type TypeTagVariant = 'textual' | 'tonal' | 'outline';
+/** How the tag is drawn: the glyph and word alone (the default), on a pale fill, in a bordered pill in the type's hue, or in a grey bordered pill. */
+export type TypeTagVariant = 'textual' | 'tonal' | 'outline' | 'neutral-outline';
 
 /* The hue each type wears when the tag has a fill or a border, the glyph's own family. */
 const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
@@ -64,7 +64,7 @@ const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
 
 export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   type: AVType;
-  /** `textual` (default), `tonal` (a pale fill) or `outline` (a bordered pill), as the design's Type_Tag set draws them. */
+  /** `textual` (default), `tonal` (a pale fill), `outline` (a bordered pill in the type's hue) or `neutral-outline` (a grey bordered pill, as the Detail card draws it), as the design's Type_Tag set draws them. */
   variant?: TypeTagVariant;
   /** The ⓘ after the word, which the design draws on the filled and bordered looks. Decorative: it marks that the type has an explanation, which the page provides. */
   info?: boolean;
@@ -76,8 +76,8 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
     return (
       <Tag
         ref={ref}
-        variant={variant}
-        tone={variant === 'textual' ? 'neutral' : TYPE_TONE[type]}
+        variant={variant === 'neutral-outline' ? 'outline' : variant}
+        tone={variant === 'textual' || variant === 'neutral-outline' ? 'neutral' : TYPE_TONE[type]}
         /* Decorative: the word beside it already says which type this is. */
         icon={<Icon name={icon} size="lg" className={cn('shrink-0', tone)} />}
         trailingIcon={info ? <Icon name="info" size="md" className="shrink-0 text-text-tertiary" /> : undefined}

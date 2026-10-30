@@ -12,6 +12,7 @@ import { DatePicker } from '../../components/date-picker';
 import { DueDateTag, dueDateTone } from '../../components/due-date-tag';
 import { Popover } from '../../components/popover';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
+import { Stepper } from '../../components/stepper';
 import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
 import { AV_TYPES, TypeTag, type AVType } from '../../components/type-tag';
 import { AV_URGENCIES, UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
@@ -224,13 +225,13 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     body.startDate = editing ? (
       <DateField label="Start Date" value={value.startDate} onChange={(v) => set({ startDate: v })} error={errors?.startDate} />
     ) : value.startDate ? (
-      <Tag size="lg" tone="neutral">{longDate(value.startDate)}</Tag>
+      <Tag size="md" tone="neutral">{longDate(value.startDate)}</Tag>
     ) : null;
     body.dueDate = editing ? (
       <DateField label="Due Date" value={value.dueDate} onChange={(v) => set({ dueDate: v })} error={errors?.dueDate} />
     ) : value.dueDate ? (
       <DueDateTag
-        size="lg"
+        size="md"
         proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })}
       >
         {longDate(value.dueDate)}
@@ -250,14 +251,14 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.cycle}
       />
     ) : cycle ? (
-      <CycleTag size="lg" code={cycle.code} start={cycle.start} end={cycle.end} />
+      <CycleTag size="md" code={cycle.code} start={cycle.start} end={cycle.end} />
     ) : null;
 
     body.status = value.status ? (
       (AV_STATUSES as readonly string[]).includes(value.status) ? (
-        <StatusTag size="lg" status={value.status as AVStatus} />
+        <StatusTag size="md" status={value.status as AVStatus} />
       ) : (
-        <StatusTag size="lg" custom={value.status} />
+        <StatusTag size="md" custom={value.status} />
       )
     ) : null;
     body.duplicates = (
@@ -290,7 +291,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.urgency}
       />
     ) : value.urgency ? (
-      <UrgencyTag size="lg" variant="tonal" urgency={value.urgency} />
+      <UrgencyTag size="md" variant="tonal" urgency={value.urgency} />
     ) : null;
     body.type = editing ? (
       <SearchSelect
@@ -304,13 +305,13 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.type}
       />
     ) : value.type ? (
-      <TypeTag size="lg" variant="outline" info type={value.type} />
+      <TypeTag size="md" variant="neutral-outline" info type={value.type} />
     ) : null;
 
     const tagList = (items: readonly string[] | undefined, tone: 'brand' | 'neutral') => (
       <div className="flex flex-wrap gap-2">
         {(items ?? []).map((t) => (
-          <Tag key={t} size="lg" tone={tone}>
+          <Tag key={t} size="md" tone={tone}>
             {t}
           </Tag>
         ))}
@@ -344,7 +345,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.category}
       />
     ) : value.category ? (
-      <Tag size="lg" tone="neutral">{value.category}</Tag>
+      <Tag size="md" tone="neutral">{value.category}</Tag>
     ) : null;
     body.tags = editing ? (
       <SearchSelect
@@ -363,17 +364,17 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       tagList(value.tags, 'neutral')
     );
     body.capacityPoints = editing ? (
-      <Input
-        type="number"
-        fullWidth
-        aria-label="Capacity Points"
-        value={value.capacityPoints ?? ''}
-        onChange={(e) =>
-          set({ capacityPoints: e.target.value === '' ? undefined : Number(e.target.value) })
-        }
+      <Stepper
+        variant="up-down"
+        className="flex w-full"
+        label="Capacity Points"
+        min={0}
+        value={value.capacityPoints ?? 0}
+        onChange={(v) => set({ capacityPoints: v })}
+        error={errors?.capacityPoints}
       />
     ) : value.capacityPoints !== undefined ? (
-      <Badge size="lg" tone="neutral">{String(value.capacityPoints)}</Badge>
+      <Badge size="md" tone="neutral">{String(value.capacityPoints)}</Badge>
     ) : null;
 
     const hasViewers = viewerCount !== undefined && !editing;
@@ -534,22 +535,19 @@ function DateField({
         align="left"
         className="w-full"
         trigger={
-          <button
-            type="button"
+          <Input
+            readOnly
+            /* It opens a calendar, so it is a combobox: that role allows the expanded state the popover sets. */
+            role="combobox"
+            fullWidth
             aria-label={label}
-            aria-invalid={error ? true : undefined}
+            invalid={!!error}
             aria-describedby={error ? errorId : undefined}
-            className={cn(
-              'flex h-10 w-full items-center gap-2 rounded-md border bg-surface-elevated px-3 text-left transition-colors',
-              error ? 'border-accent-critical-outline-border-default' : 'border-stroke-strong hover:border-stroke-focused',
-              'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-            )}
-          >
-            <Icon name="calendar-blank" size="sm" aria-hidden="true" className="text-text-tertiary" />
-            <span className={cn('text-body-sm-regular', value ? 'text-text-primary' : 'text-text-subtle')}>
-              {value ? fieldDate(value) : 'MM-DD-YYYY'}
-            </span>
-          </button>
+            leadingIcon={<Icon name="calendar-blank" size="sm" />}
+            placeholder="MM-DD-YYYY"
+            value={value ? fieldDate(value) : ''}
+            onClick={() => setOpen(true)}
+          />
         }
         content={
           <DatePicker
@@ -705,16 +703,14 @@ function PersonForm({
             value={role}
             onChange={(v: string) => setRole(v)}
           />
-          <div className="min-w-0 flex-1">
-            <Input
-              type="number"
-              aria-label="Capacity points"
-              placeholder="Points"
-              value={points}
-              onChange={(e) => setPoints(e.target.value)}
-              fullWidth
-            />
-          </div>
+          <Stepper
+            variant="up-down"
+            className="min-w-0 flex-1"
+            label="Capacity points"
+            min={0}
+            value={points === '' ? 0 : Number(points)}
+            onChange={(v) => setPoints(String(v))}
+          />
         </div>
       )}
       <div className="flex justify-end gap-2">
