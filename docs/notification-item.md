@@ -75,7 +75,7 @@ themselves.**
 | `mention` | Anyone mentioned | Yes | — | They were mentioned in a comment with @ |
 | `viewer` | Anyone added as a viewer | Yes | — | They were added as a viewer |
 
-`updated` and `rejected-feedback` are not in that document.
+Both `rejected` rows use the same sentence for now. `updated` and `rejected-feedback` are not in that document.
 
 ## Props
 
@@ -84,7 +84,7 @@ themselves.**
 | `kind` | `NotificationKind` | required | Picks the sentence |
 | `actor` | `{ name, src? }` | required | Who did it. The avatar is decorative; the name is in the sentence |
 | `subject` | `string` | required | The Added Value's title |
-| `status` | `string` | — | Required for `moved` (the status it moved to), not accepted by any other kind |
+| `status` | `string` | — | Required for `moved`, not accepted by any other kind. Any status label: one of the ten shared statuses (`AVStatus`) or a step the Added Value's domain defines (Design Review, For QA, Confirmed prod …). Those steps are the domain's data, so the type is `string` |
 | `time` | `string` | required | Already formatted: "5 minutes ago" |
 | `unread` | `boolean` | `false` | The dot, and "Unread:" in the row's name |
 | `onToggleRead` | `() => void` | — | Renders the mark-read / mark-unread button. Omit for a list that cannot be marked |
