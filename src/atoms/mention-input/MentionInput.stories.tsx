@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
+import { deleteBack, typeText } from '../../lib/story-typing';
 import { Field } from '../../components/field';
 import { MentionInput, mentionedIds, plainText, type MentionSegment } from './MentionInput';
 
@@ -39,18 +40,6 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-/* The field is `contenteditable="plaintext-only"`, which user-event does not recognise as editable,
-   so its `type` and Backspace would do nothing. These put the characters in the way the browser's
-   own typing does: through `execCommand`, which fires the same `beforeinput` and `input`. */
-async function typeText(field: HTMLElement, text: string) {
-  await userEvent.click(field);
-  for (const char of text) {
-    document.execCommand('insertText', false, char);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  }
-}
-const deleteBack = () => document.execCommand('delete');
 
 function Controlled(props: React.ComponentProps<typeof MentionInput>) {
   const [value, setValue] = React.useState<MentionSegment[]>([]);
