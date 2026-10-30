@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DescriptionSection } from './DescriptionSection';
 import { DescriptionCard } from '../description-card';
 import { FileAttachment } from '../file-attachment';
@@ -141,7 +141,8 @@ export const Collapsible: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.queryByText('Some paragraph here')).not.toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Expand Acceptance Criteria / Deliverables' }));
-    await expect(canvas.getByText('Some paragraph here')).toBeVisible();
+    /* It slides, so it is visible a moment after the press, not on it. */
+    await waitFor(() => expect(canvas.getByText('Some paragraph here')).toBeVisible());
     await expect(canvas.getByRole('button', { name: 'Collapse Acceptance Criteria / Deliverables' })).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Collapse Desired outcome' }));
     await expect(canvas.getByRole('button', { name: 'Expand Desired outcome' })).toBeVisible();

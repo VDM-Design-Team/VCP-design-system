@@ -71,6 +71,19 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
     const bodyId = React.useId();
     const [innerOpen, setInnerOpen] = React.useState(defaultOpen);
     const open = openProp ?? innerOpen;
+    /* While it opens or folds the body clips its content; once settled it does not, so the cards'
+       focus rings are not cut off. Cleared after the transition (a little over its length). */
+    const [animating, setAnimating] = React.useState(false);
+    const firstRender = React.useRef(true);
+    React.useEffect(() => {
+      if (firstRender.current) {
+        firstRender.current = false;
+        return;
+      }
+      setAnimating(true);
+      const timer = window.setTimeout(() => setAnimating(false), 250);
+      return () => window.clearTimeout(timer);
+    }, [open]);
     const toggle = () => {
       if (openProp === undefined) setInnerOpen(!open);
       onOpenChange?.(!open);
@@ -82,7 +95,7 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
       <section
         ref={ref}
         aria-labelledby={headingId}
-        className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)}
+        className={cn('flex flex-col rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
         <div className="flex items-center gap-2">
@@ -112,31 +125,44 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
           />
         </div>
 
-        <div id={bodyId} hidden={!open} className="flex flex-col gap-4">
-          {cards.length > 0 && (
-            <ol className="flex flex-col gap-4">
-              {cards.map((card, i) => (
-                <li key={React.isValidElement(card) && card.key != null ? card.key : i}>{card}</li>
-              ))}
-            </ol>
+        {/* The body slides: its row grows from nothing to its content (and back) over 200, and is
+            inert and unseen while folded, so a keyboard and a screen reader skip it. */}
+        <div
+          id={bodyId}
+          inert={!open}
+          className={cn(
+            'grid transition-[grid-template-rows,visibility] duration-200 ease-out motion-reduce:transition-none',
+            open ? 'visible grid-rows-[1fr]' : 'invisible grid-rows-[0fr]',
           )}
+        >
+          <div className={cn('min-h-0', (!open || animating) && 'overflow-hidden')}>
+            <div className="flex flex-col gap-4 pt-4">
+              {cards.length > 0 && (
+                <ol className="flex flex-col gap-4">
+                  {cards.map((card, i) => (
+                    <li key={React.isValidElement(card) && card.key != null ? card.key : i}>{card}</li>
+                  ))}
+                </ol>
+              )}
 
-          {hasAttachRow && (
-            <div className="flex items-center justify-end gap-2">
-              {attachments && <div className="flex min-w-0 flex-wrap justify-end gap-2.5">{attachments}</div>}
-              {onAttach && (
-                <IconButton
-                  icon="paperclip"
-                  variant="tertiary"
-                  size="md"
-                  label={attachLabel}
-                  onClick={onAttach}
-                  /* The glyph in the neutral outline palette, through its states. */
-                  className="text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed"
-                />
+              {hasAttachRow && (
+                <div className="flex items-center justify-end gap-2">
+                  {attachments && <div className="flex min-w-0 flex-wrap justify-end gap-2.5">{attachments}</div>}
+                  {onAttach && (
+                    <IconButton
+                      icon="paperclip"
+                      variant="tertiary"
+                      size="md"
+                      label={attachLabel}
+                      onClick={onAttach}
+                      /* The glyph in the neutral outline palette, through its states. */
+                      className="text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed"
+                    />
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </section>
     );
