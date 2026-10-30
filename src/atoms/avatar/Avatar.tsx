@@ -12,7 +12,7 @@ import { Icon } from '../icon';
  * the default every avatar starts from, not a hue a name can land on.
  */
 export const AVATAR_TONES = ['blue', 'green', 'red', 'yellow'] as const;
-export type AvatarTone = 'neutral' | (typeof AVATAR_TONES)[number];
+export type AvatarTone = 'neutral' | 'brand' | (typeof AVATAR_TONES)[number];
 
 /**
  * Deterministic name → tone, for a caller that explicitly wants to colour-code
@@ -98,6 +98,9 @@ const avatar = cva(
         /* surface.neutral + text.secondary — the default every avatar starts
            from, the same shape Badge's own neutral tone uses. */
         neutral: 'bg-surface-neutral-subtle text-text-secondary',
+        /* surface.brand.subtle + text.brand.strong — the people chips' avatar. Not in AVATAR_TONES:
+           a name never hashes onto it, a caller asks for it. */
+        brand: 'bg-surface-brand-subtle text-text-brand-strong',
         blue: 'bg-accent-blue-faint text-accent-blue-stronger',
         green: 'bg-accent-green-faint text-accent-green-stronger',
         red: 'bg-accent-red-faint text-accent-red-stronger',

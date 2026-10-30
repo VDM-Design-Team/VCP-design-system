@@ -40,7 +40,6 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `loading` | `boolean` | `false` | The send is in flight: a spinner, and no second click |
 | `placeholder` | `string` | `Type @ to mention and notify a member` | |
 | `inputLabel` | `string` | `Add a comment` | The box's accessible name |
-| `submitLabel` | `string` | `Add Comment` | |
 | `className`, `ref`, rest | | | On the `<section>` |
 
 `mentionedIds(value)` is who to notify and `plainText(value)` the words (both from
