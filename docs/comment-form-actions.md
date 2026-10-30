@@ -28,6 +28,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `submitLabel` | `string` | `Add Comment` | "Add Comment", "Reply" or "Save" |
 | `onSubmit` | `() => void` | — | |
+| `type` | `'button' \| 'submit'` | `button` | The send button's type. `submit` makes it the surrounding form's submit: leave `onSubmit` off then, or it sends twice |
+| `form` | `string` | — | The id of the form the send button belongs to, when it sits outside it |
 | `disabled` | `boolean` | `false` | The design's "Reply Disabled": the send button dims, Cancel stays usable |
 | `loading` | `boolean` | `false` | The send is in flight: a spinner, `aria-busy`, and no second click |
 | `onCancel` | `() => void` | — | Draws Cancel. Leave it off for a new comment, which has nothing to cancel |
@@ -58,6 +60,9 @@ Three differences from the Figma frames, all the system's:
 
 ## Accessibility
 
+- Inside a `<form>`, Cancel never submits (it is `type="button"`), and the send button only
+  does when you set `type="submit"`.
+- Both buttons are 36 tall, and 40 on a coarse pointer, as `CommentActions` is.
 - Real buttons, with text names. `loading` sets `aria-busy` and disables the send
   button, so a second click cannot send twice.
 - A disabled send button is out of the tab order, as any disabled button is. If the

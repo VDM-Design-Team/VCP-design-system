@@ -39,7 +39,8 @@ reaction is.
 | `replying` | `boolean` | `false` | A reply box is open: "Reply" becomes "Cancel Reply" |
 | `onReply`, `onCancelReply` | `() => void` | — | Which one runs depends on `replying` |
 | `link` | `string` | — | What Copy Link copies. Giving `link` or `onCopyLink` draws the button |
-| `onCopyLink` | `(link) => void` | — | Fires after the copy |
+| `onCopyLink` | `(link) => void` | — | Fires after a successful copy. With no `link` there is nothing to copy: it fires on click with `''` and no success is claimed |
+| `subject` | `string` | — | What the actions are about, for their names: "Amy Lee's comment" gives "Edit Amy Lee's comment", "Reply to …", "Copy link to …" |
 | `copiedDuration` | `number` | `2000` | How long the green check stays, in ms |
 | `reactions` | `ReactNode` | — | An `EmojiReactionPicker`, at the end of the row |
 | `className`, `ref`, rest | | | On the row |
@@ -50,9 +51,11 @@ gets no `onEdit` or `onDelete`, and there is no hidden state to forget to set.
 Singular and plural are handled: "Show 1 Reply", "Show 3 Replies".
 
 **Copy Link copies, then says so.** With a `link`, a click writes it to the
-clipboard and the glyph becomes the green check the design draws. If there is no
-clipboard (an insecure page, or permission refused) it does not claim success. The
-label stays "Copy Link", as drawn, and "Link copied" goes to a polite live region.
+clipboard and, once that has worked, the glyph becomes the green check the design
+draws. If the clipboard refuses (an insecure page, or permission denied) the glyph
+becomes a warning and the live region says "Couldn't copy the link"; it never claims
+success it did not have. With no `link` the click only fires `onCopyLink`. The label
+stays "Copy Link", as drawn, and "Link copied" goes to a polite live region.
 
 ## Tokens
 
@@ -92,10 +95,13 @@ The row's widths come out a pixel or two wider than the frame: the type ramp add
 
 - Every action is a real `<button>`, with text, so the name is the visible words.
   The glyphs are `aria-hidden`.
-- The replies toggle has `aria-expanded` (and `aria-controls` when you pass
-  `repliesId`).
-- Copy Link announces "Link copied" in a polite live region; the green check is for
-  sighted users and the live region is for everyone else.
+- The replies toggle changes its words ("Show" to "Hide"), so it is an action button and
+  does not also carry `aria-expanded`, which would announce the state twice. It has
+  `aria-controls` when you pass `repliesId`.
+- Give `subject` in a thread, so the buttons are not all named "Edit", "Delete", "Reply":
+  the visible word still leads the accessible name.
+- Copy Link announces "Link copied" (or "Couldn't copy the link") in a polite live
+  region; the glyph is for sighted users and the live region is for everyone else.
 - Targets are 36 tall by default and 40 on a coarse pointer. The design's 36 is under
   the system's 40, as `Button`'s small size is, for a dense pointer-driven row.
 - Visible focus ring on every button.

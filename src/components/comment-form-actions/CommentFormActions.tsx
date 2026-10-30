@@ -21,6 +21,12 @@ import { Button } from '../../atoms/button';
  * three-button ladder. Two outlined buttons need more than the frame's 4 between
  * them, so the gap is 8, as the system's spacing scale gives.
  *
+ * **Neither button submits a surrounding `<form>` on its own.** `Button` sets no default
+ * `type`, which inside a form means `submit`, so Cancel would fire `onCancel` *and* submit
+ * and Save would send twice. Cancel is always `type="button"`; the send button is
+ * `type="button"` too unless you ask for `type="submit"` (and then leave `onSubmit` off, so
+ * the form's own submit is the one send). `form` associates it with a form elsewhere.
+ *
  * `disabled` is the design's "Reply Disabled": the send button dims while the
  * box is empty, and Cancel stays usable. `loading` is the design's loading
  * state; it shows the system spinner, not the design's arrows glyph, so every
@@ -35,6 +41,10 @@ export interface CommentFormActionsProps extends Omit<React.HTMLAttributes<HTMLD
   submitLabel?: string;
   /** Sends it. */
   onSubmit?: () => void;
+  /** The send button's `type`. Default `button`; `submit` makes it the surrounding form's submit. */
+  type?: 'button' | 'submit';
+  /** The id of the form the send button belongs to, when it is not inside it. */
+  form?: string;
   /** Dims the send button — the box is empty, or nothing changed. Cancel stays usable. */
   disabled?: boolean;
   /** The send is in flight: a spinner, and no second click. */
@@ -51,6 +61,8 @@ export const CommentFormActions = React.forwardRef<HTMLDivElement, CommentFormAc
       className,
       submitLabel = 'Add Comment',
       onSubmit,
+      type = 'button',
+      form,
       disabled,
       loading,
       onCancel,
@@ -60,11 +72,19 @@ export const CommentFormActions = React.forwardRef<HTMLDivElement, CommentFormAc
     ref,
   ) => (
     <div ref={ref} className={cn('flex items-center gap-2', className)} {...props}>
-      <Button size="sm" disabled={disabled} loading={loading} onClick={onSubmit}>
+      <Button
+        size="sm"
+        type={type}
+        form={form}
+        disabled={disabled}
+        loading={loading}
+        onClick={onSubmit}
+        className="pointer-coarse:min-h-10"
+      >
         {submitLabel}
       </Button>
       {onCancel && (
-        <Button size="sm" variant="secondary" onClick={onCancel}>
+        <Button size="sm" variant="secondary" type="button" onClick={onCancel} className="pointer-coarse:min-h-10">
           {cancelLabel}
         </Button>
       )}

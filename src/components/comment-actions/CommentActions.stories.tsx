@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { CommentActions } from './CommentActions';
 import { EmojiReactionPicker } from '../emoji-reaction-picker';
 
@@ -89,7 +89,59 @@ export const LightAndDark: Story = {
   },
 };
 
-/** **Flow:** replies show and hide, Reply and Cancel Reply swap, Copy Link confirms for everyone. */
+/** Stands in for the clipboard, so a story can end in the copied or the refused state. */
+const stubClipboard = (writeText: () => Promise<void>) =>
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+
+/** Copy Link, after the clipboard accepted it: the green check, and "Link copied" for everyone else. */
+export const LinkCopied: Story = {
+  args: { link: 'https://vcp.example/av/1234#comment-9' },
+  play: async ({ canvasElement }) => {
+    stubClipboard(async () => {});
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Copy Link' }));
+    await expect(canvas.getByRole('status')).toHaveTextContent('Link copied');
+  },
+};
+
+/** Copy Link, when the clipboard refuses: a warning glyph and "Couldn’t copy the link", never a false check. */
+export const CopyFailed: Story = {
+  args: { link: 'https://vcp.example/av/1234#comment-9' },
+  play: async ({ canvasElement }) => {
+    stubClipboard(async () => {
+      throw new Error('denied');
+    });
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Copy Link' }));
+    await expect(canvas.getByRole('status')).toHaveTextContent('Couldn’t copy the link');
+  },
+};
+
+/** Without a link there is nothing to copy: the click only reaches the caller, and no success is claimed. */
+export const NoLinkNoClaim: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: { link: undefined, onCopyLink: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Copy Link' }));
+    await expect(args.onCopyLink).toHaveBeenCalledWith('');
+    await expect(canvas.getByRole('status')).toHaveTextContent('');
+  },
+};
+
+/** With a `subject`, every button says what it is about, and the visible word still leads the name. */
+export const WithSubject: Story = {
+  args: { subject: 'Amy Lee’s comment', link: 'https://vcp.example/av/1234#comment-9', onReply: () => {}, onEdit: () => {}, onDelete: () => {} },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Edit Amy Lee’s comment' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Reply to Amy Lee’s comment' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Copy link to Amy Lee’s comment' })).toBeVisible();
+  },
+};
+
+/** **Flow:** replies show and hide, Reply and Cancel Reply swap. */
 export const Flow: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
@@ -111,20 +163,14 @@ export const Flow: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
+    /* The words change, so the toggle is an action button and carries no `aria-expanded` as well. */
     const toggle = canvas.getByRole('button', { name: 'Show 3 Replies' });
-    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle).not.toHaveAttribute('aria-expanded');
     await userEvent.click(toggle);
-    await expect(canvas.getByRole('button', { name: 'Hide 3 Replies' })).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    );
+    await expect(canvas.getByRole('button', { name: 'Hide 3 Replies' })).toBeVisible();
 
     await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Cancel Reply' }));
     await expect(canvas.getByRole('button', { name: 'Reply' })).toBeInTheDocument();
-
-    /* No `link` here, so no clipboard is needed: it confirms, and says so in words. */
-    await userEvent.click(canvas.getByRole('button', { name: 'Copy Link' }));
-    await expect(canvas.getByRole('status')).toHaveTextContent('Link copied');
   },
 };

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { CommentFormActions } from './CommentFormActions';
@@ -21,6 +22,50 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/** Inside a form, Cancel never submits and Save sends once: `type="submit"` makes it the form's own submit. */
+export const InsideAForm: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: function Render() {
+    const [log, setLog] = React.useState<string[]>([]);
+    const note = (s: string) => setLog((l) => [...l, s]);
+    return (
+      <div className="flex flex-col gap-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            note('form submitted');
+          }}
+          className="flex flex-col gap-2"
+        >
+          <CommentFormActions submitLabel="Reply" onSubmit={() => note('onSubmit')} onCancel={() => note('onCancel')} />
+        </form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            note('second form submitted');
+          }}
+        >
+          <CommentFormActions submitLabel="Save" type="submit" />
+        </form>
+        <p role="status" className="m-0 text-body-sm-regular text-text-secondary">
+          {log.join(', ')}
+        </p>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    await expect(canvas.getByRole('status')).toHaveTextContent(/^onCancel$/);
+    await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
+    /* Sends once, through onSubmit, and the form is not also submitted. */
+    await expect(canvas.getByRole('status')).toHaveTextContent(/^onCancel, onSubmit$/);
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
+    await expect(canvas.getByRole('status')).toHaveTextContent('second form submitted');
+  },
+};
 
 /** A new comment: nothing to cancel, so no Cancel. */
 export const Default: Story = {};
