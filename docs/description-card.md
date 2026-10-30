@@ -35,7 +35,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `editing` | `boolean` | — | The paragraph becomes a text field |
 | `value` / `onChange` | `string` / `(value) => void` | — | Editing, controlled |
 | `defaultValue` | `string` | `''` | Editing, uncontrolled |
-| `placeholder` | `string` | — | Editing, while empty |
+| `placeholder` | `string` | the type's prompt | Editing, while empty. Problem: "Describe the problem that needs to be solved." Solution: "Explain how the problem can be solved or improved." Deliverable: "List the deliverables or conditions that define completion." Desired outcome: "Describe the expected result of improvement after completion." |
 | `invalid` | `boolean` | — | Editing: the critical border and `aria-invalid` |
 | `error` | `ReactNode` | — | Editing: a message under the card in the critical colour (`role="alert"`). Implies `invalid`; the field is described by it |
 | `label` | `string` | "Problem 1" … | Editing: the field's accessible name |
@@ -56,9 +56,9 @@ when the numbering matters to a screen reader.
 | Number block, `desired-outcome` | `surface.neutral.stronger` | `bg-surface-neutral-stronger` |
 | Number | `text.inverted.primary`, `type.label-sm-bold` | `text-text-inverted-primary text-label-sm-bold` |
 | Reading panel | `surface.neutral.subtle`, `stroke.subtle` | `bg-surface-neutral-subtle border-stroke-subtle` |
-| Editing field | `Textarea`'s: `surface.elevated`, `stroke.strong`, invalid `accent.critical.outline.border` | squared on the number's side: `rounded-l-none border-l-0` |
+| Editing field | `Textarea`'s: `surface.elevated`, `stroke.strong` (no change on hover; focus changes it), invalid `accent.critical.outline.border` | squared on the number's side: `rounded-l-none border-l-0` |
 | Paragraph | `text.primary`, `type.body-sm-regular` | `text-text-primary text-body-sm-regular` |
-| Remove | `accent.critical.outline.content.default` glyph (`x-circle`, 24), `accent.critical.tonal.surface.default` on hover | `text-accent-critical-outline-content-default hover:bg-accent-critical-tonal-surface-default`; `top-3 right-3`; a 40 target reaches 8 past it (`before:-inset-2`) |
+| Remove | `accent.critical.outline.content` default, hover, pressed on the glyph alone (`x-circle`, 24); no fill | `text-accent-critical-outline-content-default hover:text-… active:text-…`; `top-3 right-3`; a 40 target reaches 8 past it (`before:-inset-2`) |
 | Error message | `accent.critical.outline.content.default`, `type.caption-md-medium` | `mt-1.5` under the card |
 | Radius | `shape.radius.sm` | `rounded-sm` |
 | Padding, min height | Tailwind numeric scale | `p-3` (panel), `px-1 py-2` (number), `min-h-12`, `min-w-5`; `pr-12` on the field when there is a remove button |

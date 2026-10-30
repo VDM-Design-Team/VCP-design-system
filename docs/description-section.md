@@ -42,8 +42,8 @@ exist, so one component is both the editor (pass `onAdd`, `onAttach`) and the vi
 ## Tokens
 
 `surface.elevated`, `radius.md`, 16 padding, 12 between the title row, the cards and the
-attachments row, 16 between cards. The title is `label-md-bold` `text.primary`. The add button is
-an `IconButton` `primary`, `xs` (24) with a 40 target; the paperclip is `tertiary`, `md` (40). No
+attachments row, 16 between cards. The title is `title-sm-bold` (16/700) `text.primary`. The add button is
+an `IconButton` `primary`, `xs` (24) with a 40 target; the paperclip is `tertiary`, `md` (40), its glyph in the `neutral.outline.content` palette (default, hover, pressed). No
 new tokens.
 
 ## Accessibility
@@ -58,5 +58,6 @@ new tokens.
 
 - **Don't put the cards' logic here.** Whether a card is editing, its text and its remove are the
   card's and the caller's.
+- **Don't offer attachments on Desired Outcome.** It has none in the design: pass neither `onAttach` nor `attachments`.
 - **Don't add a second heading inside.** The title is the heading.
 - **Don't show the add button or the paperclip in a view.** Pass neither handler.

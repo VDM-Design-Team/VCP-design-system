@@ -65,7 +65,7 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
         {...props}
       >
         <div className="flex items-center gap-2">
-          <Heading id={headingId} className="text-label-md-bold text-text-primary">
+          <Heading id={headingId} className="text-title-sm-bold text-text-primary">
             {title}
           </Heading>
           {onAdd && (
@@ -93,7 +93,15 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
           <div className="flex items-center justify-end gap-2">
             {attachments && <div className="flex min-w-0 flex-wrap justify-end gap-2.5">{attachments}</div>}
             {onAttach && (
-              <IconButton icon="paperclip" variant="tertiary" size="md" label={attachLabel} onClick={onAttach} />
+              <IconButton
+                icon="paperclip"
+                variant="tertiary"
+                size="md"
+                label={attachLabel}
+                onClick={onAttach}
+                /* The glyph in the neutral outline palette, through its states. */
+                className="text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed"
+              />
             )}
           </div>
         )}

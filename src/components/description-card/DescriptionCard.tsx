@@ -53,6 +53,14 @@ const number = cva(
 
 export type DescriptionCardType = NonNullable<VariantProps<typeof number>['type']>;
 
+/* What an empty field says, by type. */
+const TYPE_PLACEHOLDER: Record<DescriptionCardType, string> = {
+  problem: 'Describe the problem that needs to be solved.',
+  solution: 'Explain how the problem can be solved or improved.',
+  deliverable: 'List the deliverables or conditions that define completion.',
+  'desired-outcome': 'Describe the expected result of improvement after completion.',
+};
+
 const TYPE_NAME: Record<DescriptionCardType, string> = {
   problem: 'Problem',
   solution: 'Solution',
@@ -76,6 +84,7 @@ export interface DescriptionCardProps
   defaultValue?: string;
   /** Editing: fires with the new text on every change. */
   onChange?: (value: string) => void;
+  /** Editing, while empty. Defaults to the type's own prompt ("Describe the problem that needs to be solved."). */
   placeholder?: string;
   /** Editing: the critical border and `aria-invalid`. Pair with a message of your own. */
   invalid?: boolean;
@@ -143,7 +152,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               ref={field}
               rows={1}
               value={text}
-              placeholder={placeholder}
+              placeholder={placeholder ?? TYPE_PLACEHOLDER[type]}
               invalid={isInvalid}
               aria-label={label ?? `${TYPE_NAME[type]} ${position}`}
               aria-describedby={error ? errorId : undefined}
@@ -153,6 +162,8 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               }}
               className={cn(
                 'min-h-12 min-w-0 flex-1 resize-none overflow-hidden rounded-l-none rounded-r-sm border-l-0 p-3',
+                /* The border does not change on hover; only focus does. */
+                !isInvalid && 'enabled:hover:border-stroke-strong',
                 /* Room for the remove button, so the text never runs under it. */
                 onRemove && 'pr-12',
               )}
@@ -172,10 +183,11 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               onClick={onRemove}
               className={cn(
                 'absolute top-3 right-3 grid size-6 place-items-center rounded-full',
+                /* Just the glyph, changing colour through its states (`accent.critical.outline.content`). */
                 'text-accent-critical-outline-content-default outline-none',
-                'hover:bg-accent-critical-tonal-surface-default',
+                'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
                 'before:absolute before:-inset-2',
-                'opacity-0 transition-opacity duration-150 motion-reduce:transition-none',
+                'opacity-0 transition-[opacity,color] duration-150 motion-reduce:transition-none',
                 'group-hover/card:opacity-100 group-focus-within/card:opacity-100 pointer-coarse:opacity-100',
                 'focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
               )}
