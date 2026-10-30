@@ -58,17 +58,28 @@ ids and labels from either.
 ## Behaviour
 
 - **`@` opens the list** when it starts the text or follows a space. An `@` inside a word,
-  like an email address, opens nothing.
+  like an email address, opens nothing, and neither does an `@` followed by a space: that is
+  ordinary text, and Enter is a line break.
 - **The list sits under the `@`**, not under the whole field: its left edge is the `@`'s,
-  and it opens just below the line being typed on. Where the screen cuts the bottom off it
+  and it opens just below the line being typed on. It is drawn in a portal, positioned from the
+  viewport, so a scrolling parent (a `Modal`'s body) never cuts it off. Where the screen cuts the bottom off it
   opens **above** the `@` instead, it never goes past the screen's left or right edge, and its
   height shrinks to the room there is. It follows the `@` as you type, scroll or resize.
 - **Letters after it filter**: names that contain them, case-insensitive, those that
   start with them first, at most eight.
 - **↑ ↓** move through the list, **Enter** or **Tab** choose, **Escape** closes the list
-  and keeps the text. A click on an option chooses it.
+  and keeps the text. A click on an option chooses it. **Shift+Tab** leaves the field and
+  chooses nothing. The highlighted option scrolls into view past the list's edge.
 - **A tag is one unit**: Backspace removes it whole.
-- **Plain text and tags only.** No formatting, and a paste is always plain text.
+- **Plain text and tags only.** The field is `contenteditable="plaintext-only"`: no formatting
+  can be typed (Cmd+B does nothing), pasted or dropped in. A paste is always plain text.
+- **Undo and Redo are the field's own** (Cmd/Ctrl+Z, Shift+Cmd+Z, Ctrl+Y). A tag is put in by
+  hand, which the browser's undo cannot track, so every change is a step in the field's own
+  history: choosing a member is one step, and a run of typing is one. Undoing a mention gives back
+  the `@query` as typed; the caret goes back where it was. Changing `value` from outside
+  (clearing after a send) starts a fresh history.
+- **IME composition is respected.** While a Chinese, Japanese or Korean IME is composing, Enter
+  and the arrows belong to it: they do not choose a member or add a line break.
 
 ## Tokens
 
@@ -85,8 +96,10 @@ No new tokens.
 - A `role="textbox"` (multiline) with `aria-activedescendant` and `aria-controls` while the
   list is open, and a listbox of options: focus never leaves the field, so a screen reader
   keeps reading what is being typed. The list opening is announced by a polite status
-  ("2 members. Use the up and down arrow keys."), since `aria-expanded` is not allowed on a
-  textbox.
+  ("Members list. Use the up and down arrow keys."), since `aria-expanded` is not allowed on a
+  textbox. The text does not change with the count, so it is not re-read on every keystroke.
+- **Labelling:** `Field`'s `<label for>` cannot label a `div`, so pass `aria-label` or
+  `aria-labelledby` on the field itself, as the props table says.
 - The tag is `contenteditable="false"`, so it is read as text, "@Jane Doe", and moved over
   as one unit.
 - **Escape closes only the list.** Inside a `Modal` or `Popover` that listens for Escape on
@@ -102,10 +115,8 @@ not promised.
 
 - Tested: typing and filtering, choosing by keyboard, Escape, an email's `@`, Backspace over
   a tag, loading saved content back in.
-- **Not covered:** IME composition (Chinese, Japanese, Korean input) and some mobile
-  keyboards can type around the field's own handling. Use a heavier editor if those matter.
-- The list is under the field, not under the caret, and is not repositioned near the edge
-  of the screen.
+- **Not covered:** some mobile keyboards can type around the field's own handling. Use a
+  heavier editor if that matters.
 - Members are a list you pass in. There is no async search as you type.
 
 ## Don't

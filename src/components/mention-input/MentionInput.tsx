@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../lib/cn';
 
 /**
@@ -134,6 +135,73 @@ function placeCaretAtEnd(root: HTMLElement) {
   selection?.addRange(range);
 }
 
+/* The caret as a count of what the value counts: a character is 1, a tag is 1, a line break is 1.
+   Enough to put the caret back after the field is rewritten from a saved value. */
+function caretOffset(root: HTMLElement): number {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || !root.contains(selection.anchorNode)) {
+    return readLength(root);
+  }
+  const range = document.createRange();
+  range.setStart(root, 0);
+  range.setEnd(selection.anchorNode as Node, selection.anchorOffset);
+  const holder = document.createElement('div');
+  holder.appendChild(range.cloneContents());
+  return readLength(holder);
+}
+
+function readLength(root: HTMLElement): number {
+  return readSegments(root).reduce(
+    (n, segment) => n + (segment.type === 'mention' ? 1 : segment.text.length),
+    0,
+  );
+}
+
+function placeCaretAt(root: HTMLElement, offset: number) {
+  let left = offset;
+  const range = document.createRange();
+  range.selectNodeContents(root);
+  range.collapse(false);
+  const walk = (node: Node): boolean => {
+    for (const child of Array.from(node.childNodes)) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const length = (child.textContent ?? '').length;
+        if (left <= length) {
+          range.setStart(child, left);
+          range.collapse(true);
+          return true;
+        }
+        left -= length;
+      } else if (child instanceof HTMLElement) {
+        if (child.matches(MENTION_SELECTOR) || child.tagName === 'BR') {
+          if (left === 0) {
+            range.setStartBefore(child);
+            range.collapse(true);
+            return true;
+          }
+          left -= 1;
+          if (left === 0) {
+            range.setStartAfter(child);
+            range.collapse(true);
+            return true;
+          }
+        } else if (walk(child)) return true;
+      }
+    }
+    return false;
+  };
+  walk(root);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
+/** One step of the field's own undo history: what it held and where the caret was. */
+interface HistoryEntry {
+  value: MentionSegment[];
+  caret: number;
+}
+
 /* The list's own limits, in px of layout maths and not styling: its tallest height (the
    `max-h-64` it used to carry), the gap to the `@`, and how near the screen's edge it may go. */
 const LIST_MAX_HEIGHT = 256;
@@ -165,6 +233,8 @@ function findTrigger(root: HTMLElement): Trigger | null {
   if (at === -1) return null;
   if (at > 0 && !/\s/.test(before[at - 1])) return null;
   const query = before.slice(at + 1);
+  /* "@ " is an @ followed by a space: ordinary text, not the start of a mention. */
+  if (/^\s/.test(query)) return null;
   if (query.includes('\n') || query.length > MAX_QUERY) return null;
   return { node: node as Text, start: at, end: selection.anchorOffset, query };
 }
@@ -225,14 +295,20 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
     /* Where the list sits: under the `@` it belongs to, or above it when the screen cuts
        the bottom off, and never past the screen's edges. It is measured from the `@`
        character's own box, so it follows the word being typed and not the whole field. */
-    const wrapRef = React.useRef<HTMLDivElement | null>(null);
     const listRef = React.useRef<HTMLUListElement | null>(null);
     const [place, setPlace] = React.useState<ListPlace | null>(null);
 
+    /* The list is drawn in a portal, positioned from the viewport, so a scrolling parent (a
+       Modal's body) can never cut it off. Like `Tooltip`, into the nearest `.dark` so the
+       theme follows it, else the page. */
+    const [host, setHost] = React.useState<HTMLElement | null>(null);
+    React.useLayoutEffect(() => {
+      setHost((rootRef.current?.closest('.dark') as HTMLElement | null) ?? document.body);
+    }, []);
+
     const position = React.useCallback(() => {
-      const wrap = wrapRef.current;
       const list = listRef.current;
-      if (!wrap || !list || !trigger) return;
+      if (!list || !trigger) return;
       const at = document.createRange();
       try {
         at.setStart(trigger.node, trigger.start);
@@ -241,19 +317,19 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
         return;
       }
       const anchor = at.getBoundingClientRect();
-      const box = wrap.getBoundingClientRect();
       const wanted = Math.min(list.scrollHeight, LIST_MAX_HEIGHT);
       const below = window.innerHeight - anchor.bottom - LIST_GAP - LIST_EDGE;
       const above = anchor.top - LIST_GAP - LIST_EDGE;
       const flip = wanted > below && above > below;
       const maxHeight = Math.min(LIST_MAX_HEIGHT, flip ? above : below);
-      const left =
-        Math.min(Math.max(anchor.left, LIST_EDGE), window.innerWidth - list.offsetWidth - LIST_EDGE) -
-        box.left;
+      const left = Math.min(
+        Math.max(anchor.left, LIST_EDGE),
+        window.innerWidth - list.offsetWidth - LIST_EDGE,
+      );
       setPlace(
         flip
-          ? { left, bottom: box.bottom - anchor.top + LIST_GAP, maxHeight }
-          : { left, top: anchor.bottom - box.top + LIST_GAP, maxHeight },
+          ? { left, bottom: window.innerHeight - anchor.top + LIST_GAP, maxHeight }
+          : { left, top: anchor.bottom + LIST_GAP, maxHeight },
       );
     }, [trigger]);
 
@@ -263,7 +339,12 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
         return;
       }
       position();
-    }, [open, options, position]);
+    }, [open, options, position, host]);
+
+    /* The highlighted option stays in view as the arrows move it past the list's edge. */
+    React.useEffect(() => {
+      if (open) listRef.current?.children[active]?.scrollIntoView({ block: 'nearest' });
+    }, [open, active]);
 
     React.useEffect(() => {
       if (!open) return;
@@ -275,6 +356,74 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
       };
     }, [open, position]);
 
+    /* The field's own undo history. The browser's cannot be used: a tag is put in by hand
+       (`plaintext-only` strips markup from `insertHTML`), which its undo does not track, so
+       the first Cmd+Z did nothing and the second scrambled the text. Every change, typing and
+       choosing a member alike, is a step here, and Undo and Redo walk them. */
+    const history = React.useRef<{ steps: HistoryEntry[]; at: number; time: number; type: string }>({
+      steps: [],
+      at: -1,
+      time: 0,
+      type: '',
+    });
+    const record = (type: string) => {
+      const root = rootRef.current;
+      if (!root) return;
+      const h = history.current;
+      const entry = { value: readSegments(root), caret: caretOffset(root) };
+      const current = h.steps[h.at];
+      if (current && sameSegments(current.value, entry.value)) {
+        current.caret = entry.caret;
+        return;
+      }
+      const now = Date.now();
+      /* Typing in one run, or deleting in one run, is a single step. */
+      const joins =
+        h.at > 0 &&
+        h.at === h.steps.length - 1 &&
+        type === h.type &&
+        (type === 'insertText' || type === 'deleteContentBackward') &&
+        now - h.time < 1000;
+      h.steps.length = h.at + 1;
+      if (joins) h.steps[h.at] = entry;
+      else {
+        h.steps.push(entry);
+        h.at = h.steps.length - 1;
+      }
+      h.time = now;
+      h.type = type;
+    };
+    const travel = (direction: -1 | 1) => {
+      const root = rootRef.current;
+      const h = history.current;
+      const next = h.at + direction;
+      if (!root || next < 0 || next >= h.steps.length) return;
+      h.at = next;
+      h.type = '';
+      const step = h.steps[next];
+      writeSegments(root, step.value);
+      placeCaretAt(root, step.caret);
+      setTrigger(null);
+      onChange?.(readSegments(root));
+    };
+
+    React.useEffect(() => {
+      const root = rootRef.current;
+      if (!root) return;
+      const onBeforeInput = (event: InputEvent) => {
+        if (event.inputType === 'historyUndo') {
+          event.preventDefault();
+          travel(-1);
+        } else if (event.inputType === 'historyRedo') {
+          event.preventDefault();
+          travel(1);
+        }
+      };
+      root.addEventListener('beforeinput', onBeforeInput);
+      return () => root.removeEventListener('beforeinput', onBeforeInput);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onChange]);
+
     /* Write the starting content once, and any later change that did not come from
        typing (a controlled value that moved). Typing already put its own change in the
        DOM, so an equal value is left alone and the caret is not disturbed. */
@@ -284,6 +433,11 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
       const wanted = value ?? defaultValue ?? [];
       if (!sameSegments(readSegments(root), wanted)) {
         writeSegments(root, wanted);
+        /* The value moved without the user typing (cleared after a send, say): a fresh history. */
+        history.current = { steps: [], at: -1, time: 0, type: '' };
+      }
+      if (history.current.at === -1) {
+        history.current = { steps: [{ value: readSegments(root), caret: readLength(root) }], at: 0, time: 0, type: '' };
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
@@ -295,11 +449,12 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
       }
     }, [autoFocus]);
 
-    const emit = () => {
+    const emit = (type = 'other') => {
       const root = rootRef.current;
       if (!root) return;
       /* Chrome leaves a lone <br> in an emptied field, which would hide the placeholder. */
       if (!root.textContent && !root.querySelector(MENTION_SELECTOR)) root.replaceChildren();
+      record(type);
       onChange?.(readSegments(root));
     };
 
@@ -327,10 +482,14 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
       selection?.removeAllRanges();
       selection?.addRange(caret);
       setTrigger(null);
-      emit();
+      emit('mention');
     };
 
     const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      /* While an IME is composing (Chinese, Japanese, Korean), Enter and the arrows belong to it:
+         they pick a candidate, not a member or a line break. 229 is the keyCode older browsers
+         send for the same thing. */
+      if (event.nativeEvent.isComposing || event.keyCode === 229) return;
       if (open) {
         if (event.key === 'ArrowDown') {
           event.preventDefault();
@@ -342,7 +501,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
           setActive((i) => (i - 1 + options.length) % options.length);
           return;
         }
-        if (event.key === 'Enter' || event.key === 'Tab') {
+        if (event.key === 'Enter' || (event.key === 'Tab' && !event.shiftKey)) {
           event.preventDefault();
           choose(options[active]);
           return;
@@ -363,7 +522,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
           /* A line break the browser undoes properly, rather than the block it would
              otherwise start. */
           document.execCommand('insertLineBreak');
-          emit();
+          emit('insertLineBreak');
         }
       }
     };
@@ -374,7 +533,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
     };
 
     return (
-      <div ref={wrapRef} className="relative">
+      <div className="relative">
         <div
           {...props}
           ref={(node) => {
@@ -388,13 +547,13 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
           aria-controls={open ? listId : undefined}
           aria-activedescendant={open ? optionId(active) : undefined}
           aria-haspopup="listbox"
-          contentEditable={!disabled}
+          contentEditable={disabled ? false : 'plaintext-only'}
           suppressContentEditableWarning
           spellCheck
           data-placeholder={placeholder}
           tabIndex={disabled ? -1 : 0}
-          onInput={() => {
-            emit();
+          onInput={(event) => {
+            emit((event.nativeEvent as InputEvent).inputType);
             refresh();
           }}
           onKeyDown={(event) => {
@@ -425,7 +584,9 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
           )}
         />
 
-        {open && (
+        {open &&
+          host &&
+          createPortal(
           <ul
             ref={listRef}
             id={listId}
@@ -437,7 +598,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
                 ? { left: place.left, top: place.top, bottom: place.bottom, maxHeight: place.maxHeight }
                 : { left: 0, top: 0, visibility: 'hidden' }
             }
-            className="absolute z-50 w-max max-w-72 min-w-48 overflow-y-auto rounded-md border border-stroke-default bg-surface-elevated p-1 font-sans shadow-menu"
+            className="fixed z-50 w-max max-w-72 min-w-48 overflow-y-auto rounded-md border border-stroke-default bg-surface-elevated p-1 font-sans shadow-menu"
           >
             {options.map((member, i) => (
               <li
@@ -461,12 +622,13 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
                 <span className="truncate">{member.name}</span>
               </li>
             ))}
-          </ul>
-        )}
+          </ul>,
+            host,
+          )}
 
         {/* The list opening is not otherwise announced: focus never leaves the field. */}
         <span role="status" className="sr-only">
-          {open ? `${options.length} members. Use the up and down arrow keys.` : ''}
+          {open ? 'Members list. Use the up and down arrow keys.' : ''}
         </span>
       </div>
     );
