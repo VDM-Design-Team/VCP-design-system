@@ -12,9 +12,10 @@ bump: major
 - **The panel grows to fit its longest row**, at least the field's width and at most 24rem, so a narrow field does not cut its options off.
 - **The panel** is `Menu`'s dropdown (surface, edge, radius, shadow, padding, item rows); a click inside it that lands on nothing does nothing.
 - **`confirm`** (multiple) drafts the ticks behind a Clear all / Apply footer, as Figma's status menu.
+- **`size`** (`sm` / `md`), **`fullWidth`** (off by default, as `Input` and `Select`) and **`loading`** (a spinner for the caret and "Loading…" for the rows).
 - **`searchable={false}`** drops the search box for a short list; the trigger is then the select-only combobox.
 
-Migration: the old `SearchSelect` was a text input that searched in the field. Its `placeholder` now labels the field (the search box takes `searchPlaceholder`); `renderOption` now receives `(option, { selected, active })` and draws only a row's content; avatars are no longer on by default, so pass `rows="avatar"` for a list of people; `onChange` receives a `string` for a single pick and a `string[]` with `multiple` (the old `string & string[]` hybrid is gone). Nothing in this repository imported it.
+Migration: the old `SearchSelect` was a text input that searched in the field. Its `placeholder` now labels the field (the search box takes `searchPlaceholder`); `renderOption` now receives `(option, { selected, active })` and draws only a row's content; the `avatars` prop and the option's `avatar` field are gone (avatars used to be on by default): pass `rows="avatar"` for a list of people, with `src` or `unassigned` on the option; `onChange` receives a `string` for a single pick and a `string[]` with `multiple` (the old `string & string[]` hybrid is gone). Nothing in this repository imported it.
 
 `Tag` gains `onRemove` and `removeLabel`: a ✕ button after the label, for a value picked into a field (also an AV's tags in edit mode). The ✕ is the only interactive part; a Tag without `onRemove` is unchanged. A tag that toggles or opens something is still a `Chip`.
 

@@ -13,6 +13,7 @@ pressing it opens a panel with an optional search box over the rows.
 | `Checkbox` | atom |
 | `Icon` | atom |
 | `Input` | atom |
+| `Spinner` | atom |
 | `Tag` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -138,6 +139,10 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
 | `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
+| `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
+| `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
+| `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |
+| `loadingText` | `string` | `Loading…` | What the panel says while `loading` |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
 
@@ -179,8 +184,10 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   and keeps focus. A picked row has `aria-selected`.
 - Keyboard: Enter, Space or ArrowDown on the trigger opens; arrows move (skipping disabled rows);
   Home and End jump (when the trigger has focus); Enter or Space picks the active row; Escape closes and
-  puts focus back on the trigger; Tab closes; a click away closes. With `confirm`, Escape and a
+  puts focus back on the trigger; Tab closes (with `confirm`, Tab instead walks on into Clear all and Apply, and the panel closes when focus leaves the control); a click away closes. Arrow order is the drawn order: ungrouped rows first, then each group. With `confirm`, Escape and a
   click away discard the draft.
+- **The trigger is named by its label and its value** ("Assignee Amy Lee"): the label through `aria-label`, `aria-labelledby` or a `Field`'s `<label for>`, then the picked text. The active row scrolls into view as the arrows move it.
+- Every click opens the panel, whatever is behind it (a mouse, a screen reader, voice control, `element.click()`); Enter and Space are handled on key down.
 - Rows pick on a prevented `mousedown`, so a click never blurs the field mid-pick.
 - "+N" is a real button (`aria-expanded`, `aria-controls` the tags, named "Show 3 more"); opened out it becomes "Show less". A removed tag is announced politely ("Removed Bug, 4 selected") and focus moves to the neighbouring ✕.
 - With `error`, the message is tied to the field with `aria-describedby`, and the border and text turn critical; colour is never the only signal, because the message says what is wrong.
@@ -212,6 +219,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 - **Don't add a second dropdown-with-options component.** Extend this one (Decision 2).
 - **Don't let the tags field grow without limit, or add a `wrap` mode.** See Decision 4.
 - **Don't use it for a handful of plain options** — that is a `Select`.
-- **Don't fetch as you type inside it** — search filters the `options` you pass. Async search means
-  the page updates `options`, debounced, until a real `onSearch` exists.
+- **Don't fetch as you type inside it** — search filters the `options` you pass, and nothing yet
+  hands the page the search text. A people list that is too large to load whole needs an
+  `onSearch(query)` that this component does not have: not built until a real server-side list needs it.
 - **Don't put who-may-be-picked rules in here** — eligibility is the page's business.
