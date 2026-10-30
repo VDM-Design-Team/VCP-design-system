@@ -164,6 +164,9 @@ The panel is absolutely positioned inside a relatively positioned wrapper:
   It is measured by its full content height, not its shortened one, so it settles
   once and stays put (until 30 October 2026 it flickered between the two heights
   every frame). The `ScrollsWhenNeitherSideFits` story is the regression test.
+  While shortened it also remembers the height it had before, so content that
+  shrinks to fit instead of scrolling (a column whose header and footer stay while
+  its list gives way, as `NotificationPopover`'s does) settles too.
 - It is measured again when the window or the panel is resized. It does **not**
   re-measure while the page scrolls, so an open panel never jumps to the other side
   under the reader's hands.

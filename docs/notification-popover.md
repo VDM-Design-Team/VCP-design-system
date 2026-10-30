@@ -55,7 +55,7 @@ and renders whatever it is given: the `Open` story filters its own list.
 Panel `surface.elevated`, `radius.md`, `shadow.menu` (Popover's), 528 wide
 (`w-132`, 33rem) and up to 448 tall (28rem, border included); header and footer 16 padding all round on `stroke.default` rules; title
 `body-lg-semibold` `text.primary`; the footer link `body-sm-medium`
-`text.link.default` (hover `text.link.hover`). The list takes the height the header and footer leave, and scrolls when the rows do not fit; under 448 the panel hugs its rows.
+`text.link.default` (hover `text.link.hover`). The list takes the height the header and footer leave, and scrolls when the rows do not fit; under 448 the panel hugs its rows. On a screen too short for the panel above or below the bell, `Popover` shortens it and the list gives way: the header and the inbox link stay in view, the list is the one scrolling area, and the panel itself never scrolls (the `ShortWindow` story checks it).
 No new tokens.
 
 ## Accessibility

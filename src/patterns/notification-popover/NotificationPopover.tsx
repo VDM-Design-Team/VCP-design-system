@@ -114,13 +114,20 @@ export function NotificationPopover({
       panelRole="dialog"
       label={title}
       /* 528 wide (33rem), and no panel padding: the header and footer draw their
-         own, with their own rules. */
-      panelClassName="w-132 overflow-hidden p-0"
+         own, with their own rules. A column, so that when the screen is too short and
+         `Popover` shortens the panel, the content below shrinks with it. */
+      panelClassName="flex w-132 flex-col overflow-hidden p-0"
+      /* The list is the scrolling region and a tab stop of its own when it scrolls,
+         so the panel never needs to be one. */
+      panelProps={{ tabIndex: -1 }}
       content={
         /* Up to 448 tall (28rem) counting the panel's 1 border each side, so 446 here:
            the header and the footer keep their height and the list takes the rest and
-           scrolls. Shorter than that, it hugs the rows. */
-        <div className="flex max-h-111.5 flex-col">
+           scrolls. Shorter than that, it hugs the rows. On a short screen `Popover`
+           shortens the panel and this column gives way with it (`min-h-0`): the header
+           and the inbox link stay, and only the list loses rows — one scrolling area,
+           never the whole panel. */
+        <div className="flex max-h-111.5 min-h-0 flex-col">
           {/* A div, not <header>: a <header> outside a sectioning element is a banner
               landmark, and the page already has one (the top bar). */}
           <div className="flex items-center justify-between gap-2 border-b border-stroke-default p-4">
