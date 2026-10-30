@@ -534,6 +534,9 @@ function DateField({
         onOpenChange={setOpen}
         align="left"
         className="w-full"
+        /* As InlineDateEdit sets it: the panel is the picker, no wider and with no padding of its own. */
+        width="auto"
+        panelClassName="p-0"
         trigger={
           <Input
             readOnly

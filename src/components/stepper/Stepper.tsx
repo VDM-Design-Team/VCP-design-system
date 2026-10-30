@@ -191,8 +191,10 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           /* font.family.numeric — this is a number, set as one. */
           className={cn(
             variant === 'up-down' ? 'w-20 flex-1 px-3 text-left' : 'w-14 text-center',
-            'min-w-0 border-0 bg-transparent outline-none',
-            'font-numeric text-caption-md-medium text-text-primary',
+            'min-w-0 border-0 bg-transparent outline-none text-text-primary',
+            /* The number-input layout reads like any `Input`: the system's body text. The
+               plus-minus one is a table control and keeps the numeric face. */
+            variant === 'up-down' ? 'font-sans text-body-sm-regular' : 'font-numeric text-caption-md-medium',
             'disabled:cursor-not-allowed disabled:text-text-disabled',
           )}
         />

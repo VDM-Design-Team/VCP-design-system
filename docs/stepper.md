@@ -67,7 +67,7 @@ left/right chevrons: nudging is arithmetic, not navigation.
 The Input's shell: a `stroke.strong` border, a
 `stroke.focused` ring and a `surface.neutral.subtle` disabled fill. Value in the numeric face
 (`font.family.numeric` at `caption-md` — the same treatment as DataTable's
-numbers). Nudge glyphs `text.secondary` (10.35:1 light / 11.87:1 dark),
+numbers) for `plus-minus`; the `up-down` number-input layout reads like any `Input`, so its value is `body-sm-regular` in the UI face. Nudge glyphs `text.secondary` (10.35:1 light / 11.87:1 dark),
 hover `surface.neutral.faint`. No new tokens.
 
 ## Error state
