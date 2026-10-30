@@ -21,10 +21,12 @@ two of these.
 |---|---|---|---|
 | `value` | `number` | required | Clamped into `0…max`; announced in real units |
 | `max` | `number` | `100` | — |
-| `tone` | `brand \| success \| warning \| critical` | `brand` | Consumption status — the caller's judgment |
-| `size` / `thickness` | `number` | `140` / `16` | SVG geometry — a chart is measured, not stepped |
+| `tone` | `brand \| success \| warning \| critical ` | `brand` | Consumption status — the caller's judgment |
+| `size` / `thickness` | `number \| "icon"` / `number` | `140` / `16` | SVG geometry — a chart is measured, not stepped. `size="icon"` is the small decorative one for table rows: a 20 box around a 16 ring (thickness 2), no numeral |
 | `half` | `boolean` | — | The half-donut gauge (Cycle Summary treatment) |
-| `label` | `ReactNode` | derived `%` | Replaces the centred text. Visual only |
+| `segmented` | `boolean` | — | Flat ends and a gap between the filled arc and the remainder (the gap is a quarter of `thickness`), instead of a round-capped fill over a full track. Pair with a thin `thickness` (8 on a 200 gauge) |
+| `fillClassName` | `string` | — | Token `stroke-*` class for the filled arc; wins over `tone`. A token class, never a hex |
+| `label` | `ReactNode` | derived `%` | Replaces the centred text. Visual only. Empty (`null` or `""`) removes the numeral; with no caption either, the text layer isn't rendered and the ring stands alone. `size="icon"` never draws text, whatever `label` or `caption` say. Still a meter: pass `aria-label` |
 | `caption` | `ReactNode` | — | Line under the number — "of 40 pts". A string doubles as `aria-label` |
 | `className` | `string` | — | On the wrapper |
 

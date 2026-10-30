@@ -71,14 +71,17 @@ would only ever be used to make a tooltip look like something it is not.
   offset off the trigger. A `top` tooltip near the top of the viewport, or a
   `left` one on a control at the left edge, will overflow — it will not flip to
   the opposite side. Pick the side with room, and pick it per usage.
-- **No portal.** The bubble is a DOM child of the wrapper, so any ancestor with
-  `overflow: hidden` or `overflow: auto` will clip it. Inside a scrolling table
-  cell or a card with clipped corners, expect it to be cut off.
+- **The bubble is in a portal, so no container clips it or scrolls with it.** It is
+  drawn `position: fixed` from the trigger's coordinates, in the nearest `.dark`
+  ancestor or else at the end of the page. A tooltip in a scrolling list, a table
+  cell or a card with clipped corners is not cut off, and it can no longer widen a
+  scrolling container (a hidden tooltip on a row's right-hand button used to make
+  a list scroll sideways). While it is open it follows the trigger on scroll and
+  resize.
 - **No arrow.** The gap and the proximity carry the association; a CSS triangle
   would need a background colour set twice and would not survive a theme flip.
-- **No repositioning on scroll or resize.** It is anchored in normal flow, so it
-  moves with the trigger — which is the one thing this approach gets right for
-  free.
+- **It is positioned from the trigger's box, not flipped.** Placement is still one
+  of four fixed sides; near a viewport edge the bubble can run off the screen.
 
 If a screen genuinely needs flipping and collision handling, that is a real
 positioning engine and a system-level decision, not a local fix.
@@ -284,8 +287,6 @@ in a way that helps nobody.
   body copy belongs on the page.
 - Don't set a long `openDelay` to "reduce noise". If tooltips are noisy there are
   too many of them.
-- Don't use one inside a container with `overflow: hidden` and expect it to
-  escape — there is no portal, so it will be clipped.
 - Don't assume a placement will flip near a viewport edge. It will not; choose the
   side with room.
 - Don't put status or error information in one. Those need a live region and a
