@@ -40,6 +40,7 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 | `status` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` (several picks, no search box by default) with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
 | `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable`, `searchPlaceholder` and `rows` (`text`, `avatar`, `icon`, `tag`) can be set on `status` and `tags` |
+| `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `SearchSelect` per entry (Assignee, Initiator…) with avatars and search, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array. `rows` defaults to `avatar` here. Options may carry `src` (a photo) or `unassigned` |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
 | `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset" |
 | `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show. Uncontrolled (shown) when omitted |
@@ -54,7 +55,7 @@ pages: the page decides.
 |---|---|
 | A page with every filter | `period`, `cycle`, `status`, `priority`, `tags` |
 | A draft page (every row is a draft, so a status filter would filter nothing) | everything but `status` |
-| An admin view that can also filter by person | the above plus `users` (on the user-fields PR) |
+| An admin view that can also filter by person | the above plus `users` |
 | A regular user's view of the same page | no `users` |
 | A page with nothing to filter by | only `search` (the Filters button then claims no panel) |
 
@@ -73,7 +74,7 @@ Filters, then search, then the fields two across (period and tags full width), a
 the calendar takes its touch layout, one month wide.
 
 Fields are 40 tall and fluid between a minimum and a maximum, growing to fill the row before the next
-wraps: cycle 9rem to 16rem, status 9rem to 16rem, priority 9.5rem to 16rem, period 14.5rem to 18rem, tags 9.5rem to 42.5rem, search
+wraps: cycle 9rem to 16rem, status 9rem to 16rem, priority 9.5rem to 16rem, user fields 10.5rem to 16rem, period 14.5rem to 18rem, tags 9.5rem to 42.5rem, search
 12rem and up. The minimums are measured, not guessed: each is what its placeholder (or longest value, for
 the period) needs in the real type, so nothing is cut off at the minimum. A dropdown panel is as wide as its
 longest option regardless (see `SearchSelect`), so a narrow field never cuts options off.
@@ -107,10 +108,7 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 ## Differences from the design
 
-- **No User filter in this PR.** Figma's Assignee and Initiator are a searchable list with
-  avatars that shows the chosen person in the field. `SearchSelect` clears its text after a
-  pick, so it cannot be that field, and there is no component that can yet. A page can add
-  its own through `children`; a proper one is a separate piece.
+- **Users follow tags.** Figma's bar draws Assignee and Initiator in its "current design" frame, not in `_Filter_Bar`; they are placed after tags, one `SearchSelect` each, with avatars and search.
 - **Field order.** Period, status, priority, tags, as `_Filter_Bar`'s first row draws them.
   Its second row draws a filled version in another order (tags first); that is read as a state,
   not a layout.

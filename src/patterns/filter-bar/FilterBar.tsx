@@ -7,7 +7,9 @@ import { Select, type SelectOption } from '../../atoms/select';
 import { DatePicker, type DatePickerPreset } from '../../components/date-picker';
 import {
   SearchSelect,
+  type SearchSelectDisplay,
   type SearchSelectOption,
+  type SearchSelectProps,
   type SearchSelectRows,
 } from '../../components/search-select';
 import { Popover } from '../../components/popover';
@@ -43,6 +45,8 @@ import { Popover } from '../../components/popover';
  *   list if "no filter" should be a choice.
  * - **tags** — `SearchSelect` with search, whose picks are removable tags in the field;
  *   give options a `group` for the Global / Domain-Specific headings.
+ * - **users** — one `SearchSelect` per entry (Assignee, Initiator…): a searchable
+ *   list of people with avatars. Each is named by its `label`.
  * - **children** — more fields in the same row (an assignee picker, say),
  *   shown and hidden with the others.
  *
@@ -100,6 +104,24 @@ export interface FilterBarMulti {
   rows?: SearchSelectRows;
 }
 
+export type FilterBarUser = {
+  /** Names the field for assistive tech and builds its placeholder ("Select assignee"). */
+  label: string;
+  options: ReadonlyArray<SearchSelectOption>;
+  placeholder?: string;
+  /** Row style. People get avatars (`avatar`) unless you say otherwise. */
+  rows?: SearchSelectRows;
+} & (
+  | { multiple?: false; value?: string; onChange?: (value: string) => void; display?: never }
+  | {
+      /** Several people: the panel stays open and the field summarises the picks. */
+      multiple: true;
+      value?: readonly string[];
+      onChange?: (value: string[]) => void;
+      display?: SearchSelectDisplay;
+    }
+);
+
 export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   search?: string;
   onSearchChange?: (value: string) => void;
@@ -109,6 +131,8 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   status?: FilterBarMulti;
   priority?: FilterBarSelect;
   tags?: FilterBarMulti;
+  /** People pickers, after tags: one field per entry. */
+  users?: readonly FilterBarUser[];
   /** Fires when "Reset" is pressed. The button is always shown. */
   onReset?: () => void;
   resetLabel?: string;
@@ -160,6 +184,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     status,
     priority,
     tags,
+    users,
     onReset,
     resetLabel = 'Reset',
     filtersOpen,
@@ -176,7 +201,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
 
-  const hasFields = !!(period || cycle || status || priority || tags || children);
+  const hasFields = !!(period || cycle || status || priority || tags || users?.length || children);
   /* With no fields showing (folded away, or none passed) the search takes the room they leave. */
   const showFields = hasFields && open;
   const range = period?.value;
@@ -333,6 +358,19 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               className="col-span-2 md:max-w-170 md:min-w-38 md:flex-1"
             />
           )}
+          {users?.map(({ label, placeholder, ...rest }) => (
+            <SearchSelect
+              key={label}
+              {...({
+                'aria-label': label,
+                placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
+                searchPlaceholder: 'Search by name',
+                rows: 'avatar',
+                ...rest,
+                className: 'md:max-w-64 md:min-w-42 md:flex-1',
+              } as SearchSelectProps)}
+            />
+          ))}
           {children}
         </div>
       )}
