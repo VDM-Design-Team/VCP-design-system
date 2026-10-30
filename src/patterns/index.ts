@@ -10,6 +10,7 @@ export * from './av-header';
 export * from './av-table';
 export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
+export * from './filter-bar';
 export * from './handoff-av-modal';
 export * from './report-problem-modal';
 export * from './notification-popover';
