@@ -53,7 +53,7 @@ new tokens.
 
 - A `<section>` named by its heading (`aria-labelledby`), so each is a region a screen reader can
   jump to. The cards are an `ol`, so "item 2 of 3" is announced; the number block is decorative.
-- **The fold button** is an icon button at the right of the header, named for what it does and to which section ("Collapse Problems" / "Expand Problems"), with `aria-controls` the body. Only it is the toggle; the title is plain text. The body is hidden, not unmounted, so typed text survives folding, and it slides (200, ease-out; none under reduced motion).
+- **The fold button** is an icon button at the right of the header, named for what it does and to which section ("Collapse Problems" / "Expand Problems"), with `aria-controls` the body. Only it is the toggle; the title is plain text. The body is hidden, not unmounted, so typed text survives folding, and it slides (200, ease-out); folding also dissolves the content over 100 as it lifts a little, so it is not seen being squeezed. None of it under reduced motion.
 - The add button's default name is "Add Problems", so a page with several sections has distinct
   buttons. The paperclip is "Attach files".
 - The add button is 24 to look at and 40 to press (its target reaches 8 past the circle).

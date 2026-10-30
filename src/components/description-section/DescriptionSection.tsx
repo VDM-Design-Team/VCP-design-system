@@ -136,7 +136,16 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
           )}
         >
           <div className={cn('min-h-0', (!open || animating) && 'overflow-hidden')}>
-            <div className="flex flex-col gap-4 pt-4">
+            {/* Folding: the content dissolves quickly and lifts a little while the row closes, so it
+                is not seen being squeezed. Opening is as it was (no fade), the row alone. */}
+            <div
+              className={cn(
+                'flex flex-col gap-4 pt-4',
+                open
+                  ? 'translate-y-0 opacity-100'
+                  : '-translate-y-2 opacity-0 transition-[opacity,translate] duration-100 ease-in motion-reduce:transition-none',
+              )}
+            >
               {cards.length > 0 && (
                 <ol className="flex flex-col gap-4">
                   {cards.map((card, i) => (
