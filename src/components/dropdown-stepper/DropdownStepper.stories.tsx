@@ -48,6 +48,11 @@ export const Default: Story = {
     /* First option: nowhere earlier to step. */
     await expect(c.getByRole('button', { name: 'Previous Year' })).toBeDisabled();
     await expect(c.getByRole('button', { name: 'Next Year' })).toBeEnabled();
+    /* A dead arrow is not a disabled control: the shell keeps its resting look
+       (stroke.strong border, surface.elevated fill). */
+    const shell = getComputedStyle(c.getByRole('button', { name: 'Previous Year' }).parentElement!);
+    await expect(shell.borderTopColor).toBe('rgb(100, 116, 139)');
+    await expect(shell.backgroundColor).toBe('rgb(255, 255, 255)');
   },
 };
 
@@ -117,8 +122,17 @@ export const Invalid: Story = {
   },
 };
 
+/** The Input family's disabled look — the same fill, border and cursor as a disabled `Stepper`. */
 export const Disabled: Story = {
   args: { disabled: true },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const shell = getComputedStyle(c.getByRole('button', { name: 'Previous Year' }).parentElement!);
+    /* surface.neutral.subtle and stroke.subtle, not the resting white and stroke.strong. */
+    await expect(shell.backgroundColor).not.toBe('rgb(255, 255, 255)');
+    await expect(shell.borderTopColor).not.toBe('rgb(100, 116, 139)');
+    await expect(shell.cursor).toBe('not-allowed');
+  },
 };
 
 /** Shell, buttons and list are tokens, so dark is free. */

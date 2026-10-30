@@ -52,8 +52,16 @@ const shell = cva(
         false: 'border-stroke-strong',
       },
       fullWidth: { true: 'flex w-full', false: '' },
+      /* The Input family's disabled look, as `Stepper` draws it. Keyed to the
+         `disabled` prop, never to `has-[:disabled]`: an arrow dies at the end of
+         the list, and that must not grey the whole control. Listed last so it
+         wins over the border and fill above (the class list goes through `cn`). */
+      disabled: {
+        true: 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle',
+        false: '',
+      },
     },
-    defaultVariants: { size: 'md', invalid: false, fullWidth: false },
+    defaultVariants: { size: 'md', invalid: false, fullWidth: false, disabled: false },
   },
 );
 
@@ -177,7 +185,7 @@ export const DropdownStepper = React.forwardRef<HTMLDivElement, DropdownStepperP
         className={cn('inline-flex flex-col gap-1.5', fullWidth && 'w-full', className)}
         {...props}
       >
-        <div className={shell({ size, fullWidth, invalid: isInvalid })}>
+        <div className={cn(shell({ size, fullWidth, invalid: isInvalid, disabled: Boolean(disabled) }))}>
         {arrow(-1)}
         <Menu
           className="min-w-0 flex-1"
