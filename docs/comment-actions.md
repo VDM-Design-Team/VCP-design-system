@@ -34,7 +34,7 @@ reaction is.
 | `replyCount` | `number` | `0` | The replies toggle shows when this is above 0 and `onToggleReplies` is given |
 | `repliesOpen` | `boolean` | `false` | "Show 3 Replies" becomes "Hide 3 Replies", and the caret turns up |
 | `onToggleReplies` | `() => void` | — | |
-| `repliesId` | `string` | — | The id of the replies list, wired to the toggle as `aria-controls` |
+| `repliesId` | `string` | — | The id of the replies list, wired to the toggle as `aria-controls` while they show |
 | `onEdit`, `onDelete` | `() => void` | — | **Pass only for the author.** No handler, no button |
 | `replying` | `boolean` | `false` | A reply box is open: "Reply" becomes "Cancel Reply" |
 | `onReply`, `onCancelReply` | `() => void` | — | Which one runs depends on `replying` |
@@ -97,7 +97,7 @@ The row's widths come out a pixel or two wider than the frame: the type ramp add
   The glyphs are `aria-hidden`.
 - The replies toggle changes its words ("Show" to "Hide"), so it is an action button and
   does not also carry `aria-expanded`, which would announce the state twice. It has
-  `aria-controls` when you pass `repliesId`.
+  `aria-controls` while the replies are showing and you have passed `repliesId`.
 - Give `subject` in a thread, so the buttons are not all named "Edit", "Delete", "Reply":
   the visible word still leads the accessible name.
 - Copy Link announces "Link copied" (or "Couldn't copy the link") in a polite live
