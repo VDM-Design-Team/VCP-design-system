@@ -320,3 +320,54 @@ export const FlipsWhenCutOff: Story = {
     await expect(box.right).toBeCloseTo(bottomRight.trigger.getBoundingClientRect().right, 0);
   },
 };
+
+/**
+ * **Flow:** a panel taller than the room on either side keeps the roomier side, scrolls inside, and
+ * stays put. It used to flicker between its full and its shortened height on every frame.
+ */
+export const ScrollsWhenNeitherSideFits: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => (
+    <div className="fixed inset-0 flex items-center p-2">
+      <Popover
+        trigger={<Button>Checklist</Button>}
+        width="sm"
+        content={
+          <ul className="flex flex-col gap-1">
+            {Array.from({ length: 60 }, (_, i) => (
+              <li key={i}>Checklist item {i + 1}</li>
+            ))}
+          </ul>
+        }
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Checklist' });
+    await userEvent.click(trigger);
+    const panel = await waitFor(() => {
+      const el = document.getElementById(trigger.getAttribute('aria-controls') as string);
+      if (!el) throw new Error('The panel has not opened');
+      return el;
+    });
+
+    /* Ten frames in a row at one height: it settled, it is not flickering. */
+    const heights = await new Promise<number[]>((resolve) => {
+      const seen: number[] = [];
+      const tick = () => {
+        seen.push(Math.round(panel.getBoundingClientRect().height));
+        if (seen.length < 10) requestAnimationFrame(tick);
+        else resolve(seen);
+      };
+      requestAnimationFrame(tick);
+    });
+    await expect(new Set(heights).size).toBe(1);
+
+    /* It scrolls inside, and it is all on the screen. */
+    await expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight);
+    const box = panel.getBoundingClientRect();
+    await expect(box.top).toBeGreaterThanOrEqual(0);
+    await expect(box.bottom).toBeLessThanOrEqual(window.innerHeight);
+  },
+};
