@@ -30,7 +30,7 @@ moves it down a tier, per CLAUDE.md's composition rule.
 
 ## Variants
 
-`variant` is `textual` (the default: the glyph and word alone), `tonal` (a pale fill in the glyph's hue family) or `outline` (a bordered pill, same hue), `neutral-outline` (a grey bordered pill, as the Detail card draws it), as the Figma set draws them. The label stays neutral on a fill or a border; the glyph carries the colour. `size` takes `Tag`'s.
+`variant` is `textual` (the default: the glyph and word alone), `tonal` (a pale fill in the glyph's hue family), `faint` (Figma's "Faint Fill": a white fill with a light grey edge, `stroke.default`, lighter than the neutral outline border because a tag is not a control; the Detail card uses it) or `outline` (a bordered pill, same hue): the Type_Tag set's four styles. The label stays neutral on a fill or a border; the glyph carries the colour. `size` takes `Tag`'s.
 `info` adds the ⓘ the design draws after the word on the filled and bordered looks; it is decorative, and the page provides the explanation.
 
 ## Props

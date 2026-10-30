@@ -97,7 +97,7 @@ changes come out through `onChange` as the whole `value`; the form's users come 
 ## Tag sizes
 
 Every tag in the card is **large** (28 tall: GDL's Large, our `md`, the default): the date and cycle tags, status, urgency, type, projects, category
-and tags. The people chips are their own size. Urgency is drawn tonal (a pale fill) and type in the grey bordered pill with the ⓘ, as the
+and tags. The people chips are their own size. Urgency is drawn tonal (a pale fill) and type in the "Faint Fill" style (a white fill, a light grey edge) with the ⓘ, as the
 Detail card does in Figma. Capacity Points is a `Badge` when read and a `Stepper` (`variant="up-down"`, the stacked caret pair, full width) when edited; dates are an `Input` with a calendar icon and a `DatePicker`. No field is new: each is an existing piece.
 
 ## Tokens

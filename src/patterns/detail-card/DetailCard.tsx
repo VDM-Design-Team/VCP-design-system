@@ -305,7 +305,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         error={errors?.type}
       />
     ) : value.type ? (
-      <TypeTag size="md" variant="neutral-outline" info type={value.type} />
+      <TypeTag size="md" variant="faint" info type={value.type} />
     ) : null;
 
     const tagList = (items: readonly string[] | undefined, tone: 'brand' | 'neutral') => (
