@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
+import { RemoveButton } from '../../atoms/remove-button';
 import { Textarea } from '../../atoms/textarea';
 
 /**
@@ -219,24 +219,17 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
             /* Always in the page and the tab order, only unseen: hover and focus in the card
                reveal it, so a keyboard can reach it and typing keeps it on screen. A touch
                screen has no hover, so there it is always shown. The `before` is the 40 target. */
-            <button
-              type="button"
-              aria-label={removeLabel}
+            <RemoveButton
+              label={removeLabel}
               onClick={onRemove}
               className={cn(
-                'absolute top-3 right-3 grid size-6 place-items-center rounded-full',
-                /* Just the glyph, changing colour through its states (`accent.critical.outline.content`). */
-                'text-accent-critical-outline-content-default outline-none',
-                'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
-                'before:absolute before:-inset-2',
-                'opacity-0 transition-[opacity,color] duration-150 motion-reduce:transition-none',
+                'absolute top-3 right-3',
+                'opacity-0 transition-[opacity,color] duration-150',
                 !otherFocused && 'group-hover/card:opacity-100',
                 'group-focus-within/card:opacity-100 pointer-coarse:opacity-100',
-                'focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                'focus-visible:opacity-100',
               )}
-            >
-              <Icon name="x-circle" size="md" aria-hidden="true" />
-            </button>
+            />
           )}
         </div>
         {editing && error && (

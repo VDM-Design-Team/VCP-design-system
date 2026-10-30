@@ -9,6 +9,7 @@ file size: Figma's card doesn't show one.
 | Piece | Tier |
 |---|---|
 | `Icon` | atom |
+| `RemoveButton` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -66,9 +67,9 @@ The fill sits on the 8-radius button around the 6-radius card, as Figma's
 states frame draws it. A card without `onClick` has no hover or pressed state
 — Figma notes the hover state isn't available in view mode.
 
-The ✕ is Figma's `_File_Attachment_Remove_Button`: a 28 box, 24 circle,
-`accent.critical.tonal.surface` behind an `x` in
-`accent.critical.outline.content`, in the card's top-right corner.
+The ✕ is the `RemoveButton` atom in its `tonal` look (Figma's `_File_Attachment_Remove_Button`): an `x`
+in `accent.critical.outline.content` on `accent.critical.tonal.surface`, 28, in the card's top-right
+corner, with a 40 target. The card positions it and reveals it.
 
 `domain` is Figma's `_Domain_Label`, shown when an AV is handed from one domain to
 another: a pill in `neutral.tonal.surface.default` / `neutral.tonal.content.default`

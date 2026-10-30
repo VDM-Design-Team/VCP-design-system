@@ -14,6 +14,7 @@ export * from './atoms/logo';
 export * from './atoms/pagination-dots';
 export * from './atoms/progress-bar';
 export * from './atoms/radio-group';
+export * from './atoms/remove-button';
 export * from './atoms/segmented-control';
 export * from './atoms/select';
 export * from './atoms/skeleton';

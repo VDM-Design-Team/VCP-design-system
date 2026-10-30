@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
+import { RemoveButton } from '../../atoms/remove-button';
 
 /**
  * FileAttachment — one attached file as a small card: kind glyph and name,
@@ -199,31 +200,19 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
           </>
         )}
         {onRemove && (
-          <button
-            type="button"
-            aria-label={`Remove ${name}`}
+          <RemoveButton
+            tone="tonal"
+            label={`Remove ${name}`}
             onClick={onRemove}
             className={cn(
-              'group/remove absolute right-0.5 top-0.5 grid size-7 place-items-center rounded-full p-0.5',
+              'absolute right-0.5 top-0.5',
               /* In the tab order always; visible on card hover or any focus —
                  never mounted-by-hover, which no keyboard can trigger. Hidden
                  while the card itself is pressed, per Figma's note. */
-              'opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100',
+              'opacity-0 transition-[opacity,color,background-color] group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100',
               'peer-active/tile:invisible',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
-          >
-            <span
-              className={cn(
-                'grid size-full place-items-center rounded-full transition-colors',
-                'bg-accent-critical-tonal-surface-default text-accent-critical-outline-content-default',
-                'group-hover/remove:bg-accent-critical-tonal-surface-hover group-hover/remove:text-accent-critical-outline-content-hover',
-                'group-active/remove:bg-accent-critical-tonal-surface-pressed group-active/remove:text-accent-critical-outline-content-pressed',
-              )}
-            >
-              <Icon name="x" size="sm" aria-hidden="true" />
-            </span>
-          </button>
+          />
         )}
       </div>
     );
