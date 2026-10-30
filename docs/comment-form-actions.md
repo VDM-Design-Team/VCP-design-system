@@ -19,7 +19,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `CommentFormActions` | Under a new-comment box, a reply box, or an edit box |
+| `CommentFormActions` | Under a new-comment box, a reply box, or an edit box (`CommentComposer` already has it) |
 | `Button` | Any other button; this is only the one arrangement three comment screens share |
 | `CommentActions` | The row under a *posted* comment |
 

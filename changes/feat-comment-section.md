@@ -1,0 +1,6 @@
+---
+bump: minor
+---
+### `CommentComposer`, `CommentSection` — the box to write a comment, and a whole comment list (October 2026)
+
+Two new pieces, restructuring the comment set into the right tiers. **`CommentComposer`** (a component) is the box a comment is written in: an optional avatar, the `MentionInput` field and the send button with an optional Cancel. It is also the reply box and the edit box under a comment, so there is one box to learn. Its `onSubmit` may be async: the button shows its spinner, the box clears when the promise resolves and keeps what was typed if it rejects. **`CommentSection`** (a pattern) is the piece to reach for: the title with the sort switch, the new-comment box, and every comment with its replies. Give it the comments as data (a tree) and say what to do on add, reply, edit, delete and react; it holds which threads are open and which box is showing, shows Edit and Delete only on the current user's own comments, and draws the thread lines. `CommentReply` now uses `CommentComposer` for its reply and edit boxes (their `onSubmit` handlers may be async too), and the unreleased `NewComment` pattern is removed, replaced by these two. `Popover` and everything built on it now opens on the side that has room (see `feat-popover-flip`).
