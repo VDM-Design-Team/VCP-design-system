@@ -11,7 +11,7 @@ signed-in user on the right.
 | `Logo` | atom | The left side, linked home, when there is no `primaryAction` |
 | `Toggle` | atom | The light/dark mode switch, with the sun and moon in its knob (`knobIcons`) |
 | `Divider` | atom | The vertical rule between the bell and the mode and user group |
-| `IconButton` | atom | The notification bell |
+| `NotificationBell` | component | The notification bell and its unread dot |
 | `UserMenu` | component | The signed-in user: the account menu when `userMenuItems` or `onUserMenuSelect` is given, and the chip itself (`UserMenuTrigger` as a button for `onUserMenu`, `UserChip` as plain content) otherwise. The chip is drawn there, once |
 | `Menu` | component | Only its `MenuItem` type, for `userMenuItems`; the menu itself is drawn by `UserMenu` |
 
@@ -53,15 +53,11 @@ title, no `h1`, no back.
 ## Tokens
 
 `surface.elevated` bar (64 tall = `h-16`) on `stroke.subtle`; user name
-`label-lg` `text.primary`. The bell is neutral (`neutral.outline.content`, with
-the `surface.neutral` hover fills), not brand blue, and a standard `IconButton` (a 20 glyph in a 40 target). The unread dot is 10, level with the glyph's right edge and 2 above its top, and
-`accent.critical.filled.surface.default` — the design's red dot, a filled shape, 4.8:1 on
-the bar in light and 3.7:1 in dark — with a pulse behind it: three 1.5s cycles
-(4.5s, under WCAG 2.2.2's 5s), then the dot stays still. It is keyed on the
-count, so a new notification pulses again, and it is dropped under reduced motion. The divider is the
-`Divider` atom, vertical and 40 tall, drawn only between the bell and the mode
-and user group. No new tokens —
-every visible piece is a composed component wearing its own.
+`label-lg` `text.primary`. The bell is `NotificationBell`: neutral, with a 10
+unread dot that pulses three times when the count changes (see `docs/notification-bell.md`). The
+divider is the `Divider` atom, vertical and 40 tall, drawn only between the bell
+and the mode and user group. No new tokens — every visible piece is a composed
+component wearing its own.
 
 ## Accessibility
 
@@ -72,7 +68,7 @@ every visible piece is a composed component wearing its own.
   docs/logo.md). Without `homeHref` there is no link at all: an `<a>` with no
   `href` is not a link and may not carry a name, so the `Logo` renders alone
   and names itself. (Found by the story tests, 10 Sep 2026.)
-- The bell is an `IconButton` whose name carries the count ("Notifications,
+- The bell is a `NotificationBell` (an `IconButton` underneath) whose name carries the count ("Notifications,
   3 unread"); the dot and its pulse are `aria-hidden` — colour and motion never
   carry it alone.
 - The mode switch is the system `Toggle` named "Dark mode" — a real switch
