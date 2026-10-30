@@ -87,7 +87,7 @@ export const Unread: Story = {
     const canvas = within(canvasElement);
     /* The row is named from its message, and says it is unread. */
     const row = canvas.getByRole('link', {
-      name: 'Unread: John Kestrel commented on Change the notification layout for testing a few seconds ago',
+      name: 'Unread: John Kestrel commented on Change the notification layout for testing. a few seconds ago',
     });
     await expect(row).toHaveAttribute('href', '#av-1');
     const mark = canvas.getByRole('button', { name: /^Mark as read/ });
@@ -154,8 +154,8 @@ export const Kinds: Story = {
       { kind: 'rejected-feedback', time: '2 hours ago', expect: /rejected .* with feedback/ },
       { kind: 'assigned', time: '3 hours ago', expect: /assigned you/ },
       { kind: 'backlog', time: '3 hours ago', expect: /moved .* to the backlog/ },
-      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review/ },
-      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
+      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review\./ },
+      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing\./ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
@@ -171,9 +171,9 @@ export const Kinds: Story = {
   play: async ({ canvasElement }) => {
     const links = within(canvasElement).getAllByRole('link');
     await expect(links).toHaveLength(13);
-    await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod');
-    await expect(links[10]).toHaveTextContent(/handed off .*testing\. Ready for Review/);
-    await expect(links[11]).toHaveTextContent(/accepted & completed .*testing/);
+    await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod.');
+    await expect(links[10]).toHaveTextContent(/handed off .*testing\. Ready for Review\./);
+    await expect(links[11]).toHaveTextContent(/accepted & completed .*testing\./);
   },
 };
 
