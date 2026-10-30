@@ -8,7 +8,7 @@ the popup is the platform's.
 | Use | For |
 |---|---|
 | `Select` | A handful to a few dozen known options |
-| `SearchSelect` *(to port)* | Long lists that need typing to filter |
+| `SearchSelect` | Long or rich lists that need search, several picks, groups or avatars |
 | `RadioGroup` | ≤5 options worth seeing all at once |
 | `SegmentedControl` | 2–4 options that switch a view in place |
 

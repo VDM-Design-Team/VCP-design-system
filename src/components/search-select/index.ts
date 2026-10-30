@@ -1,2 +1,10 @@
 export { SearchSelect } from './SearchSelect';
-export type { SearchSelectProps, SearchSelectOption } from './SearchSelect';
+export type {
+  SearchSelectProps,
+  SearchSelectSingleProps,
+  SearchSelectMultipleProps,
+  SearchSelectOption,
+  SearchSelectDisplay,
+  SearchSelectRows,
+  SearchSelectRowState,
+} from './SearchSelect';
