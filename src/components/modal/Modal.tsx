@@ -15,8 +15,9 @@ import { IconButton } from '../../atoms/icon-button';
  *   open   → remember what had focus, move focus into the panel, make everything
  *            behind it inert, lock the page scroll without shifting the layout
  *   while  → Tab and Shift+Tab cycle inside the panel and never leave it
- *   close  → Escape always works, the background comes back, and focus returns
- *            to whatever opened the dialog
+ *   close  → Escape always works (a popup open inside takes the first one), the
+ *            background comes back, and focus returns to whatever opened the
+ *            dialog
  *
  * It renders through a portal to `document.body`, so no ancestor's
  * `overflow: hidden` can clip it and the backdrop always covers the viewport.
@@ -180,8 +181,9 @@ function hideBackground(portalEl: HTMLElement): () => void {
  * Every open dialog, innermost last. **Only the last one answers the
  * keyboard.**
  *
- * Both traps bind to `document` in the capture phase, so with two dialogs open
- * the outer one's listener — registered first — ran first and answered for
+ * Every dialog binds its keyboard listeners to the same nodes (`document` for
+ * Tab, `window` for Escape), so with two dialogs open the outer one's listener
+ * — registered first — runs first, and before this stack it answered for
  * both. Escape closed the *outer* dialog and left the inner one orphaned over a
  * page that was no longer inert; Tab died on the outer trap's `preventDefault`,
  * because its own panel is inert by then so it found nothing to focus and
@@ -419,13 +421,6 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       if (event.defaultPrevented) return;
       /* An outer dialog stands down while an inner one is open. */
       if (openPanels[openPanels.length - 1] !== panelEl) return;
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        event.stopPropagation();
-        latest.current.onClose();
-        return;
-      }
       if (event.key !== 'Tab') return;
 
       const items = getFocusable(panelEl);
@@ -457,10 +452,25 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       }
     };
 
+    /* 5. Escape — the opposite of the trap: on `window`, in the bubble phase,
+       the last stop an event makes. Everything inside the dialog hears the key
+       first, so an open popup (a select panel, a suggestion list, a Popover)
+       closes itself and calls `preventDefault()`, and the dialog stays. Only an
+       Escape that nothing inside used closes it. See "Escape and the popups
+       inside" in docs/modal.md. */
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      if (openPanels[openPanels.length - 1] !== panelEl) return;
+      event.preventDefault();
+      latest.current.onClose();
+    };
+
     document.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener('keydown', onEscape);
 
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('keydown', onEscape);
       const index = openPanels.indexOf(panelEl);
       if (index !== -1) openPanels.splice(index, 1);
       unlockScroll();
