@@ -11,13 +11,17 @@ const meta = {
       description: {
         component:
           'The buttons under a comment box: the one that sends it and, when there is a way out, ' +
-          '"Cancel". The system’s small `Button` and an outlined `secondary` Cancel, 8 apart — the one arrangement ' +
-          'a new comment, a reply and an edit all need.',
+          '"Cancel". The system’s small `Button` and an outlined `secondary` Cancel, 8 apart. The only choice is the ' +
+          '`variant` — `comment`, `reply` or `save` — which fixes the words and whether there is a Cancel.',
       },
     },
   },
-  args: { submitLabel: 'Add Comment', onSubmit: fn() },
-  argTypes: { onSubmit: { control: false }, onCancel: { control: false } },
+  args: { onSubmit: fn() },
+  argTypes: {
+    variant: { control: 'radio', options: ['comment', 'reply', 'save'] },
+    onSubmit: { control: false },
+    onCancel: { control: false },
+  },
 } satisfies Meta<typeof CommentFormActions>;
 
 export default meta;
@@ -39,7 +43,7 @@ export const InsideAForm: Story = {
           }}
           className="flex flex-col gap-2"
         >
-          <CommentFormActions submitLabel="Reply" onSubmit={() => note('onSubmit')} onCancel={() => note('onCancel')} />
+          <CommentFormActions variant="reply" onSubmit={() => note('onSubmit')} onCancel={() => note('onCancel')} />
         </form>
         <form
           onSubmit={(e) => {
@@ -47,7 +51,7 @@ export const InsideAForm: Story = {
             note('second form submitted');
           }}
         >
-          <CommentFormActions submitLabel="Save" type="submit" />
+          <CommentFormActions variant="save" type="submit" onCancel={() => {}} />
         </form>
         <p role="status" className="m-0 text-body-sm-regular text-text-secondary">
           {log.join(', ')}
@@ -57,7 +61,8 @@ export const InsideAForm: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
+    /* Two forms, so two Cancels: the first form's. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Cancel' })[0]);
     await expect(canvas.getByRole('status')).toHaveTextContent(/^onCancel$/);
     await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
     /* Sends once, through onSubmit, and the form is not also submitted. */
@@ -68,16 +73,16 @@ export const InsideAForm: Story = {
 };
 
 /** A new comment: nothing to cancel, so no Cancel. */
-export const Default: Story = {};
+export const Default: Story = { args: { variant: 'comment' } };
 
 /** The design's states, together: reply, reply while the box is empty, saving an edit, and waiting. */
 export const Variants: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-4">
-      <CommentFormActions submitLabel="Reply" onSubmit={() => {}} onCancel={() => {}} />
-      <CommentFormActions submitLabel="Reply" disabled onSubmit={() => {}} onCancel={() => {}} />
-      <CommentFormActions submitLabel="Save" onSubmit={() => {}} onCancel={() => {}} />
-      <CommentFormActions submitLabel="Add Comment" loading onSubmit={() => {}} />
+      <CommentFormActions variant="reply" onSubmit={() => {}} onCancel={() => {}} />
+      <CommentFormActions variant="reply" disabled onSubmit={() => {}} onCancel={() => {}} />
+      <CommentFormActions variant="save" onSubmit={() => {}} onCancel={() => {}} />
+      <CommentFormActions variant="comment" loading onSubmit={() => {}} />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -100,8 +105,8 @@ export const LightAndDark: Story = {
   render: () => {
     const set = (
       <div className="flex flex-col items-start gap-4 bg-surface-canvas p-8">
-        <CommentFormActions submitLabel="Reply" onSubmit={() => {}} onCancel={() => {}} />
-        <CommentFormActions submitLabel="Reply" disabled onSubmit={() => {}} onCancel={() => {}} />
+        <CommentFormActions variant="reply" onSubmit={() => {}} onCancel={() => {}} />
+        <CommentFormActions variant="reply" disabled onSubmit={() => {}} onCancel={() => {}} />
       </div>
     );
     return (
@@ -113,11 +118,11 @@ export const LightAndDark: Story = {
   },
 };
 
-/** **Flow:** each button fires its own handler, and Cancel is there only when it has one. */
+/** **Flow:** each button fires its own handler. A new comment has no Cancel; a reply or an edit does. */
 export const Flow: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
-  args: { submitLabel: 'Save', onCancel: fn() },
+  args: { variant: 'save', onCancel: fn() },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
