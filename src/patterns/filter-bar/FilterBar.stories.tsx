@@ -117,18 +117,18 @@ export const Default: Story = {
 
     /* Priority: the native select, with an explicit "All priorities". */
     /* Cycle: the row says the code and the dates, the field keeps just the code. */
-    await userEvent.click(canvas.getByRole('button', { name: 'Cycle' }));
+    await userEvent.click(canvas.getByRole('button', { name: /^Cycle/ }));
     await userEvent.click(canvas.getByRole('option', { name: 'C33 (May 25, 2026 - Jun 08, 2026)' }));
-    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('C33');
+    await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('C33');
 
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Priority' }), 'high');
     await expect(canvas.getByRole('combobox', { name: 'Priority' })).toHaveValue('high');
 
     /* Status: a draft until Apply. */
-    await userEvent.click(canvas.getByRole('combobox', { name: 'Status' }));
+    await userEvent.click(canvas.getByRole('combobox', { name: /^Status/ }));
     await userEvent.click(canvas.getByRole('option', { name: 'In progress' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
-    await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('In progress');
+    await expect(canvas.getByRole('combobox', { name: /^Status/ })).toHaveTextContent('In progress');
 
     /* Tags: removable tags in the field. */
     /* Tags has a search box, so its trigger is a button; status has none, so its trigger is the combobox. */
@@ -149,8 +149,8 @@ export const Default: Story = {
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();
-    await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('Select status');
-    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Select cycle');
+    await expect(canvas.getByRole('combobox', { name: /^Status/ })).toHaveTextContent('Select status');
+    await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Select cycle');
   },
 };
 
@@ -161,19 +161,19 @@ export const FiltersHidden: Story = {
     const canvas = within(canvasElement);
     const toggle = canvas.getByRole('button', { name: 'Filters' });
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    await expect(canvas.getByRole('combobox', { name: 'Status' })).toBeVisible();
+    await expect(canvas.getByRole('combobox', { name: /^Status/ })).toBeVisible();
 
     const searchWidth = () => canvas.getByRole('searchbox').parentElement!.getBoundingClientRect().width;
     const withFilters = searchWidth();
 
     await userEvent.click(toggle);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    await expect(canvas.getByRole('combobox', { name: 'Status', hidden: true })).not.toBeVisible();
+    await expect(canvas.getByRole('combobox', { name: /^Status/, hidden: true })).not.toBeVisible();
     /* The search takes the room the fields leave. */
     await expect(searchWidth()).toBeGreaterThan(withFilters);
 
     await userEvent.click(toggle);
-    await expect(canvas.getByRole('combobox', { name: 'Status' })).toHaveTextContent('Pending');
+    await expect(canvas.getByRole('combobox', { name: /^Status/ })).toHaveTextContent('Pending');
   },
 };
 
@@ -202,7 +202,7 @@ export const WithoutStatus: Story = {
   render: (args) => <Page {...args} without={['status']} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.queryByRole('combobox', { name: 'Status' })).toBeNull();
+    await expect(canvas.queryByRole('combobox', { name: /^Status/ })).toBeNull();
     await expect(canvas.getByRole('combobox', { name: 'Priority' })).toBeVisible();
     await expect(canvas.getByRole('button', { name: 'Tags' })).toBeVisible();
   },
