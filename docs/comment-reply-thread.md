@@ -66,8 +66,9 @@ Nothing of its own: `CommentReply`'s, plus the line (`bg-stroke-default`) and th
 
 ## Accessibility
 
-- The replies are a `list` of `listitem`s, controlled by the toggle (`aria-expanded`,
-  `aria-controls`), which `CommentActions` provides.
+- The replies are a `list` of `listitem`s, controlled by the toggle, which
+  `CommentActions` provides: its words change ("Show", "Hide"), so it does not also carry
+  `aria-expanded`, and it has `aria-controls` while the list is there.
 - The thread line is decoration, and a nested sub-thread is the same arrangement one level in.
 
 ## Don't

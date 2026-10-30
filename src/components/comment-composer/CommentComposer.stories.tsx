@@ -42,14 +42,14 @@ export const Default: Story = { args: { user: { name: 'Jane Doe' } } };
 
 /** A reply box: no avatar, Reply and Cancel. The send button is dim until there is something to send. */
 export const ReplyBox: Story = {
-  args: { inputLabel: 'Reply to John Smith', submitLabel: 'Reply', onCancel: () => {} },
+  args: { inputLabel: 'Reply to John Smith', variant: 'reply', onCancel: () => {} },
 };
 
 /** An edit box: it starts with the comment, and Save sends the change. */
 export const EditBox: Story = {
   args: {
     inputLabel: 'Edit comment',
-    submitLabel: 'Save',
+    variant: 'save',
     onCancel: () => {},
     defaultValue: [
       { type: 'mention', id: '204', label: 'Jane Doe' },

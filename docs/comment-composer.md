@@ -23,7 +23,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `CommentComposer` | A new comment (`user` given), a reply (`submitLabel="Reply"`, `onCancel`), an edit (`defaultValue`, `submitLabel="Save"`, `onCancel`) |
+| `CommentComposer` | A new comment (`user` given), a reply (`variant="reply"`, `onCancel`), an edit (`defaultValue`, `variant="save"`, `onCancel`) |
 | [`CommentSection`](comment-section.md) | A whole comment list |
 | `MentionInput` | Just the field, with no send button |
 | `Textarea` | Multi-line text with no mentions |
@@ -37,11 +37,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `value` / `onChange` | `MentionSegment[]` | — | Controlled content |
 | `defaultValue` | `MentionSegment[]` | `[]` | Starting content when uncontrolled: an edit box starts with the comment |
 | `onSubmit` | `(value) => void \| Promise<void>` | — | The button, or Ctrl or Cmd + Enter. May return a promise |
-| `onCancel` | `() => void` | — | Draws Cancel. Leave it off for a new comment |
+| `onCancel` | `() => void` | — | Fires when Cancel is clicked. Give it for `reply` and `save`, which draw a Cancel; a new comment has none |
 | `loading` | `boolean` | `false` | A send you are tracking yourself. A promise from `onSubmit` is tracked for you |
 | `placeholder` | `string` | `Type @ to mention and notify a member` | |
 | `inputLabel` | `string` | `Add a comment` | The box's accessible name. Say what it is for: "Reply to John Smith" |
-| `submitLabel` | `string` | `Add Comment` | "Reply" or "Save" |
+| `variant` | `'comment' \| 'reply' \| 'save'` | `comment` | Which box it is. It fixes the send button's words ("Add Comment", "Reply", "Save") and whether there is a Cancel. The words are not props |
 | `autoFocus` | `boolean` | `false` | A reply or edit box wants it |
 | `className`, `ref`, rest | | | On the root |
 

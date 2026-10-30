@@ -48,18 +48,18 @@ export interface CommentComposerProps
   onChange?: (value: MentionSegment[]) => void;
   /** Sends it: the button, or Ctrl or Cmd + Enter. Gets the segments. May return a promise. */
   onSubmit?: (value: MentionSegment[]) => void | Promise<void>;
-  /** Draws Cancel and fires when it is clicked. Leave it off for a new comment. */
-  onCancel?: () => void;
   /** A send is in flight that you are tracking yourself. (A promise from `onSubmit` is tracked for you.) */
   loading?: boolean;
   /** The box's placeholder. Default "Type @ to mention and notify a member". */
   placeholder?: string;
   /** The box's accessible name. Default "Add a comment". */
   inputLabel?: string;
-  /** The send button's words: "Add Comment" (default), "Reply" or "Save". */
-  submitLabel?: string;
   /** Focus the box when it appears — what a reply or edit box wants. */
   autoFocus?: boolean;
+  /** Which comment box it is: `comment` (default, "Add Comment", no Cancel), `reply` or `save` (each with a Cancel). The words are fixed. */
+  variant?: 'comment' | 'reply' | 'save';
+  /** Fires when Cancel is clicked. Give it for `reply` and `save`, which draw a Cancel. */
+  onCancel?: () => void;
 }
 
 export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerProps>(
@@ -72,11 +72,11 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
       defaultValue,
       onChange,
       onSubmit,
+      variant = 'comment',
       onCancel,
       loading,
       placeholder,
       inputLabel = 'Add a comment',
-      submitLabel = 'Add Comment',
       autoFocus,
       ...props
     },
@@ -140,13 +140,17 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
             placeholder={placeholder}
             autoFocus={autoFocus}
           />
-          <CommentFormActions
-            submitLabel={submitLabel}
-            onSubmit={submit}
-            disabled={empty}
-            loading={loading || busy}
-            onCancel={onCancel}
-          />
+          {variant === 'comment' ? (
+            <CommentFormActions variant="comment" onSubmit={submit} disabled={empty} loading={loading || busy} />
+          ) : (
+            <CommentFormActions
+              variant={variant}
+              onSubmit={submit}
+              disabled={empty}
+              loading={loading || busy}
+              onCancel={onCancel ?? (() => {})}
+            />
+          )}
         </div>
       </div>
     );

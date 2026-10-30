@@ -149,11 +149,11 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
               <CommentComposer
                 members={members}
                 inputLabel="Edit comment"
-                submitLabel="Save"
+                variant="save"
                 defaultValue={body}
                 loading={editLoading}
                 onSubmit={onSubmitEdit}
-                onCancel={onCancelEdit}
+                onCancel={onCancelEdit ?? (() => {})}
                 autoFocus
               />
             ) : (
@@ -188,10 +188,10 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
             <CommentComposer
               members={members}
               inputLabel={`Reply to ${author.name}`}
-              submitLabel="Reply"
+              variant="reply"
               loading={replyLoading}
               onSubmit={onSubmitReply}
-              onCancel={onCancelReply}
+              onCancel={onCancelReply ?? (() => {})}
               autoFocus
             />
           )}

@@ -166,13 +166,14 @@ export const ShowsAndHidesReplies: Story = {
     await expect(canvas.queryByRole('list')).not.toBeInTheDocument();
 
     const show = canvas.getByRole('button', { name: 'Show 2 Replies' });
-    await expect(show).toHaveAttribute('aria-expanded', 'false');
+    /* The words change (Show, Hide), so the toggle carries no `aria-expanded` as well; it points at the list only while it is there. */
+    await expect(show).not.toHaveAttribute('aria-expanded');
+    await expect(show).not.toHaveAttribute('aria-controls');
     await userEvent.click(show);
 
     const list = canvas.getByRole('list');
     await expect(within(list).getAllByRole('listitem')).toHaveLength(2);
     const hide = canvas.getByRole('button', { name: 'Hide 2 Replies' });
-    await expect(hide).toHaveAttribute('aria-expanded', 'true');
     await expect(hide).toHaveAttribute('aria-controls', list.id);
 
     await userEvent.click(hide);

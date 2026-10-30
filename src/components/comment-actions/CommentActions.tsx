@@ -23,10 +23,19 @@ import { Icon, type IconName } from '../../atoms/icon';
  * and counts, which are `EmojiReactionPicker`. Pass it as `reactions` — this
  * piece does not know what a reaction is, so the picker keeps its own state.
  *
- * **Copy Link copies, then says so.** With a `link`, a click writes it to the
- * clipboard and the glyph becomes the green check the design draws, for
- * `copiedDuration`; "Link copied" goes to a polite live region for everyone
- * who cannot see the glyph. The label stays "Copy Link", as drawn.
+ * **Copy Link copies, then says so, and never says so falsely.** With a `link`, a click
+ * writes it to the clipboard and, only once that has worked, the glyph becomes the green
+ * check the design draws, for `copiedDuration`; "Link copied" goes to a polite live region
+ * for everyone who cannot see the glyph. If the clipboard refuses (an insecure page, or
+ * permission denied) the glyph becomes a warning and the live region says "Couldn't copy
+ * the link". With no `link` there is nothing to copy: the click only fires `onCopyLink` and
+ * no success is claimed. The label stays "Copy Link", as drawn.
+ *
+ * **Names with context.** In a long thread every button would otherwise be named "Edit",
+ * "Delete" or "Reply". Give `subject` ("Amy Lee's comment") and each reads "Edit Amy Lee's
+ * comment", "Reply to Amy Lee's comment" and so on; the visible word still leads the name.
+ * The replies toggle changes its words ("Show 3 Replies" to "Hide 3 Replies") and so does
+ * not also carry `aria-expanded`, which would announce the state twice.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -53,8 +62,10 @@ export interface CommentActionsProps extends Omit<React.HTMLAttributes<HTMLDivEl
   onCancelReply?: () => void;
   /** What Copy Link puts on the clipboard. Giving it (or `onCopyLink`) draws the button. */
   link?: string;
-  /** Fires after the copy, with the link. */
+  /** Fires after a successful copy, with the link. With no `link` it fires on click with `''`. */
   onCopyLink?: (link: string) => void;
+  /** What the actions are about, for their accessible names: "Amy Lee's comment". Optional. */
+  subject?: string;
   /** How long the green check stays after a copy, in ms. Default 2000. */
   copiedDuration?: number;
   /** The reaction buttons and counts — an `EmojiReactionPicker`. */
@@ -100,29 +111,40 @@ export const CommentActions = React.forwardRef<HTMLDivElement, CommentActionsPro
       link,
       onCopyLink,
       copiedDuration = 2000,
+      subject,
       reactions,
       ...props
     },
     ref,
   ) => {
-    const [copied, setCopied] = React.useState(false);
+    const [copy, setCopy] = React.useState<'idle' | 'copied' | 'failed'>('idle');
     const timer = React.useRef<ReturnType<typeof setTimeout>>(undefined);
     React.useEffect(() => () => clearTimeout(timer.current), []);
 
-    const copy = async () => {
-      if (link !== undefined) {
-        try {
-          await navigator.clipboard.writeText(link);
-        } catch {
-          /* No clipboard (an insecure page, or permission refused): do not claim success. */
-          return;
-        }
-      }
-      setCopied(true);
+    const flash = (next: 'copied' | 'failed') => {
+      setCopy(next);
       clearTimeout(timer.current);
-      timer.current = setTimeout(() => setCopied(false), copiedDuration);
-      onCopyLink?.(link ?? '');
+      timer.current = setTimeout(() => setCopy('idle'), copiedDuration);
     };
+
+    const copyLink = async () => {
+      /* Nothing to copy: hand the click to the caller and claim nothing. */
+      if (link === undefined) {
+        onCopyLink?.('');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(link);
+      } catch {
+        flash('failed');
+        return;
+      }
+      flash('copied');
+      onCopyLink?.(link);
+    };
+
+    /* With a subject, a name that says what the action is about; the visible word still leads. */
+    const named = (name: string) => (subject ? name.replace('{}', subject) : undefined);
 
     const showReplies = replyCount > 0 && onToggleReplies;
     const showReply = replying ? onCancelReply : onReply;
@@ -133,42 +155,55 @@ export const CommentActions = React.forwardRef<HTMLDivElement, CommentActionsPro
         {showReplies && (
           <Action
             icon={repliesOpen ? 'caret-up' : 'caret-down'}
-            aria-expanded={repliesOpen}
-            aria-controls={repliesId}
+            /* Only while the list is there: a button with no `aria-expanded` may not point at nothing. */
+            aria-controls={repliesOpen ? repliesId : undefined}
+            aria-label={named(`${repliesOpen ? 'Hide' : 'Show'} ${replyCount} ${replyCount === 1 ? 'Reply' : 'Replies'} to {}`)}
             onClick={onToggleReplies}
           >
             {`${repliesOpen ? 'Hide' : 'Show'} ${replyCount} ${replyCount === 1 ? 'Reply' : 'Replies'}`}
           </Action>
         )}
         {onEdit && (
-          <Action icon="pencil-simple" onClick={onEdit}>
+          <Action icon="pencil-simple" aria-label={named('Edit {}')} onClick={onEdit}>
             Edit
           </Action>
         )}
         {onDelete && (
-          <Action icon="trash" onClick={onDelete}>
+          <Action icon="trash" aria-label={named('Delete {}')} onClick={onDelete}>
             Delete
           </Action>
         )}
         {showReply && (
-          <Action icon="arrow-u-up-left" onClick={replying ? onCancelReply : onReply}>
+          <Action
+            icon="arrow-u-up-left"
+            aria-label={named(replying ? 'Cancel Reply to {}' : 'Reply to {}')}
+            onClick={replying ? onCancelReply : onReply}
+          >
             {replying ? 'Cancel Reply' : 'Reply'}
           </Action>
         )}
         {showCopy && (
           <Action
-            icon={copied ? 'check-circle-fill' : 'link'}
+            icon={copy === 'copied' ? 'check-circle-fill' : copy === 'failed' ? 'warning-circle' : 'link'}
             /* The design's green check: the success colour used as a foreground, so
-               the content token of the same value, not the filled surface. */
-            iconClassName={copied ? 'text-accent-success-outline-content-default' : undefined}
-            onClick={copy}
+               the content token of the same value, not the filled surface. A refusal
+               is the critical one. */
+            iconClassName={
+              copy === 'copied'
+                ? 'text-accent-success-outline-content-default'
+                : copy === 'failed'
+                  ? 'text-accent-critical-outline-content-default'
+                  : undefined
+            }
+            aria-label={named('Copy link to {}')}
+            onClick={copyLink}
           >
             Copy Link
           </Action>
         )}
         {reactions}
         <span role="status" className="sr-only">
-          {copied ? 'Link copied' : ''}
+          {copy === 'copied' ? 'Link copied' : copy === 'failed' ? 'Couldn’t copy the link' : ''}
         </span>
       </div>
     );
