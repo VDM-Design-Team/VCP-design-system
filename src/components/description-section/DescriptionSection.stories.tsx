@@ -4,6 +4,7 @@ import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DescriptionSection } from './DescriptionSection';
 import { DescriptionCard } from '../description-card';
 import { FileAttachment } from '../file-attachment';
+import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Components/Forms/DescriptionSection',
@@ -20,7 +21,7 @@ const meta = {
       },
     },
   },
-  args: { title: 'Problems' },
+  args: { type: 'problem' },
   decorators: [
     (Story) => (
       <div className="w-176 max-w-full bg-surface-canvas p-4">
@@ -44,34 +45,64 @@ const files = (
   </>
 );
 
-/** Editing: the add button, the cards as text fields, two attached files and the paperclip. */
+/** Editing: the add button, the cards as text fields, two attached files and the paperclip. The cards need no type or number. */
 export const Editing: Story = {
-  args: { onAdd: fn(), onAttach: fn(), attachments: files },
+  args: { type: 'problem', onAdd: fn(), onAttach: fn(), attachments: files },
   render: (args) => (
     <DescriptionSection {...args}>
-      <DescriptionCard editing position={1} defaultValue="Some paragraph here" onRemove={fn()} removeLabel="Remove problem 1" />
-      <DescriptionCard editing position={2} defaultValue="Some paragraph here" onRemove={fn()} removeLabel="Remove problem 2" />
+      <DescriptionCard editing defaultValue="Some paragraph here" onRemove={fn()} />
+      <DescriptionCard editing defaultValue="Some paragraph here" onRemove={fn()} />
     </DescriptionSection>
   ),
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('region', { name: 'Problems' })).toBeVisible();
     await expect(canvas.getAllByRole('listitem')).toHaveLength(2);
-    await userEvent.click(canvas.getByRole('button', { name: 'Add Problems' }));
+    /* Each card was given its number and a name for its remove button. */
+    await expect(canvas.getByRole('textbox', { name: 'Problem 2' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Remove problem 2' })).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Add problem' }));
     await expect(args.onAdd).toHaveBeenCalledTimes(1);
     await userEvent.click(canvas.getByRole('button', { name: 'Attach files' }));
     await expect(args.onAttach).toHaveBeenCalledTimes(1);
   },
 };
 
-/** Viewing: no controls, the cards in their reading look. Deliverables are teal. */
+/** The four sections, each with its fixed title and its cards in its own colour. */
+export const Types: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <DescriptionSection type="problem" onAdd={fn()} onAttach={fn()}>
+        <DescriptionCard>Some paragraph here</DescriptionCard>
+      </DescriptionSection>
+      <DescriptionSection type="solution" onAdd={fn()} onAttach={fn()}>
+        <DescriptionCard>Some paragraph here</DescriptionCard>
+      </DescriptionSection>
+      <DescriptionSection type="deliverable" onAdd={fn()}>
+        <DescriptionCard>Some paragraph here</DescriptionCard>
+      </DescriptionSection>
+      <DescriptionSection type="desired-outcome">
+        <DescriptionCard>Some paragraph here</DescriptionCard>
+      </DescriptionSection>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    for (const name of ['Problems', 'Solutions', 'Acceptance Criteria / Deliverables', 'Desired outcome']) {
+      await expect(canvas.getByRole('region', { name })).toBeVisible();
+    }
+  },
+};
+
+/** Viewing: no add and no paperclip, the cards in their reading look. */
 export const Viewing: Story = {
-  args: { title: 'Acceptance Criteria / Deliverables' },
+  args: { type: 'deliverable' },
   render: (args) => (
     <DescriptionSection {...args}>
-      <DescriptionCard type="deliverable" position={1}>Some paragraph here</DescriptionCard>
-      <DescriptionCard type="deliverable" position={2}>Some paragraph here</DescriptionCard>
-      <DescriptionCard type="deliverable" position={3}>Some paragraph here</DescriptionCard>
+      <DescriptionCard>Some paragraph here</DescriptionCard>
+      <DescriptionCard>Some paragraph here</DescriptionCard>
+      <DescriptionCard>Some paragraph here</DescriptionCard>
     </DescriptionSection>
   ),
   play: async ({ canvasElement }) => {
@@ -86,17 +117,11 @@ export const Viewing: Story = {
 export const WithAnError: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { title: 'Solution', onAdd: fn(), onAttach: fn() },
+  args: { type: 'solution', onAdd: fn(), onAttach: fn() },
   render: (args) => (
     <DescriptionSection {...args}>
-      <DescriptionCard type="solution" editing position={1} defaultValue="Some paragraph here" />
-      <DescriptionCard
-        type="solution"
-        editing
-        position={2}
-        placeholder="Describe the solution"
-        error="You need to fill in this field before submitting the Added Value"
-      />
+      <DescriptionCard editing defaultValue="Some paragraph here" />
+      <DescriptionCard editing error="You need to fill in this field before submitting the Added Value" />
     </DescriptionSection>
   ),
   play: async ({ canvasElement }) => {
@@ -106,34 +131,38 @@ export const WithAnError: Story = {
   },
 };
 
-/** A single card, with no add button: "Desired Outcome". */
-export const SingleCard: Story = {
+/** Desired outcome is one card: even if asked, it has no add button and no attachments. */
+export const DesiredOutcome: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { title: 'Desired Outcome' },
+  args: { type: 'desired-outcome', onAdd: fn(), onAttach: fn(), attachments: files },
   render: (args) => (
     <DescriptionSection {...args}>
-      <DescriptionCard type="desired-outcome" editing position={1} defaultValue="Some paragraph here" />
+      <DescriptionCard editing />
     </DescriptionSection>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).queryByRole('button', { name: /^Add/ })).toBeNull();
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: /^Add/ })).toBeNull();
+    await expect(canvas.queryByRole('button', { name: 'Attach files' })).toBeNull();
+    await expect(canvas.queryByText('image.png')).toBeNull();
+    await expect(canvas.getByRole('textbox', { name: 'Desired outcome 1' })).toBeVisible();
   },
 };
 
 /**
- * Every section folds: the caret button at the right of the header is the toggle (the title is not). Folded, only the header
- * shows; the body is hidden, not unmounted, so what was typed is there when it opens again.
+ * Every section folds: the caret button at the right of the header is the toggle (the title is not). Folded,
+ * only the header shows; the body is hidden, not unmounted, so what was typed is there when it opens again.
  */
 export const Collapsible: Story = {
-  args: { title: 'Acceptance Criteria / Deliverables', defaultOpen: false },
+  args: { type: 'deliverable', defaultOpen: false },
   render: (args) => (
     <div className="flex flex-col gap-4">
       <DescriptionSection {...args}>
-        <DescriptionCard type="deliverable" position={1}>Some paragraph here</DescriptionCard>
+        <DescriptionCard>Some paragraph here</DescriptionCard>
       </DescriptionSection>
-      <DescriptionSection title="Desired outcome" defaultOpen>
-        <DescriptionCard type="desired-outcome" editing position={1} />
+      <DescriptionSection type="desired-outcome" defaultOpen>
+        <DescriptionCard editing />
       </DescriptionSection>
     </div>
   ),
@@ -150,18 +179,18 @@ export const Collapsible: Story = {
 };
 
 /** The add button and the fold button are separate controls: pressing add does not fold the section. */
-export const AddInACollapsibleHeader: Story = {
+export const AddInTheHeader: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { title: 'Problems', onAdd: fn() },
+  args: { type: 'problem', onAdd: fn() },
   render: (args) => (
     <DescriptionSection {...args}>
-      <DescriptionCard editing position={1} />
+      <DescriptionCard editing />
     </DescriptionSection>
   ),
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Add Problems' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Add problem' }));
     await expect(args.onAdd).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('button', { name: 'Collapse Problems' })).toBeVisible();
   },
@@ -169,16 +198,17 @@ export const AddInACollapsibleHeader: Story = {
 
 /** Both themes. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  /* Two identical sections side by side, one per theme: the landmark-uniqueness rules stand down. */
+  parameters: { layout: 'fullscreen', controls: { disable: true }, ...SIDE_BY_SIDE },
   decorators: [],
   render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="bg-surface-canvas p-6">
-            <DescriptionSection title={isDark ? 'Problems (dark)' : 'Problems'} onAdd={fn()} onAttach={fn()} attachments={files}>
-              <DescriptionCard editing position={1} defaultValue="Some paragraph here" onRemove={fn()} />
-              <DescriptionCard editing position={2} defaultValue="" placeholder="Required" error="You need to fill in this field" />
+            <DescriptionSection type="problem" onAdd={fn()} onAttach={fn()} attachments={files}>
+              <DescriptionCard editing defaultValue="Some paragraph here" onRemove={fn()} />
+              <DescriptionCard editing placeholder="Required" error="You need to fill in this field" />
             </DescriptionSection>
           </div>
         </div>

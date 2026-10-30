@@ -1,12 +1,21 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { IconButton } from '../../atoms/icon-button';
+import type { DescriptionCardProps, DescriptionCardType } from '../description-card';
 
 /**
- * DescriptionSection — one block of an Added Value's description: a title ("Problems",
- * "Solutions", "Desired Outcome") with an optional round add button after it, the numbered
- * `DescriptionCard`s under it, and the files attached to it with a paperclip to attach more.
- * Read off the Figma `Description_Card_Content`, in its edit and view variants.
+ * DescriptionSection — one block of an Added Value's description: a title with an optional
+ * round add button after it, the numbered `DescriptionCard`s under it, and the files attached to
+ * it with a paperclip to attach more. Read off the Figma `Description_Card_Content`, in its edit
+ * and view variants.
+ *
+ * **There are four sections, and `type` picks one.** `problem`, `solution`, `deliverable`,
+ * `desired-outcome`: the type fixes the title ("Problems", "Solutions", "Acceptance Criteria /
+ * Deliverables", "Desired outcome"), the colour of the cards inside it, and which controls it can
+ * have. A section is not a free-form container, so the title is not a prop. The cards need no
+ * `type` or `position` of their own: the section gives each its type and its number, and a
+ * default "Remove problem 2" name, unless the card sets its own. Desired outcome is one card with
+ * no add button and no attachments.
  *
  * **It always folds.** A caret button at the right of the header (down when folded, up when
  * open) hides the cards and the files, which are hidden, not unmounted, so what was typed is
@@ -23,9 +32,26 @@ import { IconButton } from '../../atoms/icon-button';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export interface DescriptionSectionProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
-  /** The section's name: "Problems", "Solutions". */
-  title: string;
+/* THE mapping — section type → title, the noun in the controls' names, and which controls exist.
+   Desired outcome is one card: nothing to add, and no files. */
+const SECTION: Record<
+  DescriptionCardType,
+  { title: string; noun: string; addable: boolean; attachable: boolean }
+> = {
+  problem: { title: 'Problems', noun: 'problem', addable: true, attachable: true },
+  solution: { title: 'Solutions', noun: 'solution', addable: true, attachable: true },
+  deliverable: {
+    title: 'Acceptance Criteria / Deliverables',
+    noun: 'deliverable',
+    addable: true,
+    attachable: true,
+  },
+  'desired-outcome': { title: 'Desired outcome', noun: 'desired outcome', addable: false, attachable: false },
+};
+
+export interface DescriptionSectionProps extends React.HTMLAttributes<HTMLElement> {
+  /** Which section this is. Fixes the title, the cards' colour and which controls it can have. */
+  type: DescriptionCardType;
   /** The heading level to draw the title as. Default `h2`: a section sits directly under the page's own `h1`. */
   headingLevel?: 'h2' | 'h3' | 'h4';
   /** Controlled: whether the cards and files are showing. */
@@ -34,17 +60,17 @@ export interface DescriptionSectionProps extends Omit<React.HTMLAttributes<HTMLE
   defaultOpen?: boolean;
   /** Fires with the next state when the header is pressed. */
   onOpenChange?: (open: boolean) => void;
-  /** Renders the round add button after the title, and fires when it is pressed. */
+  /** Renders the round add button after the title, and fires when it is pressed. Not on desired outcome. */
   onAdd?: () => void;
-  /** The add button's accessible name. Default "Add" plus the title: "Add Problems". */
+  /** The add button's accessible name. Default "Add problem", "Add solution". */
   addLabel?: string;
-  /** Renders the paperclip under the cards, and fires when it is pressed. */
+  /** Renders the paperclip under the cards, and fires when it is pressed. Not on desired outcome. */
   onAttach?: () => void;
   /** The paperclip's accessible name. Default "Attach files". */
   attachLabel?: string;
   /** The files attached, as `FileAttachment`s. They sit to the left of the paperclip. */
   attachments?: React.ReactNode;
-  /** The cards: `DescriptionCard`s, in order. Each is drawn as a list item. */
+  /** The cards: `DescriptionCard`s, in order, with no `type` or `position`. Each is drawn as a list item. */
   children?: React.ReactNode;
 }
 
@@ -52,7 +78,7 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
   (
     {
       className,
-      title,
+      type,
       headingLevel: Heading = 'h2',
       open: openProp,
       defaultOpen = true,
@@ -88,8 +114,21 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
       if (openProp === undefined) setInnerOpen(!open);
       onOpenChange?.(!open);
     };
-    const cards = React.Children.toArray(children);
-    const hasAttachRow = Boolean(onAttach) || React.Children.count(attachments) > 0;
+    const { title, noun, addable, attachable } = SECTION[type];
+    const canAdd = addable && Boolean(onAdd);
+    const canAttach = attachable && Boolean(onAttach);
+    /* Each card gets the section's type and its place in the list, and a name for its remove
+       button, unless it says otherwise. */
+    const cards = React.Children.toArray(children).map((card, i) =>
+      React.isValidElement<DescriptionCardProps>(card)
+        ? React.cloneElement(card, {
+            type: card.props.type ?? type,
+            position: card.props.position ?? i + 1,
+            removeLabel: card.props.removeLabel ?? `Remove ${noun} ${card.props.position ?? i + 1}`,
+          })
+        : card,
+    );
+    const hasAttachRow = canAttach || (attachable && React.Children.count(attachments) > 0);
 
     return (
       <section
@@ -102,12 +141,12 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
           <Heading id={headingId} className="text-title-sm-bold text-text-primary">
             {title}
           </Heading>
-          {onAdd && (
+          {canAdd && (
             <IconButton
               icon="plus"
               variant="primary"
               size="xs"
-              label={addLabel ?? `Add ${title}`}
+              label={addLabel ?? `Add ${noun}`}
               onClick={onAdd}
               /* 24 to look at, 40 to press: the target reaches 8 past the circle on every side. */
               className="relative before:absolute before:-inset-2"
@@ -156,8 +195,8 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
 
               {hasAttachRow && (
                 <div className="flex items-center justify-end gap-2">
-                  {attachments && <div className="flex min-w-0 flex-wrap justify-end gap-2.5">{attachments}</div>}
-                  {onAttach && (
+                  {attachable && attachments && <div className="flex min-w-0 flex-wrap justify-end gap-2.5">{attachments}</div>}
+                  {canAttach && (
                     <IconButton
                       icon="paperclip"
                       variant="tertiary"
