@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
-import { IconButton } from '../../atoms/icon-button';
+import { Icon } from '../../atoms/icon';
 import { Textarea } from '../../atoms/textarea';
 
 /**
@@ -13,8 +13,10 @@ import { Textarea } from '../../atoms/textarea';
  *
  * It has two modes. **Reading** shows the paragraph in a quiet panel. **Editing**
  * (`editing`) turns the panel into a text field that grows with what is typed,
- * can say it is invalid (the critical border), and can offer a remove button
- * beside the row (`onRemove`). The number block and its colour are the same in both.
+ * can say it is invalid (the critical border) with a message under it (`error`), and
+ * can offer a remove button inside the card's right edge (`onRemove`), which appears when
+ * the card is hovered or has focus in it, and stays while you are typing. The number block
+ * and its colour are the same in both.
  *
  * The colour is the type's, and the type is the whole of what it says: the number
  * block is a label, not a status. A card is one row; the list is the caller's (an
@@ -79,7 +81,16 @@ export interface DescriptionCardProps
   invalid?: boolean;
   /** Editing: the field's accessible name. Defaults to "Problem 1", "Solution 2" and so on. */
   label?: string;
-  /** Editing: shows a remove button beside the row. It only reports; the list is yours. */
+  /**
+   * Editing: a message under the card, in the critical colour. Implies `invalid`, and the
+   * field is described by it.
+   */
+  error?: React.ReactNode;
+  /**
+   * Editing: shows a remove button inside the card's right edge. It appears on hover and
+   * while the card has focus (so while typing), and always on a touch screen, which has no
+   * hover. It only reports; the list is yours.
+   */
   onRemove?: () => void;
   /** The remove button's accessible name. Default "Remove". Say which: "Remove problem 2". */
   removeLabel?: string;
@@ -98,6 +109,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
       onChange,
       placeholder,
       invalid,
+      error,
       label,
       onRemove,
       removeLabel = 'Remove',
@@ -108,6 +120,8 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
     const [inner, setInner] = React.useState(defaultValue);
     const text = value ?? inner;
     const field = React.useRef<HTMLTextAreaElement | null>(null);
+    const errorId = React.useId();
+    const isInvalid = !!invalid || !!error;
 
     /* One row to begin with, growing to fit what is typed. */
     React.useLayoutEffect(() => {
@@ -118,8 +132,8 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
     }, [editing, text]);
 
     return (
-      <div ref={ref} className={cn('flex items-stretch gap-2 font-sans', className)} {...props}>
-        <div className="flex min-w-0 flex-1 items-stretch">
+      <div ref={ref} className={cn('font-sans', className)} {...props}>
+        <div className="group/card relative flex min-w-0 items-stretch">
           {/* The number is a visual marker; a list of these is numbered by its own `ol` when it matters. */}
           <span aria-hidden="true" className={number({ type })}>
             {position}
@@ -130,30 +144,50 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               rows={1}
               value={text}
               placeholder={placeholder}
-              invalid={invalid}
+              invalid={isInvalid}
               aria-label={label ?? `${TYPE_NAME[type]} ${position}`}
+              aria-describedby={error ? errorId : undefined}
               onChange={(e) => {
                 if (value === undefined) setInner(e.target.value);
                 onChange?.(e.target.value);
               }}
-              className="min-h-12 min-w-0 flex-1 resize-none overflow-hidden rounded-l-none rounded-r-sm border-l-0 p-3"
+              className={cn(
+                'min-h-12 min-w-0 flex-1 resize-none overflow-hidden rounded-l-none rounded-r-sm border-l-0 p-3',
+                /* Room for the remove button, so the text never runs under it. */
+                onRemove && 'pr-12',
+              )}
             />
           ) : (
             <div className="flex min-h-12 min-w-0 flex-1 flex-col justify-center rounded-r-sm border border-stroke-subtle bg-surface-neutral-subtle p-3 text-body-sm-regular text-text-primary">
               {children}
             </div>
           )}
+          {editing && onRemove && (
+            /* Always in the page and the tab order, only unseen: hover and focus in the card
+               reveal it, so a keyboard can reach it and typing keeps it on screen. A touch
+               screen has no hover, so there it is always shown. The `before` is the 40 target. */
+            <button
+              type="button"
+              aria-label={removeLabel}
+              onClick={onRemove}
+              className={cn(
+                'absolute top-3 right-3 grid size-6 place-items-center rounded-full',
+                'text-accent-critical-outline-content-default outline-none',
+                'hover:bg-accent-critical-tonal-surface-default',
+                'before:absolute before:-inset-2',
+                'opacity-0 transition-opacity duration-150 motion-reduce:transition-none',
+                'group-hover/card:opacity-100 group-focus-within/card:opacity-100 pointer-coarse:opacity-100',
+                'focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+              )}
+            >
+              <Icon name="x-circle" size="md" aria-hidden="true" />
+            </button>
+          )}
         </div>
-        {editing && onRemove && (
-          <IconButton
-            icon="x-circle"
-            variant="danger"
-            size="sm"
-            shape="round"
-            label={removeLabel}
-            onClick={onRemove}
-            className="self-center"
-          />
+        {editing && error && (
+          <p id={errorId} role="alert" className="mt-1.5 text-caption-md-medium text-accent-critical-outline-content-default">
+            {error}
+          </p>
         )}
       </div>
     );

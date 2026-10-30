@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import * as React from 'react';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DescriptionCard } from './DescriptionCard';
 
 const meta = {
@@ -70,17 +70,46 @@ export const Editing: Story = {
   },
 };
 
-/** Empty with a placeholder, and the invalid state (the critical border). */
+/**
+ * The remove button is in the page but unseen until the card is hovered or has focus in it: the
+ * keyboard can reach it, and typing keeps it on screen. (A touch screen shows it always.)
+ */
+export const RemoveAppearsWithFocus: Story = {
+  args: { editing: true, defaultValue: 'Some paragraph here', onRemove: fn(), removeLabel: 'Remove problem 1' },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const remove = canvas.getByRole('button', { name: 'Remove problem 1' });
+    await expect(getComputedStyle(remove).opacity).toBe('0');
+    /* Typing in the field: focus is in the card, so it shows and stays. */
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Problem 1' }));
+    await waitFor(() => expect(getComputedStyle(remove).opacity).toBe('1'));
+    /* Tabbing on to the button keeps it shown. */
+    await userEvent.tab();
+    await expect(remove).toHaveFocus();
+    await expect(getComputedStyle(remove).opacity).toBe('1');
+  },
+};
+
+/** Empty with a placeholder, and the error state: the critical border and the message under the card. */
 export const EditingEmptyAndInvalid: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
       <DescriptionCard type="solution" position={1} editing placeholder="Describe the solution" />
-      <DescriptionCard type="solution" position={2} editing invalid defaultValue="" placeholder="Required" />
+      <DescriptionCard
+        type="solution"
+        position={2}
+        editing
+        defaultValue=""
+        placeholder="Required"
+        error="You need to fill in this field before submitting the Added Value"
+      />
     </div>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('textbox', { name: 'Solution 2' })).toHaveAttribute('aria-invalid', 'true');
+    const field = canvas.getByRole('textbox', { name: 'Solution 2' });
+    await expect(field).toHaveAttribute('aria-invalid', 'true');
+    await expect(field).toHaveAccessibleDescription('You need to fill in this field before submitting the Added Value');
   },
 };
 

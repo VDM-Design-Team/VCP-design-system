@@ -12,7 +12,7 @@ Read off the Figma `Description_Card` set (`3969:4115`), four types, and its bas
 
 | Piece | Tier |
 |---|---|
-| `IconButton` | atom |
+| `Icon` | atom |
 | `Textarea` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -36,14 +36,15 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `value` / `onChange` | `string` / `(value) => void` | — | Editing, controlled |
 | `defaultValue` | `string` | `''` | Editing, uncontrolled |
 | `placeholder` | `string` | — | Editing, while empty |
-| `invalid` | `boolean` | — | Editing: the critical border and `aria-invalid`. Pair with a message of your own |
+| `invalid` | `boolean` | — | Editing: the critical border and `aria-invalid` |
+| `error` | `ReactNode` | — | Editing: a message under the card in the critical colour (`role="alert"`). Implies `invalid`; the field is described by it |
 | `label` | `string` | "Problem 1" … | Editing: the field's accessible name |
-| `onRemove` / `removeLabel` | `() => void` / `string` | — / `Remove` | Editing: a remove button beside the row. It only reports; the list is yours. Say which: "Remove problem 2" |
+| `onRemove` / `removeLabel` | `() => void` / `string` | — / `Remove` | Editing: a remove button inside the card's right edge. It appears on hover and while the card has focus (so while typing), and is always shown on a touch screen, which has no hover. It only reports; the list is yours. Say which: "Remove problem 2" |
 | `className` | `string` | — | Merged via `cn()` |
 
 A card is one row. The list around it, the section's title, the add button and any
-attached files are the caller's: wrap several cards in an `ol` when the numbering
-matters to a screen reader.
+attached files are `DescriptionSection`'s (or the caller's): wrap several cards in an `ol`
+when the numbering matters to a screen reader.
 
 ## Tokens
 
@@ -57,9 +58,10 @@ matters to a screen reader.
 | Reading panel | `surface.neutral.subtle`, `stroke.subtle` | `bg-surface-neutral-subtle border-stroke-subtle` |
 | Editing field | `Textarea`'s: `surface.elevated`, `stroke.strong`, invalid `accent.critical.outline.border` | squared on the number's side: `rounded-l-none border-l-0` |
 | Paragraph | `text.primary`, `type.body-sm-regular` | `text-text-primary text-body-sm-regular` |
-| Remove | `IconButton` `danger`, `x-circle` | `size="sm"` (36) |
+| Remove | `accent.critical.outline.content.default` glyph (`x-circle`, 24), `accent.critical.tonal.surface.default` on hover | `text-accent-critical-outline-content-default hover:bg-accent-critical-tonal-surface-default`; `top-3 right-3`; a 40 target reaches 8 past it (`before:-inset-2`) |
+| Error message | `accent.critical.outline.content.default`, `type.caption-md-medium` | `mt-1.5` under the card |
 | Radius | `shape.radius.sm` | `rounded-sm` |
-| Padding, min height | Tailwind numeric scale | `p-3` (panel), `px-1 py-2` (number), `min-h-12`, `min-w-5`, `gap-2` (to the remove button) |
+| Padding, min height | Tailwind numeric scale | `p-3` (panel), `px-1 py-2` (number), `min-h-12`, `min-w-5`; `pr-12` on the field when there is a remove button |
 
 **Two colours are stand-ins.** The design draws `deliverable` in a cyan that is on no
 colour ramp, so it uses `info` until design picks a tone; and `desired-outcome` is drawn
@@ -72,7 +74,8 @@ the strongest neutral fill. Both are one-line changes here when the tokens exist
   that needs its numbering announced is an `ol`, which numbers its own items.
 - While editing, the field is a real `textarea` with an accessible name ("Problem 1" by
   default, or your `label`), `aria-invalid` when `invalid`, and its own focus ring.
-- The remove button is an `IconButton`: icon-only with a required name.
+- The remove button is icon-only with a required name. It is always in the page and the tab order and only unseen (opacity), so a keyboard reaches it and it shows when it has focus; hover or focus anywhere in the card reveals it, and a touch screen always shows it. It is 24 to look at and 40 to press.
+- With `error` the message is announced when it appears and tied to the field with `aria-describedby`; the border turns critical, and the message says what is wrong, so colour is not the only signal.
 - The colour is never the only signal: the type is the caller's heading or surrounding
   context, and the white number sits at 4.5:1 or better on all four fills in light and dark.
 
