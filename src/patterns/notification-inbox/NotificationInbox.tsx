@@ -29,7 +29,10 @@ export interface NotificationInboxProps extends React.HTMLAttributes<HTMLDivElem
   /** "Show unread only". Uncontrolled (off) when omitted. */
   unreadOnly?: boolean;
   onUnreadOnlyChange?: (unreadOnly: boolean) => void;
-  /** Fires when "Mark all as read" is pressed. The button is always there. */
+  /**
+   * Draws "Mark all as read" and fires when it is pressed. Without it there is no
+   * button, as in `NotificationPopover`: a button that does nothing is never shown.
+   */
   onMarkAllRead?: () => void;
   /**
    * The pager under the list, the large one: page numbers, the range readout and
@@ -84,9 +87,11 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
         {...props}
       >
         <div className="flex items-center justify-end gap-4">
-          <Button variant="tertiary" size="sm" onClick={onMarkAllRead}>
-            Mark all as read
-          </Button>
+          {onMarkAllRead && (
+            <Button variant="tertiary" size="sm" onClick={onMarkAllRead}>
+              Mark all as read
+            </Button>
+          )}
           <Toggle
             label="Show unread only"
             checked={onlyUnread}
