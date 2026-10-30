@@ -1,4 +1,4 @@
-# @vcp/design-system
+# @vdm-design-team/vcp-design-system
 
 The single source of truth for the VCP Design System: **design tokens**, **React
 components**, and **usage docs**. Design edits it through Claude, engineering
@@ -9,7 +9,8 @@ tokens/core/       raw values      — VCP's own: color.vcp-blue.*, color.brand.
                                     (shared scales and the type ramp come from GDL,
                                     @vdm-design-team/gdl — the parent design system)
 tokens/semantic/   intent          — surface.brand, content.muted, line.default
-dist/              GENERATED       — theme.css, tokens.css, tokens.ts, tokens.flat.json
+dist/              GENERATED       — theme.css, tokens.css, tokens.ts, tokens.flat.json;
+                                    npm run build adds index.js and types/
 src/components/    React + Tailwind components
 docs/              per-component usage, a11y, and "don't" rules
 CLAUDE.md          the rules any AI agent must follow when editing this repo
@@ -19,16 +20,33 @@ CLAUDE.md          the rules any AI agent must follow when editing this repo
 
 ## For engineering
 
-```bash
-npm i @vcp/design-system
+The package is on GitHub Packages, like GDL. Tell npm where the scope lives, in
+the app's `.npmrc`:
+
+```ini
+@vdm-design-team:registry=https://npm.pkg.github.com
 ```
 
-**1. Load the theme.** In your app's root CSS — this replaces `@import "tailwindcss"`:
+Log in once per machine (the `npm login` under "For designers" below), then:
+
+```bash
+npm i @vdm-design-team/vcp-design-system
+```
+
+React 18+ and Tailwind v4 are peer dependencies: the app's own copies are used.
+
+**1. Load the theme.** In your app's root CSS, after Tailwind:
 
 ```css
-@import "@vcp/design-system/theme.css";
-@source "../node_modules/@vcp/design-system/dist";
+@import "tailwindcss";
+@import "@vdm-design-team/vcp-design-system/theme.css";
 ```
+
+`theme.css` doesn't load Tailwind a second time. It adds the tokens to the app's
+Tailwind theme and points that Tailwind at the component bundle, so the
+components' classes are generated with no `@source` line in the app. Dark theme:
+`.dark` on `<html>` (what `next-themes` sets). The theme names the faces, Poppins
+for UI and Inter for numerics, but doesn't load them, so the app loads both.
 
 Every token is now a Tailwind utility:
 
@@ -39,14 +57,20 @@ Every token is now a Tailwind utility:
 **2. Use the components.**
 
 ```jsx
-import { Button } from '@vcp/design-system';
+import { Button } from '@vdm-design-team/vcp-design-system';
 
 <Button variant="primary" size="md" loading={saving}>Save changes</Button>
 ```
 
+Every component is a client component (the bundle starts with `"use client"`),
+so a Next.js Server Component can import and render one directly. Helpers
+exported with them, like `cn`, can only be *called* in client code. Token values
+for server code come from `@vdm-design-team/vcp-design-system/tokens`, which
+isn't a client module.
+
 **3. Point your AI agent at it.** Add to your app's `CLAUDE.md` / `AGENTS.md`:
 
-> UI must be built from `@vcp/design-system`. Check `node_modules/@vcp/design-system/docs/`
+> UI must be built from `@vdm-design-team/vcp-design-system`. Check `node_modules/@vdm-design-team/vcp-design-system/docs/`
 > for component usage before writing any new UI. Never hardcode colors or spacing —
 > use the token utilities (`bg-surface-*`, `text-content-*`, `border-line-*`, `p-*`, `gap-*`).
 
@@ -107,9 +131,10 @@ If a utility like `bg-surface-brand` renders unstyled, the token didn't reach th
 Tailwind theme — check `dist/theme.css` before touching the component.
 
 > **Gotcha:** Tailwind v4 only generates utilities for class names it finds in
-> scanned source files, and it skips anything in `.gitignore`. Consuming apps
-> must add `@source "../node_modules/@vcp/design-system/dist";` or the
-> components will ship without their styles.
+> scanned source files, and it skips anything in `.gitignore`, `node_modules`
+> included. `theme.css` covers that for apps: its `@source "./index.js"` adds the
+> component bundle. An app that uses the components without importing
+> `theme.css` gets them without their styles.
 
 ## For designers — seeing the latest
 
