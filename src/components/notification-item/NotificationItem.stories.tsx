@@ -1,13 +1,20 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import {
   NotificationItem,
+  type NotificationItemBaseProps,
   type NotificationKind,
   type NotificationReply,
 } from './NotificationItem';
 import type { EmojiReaction } from '../emoji-reaction-picker';
 import type { MentionSegment } from '../mention-input';
+
+/* The component's props are a union (`moved` requires `status`), which Storybook's `args` typing
+   cannot hold, so the stories take the loose shape. The requirement itself is the component's. */
+const Item = NotificationItem as unknown as React.ComponentType<
+  NotificationItemBaseProps & { kind: NotificationKind; status?: string }
+>;
 
 const SUBJECT = 'Change the notification layout for testing';
 
@@ -19,14 +26,14 @@ const LONG_COMMENT =
 
 const meta = {
   title: 'Components/Feedback/NotificationItem',
-  component: NotificationItem,
+  component: Item,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
         component:
           'One line in a list of notifications: who did what to which Added Value, when, and whether ' +
-          'it has been read. The eleven kinds of event come from Figma\'s `_Message_Content`, and the ' +
+          'it has been read. The thirteen kinds of event come from Figma\'s `_Message_Content`, and the ' +
           'component owns the sentence, so the bold and regular runs are the same everywhere. The whole ' +
           'row is the target (`href` or `onSelect`); the unread dot makes way for the mark-read button ' +
           'on hover and focus. Put items in a list.',
@@ -49,6 +56,7 @@ const meta = {
         'commented',
         'mention',
         'moved',
+        'pending',
         'accepted',
         'updated',
         'rejected',
@@ -56,6 +64,7 @@ const meta = {
         'assigned',
         'backlog',
         'handoff',
+        'completed',
         'viewer',
       ] satisfies NotificationKind[],
     },
@@ -70,7 +79,7 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof NotificationItem>;
+} satisfies Meta<typeof Item>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -84,18 +93,32 @@ export const Unread: Story = {
       name: 'Unread: John Kestrel commented on Change the notification layout for testing a few seconds ago',
     });
     await expect(row).toHaveAttribute('href', '#av-1');
-    const mark = canvas.getByRole('button', { name: 'Mark as read' });
+    const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     await userEvent.click(mark);
     await expect(args.onToggleRead).toHaveBeenCalledTimes(1);
+    /* An unread row draws its dot. */
+    await expect(canvasElement.querySelector('[data-unread-dot]')).not.toBeNull();
   },
 };
 
-/** The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. */
+/**
+ * The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. The bubble
+ * is always in the DOM (closed is `opacity-0`, so `aria-describedby` never dangles), so the test
+ * reads whether its positioner is open, not whether the bubble exists.
+ */
 export const MarkReadTooltip: Story = {
-  play: async () => {
+  play: async ({ canvasElement }) => {
+    const mark = within(canvasElement).getByRole('button', { name: /^Mark as read/ });
+    const bubble = () => document.getElementById(mark.getAttribute('aria-describedby')!)!;
+    const open = () => bubble().parentElement!.classList.contains('opacity-100');
+    await expect(open()).toBe(false);
     await userEvent.tab();
     await userEvent.tab();
-    await expect(await screen.findByRole('tooltip')).toHaveTextContent('Mark as read');
+    await expect(mark).toHaveFocus();
+    await waitFor(() => expect(open()).toBe(true));
+    await expect(bubble()).toHaveTextContent('Mark as read');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(open()).toBe(false));
   },
 };
 
@@ -104,10 +127,10 @@ export const Read: Story = {
   args: { unread: false, kind: 'accepted', time: '8 hours ago' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('link', { name: /^John Kestrel accepts/ })).toBeVisible();
+    await expect(canvas.getByRole('link', { name: /^John Kestrel accepted/ })).toBeVisible();
     /* Read: empty on the right at rest. The mark-unread button is there for the
        keyboard, but invisible until the row is hovered or focused. */
-    const mark = canvas.getByRole('button', { name: 'Mark as unread' });
+    const mark = canvas.getByRole('button', { name: /^Mark as unread/ });
     await expect(mark).toBeInTheDocument();
     await expect(getComputedStyle(mark).opacity).toBe('0');
     /* Tab to the row, then to the button: focus brings it in. */
@@ -127,20 +150,22 @@ export const Kinds: Story = {
       { kind: 'commented', time: 'a few seconds ago', expect: /commented on/ },
       { kind: 'mention', time: 'a few seconds ago', expect: /mentioned you in a comment on/ },
       { kind: 'moved', status: 'Confirmed prod', time: '5 minutes ago', expect: /moved .* to Confirmed prod/ },
-      { kind: 'accepted', time: '8 hours ago', expect: /accepts/ },
+      { kind: 'pending', time: '3 hours ago', expect: /submitted .* for approval\. Pending/ },
+      { kind: 'accepted', time: '8 hours ago', expect: /accepted/ },
       { kind: 'updated', time: '38 minutes ago', expect: /made an update to/ },
       { kind: 'rejected', time: '38 minutes ago', expect: /rejected/ },
       { kind: 'rejected-feedback', time: '2 hours ago', expect: /rejected .* with feedback/ },
       { kind: 'assigned', time: '3 hours ago', expect: /assigned you/ },
       { kind: 'backlog', time: '3 hours ago', expect: /moved .* to the backlog/ },
-      { kind: 'handoff', time: '3 hours ago', expect: /completes .*\. Ready for review/ },
+      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review/ },
+      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
       <ul className="w-128">
         {rows.map((row) => (
           <li key={row.kind}>
-            <NotificationItem {...args} kind={row.kind} status={row.status} time={row.time} />
+            <Item {...args} kind={row.kind} status={row.status} time={row.time} />
           </li>
         ))}
       </ul>
@@ -148,9 +173,10 @@ export const Kinds: Story = {
   },
   play: async ({ canvasElement }) => {
     const links = within(canvasElement).getAllByRole('link');
-    await expect(links).toHaveLength(11);
+    await expect(links).toHaveLength(13);
     await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod');
-    await expect(links[9]).toHaveTextContent(/completes .*testing\. Ready for review/);
+    await expect(links[10]).toHaveTextContent(/handed off .*testing\. Ready for Review/);
+    await expect(links[11]).toHaveTextContent(/accepted & completed .*testing/);
   },
 };
 
@@ -170,7 +196,7 @@ export const Static: Story = {
   play: async ({ canvasElement }) => {
     /* Read with nothing to press: nothing on the right at all. */
     await expect(within(canvasElement).queryByRole('button')).toBeNull();
-    await expect(canvasElement.querySelector('[data-read-mark]')).toBeNull();
+    await expect(canvasElement.querySelector('[data-unread-dot]')).toBeNull();
   },
 };
 
@@ -399,7 +425,7 @@ export const MarkersClear3to1: Story = {
         <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
           <div className="flex justify-center bg-surface-canvas p-8">
             <div className="w-128">
-              <NotificationItem {...args} />
+              <Item {...args} />
             </div>
           </div>
         </div>
@@ -441,9 +467,9 @@ export const LightAndDark: Story = {
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
             <div className="w-128">
-            <NotificationItem {...args} />
-            <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
-            <NotificationItem {...args} preview={LONG_COMMENT} />
+            <Item {...args} />
+            <Item {...args} unread={false} kind="moved" status="Confirmed prod" />
+            <Item {...args} preview={LONG_COMMENT} />
             </div>
           </div>
         </div>
