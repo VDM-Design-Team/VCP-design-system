@@ -33,10 +33,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/* A small inline picture stands in for an uploaded image, so the card shows its own preview. */
+const PICTURE =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='64' height='64' fill='%23c7d2fe'/><circle cx='22' cy='24' r='8' fill='%236366f1'/><path d='M0 64 L24 36 L40 52 L50 42 L64 58 V64Z' fill='%234f46e5'/></svg>";
+
 const files = (
   <>
-    <FileAttachment name="image.png" kind="image" onRemove={fn()} />
-    <FileAttachment name="image.png" kind="image" onRemove={fn()} />
+    <FileAttachment name="image.png" kind="image" thumb={PICTURE} onRemove={fn()} />
+    <FileAttachment name="report.pdf" kind="pdf" onRemove={fn()} />
   </>
 );
 

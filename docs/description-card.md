@@ -73,7 +73,7 @@ the strongest neutral fill. Both are one-line changes here when the tokens exist
 - The number block is decorative (`aria-hidden`); the paragraph is the content. A list
   that needs its numbering announced is an `ol`, which numbers its own items.
 - While editing, the field is a real `textarea` with an accessible name ("Problem 1" by
-  default, or your `label`), `aria-invalid` when `invalid`, and its own focus ring.
+  default, or your `label`), `aria-invalid` when `invalid`, and a focus ring drawn around the whole row (number block and field together) so it never lands on the block's edge; the field's border also turns `stroke.focused` while editing.
 - The remove button is icon-only with a required name. It is always in the page and the tab order and only unseen (opacity), so a keyboard reaches it and it shows when it has focus; hover or focus anywhere in the card reveals it, and a touch screen always shows it. It is 24 to look at and 40 to press.
 - With `error` the message is announced when it appears and tied to the field with `aria-describedby`; the border turns critical, and the message says what is wrong, so colour is not the only signal.
 - The colour is never the only signal: the type is the caller's heading or surrounding

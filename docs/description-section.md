@@ -28,10 +28,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `title` | `string` | required | The section's name. It is the heading, and names the region |
-| `headingLevel` | `'h2' \| 'h3' \| 'h4'` | `h3` | The level to draw the title as |
+| `headingLevel` | `'h2' \| 'h3' \| 'h4'` | `h2` | The level to draw the title as. A screen reader user jumps between headings, so it has to fit the page's outline: `h2` directly under the page's `h1`, `h3` inside a modal whose title is an `h2` |
 | `onAdd` / `addLabel` | `() => void` / `string` | — / "Add {title}" | Renders the round add button after the title. Leave it off for a section with one card (Desired Outcome) or for a view |
-| `onAttach` / `attachLabel` | `() => void` / `string` | — / `Attach files` | Renders the paperclip under the cards. Leave it off for a view |
-| `attachments` | `ReactNode` | — | The attached files, as `FileAttachment`s, to the left of the paperclip |
+| `onAttach` / `attachLabel` | `() => void` / `string` | — / `Attach files` | Renders the paperclip under the cards and reports the press. It does not open anything: the page opens the file picker, or the attachment modal with a `Dropzone`. Leave it off for a view |
+| `attachments` | `ReactNode` | — | The attached files, as `FileAttachment`s (an image shows its own thumbnail through `thumb`), to the left of the paperclip. Opening one leads to `AttachmentPreview` |
 | `children` | `ReactNode` | — | The cards. Each is drawn as an item of an ordered list, 16 apart |
 | `className`, `ref`, rest | | | On the root `<section>` |
 

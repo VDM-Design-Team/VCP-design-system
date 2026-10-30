@@ -21,7 +21,7 @@ import { IconButton } from '../../atoms/icon-button';
 export interface DescriptionSectionProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
   /** The section's name: "Problems", "Solutions". */
   title: string;
-  /** The heading level to draw the title as. Default `h3`. */
+  /** The heading level to draw the title as. Default `h2`: a section sits directly under the page's own `h1`. */
   headingLevel?: 'h2' | 'h3' | 'h4';
   /** Renders the round add button after the title, and fires when it is pressed. */
   onAdd?: () => void;
@@ -42,7 +42,7 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
     {
       className,
       title,
-      headingLevel: Heading = 'h3',
+      headingLevel: Heading = 'h2',
       onAdd,
       addLabel,
       onAttach,

@@ -142,7 +142,14 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
 
     return (
       <div ref={ref} className={cn('font-sans', className)} {...props}>
-        <div className="group/card relative flex min-w-0 items-stretch">
+        <div
+          className={cn(
+            'group/card relative flex min-w-0 items-stretch rounded-sm',
+            /* One focus ring around the whole row, the number block and the field together, so it
+               never lands on the block's edge. The field's own ring is turned off below. */
+            'has-[textarea:focus-visible]:outline-2 has-[textarea:focus-visible]:outline-offset-2 has-[textarea:focus-visible]:outline-stroke-focused',
+          )}
+        >
           {/* The number is a visual marker; a list of these is numbered by its own `ol` when it matters. */}
           <span aria-hidden="true" className={number({ type })}>
             {position}
@@ -162,8 +169,10 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               }}
               className={cn(
                 'min-h-12 min-w-0 flex-1 resize-none overflow-hidden rounded-l-none rounded-r-sm border-l-0 p-3',
-                /* The border does not change on hover; only focus does. */
-                !isInvalid && 'enabled:hover:border-stroke-strong',
+                /* The ring is the row's (above). The border does not change on hover, and turns
+                   the focused blue while editing; an error keeps its critical border. */
+                'focus-visible:outline-none',
+                !isInvalid && 'enabled:hover:border-stroke-strong focus:border-stroke-focused',
                 /* Room for the remove button, so the text never runs under it. */
                 onRemove && 'pr-12',
               )}
