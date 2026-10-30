@@ -13,7 +13,7 @@ Read off the Figma `New_Comment` (`2877:6757`, Comment Section page).
 | `Avatar` | atom |
 | `CommentFormActions` | component |
 | `CommentSortChip` | component |
-| `MentionInput` | component |
+| `MentionInput` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

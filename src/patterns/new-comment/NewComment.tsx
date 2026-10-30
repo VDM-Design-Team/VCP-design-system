@@ -8,7 +8,7 @@ import {
   plainText,
   type MentionMember,
   type MentionSegment,
-} from '../../components/mention-input';
+} from '../../atoms/mention-input';
 
 /**
  * NewComment — the top of a comment list: the "Comments" title with the sort
