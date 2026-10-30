@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { EmojiReactionPicker, type EmojiReaction } from './EmojiReactionPicker';
 
 const meta = {
@@ -115,6 +115,45 @@ export const PaletteOpen: Story = {
     await expect(body.getByText('Symbols')).toBeInTheDocument();
     await expect(body.getByRole('button', { name: 'React with \u2764\uFE0F' })).toBeInTheDocument();
     await expect(body.getByRole('button', { name: 'React with \u26A0\uFE0F' })).toBeInTheDocument();
+  },
+};
+
+/**
+ * **Flow:** the "Add reaction" tooltip belongs to the button and only the button.
+ * Moving from the button onto the open palette used to bring it back, because the
+ * palette sat inside the tooltip's hover area.
+ */
+export const TooltipStaysOnTheButton: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: { onSelect: () => {} },
+  render: (args) => (
+    <div className="h-96 p-16">
+      <EmojiReactionPicker {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole('button', { name: 'Add reaction' });
+    /* The bubble is drawn in a portal on the page body, outside the story canvas. */
+    const bubble = () => body.getByText('Add reaction', { selector: '[role="tooltip"]' });
+    const isOpen = () => bubble().parentElement?.classList.contains('opacity-100');
+
+    /* On the button it opens, after the hover delay. */
+    await userEvent.hover(trigger);
+    await waitFor(() => expect(isOpen()).toBe(true), { timeout: 1500 });
+
+    /* Open the palette, then move off the button and onto a reaction in it. */
+    await userEvent.click(trigger);
+    await body.findByText('Hand Gestures');
+    await userEvent.unhover(trigger);
+    await waitFor(() => expect(isOpen()).toBe(false));
+    await userEvent.hover(body.getByRole('button', { name: 'React with \u{1F44E}' }));
+
+    /* Long enough for the hover delay to have fired, had it been going to. */
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await expect(isOpen()).toBe(false);
   },
 };
 
