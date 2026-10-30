@@ -90,6 +90,34 @@ export const RemoveAppearsWithFocus: Story = {
   },
 };
 
+/**
+ * With one card being written in, hovering another does not reveal its remove button, and the
+ * border of the focused field is the focused blue even while the pointer is over it.
+ */
+export const OnlyTheFocusedCardOffersRemove: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <DescriptionCard editing position={1} defaultValue="First" onRemove={fn()} removeLabel="Remove 1" />
+      <DescriptionCard editing position={2} defaultValue="Second" onRemove={fn()} removeLabel="Remove 2" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const first = canvas.getByRole('textbox', { name: 'Problem 1' });
+    await userEvent.click(first);
+    await waitFor(() => expect(getComputedStyle(canvas.getByRole('button', { name: 'Remove 1' })).opacity).toBe('1'));
+    /* Focus is in card 1, so card 2's button stays hidden whatever the pointer does. */
+    await expect(getComputedStyle(canvas.getByRole('button', { name: 'Remove 2' })).opacity).toBe('0');
+    /* The focused field's border is the focused colour: read it off a probe that uses the token. */
+    const probe = document.createElement('div');
+    probe.className = 'border-2 border-stroke-focused';
+    canvasElement.append(probe);
+    const focusedBlue = getComputedStyle(probe).borderTopColor;
+    probe.remove();
+    await expect(getComputedStyle(first).borderTopColor).toBe(focusedBlue);
+  },
+};
+
 /** Empty with a placeholder, and the error state: the critical border and the message under the card. */
 export const EditingEmptyAndInvalid: Story = {
   render: () => (

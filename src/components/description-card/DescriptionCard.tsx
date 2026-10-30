@@ -132,6 +132,30 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
     const errorId = React.useId();
     const isInvalid = !!invalid || !!error;
 
+    /* Whether another card's field has focus. While one does, hovering this card does not
+       reveal its remove button: the one being written in is the only one that offers it. */
+    const root = React.useRef<HTMLDivElement | null>(null);
+    const [otherFocused, setOtherFocused] = React.useState(false);
+    React.useEffect(() => {
+      if (!editing || !onRemove) return;
+      const update = () => {
+        const active = document.activeElement;
+        setOtherFocused(
+          !!active &&
+            active.tagName === 'TEXTAREA' &&
+            !!active.closest('[data-description-card]') &&
+            !root.current?.contains(active),
+        );
+      };
+      document.addEventListener('focusin', update);
+      document.addEventListener('focusout', update);
+      update();
+      return () => {
+        document.removeEventListener('focusin', update);
+        document.removeEventListener('focusout', update);
+      };
+    }, [editing, onRemove]);
+
     /* One row to begin with, growing to fit what is typed. */
     React.useLayoutEffect(() => {
       const el = field.current;
@@ -141,7 +165,16 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
     }, [editing, text]);
 
     return (
-      <div ref={ref} className={cn('font-sans', className)} {...props}>
+      <div
+        ref={(node) => {
+          root.current = node;
+          if (typeof ref === 'function') ref(node);
+          else if (ref) ref.current = node;
+        }}
+        data-description-card=""
+        className={cn('font-sans', className)}
+        {...props}
+      >
         <div
           className={cn(
             'group/card relative flex min-w-0 items-stretch rounded-sm',
@@ -172,7 +205,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
                 /* The ring is the row's (above). The border does not change on hover, and turns
                    the focused blue while editing; an error keeps its critical border. */
                 'focus-visible:outline-none',
-                !isInvalid && 'enabled:hover:border-stroke-strong focus:border-stroke-focused',
+                !isInvalid && 'border-stroke-strong enabled:hover:border-stroke-strong focus:border-stroke-focused enabled:hover:focus:border-stroke-focused',
                 /* Room for the remove button, so the text never runs under it. */
                 onRemove && 'pr-12',
               )}
@@ -197,7 +230,8 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
                 'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
                 'before:absolute before:-inset-2',
                 'opacity-0 transition-[opacity,color] duration-150 motion-reduce:transition-none',
-                'group-hover/card:opacity-100 group-focus-within/card:opacity-100 pointer-coarse:opacity-100',
+                !otherFocused && 'group-hover/card:opacity-100',
+                'group-focus-within/card:opacity-100 pointer-coarse:opacity-100',
                 'focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
               )}
             >
