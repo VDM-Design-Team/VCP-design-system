@@ -1,9 +1,9 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
-import { expect, within } from 'storybook/test';
 
 const meta = {
   title: 'Patterns/TopBar',
@@ -105,6 +105,61 @@ export const LiveThemeToggle: Story = {
 /** No unread: the bell stays, the dot goes, the name says just "Notifications". */
 export const NoUnread: Story = {
   args: { homeHref: '#home', notifications: 0, theme: 'light', onNotifications: () => {} },
+};
+
+/**
+ * With `onUserMenuSelect` (or `userMenuItems`), the chip is a `UserMenu`: it opens the account menu —
+ * Settings and Logout unless the app passes its own rows — and `onUserMenuSelect` hears the row's `key`.
+ */
+export const WithUserMenu: Story = {
+  args: {
+    homeHref: '#home',
+    theme: 'light',
+    onUserMenu: undefined,
+    onUserMenuSelect: fn(),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /account menu/ }));
+    await userEvent.click(canvas.getByRole('menuitem', { name: 'Settings' }));
+    await expect(args.onUserMenuSelect).toHaveBeenCalledWith('settings');
+  },
+};
+
+/**
+ * **Flow:** the user chip is drawn in one place (`UserMenu`'s `UserMenuTrigger` and `UserChip`), so the
+ * three ways `TopBar` shows it — nothing to open, the app's own menu, and the built-in menu — measure the same.
+ */
+export const ChipLooksTheSame: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { ...SIDE_BY_SIDE, chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => {
+    const user = { name: 'Francis M.' };
+    return (
+      <div className="flex flex-col gap-4">
+        <TopBar user={user} />
+        <TopBar user={user} onUserMenu={() => {}} />
+        <TopBar user={user} onUserMenuSelect={() => {}} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const names = within(canvasElement).getAllByText('Francis M.');
+    await expect(names).toHaveLength(3);
+    const looks = names.map((name) => {
+      const chip = name.parentElement as HTMLElement;
+      const style = getComputedStyle(chip);
+      return [
+        style.paddingLeft,
+        style.paddingTop,
+        style.columnGap,
+        style.borderRadius,
+        Math.round(chip.getBoundingClientRect().height),
+      ];
+    });
+    await expect(looks[1]).toEqual(looks[0]);
+    await expect(looks[2]).toEqual(looks[0]);
+  },
 };
 
 /** Without `onUserMenu`, the chip is a plain group — no dead button. */

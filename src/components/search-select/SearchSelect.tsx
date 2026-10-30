@@ -4,6 +4,7 @@ import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { CheckboxMark } from '../../atoms/checkbox';
 import { Icon, type IconName } from '../../atoms/icon';
+import { Spinner } from '../../atoms/spinner';
 import { Input } from '../../atoms/input';
 import { Tag, type TagTone } from '../../atoms/tag';
 
@@ -121,6 +122,24 @@ interface SearchSelectBase
    */
   renderOption?: (option: SearchSelectOption, state: SearchSelectRowState) => React.ReactNode;
   disabled?: boolean;
+  /** `sm` 32 tall, `md` 40 (default), as `Select`. */
+  size?: 'sm' | 'md';
+  /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
+  fullWidth?: boolean;
+  /**
+   * The rows are on their way: the field is `aria-busy`, a spinner stands in for the caret, and
+   * the panel says "Loading…" in place of the rows.
+   */
+  loading?: boolean;
+  /**
+   * Search happens on your server: called with the text on every change in the search box (and
+   * with `''` when the panel opens), and the component then stops filtering `options` itself, so
+   * you pass what matches. Debounce it on your side; pair it with `loading` while the request runs.
+   * Picked values that are not in the current `options` still show, by their value.
+   */
+  onSearch?: (query: string) => void;
+  /** What the panel says while `loading`. */
+  loadingText?: string;
   /** Critical border + `aria-invalid`. Pair with a visible message (or use `error`). */
   invalid?: boolean;
   /**
@@ -224,6 +243,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       rows = 'text',
       renderOption,
       disabled,
+      size = 'md',
+      fullWidth = false,
+      loading,
+      onSearch,
+      loadingText = 'Loading…',
       invalid,
       error,
       id,
@@ -238,6 +262,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const listId = React.useId();
     const tagsId = React.useId();
     const errorId = React.useId();
+    const valueId = React.useId();
+    const generatedTriggerId = React.useId();
+    const triggerId = id ?? generatedTriggerId;
     const wrapperRef = React.useRef<HTMLDivElement>(null);
     const fieldRef = React.useRef<HTMLDivElement>(null);
     const rowRef = React.useRef<HTMLDivElement>(null);
@@ -272,9 +299,22 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const shown = multiple && confirm && open ? draft : committed;
     const isInvalid = !!invalid || !!error;
 
-    const list = searchable && query
-      ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
-      : all;
+    /* Rows in the order they are drawn: ungrouped first, then each group in the order first seen.
+       Arrow keys, Home / End and the active row all index this list, so they match the screen. */
+    const arrange = (rows: SearchSelectOption[]) => {
+      /* Not `sort`: it sends `undefined` (the ungrouped rows' name) to the end without asking. */
+      const names: string[] = [];
+      rows.forEach((o) => {
+        if (o.group && !names.includes(o.group)) names.push(o.group);
+      });
+      return [...rows.filter((o) => !o.group), ...names.flatMap((name) => rows.filter((o) => o.group === name))];
+    };
+    const arranged = arrange(all);
+    const list = arrange(
+      searchable && query && !onSearch
+        ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+        : all,
+    );
     const firstEnabled = (rows: SearchSelectOption[]) => Math.max(0, rows.findIndex((o) => !o.disabled));
     const activeIndex = Math.min(active, list.length - 1);
     const activeOption = list[activeIndex];
@@ -290,9 +330,10 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const openPanel = () => {
       if (disabled) return;
       setQuery('');
+      onSearch?.('');
       setDraft(committed);
-      const at = all.findIndex((o) => committed.includes(o.value));
-      setActive(at >= 0 ? at : firstEnabled(all));
+      const at = arranged.findIndex((o) => committed.includes(o.value));
+      setActive(at >= 0 ? at : firstEnabled(arranged));
       setOpen(true);
     };
     const closePanel = (restoreFocus = false) => {
@@ -380,10 +421,20 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
           }
           break;
         case 'Tab':
-          closePanel();
+          /* With Clear all / Apply the panel is a stop on the way: Tab walks on into it, and
+             the panel closes when focus leaves the whole control. Without them Tab just leaves. */
+          if (!(multiple && confirm)) closePanel();
           break;
       }
     };
+
+    /* The active row stays in view as the arrows move it, and when the panel opens on a far-down pick. */
+    React.useEffect(() => {
+      if (open && activeOption) {
+        document.getElementById(optionId(activeIndex))?.scrollIntoView({ block: 'nearest' });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, activeIndex]);
 
     /* With search, focus moves into it the moment the panel opens. */
     React.useEffect(() => {
@@ -400,7 +451,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       }
       g.rows.push({ option, index });
     });
-    const ordered = [...groups].sort((a, b) => Number(!!a.name) - Number(!!b.name));
+    const ordered = groups;
 
     const summary =
       committed.length === 0
@@ -408,6 +459,21 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         : committed.length === 1
           ? labelOf(committed[0]!)
           : `${committed.length} selected`;
+    /* The trigger is named by its label and then its value ("Assignee Amy Lee"), so a screen reader
+       hears what was picked. An `aria-label` is named by the trigger itself; a `<label for>` (a Field)
+       is found through the button's `labels`, and given an id if it has none. */
+    const [labelIds, setLabelIds] = React.useState<string[]>([]);
+    React.useLayoutEffect(() => {
+      if (ariaLabel || ariaLabelledBy) return;
+      const ids = Array.from(triggerRef.current?.labels ?? []).map((label, i) => {
+        if (!label.id) label.id = `${listId}-label-${i}`;
+        return label.id;
+      });
+      setLabelIds((prev) => (prev.join(' ') === ids.join(' ') ? prev : ids));
+    });
+    const hasValue = committed.length > 0;
+    const nameParts = ariaLabelledBy ? [ariaLabelledBy] : ariaLabel ? [triggerId] : labelIds;
+    const triggerName = hasValue && nameParts.length > 0 ? [...nameParts, valueId].join(' ') : ariaLabelledBy;
     const showTags = !!multiple && display === 'tags' && committed.length > 0;
     const tagsKey = committed.join('\u0000');
     /* Without a search box the trigger is the combobox. */
@@ -482,8 +548,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         return;
       }
       pendingFocus.current = null;
+      /* Found by the tag's own value, never through a selector: a label can hold any character. */
       const target = pending.tag
-        ? rowRef.current?.querySelector<HTMLElement>(`button[aria-label="Remove ${labelOf(pending.tag)}"]`)
+        ? tagEls()
+            .find((el) => el.dataset.selectTag === pending.tag)
+            ?.querySelector<HTMLElement>('button')
         : null;
       (target && target.offsetParent !== null ? target : triggerRef.current)?.focus();
     });
@@ -512,7 +581,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     return (
       <div
         ref={setWrapperRef}
-        className={cn('font-sans', className)}
+        aria-busy={loading || undefined}
+        className={cn('font-sans', fullWidth ? 'w-full' : 'inline-block min-w-48 max-w-full', className)}
         onBlur={(e) => {
           onBlur?.(e);
           /* Focus left the whole control, not just moved into the panel — or a
@@ -545,7 +615,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               }
             }}
             className={cn(
-              'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
+              'flex items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
+              size === 'sm' ? 'min-h-8' : 'min-h-10',
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
               isInvalid
                 ? 'border-accent-critical-outline-border-default'
@@ -566,7 +637,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 {committed.map((v, i) => (
                   <Tag
                     key={v}
-                    data-select-tag=""
+                    data-select-tag={v}
                     size="sm"
                     tone={rows === 'tag' ? (all.find((o) => o.value === v)?.tone ?? 'neutral') : 'neutral'}
                     onRemove={disabled ? undefined : () => removeTag(v)}
@@ -615,7 +686,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             )}
             <button
               ref={triggerRef}
-              id={id}
+              id={triggerId}
               type="button"
               role={triggerIsCombobox ? 'combobox' : undefined}
               aria-haspopup="listbox"
@@ -625,40 +696,51 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 triggerIsCombobox && open && activeOption ? optionId(activeIndex) : undefined
               }
               aria-label={ariaLabel}
-              aria-labelledby={ariaLabelledBy}
+              aria-labelledby={triggerName}
               aria-invalid={isInvalid || undefined}
               aria-describedby={error ? errorId : undefined}
               disabled={disabled}
               onKeyDown={(e) => onKeyDown(e, false)}
-              onClick={(e) => {
-                /* Keyboard activation is handled in onKeyDown (detail 0). */
-                if (e.detail === 0) return;
-                open ? closePanel() : openPanel();
+              /* Enter and Space are handled on keydown, which also stops the click the browser
+                 would send (Enter on keydown, Space on keyup, so keyup is stopped too). Every
+                 click that does arrive is a real one: a mouse, a screen reader's browse mode,
+                 voice control, a switch, `element.click()`. */
+              onKeyUp={(e) => {
+                if (e.key === ' ') e.preventDefault();
               }}
+              onClick={() => (open ? closePanel() : openPanel())}
               className={cn(
-                'flex h-8 items-center justify-between gap-2 rounded-sm text-left outline-none',
+                'flex items-center justify-between gap-2 rounded-sm text-left outline-none',
+                size === 'sm' ? 'h-6' : 'h-8',
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
                   ? 'text-body-sm-medium text-text-primary'
                   : 'text-body-sm-regular text-text-subtle',
+                size === 'sm' && 'text-caption-md-regular',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',
               )}
             >
               {showTags ? (
                 /* The tags carry the value; the button still needs a name. */
-                <span className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
+                <span id={valueId} className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
               ) : (
-                <span className="min-w-0 truncate">{summary ?? placeholder}</span>
+                <span id={valueId} className="min-w-0 truncate">
+                  {summary ?? placeholder}
+                </span>
               )}
-              <Icon
-                name="caret-down"
-                size="sm"
-                aria-hidden="true"
-                className={cn(
-                  'shrink-0 text-text-tertiary transition-transform motion-reduce:transition-none',
-                  open && 'rotate-180',
-                )}
-              />
+              {loading ? (
+                <Spinner size="sm" decorative className="shrink-0 text-text-tertiary" />
+              ) : (
+                <Icon
+                  name="caret-down"
+                  size="sm"
+                  aria-hidden="true"
+                  className={cn(
+                    'shrink-0 text-text-tertiary transition-transform motion-reduce:transition-none',
+                    open && 'rotate-180',
+                  )}
+                />
+              )}
             </button>
           </div>
 
@@ -691,12 +773,18 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   onChange={(e) => {
                     setQuery(e.target.value);
                     setActive(0);
+                    onSearch?.(e.target.value);
                   }}
                   onKeyDown={(e) => onKeyDown(e, true)}
                 />
               </div>
             )}
-            {list.length === 0 && (
+            {loading && (
+              <div role="status" className={cn('px-3 pb-3 text-caption-md-semibold text-text-tertiary', searchable ? 'pt-1' : 'pt-2')}>
+                {loadingText}
+              </div>
+            )}
+            {!loading && list.length === 0 && (
               /* Outside the listbox: a listbox may hold only options. */
               <div
                 className={cn(
@@ -713,7 +801,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               aria-label={ariaLabel}
               aria-labelledby={ariaLabelledBy}
               aria-multiselectable={multiple || undefined}
-              hidden={list.length === 0}
+              hidden={loading || list.length === 0}
               className="max-h-64 overflow-y-auto"
               /* Reachable by keyboard when it scrolls, though focus never needs it. */
               tabIndex={-1}
