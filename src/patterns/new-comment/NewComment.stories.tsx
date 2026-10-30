@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { NewComment } from './NewComment';
+import { typeText } from '../../lib/story-typing';
 import type { CommentSort } from '../../components/comment-sort-chip';
 
 const MEMBERS = [
@@ -99,7 +100,7 @@ export const Flow: Story = {
     const send = canvas.getByRole('button', { name: 'Add Comment' });
 
     await expect(send).toBeDisabled();
-    await userEvent.type(field, 'Hello team');
+    await typeText(field, 'Hello team');
     await waitFor(() => expect(send).toBeEnabled());
 
     await userEvent.click(send);
@@ -108,7 +109,7 @@ export const Flow: Story = {
     await expect(send).toBeDisabled();
 
     /* The keyboard sends too. */
-    await userEvent.type(field, 'Second one');
+    await typeText(field, 'Second one');
     await userEvent.keyboard('{Control>}{Enter}{/Control}');
     await waitFor(() => expect(args.onSubmit).toHaveBeenCalledTimes(2));
     await expect(args.onSubmit).toHaveBeenLastCalledWith([{ type: 'text', text: 'Second one' }]);
