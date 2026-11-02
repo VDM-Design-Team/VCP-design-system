@@ -199,6 +199,25 @@ const emojiCell = cn(
   'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
 );
 
+/**
+ * The "Add reaction" trigger: the glyph button with its tooltip. A component of
+ * its own so `Popover` can clone it — it forwards the ref and every prop it is
+ * given (`onClick`, `aria-expanded`, `aria-controls`, the open keys) to the real
+ * `<button>`, with the `Tooltip` around the button alone.
+ */
+const AddReactionButton = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>((props, ref) => (
+  <Tooltip content="Add reaction">
+    <button ref={ref} type="button" aria-label="Add reaction" className={textualIconButton} {...props}>
+      {/* The design's SmileyPlus — the plus is part of the glyph. */}
+      <Icon name="smiley-plus" size="sm" aria-hidden="true" />
+    </button>
+  </Tooltip>
+));
+AddReactionButton.displayName = 'AddReactionButton';
+
 export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactionPickerProps>(
   (
     {
@@ -247,55 +266,46 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
           <Icon name="thumbs-up" size="sm" aria-hidden="true" />
         </button>
         {/*
-          Tooltip wraps the whole Popover, not just its trigger button.
-          Popover's own contract clones `trigger` directly (ref, onClick,
-          aria-expanded/-controls) — nesting Tooltip inside that clone would
-          break it, since Tooltip's ref and its `{...props}` spread land on
-          its own wrapping <span>, not on the button inside. Wrapping the
-          other way round costs nothing here: the tooltip text repeats the
-          button's own `aria-label` verbatim, so a screen-reader user loses
-          nothing by `aria-describedby` landing on Popover's wrapper div
-          instead of the button itself, and hover/focus still bubble to
-          Tooltip's span correctly either way.
+          The tooltip belongs to the button and only the button. It used to wrap
+          the whole Popover, so the open palette — a DOM child of the wrapper —
+          counted as hovering the trigger: moving from the button onto the
+          palette crossed the gap (tooltip hides), then entered the palette
+          (tooltip comes back after the delay, then goes again). The trigger is
+          now `AddReactionButton`, which puts the Tooltip around the real button
+          and hands everything Popover clones onto it (ref, onClick, aria-*), so
+          the palette is outside the tooltip's hover area.
         */}
-        <Tooltip content="Add reaction">
-          <Popover
-            open={open}
-            onOpenChange={setOpen}
-            trigger={
-              <button type="button" aria-label="Add reaction" className={textualIconButton}>
-                {/* The design's SmileyPlus — the plus is part of the glyph. */}
-                <Icon name="smiley-plus" size="sm" aria-hidden="true" />
-              </button>
-            }
-            content={
-              emoji ? (
-                <div role="group" aria-label="Pick a reaction" className="grid grid-cols-8">
-                  {emoji.map(cell)}
-                </div>
-              ) : (
-                <div role="group" aria-label="Pick a reaction" className="flex flex-col gap-3">
-                  {categories.map((c, i) => (
-                    <div
-                      key={c.name}
-                      role="group"
-                      aria-labelledby={`${idBase}-cat-${i}`}
-                      className="flex flex-col"
+        <Popover
+          open={open}
+          onOpenChange={setOpen}
+          trigger={<AddReactionButton />}
+          content={
+            emoji ? (
+              <div role="group" aria-label="Pick a reaction" className="grid grid-cols-8">
+                {emoji.map(cell)}
+              </div>
+            ) : (
+              <div role="group" aria-label="Pick a reaction" className="flex flex-col gap-3">
+                {categories.map((c, i) => (
+                  <div
+                    key={c.name}
+                    role="group"
+                    aria-labelledby={`${idBase}-cat-${i}`}
+                    className="flex flex-col"
+                  >
+                    <span
+                      id={`${idBase}-cat-${i}`}
+                      className="font-sans text-caption-md-medium text-text-tertiary"
                     >
-                      <span
-                        id={`${idBase}-cat-${i}`}
-                        className="font-sans text-caption-md-medium text-text-tertiary"
-                      >
-                        {c.name}
-                      </span>
-                      <div className="grid grid-cols-8">{c.emoji.map(cell)}</div>
-                    </div>
-                  ))}
-                </div>
-              )
-            }
-          />
-        </Tooltip>
+                      {c.name}
+                    </span>
+                    <div className="grid grid-cols-8">{c.emoji.map(cell)}</div>
+                  </div>
+                ))}
+              </div>
+            )
+          }
+        />
         {visible.map((r) => {
           const name = r.name ?? emojiName(r.emoji);
           const pill = (
