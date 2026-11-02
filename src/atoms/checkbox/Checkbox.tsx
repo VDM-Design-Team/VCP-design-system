@@ -123,10 +123,10 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
 );
 Checkbox.displayName = 'Checkbox';
 
-function CheckGlyph({ size }: { size: 'sm' | 'md' }) {
+function CheckGlyph({ size, always }: { size: 'sm' | 'md'; always?: boolean }) {
   return (
     <svg
-      className={cn('hidden group-has-checked:block', size === 'md' ? 'size-3.5' : 'size-3')}
+      className={cn(always ? 'block' : 'hidden group-has-checked:block', size === 'md' ? 'size-3.5' : 'size-3')}
       viewBox="0 0 12 12"
       fill="none"
       aria-hidden="true"
@@ -147,5 +147,44 @@ function MixedGlyph({ size }: { size: 'sm' | 'md' }) {
     <svg className={size === 'md' ? 'size-3.5' : 'size-3'} viewBox="0 0 12 12" fill="none" aria-hidden="true">
       <path d="M3 6h6" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
+  );
+}
+
+export interface CheckboxMarkProps {
+  checked?: boolean;
+  disabled?: boolean;
+  /** 16 (`sm`, default) or 20 (`md`), as `Checkbox`. */
+  size?: 'sm' | 'md';
+  className?: string;
+}
+
+/**
+ * CheckboxMark — the checkbox's box and tick with no input behind it, for a row
+ * that is itself the control (`SearchSelect`'s options when `multiple`: the
+ * row is an `option`, its state is `aria-selected`, and an `<input>` inside one
+ * would be invalid). Decorative: `aria-hidden`, no focus, no hover or pressed
+ * states of its own — the row owns those.
+ *
+ * Same box, tokens and tick as `Checkbox`, so the two never drift.
+ */
+export function CheckboxMark({ checked, disabled, size = 'sm', className }: CheckboxMarkProps) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-xs border text-action-primary-content-default',
+        size === 'md' ? 'size-5' : 'size-4',
+        checked
+          ? 'border-action-primary-surface-default bg-action-primary-surface-default'
+          : 'border-stroke-strong bg-surface-base',
+        disabled &&
+          (checked
+            ? 'border-action-primary-surface-disabled bg-action-primary-surface-disabled'
+            : 'border-stroke-subtle bg-surface-neutral-faint'),
+        className,
+      )}
+    >
+      {checked && <CheckGlyph size={size} always />}
+    </span>
   );
 }

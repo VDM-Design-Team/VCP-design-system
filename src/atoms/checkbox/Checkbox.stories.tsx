@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Checkbox } from './Checkbox';
+import { Checkbox, CheckboxMark } from './Checkbox';
 
 const meta = {
   title: 'Atoms/Checkbox',
@@ -177,6 +177,26 @@ export const Themes: Story = {
           <Checkbox {...args} label="Disabled" disabled defaultChecked />
         </div>
       </div>
+    </div>
+  ),
+};
+
+/**
+ * `CheckboxMark`: the box and tick with no input, for a row that is itself the control
+ * (`SearchSelect`'s options when `multiple`). Beside the real checkbox, so the two can be compared.
+ */
+export const Mark: Story = {
+  render: () => (
+    <div className="flex items-center gap-6">
+      {(['sm', 'md'] as const).map((size) => (
+        <div key={size} className="flex items-center gap-3">
+          <CheckboxMark size={size} />
+          <CheckboxMark size={size} checked />
+          <CheckboxMark size={size} disabled />
+          <CheckboxMark size={size} disabled checked />
+          <Checkbox size={size} aria-label={`Real checkbox, ${size}`} defaultChecked />
+        </div>
+      ))}
     </div>
   ),
 };
