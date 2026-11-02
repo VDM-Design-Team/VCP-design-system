@@ -37,7 +37,12 @@ const SECTIONS: PlanningSection[] = [
       row(3, { assignee: { name: 'John Doe', availability: 'unavailable' }, due: { value: '2026-03-16', estimated: true } }),
     ],
   },
-  { id: 'backlog', kind: 'backlog', title: 'Backlog', rows: [row(4), row(5)] },
+  {
+    id: 'backlog',
+    kind: 'backlog',
+    title: 'Backlog',
+    rows: [row(4, { status: { status: 'Backlog' } }), row(5, { status: { status: 'Backlog' } })],
+  },
 ];
 
 const meta = {
