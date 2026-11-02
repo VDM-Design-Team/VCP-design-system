@@ -143,10 +143,12 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ className, variant, size, shape, icon, label, loading, disabled, ...props }, ref) => {
     const scale = size ?? 'md';
     /* `title` gives pointer users a hover hint — but a Tooltip wrapping this
-       button already draws one, and it associates itself with aria-describedby.
+       button already draws one, and marks it: with aria-describedby, or with
+       data-tooltip when it shows without describing (`describe={false}`).
        Leaving `title` on would render both: ours, then the browser's native
        bubble on top of it, which the caller has no way to suppress. */
-    const describedBy = (props as { 'aria-describedby'?: string })['aria-describedby'];
+    const marked = props as { 'aria-describedby'?: string; 'data-tooltip'?: string };
+    const describedBy = marked['aria-describedby'] || marked['data-tooltip'];
     return (
       <button
         ref={ref}

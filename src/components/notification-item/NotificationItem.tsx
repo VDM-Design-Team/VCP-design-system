@@ -250,6 +250,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                  not the row or the header above. */
               <Tooltip
                 content={unread ? 'Mark as read' : 'Mark as unread'}
+                /* The button's name ("Mark as read: …") already says it. */
+                describe={false}
                 openDelay={500}
                 placement="left"
                 className="absolute inset-0 z-10 flex"

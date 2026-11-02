@@ -69,7 +69,10 @@ export const DomainLabel = React.forwardRef<HTMLSpanElement, DomainLabelProps>(
     );
 
     return tooltip && domain && !decorative ? (
-      <Tooltip content={`Added by ${spec.fullName}`}>{pill}</Tooltip>
+      /* The pill's hidden text already says "Added by …": shown, not described again. */
+      <Tooltip content={`Added by ${spec.fullName}`} describe={false}>
+        {pill}
+      </Tooltip>
     ) : (
       pill
     );

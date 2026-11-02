@@ -105,7 +105,9 @@ and the hover (`stroke.focused`) are the design's. Decided in review of this PR,
 ## Accessibility
 
 - The input is real and focusable; the whole zone is its `<label>`, so
-  clicking anywhere opens the dialog and the name is the visible text.
+  clicking anywhere opens the dialog. Its **name is the call to action** ("Upload a file or drag and
+  drop", by `aria-labelledby`) and the hint or error is its **description**, so each is heard once.
+  (The label wraps them all; named by the label alone, the hint was read twice.)
 - `accept` is a convenience, not a gate — announce actual constraints in
   `hint` and validate what arrives, because drops bypass the filter.
 - Disabled is visibly quiet *and* inert to drops — not just a greyed label

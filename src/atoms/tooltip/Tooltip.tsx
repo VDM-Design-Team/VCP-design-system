@@ -304,8 +304,12 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
 
     const child = React.Children.only(children) as React.ReactElement<{
       'aria-describedby'?: string;
+      'data-tooltip'?: string;
     }>;
     const describedBy = [child.props['aria-describedby'], describe && id].filter(Boolean).join(' ') || undefined;
+    /* A trigger that is not described still has a tooltip, and some pieces need to know: `IconButton`
+       drops its native `title` under one, or the browser would draw a second bubble over ours. */
+    const marker = describe ? {} : { 'data-tooltip': id };
 
     return (
       <span
@@ -323,7 +327,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         onBlur={handleBlur}
         {...props}
       >
-        {React.cloneElement(child, { 'aria-describedby': describedBy })}
+        {React.cloneElement(child, { 'aria-describedby': describedBy, ...marker })}
         {host &&
           createPortal(
             <span

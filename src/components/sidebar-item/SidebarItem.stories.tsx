@@ -115,11 +115,11 @@ export const Collapsed: Story = {
           ['Assigned', 'eye', false],
         ] as const
       ).map(([label, icon, selected]) => (
-        <Tooltip key={label} content={label} placement="right">
+        <Tooltip key={label} content={label} placement="right" describe={false}>
           <SidebarItem label={label} icon={icon} href="#" collapsed selected={selected} />
         </Tooltip>
       ))}
-      <Tooltip content="Archive" placement="right">
+      <Tooltip content="Archive" placement="right" describe={false}>
         <SidebarItem
           label="Archive"
           icon="archive"
