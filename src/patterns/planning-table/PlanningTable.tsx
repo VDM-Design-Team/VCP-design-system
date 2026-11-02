@@ -16,9 +16,9 @@ import {
   type DataTableSort,
 } from '../../components/data-table';
 import { InlineDateEdit, InlineEdit } from '../../components/inline-edit';
-import { StatusTag, type StatusTagProps } from '../../components/status-tag';
-import { TypeTag, type AVType } from '../../components/type-tag';
-import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
+import { StatusTag, STATUS_COLUMN_HINT, type StatusTagProps } from '../../components/status-tag';
+import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
+import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
 
 /**
  * PlanningTable — the Planning list: Added Values grouped into collapsible
@@ -40,7 +40,7 @@ import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
  *   no dates or capacity. Folded, only the header shows.
  * - **Start Date, Points and Due Date edit in place**, each with its own change
  *   callback; give none and the cell just reads. An *estimated* date reads with
- *   "(estimate)" after it, as the detail card writes it.
+ *   "(est.)" after it. The tooltip says what that means.
  * - **It does not sort, fetch or paginate.** `sections` render in the order
  *   given; `sort` and `page` are the caller's, as in `DataTable`.
  *
@@ -54,7 +54,7 @@ import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 export interface PlanningDate {
   /** ISO `yyyy-mm-dd`. */
   value: string;
-  /** A computed date, not one a person set — reads "(estimate)". */
+  /** A computed date, not one a person set — reads "(est.)". */
   estimated?: boolean;
 }
 
@@ -96,12 +96,12 @@ export interface PlanningSection {
  * change the copy, or `''` to drop a column's glyph.
  */
 export interface PlanningTableHints {
-  urgency?: string;
-  type?: string;
-  start?: string;
-  points?: string;
-  due?: string;
-  status?: string;
+  urgency?: React.ReactNode;
+  type?: React.ReactNode;
+  start?: React.ReactNode;
+  points?: React.ReactNode;
+  due?: React.ReactNode;
+  status?: React.ReactNode;
 }
 
 export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
@@ -141,20 +141,20 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
 }
 
 /**
- * The header tooltips. Start Date, Points and Due Date, Urgency and Type are Figma's own copy; Status has
- * none there, so it borrows the line `AVTable`'s stories already use until the product writes one.
+ * The header tooltips. Start Date, Points and Due Date are the formula columns, with Figma's copy; Urgency,
+ * Type and Status use the copy their own pieces own, so every table says the same thing.
  */
 const FORMULA_HINTS = {
-  urgency: 'Indicates how urgent or important a task is compared to others',
-  type: 'Type 1: Direct KPI impact with clear ROI\nType 2: Indirect impact, enablement/optimization\nType 3: Non-critical, no meaningful KPI impact',
-  status: 'Where this sits in its domain’s flow.',
+  urgency: URGENCY_COLUMN_HINT,
+  type: TYPE_COLUMN_HINT,
+  status: STATUS_COLUMN_HINT,
   start: 'This column is editable, changing Start Date affects Due Date.',
   points: 'This column is editable, changing Points affects Due Date.',
   due: 'This column is editable, changing Due Date affects Start Date.\nDue Date = Approx. Start Date + Approx. Working Days + Buffer',
 };
 const ESTIMATE_HINT = 'This date is an estimate and may not be fully accurate.';
 
-const dateText = (d: PlanningDate) => (d.estimated ? `${d.value} (estimate)` : d.value);
+const dateText = (d: PlanningDate) => (d.estimated ? `${d.value} (est.)` : d.value);
 
 /** An estimated date carries the design's caution on hover and focus; a set one has nothing to say. */
 function EstimateHint({ estimated, children }: { estimated?: boolean; children: React.ReactElement }) {
@@ -296,7 +296,17 @@ export function PlanningTable({
       label: 'Initiator',
       render: (row) =>
         row.initiator ? (
-          <Avatar name={row.initiator.name} src={row.initiator.src} size="md" aria-label={`Initiator: ${row.initiator.name}`} />
+          /* The name on hover and focus — an avatar alone says who only to people who know the face. */
+          <Tooltip content={row.initiator.name}>
+            <span
+              role="img"
+              aria-label={`Initiator: ${row.initiator.name}`}
+              tabIndex={0}
+              className="inline-flex rounded-pill focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+            >
+              <Avatar name={row.initiator.name} src={row.initiator.src} size="md" aria-hidden="true" />
+            </span>
+          </Tooltip>
         ) : null,
     },
     {

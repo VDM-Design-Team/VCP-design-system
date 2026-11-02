@@ -12,6 +12,7 @@ Read off the Figma `Type_Tag` set (`3491:6845`), audit batch 5,
 | Piece | Tier |
 |---|---|
 | `Tag` | atom |
+| `Tooltip` | atom |
 | `Icon` | sub-atomic |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -33,9 +34,11 @@ moves it down a tier, per CLAUDE.md's composition rule.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `type` | `AVType` | — | Required. Three values; a typo is a compile error |
+| `tooltip` | `boolean` | `true` | Says what the type means on hover — "Type 3: Non-critical, no meaningful KPI impact" — as the design's tag does. The tag is not focusable, so this is a pointer nicety: the same meanings are on the Type column's header ⓘ, which keyboards reach. Turn it off where the meaning is already on screen |
 
 `AV_TYPES` exports the vocabulary heaviest-first, the order the design ranks
-them in.
+them in. `AV_TYPE_MEANING` holds what each type means — the one place that copy lives — and
+`TYPE_COLUMN_HINT` is the Type column's header tooltip built from it (the three meanings, the type in bold).
 
 ## The mapping
 

@@ -116,7 +116,7 @@ export function ColumnHint({
   column,
   icon = 'info',
 }: {
-  text?: string;
+  text?: React.ReactNode;
   column: string;
   /** The glyph. `info` (ⓘ) by default; the Planning table marks its editable, formula-linked columns with `function`. */
   icon?: IconName;
@@ -124,8 +124,17 @@ export function ColumnHint({
   if (!text) return null;
   return (
     <Tooltip
-      content={text.includes('\n') ? text.split('\n').map((line, i) => <span key={i} className="block">{line}</span>) : text}
+      content={
+        typeof text === 'string' && text.includes('\n')
+          ? text.split('\n').map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))
+          : text
+      }
       placement="bottom"
+      wide={typeof text !== 'string' || text.includes('\n')}
     >
       <button
         type="button"
@@ -135,12 +144,19 @@ export function ColumnHint({
           /* `function` is the formula columns' mark (Figma's `_function_tooltip_icon`): a ƒ in a ring, in
              brand blue, where the info glyph is a quiet grey. */
           icon === 'function'
-            ? 'rounded-pill border border-text-brand-medium text-text-brand-medium hover:border-text-brand-strong hover:text-text-brand-strong'
+            ? 'text-text-brand-medium hover:text-text-brand-strong'
             : 'text-text-tertiary hover:text-text-secondary',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
         )}
       >
-        <Icon name={icon} size={icon === 'function' ? 10 : 'sm'} />
+        {icon === 'function' ? (
+          /* The ring is drawn as wide as the ⓘ's own circle (12 inside its 16), so the two marks match. */
+          <span className="grid size-3 place-items-center rounded-pill border border-current">
+            <Icon name="function" size={10} />
+          </span>
+        ) : (
+          <Icon name={icon} size="sm" />
+        )}
       </button>
     </Tooltip>
   );

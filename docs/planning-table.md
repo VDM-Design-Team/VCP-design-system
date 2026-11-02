@@ -48,11 +48,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onPointsChange` | `(row, points) => void` | — | Same, for points |
 | `page` / `pageCount` / `onPageChange` | | — | Pagination renders only when all three are given |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | With the pagination: the "Items 50 ▾" selector and the "1-50 of 1,250" range |
-| `hints` | `{ urgency, type, start, points, due, status }` | the design's copy | The header tooltips. Start Date, Points and Due Date are the formula columns (ƒ in a ring, brand blue); Urgency and Type use Figma's copy; Status has none in Figma and borrows `AVTable`'s story line until the product writes one. Pass a string to change a column's copy, `''` to drop its glyph |
+| `hints` | `{ urgency, type, start, points, due, status }` | the product's copy | The header tooltips. Start Date, Points and Due Date are the formula columns (ƒ in a ring, brand blue, as wide as the ⓘ's circle); Urgency, Type and Status use the copy their own pieces own, as `AVTable` does. Pass a string or node to change a column's copy, `''` to drop its glyph |
 | `empty` | `ReactNode` | — | What a section with no rows says |
 
 A row is `{ id, ref, title, domain?, urgency?, type?, initiator?, assignee?, start?, points?, due?, status? }`;
-`start` and `due` are `{ value (ISO), estimated? }`, and an estimated date reads "2026-03-16 (estimate)".
+`start` and `due` are `{ value (ISO), estimated? }`, and an estimated date reads "2026-03-16 (est.)".
 
 ## Columns
 
@@ -82,7 +82,9 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
 |---|---|
 | Urgency ⓘ | "Indicates how urgent or important a task is compared to others" |
 | Type ⓘ | "Type 1: Direct KPI impact with clear ROI / Type 2: Indirect impact, enablement/optimization / Type 3: Non-critical, no meaningful KPI impact" (one line each) |
-| Status ⓘ | "Where this sits in its domain’s flow." (placeholder — not in Figma) |
+| Status ⓘ | "Reflects the current stage of the task (e.g., in progress, completed)." |
+| A type tag | "Type 3: Non-critical, no meaningful KPI impact" |
+| The initiator's avatar | Their name |
 | Start Date ƒ | "This column is editable, changing Start Date affects Due Date." |
 | Points ƒ | "This column is editable, changing Points affects Due Date." |
 | Due Date ƒ | "This column is editable, changing Due Date affects Start Date. Due Date = Approx. Start Date + Approx. Working Days + Buffer" |

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { Tag } from '../../atoms/tag';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * TypeTag — an Added Value's type, as a glyph and a word. The owner of VCP's
@@ -52,14 +53,42 @@ const TYPE: Record<AVType, { icon: IconName; className: string }> = {
   'Type 3': { icon: 'caret-up', className: 'text-text-brand-medium' },
 };
 
+/** What each type means — the one place this copy lives (Figma's tag tooltips and the column's ⓘ). */
+export const AV_TYPE_MEANING: Record<AVType, string> = {
+  'Type 1': 'Direct KPI impact with clear ROI',
+  'Type 2': 'Indirect impact, enablement/optimization',
+  'Type 3': 'Non-critical, no meaningful KPI impact',
+};
+
+/**
+ * The Type column's header tooltip: the three meanings, one a line, the type in bold. Pass it as a
+ * `ColumnHint`'s `text`.
+ */
+export const TYPE_COLUMN_HINT = (
+  <>
+    {AV_TYPES.map((t) => (
+      <span key={t} className="block">
+        <strong className="font-semibold">{t}:</strong> {AV_TYPE_MEANING[t]}
+      </span>
+    ))}
+  </>
+);
+
 export interface TypeTagProps extends React.HTMLAttributes<HTMLSpanElement> {
   type: AVType;
+  /**
+   * Say what the type means on hover ("Type 3: Non-critical, no meaningful KPI impact"), as the
+   * design's tag does. On by default. The tag is not focusable, so this is a pointer nicety: the same
+   * three meanings are on the Type column's header ⓘ (`TYPE_COLUMN_HINT`), which keyboards reach.
+   * Turn it off where the meaning is already on screen.
+   */
+  tooltip?: boolean;
 }
 
 export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, tooltip = true, ...props }, ref) => {
     const { icon, className: tone } = TYPE[type];
-    return (
+    const tag = (
       <Tag
         ref={ref}
         variant="textual"
@@ -72,6 +101,7 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
         {type}
       </Tag>
     );
+    return tooltip ? <Tooltip content={`${type}: ${AV_TYPE_MEANING[type]}`}>{tag}</Tooltip> : tag;
   },
 );
 TypeTag.displayName = 'TypeTag';

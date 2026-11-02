@@ -6,12 +6,12 @@ import {
   type DataTableColumn,
   type DataTableSort,
 } from '../../components/data-table';
-import { StatusTag, type StatusTagProps } from '../../components/status-tag';
+import { StatusTag, STATUS_COLUMN_HINT, type StatusTagProps } from '../../components/status-tag';
 import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../atoms/pagination';
-import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
-import { TypeTag, type AVType } from '../../components/type-tag';
+import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
+import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
@@ -71,17 +71,23 @@ export interface AVTableRow {
 }
 
 /**
- * The four columns the design puts an info glyph on. **There is no default
- * copy**, and there will not be: Figma draws the glyphs but writes no tooltip
- * text, and inventing four sentences of product copy is not a design system's
- * job. Pass what the product says; omit one and its glyph does not render.
+ * The four columns the design puts an info glyph on. Urgency, Type and Status default to the product's
+ * copy — each piece owns its own (`URGENCY_COLUMN_HINT`, `TYPE_COLUMN_HINT`, `STATUS_COLUMN_HINT`).
+ * **Members has none**: Figma draws the glyph and writes nothing, so it stays silent until you pass
+ * a line. Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
  */
 export interface AVTableHints {
-  urgency?: string;
-  type?: string;
-  status?: string;
-  members?: string;
+  urgency?: React.ReactNode;
+  type?: React.ReactNode;
+  status?: React.ReactNode;
+  members?: React.ReactNode;
 }
+
+const DEFAULT_HINTS: AVTableHints = {
+  urgency: URGENCY_COLUMN_HINT,
+  type: TYPE_COLUMN_HINT,
+  status: STATUS_COLUMN_HINT,
+};
 
 export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   rows: readonly AVTableRow[];
@@ -103,7 +109,7 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   page?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
-  /** The four info tooltips. No defaults — see `AVTableHints`. */
+  /** The info tooltips. Urgency, Type and Status default to the product's copy — see `AVTableHints`. */
   hints?: AVTableHints;
   empty?: React.ReactNode;
   caption?: string;
@@ -136,11 +142,12 @@ export function AVTable({
   page,
   pageCount,
   onPageChange,
-  hints,
+  hints: hintOverrides,
   empty,
   caption = 'Added Values',
   ...props
 }: AVTableProps) {
+  const hints = { ...DEFAULT_HINTS, ...hintOverrides };
   const columns: Array<DataTableColumn<AVTableRow>> = [
     {
       key: 'title',
@@ -207,7 +214,7 @@ export function AVTable({
     {
       key: 'urgency',
       label: 'Urgency',
-      hint: <ColumnHint text={hints?.urgency} column="urgency" />,
+      hint: <ColumnHint text={hints.urgency} column="urgency" />,
       /* The tag carries Figma's own 8 of padding, so the cell gives it back to
          keep the column's left edge true. */
       render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
@@ -215,19 +222,19 @@ export function AVTable({
     {
       key: 'type',
       label: 'Type',
-      hint: <ColumnHint text={hints?.type} column="type" />,
+      hint: <ColumnHint text={hints.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
     },
     {
       key: 'status',
       label: 'Status',
-      hint: <ColumnHint text={hints?.status} column="status" />,
+      hint: <ColumnHint text={hints.status} column="status" />,
       render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
     },
     {
       key: 'members',
       label: 'Members',
-      hint: <ColumnHint text={hints?.members} column="members" />,
+      hint: <ColumnHint text={hints.members} column="members" />,
       render: (row) =>
         row.members?.length ? (
           <AvatarGroup people={row.members} size="md" max={3} label="Members" />

@@ -79,7 +79,7 @@ rather than a `variant` prop.
 | `onDeleteSelected` | `(ids) => void` | — | The destructive button above the pagination |
 | `deleteSelectedLabel` | `(count) => string` | `Delete Selected (n)` | |
 | `page` / `pageCount` / `onPageChange` | — | — | Pagination renders only when **all three** are given |
-| `hints` | `AVTableHints` | — | The four info tooltips. No defaults — see below |
+| `hints` | `AVTableHints` | Urgency, Type, Status: the product's copy | The info tooltips — see below |
 | `empty` | `ReactNode` | `DataTable`'s | An `<EmptyState>` fits |
 | `caption` | `string` | `'Added Values'` | Visually hidden `<caption>` |
 
@@ -111,12 +111,20 @@ value someone chose.
 date maths and no relative time — see `docs/due-date-tag.md` for why the
 threshold is not a design-system decision.
 
-### `hints` has no defaults, deliberately
+### `hints`: three have copy, Members does not
 
-Figma puts an info glyph on four headers — Urgency, Type, Status, Members —
-and writes no tooltip text on any of them. Inventing four sentences of product
-copy is not a design system's job, so the glyph renders only for a hint you
-supply. **Open question for design**, below.
+Figma puts an info glyph on four headers — Urgency, Type, Status, Members. Three now have the product's
+copy, owned by the piece each describes (`URGENCY_COLUMN_HINT`, `TYPE_COLUMN_HINT`, `STATUS_COLUMN_HINT`), so
+every table says the same thing:
+
+| Column | Says |
+|---|---|
+| Urgency | "Indicates how urgent or important a task is compared to others" |
+| Type | **Type 1:** Direct KPI impact with clear ROI / **Type 2:** Indirect impact, enablement/optimization / **Type 3:** Non-critical, no meaningful KPI impact (one a line, the type in bold) |
+| Status | "Reflects the current stage of the task (e.g., in progress, completed)." |
+
+**Members has no copy** — Figma draws the glyph and writes nothing — so it renders only for a hint you supply.
+Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
 
 ## Accessibility
 
@@ -176,9 +184,8 @@ the canvas**: 81, 16 and 32 respectively, all exact.
 
 ## Still open
 
-1. **The four info tooltips have no copy.** Design drew the glyphs; nobody
-   wrote the sentences. Until they exist, `hints` is empty and the glyphs do
-   not render.
+1. **The Members tooltip has no copy.** Design drew the glyph; nobody wrote the sentence. Until
+   it exists, the glyph does not render.
 2. **What "due soon" means** — carried over from `docs/due-date-tag.md`.
 3. **`Pagination`'s three missing affordances**, listed above. They belong on
    that component, not here.
