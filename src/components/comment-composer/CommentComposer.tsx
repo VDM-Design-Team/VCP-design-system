@@ -62,6 +62,29 @@ export interface CommentComposerProps
   onCancel?: () => void;
 }
 
+const same = (a: MentionSegment, b: MentionSegment) =>
+  a.type === 'text' ? b.type === 'text' && a.text === b.text : b.type === 'mention' && a.id === b.id;
+
+/* What the box holds once what was sent is taken off its front: whatever was typed while the send
+   was in flight. `null` when the box no longer starts with what was sent (it was changed while
+   sending), so nothing can safely be taken. */
+function afterSent(now: readonly MentionSegment[], sent: readonly MentionSegment[]): MentionSegment[] | null {
+  if (sent.length === 0) return [...now];
+  const k = sent.length - 1;
+  if (now.length < sent.length || !sent.slice(0, k).every((s, i) => same(s, now[i]!))) return null;
+  const last = sent[k]!;
+  const here = now[k]!;
+  let rest = now.slice(k + 1);
+  if (last.type === 'text' && here.type === 'text') {
+    if (!here.text.startsWith(last.text)) return null;
+    rest = [{ type: 'text', text: here.text.slice(last.text.length) }, ...rest];
+  } else if (!same(last, here)) return null;
+  /* The space that separated the new words from the sent ones goes with the sent ones. */
+  const first = rest[0];
+  if (first?.type === 'text') rest[0] = { type: 'text', text: first.text.replace(/^\s+/, '') };
+  return rest.filter((s) => s.type === 'mention' || s.text !== '');
+}
+
 export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerProps>(
   (
     {
@@ -97,9 +120,33 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
       };
     }, []);
 
+    /* A send that has settled while the field may still show its words. Until the field is redrawn,
+       a keystroke reads those words back from it, so `change` takes them off as well. */
+    const settled = React.useRef<readonly MentionSegment[] | null>(null);
+    /* After a send clears the box down to what was typed meanwhile, the caret goes back to its end. */
+    const field = React.useRef<HTMLDivElement>(null);
+    const caretToEnd = React.useRef(false);
+    React.useLayoutEffect(() => {
+      /* The field has been redrawn from `inner` (its own layout effect runs first): the sent words are gone. */
+      settled.current = null;
+      const box = field.current;
+      if (!caretToEnd.current || !box) return;
+      caretToEnd.current = false;
+      if (document.activeElement !== box) return;
+      const range = document.createRange();
+      range.selectNodeContents(box);
+      range.collapse(false);
+      window.getSelection()?.removeAllRanges();
+      window.getSelection()?.addRange(range);
+    }, [inner]);
+
     const change = (next: MentionSegment[]) => {
-      if (!controlled) setInner(next);
-      onChange?.(next);
+      const rest = settled.current ? afterSent(next, settled.current) : null;
+      if (rest) caretToEnd.current = rest.length > 0;
+      else settled.current = null;
+      const value = rest ?? next;
+      if (!controlled) setInner(value);
+      onChange?.(value);
     };
 
     const submit = async () => {
@@ -111,7 +158,16 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
           setBusy(true);
           await result;
         }
-        if (mounted.current && !controlled) setInner([]);
+        /* Clear what was sent, and only that: words typed while it was sending stay. If the sent
+           words were changed meanwhile, nothing is taken, and the box is left as the person has it. */
+        if (mounted.current && !controlled) {
+          settled.current = sent;
+          setInner((now) => {
+            const rest = afterSent(now, sent);
+            caretToEnd.current = !!rest?.length;
+            return rest ?? now;
+          });
+        }
       } catch {
         /* Rejected: the text stays, and reporting the error is the caller's. */
       } finally {
@@ -132,6 +188,7 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <MentionInput
+            ref={field}
             aria-label={inputLabel}
             members={members}
             value={current}

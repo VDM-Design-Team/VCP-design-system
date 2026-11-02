@@ -124,80 +124,104 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
       ...props
     },
     ref,
-  ) => (
-    <article ref={ref} className={cn('flex flex-col gap-2 py-2 font-sans', className)} {...props}>
-      <div className="flex items-start gap-4">
-        {/* The rail: the avatar, and under it the thread line. Stretches the row's height (the box, when
-            there is one, is part of it), and reaches 8 past it so the line meets the replies below,
-            whatever is between. The line is placed at 16, the middle of the avatar, so it lands on the
-            same pixel as the replies' corners (`CommentReplyThread`). */}
-        <div className={cn('relative w-8 shrink-0 self-stretch', thread !== 'none' && '-mb-2')}>
-          <Avatar size="md" name={author.name} src={author.src} className={AVATAR} />
-          {thread !== 'none' && (
-            <span aria-hidden="true" className="absolute top-9 bottom-0 left-4 w-px bg-stroke-default" />
-          )}
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-label-sm-medium text-text-primary">{author.name}</span>
-              <time dateTime={dateTime} className="text-body-sm-regular text-text-tertiary">
-                {time}
-              </time>
-            </div>
-            {editing ? (
-              <CommentComposer
-                members={members}
-                inputLabel="Edit comment"
-                variant="save"
-                defaultValue={body}
-                loading={editLoading}
-                onSubmit={onSubmitEdit}
-                onCancel={onCancelEdit ?? (() => {})}
-                autoFocus
-              />
-            ) : (
-              <p className="m-0 text-body-sm-regular break-words whitespace-pre-wrap text-text-primary">
-                {body.map((segment, i) =>
-                  segment.type === 'mention' ? (
-                    <MentionTag key={i} id={segment.id} label={segment.label} />
-                  ) : (
-                    <React.Fragment key={i}>{segment.text}</React.Fragment>
-                  ),
-                )}
-              </p>
+  ) => {
+    /* A reply or edit box that closes (sent, saved or cancelled) takes the focus with it. Hand it
+       back to the button that opened the box, unless it has already gone somewhere else, such as
+       the box another comment's Reply just opened. */
+    const actions = React.useRef<HTMLDivElement>(null);
+    const was = React.useRef({ replying, editing });
+    React.useEffect(() => {
+      const closed = was.current.editing && !editing ? 'edit' : was.current.replying && !replying ? 'reply' : null;
+      was.current = { replying, editing };
+      const lost = !document.activeElement || document.activeElement === document.body;
+      if (closed && lost) actions.current?.querySelector<HTMLElement>(`[data-action="${closed}"]`)?.focus();
+    }, [replying, editing]);
+
+    return (
+      <article
+        ref={ref}
+        className={cn(
+          'flex flex-col gap-2 py-2 font-sans',
+          /* Seen only when focus is put here (`CommentSection` does, after a delete). */
+          'rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+          className,
+        )}
+        {...props}
+      >
+        <div className="flex items-start gap-4">
+          {/* The rail: the avatar, and under it the thread line. Stretches the row's height (the box, when
+              there is one, is part of it), and reaches 8 past it so the line meets the replies below,
+              whatever is between. The line is placed at 16, the middle of the avatar, so it lands on the
+              same pixel as the replies' corners (`CommentReplyThread`). */}
+          <div className={cn('relative w-8 shrink-0 self-stretch', thread !== 'none' && '-mb-2')}>
+            <Avatar size="md" name={author.name} src={author.src} className={AVATAR} />
+            {thread !== 'none' && (
+              <span aria-hidden="true" className="absolute top-9 bottom-0 left-4 w-px bg-stroke-default" />
             )}
           </div>
-          {!editing && (
-            <CommentActions
-              replyCount={replyCount}
-              repliesOpen={repliesOpen}
-              onToggleReplies={onToggleReplies}
-              repliesId={repliesId}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              replying={replying}
-              onReply={onReply}
-              onCancelReply={onCancelReply}
-              link={link}
-              onCopyLink={onCopyLink}
-              reactions={reactions}
-            />
-          )}
-          {replying && !editing && (
-            <CommentComposer
-              members={members}
-              inputLabel={`Reply to ${author.name}`}
-              variant="reply"
-              loading={replyLoading}
-              onSubmit={onSubmitReply}
-              onCancel={onCancelReply ?? (() => {})}
-              autoFocus
-            />
-          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-label-sm-medium text-text-primary">{author.name}</span>
+                <time dateTime={dateTime} className="text-body-sm-regular text-text-tertiary">
+                  {time}
+                </time>
+              </div>
+              {editing ? (
+                <CommentComposer
+                  members={members}
+                  inputLabel="Edit comment"
+                  variant="save"
+                  defaultValue={body}
+                  loading={editLoading}
+                  onSubmit={onSubmitEdit}
+                  onCancel={onCancelEdit ?? (() => {})}
+                  autoFocus
+                />
+              ) : (
+                <p className="m-0 text-body-sm-regular break-words whitespace-pre-wrap text-text-primary">
+                  {body.map((segment, i) =>
+                    segment.type === 'mention' ? (
+                      <MentionTag key={i} id={segment.id} label={segment.label} />
+                    ) : (
+                      <React.Fragment key={i}>{segment.text}</React.Fragment>
+                    ),
+                  )}
+                </p>
+              )}
+            </div>
+            {!editing && (
+              <CommentActions
+                ref={actions}
+                replyCount={replyCount}
+                repliesOpen={repliesOpen}
+                onToggleReplies={onToggleReplies}
+                repliesId={repliesId}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                replying={replying}
+                onReply={onReply}
+                onCancelReply={onCancelReply}
+                link={link}
+                onCopyLink={onCopyLink}
+                reactions={reactions}
+              />
+            )}
+            {replying && !editing && (
+              <CommentComposer
+                members={members}
+                inputLabel={`Reply to ${author.name}`}
+                variant="reply"
+                loading={replyLoading}
+                onSubmit={onSubmitReply}
+                onCancel={onCancelReply ?? (() => {})}
+                autoFocus
+              />
+            )}
+          </div>
         </div>
-      </div>
-    </article>
-  ),
+      </article>
+    );
+  },
 );
 CommentReply.displayName = 'CommentReply';

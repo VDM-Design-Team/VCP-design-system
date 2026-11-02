@@ -124,3 +124,43 @@ export const KeepsTheTextWhenASendFails: Story = {
     await expect(box).toHaveTextContent('Do not lose me');
   },
 };
+
+/* Lets the story below finish its send when it chooses. */
+let finishSend: () => void = () => {};
+
+/** **Flow:** words typed while a send is still out stay in the box; only what was sent is cleared. */
+export const KeepsWhatIsTypedWhileSending: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: {
+    onSubmit: fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishSend = resolve;
+        }),
+    ),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const box = canvas.getByRole('textbox', { name: 'Add a comment' });
+    await typeText(box, 'First thought');
+    await userEvent.click(canvas.getByRole('button', { name: 'Add Comment' }));
+    await expect(args.onSubmit).toHaveBeenCalledWith([{ type: 'text', text: 'First thought' }]);
+
+    /* Back in the box, at its end, typing on while the send is still out. */
+    box.focus();
+    window.getSelection()?.selectAllChildren(box);
+    window.getSelection()?.collapseToEnd();
+    for (const char of ' and a') {
+      document.execCommand('insertText', false, char);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    /* The send settles, and the next keys land at once, before the box has been redrawn: they must
+       not bring the sent words back. */
+    finishSend();
+    for (let tick = 0; tick < 5; tick++) await Promise.resolve();
+    for (const char of ' second') document.execCommand('insertText', false, char);
+    await waitFor(() => expect(box).toHaveTextContent(/^and a second$/));
+  },
+};

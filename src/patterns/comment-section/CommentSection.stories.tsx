@@ -287,3 +287,51 @@ export const RepliesReadOldestFirst: Story = {
     await expect(order[1]).toContain('Second reply.');
   },
 };
+
+/**
+ * **Flow:** the focus is never dropped. A reply that is sent, and an edit that is saved or cancelled,
+ * hand it back to the Reply or Edit that opened the box; deleting a comment moves it to the comment
+ * that takes its place (the next, else the one before, else the one it replied to).
+ */
+export const FocusIsNeverDropped: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: function Render(args) {
+    const demo = useDemo(SEED);
+    return <CommentSection {...args} {...demo} defaultRepliesOpen />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* A comment by what it says, and a button in it. */
+    const comment = (words: string | RegExp) =>
+      [...canvasElement.querySelectorAll<HTMLElement>('article')].find((a) => within(a).queryByText(words))!;
+    const action = (words: string | RegExp, name: string) => within(comment(words)).getAllByRole('button', { name })[0]!;
+    const JANES = 'Can we move the review to Thursday?';
+    const JOHNS = /Test comment here\./;
+
+    /* Reply to Jane's comment and send it: back on its Reply. */
+    await userEvent.click(action(JANES, 'Reply'));
+    await typeText(await canvas.findByRole('textbox', { name: 'Reply to Jane Doe' }), 'On it');
+    await userEvent.click(within(comment(JANES)).getByRole('button', { name: 'Reply' }));
+    await canvas.findByText('On it');
+    await waitFor(() => expect(action(JANES, 'Reply')).toHaveFocus());
+
+    /* Edit John's comment, then cancel, then save: back on its Edit both times. */
+    await userEvent.click(action(JOHNS, 'Edit'));
+    await userEvent.click(await canvas.findByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(action(JOHNS, 'Edit')).toHaveFocus());
+    await userEvent.click(action(JOHNS, 'Edit'));
+    await typeText(await canvas.findByRole('textbox', { name: 'Edit comment' }), ' Edited.');
+    await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
+    await canvas.findByText(/Edited\./);
+    await waitFor(() => expect(action(JOHNS, 'Edit')).toHaveFocus());
+
+    /* Delete John's only reply to Jane: the focus goes to Jane's comment it replied to. */
+    await userEvent.click(action('Thanks, Jane.', 'Delete'));
+    await waitFor(() => expect(comment('Looking at it now.')).toHaveFocus());
+
+    /* Delete John's top-level comment: the focus goes to the next one. */
+    await userEvent.click(action(JOHNS, 'Delete'));
+    await waitFor(() => expect(comment(JANES)).toHaveFocus());
+  },
+};
