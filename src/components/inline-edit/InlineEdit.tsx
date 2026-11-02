@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { IconButton } from '../../atoms/icon-button';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * InlineEdit — a value you can change in place: read it, press the pen, change

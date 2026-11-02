@@ -11,7 +11,7 @@ used. The words are fixed, not props: the only choice is which order it is in.
 
 | Piece | Tier |
 |---|---|
-| `Chip` | component |
+| `Chip` | atom |
 | `Icon` | sub-atomic |
 
 Generated from the real imports — `npm test` fails if this list drifts.

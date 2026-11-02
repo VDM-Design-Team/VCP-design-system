@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Logo } from '../../atoms/logo';
 import { Icon } from '../../atoms/icon';
 import { Menu } from '../../components/menu';
-import { Tooltip } from '../../components/tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 import { SidebarItem, type SidebarSubItem } from '../../components/sidebar-item';
 import type { IconName } from '../../atoms/icon';
 

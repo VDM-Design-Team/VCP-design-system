@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
+import { Icon } from '../icon';
 
 /**
  * Pagination — page numbers for a data set with pages worth naming: tables,

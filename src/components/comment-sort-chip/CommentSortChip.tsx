@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Chip, type ChipProps } from '../chip';
+import { Chip, type ChipProps } from '../../atoms/chip';
 import { Icon } from '../../atoms/icon';
 
 /**

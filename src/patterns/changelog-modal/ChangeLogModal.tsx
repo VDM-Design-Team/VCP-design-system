@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Modal } from '../../components/modal';
 import { Carousel } from '../../components/carousel';
-import { Tooltip } from '../../components/tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 import { Badge } from '../../atoms/badge';
 import { Button } from '../../atoms/button';
 import { Icon, type IconName } from '../../atoms/icon';

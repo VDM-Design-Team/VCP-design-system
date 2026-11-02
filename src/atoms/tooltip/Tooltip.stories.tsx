@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Tooltip } from './Tooltip';
-import { Button } from '../../atoms/button';
-import { IconButton } from '../../atoms/icon-button';
+import { Button } from '../button';
+import { IconButton } from '../icon-button';
 
 const meta = {
-  title: 'Components/Overlays/Tooltip',
+  title: 'Atoms/Tooltip',
   component: Tooltip,
   parameters: {
     docs: {
