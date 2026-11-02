@@ -150,7 +150,7 @@ export const DomainItem = React.forwardRef<HTMLDivElement, DomainItemProps>(
           </Tag>
         ) : (
           (onEdit || onDelete) && (
-            <div className="flex shrink-0 items-center gap-1">
+            <div className="flex shrink-0 items-center">
               {onEdit && (
                 <IconButton icon="note-pencil" label={`Edit ${label}`} onClick={onEdit} />
               )}
