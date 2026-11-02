@@ -15,7 +15,7 @@ import {
  *
  * - **No scrollbar is drawn** — the design draws none — so every other way to scroll still works: a touch swipe, a
  *   trackpad swipe, Shift + wheel, **dragging the row with the mouse**, Tab (focusing a card brings it into view), and an
- *   arrow at each edge that moves one card. The arrows are 40 tonal discs in a 48 hit area, shown while the strip is hovered
+ *   arrow at each edge that moves one card. The arrows are 32 tonal discs in a 40 press area (a step down from Figma's 40 in 48), shown while the strip is hovered
  *   or has focus, and not at all at an end they would run into; on a touch screen they stay out of the way. (A plain
  *   vertical wheel is left to the page: turning it into a sideways scroll would trap anyone scrolling past.)
  * - **It owns no state.** `items` in, `onOpen(item)` and `onDismiss(item)` out. A dismissed card must stay away, the
@@ -99,11 +99,12 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
 
     if (items.length === 0) return null;
 
-    /* A 48 hit area around a 40 disc, the design's `_ICYMI_Arrow_Button`. */
+    /* A 40 press area around a 32 disc: one size down from the design's `_ICYMI_Arrow_Button` (48 around 40), which read as
+       too big beside the cards, with the same 40 minimum target. */
     const arrow =
-      'group/arrow absolute top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-pill pointer-coarse:hidden opacity-0 transition-opacity group-hover/strip:opacity-100 group-focus-within/strip:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused';
+      'group/arrow absolute top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-pill pointer-coarse:hidden opacity-0 transition-opacity group-hover/strip:opacity-100 group-focus-within/strip:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused';
     const disc =
-      'grid size-10 place-items-center rounded-pill bg-neutral-tonal-surface-default text-neutral-tonal-content-default transition-colors group-hover/arrow:bg-neutral-tonal-surface-hover group-active/arrow:bg-neutral-tonal-surface-pressed';
+      'grid size-8 place-items-center rounded-pill bg-neutral-tonal-surface-default text-neutral-tonal-content-default transition-colors group-hover/arrow:bg-neutral-tonal-surface-hover group-active/arrow:bg-neutral-tonal-surface-pressed';
 
     return (
       <section
@@ -176,14 +177,14 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
           {!edges.start && (
             <button type="button" aria-label="Previous" onClick={() => move(-1)} className={cn(arrow, 'left-0')}>
               <span className={disc}>
-                <Icon name="caret-left" size="lg" aria-hidden="true" />
+                <Icon name="caret-left" size="md" aria-hidden="true" />
               </span>
             </button>
           )}
           {!edges.end && (
             <button type="button" aria-label="Next" onClick={() => move(1)} className={cn(arrow, 'right-0')}>
               <span className={disc}>
-                <Icon name="caret-right" size="lg" aria-hidden="true" />
+                <Icon name="caret-right" size="md" aria-hidden="true" />
               </span>
             </button>
           )}

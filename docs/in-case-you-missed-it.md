@@ -37,7 +37,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 - **No scrollbar is drawn** (the design draws none), so scrolling works every other way: a touch or trackpad swipe, Shift + wheel,
   **dragging the row with the mouse** (past a few pixels it is a drag, and the click that ends it is swallowed so letting go over a
   card does not open it), Tab (focusing a card brings it into view), and an arrow at each edge that moves one card. The arrows are
-  40 tonal discs in a 48 hit area (Figma's `_ICYMI_Arrow_Button`), shown while the strip is hovered or has focus, not at an end the
+  32 tonal discs in a 40 press area — one size down from Figma's `_ICYMI_Arrow_Button` (a 40 disc in 48), which read as too big beside the
+  cards, with the same 40 minimum target — shown while the strip is hovered or has focus, not at an end the
   row cannot go past, and not at all when everything fits; on a touch screen they are hidden. A plain vertical wheel is left to the
   page — turning it sideways would trap anyone scrolling past the strip.
 - **It owns no state.** A dismissed card must stay away "even after logging out and in and after a refresh" while it keeps its current
