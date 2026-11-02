@@ -50,9 +50,9 @@ bring a case the reason does not cover.
   moves into the search box (the combobox); without it the button itself is the select-only combobox.
   Two patterns, chosen by one prop, not two components.
 - **What would justify a second pattern:** a list too large to hold in the browser (typing asks a
-  server), or typing a *new* value into the list. Neither is in the designs. If one arrives, add an
-  option here (`onSearch`, `creatable`); do not move search back into the field for the cases
-  that work today.
+  server), or typing a *new* value into the list. The first is now an option here (`onSearch`),
+  not a second pattern; the second is not in the designs, and if it arrives it is an option too
+  (`creatable`). Do not move search back into the field for the cases that work today.
 
 ### 2. One component, not one per kind of list
 
@@ -142,7 +142,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
 | `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
 | `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |
-| `onSearch` | `(query: string) => void` | — | Search is on your server: called with the text on every change (and `''` when the panel opens), and the component stops filtering `options` itself, so you pass what matches. Debounce on your side and pair it with `loading` while the request runs. Picked values missing from the current `options` still show, by their value |
+| `onSearch` | `(query: string) => void` | — | Search is on your server: called with the text on every change (and `''` when the panel opens), and the component stops filtering `options` itself, so you pass what matches. Debounce on your side and pair it with `loading` while the request runs. A pick keeps its name after it drops out of `options`: the field remembers every option it has been given. For a value set before any search (a saved form), include its option in the first `options` |
 | `loadingText` | `string` | `Loading…` | What the panel says while `loading` |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
@@ -198,7 +198,8 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   never inside it. While tags carry the value, the trigger's text says how many are picked.
 - When there are no rows the message sits outside the listbox, which is hidden: a listbox may hold
   only options.
-- The trigger is a `<button>` so a `Field` label can name it. Without one, pass `aria-label`.
+- The trigger is a `<button>` so a `Field` label can name it. Without one, pass `aria-label`. Clicking the
+  label focuses the field, as it does a native `Select`; it does not open the panel.
 
 ## Differences from the designs
 

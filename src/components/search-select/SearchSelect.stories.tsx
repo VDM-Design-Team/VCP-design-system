@@ -83,12 +83,18 @@ const meta = {
     disabled: { control: 'boolean' },
     invalid: { control: 'boolean' },
   },
+  /* Room under the field for the panel, at the width a field usually gets. A story that needs
+     more says so with `parameters.frame`: `wide` for a wider column, `none` for its own layout
+     (a story's own `decorators` add to this one, they cannot replace it). */
   decorators: [
-    (Story) => (
-      <div className="h-96 w-60">
+    (Story, { parameters }) =>
+      parameters.frame === 'none' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        <div className={parameters.frame === 'wide' ? 'h-96 w-96' : 'h-96 w-60'}>
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<StoryProps>;
 
@@ -622,7 +628,13 @@ export const InAField: Story = {
     </Field>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: /Assignee/ })).toBeVisible();
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: /Assignee/ });
+    await expect(trigger).toBeVisible();
+    /* The label focuses the field, as it does a native Select, and does not open the panel. */
+    await userEvent.click(canvas.getByText('Assignee'));
+    await expect(trigger).toHaveFocus();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   },
 };
 
@@ -683,6 +695,8 @@ export const States: Story = {
  * Everything but the row's content (checkbox, states, keyboard, ARIA) is the same in all of them.
  */
 export const Rows: Story = {
+  /* Wide enough for the five-way switcher to read in full. */
+  parameters: { frame: 'wide' },
   render: function Render() {
     const [kind, setKind] = React.useState('avatar');
     const config: Record<string, StoryProps> = {
@@ -731,17 +745,56 @@ export const Rows: Story = {
 /** Light and dark: the search box, avatars, checkboxes and tags hold in both. */
 export const LightAndDark: Story = {
   args: { multiple: true, rows: 'avatar', value: ['amy', 'liam'] },
-  decorators: [],
+  parameters: { layout: 'fullscreen', frame: 'none' },
   render: (args) => (
-    <div className="flex flex-col gap-6">
-      <div className="h-96 w-60 p-4">
+    <div className="grid min-h-screen grid-cols-1 sm:grid-cols-2">
+      <div className="bg-surface-canvas p-8">
         <Controlled {...args} aria-label="Watchers (light)" />
       </div>
-      <div className="dark h-96 w-60 bg-surface-base p-4">
+      <div className="dark bg-surface-canvas p-8">
         <Controlled {...args} aria-label="Watchers (dark)" />
       </div>
     </div>
   ),
+};
+
+/**
+ * `size` (`sm` is 32 tall, `md` the default 40), `fullWidth` (fills its container; off, the field
+ * hugs its content) and `loading` (a spinner for the caret; the panel says "Loading…").
+ */
+export const SizesWidthAndLoading: Story = {
+  name: 'Sizes, full width and loading',
+  parameters: { frame: 'wide' },
+  args: { rows: 'avatar' },
+  render: (args) => (
+    <div className="flex flex-col gap-4">
+      {(
+        [
+          ['Small', { size: 'sm' }],
+          ['Medium (default)', {}],
+          ['Full width', { fullWidth: true }],
+          ['Loading', { loading: true }],
+        ] as const
+      ).map(([name, props]) => (
+        /* `items-start`: a column would otherwise stretch every field to its width. */
+        <div key={name} className="flex flex-col items-start gap-1">
+          <span className="text-caption-md-medium text-text-tertiary">{name}</span>
+          <Controlled {...args} {...props} aria-label={name} />
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = (name: string) => canvas.getByRole('button', { name }).parentElement!;
+    await expect(field('Small').getBoundingClientRect().height).toBeLessThan(
+      field('Medium (default)').getBoundingClientRect().height,
+    );
+    await expect(field('Full width').getBoundingClientRect().width).toBeGreaterThan(
+      field('Medium (default)').getBoundingClientRect().width,
+    );
+    await expect(canvasElement.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+  },
 };
 
 /* ---- Review fixes: each of these was a bug found by the reviewer. ---- */
@@ -919,5 +972,12 @@ export const ServerSearch: Story = {
     fireEvent.change(canvas.getByRole('combobox', { name: 'Search by name' }), { target: { value: 'zz' } });
     await waitFor(() => expect(args.onSearch).toHaveBeenLastCalledWith('zz'));
     await waitFor(() => expect(canvas.getByRole('option', { name: 'Carl Baker' })).toBeVisible());
+    /* Picked, then the search resets to two others: the field still says who, not "carl". */
+    await userEvent.click(canvas.getByRole('option', { name: 'Carl Baker' }));
+    const trigger = canvas.getByRole('button', { name: /Assignee/ });
+    await expect(trigger).toHaveTextContent('Carl Baker');
+    await userEvent.click(trigger);
+    await waitFor(() => expect(canvas.queryByRole('option', { name: 'Carl Baker' })).toBeNull());
+    await expect(trigger).toHaveTextContent('Carl Baker');
   },
 };
