@@ -205,10 +205,16 @@ export const EmptyDates: Story = {
   },
 };
 
+const addDays = (iso: string, days: number) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
 /**
  * The animation is a signal for *this session's* auto-calculation, never a reminder. Here VCP-1233 already
  * carries `animated` when the page loads (an old flag left in someone's state) and does **not** play; press the
- * button — the page calculating dates — and VCP-1234's start and due dates do: a sweep and a blue → white flash,
+ * button — the page calculating dates — and VCP-1239's start and due dates do (press it again for a new calculation): a sweep and a blue → white flash,
  * three times, stopping early when the pointer enters. Each date reports itself seen (`onAnimationDismiss`) and
  * the page clears its flag; it never plays again.
  */
@@ -228,6 +234,7 @@ export const AnimatedDates: Story = {
       }),
       flagged({ id: 'vcp-9', ref: 'VCP-1239', start: { value: '2026-03-02' }, due: { value: '2026-03-09' } }),
     ]);
+    const [runs, setRuns] = React.useState(0);
     const clear = (r: PlanningRow, field: 'start' | 'due') => {
       setRows((now) =>
         now.map((x) => (x.id === r.id && x[field] ? { ...x, [field]: { ...x[field]!, animated: false } } : x)),
@@ -238,19 +245,22 @@ export const AnimatedDates: Story = {
       <div className="flex flex-col gap-4">
         <Button
           variant="secondary"
-          onClick={() =>
+          onClick={() => {
+            /* Each press is a fresh calculation — new dates — because the same value twice is not a new signal. */
+            const next = runs + 1;
+            setRuns(next);
             setRows((now) =>
               now.map((x) =>
                 x.id === 'vcp-9'
                   ? {
                       ...x,
-                      start: { value: '2026-03-06', estimated: true, animated: true },
-                      due: { value: '2026-03-19', estimated: true, animated: true },
+                      start: { value: addDays('2026-03-06', next), estimated: true, animated: true },
+                      due: { value: addDays('2026-03-19', next), estimated: true, animated: true },
                     }
                   : x,
               ),
-            )
-          }
+            );
+          }}
         >
           Auto-calculate VCP-1239’s dates
         </Button>
