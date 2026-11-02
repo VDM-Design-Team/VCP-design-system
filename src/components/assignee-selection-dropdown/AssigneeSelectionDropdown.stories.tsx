@@ -45,7 +45,7 @@ function Controlled(args: React.ComponentProps<typeof AssigneeSelectionDropdown>
 }
 
 const open = async (canvasElement: HTMLElement) => {
-  await userEvent.click(within(canvasElement).getByRole('button', { name: /Assignee/ }));
+  await userEvent.click(within(canvasElement).getByRole('combobox', { name: /Assignee/ }));
 };
 
 /** The default view: Available and Busy open, Unavailable folded. */
