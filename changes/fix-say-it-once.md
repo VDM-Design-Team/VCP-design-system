@@ -16,4 +16,7 @@ and these are fixed:
   words and described by the hint, so "Starter, Up to 3 seats" is heard once, not "Starter Up to 3 seats, Up
   to 3 seats".
 
+`Tooltip` marks a trigger it does not describe with `data-tooltip`, and `IconButton` drops its native `title` under
+either mark, so the pen never gets the browser's own bubble on top of ours.
+
 Nothing changes on screen. No API change.
