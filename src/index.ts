@@ -1,4 +1,5 @@
 /* Atoms — single self-contained elements. */
+export * from './atoms/assignee-status';
 export * from './atoms/avatar';
 export * from './atoms/badge';
 export * from './atoms/button';
@@ -31,6 +32,8 @@ export * from './atoms/toggle';
 /* Components — units assembled from atoms (and other components). */
 export * from './components/accordion';
 export * from './components/attachment-preview';
+export * from './components/assignee-selection-dropdown';
+export * from './components/assignee-with-status';
 export * from './components/avatar-group';
 export * from './components/banner';
 export * from './components/breadcrumb';

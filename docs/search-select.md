@@ -138,6 +138,11 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `emptyText` | `string` | `No matches` | What the panel says when there are no rows |
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
 | `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
+| `warning` | `ReactNode` | — | A caution under the field in the warning colour (`accent.warning.outline.content`), with an amber border: the pick is allowed but worth a second look. `error` wins if both are set. Announced with the field |
+| `collapsibleGroups` | `boolean` | — | Group headings become buttons (`aria-expanded`, a caret). A folded group's rows leave the list — and the arrow keys. A search query unfolds every group that has a match |
+| `defaultCollapsedGroups` | `string[]` | — | Group names that start folded |
+| `renderGroupHeading` | `(name, { collapsed }) => ReactNode` | — | Draws a heading's content (a status dot beside the name). The button, caret and ARIA stay the component's |
+| `panelNotice` | `ReactNode` | — | A line above the rows inside the panel, with a divider under it |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
 | `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
 | `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
@@ -149,6 +154,17 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 
 There is no built-in "clear" for a single pick. For "no one in particular" add an option that
 says so ("Anyone", "Unassigned") — it is then a choice the user can see.
+
+## Collapsible groups
+
+`collapsibleGroups` is for a long list whose groups matter more than the rows — assignees by
+availability, where the people who can take the work should lead and the rest can fold away.
+Each heading is a real `<button>` with `aria-expanded`, so folding works with a pointer or the
+keyboard: **Tab** from the search box walks the headings (the panel stays open while focus is in
+it), **Enter** or **Space** folds one, **Escape** closes the panel from anywhere in it. The arrow
+keys only ever visit rows that are on screen, so a folded group is never a hidden stop. While
+the user is searching, groups with matches show whether folded or not — a search must not hide
+its own results.
 
 ## The panel
 
