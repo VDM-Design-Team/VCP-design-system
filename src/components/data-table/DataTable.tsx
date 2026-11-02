@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
+import { Icon, type IconName } from '../../atoms/icon';
 import { Checkbox } from '../../atoms/checkbox';
 import { Tooltip } from '../../atoms/tooltip';
 
@@ -106,7 +106,16 @@ const headerInner = 'flex items-center gap-1.5';
  * copy; the product says what the column is for. With no `text` it renders
  * nothing, so a conditional hint needs no conditional.
  */
-export function ColumnHint({ text, column }: { text?: string; column: string }) {
+export function ColumnHint({
+  text,
+  column,
+  icon = 'info',
+}: {
+  text?: string;
+  column: string;
+  /** The glyph. `info` (ⓘ) by default; the Planning table marks its editable, formula-linked columns with `function`. */
+  icon?: IconName;
+}) {
   if (!text) return null;
   return (
     <Tooltip content={text} placement="bottom">
@@ -119,7 +128,7 @@ export function ColumnHint({ text, column }: { text?: string; column: string }) 
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
         )}
       >
-        <Icon name="info" size="sm" />
+        <Icon name={icon} size="sm" />
       </button>
     </Tooltip>
   );

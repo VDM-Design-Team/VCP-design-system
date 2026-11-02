@@ -2,13 +2,15 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { PlanningTable, type PlanningRow, type PlanningSection } from './PlanningTable';
+import type { DataTableSort } from '../../components/data-table';
 
-const TITLE = '[VCP] Automated Planning Workspace for VCP Planning List - DESIGN';
+const TITLES = ['Automated Planning Workspace', 'Billing export', 'Calendar sync', 'Dashboard filters', 'Email digests'];
+const titleFor = (n: number) => `[VCP] ${TITLES[(n - 1) % TITLES.length]} for VCP Planning List - DESIGN`;
 
 const row = (n: number, extra: Partial<PlanningRow> = {}): PlanningRow => ({
   id: `vcp-${n}`,
   ref: `VCP-${1230 + n}`,
-  title: TITLE,
+  title: titleFor(n),
   domain: 'VCP',
   urgency: 'Normal',
   type: 'Type 3',
@@ -80,19 +82,28 @@ export const EmptySection: Story = {
 };
 
 export const WithPagination: Story = {
-  args: { defaultCollapsed: ['backlog'], page: 2, pageCount: 25, onPageChange: () => {} },
+  args: {
+    defaultCollapsed: ['backlog'],
+    page: 2,
+    pageCount: 25,
+    onPageChange: () => {},
+    itemCount: 1250,
+    pageSize: 50,
+    pageSizeOptions: [25, 50, 100],
+    onPageSizeChange: () => {},
+  },
 };
 
-/** The info glyphs only draw where there is copy; there is no default copy. */
+/**
+ * Start Date, Points and Due Date carry the design's formula tooltips (the ƒ glyph). Urgency, Type and
+ * Status have no copy in Figma, so they draw no glyph until the product supplies some.
+ */
 export const WithHints: Story = {
   args: {
     defaultCollapsed: ['backlog'],
     hints: {
       urgency: 'How soon this needs doing.',
       type: 'How heavy the change is.',
-      start: 'When work is planned to start.',
-      points: 'The capacity this takes.',
-      due: 'When it is due.',
       status: 'Where the Added Value is now.',
     },
   },
@@ -102,6 +113,7 @@ export const DarkTheme: Story = { args: { defaultCollapsed: ['backlog'] }, globa
 
 function Editable(args: React.ComponentProps<typeof PlanningTable>) {
   const [sections, setSections] = React.useState(args.sections);
+  const [sort, setSort] = React.useState<DataTableSort | undefined>(args.sort);
   const patch = (id: string, change: Partial<PlanningRow>) =>
     setSections((now) =>
       now.map((s) => ({ ...s, rows: s.rows.map((r) => (r.id === id ? { ...r, ...change } : r)) })),
@@ -109,7 +121,15 @@ function Editable(args: React.ComponentProps<typeof PlanningTable>) {
   return (
     <PlanningTable
       {...args}
-      sections={sections}
+      sections={sections.map((s) => ({
+        ...s,
+        /* Sorting is the caller's: the table reports the key and direction, and this story applies it. */
+        rows: sort
+          ? [...s.rows].sort((a, b) => (sort.direction === 'asc' ? 1 : -1) * a.title.localeCompare(b.title))
+          : s.rows,
+      }))}
+      sort={sort}
+      onSortChange={setSort}
       onStartChange={(r, iso) => patch(r.id, { start: { value: iso } })}
       onDueChange={(r, iso) => patch(r.id, { due: { value: iso } })}
       onPointsChange={(r, points) => patch(r.id, { points })}
@@ -142,5 +162,22 @@ export const FoldingAndEditing: Story = {
     await userEvent.type(field, '5');
     await userEvent.click(within(firstRow).getByRole('button', { name: 'Save' }));
     await expect(within(firstRow).getByText('5')).toBeInTheDocument();
+  },
+};
+
+/** Sorting is the caller's: the header reports the key and direction, this story applies it (here, per section). */
+export const SortingByTitle: Story = {
+  args: { defaultCollapsed: ['backlog'] },
+  render: (args) => <Editable {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const titles = () => canvas.getAllByRole('row').slice(1, 4).map((r) => r.textContent ?? '');
+    const first = (t: string[]) => t[0]!.includes('Automated') ? 'automated' : t[0]!.includes('Billing') ? 'billing' : 'calendar';
+    await expect(first(titles())).toBe('automated');
+    const header = canvas.getAllByRole('button', { name: /Added Value Title/ })[0]!;
+    await userEvent.click(header);
+    await userEvent.click(header);
+    /* Descending: Calendar sync leads. */
+    await expect(first(titles())).toBe('calendar');
   },
 };

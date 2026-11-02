@@ -2,9 +2,11 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Icon } from '../../atoms/icon';
+import { CopyText } from '../../atoms/copy-text';
 import { Input } from '../../atoms/input';
 import { Pagination } from '../../atoms/pagination';
 import { Tag } from '../../atoms/tag';
+import { Tooltip } from '../../atoms/tooltip';
 import type { AssigneeAvailability } from '../../atoms/assignee-status';
 import { AssigneeWithStatus } from '../../components/assignee-with-status';
 import {
@@ -86,7 +88,11 @@ export interface PlanningSection {
   rows: readonly PlanningRow[];
 }
 
-/** The six columns the design puts an info glyph on. No default copy — pass what the product says. */
+/**
+ * The six columns the design puts a glyph on. **Start Date, Points and Due Date have the design's
+ * own copy** (the formula tooltips, default below); Urgency, Type and Status have none in Figma, so
+ * those stay silent until the product says something.
+ */
 export interface PlanningTableHints {
   urgency?: string;
   type?: string;
@@ -115,12 +121,31 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   page?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
+  /** With the pagination: the "Items 50 ▾" selector and "1-50 of 1,250" range (`Pagination`'s own props). */
+  itemCount?: number;
+  pageSize?: number;
+  pageSizeOptions?: readonly number[];
+  onPageSizeChange?: (pageSize: number) => void;
+  /** Overrides for the info tooltips. The three formula columns default to the design's copy. */
   hints?: PlanningTableHints;
   /** What a section with no rows says. */
   empty?: React.ReactNode;
 }
 
+/** Figma's tooltip copy for the three editable, formula-linked columns. */
+const FORMULA_HINTS = {
+  start: 'This column is editable, changing Start Date affects Due Date.',
+  points: 'This column is editable, changing Points affects Due Date.',
+  due: 'This column is editable, changing Due Date affects Start Date.\nDue Date = Approx. Start Date + Approx. Working Days + Buffer',
+};
+const ESTIMATE_HINT = 'This date is an estimate and may not be fully accurate.';
+
 const dateText = (d: PlanningDate) => (d.estimated ? `${d.value} (estimate)` : d.value);
+
+/** An estimated date carries the design's caution on hover and focus; a set one has nothing to say. */
+function EstimateHint({ estimated, children }: { estimated?: boolean; children: React.ReactElement }) {
+  return estimated ? <Tooltip content={ESTIMATE_HINT}>{children}</Tooltip> : children;
+}
 
 /** Points, edited in place: a number field that keeps its own draft until confirmed. */
 function PointsCell({
@@ -172,11 +197,16 @@ export function PlanningTable({
   page,
   pageCount,
   onPageChange,
-  hints,
+  itemCount,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
+  hints: hintOverrides,
   empty,
   ...props
 }: PlanningTableProps) {
   const baseId = React.useId();
+  const hints = { ...FORMULA_HINTS, ...hintOverrides };
   const [inner, setInner] = React.useState<readonly string[]>(defaultCollapsed);
   const folded = collapsed ?? inner;
   const toggle = (id: string) => {
@@ -192,19 +222,10 @@ export function PlanningTable({
       key: 'ref',
       width: '9%',
       label: 'ID',
-      render: (row) =>
-        onOpen ? (
-          <button
-            type="button"
-            onClick={() => onOpen(row)}
-            className="rounded-sm text-body-sm-regular whitespace-nowrap text-text-tertiary transition-colors hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-          >
-            {row.ref}
-            <span className="sr-only">: {row.title}</span>
-          </button>
-        ) : (
-          <span className="text-body-sm-regular whitespace-nowrap text-text-tertiary">{row.ref}</span>
-        ),
+      /* Click to copy the reference ("Copied" says so). Opening the Added Value is the title's job. */
+      render: (row) => (
+        <CopyText text={row.ref} className="text-body-sm-regular whitespace-nowrap text-text-tertiary" />
+      ),
     },
     {
       key: 'title',
@@ -214,9 +235,20 @@ export function PlanningTable({
       render: (row) => (
         /* 16 above and below, Figma's own cell padding: with the domain tag that is the 81 row. */
         <div className="flex flex-col items-start gap-1 py-4">
-          <span className="block max-w-96 truncate text-label-sm-medium text-text-primary" title={row.title}>
-            {row.title}
-          </span>
+          {onOpen ? (
+            <button
+              type="button"
+              onClick={() => onOpen(row)}
+              title={row.title}
+              className="block max-w-96 truncate rounded-sm text-left text-label-sm-medium text-text-primary hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+            >
+              {row.title}
+            </button>
+          ) : (
+            <span className="block max-w-96 truncate text-label-sm-medium text-text-primary" title={row.title}>
+              {row.title}
+            </span>
+          )}
           {row.domain && (
             <Tag tone="brand" size="sm">
               {row.domain}
@@ -265,40 +297,44 @@ export function PlanningTable({
       key: 'start',
       width: '9%',
       label: 'Start Date',
-      hint: <ColumnHint text={hints?.start} column="start date" />,
+      hint: <ColumnHint text={hints.start} column="start date" icon="function" />,
       render: (row) =>
         row.start ? (
-          <InlineDateEdit
-            label={`start date for ${row.ref}`}
-            value={row.start.value}
-            format={() => dateText(row.start!)}
-            disabled={!onStartChange}
-            onChange={(iso) => onStartChange?.(row, iso)}
-          />
+          <EstimateHint estimated={row.start.estimated}>
+            <InlineDateEdit
+              label={`start date for ${row.ref}`}
+              value={row.start.value}
+              format={() => dateText(row.start!)}
+              disabled={!onStartChange}
+              onChange={(iso) => onStartChange?.(row, iso)}
+            />
+          </EstimateHint>
         ) : null,
     },
     {
       key: 'points',
       width: '5%',
       label: 'Points',
-      hint: <ColumnHint text={hints?.points} column="points" />,
+      hint: <ColumnHint text={hints.points} column="points" icon="function" />,
       render: (row) => <PointsCell row={row} onChange={onPointsChange} />,
     },
     {
       key: 'due',
       width: '10%',
       label: 'Due Date',
-      hint: <ColumnHint text={hints?.due} column="due date" />,
+      hint: <ColumnHint text={hints.due} column="due date" icon="function" />,
       render: (row) =>
         row.due ? (
-          <InlineDateEdit
-            label={`due date for ${row.ref}`}
-            value={row.due.value}
-            format={() => dateText(row.due!)}
-            align="right"
-            disabled={!onDueChange}
-            onChange={(iso) => onDueChange?.(row, iso)}
-          />
+          <EstimateHint estimated={row.due.estimated}>
+            <InlineDateEdit
+              label={`due date for ${row.ref}`}
+              value={row.due.value}
+              format={() => dateText(row.due!)}
+              align="right"
+              disabled={!onDueChange}
+              onChange={(iso) => onDueChange?.(row, iso)}
+            />
+          </EstimateHint>
         ) : null,
     },
     {
@@ -333,11 +369,16 @@ export function PlanningTable({
                   onClick={() => toggle(section.id)}
                   className="flex items-baseline gap-3 rounded-sm text-left whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
                 >
+                  {/* One glyph that turns in place, as `Accordion`'s caret does — not two swapped.
+                      20 in `text.secondary`: the title is the heading, the caret only a hinge. */}
                   <Icon
-                    name={isFolded ? 'caret-down' : 'caret-up'}
-                    size={28}
+                    name="caret-down"
+                    size={20}
                     aria-hidden="true"
-                    className="shrink-0 self-center text-text-primary"
+                    className={cn(
+                      'shrink-0 self-center text-text-secondary transition-transform duration-200 motion-reduce:transition-none',
+                      !isFolded && 'rotate-180',
+                    )}
                   />
                   <span>{section.title}</span>
                   {section.dates && (
@@ -375,7 +416,15 @@ export function PlanningTable({
 
       {paginated && (
         <div className="flex justify-end">
-          <Pagination page={page} pageCount={pageCount} onChange={onPageChange} />
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            onChange={onPageChange}
+            itemCount={itemCount}
+            pageSize={pageSize}
+            pageSizeOptions={pageSizeOptions}
+            onPageSizeChange={onPageSizeChange}
+          />
         </div>
       )}
     </div>
