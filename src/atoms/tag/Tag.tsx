@@ -63,6 +63,51 @@ const tag = cva(
   },
 );
 
+/* The ✕'s hover and pressed look, per style and tone. Each takes the hover and pressed
+   tokens of the tag's own colours, which only ever move away from the background (darker
+   on light, lighter on dark), so the ✕ never reads worse than at rest. A neutral tag that
+   is not filled uses `neutral.textual.content`; a filled tag cannot darken its pale ✕, so
+   it shows its tone's hover fill behind it instead. */
+const NEUTRAL_REMOVE =
+  'text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed';
+const BRAND_REMOVE = 'hover:text-text-brand-stronger active:text-text-brand-stronger';
+const REMOVE_STATES: Record<ClassificationVariant, Record<ClassificationTone, string>> = {
+  textual: {
+    neutral: NEUTRAL_REMOVE,
+    brand: BRAND_REMOVE,
+    info: 'hover:text-accent-info-outline-content-hover active:text-accent-info-outline-content-pressed',
+    success: 'hover:text-accent-success-outline-content-hover active:text-accent-success-outline-content-pressed',
+    warning: 'hover:text-accent-warning-outline-content-hover active:text-accent-warning-outline-content-pressed',
+    critical: 'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
+  },
+  outline: {
+    neutral: NEUTRAL_REMOVE,
+    brand: BRAND_REMOVE,
+    info: 'hover:text-accent-info-outline-content-hover active:text-accent-info-outline-content-pressed',
+    success: 'hover:text-accent-success-outline-content-hover active:text-accent-success-outline-content-pressed',
+    warning: 'hover:text-accent-warning-outline-content-hover active:text-accent-warning-outline-content-pressed',
+    critical: 'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
+  },
+  tonal: {
+    neutral: NEUTRAL_REMOVE,
+    brand: BRAND_REMOVE,
+    info: 'hover:text-accent-info-tonal-content-hover active:text-accent-info-tonal-content-pressed',
+    success: 'hover:text-accent-success-tonal-content-hover active:text-accent-success-tonal-content-pressed',
+    warning: 'hover:text-accent-warning-tonal-content-hover active:text-accent-warning-tonal-content-pressed',
+    critical: 'hover:text-accent-critical-tonal-content-hover active:text-accent-critical-tonal-content-pressed',
+  },
+  filled: {
+    neutral: 'hover:bg-surface-neutral-strong active:bg-surface-neutral-strong',
+    /* Pressed keeps the hover fill: in dark, `action.primary.surface.pressed` behind the
+       dark ✕ is 2.23:1. */
+    brand: 'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-hover',
+    info: 'hover:bg-accent-info-filled-surface-hover active:bg-accent-info-filled-surface-pressed',
+    success: 'hover:bg-accent-success-filled-surface-hover active:bg-accent-success-filled-surface-pressed',
+    warning: 'hover:bg-accent-warning-filled-surface-hover active:bg-accent-warning-filled-surface-pressed',
+    critical: 'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
+  },
+};
+
 export type TagVariant = ClassificationVariant;
 export type TagTone = ClassificationTone;
 
@@ -84,7 +129,8 @@ export interface TagProps
   trailingIcon?: React.ReactNode;
   /**
    * Renders a ✕ button after the label and calls this when it is pressed. The
-   * button is the only interactive part of the tag.
+   * button is the only interactive part of the tag. The ✕ leaves with the tag,
+   * so move focus yourself afterwards: to the next tag's ✕, or the field.
    */
   onRemove?: () => void;
   /**
@@ -132,18 +178,17 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
           aria-label={removeLabel ?? (typeof children === 'string' ? `Remove ${children}` : 'Remove')}
           onClick={onRemove}
           className={cn(
-            'grid size-5 shrink-0 place-items-center rounded-full motion-reduce:transition-none',
+            'grid size-5 shrink-0 place-items-center rounded-full transition-colors motion-reduce:transition-none',
             /* Cancels the tag's own gap, so the ✕ sits against the label; a
                leading icon keeps its gap. The button's own room around the
-               glyph is all that is left between them. */
-            size === 'xs' || size === 'sm' ? '-ml-1' : '-ml-1.5',
-            /* Textual: no fill behind a glyph this small. On a neutral tag that
-               is not solid, it takes `neutral.textual.content` and darkens
-               through hover and pressed; any other tone keeps its own ink and
-               dims on hover instead, since a grey ✕ would clash with it. */
-            tone === 'neutral' && variant !== 'filled'
-              ? 'text-neutral-textual-content-default transition-colors hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed'
-              : 'transition-opacity hover:opacity-70',
+               glyph is all that is left between them. Not on `filled`: its
+               hover fill is a circle the size of the button, which would
+               touch the label's last letter without the gap. */
+            variant !== 'filled' && (size === 'xs' || size === 'sm' ? '-ml-1' : '-ml-1.5'),
+            /* A neutral tag that is not filled gives the ✕ `neutral.textual.content`;
+               any other keeps the tag's own ink, since a grey ✕ would clash with it.
+               Hover and pressed: see `REMOVE_STATES`. */
+            REMOVE_STATES[variant][tone],
             /* Drawn inside the button: the tag clips its overflow. */
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
           )}

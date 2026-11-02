@@ -41,7 +41,7 @@ originally duplicated an identical shell between them instead of sharing one.
 | `variant` | `textual \| outline \| tonal \| filled` | `tonal` | All four are VCP's own semantics — GDL's Tag primitive doesn't dictate them |
 | `tone` | `neutral \| brand \| info \| success \| warning \| critical` | `neutral` | Generic tones only. VCP vocabulary belongs to a composing piece (`TypeTag`, etc.), never here |
 | `size` | `xs \| sm \| md \| lg` | `md` | 20 / 24 / 28 / 32 tall, with 10 / 12 / 14 / 16 type. `sm` for dense tables and inline-with-body-text. See "Sizes" below |
-| `onRemove` | `() => void` | — | Renders a ✕ button after the label. The only interactive part of the tag; the tag itself never takes a click |
+| `onRemove` | `() => void` | — | Renders a ✕ button after the label. The only interactive part of the tag; the tag itself never takes a click. When the tag goes, move focus yourself (see Accessibility) |
 | `removeLabel` | `string` | `Remove ${children}` | The ✕'s accessible name. **Required in practice when `children` is not a string** — the fallback is a bare "Remove" |
 | `icon` / `trailingIcon` | `ReactNode` | — | Decorative — rendered `aria-hidden`. Pass an `Icon`; match its `size` to the tag's |
 | `children` | `ReactNode` | — | The label. Never wraps; truncates with an ellipsis when constrained |
@@ -66,7 +66,7 @@ differs between the two:
 | Height | Tailwind numeric scale | `h-8` (`lg`, 32) / `h-7` (`md`, 28) / `h-6` (`sm`, 24) / `h-5` (`xs`, 20) |
 | Padding | Tailwind numeric scale | `px-2` (`lg`, `md`, 8) / `px-1.5` (`sm`, `xs`, 6) |
 | Gap | Tailwind numeric scale | `gap-1.5` (`lg`, `md`, 6) / `gap-1` (`sm`, `xs`, 4) |
-| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) round hit area, 14 glyph, `pr-1` on the tag, and a negative left margin that cancels the tag's gap so the ✕ sits right against the label: `-ml-1` on `xs` / `sm` (gap 4), `-ml-1.5` on `md` / `lg` (gap 6). A leading icon keeps its gap. Textual: no fill. On a neutral tag that is not `filled` the glyph is `neutral.textual.content` default, hover, pressed; other tones keep their own ink and dim to 70% on hover |
+| ✕ button (`onRemove`) | Tailwind numeric scale | `size-5` (20) round hit area, 14 glyph, `pr-1` on the tag, and a negative left margin that cancels the tag's gap so the ✕ sits right against the label: `-ml-1` on `xs` / `sm` (gap 4), `-ml-1.5` on `md` / `lg` (gap 6). A leading icon keeps its gap, and so does a `filled` tag's ✕, whose hover circle would otherwise touch the label. On a neutral tag that is not `filled` the glyph is `neutral.textual.content` default, hover, pressed; other tones keep their own ink, and hover and pressed take that ink's own hover and pressed tokens (`accent.<tone>.outline.content` on `textual` and `outline`, `accent.<tone>.tonal.content` on `tonal`, `text.brand.stronger` for brand). A `filled` tag shows its tone's hover and pressed fill behind the ✕ instead (`accent.<tone>.filled.surface`, `action.primary.surface.hover` for brand, `surface.neutral.strong` for neutral) |
 | Icon colour | — | Inherited from the tone's content token via `currentColor`, unless the icon sets its own colour (see `TypeTag`/`UrgencyTag`) |
 
 The dark theme comes for free — every colour class is a semantic token that
@@ -128,7 +128,8 @@ same Figma `Tag` node.
 - **Icons are decorative** and rendered `aria-hidden`, so a screen reader
   reads the label once. Pass a plain `Icon` with no `label` — naming both
   double-announces.
-- **The ✕ stays legible through its states.** On the neutral tonal tag it is 6.92:1 light / 6.97:1 dark at rest, 9.45:1 / 8.40:1 on hover and 13.35:1 / 9.45:1 pressed, against the 3:1 a graphic needs. Other tones dim to 70% on hover instead; a grey ✕ would clash with their ink.
+- **The ✕ stays legible through its states.** It holds the 3:1 a graphic needs at rest, hovered and pressed on every style and tone in both themes; the *Removable everywhere* story checks all 48. Hover and pressed take the tag's own hover and pressed tokens, which only move away from the background, so they never read worse than rest. (They used to dim to 70%, which took eight of the 48 under 3:1.) A filled brand tag keeps its hover fill when pressed: in dark, `action.primary.surface.pressed` behind the ✕ is 2.23:1.
+- **Move focus when a tag goes.** The ✕ leaves with its tag, so after a removal focus falls back to the page. The tag cannot know where it belongs; the caller does: the next tag's ✕, or the previous one if it was the last, or the field when none are left, as `SearchSelect` does.
 - **Not a control, so no target size — until it has a ✕.** A plain Tag takes no
   focus and handles no events, which is why the 40 minimum does not apply. With
   `onRemove` the ✕ is a real `<button>`, a sibling of the label (never wrapping
