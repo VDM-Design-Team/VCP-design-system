@@ -75,7 +75,8 @@ export const FilledTextContrast: Story = {
   name: 'Filled text contrast, both themes',
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2">
+    /* The full height, so the dark half reaches the foot of the page like the light one. */
+    <div className="grid min-h-screen grid-cols-1 sm:grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
           <div className="flex h-full flex-wrap items-center gap-2 bg-surface-canvas p-8">
