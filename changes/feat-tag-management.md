@@ -12,3 +12,5 @@ New, built to Figma's Tag Management page.
 **`Modal`** — new `actions` prop (the standard Cancel + answer row; `secondary` + `primary`) and `tone="critical"` (swaps to a grey `neutral` Cancel and a red `danger` answer, and defaults to `alertdialog`, no ✕, no backdrop dismissal). `footer` is unchanged and wins when set.
 
 **`TagManagementModal`** — `mode="edit"` + `initialName` rename a tag or domain (not drawn in Figma; the add dialog, reused).
+
+**`IconButton`** — new `critical` variant: a red glyph with no fill, tonal red on hover (`accent.critical.outline.content` + `accent.critical.tonal.surface`). The quiet destructive control, for a row's bin; `danger` stays the loud filled one.

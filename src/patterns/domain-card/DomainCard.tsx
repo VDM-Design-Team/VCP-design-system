@@ -18,9 +18,12 @@ import { DomainItem, type DomainItemVariant } from '../../components/domain-item
  * themselves — a locked row never moves, and a draggable row never passes one.
  * Two ways in, same result (`onReorder` gets the whole new order of ids):
  *
- * - **Keyboard and assistive tech** — focus a row's grip, press ↑ / ↓. Focus
- *   stays on the grip after the move, and a polite live region says where the
- *   row went ("In Progress moved to position 2 of 2").
+ * - **Keyboard and assistive tech** — a move is deliberate, so an arrow key
+ *   alone does nothing. Focus the grip and press Space or Enter to *pick the
+ *   row up*, ↑ / ↓ to move it, Space or Enter to *drop* it (that is when
+ *   `onReorder` fires), Escape — or tabbing away — to cancel and put it back.
+ *   Focus stays on the grip throughout, and a polite live region says each
+ *   step ("In Progress moved to position 2 of 2").
  * - **Pointer** — drag the row onto another draggable row.
  *
  * The card never reorders itself: it asks, you own `items`.
@@ -68,11 +71,20 @@ export const DomainCard = React.forwardRef<HTMLElement, DomainCardProps>(
     const [announcement, setAnnouncement] = React.useState('');
     const [dragId, setDragId] = React.useState<string | null>(null);
     const [overId, setOverId] = React.useState<string | null>(null);
-    /* The grip to give focus back to once the reorder has rendered. */
+    /* A keyboard move in progress: the row picked up, and the order as it
+       would be if dropped now. `onReorder` hears nothing until the drop. */
+    const [grabId, setGrabId] = React.useState<string | null>(null);
+    const [draft, setDraft] = React.useState<string[] | null>(null);
+    /* The grip to give focus back to once a reorder has rendered. Moving a
+       node can blur it, so a pending refocus also means "that blur is ours". */
     const refocus = React.useRef<string | null>(null);
 
-    const ids = items.map((item) => item.id);
-    const draggable = items.filter((item) => item.variant === 'draggable');
+    const byId = new Map(items.map((item) => [item.id, item]));
+    const realIds = items.map((item) => item.id);
+    const ids = draft ?? realIds;
+    const rows = ids.map((id) => byId.get(id)!).filter(Boolean);
+    const draggable = rows.filter((item) => item.variant === 'draggable');
+    const positionOf = (id: string) => draggable.findIndex((d) => d.id === id) + 1;
 
     React.useLayoutEffect(() => {
       if (!refocus.current) return;
@@ -81,31 +93,53 @@ export const DomainCard = React.forwardRef<HTMLElement, DomainCardProps>(
       ).find((el) => el.dataset.domainHandle === refocus.current);
       refocus.current = null;
       grip?.focus();
-    }, [items]);
+    }, [ids.join('|')]);
+
+    const grab = (item: DomainCardItem) => {
+      setGrabId(item.id);
+      setDraft(realIds);
+      setAnnouncement(
+        `${item.label} picked up, position ${positionOf(item.id)} of ${draggable.length}. ` +
+          'Use the up and down arrow keys to move it, space to drop it, escape to cancel.',
+      );
+    };
+
+    const drop = (item: DomainCardItem) => {
+      const changed = draft !== null && draft.join('|') !== realIds.join('|');
+      const next = draft;
+      setGrabId(null);
+      setDraft(null);
+      setAnnouncement(`${item.label} dropped at position ${positionOf(item.id)} of ${draggable.length}`);
+      if (changed && next) onReorder?.(next);
+    };
+
+    const cancel = (item: DomainCardItem) => {
+      /* The blur from our own refocus is not the user leaving. */
+      if (refocus.current) return;
+      setGrabId(null);
+      setDraft(null);
+      setAnnouncement(`Move cancelled, ${item.label} is back at its original position`);
+    };
 
     const move = (item: DomainCardItem, direction: 'up' | 'down') => {
       const from = ids.indexOf(item.id);
       const to = from + (direction === 'up' ? -1 : 1);
       /* Only past another draggable row — never over a locked one. */
-      if (items[to]?.variant !== 'draggable') return;
+      if (byId.get(ids[to])?.variant !== 'draggable') return;
       refocus.current = item.id;
-      setAnnouncement(
-        `${item.label} moved to position ${draggable.findIndex((d) => d.id === items[to].id) + 1} of ${draggable.length}`,
-      );
-      onReorder?.(moved(ids, from, to));
+      const next = moved(ids, from, to);
+      setDraft(next);
+      const among = next.map((id) => byId.get(id)!).filter((row) => row.variant === 'draggable');
+      setAnnouncement(`${item.label} moved to position ${among.indexOf(item) + 1} of ${among.length}`);
     };
 
-    const drop = (target: DomainCardItem) => {
-      const dragged = items.find((item) => item.id === dragId);
+    const dropOn = (target: DomainCardItem) => {
+      const dragged = byId.get(dragId ?? '');
       setDragId(null);
       setOverId(null);
       if (!dragged || dragged.id === target.id || target.variant !== 'draggable') return;
-      const from = ids.indexOf(dragged.id);
-      const to = ids.indexOf(target.id);
-      setAnnouncement(
-        `${dragged.label} moved to position ${draggable.findIndex((d) => d.id === target.id) + 1} of ${draggable.length}`,
-      );
-      onReorder?.(moved(ids, from, to));
+      setAnnouncement(`${dragged.label} moved to position ${positionOf(target.id)} of ${draggable.length}`);
+      onReorder?.(moved(realIds, realIds.indexOf(dragged.id), realIds.indexOf(target.id)));
     };
 
     return (
@@ -131,10 +165,9 @@ export const DomainCard = React.forwardRef<HTMLElement, DomainCardProps>(
         </header>
 
         <div role="list" className="flex flex-col bg-surface-elevated py-4">
-          {items.map((item) => {
+          {rows.map((item) => {
             const variant = item.variant ?? 'default';
             const canDrag = variant === 'draggable';
-            const position = draggable.findIndex((d) => d.id === item.id);
             return (
               <div role="listitem" key={item.id} className="contents">
                 <DomainItem
@@ -143,10 +176,15 @@ export const DomainCard = React.forwardRef<HTMLElement, DomainCardProps>(
                   handleId={item.id}
                   onEdit={onEdit ? () => onEdit(item) : undefined}
                   onDelete={onDelete ? () => onDelete(item) : undefined}
+                  grabbed={grabId === item.id}
+                  onGrabToggle={
+                    canDrag ? () => (grabId === item.id ? drop(item) : grab(item)) : undefined
+                  }
                   onMove={canDrag ? (direction) => move(item, direction) : undefined}
+                  onCancel={canDrag ? () => cancel(item) : undefined}
                   dragging={dragId === item.id}
                   dropTarget={overId === item.id && dragId !== item.id}
-                  draggable={canDrag && position >= 0 && draggable.length > 1 ? true : undefined}
+                  draggable={canDrag && draggable.length > 1 && !grabId ? true : undefined}
                   onDragStart={canDrag ? () => setDragId(item.id) : undefined}
                   onDragEnd={canDrag ? () => (setDragId(null), setOverId(null)) : undefined}
                   onDragOver={
@@ -161,7 +199,7 @@ export const DomainCard = React.forwardRef<HTMLElement, DomainCardProps>(
                     dragId && canDrag
                       ? (event) => {
                           event.preventDefault();
-                          drop(item);
+                          dropOn(item);
                         }
                       : undefined
                   }

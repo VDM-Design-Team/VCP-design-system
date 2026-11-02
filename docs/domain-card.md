@@ -41,8 +41,10 @@ Only `draggable` rows move, and only among themselves: a locked row never moves 
 draggable row never passes one (in Status, "In Progress" and "Design Review" swap; neither
 crosses "Review").
 
-- **Keyboard / assistive tech:** focus a row's grip, ↑ / ↓. Focus stays on the grip, and a
-  polite live region announces "In Progress moved to position 2 of 2".
+- **Keyboard / assistive tech:** a move is deliberate. Focus the grip; Space or Enter **picks the
+  row up**; ↑ / ↓ move it; Space or Enter **drops it** (this is when `onReorder` fires); Escape, or
+  tabbing away, cancels and puts it back. An arrow key on its own does nothing. Focus stays on the
+  grip, and a polite live region announces each step ("In Progress moved to position 2 of 2").
 - **Pointer:** drag a draggable row onto another.
 
 ## Accessibility

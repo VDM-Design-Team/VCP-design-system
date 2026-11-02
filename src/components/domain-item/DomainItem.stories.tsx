@@ -15,7 +15,7 @@ const meta = {
       },
     },
   },
-  args: { label: 'Tag', onEdit: fn(), onDelete: fn(), onMove: fn() },
+  args: { label: 'Tag', onEdit: fn(), onDelete: fn(), onMove: fn(), onGrabToggle: fn(), onCancel: fn() },
   argTypes: {
     variant: { control: 'radio', options: ['default', 'locked', 'draggable'] },
   },
@@ -49,6 +49,9 @@ export const AllTypes: Story = {
   ),
 };
 
+/** Picked up for a keyboard move: the grip is pressed and the row takes the neutral fill. */
+export const Grabbed: Story = { args: { variant: 'draggable', grabbed: true } };
+
 /** The dragged row takes a neutral fill; the row it is over takes the drop-target fill. */
 export const DragStates: Story = {
   render: (args) => (
@@ -65,7 +68,7 @@ export const DarkTheme: Story = {
   render: AllTypes.render,
 };
 
-/** Each button is named for its row; the grip reports ↑ / ↓ and nothing else. */
+/** Each button is named for its row. */
 export const UsingIt: Story = {
   args: { variant: 'draggable', label: 'In Progress' },
   play: async ({ canvasElement, args }) => {
@@ -77,8 +80,24 @@ export const UsingIt: Story = {
 
     const grip = canvas.getByRole('button', { name: 'Move In Progress' });
     grip.focus();
+    /* An arrow key alone never moves a row — only while picked up. */
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(args.onMove).not.toHaveBeenCalled();
+    await userEvent.keyboard(' ');
+    await expect(args.onGrabToggle).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** While `grabbed`: ↑ / ↓ report their direction, Escape cancels. */
+export const MovingWhileGrabbed: Story = {
+  args: { variant: 'draggable', label: 'In Progress', grabbed: true },
+  play: async ({ canvasElement, args }) => {
+    const grip = within(canvasElement).getByRole('button', { name: 'Move In Progress' });
+    grip.focus();
     await userEvent.keyboard('{ArrowDown}{ArrowUp}');
     await expect(args.onMove).toHaveBeenNthCalledWith(1, 'down');
     await expect(args.onMove).toHaveBeenNthCalledWith(2, 'up');
+    await userEvent.keyboard('{Escape}');
+    await expect(args.onCancel).toHaveBeenCalledTimes(1);
   },
 };

@@ -86,22 +86,42 @@ export const DarkTheme: Story = {
   globals: { theme: 'dark' },
 };
 
-/** Keyboard: focus the grip, ↓ moves it past the next draggable row, focus stays, the move is announced. */
+/**
+ * Keyboard moves are deliberate: an arrow key alone does nothing. Space picks the row up, ↓ moves
+ * it (announced, focus stays), Space drops it — only then does `onReorder` fire — and Escape puts
+ * it back without firing at all.
+ */
 export const ReorderingByKeyboard: Story = {
   ...Status,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const grip = canvas.getByRole('button', { name: 'Move In Progress' });
-    grip.focus();
+    const grip = () => canvas.getByRole('button', { name: 'Move In Progress' });
+    const names = () => canvas.getAllByRole('listitem').map((li) => li.textContent);
+    const at = (text: string) => names().findIndex((name) => name?.includes(text));
+
+    grip().focus();
+    await userEvent.keyboard('{ArrowDown}');
+    /* Not picked up: nothing moved. */
+    await expect(at('In Progress')).toBeLessThan(at('Design Review'));
+
+    await userEvent.keyboard(' ');
+    await expect(grip()).toHaveAttribute('aria-pressed', 'true');
     await userEvent.keyboard('{ArrowDown}');
     await expect(canvas.getByRole('status')).toHaveTextContent('In Progress moved to position 2 of 2');
-    await expect(canvas.getByRole('button', { name: 'Move In Progress' })).toHaveFocus();
-    /* Already last among the draggable rows: a locked row is never passed. */
-    await userEvent.keyboard('{ArrowDown}');
-    await expect(canvas.getByRole('button', { name: 'Move In Progress' })).toHaveFocus();
-    const names = canvas.getAllByRole('listitem').map((li) => li.textContent);
-    const at = (text: string) => names.findIndex((name) => name?.includes(text));
+    await expect(grip()).toHaveFocus();
     await expect(at('Design Review')).toBeLessThan(at('In Progress'));
+    /* Last among the draggable rows: a locked row is never passed. */
+    await userEvent.keyboard('{ArrowDown}');
     await expect(at('In Progress')).toBeLessThan(at('ReviewDefault'));
+
+    /* Escape puts it back. */
+    await userEvent.keyboard('{Escape}');
+    await expect(grip()).toHaveAttribute('aria-pressed', 'false');
+    await expect(at('In Progress')).toBeLessThan(at('Design Review'));
+
+    /* Pick up, move, drop: the order sticks. */
+    await userEvent.keyboard(' {ArrowDown} ');
+    await expect(canvas.getByRole('status')).toHaveTextContent('In Progress dropped at position 2 of 2');
+    await expect(at('Design Review')).toBeLessThan(at('In Progress'));
   },
 };

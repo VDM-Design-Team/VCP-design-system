@@ -14,11 +14,14 @@ import { Tag } from '../../atoms/tag';
  *   nobody adds a duplicate, but it cannot be renamed, deleted or moved.
  * - **draggable** — default, plus a six-dot grip at the left to reorder it.
  *
- * **Reordering has a keyboard path.** The grip is a real button, not a
- * drag-only affordance: focus it and press ↑ / ↓ and `onMove` fires. The
- * pointer path (dragging the row) is the caller's to wire through the plain
- * `draggable` / `onDrag*` attributes this row passes down to its `<div>`;
- * `DomainCard` does both and announces each move.
+ * **Reordering has a keyboard path, and it is deliberate.** The grip is a real
+ * toggle button, not a drag-only affordance, and an arrow key alone never moves
+ * a row: Space or Enter *picks it up* (`grabbed`, `aria-pressed`), ↑ / ↓ then
+ * call `onMove`, Space or Enter drops it (`onGrabToggle`), and Escape — or
+ * leaving the grip — cancels (`onCancel`). So a stray key cannot reorder
+ * anything. The pointer path (dragging the row) is the caller's to wire through
+ * the plain `draggable` / `onDrag*` attributes this row passes down to its
+ * `<div>`; `DomainCard` does both and announces each step.
  *
  * The row is 40 tall, the same as the 40 `IconButton`s in it, so the buttons
  * meet the touch minimum without growing the row past the design.
@@ -39,11 +42,17 @@ export interface DomainItemProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   onEdit?: () => void;
   /** Renders the bin (default and draggable rows). */
   onDelete?: () => void;
+  /** The row is picked up for a keyboard move: ↑ / ↓ call `onMove` only while this is true. */
+  grabbed?: boolean;
+  /** Space, Enter or a click on the grip — pick the row up, or drop it. */
+  onGrabToggle?: () => void;
   /**
-   * The grip's keyboard path: ↑ and ↓ ask to move this row. Whether the move
-   * is possible is the caller's; the grip only reports the direction.
+   * ↑ and ↓ while `grabbed`. Whether the move is possible is the caller's; the
+   * grip only reports the direction.
    */
   onMove?: (direction: 'up' | 'down') => void;
+  /** Escape, or focus leaving the grip, while `grabbed` — put the row back. */
+  onCancel?: () => void;
   /** This row is the one being dragged — it takes a neutral fill. */
   dragging?: boolean;
   /** A dragged row is over this one — it takes the drop-target fill. */
@@ -61,7 +70,10 @@ export const DomainItem = React.forwardRef<HTMLDivElement, DomainItemProps>(
       lockedLabel = 'Default',
       onEdit,
       onDelete,
+      grabbed,
+      onGrabToggle,
       onMove,
+      onCancel,
       dragging,
       dropTarget,
       handleId,
@@ -79,7 +91,7 @@ export const DomainItem = React.forwardRef<HTMLDivElement, DomainItemProps>(
         className={cn(
           'flex min-h-10 items-center justify-between gap-4 bg-surface-elevated pr-7 font-sans transition-colors',
           draggable ? 'pl-5' : 'pl-7',
-          dragging && 'bg-surface-neutral-subtle',
+          (dragging || grabbed) && 'bg-surface-neutral-subtle',
           dropTarget && 'bg-surface-brand-faint',
           className,
         )}
@@ -93,17 +105,32 @@ export const DomainItem = React.forwardRef<HTMLDivElement, DomainItemProps>(
                 data-domain-handle={handleId}
                 aria-label={`Move ${label}`}
                 aria-describedby={hintId}
+                aria-pressed={grabbed ?? false}
+                onClick={onGrabToggle}
+                onBlur={() => grabbed && onCancel?.()}
                 onKeyDown={(event) => {
+                  if (!grabbed) return;
+                  if (event.key === 'Escape') {
+                    /* Cancels the move, not an enclosing dialog. */
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onCancel?.();
+                    return;
+                  }
                   if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
                   event.preventDefault();
                   onMove?.(event.key === 'ArrowUp' ? 'up' : 'down');
                 }}
-                className="-ml-1 inline-flex size-10 shrink-0 cursor-grab items-center justify-center rounded-sm text-text-tertiary hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+                className={cn(
+                  '-ml-1 inline-flex size-10 shrink-0 cursor-grab items-center justify-center rounded-sm hover:text-text-primary',
+                  grabbed ? 'text-text-primary' : 'text-text-tertiary',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                )}
               >
                 <Icon name="dots-six-vertical" size="lg" aria-hidden="true" />
               </button>
               <span id={hintId} className="sr-only">
-                Press the up or down arrow key to move
+                Press space to pick up, then the up or down arrow keys to move, space to drop, escape to cancel
               </span>
             </>
           )}
@@ -128,7 +155,12 @@ export const DomainItem = React.forwardRef<HTMLDivElement, DomainItemProps>(
                 <IconButton icon="note-pencil" label={`Edit ${label}`} onClick={onEdit} />
               )}
               {onDelete && (
-                <IconButton icon="trash-simple" label={`Delete ${label}`} onClick={onDelete} />
+                <IconButton
+                  icon="trash-simple"
+                  variant="critical"
+                  label={`Delete ${label}`}
+                  onClick={onDelete}
+                />
               )}
             </div>
           )

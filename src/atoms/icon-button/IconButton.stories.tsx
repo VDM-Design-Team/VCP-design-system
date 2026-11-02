@@ -29,7 +29,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'danger'],
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'critical', 'danger'],
     },
     size: { control: 'radio', options: ['xs', 'sm', 'md', 'lg'] },
     shape: { control: 'radio', options: ['round', 'square'] },
@@ -38,6 +38,11 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/** The quiet destructive control — a row's bin. A red glyph; tonal red on hover. */
+export const Critical: Story = {
+  args: { variant: 'critical', icon: 'trash-simple', label: 'Delete tag' },
+};
 
 export const Default: Story = {};
 
