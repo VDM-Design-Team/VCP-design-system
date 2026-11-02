@@ -181,8 +181,10 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
             'grid size-5 shrink-0 place-items-center rounded-full transition-colors motion-reduce:transition-none',
             /* Cancels the tag's own gap, so the ✕ sits against the label; a
                leading icon keeps its gap. The button's own room around the
-               glyph is all that is left between them. */
-            size === 'xs' || size === 'sm' ? '-ml-1' : '-ml-1.5',
+               glyph is all that is left between them. Not on `filled`: its
+               hover fill is a circle the size of the button, which would
+               touch the label's last letter without the gap. */
+            variant !== 'filled' && (size === 'xs' || size === 'sm' ? '-ml-1' : '-ml-1.5'),
             /* A neutral tag that is not filled gives the ✕ `neutral.textual.content`;
                any other keeps the tag's own ink, since a grey ✕ would clash with it.
                Hover and pressed: see `REMOVE_STATES`. */

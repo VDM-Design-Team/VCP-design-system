@@ -206,26 +206,24 @@ export const Mark: Story = {
         >
           <div className="flex flex-wrap gap-6 rounded-md bg-surface-canvas p-4">
             {(['sm', 'md'] as const).map((size) => (
-              <div key={size} className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  {MARK_STATES.map((s) => (
-                    <span key={s.name} data-mark={`${size} ${s.name}`}>
-                      <CheckboxMark size={size} checked={s.checked} disabled={s.disabled} />
-                    </span>
-                  ))}
-                </div>
-                <div className="flex items-center gap-3">
-                  {MARK_STATES.map((s) => (
-                    <Checkbox
-                      key={s.name}
-                      size={size}
-                      defaultChecked={s.checked}
-                      disabled={s.disabled}
-                      aria-label={`Real checkbox, ${size}, ${s.name}`}
-                      data-real={`${size} ${s.name}`}
-                    />
-                  ))}
-                </div>
+              /* One grid, so each mark sits in the same column as its real checkbox, which
+                 is wider for its 40 target. */
+              <div key={size} className="grid grid-cols-4 place-items-center gap-y-1">
+                {MARK_STATES.map((s) => (
+                  <span key={s.name} data-mark={`${size} ${s.name}`}>
+                    <CheckboxMark size={size} checked={s.checked} disabled={s.disabled} />
+                  </span>
+                ))}
+                {MARK_STATES.map((s) => (
+                  <Checkbox
+                    key={s.name}
+                    size={size}
+                    defaultChecked={s.checked}
+                    disabled={s.disabled}
+                    aria-label={`Real checkbox, ${size}, ${s.name}`}
+                    data-real={`${size} ${s.name}`}
+                  />
+                ))}
               </div>
             ))}
           </div>
