@@ -13,6 +13,7 @@ export * from './confirm-delete-av-modal';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
 export * from './comment-section';
+export * from './planning-filters';
 export * from './report-problem-modal';
 export * from './notification-inbox';
 export * from './notification-popover';
