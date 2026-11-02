@@ -42,6 +42,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `sections` | `PlanningSection[]` | required | `{ id, kind?, title, dates?, totalCapacity?, remainingCapacity?, rows }` — `kind` is `cycle` or `backlog` |
 | `collapsed` / `defaultCollapsed` / `onCollapsedChange` | `string[]` | — | Folded section ids. Controlled when `collapsed` is given |
 | `sort` / `onSortChange` | `DataTableSort` | — | The sortable key is `title`. **Sorting is a handler, not the table's job**: the header reports the key and direction and the caller (usually the server) returns the rows in that order. The table never reorders rows in the browser |
+| `onAnimationDismiss` | `(row, field: 'start' \| 'due') => void` | — | A date's animation is over (three loops, hover, or the table left) — clear its `animated` flag |
 | `onMoveRow` | `(row, from, to) => void` | — | A Backlog row was dropped on a Cycle. The table moves nothing — in the design this opens *Add Required Details*. Backlog rows are draggable with or without it |
 | `onOpen` | `(row) => void` | — | Given, the title is a button. (The ID is click-to-copy, so opening is the title's job) |
 | `onStartChange` / `onDueChange` | `(row, iso) => void` | — | Each date edits in place only if its callback is given |
@@ -55,10 +56,21 @@ Generated from the real imports — `npm test` fails if this list drifts.
 A row is `{ id, ref, title, domain?, urgency?, type?, initiator?, assignee?, start?, points?, due?, status? }`;
 `start` and `due` are `{ value (ISO), estimated?, animated? }`, and an estimated date reads "2026-03-16 (est.)". A row with no date, or no points, reads "-".
 
-**`animated`** marks a date that was just filled in (a Backlog row dropped on a Cycle gets estimated dates): a blue
-sweep crosses the cell and the text flashes black → blue → white → blue → black, one 2.5-second loop played three
-times, and both stop the moment the pointer enters the cell. Not played with reduced motion. Whether a date is
-estimated, and when it stops being, is the caller's (the flow: editing the Start Date makes it a real date).
+**`animated` is a one-shot signal, not a state.** Set it on a date at the moment something the user did in this session
+auto-calculated it (a Backlog row dropped on a Cycle gets estimated dates). The table then plays the design's animation
+— a blue sweep crosses the cell and the text flashes black → blue → white → blue → black, 1.6 seconds a loop, **three
+loops** — and reports the date seen through `onAnimationDismiss(row, field)`, where you clear the flag. A date is
+dismissed when:
+
+- its third loop ends, or
+- the pointer enters the cell, or
+- the table goes away while it is playing (navigating off the page).
+
+It never comes back: not on refresh, not on sorting, filtering or paging, and **a flag already set when the table first
+renders is ignored**, so an old flag left in your state cannot replay on a page load. If the value changes again before it
+is dismissed, the three loops start over — each calculation is its own signal. With reduced motion nothing plays and the
+date is simply reported seen. Whether a date is `estimated`, and when it stops being (editing the Start Date makes it
+a real date), is the caller's.
 
 ## Columns
 

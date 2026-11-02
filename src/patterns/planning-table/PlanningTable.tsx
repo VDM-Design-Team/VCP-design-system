@@ -44,8 +44,7 @@ import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../component
  * - **It does not sort, fetch or paginate.** `sections` render in the order
  *   given; `sort` and `page` are the caller's, as in `DataTable`.
  *
- * Not here, by design: the filter row above the table and the animated
- * (changed-value) cells — both are tracked separately.
+ * Not here, by design: the filter row above the table, which is tracked separately.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -57,9 +56,13 @@ export interface PlanningDate {
   /** A computed date, not one a person set — reads "(est.)". */
   estimated?: boolean;
   /**
-   * Draw attention to a date that was just filled in (a Backlog row dropped on a Cycle gets estimated
-   * dates): a blue sweep crosses the cell and the text flashes through blue to white, 3 times over 7.5
-   * seconds — and stops the moment the pointer enters the cell. Not played with reduced motion.
+   * A one-shot signal: this date was **just auto-calculated** by something the user did in this session,
+   * so draw attention to it — a blue sweep crosses the cell and the text flashes through blue to white,
+   * three times, then it stops. Set it when the calculation happens and clear it when the table reports
+   * the date seen (`onAnimationDismiss`). It never replays: not on a refresh, not on sorting, filtering
+   * or re-opening the page, and a flag already set when the table first renders is ignored. If the
+   * value changes again before it is dismissed, the three plays start over. Not played with reduced
+   * motion (the date is simply reported seen).
    */
   animated?: boolean;
 }
@@ -131,6 +134,11 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   onStartChange?: (row: PlanningRow, iso: string) => void;
   onDueChange?: (row: PlanningRow, iso: string) => void;
   onPointsChange?: (row: PlanningRow, points: number) => void;
+  /**
+   * A date's animation is over — its three plays ended, the pointer entered it, or the table went away
+   * while it was still playing. Clear that date's `animated` flag in your state: it is a one-shot signal.
+   */
+  onAnimationDismiss?: (row: PlanningRow, field: 'start' | 'due') => void;
   /** The points a row can take — the Points dropdown's choices. Defaults to the capacity scale. */
   pointOptions?: readonly number[];
   /** Pagination renders only when all three are given. 1-based. */
@@ -219,24 +227,41 @@ function PointsCell({
   );
 }
 
+/** One loop of the sweep and of the text flash — the design's animation, three times over. */
+const SWEEP_MS = 1600;
+const SWEEP_PLAYS = 3;
+
 /**
- * Wraps a date cell that can be flagged `animated`: a gradient sweeps across it and the text runs
- * black → blue → white → blue → black, on one 2.5-second loop played three times (the design's
- * "animation of cells" flow), and both stop the moment the pointer enters. Web Animations, not CSS
- * keyframes, so it needs nothing outside this file; colours are the system's tokens, by variable.
+ * Wraps a date cell that is `live` (flagged, new this session, not yet seen): a gradient sweeps across it
+ * and the text runs black → blue → white → blue → black, one loop per `SWEEP_MS`, `SWEEP_PLAYS` times. It is
+ * dismissed — `onDismiss` — when the third loop ends or the pointer enters, and a new `playKey` (the date
+ * changed again) starts the three plays over. Web Animations, not CSS keyframes, so it needs nothing outside
+ * this file; colours are the system's tokens, by variable.
  */
-function AnimatedCell({ animated, children }: { animated?: boolean; children: React.ReactNode }) {
-  const [seen, setSeen] = React.useState(false);
+function AnimatedCell({
+  live,
+  playKey,
+  onDismiss,
+  children,
+}: {
+  live: boolean;
+  /** Changes when the value does, so a fresh calculation restarts the count. */
+  playKey: string;
+  onDismiss: () => void;
+  children: React.ReactNode;
+}) {
   const sweep = React.useRef<HTMLSpanElement>(null);
   const text = React.useRef<HTMLSpanElement>(null);
-  const active = !!animated && !seen;
+  const dismiss = React.useRef(onDismiss);
+  dismiss.current = onDismiss;
 
   React.useEffect(() => {
-    if (!active) return undefined;
+    if (!live) return undefined;
     if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      dismiss.current();
       return undefined;
     }
-    const timing = { duration: 2500, iterations: 3 } as const;
+    const timing = { duration: SWEEP_MS, iterations: SWEEP_PLAYS } as const;
     const a = sweep.current?.animate(
       [{ transform: 'translateX(-100%)' }, { transform: 'translateX(100%)' }],
       { ...timing, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
@@ -252,25 +277,27 @@ function AnimatedCell({ animated, children }: { animated?: boolean; children: Re
       ],
       { ...timing, easing: 'linear' },
     );
+    /* The third loop ending is a dismissal; a cancel (unmount, a new playKey) is not. */
+    const finished = () => dismiss.current();
+    b?.addEventListener('finish', finished);
     return () => {
+      b?.removeEventListener('finish', finished);
       a?.cancel();
       b?.cancel();
     };
-  }, [active]);
+  }, [live, playKey]);
 
-  if (!animated) return <>{children}</>;
+  if (!live) return <>{children}</>;
   return (
     <span
       className="relative isolate -mx-2 inline-flex overflow-hidden rounded-sm px-2 py-1"
-      onMouseEnter={() => setSeen(true)}
+      onMouseEnter={() => dismiss.current()}
     >
-      {active && (
-        <span
-          ref={sweep}
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-1/3 -z-10 bg-linear-105 from-transparent from-10% via-action-tertiary-content-default/75 via-50% to-transparent to-90%"
-        />
-      )}
+      <span
+        ref={sweep}
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-1/3 -z-10 bg-linear-105 from-transparent from-10% via-action-tertiary-content-default/75 via-50% to-transparent to-90%"
+      />
       <span ref={text} className="relative">
         {children}
       </span>
@@ -291,6 +318,7 @@ export function PlanningTable({
   onStartChange,
   onDueChange,
   onPointsChange,
+  onAnimationDismiss,
   pointOptions = DEFAULT_POINT_OPTIONS,
   page,
   pageCount,
@@ -309,6 +337,49 @@ export function PlanningTable({
   const [dragging, setDragging] = React.useState<{ rowId: string; fromId: string } | null>(null);
   const [overId, setOverId] = React.useState<string | null>(null);
   const sectionById = new Map(sections.map((s) => [s.id, s]));
+
+  /* Animated dates. A flag is only a live signal if it was raised after the table appeared (a flag already
+     there on the first render is old news — a refreshed page must not replay it) and has not been
+     dismissed. Both sets are keyed by row, field and value, so a changed value is a new signal, and
+     they outlive a row's remounting (filtering, paging) without outliving the table. */
+  const animKey = (row: PlanningRow, field: 'start' | 'due') =>
+    `${row.id}:${field}:${(field === 'start' ? row.start : row.due)?.value}`;
+  const initialFlags = React.useRef<Set<string> | null>(null);
+  if (initialFlags.current === null) {
+    initialFlags.current = new Set();
+    for (const section of sections)
+      for (const row of section.rows) {
+        if (row.start?.animated) initialFlags.current.add(animKey(row, 'start'));
+        if (row.due?.animated) initialFlags.current.add(animKey(row, 'due'));
+      }
+  }
+  const dismissedFlags = React.useRef(new Set<string>());
+  const [, rerender] = React.useReducer((n: number) => n + 1, 0);
+  const isLive = (row: PlanningRow, field: 'start' | 'due') => {
+    const d = field === 'start' ? row.start : row.due;
+    const key = animKey(row, field);
+    return !!d?.animated && !initialFlags.current!.has(key) && !dismissedFlags.current.has(key);
+  };
+  const dismissFlag = (row: PlanningRow, field: 'start' | 'due') => {
+    const key = animKey(row, field);
+    if (dismissedFlags.current.has(key)) return;
+    dismissedFlags.current.add(key);
+    rerender();
+    onAnimationDismiss?.(row, field);
+  };
+  /* Leaving the page while a date is still playing dismisses it too: it must not be waiting when they return. */
+  const liveNow = React.useRef<Array<{ row: PlanningRow; field: 'start' | 'due' }>>([]);
+  liveNow.current = sections.flatMap((section) =>
+    section.rows.flatMap((row) =>
+      (['start', 'due'] as const).filter((field) => isLive(row, field)).map((field) => ({ row, field })),
+    ),
+  );
+  const onDismissRef = React.useRef(onAnimationDismiss);
+  onDismissRef.current = onAnimationDismiss;
+  React.useEffect(
+    () => () => liveNow.current.forEach(({ row, field }) => onDismissRef.current?.(row, field)),
+    [],
+  );
   const [inner, setInner] = React.useState<readonly string[]>(defaultCollapsed);
   const folded = collapsed ?? inner;
   const toggle = (id: string) => {
@@ -420,7 +491,11 @@ export function PlanningTable({
       hint: <ColumnHint text={hints.start} column="start date" icon="function" />,
       render: (row) =>
         row.start ? (
-          <AnimatedCell animated={row.start.animated}>
+          <AnimatedCell
+            live={isLive(row, 'start')}
+            playKey={animKey(row, 'start')}
+            onDismiss={() => dismissFlag(row, 'start')}
+          >
             <EstimateHint estimated={row.start.estimated}>
               <InlineDateEdit
                 label={`start date for ${row.ref}`}
@@ -451,7 +526,11 @@ export function PlanningTable({
       hint: <ColumnHint text={hints.due} column="due date" icon="function" />,
       render: (row) =>
         row.due ? (
-          <AnimatedCell animated={row.due.animated}>
+          <AnimatedCell
+            live={isLive(row, 'due')}
+            playKey={animKey(row, 'due')}
+            onDismiss={() => dismissFlag(row, 'due')}
+          >
             <EstimateHint estimated={row.due.estimated}>
               <InlineDateEdit
                 label={`due date for ${row.ref}`}

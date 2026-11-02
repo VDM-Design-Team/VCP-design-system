@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fireEvent, fn, userEvent, within } from 'storybook/test';
+import { expect, fireEvent, fn, userEvent, waitFor, within } from 'storybook/test';
+import { Button } from '../../atoms/button';
 import { PlanningTable, type PlanningRow, type PlanningSection } from './PlanningTable';
 
 const TITLES = ['Automated Planning Workspace', 'Billing export', 'Calendar sync', 'Dashboard filters', 'Email digests'];
@@ -205,23 +206,77 @@ export const EmptyDates: Story = {
 };
 
 /**
- * A row just dropped on a Cycle with no dates is given estimated ones, and the cells say so: a sweep crosses
- * them and the text flashes blue → white, three times — until the pointer enters. (Not with reduced motion.)
+ * The animation is a signal for *this session's* auto-calculation, never a reminder. Here VCP-1233 already
+ * carries `animated` when the page loads (an old flag left in someone's state) and does **not** play; press the
+ * button — the page calculating dates — and VCP-1234's start and due dates do: a sweep and a blue → white flash,
+ * three times, stopping early when the pointer enters. Each date reports itself seen (`onAnimationDismiss`) and
+ * the page clears its flag; it never plays again.
  */
 export const AnimatedDates: Story = {
-  args: {
-    sections: [
-      {
-        ...SECTIONS[0]!,
-        rows: [
-          row(1),
-          row(3, {
-            start: { value: '2026-03-04', estimated: true, animated: true },
-            due: { value: '2026-03-16', estimated: true, animated: true },
-            status: { status: 'Accepted' },
-          }),
-        ],
-      },
-    ],
+  args: { onAnimationDismiss: fn() },
+  render: function AnimatedDatesStory(args) {
+    const flagged = (extra: Partial<PlanningRow>): PlanningRow => ({
+      ...row(3),
+      status: { status: 'Accepted' },
+      ...extra,
+    });
+    const [rows, setRows] = React.useState<PlanningRow[]>([
+      row(1),
+      flagged({
+        start: { value: '2026-03-04', estimated: true, animated: true },
+        due: { value: '2026-03-16', estimated: true, animated: true },
+      }),
+      flagged({ id: 'vcp-9', ref: 'VCP-1239', start: { value: '2026-03-02' }, due: { value: '2026-03-09' } }),
+    ]);
+    const clear = (r: PlanningRow, field: 'start' | 'due') => {
+      setRows((now) =>
+        now.map((x) => (x.id === r.id && x[field] ? { ...x, [field]: { ...x[field]!, animated: false } } : x)),
+      );
+      args.onAnimationDismiss?.(r, field);
+    };
+    return (
+      <div className="flex flex-col gap-4">
+        <Button
+          variant="secondary"
+          onClick={() =>
+            setRows((now) =>
+              now.map((x) =>
+                x.id === 'vcp-9'
+                  ? {
+                      ...x,
+                      start: { value: '2026-03-06', estimated: true, animated: true },
+                      due: { value: '2026-03-19', estimated: true, animated: true },
+                    }
+                  : x,
+              ),
+            )
+          }
+        >
+          Auto-calculate VCP-1239’s dates
+        </Button>
+        <PlanningTable
+          {...args}
+          sections={[{ ...SECTIONS[0]!, rows }]}
+          onAnimationDismiss={clear}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const playing = () =>
+      document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.getTiming().duration === 1600);
+    /* Loaded with an old flag: nothing plays. */
+    await expect(playing()).toHaveLength(0);
+
+    await userEvent.click(canvas.getByRole('button', { name: /Auto-calculate/ }));
+    await waitFor(() => expect(playing().length).toBeGreaterThan(0));
+    await expect((playing()[0]!.effect as KeyframeEffect).getTiming().iterations).toBe(3);
+
+    /* Entering a cell dismisses it, and only it. */
+    const [sweepCell] = Array.from(canvasElement.querySelectorAll('span.isolate'));
+    await userEvent.hover(sweepCell!);
+    await waitFor(() => expect(args.onAnimationDismiss).toHaveBeenCalledTimes(1));
+    await expect(args.onAnimationDismiss).toHaveBeenCalledWith(expect.objectContaining({ ref: 'VCP-1239' }), 'start');
   },
 };
