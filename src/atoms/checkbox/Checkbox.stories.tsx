@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { Checkbox, CheckboxMark } from './Checkbox';
 
 const meta = {
@@ -181,22 +182,77 @@ export const Themes: Story = {
   ),
 };
 
+const MARK_STATES = [
+  { name: 'unchecked', checked: false, disabled: false },
+  { name: 'checked', checked: true, disabled: false },
+  { name: 'disabled', checked: false, disabled: true },
+  { name: 'disabled checked', checked: true, disabled: true },
+] as const;
+
 /**
  * `CheckboxMark`: the box and tick with no input, for a row that is itself the control
- * (`SearchSelect`'s options when `multiple`). Beside the real checkbox, so the two can be compared.
+ * (`SearchSelect`'s options when `multiple`). Each row of marks sits over a row of real checkboxes
+ * in the same states, in both themes and both sizes. The test checks every mark against its real
+ * checkbox (border, fill and tick), so the two cannot drift apart.
  */
 export const Mark: Story = {
   render: () => (
-    <div className="flex items-center gap-6">
-      {(['sm', 'md'] as const).map((size) => (
-        <div key={size} className="flex items-center gap-3">
-          <CheckboxMark size={size} />
-          <CheckboxMark size={size} checked />
-          <CheckboxMark size={size} disabled />
-          <CheckboxMark size={size} disabled checked />
-          <Checkbox size={size} aria-label={`Real checkbox, ${size}`} defaultChecked />
+    <div className="flex flex-wrap gap-4">
+      {[false, true].map((isDark) => (
+        <div
+          key={String(isDark)}
+          className={isDark ? 'dark' : undefined}
+          data-theme-case={isDark ? 'dark' : 'light'}
+        >
+          <div className="flex flex-wrap gap-6 rounded-md bg-surface-canvas p-4">
+            {(['sm', 'md'] as const).map((size) => (
+              <div key={size} className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  {MARK_STATES.map((s) => (
+                    <span key={s.name} data-mark={`${size} ${s.name}`}>
+                      <CheckboxMark size={size} checked={s.checked} disabled={s.disabled} />
+                    </span>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3">
+                  {MARK_STATES.map((s) => (
+                    <Checkbox
+                      key={s.name}
+                      size={size}
+                      defaultChecked={s.checked}
+                      disabled={s.disabled}
+                      aria-label={`Real checkbox, ${size}, ${s.name}`}
+                      data-real={`${size} ${s.name}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const drift: string[] = [];
+    for (const scope of Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-theme-case]'))) {
+      const theme = scope.dataset.themeCase;
+      for (const holder of Array.from(scope.querySelectorAll<HTMLElement>('[data-mark]'))) {
+        const mark = holder.firstElementChild as HTMLElement;
+        const input = scope.querySelector<HTMLInputElement>(`[data-real="${holder.dataset.mark}"]`)!;
+        const box = input.nextElementSibling as HTMLElement;
+        /* A real box under the pointer shows its hover border; the mark has no hover of its own. */
+        if (input.closest('label')!.matches(':hover')) continue;
+        for (const property of ['borderTopColor', 'backgroundColor', 'color'] as const) {
+          const [a, b] = [getComputedStyle(mark)[property], getComputedStyle(box)[property]];
+          if (a !== b) drift.push(`${theme} ${holder.dataset.mark} ${property}: mark ${a}, checkbox ${b}`);
+        }
+        const [tickA, tickB] = [mark.querySelector('svg'), box.querySelector('svg')].map(
+          (svg) => svg !== null && getComputedStyle(svg).display !== 'none',
+        );
+        if (tickA !== tickB) drift.push(`${theme} ${holder.dataset.mark} tick: mark ${tickA}, checkbox ${tickB}`);
+      }
+    }
+    await expect(drift).toEqual([]);
+  },
 };
