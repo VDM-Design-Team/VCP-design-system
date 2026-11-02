@@ -29,7 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | | |
 |---|---|
 | **Every file** | A header with the file's glyph, its name and "2 of 4", a download button and a close button. Previous and next arrows at the sides (stopped at the first and last). A strip of thumbnails along the bottom, the picture itself for an image and a document glyph otherwise, with the open one marked. `←` and `→` step; Escape closes |
-| **An image** | Shown to fit. **Zoom:** − and + buttons and a reset, with the percentage beside them (25 to 400 in steps of 25; the keys `+`, `-` and `0` do the same). Zoomed in, it scrolls |
+| **An image** | Shown **fitted to the frame**: scaled up or down until its longer side fills the space, so it never clips and never goes behind an arrow (the stage is padded by the arrows' width). **Zoom:** − and + buttons and a reset, with the percentage beside them (25 to 400 in steps of 25; the keys `+`, `-` and `0` do the same). Zoomed in, it scrolls |
 | **A PDF** | In the browser's own viewer, in a frame. It has its own zoom, search and print, so ours is not drawn |
 | **A video** | Plays, with the browser's controls |
 | **Anything else** | "No preview available for this file." and the download |
@@ -63,6 +63,7 @@ of three `IconButton`s and the percentage. No new tokens.
   carry the file's name.
 - The percentage is `aria-live="polite"`, so a zoom is read out. The strip's thumbnails are buttons named "{name}, 2 of 4"
   with `aria-current` on the open one.
+- **Contrast holds on the dark surface**, and a story measures it. Text: the name 17.9:1, the count 12:1, the percentage 10.4:1. Glyphs: download and close 7.7:1, the arrow 12:1, zoom 4.5:1, a document thumbnail 7:1. Marks: the arrows' edge 3.75:1, the open thumbnail's outline 7.7:1. Disabled controls (the first file's previous arrow, the reset at 100%) are exempt. Every colour is a semantic token.
 - Everything is reachable by keyboard; the arrow keys and `+ - 0` are shortcuts, not the only way.
 
 ## Don't

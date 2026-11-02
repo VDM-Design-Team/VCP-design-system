@@ -123,3 +123,51 @@ export const OpenedFromAButton: Story = {
     await waitFor(() => expect(opener).toHaveFocus());
   },
 };
+
+/* WCAG 1.4.3 / 1.4.11: text 4.5:1, glyphs and the marks that carry meaning 3:1. axe does not measure icons. */
+const channels = (css: string) => css.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+const luminance = ([r, g, b]: number[]) => {
+  const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/** The viewer's text and controls hold their contrast on its dark surface (disabled controls are exempt). */
+export const ContrastHolds: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    const view = within(dialog);
+    const canvas = channels(getComputedStyle(dialog.querySelector('.dark') as HTMLElement).backgroundColor);
+    const colour = (el: HTMLElement) => channels(getComputedStyle(el).color);
+    const pill = channels(getComputedStyle(dialog.querySelector('[role="group"]') as HTMLElement).backgroundColor);
+    const checks: Array<[string, number[], number[], number]> = [
+      ['file name', colour(view.getByRole('heading')), canvas, 4.5],
+      ['count', colour(dialog.querySelector('header p') as HTMLElement), canvas, 4.5],
+      ['download', colour(view.getByRole('button', { name: /^Download/ })), canvas, 3],
+      ['close', colour(view.getByRole('button', { name: 'Close' })), canvas, 3],
+      ['next arrow glyph', colour(view.getByRole('button', { name: 'Next attachment' })), canvas, 3],
+      [
+        'next arrow edge',
+        channels(getComputedStyle(view.getByRole('button', { name: 'Next attachment' })).borderTopColor),
+        canvas,
+        3,
+      ],
+      ['zoom in', colour(view.getByRole('button', { name: 'Zoom in' })), pill, 3],
+      ['percentage', colour(dialog.querySelector('[aria-live]') as HTMLElement), pill, 4.5],
+      [
+        'open thumbnail mark',
+        channels(getComputedStyle(view.getByRole('button', { name: /1 of 4/ })).outlineColor),
+        canvas,
+        3,
+      ],
+    ];
+    for (const [name, fg, bg, min] of checks) {
+      await expect({ name, ok: contrast(fg, bg) >= min }).toEqual({ name, ok: true });
+    }
+  },
+};

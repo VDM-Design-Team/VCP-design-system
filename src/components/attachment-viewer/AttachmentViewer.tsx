@@ -120,14 +120,15 @@ export function AttachmentViewer({
     if (!file.src) return <NoPreview file={file} onDownload={onDownload} />;
     if (file.kind === 'image') {
       return (
-        <div className="grid h-full w-full place-items-center overflow-auto p-4">
-          {/* The header already names the file; the picture does not announce it again. */}
-          <img
-            src={file.src}
-            alt=""
-            className={zoom === ZOOM_DEFAULT ? 'max-h-full max-w-full object-contain' : undefined}
-            style={zoom === ZOOM_DEFAULT ? undefined : { width: `${zoom}%`, maxWidth: 'none', maxHeight: 'none' }}
-          />
+        /* Scrolls when zoomed in. `m-auto` on the inner box centres it and still lets the left and top
+           edges be reached, which centring with a grid does not. */
+        <div className="flex h-full w-full overflow-auto">
+          {/* 100% is the picture fitted to the frame, whichever of its height and width is the longer: it
+              fills that side and never clips. Zoom scales that box, so 200% is twice the fit. */}
+          <div className="m-auto flex-none" style={{ width: `${zoom}%`, height: `${zoom}%` }}>
+            {/* The header already names the file; the picture does not announce it again. */}
+            <img src={file.src} alt="" className="size-full object-contain" />
+          </div>
         </div>
       );
     }
@@ -173,7 +174,8 @@ export function AttachmentViewer({
         </header>
 
         <div className="relative flex min-h-0 flex-1 items-stretch">
-          <div className="min-h-0 min-w-0 flex-1">{stage()}</div>
+          {/* Padded at the sides by the arrows' width, so the file never goes behind a caret. */}
+          <div className="min-h-0 min-w-0 flex-1 px-20 py-4">{stage()}</div>
 
           {files.length > 1 && (
             <>
