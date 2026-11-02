@@ -981,3 +981,29 @@ export const ServerSearch: Story = {
     await expect(trigger).toHaveTextContent('Carl Baker');
   },
 };
+
+/** `collapsibleGroups`: each heading is a button with a caret; folded groups leave the list and the keys. */
+export const CollapsibleGroups: Story = {
+  args: {
+    'aria-label': 'Person',
+    collapsibleGroups: true,
+    defaultCollapsedGroups: ['Away'],
+    options: [
+      { value: 'a', label: 'Amy Lee', group: 'Here' },
+      { value: 'b', label: 'Bo Tran', group: 'Here' },
+      { value: 'c', label: 'Cy Park', group: 'Away' },
+    ],
+  },
+  decorators: [(Story) => <div className="h-72 w-72"><Story /></div>],
+};
+
+/** `warning`: the pick is allowed but worth a second look — an amber border and message. */
+export const Warning: Story = {
+  args: {
+    'aria-label': 'Person',
+    value: 'a',
+    options: ['a', 'b'].map((value) => ({ value, label: `Person ${value}` })),
+    warning: 'This person is busy during the selected dates, but can still be assigned.',
+  },
+  decorators: [(Story) => <div className="h-40 w-72"><Story /></div>],
+};
