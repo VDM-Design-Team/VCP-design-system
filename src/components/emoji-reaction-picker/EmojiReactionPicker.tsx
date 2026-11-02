@@ -209,7 +209,8 @@ const AddReactionButton = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLButtonElement>
 >((props, ref) => (
-  <Tooltip content="Add reaction">
+  /* The tooltip shows the button's name to sighted users; it would only repeat it to a screen reader. */
+  <Tooltip content="Add reaction" describe={false}>
     <button ref={ref} type="button" aria-label="Add reaction" className={textualIconButton} {...props}>
       {/* The design's SmileyPlus — the plus is part of the glyph. */}
       <Icon name="smiley-plus" size="sm" aria-hidden="true" />

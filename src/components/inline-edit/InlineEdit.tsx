@@ -183,7 +183,8 @@ export const InlineEdit = React.forwardRef<HTMLDivElement, InlineEditProps>(
             {!disabled && (
               /* Hidden until the cell is hovered or the pen has keyboard focus, and
                  never `display:none` — it stays tabbable and announced. */
-              <Tooltip content="Edit" placement="top">
+              /* The pen is named "Edit <label>": the tooltip shows "Edit", it does not describe it again. */
+              <Tooltip content="Edit" placement="top" describe={false}>
                 <IconButton
                   ref={pen}
                   icon="note-pencil"
