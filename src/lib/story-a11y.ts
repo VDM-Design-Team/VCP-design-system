@@ -6,6 +6,11 @@
  * image, Marvin Reed" (PR 238). It fails when the description is empty of anything new: the same as
  * the name, or contained in it. Pass `describe={false}` to the `Tooltip`, or say something the name
  * does not.
+ *
+ * A `title` is a description too, whenever something else gave the name: `aria-label="Edit"
+ * title="Edit"` is "Edit, button, Edit". With no `aria-describedby`, an element named by `aria-label`
+ * or `aria-labelledby` is held to its `title`. Let the `title` be the name instead (drop the
+ * `aria-label`), as IconButton does.
  */
 type AxeLike = {
   commons: {
@@ -25,13 +30,19 @@ export const DESCRIPTION_REPEATS_NAME = {
       evaluate(node: Element, _options: unknown, virtualNode: unknown) {
         const axe = (window as unknown as { axe: AxeLike }).axe;
         const name = norm(axe.commons.text.accessibleTextVirtual(virtualNode));
+        const described = (node.getAttribute('aria-describedby') ?? '')
+          .split(/\s+/)
+          .filter(Boolean)
+          .map((id) => node.ownerDocument.getElementById(id))
+          .filter((el): el is HTMLElement => !!el);
+        /* aria-describedby wins; without it, a title the name didn't come from is the description. */
+        const authorNamed = node.hasAttribute('aria-label') || node.hasAttribute('aria-labelledby');
         const description = norm(
-          (node.getAttribute('aria-describedby') ?? '')
-            .split(/\s+/)
-            .filter(Boolean)
-            .map((id) => node.ownerDocument.getElementById(id))
-            .map((el) => (el ? axe.commons.text.accessibleText(el, { inLabelledByContext: true }) : ''))
-            .join(' '),
+          described.length
+            ? described.map((el) => axe.commons.text.accessibleText(el, { inLabelledByContext: true })).join(' ')
+            : authorNamed
+              ? (node.getAttribute('title') ?? '')
+              : '',
         );
         return !name || !description || !name.includes(description);
       },
@@ -40,15 +51,15 @@ export const DESCRIPTION_REPEATS_NAME = {
   rules: [
     {
       id: 'vcp-description-repeats-name',
-      selector: '[aria-describedby]',
+      selector: '[aria-describedby], [title][aria-label], [title][aria-labelledby]',
       any: ['vcp-description-adds-something'],
       impact: 'moderate',
       tags: ['vcp'],
       metadata: {
-        description: 'A description (aria-describedby) must say something its element’s name does not',
+        description: 'A description (aria-describedby, or a title beside an aria-label) must say something its element’s name does not',
         help:
           'The description repeats the name, so it is heard twice. On a Tooltip whose trigger is already ' +
-          'named by its words, pass describe={false}.',
+          'named by its words, pass describe={false}; for a title that repeats an aria-label, drop the aria-label.',
       },
     },
   ],

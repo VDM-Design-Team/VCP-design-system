@@ -33,7 +33,8 @@ Claude Design project — those mirror this repo, not the other way round.
    - **Say it once.** A tooltip describes its trigger, so one that repeats the
      trigger's name is heard twice: pass `describe={false}`. The same goes for a
      hint that is inside a label *and* in its `aria-describedby`: name the control
-     by its own words (`aria-labelledby`). The story tests fail it
+     by its own words (`aria-labelledby`), and for a `title` beside an `aria-label`
+     that repeats it: let the `title` be the name. The story tests fail it
      (`vcp-description-repeats-name`, in `src/lib/story-a11y.ts`).
    - **Never drop focus.** When the element that has focus goes away (a box
      closes, a row is deleted), move focus on purpose: back to the control that
