@@ -2,10 +2,10 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Chip } from './Chip';
-import { Avatar } from '../../atoms/avatar';
+import { Avatar } from '../avatar';
 
 const meta = {
-  title: 'Components/Display/Chip',
+  title: 'Atoms/Chip',
   component: Chip,
   parameters: {
     docs: {

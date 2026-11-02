@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * NotificationItem — one line in a list of notifications: who did what to which
@@ -336,6 +336,9 @@ function CommentPreview({ text }: { text: string }) {
           <Button
             variant="tertiary"
             size="sm"
+            /* The focus ring is drawn inside the button: the card clips its overflow and the
+               button sits on its bottom edge, so a ring outside showed only its two sides. */
+            className="focus-visible:-outline-offset-2"
             aria-expanded={expanded}
             aria-controls={id}
             onClick={() => setExpanded((open) => !open)}

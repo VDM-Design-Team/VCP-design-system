@@ -1,4 +1,4 @@
-# Tooltip
+# Tooltip *(atom)*
 
 A small floating label describing the element it is attached to.
 

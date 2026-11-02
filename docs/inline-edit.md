@@ -12,7 +12,7 @@ with whatever control fits — typing or choosing — then confirm or cancel.
 | `IconButton` | atom |
 | `DatePicker` | component |
 | `Popover` | component |
-| `Tooltip` | component |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
