@@ -153,9 +153,7 @@ export function AVTable({
       key: 'title',
       label: 'Task Title',
       sortable: true,
-      /* 4fr against six 1fr-ish columns in Figma. As a `<col>` width, 40%
-         leaves the rest to share the remainder in the same proportion. */
-      width: '40%',
+      grow: true,
       render: (row) => (
         /* 16 top and bottom, Figma's own cell padding. With the two-line title
              block that makes an 81 row, which is what the canvas draws. */
@@ -204,6 +202,7 @@ export function AVTable({
     },
     {
       key: 'due',
+      fit: true,
       label: 'Due Date',
       sortable: true,
       render: (row) =>
@@ -213,26 +212,30 @@ export function AVTable({
     },
     {
       key: 'urgency',
+      fit: true,
       label: 'Urgency',
       hint: <ColumnHint text={hints.urgency} column="urgency" />,
       /* The tag carries Figma's own 8 of padding, so the cell gives it back to
          keep the column's left edge true. */
-      render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
+      render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2 max-w-none" /> : null),
     },
     {
       key: 'type',
+      fit: true,
       label: 'Type',
       hint: <ColumnHint text={hints.type} column="type" />,
-      render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
+      render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2 max-w-none" /> : null),
     },
     {
       key: 'status',
+      fit: true,
       label: 'Status',
       hint: <ColumnHint text={hints.status} column="status" />,
       render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
     },
     {
       key: 'members',
+      fit: true,
       label: 'Members',
       hint: <ColumnHint text={hints.members} column="members" />,
       render: (row) =>
@@ -242,6 +245,7 @@ export function AVTable({
     },
     {
       key: 'lastUpdated',
+      fit: true,
       label: 'Last Updated',
       sortable: true,
       render: (row) => <span className="text-label-sm-medium text-text-tertiary">{row.lastUpdated}</span>,

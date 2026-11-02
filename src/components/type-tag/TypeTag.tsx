@@ -68,7 +68,7 @@ export const TYPE_COLUMN_HINT = (
   <>
     {AV_TYPES.map((t) => (
       <span key={t} className="block">
-        <strong className="font-semibold">{t}:</strong> {AV_TYPE_MEANING[t]}
+        <strong className="text-caption-md-semibold">{t}:</strong> {AV_TYPE_MEANING[t]}
       </span>
     ))}
   </>

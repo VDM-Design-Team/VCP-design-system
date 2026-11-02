@@ -234,12 +234,12 @@ export function PlanningTable({
     onCollapsedChange?.(next);
   };
 
-  /* Every column has a width, so the Cycle's table and the Backlog's line up: they are
-     separate tables, and left to size themselves each would fit its own content. */
+  /* Every column hugs its content except the title, which takes what is left and truncates — so the
+     table is as narrow as its content allows and scrolls sideways only below that. */
   const columns: Array<DataTableColumn<PlanningRow>> = [
     {
       key: 'ref',
-      width: '9%',
+      fit: true,
       label: 'ID',
       /* Click to copy the reference ("Copied" says so). Opening the Added Value is the title's job. */
       render: (row) => (
@@ -248,7 +248,7 @@ export function PlanningTable({
     },
     {
       key: 'title',
-      width: '21%',
+      grow: true,
       label: 'Added Value Title',
       sortable: true,
       render: (row) => (
@@ -259,12 +259,12 @@ export function PlanningTable({
               type="button"
               onClick={() => onOpen(row)}
               title={row.title}
-              className="block max-w-96 truncate rounded-sm text-left text-label-sm-medium text-text-primary hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+              className="block max-w-full truncate rounded-sm text-left text-label-sm-medium text-text-primary hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
             >
               {row.title}
             </button>
           ) : (
-            <span className="block max-w-96 truncate text-label-sm-medium text-text-primary" title={row.title}>
+            <span className="block max-w-full truncate text-label-sm-medium text-text-primary" title={row.title}>
               {row.title}
             </span>
           )}
@@ -278,21 +278,21 @@ export function PlanningTable({
     },
     {
       key: 'urgency',
-      width: '12%',
+      fit: true,
       label: 'Urgency',
       hint: <ColumnHint text={hints?.urgency} column="urgency" />,
-      render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
+      render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2 max-w-none" /> : null),
     },
     {
       key: 'type',
-      width: '11%',
+      fit: true,
       label: 'Type',
       hint: <ColumnHint text={hints?.type} column="type" />,
-      render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
+      render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2 max-w-none" /> : null),
     },
     {
       key: 'initiator',
-      width: '6%',
+      fit: true,
       label: 'Initiator',
       render: (row) =>
         row.initiator ? (
@@ -311,7 +311,7 @@ export function PlanningTable({
     },
     {
       key: 'assignee',
-      width: '8%',
+      fit: true,
       label: 'Assignee',
       render: (row) =>
         row.assignee ? (
@@ -324,7 +324,7 @@ export function PlanningTable({
     },
     {
       key: 'start',
-      width: '9%',
+      fit: true,
       label: 'Start Date',
       hint: <ColumnHint text={hints.start} column="start date" icon="function" />,
       render: (row) =>
@@ -342,14 +342,14 @@ export function PlanningTable({
     },
     {
       key: 'points',
-      width: '5%',
+      fit: true,
       label: 'Points',
       hint: <ColumnHint text={hints.points} column="points" icon="function" />,
       render: (row) => <PointsCell row={row} onChange={onPointsChange} />,
     },
     {
       key: 'due',
-      width: '10%',
+      fit: true,
       label: 'Due Date',
       hint: <ColumnHint text={hints.due} column="due date" icon="function" />,
       render: (row) =>
@@ -368,6 +368,7 @@ export function PlanningTable({
     },
     {
       key: 'status',
+      fit: true,
       label: 'Status',
       hint: <ColumnHint text={hints?.status} column="status" />,
       render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
@@ -468,8 +469,7 @@ export function PlanningTable({
                 rows={section.rows}
                 sort={sort}
                 onSortChange={onSortChange}
-                /* Not `overflow-x: auto`: that would clip an inline date picker. */
-                className="overflow-visible rounded-none border-0"
+                className="rounded-none border-0"
                 rowProps={
                   onMoveRow && section.kind === 'backlog'
                     ? (row) => ({

@@ -31,7 +31,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, hint?, render? }` |
+| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, fit?, grow?, sortable?, hint?, render? }` |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
@@ -41,6 +41,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `empty` | `ReactNode` | `'Nothing here yet.'` | An `<EmptyState>` fits; its copy rules apply |
 | `dense` | `boolean` | — | 44 rows instead of 56 |
 | `caption` | `string` | — | Visually hidden `<caption>` naming the table. Strongly encouraged |
+| `rowProps` | `(row) => HTMLAttributes<tr>` | — | Extra attributes for a row — a drag source, a data attribute. `className` is merged; the row stays a plain row |
 | `className` | `string` | — | On the scrolling container |
 
 `DataTableColumn.hint` renders after the label and **before the sort arrows** — a
@@ -63,6 +64,21 @@ batch 5.
 A trap worth naming: **the repo's type ramp and Figma's share names but not
 values.** Figma's `label-sm` is 14px; this repo's is 11px. Read a spec off the
 canvas by *value*, not by token name — 14px medium here is `label-lg`.
+
+### How a column is sized: hug, or take the rest
+
+The responsive pattern for every VCP table: **a column is as wide as its content needs and no wider, and
+the one long text column takes the rest.**
+
+| Column option | What it does | Use it for |
+|---|---|---|
+| `fit` | Hugs its widest cell or header — never wrapped, never cut with "…" | Tags, dates, avatars, counts: anything whose length *is* the information |
+| `grow` | Takes what the `fit` columns leave. Its content truncates with "…" as the table narrows, down to 16rem; below that the table scrolls sideways | The one long text column — an Added Value's title, which is almost always longer than its header. Use it once |
+| neither | The browser sizes it (or `width` does) | Anything else — the generic default |
+
+So as the window narrows the title gives way first; when it cannot give any more the table scrolls
+horizontally (the container, never the page). `AVTable` and `PlanningTable` use it. A tag in a `fit` cell
+needs `max-w-none`: a `Tag` is `max-w-full`, which in a cell sized to its content would clip it.
 
 `DataTableColumn.width` takes CSS widths (`'120px'`, `'30%'`) applied to
 `<col>` — **not** the export's grid tracks; `'1fr'` has no meaning in a table.

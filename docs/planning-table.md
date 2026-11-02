@@ -112,8 +112,14 @@ dialog first, and the move happens on confirm).
 
 ## Popovers
 
-An inline date picker opens out of its cell, so neither the section card nor the table clips: both are
-`overflow: visible`. The cost is that the table no longer scrolls sideways on its own — the page owns that.
+An inline date picker opens out of its cell. `InlineDateEdit`'s popover is `strategy="fixed"`, so it floats over
+the table's horizontal scroll instead of being clipped by it.
+
+## Sizing
+
+Every column hugs its content (`fit`) except the title, which takes the rest and truncates (`grow`, minimum
+16rem). Narrow the window and the title gives way first; below that the table scrolls sideways, one scroller
+per section (see `docs/data-table.md`).
 
 ## Don't
 

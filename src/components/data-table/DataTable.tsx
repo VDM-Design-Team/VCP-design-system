@@ -49,6 +49,19 @@ export interface DataTableColumn<Row> {
   label: string;
   /** CSS width for the `<col>` — '120px', '30%'. Unsized columns share the rest. ds-lint-ignore */
   width?: string;
+  /**
+   * **Hug the content.** The column is exactly as wide as its widest cell or header (never wrapped,
+   * never cut with "…"), and no wider. Use it for tags, dates, avatars, counts — anything whose
+   * length is the information. If the columns together are wider than the table, it scrolls sideways.
+   */
+  fit?: boolean;
+  /**
+   * **Take the room that is left.** The column fills what the `fit` columns leave and its content
+   * truncates with "…" as the table narrows — down to a minimum (16rem) before the table scrolls
+   * instead. Use it once, for the long text (an Added Value's title) that is almost always longer
+   * than its header.
+   */
+  grow?: boolean;
   sortable?: boolean;
   /**
    * Rendered after the label and **before** the sort arrows — a tooltip
@@ -209,7 +222,7 @@ export function DataTable<Row extends { id?: string | number }>({
           {/* The checkbox column is a fixed 40 gutter. */}
           {selectable && <col style={{ width: '40px' }} /> /* ds-lint-ignore */}
           {columns.map((c) => (
-            <col key={c.key} style={c.width ? { width: c.width } : undefined} />
+            <col key={c.key} style={c.width && !c.fit && !c.grow ? { width: c.width } : undefined} />
           ))}
         </colgroup>
         <thead>
@@ -233,7 +246,7 @@ export function DataTable<Row extends { id?: string | number }>({
                   aria-sort={
                     sorted ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined
                   }
-                  className={headerCell}
+                  className={cn(headerCell, columnSizing(c))}
                 >
                   {/* Label, then the hint, then the sort arrows — in that order, as
                       Figma draws a header that has both. The sort button is the
@@ -317,7 +330,7 @@ export function DataTable<Row extends { id?: string | number }>({
                     </td>
                   )}
                   {columns.map((c) => (
-                    <td key={c.key} className={cn(cell(dense), 'text-left')}>
+                    <td key={c.key} className={cn(cell(dense), 'text-left', columnSizing(c))}>
                       {c.render
                         ? c.render(row)
                         : ((row as Record<string, unknown>)[c.key] as React.ReactNode)}
@@ -335,6 +348,11 @@ export function DataTable<Row extends { id?: string | number }>({
 
 /* 56 rows by default, 44 dense — the export's two densities, as min-heights so
    a tall cell can grow. */
+/* `fit`: the narrowest width, with no wrapping, which a table cell stretches to its content. `grow`: the rest of the
+   row, with `max-w-0` so its own content truncates instead of widening the column. */
+const columnSizing = (c: { fit?: boolean; grow?: boolean }) =>
+  c.grow ? 'w-full min-w-64 max-w-0' : c.fit ? 'w-px whitespace-nowrap' : undefined;
+
 const cell = (dense?: boolean) =>
   cn(
     'px-2 align-middle text-body-sm-regular text-text-secondary first:pl-4 last:pr-4',

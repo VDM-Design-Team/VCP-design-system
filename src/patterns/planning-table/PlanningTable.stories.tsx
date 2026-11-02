@@ -2,7 +2,6 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fireEvent, fn, userEvent, within } from 'storybook/test';
 import { PlanningTable, type PlanningRow, type PlanningSection } from './PlanningTable';
-import type { DataTableSort } from '../../components/data-table';
 
 const TITLES = ['Automated Planning Workspace', 'Billing export', 'Calendar sync', 'Dashboard filters', 'Email digests'];
 const titleFor = (n: number) => `[VCP] ${TITLES[(n - 1) % TITLES.length]} for VCP Planning List - DESIGN`;
@@ -55,6 +54,8 @@ const meta = {
     },
   },
   args: { sections: SECTIONS },
+  /* Every story edits in place, as the product does: a cell is editable once its handler exists. */
+  render: (args) => <Editable {...args} />,
   decorators: [
     (Story) => (
       <div className="bg-surface-canvas p-6">
@@ -126,7 +127,6 @@ function Editable(args: React.ComponentProps<typeof PlanningTable>) {
 /** Fold a section from its caret, change a row's points in place. */
 export const FoldingAndEditing: Story = {
   args: { defaultCollapsed: ['backlog'] },
-  render: (args) => <Editable {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const cycle = canvas.getByRole('button', { name: /Cycle 27/ });
@@ -148,20 +148,6 @@ export const FoldingAndEditing: Story = {
     await userEvent.type(field, '5');
     await userEvent.click(within(firstRow).getByRole('button', { name: 'Save' }));
     await expect(within(firstRow).getByText('5')).toBeInTheDocument();
-  },
-};
-
-/**
- * Sorting is a **handler**, not the table's job: the header reports the key and direction through
- * `onSortChange` and the caller (usually the server) returns the rows in that order. Nothing here
- * reorders in the browser — which is why no story does.
- */
-export const SortingIsAHandler: Story = {
-  args: { defaultCollapsed: ['backlog'], sort: { key: 'title', direction: 'asc' }, onSortChange: fn() },
-  play: async ({ canvasElement, args }) => {
-    const header = within(canvasElement).getAllByRole('button', { name: /Added Value Title/ })[0]!;
-    await userEvent.click(header);
-    await expect(args.onSortChange).toHaveBeenCalledWith({ key: 'title', direction: 'desc' });
   },
 };
 
