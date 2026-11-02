@@ -298,3 +298,18 @@ export const AnimatedDatesBehaviour: Story = {
     await expect(args.onAnimationDismiss).toHaveBeenLastCalledWith(expect.objectContaining({ ref: 'VCP-1239' }), 'due');
   },
 };
+
+/** **Flow:** what a screen reader gets: the initiator's name once, and an empty cell as "Not set", not "dash". */
+export const ReadsCleanly: Story = {
+  ...EmptyDates,
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const initiator = canvas.getAllByRole('img', { name: 'Initiator: Marvin Reed' })[0]!;
+    await expect(initiator).toHaveAccessibleDescription('');
+    const empty = canvas.getAllByText('Not set')[0]!;
+    await expect(empty.previousElementSibling).toHaveAttribute('aria-hidden', 'true');
+    await expect(empty.previousElementSibling).toHaveTextContent('-');
+  },
+};
