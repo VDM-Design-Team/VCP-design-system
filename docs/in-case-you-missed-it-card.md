@@ -29,8 +29,8 @@ The card owns it, once. Each type is a tag and a message in the tone's own colou
 
 | `type` | Tag | Message (`days: 3`) |
 |---|---|---|
-| `overdue` | critical, `warning` glyph | "since 3 days ago" (critical) |
-| `due-soon` | critical, `hourglass-low` | "in 3 days" (critical) |
+| `overdue` | critical, `warning-fill` (solid, as Figma draws it) | "since 3 days ago" (critical) |
+| `due-soon` | critical, `hourglass-low-fill` (solid) | "in 3 days" (critical) |
 | `awaiting-review` | warning, `clock-user` | "since 3 days ago" (warning) |
 | `pending` | warning, `clock` | "since 3 days ago" (warning) |
 

@@ -14,8 +14,8 @@ import { Tag, type TagTone } from '../../atoms/tag';
  *
  * | Type | Tag | Message |
  * |---|---|---|
- * | `overdue` | critical, `warning` | "since 3 days ago" |
- * | `due-soon` | critical, `hourglass-low` | "in 3 days" |
+ * | `overdue` | critical, `warning-fill` | "since 3 days ago" |
+ * | `due-soon` | critical, `hourglass-low-fill` | "in 3 days" |
  * | `awaiting-review` | warning, `clock-user` | "since 3 days ago" |
  * | `pending` | warning, `clock` | "since 3 days ago" |
  *
@@ -51,14 +51,14 @@ const days = (n: number) => `${n} ${n === 1 ? 'day' : 'days'}`;
 const TYPE: Record<MissedItemType, TypeStyle> = {
   overdue: {
     label: 'Overdue',
-    icon: 'warning',
+    icon: 'warning-fill',
     tone: 'critical',
     messageClassName: 'text-accent-critical-outline-content-default',
     message: (n) => `since ${days(n)} ago`,
   },
   'due-soon': {
     label: 'Due Soon',
-    icon: 'hourglass-low',
+    icon: 'hourglass-low-fill',
     tone: 'critical',
     messageClassName: 'text-accent-critical-outline-content-default',
     message: (n) => `in ${days(n)}`,
