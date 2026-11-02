@@ -63,7 +63,7 @@ of three `IconButton`s and the percentage. No new tokens.
   carry the file's name.
 - The percentage is `aria-live="polite"`, so a zoom is read out. The strip's thumbnails are buttons named "{name}, 2 of 4"
   with `aria-current` on the open one.
-- **Contrast holds on the dark surface**, and a story measures it. Text: the name 17.9:1, the count 12:1, the percentage 10.4:1. Glyphs: download and close 12:1, the arrow 12:1, zoom 7:1, a document thumbnail 7:1. Marks: the arrows' edge 3.75:1, the open thumbnail's outline 7.7:1. Disabled controls (the first file's previous arrow, the reset at 100%) are exempt. Every colour is a semantic token.
+- **Contrast holds on the dark surface**, and a story measures it. Text: the name 17.9:1, the count 12:1, the percentage 10.4:1. Glyphs: download and close 12:1, the arrow 12:1, zoom 7:1 at rest (8.4:1 hovered on its fill, 6.9:1 pressed on its fill), a document thumbnail 7:1. Marks: the arrows' edge 3.75:1, the open thumbnail's outline 7.7:1. Disabled controls (the first file's previous arrow, the reset at 100%) are exempt. Every colour is a semantic token.
 - Everything is reachable by keyboard; the arrow keys and `+ - 0` are shortcuts, not the only way.
 
 ## Don't
