@@ -35,7 +35,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `priorityOptions` | same | Low, Normal, High, Urgent | |
 | `onReset` | `() => void` | required | The page clears its filters |
 | `onViewCycle` | `() => void` | — | Omit it and the button is not drawn. What it opens is the page's |
-| `statusPlaceholder` / `priorityPlaceholder` / `searchPlaceholder` | `string` | "Select status" / "Search priority" / "Search by title or ID" | Figma's copy |
+| `statusPlaceholder` / `priorityPlaceholder` / `searchPlaceholder` | `string` | "Select status" / "Select priority" / "Search by title or ID" | A picker says *Select*, a search box says *Search* |
 | `resetLabel` / `viewCycleLabel` | `string` | "Reset" / "View Cycle" | |
 
 ## Layout
@@ -47,8 +47,8 @@ with the calendar glyph) on the right. The row wraps on a narrow screen rather t
 
 - A `role="search"` region named "Filter the planning list"; the search is a real `type="search"` field named by its placeholder text.
 - The two selects are `SearchSelect`s (keyboard, listbox, announcements — see docs/search-select.md), named "Status" and "Priority".
-- "Search priority" is Figma's copy for the priority placeholder, though the dropdown is a short pick list with no search box; pass
-  `priorityPlaceholder` to change it.
+- The priority placeholder reads "Select priority", the system's wording for a picker. Figma's frame says "Search priority", though
+  the dropdown is a short pick list with no search box — a copy slip, not a design choice.
 
 ## Don't
 
