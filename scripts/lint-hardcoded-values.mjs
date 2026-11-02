@@ -5,8 +5,9 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, extname } from 'node:path';
 
+const HEX = /#[0-9a-fA-F]{3,8}\b/g;
 const RULES = [
-  [/#[0-9a-fA-F]{3,8}\b/g,            'hex color — use a token (VCP ramps: tokens/core/color.json; shared ones come from GDL)'],
+  [HEX,                               'hex color — use a token (VCP ramps: tokens/core/color.json; shared ones come from GDL)'],
   [/\b(rgb|rgba|hsl|hsla)\(/g,        'raw color function — use a token'],
   [/\b(bg|text|border|fill|stroke|outline)-\[[^\]]+\]/g, 'arbitrary Tailwind color — use a token utility'],
   [/\b(p|m|gap|w|h|top|left|right|bottom)[trblxy]?-\[[^\]]+\]/g, 'arbitrary Tailwind size — use a spacing token'],
@@ -19,14 +20,27 @@ const walk = (dir) =>
     return statSync(p).isDirectory() ? walk(p) : ['.tsx', '.ts', '.css'].includes(extname(p)) ? [p] : [];
   });
 
+/* The file with its comments blanked (lengths and line breaks kept), to tell a comment from code.
+   A `//` after a `:` is a URL's, not a comment. */
+const withoutComments = (src) =>
+  src
+    .replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:])(\/\/[^\n]*)/g, (_, before, c) => before + ' '.repeat(c.length));
+
+/* "#212" in a comment is a PR or issue number, not a colour: a hex made only of digits is let through
+   there. In code it is still a colour ('#333'), and in a comment a hex with letters still fails. */
+const isIssueNumber = (match, codeLine) => /^#\d+$/.test(match[0]) && codeLine[match.index] === ' ';
+
 let failed = 0;
 for (const file of walk('src')) {
   if (file.endsWith('.stories.tsx')) continue;
   const src = readFileSync(file, 'utf8');
+  const code = withoutComments(src).split('\n');
   src.split('\n').forEach((line, i) => {
     if (/eslint-disable|ds-lint-ignore/.test(line)) return;
     for (const [re, msg] of RULES) {
       for (const m of line.matchAll(re)) {
+        if (re === HEX && isIssueNumber(m, code[i])) continue;
         console.error(`${file}:${i + 1}  ${m[0]}  →  ${msg}`);
         failed++;
       }
