@@ -177,17 +177,37 @@ export function MoveAVToCycleModal({
   const patchRow = (id: string, change: Partial<AssigneeRowDraft>) =>
     setRows((now) => now.map((r) => (r.id === id ? { ...r, ...change } : r)));
 
+  /* Rows by id, so focus can follow them. A removed row takes its focused ⊖ with it: focus goes to the
+     row that took its place (its ⊖, or its assignee when it is the last one left). An added row is
+     there to be filled, so focus goes to its assignee. */
+  const rowEls = React.useRef(new Map<string, HTMLDivElement>());
+  const focusAfter = React.useRef<{ index: number; on: 'remove' | 'assignee' } | null>(null);
+  const assigneeIn = (el: HTMLElement | undefined) => el?.querySelector<HTMLElement>('[aria-haspopup="listbox"]');
+  React.useEffect(() => {
+    const want = focusAfter.current;
+    if (!want || rows.length === 0) return;
+    focusAfter.current = null;
+    const el = rowEls.current.get(rows[Math.min(want.index, rows.length - 1)]!.id);
+    const remove = el?.querySelector<HTMLElement>('[data-remove-assignee]');
+    (want.on === 'remove' ? (remove ?? assigneeIn(el)) : assigneeIn(el))?.focus();
+  }, [rows]);
+
   const submit = () => {
     const chosen = rows.filter((r) => r.person);
     const next: typeof errors = {};
     if (chosen.length === 0) next.assignee = 'Add at least one assignee.';
     if (!due) next.due = 'Add a due date.';
     if (points === '') next.points = 'Add capacity points.';
-    const unavailable =
-      availabilityKnown && chosen.some((r) => byValue.get(r.person)?.availability === 'unavailable');
-    if (unavailable) next.assignee = 'A selected assignee is unavailable during these dates. Change the dates or remove them.';
+    const unavailable = availabilityKnown
+      ? chosen.find((r) => byValue.get(r.person)?.availability === 'unavailable')
+      : undefined;
     setErrors(next);
-    if (unavailable) return onInvalid?.('unavailable-assignee');
+    if (unavailable) {
+      /* The row already says why, under its own field; a second message for the group said it twice.
+         Take the person there instead: focus reads the field and its error. */
+      assigneeIn(rowEls.current.get(unavailable.id))?.focus();
+      return onInvalid?.('unavailable-assignee');
+    }
     if (Object.keys(next).length) return onInvalid?.('missing-details');
     onConfirm({
       assignees: [...draft.assignees],
@@ -220,14 +240,24 @@ export function MoveAVToCycleModal({
       <div className="flex flex-col gap-6">
         <Field
           label="Assignee"
-          onAdd={() => setRows((now) => [...now, newRow(roles[0] ?? 'Assignee')])}
+          onAdd={() => {
+            focusAfter.current = { index: rows.length, on: 'assignee' };
+            setRows((now) => [...now, newRow(roles[0] ?? 'Assignee')]);
+          }}
           addLabel="Add assignee"
           error={errors.assignee}
         >
           {() => (
             <div className="flex flex-col gap-3">
               {rows.map((row, i) => (
-                <div key={row.id} className="flex items-start gap-2">
+                <div
+                  key={row.id}
+                  ref={(el) => {
+                    if (el) rowEls.current.set(row.id, el);
+                    else rowEls.current.delete(row.id);
+                  }}
+                  className="flex items-start gap-2"
+                >
                   <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
                     <AssigneeSelectionDropdown
                       fullWidth
@@ -257,7 +287,11 @@ export function MoveAVToCycleModal({
                     <IconButton
                       icon="minus-circle"
                       label={`Remove assignee ${i + 1}`}
-                      onClick={() => setRows((now) => now.filter((r) => r.id !== row.id))}
+                      data-remove-assignee
+                      onClick={() => {
+                        focusAfter.current = { index: i, on: 'remove' };
+                        setRows((now) => now.filter((r) => r.id !== row.id));
+                      }}
                     />
                   )}
                 </div>

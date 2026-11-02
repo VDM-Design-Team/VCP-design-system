@@ -68,7 +68,10 @@ an unavailable assignee** — it says so under the field and calls `onInvalid('u
 - A `Modal` (focus trap, Escape, focus returns to where it opened). Every control is named: "Assignee 1", "Role for assignee 1",
   "Capacity points for assignee 1", the date fields by their labels.
 - The "+" beside Assignee is "Add assignee"; each extra row has "Remove assignee N" (the first row cannot be removed).
-- Errors appear under their field and are announced with it.
+  **Focus follows the rows:** "Add assignee" moves it to the new row's assignee, and removing a row moves it to the
+  row that took its place (its ⊖, or its assignee when it is the last one left), never to the page.
+- Errors appear under their field and are announced with it. An unavailable assignee is said **once**, under that
+  person's own field; Confirm moves focus there, so it is heard.
 
 ## Don't
 
