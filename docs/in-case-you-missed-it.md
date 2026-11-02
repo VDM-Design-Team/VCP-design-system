@@ -9,7 +9,6 @@ card (with an ⓘ that says what it is for) over a row of `InCaseYouMissedItCard
 | Piece | Tier |
 |---|---|
 | `Icon` | sub-atomic |
-| `IconButton` | atom |
 | `Tooltip` | atom |
 | `InCaseYouMissedItCard` | component |
 
@@ -35,9 +34,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Behaviour
 
-- **Scrolling is normal scrolling** — swipe, wheel, the scrollbar — plus an arrow at each edge that moves one card. The arrows are
-  tonal 48 discs, shown while the strip is hovered or has focus, not at an end the row cannot go past, and not at all when everything
-  fits. On a touch screen they are hidden: the swipe does the work.
+- **No scrollbar is drawn** (the design draws none), so scrolling works every other way: a touch or trackpad swipe, Shift + wheel,
+  **dragging the row with the mouse** (past a few pixels it is a drag, and the click that ends it is swallowed so letting go over a
+  card does not open it), Tab (focusing a card brings it into view), and an arrow at each edge that moves one card. The arrows are
+  40 tonal discs in a 48 hit area (Figma's `_ICYMI_Arrow_Button`), shown while the strip is hovered or has focus, not at an end the
+  row cannot go past, and not at all when everything fits; on a touch screen they are hidden. A plain vertical wheel is left to the
+  page — turning it sideways would trap anyone scrolling past the strip.
 - **It owns no state.** A dismissed card must stay away "even after logging out and in and after a refresh" while it keeps its current
   status — so the caller removes it from `items` **and remembers it** (server-side). This strip cannot.
 - Cards are `w-85` (340 with their padding), snap to the start, and keep their size however wide the page.

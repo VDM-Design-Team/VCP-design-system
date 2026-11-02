@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
-import { IconButton } from '../../atoms/icon-button';
 import { Tooltip } from '../../atoms/tooltip';
 import {
   InCaseYouMissedItCard,
@@ -14,9 +13,11 @@ import {
  * `InCaseYouMissedItCard`s that scrolls sideways. Built to Figma's `InCaseYouMissedIt` (`4361:23920`) and
  * its flow.
  *
- * - **Scrolling is normal scrolling** — swipe, wheel, drag the scrollbar — plus an arrow at each edge that moves one
- *   card. The arrows are tonal discs, shown while the strip is hovered or has focus, and not at all at the end they
- *   would run into; on a touch screen they stay out of the way and the swipe does the work.
+ * - **No scrollbar is drawn** — the design draws none — so every other way to scroll still works: a touch swipe, a
+ *   trackpad swipe, Shift + wheel, **dragging the row with the mouse**, Tab (focusing a card brings it into view), and an
+ *   arrow at each edge that moves one card. The arrows are 40 tonal discs in a 48 hit area, shown while the strip is hovered
+ *   or has focus, and not at all at an end they would run into; on a touch screen they stay out of the way. (A plain
+ *   vertical wheel is left to the page: turning it into a sideways scroll would trap anyone scrolling past.)
  * - **It owns no state.** `items` in, `onOpen(item)` and `onDismiss(item)` out. A dismissed card must stay away, the
  *   design says, "even after logging out and in and after a refresh", while it keeps its current status — so the
  *   caller removes it from `items` and remembers it; this strip cannot.
@@ -85,9 +86,24 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
       el?.scrollBy({ left: direction * (card?.offsetWidth ?? el.clientWidth), behavior: 'smooth' });
     };
 
+    /* Dragging the row with a mouse, since a hidden scrollbar leaves nothing to grab. Past a few pixels it is a
+       drag, and the click that ends it is swallowed, so letting go over a card does not open it. */
+    const drag = React.useRef<{ x: number; left: number } | null>(null);
+    const [dragging, setDragging] = React.useState(false);
+    const justDragged = React.useRef(false);
+    const endDrag = () => {
+      if (drag.current && dragging) justDragged.current = true;
+      drag.current = null;
+      setDragging(false);
+    };
+
     if (items.length === 0) return null;
 
-    const arrow = 'pointer-coarse:hidden opacity-0 transition-opacity group-hover/strip:opacity-100 group-focus-within/strip:opacity-100 focus-visible:opacity-100';
+    /* A 48 hit area around a 40 disc, the design's `_ICYMI_Arrow_Button`. */
+    const arrow =
+      'group/arrow absolute top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-pill pointer-coarse:hidden opacity-0 transition-opacity group-hover/strip:opacity-100 group-focus-within/strip:opacity-100 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused';
+    const disc =
+      'grid size-10 place-items-center rounded-pill bg-neutral-tonal-surface-default text-neutral-tonal-content-default transition-colors group-hover/arrow:bg-neutral-tonal-surface-hover group-active/arrow:bg-neutral-tonal-surface-pressed';
 
     return (
       <section
@@ -115,7 +131,32 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
           <ul
             ref={scroller}
             onScroll={measure}
-            className="m-0 flex list-none snap-x overflow-x-auto p-0"
+            onPointerDown={(event) => {
+              if (event.pointerType !== 'mouse' || event.button !== 0) return;
+              drag.current = { x: event.clientX, left: scroller.current?.scrollLeft ?? 0 };
+              justDragged.current = false;
+            }}
+            onPointerMove={(event) => {
+              const start = drag.current;
+              if (!start || !scroller.current) return;
+              const dx = event.clientX - start.x;
+              if (!dragging && Math.abs(dx) < 5) return;
+              if (!dragging) setDragging(true);
+              scroller.current.scrollLeft = start.left - dx;
+            }}
+            onPointerUp={endDrag}
+            onPointerLeave={endDrag}
+            onPointerCancel={endDrag}
+            onClickCapture={(event) => {
+              if (!justDragged.current) return;
+              justDragged.current = false;
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            className={cn(
+              'm-0 flex list-none overflow-x-auto p-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+              dragging ? 'cursor-grabbing snap-none select-none' : 'snap-x',
+            )}
           >
             {items.map((item) => (
               <li key={item.id} className="w-85 shrink-0 snap-start">
@@ -133,24 +174,18 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
           </ul>
 
           {!edges.start && (
-            <IconButton
-              variant="tonal"
-              size="lg"
-              icon="caret-left"
-              label="Previous"
-              onClick={() => move(-1)}
-              className={cn('absolute top-1/2 left-0 -translate-y-1/2', arrow)}
-            />
+            <button type="button" aria-label="Previous" onClick={() => move(-1)} className={cn(arrow, 'left-0')}>
+              <span className={disc}>
+                <Icon name="caret-left" size="lg" aria-hidden="true" />
+              </span>
+            </button>
           )}
           {!edges.end && (
-            <IconButton
-              variant="tonal"
-              size="lg"
-              icon="caret-right"
-              label="Next"
-              onClick={() => move(1)}
-              className={cn('absolute top-1/2 right-0 -translate-y-1/2', arrow)}
-            />
+            <button type="button" aria-label="Next" onClick={() => move(1)} className={cn(arrow, 'right-0')}>
+              <span className={disc}>
+                <Icon name="caret-right" size="lg" aria-hidden="true" />
+              </span>
+            </button>
           )}
         </div>
       </section>

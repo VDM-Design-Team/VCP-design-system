@@ -86,3 +86,25 @@ export const ScrollingAndDismissing: Story = {
     await expect(canvas.getAllByRole('listitem')).toHaveLength(ITEMS.length - 1);
   },
 };
+
+/** With no scrollbar to grab, a mouse can drag the row; letting go over a card does not open it (hidden: tested). */
+export const DraggingTheRow: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => <Dismissable {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const row = canvas.getAllByRole('list')[0]!;
+    await expect(row.scrollLeft).toBe(0);
+    const card = canvas.getAllByRole('button', { name: /^John Smith/ })[0]!;
+    const box = card.getBoundingClientRect();
+    await userEvent.pointer([
+      { keys: '[MouseLeft>]', target: card, coords: { clientX: box.left + 250, clientY: box.top + 40 } },
+      { target: card, coords: { clientX: box.left + 120, clientY: box.top + 40 } },
+      { target: card, coords: { clientX: box.left + 40, clientY: box.top + 40 } },
+      { keys: '[/MouseLeft]', target: card, coords: { clientX: box.left + 40, clientY: box.top + 40 } },
+    ]);
+    await waitFor(() => expect(row.scrollLeft).toBeGreaterThan(50));
+    await expect(args.onOpen).not.toHaveBeenCalled();
+  },
+};
