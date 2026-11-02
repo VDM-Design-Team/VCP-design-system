@@ -153,7 +153,7 @@ nothing else changes. Everything else on the card is on the ramp:
 | Tooltip glyph (`text.tertiary`) | **7.58:1** | **9.85:1** |
 
 The tone colours are below 3:1 against a white card in places — light theme:
-neutral **2.56**, success **2.22**, warning **1.91**; dark theme: info **2.79**.
+neutral **2.56**, success **2.22**; dark theme: info **2.79**. (Warning was **1.91** until its token moved to yellow-700, November 2026: now 4.93.)
 The stripe and icon are decorative and hidden from assistive tech — the label
 says what the card is — so they confirm a category rather than carry it, but
 they are a known soft spot of `outline.border.default` as a fill. The 1px
