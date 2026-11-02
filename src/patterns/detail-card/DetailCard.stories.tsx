@@ -161,6 +161,35 @@ export const InitiatedToOtherDomain: Story = {
   },
 };
 
+/**
+ * One box per domain the AV was duplicated to, each with the domain's name on the left and its current status on
+ * the right, in the order given. Another duplication adds another box under Duplicates.
+ */
+export const DuplicatedToSeveralDomains: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    type: 'duplicate',
+    value: {
+      ...VIEWING,
+      status: 'Initiated',
+      duplicates: [
+        { domain: 'Design (BESA)', status: 'Initiated' },
+        { domain: 'Development', status: 'In Progress' },
+        { domain: 'Content', status: 'Draft' },
+        { domain: 'Governance', status: 'Pending' },
+        { domain: 'Partners', status: 'Accepted' },
+        { domain: 'Quality Assurance', status: 'For QA' },
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const group = within(within(canvasElement).getByRole('group', { name: 'Duplicates' }));
+    await expect(group.getAllByRole('listitem')).toHaveLength(6);
+    await expect(group.getByText('Quality Assurance')).toBeVisible();
+  },
+};
+
 /** Design has no Cycle; Development has every field. */
 export const DesignHasNoCycle: Story = {
   tags: ['!dev', '!autodocs'],

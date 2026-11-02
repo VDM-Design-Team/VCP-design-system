@@ -269,13 +269,13 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         {(value.duplicates ?? []).map((d) => (
           <li
             key={d.domain}
-            className="flex items-center justify-between gap-2 rounded-sm border border-stroke-subtle px-3 py-2 text-body-sm-regular text-text-primary"
+            className="flex min-h-14 items-center justify-between gap-2 rounded-md border border-stroke-default px-3 text-body-sm-regular text-text-primary"
           >
             {d.domain}
             {(AV_STATUSES as readonly string[]).includes(d.status) ? (
-              <StatusTag status={d.status as AVStatus} />
+              <StatusTag size="md" status={d.status as AVStatus} />
             ) : (
-              <StatusTag custom={d.status} />
+              <StatusTag size="md" custom={d.status} />
             )}
           </li>
         ))}
