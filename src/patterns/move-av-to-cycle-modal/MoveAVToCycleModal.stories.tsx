@@ -111,6 +111,30 @@ export const UnavailableAssigneeBlocksConfirm: Story = {
     await userEvent.click(ui.getByRole('button', { name: 'Confirm' }));
     await expect(args.onInvalid).toHaveBeenCalledWith('unavailable-assignee');
     await expect(args.onConfirm).not.toHaveBeenCalled();
-    await expect(ui.getAllByText(/unavailable during/i).length).toBeGreaterThan(0);
+    /* Said once, under the person's own field, and focus goes there so it is heard. */
+    await expect(ui.getAllByText(/not available during the selected dates/i)).toHaveLength(1);
+    await expect(ui.queryByText(/unavailable during these dates/i)).toBeNull();
+    await waitFor(() => expect(ui.getByRole('combobox', { name: /Assignee 1/ })).toHaveFocus());
+  },
+};
+
+/** **Flow:** adding an assignee goes to its field; removing one never drops focus (hidden: tested). */
+export const FocusFollowsTheRows: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async () => {
+    const dialog = await open('Add Required Details');
+    const ui = within(dialog);
+    const add = ui.getByRole('button', { name: 'Add assignee' });
+    await userEvent.click(add);
+    await waitFor(() => expect(ui.getByRole('combobox', { name: /Assignee 2/ })).toHaveFocus());
+    await userEvent.click(add);
+    await waitFor(() => expect(ui.getByRole('combobox', { name: /Assignee 3/ })).toHaveFocus());
+    /* The middle one goes: focus is on the ⊖ of the row that took its place. */
+    await userEvent.click(ui.getByRole('button', { name: 'Remove assignee 2' }));
+    await waitFor(() => expect(ui.getByRole('button', { name: 'Remove assignee 2' })).toHaveFocus());
+    /* Down to one row, which has no ⊖: focus is on its assignee. */
+    await userEvent.click(ui.getByRole('button', { name: 'Remove assignee 2' }));
+    await waitFor(() => expect(ui.getByRole('combobox', { name: /Assignee 1/ })).toHaveFocus());
   },
 };
