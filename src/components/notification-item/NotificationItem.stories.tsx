@@ -94,17 +94,24 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/* The tooltip a trigger is described by, and whether it is open, as in
-   `Tooltip.stories`. The bubble is in a portal on `document.body`, and closed is
-   `opacity-0`, not `hidden`, so it is in the DOM either way: finding it proves
-   nothing, its positioner's open class does. */
+/* The mark-read tooltip, and whether it is open. It shows the button's name and does not
+   describe the button (the name already says it), so it is found by its words, not through
+   `aria-describedby`. The bubble is in a portal on `document.body`, and closed is `opacity-0`,
+   not `hidden`, so it is in the DOM either way: finding it proves nothing, its positioner's open
+   class does. */
 const bubbleOf = (trigger: HTMLElement) => {
-  const ids = (trigger.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
-  const bubble = document.getElementById(ids[ids.length - 1] ?? '');
-  if (!bubble) throw new Error('The trigger is not described by a tooltip');
+  const words = (trigger.getAttribute('aria-label') ?? '').split(':')[0];
+  const bubble = [...document.querySelectorAll<HTMLElement>('[role="tooltip"]')].find(
+    (t) => t.textContent?.trim() === words,
+  );
+  if (!bubble) throw new Error(`No tooltip reads "${words}"`);
   return bubble;
 };
-const described = (trigger: HTMLElement) => waitFor(() => bubbleOf(trigger));
+/* The tooltip is there, and the button is not described by it: its name is heard once. */
+const described = async (trigger: HTMLElement) => {
+  await waitFor(() => bubbleOf(trigger));
+  await expect(trigger).not.toHaveAttribute('aria-describedby');
+};
 const isOpen = (trigger: HTMLElement) => bubbleOf(trigger).parentElement?.classList.contains('opacity-100');
 
 /* The unread dot (the avatar is `rounded-pill`, so this is the only round span). */

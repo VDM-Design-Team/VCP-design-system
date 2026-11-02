@@ -73,6 +73,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
     ref,
   ) => {
     const messageId = React.useId();
+    const labelId = React.useId();
     const [over, setOver] = React.useState(false);
     /* A file is being dragged somewhere on the page — arms the wider hit area. */
     const [dragging, setDragging] = React.useState(false);
@@ -172,6 +173,10 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           multiple={multiple}
           disabled={disabled}
           aria-invalid={error ? true : undefined}
+          /* The zone's <label> wraps the hint or error too, so without this they are in the name *and*
+             the description, and heard twice. Named by its call to action, the hint is said once. A
+             caller's own aria-label or aria-labelledby still wins. */
+          aria-labelledby={props['aria-label'] ? undefined : labelId}
           aria-describedby={error || hint ? messageId : undefined}
           onChange={(e) => {
             take(e.target.files);
@@ -191,6 +196,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           )}
         />
         <span
+          id={labelId}
           className={cn(
             'font-sans text-body-sm-regular',
             disabled ? 'text-text-disabled' : 'text-text-primary',

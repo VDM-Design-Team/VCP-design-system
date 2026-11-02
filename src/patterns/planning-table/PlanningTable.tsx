@@ -170,10 +170,12 @@ function EstimateHint({ estimated, children }: { estimated?: boolean; children: 
 /** The capacity scale: the same choices the detail card's Capacity Points dropdown offers. */
 const DEFAULT_POINT_OPTIONS: readonly number[] = [0, 1, 2, 3, 5, 8, 13];
 
-/** What an empty Start Date, Due Date or Points cell reads — the design's hyphen. */
+/** What an empty Start Date, Due Date or Points cell reads — the design's hyphen, and "Not set" aloud.
+    (An `aria-label` on a plain span is not allowed, and most screen readers would say "dash".) */
 const Empty = () => (
-  <span className="text-label-sm-medium text-text-tertiary" aria-label="Not set">
-    -
+  <span className="text-label-sm-medium text-text-tertiary">
+    <span aria-hidden="true">-</span>
+    <span className="sr-only">Not set</span>
   </span>
 );
 
@@ -452,8 +454,9 @@ export function PlanningTable({
       label: 'Initiator',
       render: (row) =>
         row.initiator ? (
-          /* The name on hover and focus — an avatar alone says who only to people who know the face. */
-          <Tooltip content={row.initiator.name}>
+          /* The name on hover and focus — an avatar alone says who only to people who know the face.
+             The avatar's own name already says it, so the tooltip does not describe it again. */
+          <Tooltip content={row.initiator.name} describe={false}>
             <span
               role="img"
               aria-label={`Initiator: ${row.initiator.name}`}
