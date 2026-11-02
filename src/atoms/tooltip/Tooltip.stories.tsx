@@ -111,7 +111,7 @@ export const OnAnIconButton: Story = {
         <IconButton icon="funnel-simple" label="Filter results" variant="secondary" />
       </Tooltip>
       <Tooltip {...args} content="Edit deliverable">
-        <IconButton icon="pencil-simple" label="Edit deliverable" variant="secondary" />
+        <IconButton icon="note-pencil" label="Edit deliverable" variant="secondary" />
       </Tooltip>
       <span className="text-caption-md-regular text-text-subtle">
         ← the third one duplicates its own accessible name. Don’t.

@@ -52,7 +52,7 @@ export const WithIcons: Story = {
   name: 'With icons',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { key: 'share', label: 'Share with team', icon: 'users' },
       { key: 'export', label: 'Export as file', icon: 'file' },
@@ -65,7 +65,7 @@ export const WithShortcuts: Story = {
   name: 'With shortcuts',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple', shortcut: '⌘E' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil', shortcut: '⌘E' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle', shortcut: '⌘D' },
       { key: 'share', label: 'Share with team', icon: 'users', shortcut: '⇧⌘S' },
     ],
@@ -77,7 +77,7 @@ export const WithDivider: Story = {
   name: 'With a divider',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { divider: true },
       { key: 'archive', label: 'Archive', icon: 'trash-simple' },
@@ -93,7 +93,7 @@ export const WithDangerItem: Story = {
   name: 'With a danger item',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { divider: true },
       { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'danger' },
@@ -134,7 +134,7 @@ export const WithDisabledItem: Story = {
   name: 'With a disabled item',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
       { key: 'share', label: 'Share with team', icon: 'users' },
     ],
@@ -187,7 +187,7 @@ export const LightAndDark: Story = {
           defaultOpen
           align="left"
           items={[
-            { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple', shortcut: '⌘E' },
+            { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil', shortcut: '⌘E' },
             { key: 'share', label: 'Share with team', icon: 'users' },
             { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
             { divider: true },
@@ -206,7 +206,7 @@ export const LightAndDark: Story = {
 };
 
 const actions: MenuItem[] = [
-  { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+  { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
   { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
   { key: 'share', label: 'Share with team', icon: 'users' },
   { key: 'export', label: 'Export as file', icon: 'file' },
@@ -275,7 +275,7 @@ export const SkipsDisabledAndDividers: Story = {
   args: {
     trigger: <Button variant="secondary">Deliverable actions</Button>,
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { divider: true },
       { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
       { key: 'share', label: 'Share with team', icon: 'users' },
