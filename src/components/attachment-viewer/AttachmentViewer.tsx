@@ -63,6 +63,11 @@ const KIND_ICON: Record<AttachmentViewerKind, IconName> = {
   csv: 'file',
 };
 
+/* The viewer's quiet controls (download, close, zoom) wear the neutral palette, not the brand blue of a
+   ghost button: they are chrome around a picture, not actions to invite. */
+const NEUTRAL_GLYPH =
+  'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed';
+
 const ZOOM_MIN = 25;
 const ZOOM_MAX = 400;
 const ZOOM_STEP = 25;
@@ -168,9 +173,10 @@ export function AttachmentViewer({
               variant="tertiary"
               label={`Download ${file.name}`}
               onClick={() => onDownload(file)}
+              className={NEUTRAL_GLYPH}
             />
           )}
-          <IconButton icon="x" variant="tertiary" label="Close" onClick={onClose} />
+          <IconButton icon="x" variant="tertiary" label="Close" onClick={onClose} className={NEUTRAL_GLYPH} />
         </header>
 
         <div className="relative flex min-h-0 flex-1 items-stretch">
@@ -241,6 +247,7 @@ export function AttachmentViewer({
                 label="Zoom out"
                 disabled={zoom <= ZOOM_MIN}
                 onClick={() => zoomBy(-ZOOM_STEP)}
+                className={NEUTRAL_GLYPH}
               />
               <IconButton
                 icon="arrows-clockwise"
@@ -249,6 +256,7 @@ export function AttachmentViewer({
                 label="Reset zoom"
                 disabled={zoom === ZOOM_DEFAULT}
                 onClick={() => setZoom(ZOOM_DEFAULT)}
+                className={NEUTRAL_GLYPH}
               />
               <IconButton
                 icon="plus"
@@ -257,6 +265,7 @@ export function AttachmentViewer({
                 label="Zoom in"
                 disabled={zoom >= ZOOM_MAX}
                 onClick={() => zoomBy(ZOOM_STEP)}
+                className={NEUTRAL_GLYPH}
               />
               <span
                 aria-live="polite"
