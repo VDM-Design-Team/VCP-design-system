@@ -36,7 +36,8 @@ record of when each piece landed.
 | component | `Breadcrumb`, `Pagination`, `Accordion` | PR #39 |
 | component | `DataTable` | PR #43 |
 | atom | `Select` | PR #46 |
-| component | `Stepper`, `Dropzone` | PR #46 |
+| component | `Stepper` | PR #46 |
+| atom | `Dropzone` | PR #46 (moved from components) |
 | atom | `DonutChart` | PR #47 |
 | component | `Timeline`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |

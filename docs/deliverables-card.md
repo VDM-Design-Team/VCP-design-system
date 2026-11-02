@@ -14,7 +14,7 @@ Read off Figma's `Deliverables_Card` (`3234:10776`): View and Edit, for the Desi
 | `DeliverableLink` | component |
 | `DeliverableLinkForm` | component |
 | `DomainLabel` | component |
-| `Dropzone` | component |
+| `Dropzone` | atom |
 | `FileAttachment` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.

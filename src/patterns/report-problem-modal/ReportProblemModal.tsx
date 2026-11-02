@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Modal } from '../../components/modal';
 import { Field } from '../../components/field';
-import { Dropzone } from '../../components/dropzone';
+import { Dropzone } from '../../atoms/dropzone';
 import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 

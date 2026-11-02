@@ -14,7 +14,7 @@ Read off the Figma `Handoff_AV_Modal` (`5342:78539`, audit batch 4,
 | `Modal` | component | The dialog — header, focus trap, Escape, inert background |
 | `Banner` | component | Names the delay, on the overdue variant |
 | `Field` | component | Labels every group, and carries the reason's error |
-| `Dropzone` | component | The file picker |
+| `Dropzone` | atom | The file picker |
 | `FileAttachment` | component | Files already on the value |
 | `Select` | atom | The overdue reason |
 | `Input` | atom | Date, links, notes |

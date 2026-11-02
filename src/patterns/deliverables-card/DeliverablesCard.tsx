@@ -6,7 +6,7 @@ import { DeliverableLink } from '../../components/deliverable-link';
 import { DeliverableLinkForm, type DeliverableLinkDraft } from '../../components/deliverable-link-form';
 import type { DomainKey } from '../../components/domain-label';
 import { AttachmentViewer } from '../../components/attachment-viewer';
-import { Dropzone, type DropzoneProps } from '../../components/dropzone';
+import { Dropzone, type DropzoneProps } from '../../atoms/dropzone';
 import { FileAttachment, type FileAttachmentKind } from '../../components/file-attachment';
 
 /**
