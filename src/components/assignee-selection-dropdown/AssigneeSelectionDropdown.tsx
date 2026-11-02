@@ -6,8 +6,8 @@ import {
   ASSIGNEE_STATUS_LABEL,
   type AssigneeAvailability,
 } from '../../atoms/assignee-status';
+import { Badge } from '../../atoms/badge';
 import { Icon } from '../../atoms/icon';
-import { Tag } from '../../atoms/tag';
 import { SearchSelect, type SearchSelectSingleProps } from '../search-select';
 
 /**
@@ -18,7 +18,7 @@ import { SearchSelect, type SearchSelectSingleProps } from '../search-select';
  *
  * - **Availabilities known** (the dates are set): people sit under three
  *   collapsible headings — *Available*, *Busy*, *Unavailable* — each with its
- *   status dot, in that order. *Busy* and *Unavailable* rows carry a date pill
+ *   status dot, in that order. *Busy* and *Unavailable* rows carry a date `Badge`
  *   ("May 17": when they are free again). **Unavailable people cannot be
  *   picked**: their rows are greyed and skipped by the keyboard. The default
  *   view has *Unavailable* folded, so the list opens on the people who can
@@ -168,9 +168,9 @@ export const AssigneeSelectionDropdown = React.forwardRef<HTMLDivElement, Assign
               />
               <span className="min-w-0 flex-1 truncate">{person.label}</span>
               {availabilityKnown && person.until && person.availability !== 'available' && (
-                <Tag size="sm" tone="neutral">
+                <Badge size="sm" tone="neutral">
                   {person.until}
-                </Tag>
+                </Badge>
               )}
             </>
           );

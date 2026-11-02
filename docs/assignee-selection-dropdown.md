@@ -7,10 +7,10 @@ Picking an assignee when availability matters. Built to Figma's `Dev_Assignee_Se
 
 | Piece | Tier |
 |---|---|
-| `Avatar` | atom |
 | `AssigneeStatus` | atom |
+| `Avatar` | atom |
+| `Badge` | atom |
 | `Icon` | atom |
-| `Tag` | atom |
 | `SearchSelect` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -37,7 +37,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | State | What you see |
 |---|---|
-| **Known — default view** | Available and Busy open, Unavailable folded. Each heading has its dot. Busy and Unavailable rows carry a date pill |
+| **Known — default view** | Available and Busy open, Unavailable folded. Each heading has its dot. Busy and Unavailable rows carry a date `Badge` (a pill, not a `Tag`: it is a fact about the person, not a classification) |
 | **All collapsed / all expanded** | The user's folds. A folded group's rows leave the list and the arrow keys |
 | **Unknown** | "Assignee availability is unknown. Select a start date or cycle first to view availability." over a plain list; anyone can be picked |
 | **Picked, busy** | Amber border and "This assignee is busy during the selected dates, but can still be assigned." |
