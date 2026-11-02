@@ -90,8 +90,8 @@ export interface MoveAVToCycleModalProps {
   /** Who can be assigned. A function gets the draft, so availability can follow the dates. */
   people: ReadonlyArray<AssigneeOption> | ((draft: MoveAVToCycleDraft) => ReadonlyArray<AssigneeOption>);
   /**
-   * The cycles on offer: `{ value, code, start, end }` (dates ISO). A row reads "C36 (Mar 02, 2026 - Mar 23, 2026)" with
-   * the code in bold; the field keeps to the code — `SearchSelect`'s short label, as everywhere a cycle is picked.
+   * The cycles on offer: `{ value, code, start, end }` (dates ISO). A cycle reads "C36 (Mar 02, 2026 - Mar 23, 2026)" —
+   * `CycleTag`'s own form, from `formatCycleRange` — in the field and in the rows, where the code is bold.
    */
   cycles: ReadonlyArray<{ value: string; code: string; start: string; end: string }>;
   /** The roles an assignee can take. */
@@ -298,7 +298,6 @@ export function MoveAVToCycleModal({
             options={cycles.map((c) => ({
               value: c.value,
               label: `${c.code} (${formatCycleRange(c.start, c.end)})`,
-              shortLabel: c.code,
             }))}
             renderOption={(option) => {
               const c = cycles.find((x) => x.value === option.value);
