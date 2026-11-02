@@ -2,10 +2,10 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { within } from 'storybook/test';
 import { Dropzone } from './Dropzone';
-import { Field } from '../field';
+import { Field } from '../../components/field';
 
 const meta = {
-  title: 'Components/Forms/Dropzone',
+  title: 'Atoms/Dropzone',
   component: Dropzone,
   parameters: {
     docs: {

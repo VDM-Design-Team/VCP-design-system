@@ -38,6 +38,9 @@ Rules of thumb:
   the wrong question. The component survives it (the lock is counted and the
   inertness nests), but the interaction does not.
 
+
+**`size="full"`** takes the whole viewport (no margin, corners or shadow), for a viewer that is the page while it is open: `AttachmentViewer`. Pair it with `showClose={false}` and draw your own header.
+
 ## Props
 
 | Prop | Type | Default | Notes |
