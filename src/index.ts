@@ -11,6 +11,7 @@ export * from './atoms/icon-button';
 export * from './atoms/input';
 export * from './atoms/legend-item';
 export * from './atoms/logo';
+export * from './atoms/mention-input';
 export * from './atoms/pagination-dots';
 export * from './atoms/progress-bar';
 export * from './atoms/radio-group';

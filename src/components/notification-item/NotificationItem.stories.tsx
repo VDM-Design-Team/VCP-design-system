@@ -1,3 +1,6 @@
+/* Types `cdp().send` for the pointer below; `vitest.shims.d.ts`, which carries it too,
+   is outside the tsconfig. */
+/// <reference types="@vitest/browser-playwright" />
 import * as React from 'react';
 import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
@@ -117,25 +120,47 @@ const hitAt = (el: Element) => {
   return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) as HTMLElement;
 };
 /* `userEvent.hover` fires the events but cannot make CSS `:hover` match, and the dot
-   is driven by `:hover`. Under `npm test` (Vitest's browser mode) Playwright moves a
-   real pointer; in the Storybook UI there is none, so the hover checks skip there. */
+   is driven by `:hover`. Under `npm test` (Vitest's browser mode) the browser's own
+   pointer moves, through the DevTools protocol; in the Storybook UI there is none, so
+   the hover checks skip there.
+   A move is one `Input.dispatchMouseEvent`, not Playwright's `hover()`: that one first
+   waits for its target to be visible, stable and unobstructed, a dozen and more round
+   trips between Vitest and the page, and in a full `npm test`, several pages at
+   once, they ate the test's whole 15s. So the move does not wait for anything, and the
+   stories check where it landed (`:hover`) in the page instead. */
 const realPointer = async () => {
+  let cdp: typeof import('vitest/browser').cdp;
   try {
-    return (await import('vitest/browser')).userEvent;
+    ({ cdp } = await import('vitest/browser'));
   } catch {
     return null;
   }
+  /* The protocol takes the whole page's coordinates, and the story is in Vitest's
+     iframe, scaled to fit: carry the point out through each frame. */
+  const moveTo = (x: number, y: number) => {
+    for (let w: Window = window; w.frameElement; w = w.parent) {
+      const frame = w.frameElement.getBoundingClientRect();
+      const scale = frame.width / w.innerWidth;
+      x = frame.left + x * scale;
+      y = frame.top + y * scale;
+    }
+    return cdp().send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+  };
+  return {
+    /* Onto the middle of an element. */
+    hover: (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return moveTo(r.left + r.width / 2, r.top + r.height / 2);
+    },
+    /* The real pointer stays wherever the last test left it, which can be over this
+       story's row: then the row is already hovered and the dot already gone before the
+       test starts. Park it in the screen's bottom-right corner. Not the top-left: under
+       Vitest the story is not centred, so the row starts there, and its stretched
+       target covers the corner. */
+    park: () => moveTo(window.innerWidth - 1, window.innerHeight - 1),
+  };
 };
-/* The real pointer stays wherever the last test left it, which can be over this story's
-   row: then the row is already hovered and the dot already gone before the test starts.
-   Park it on a spot in the screen's corner first. */
-const parkPointer = async (pointer: NonNullable<Awaited<ReturnType<typeof realPointer>>>) => {
-  const spot = document.createElement('div');
-  spot.className = 'fixed right-0 bottom-0 size-1';
-  document.body.append(spot);
-  await pointer.hover(spot);
-  spot.remove();
-};
+const isHovered = (el: Element) => el.matches(':hover');
 
 /** Unread, a link, with the mark-read button waiting for hover or focus. */
 export const Unread: Story = {
@@ -369,7 +394,10 @@ export const DotMakesWayForMarkRead: Story = {
     const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
     const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     const pointer = await realPointer();
-    if (pointer) await parkPointer(pointer);
+    if (pointer) {
+      await pointer.park();
+      await waitFor(() => expect(isHovered(row)).toBe(false));
+    }
     await expect(await opacityOf(dot)).toBe('1');
     /* The row's own focus: the dot stays, and the button stays hidden. */
     await userEvent.tab();
@@ -388,9 +416,10 @@ export const DotMakesWayForMarkRead: Story = {
     /* Hover: the dot makes way for the button. */
     if (pointer) {
       await pointer.hover(row);
+      await waitFor(() => expect(isHovered(row)).toBe(true));
       await expect(await opacityOf(dot)).toBe('0');
       await expect(await opacityOf(mark)).toBe('1');
-      await pointer.unhover(row, { position: { x: 0, y: 0 } });
+      await pointer.park();
     }
   },
 };
@@ -404,14 +433,18 @@ export const DotStaysWithoutMarkRead: Story = {
     const row = canvas.getByRole('link', { name: /^Unread: John Kestrel commented on/ });
     await expect(canvas.queryByRole('button')).toBeNull();
     const pointer = await realPointer();
-    if (pointer) await parkPointer(pointer);
+    if (pointer) {
+      await pointer.park();
+      await waitFor(() => expect(isHovered(row)).toBe(false));
+    }
     await userEvent.tab();
     await expect(row).toHaveFocus();
     await expect(await opacityOf(dot)).toBe('1');
     if (pointer) {
       await pointer.hover(row);
+      await waitFor(() => expect(isHovered(row)).toBe(true));
       await expect(await opacityOf(dot)).toBe('1');
-      await pointer.unhover(row, { position: { x: 0, y: 0 } });
+      await pointer.park();
     }
   },
 };
