@@ -20,7 +20,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `EmojiReactionPicker` | Lightweight acknowledgement on comments and updates |
-| `CommentComposer` *(pattern, to port)* | An actual reply |
+| [`CommentComposer`](comment-composer.md) | An actual reply |
 | `Toggle` / `Checkbox` | A real setting — reactions are social, not state |
 
 ## Props

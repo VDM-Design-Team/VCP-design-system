@@ -2,6 +2,8 @@
 
 A comment and, under it, its replies. A component.
 
+> Building a comment list? Use [`CommentSection`](comment-section.md): it draws one of these for every comment and holds which are open.
+
 Read off the Figma `Comment_Reply_Thread` (`3506:10331`, Comment Component section): a
 `Comment_Reply` with a `Replies` slot beneath. The design's own note on the slot reads:
 "Insert a Comment Reply into this slot to build a comment thread. A new sub-thread is
