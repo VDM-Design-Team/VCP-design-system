@@ -170,3 +170,34 @@ export const LightAndDark: Story = {
     </div>
   ),
 };
+
+/**
+ * Review fixes (hidden, tested): a disabled select with its placeholder showing is drawn in the disabled colour, not
+ * the enabled placeholder grey; an `error` does not stretch a select sized to its content; and a real option with an
+ * empty value reads as a chosen value, not as a placeholder.
+ */
+export const ReviewFixes: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div className="flex w-128 flex-col items-start gap-4">
+      <Select {...args} aria-label="Enabled" />
+      <Select {...args} aria-label="Disabled" disabled />
+      <Select {...args} aria-label="Plain" />
+      <Select {...args} aria-label="With error" error="Pick a domain." />
+      <Select aria-label="All suppliers" defaultValue="" options={[{ value: '', label: 'All suppliers' }, 'Acme', 'Globex']} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const color = (name: string) => getComputedStyle(canvas.getByRole('combobox', { name })).color;
+    await expect(color('Disabled')).not.toBe(color('Enabled'));
+    await expect(color('All suppliers')).not.toBe(color('Enabled'));
+
+    const plain = canvas.getByRole('combobox', { name: 'Plain' }).parentElement as HTMLElement;
+    const withError = canvas.getByRole('combobox', { name: 'With error' }).parentElement as HTMLElement;
+    await expect(withError.offsetWidth).toBe(plain.offsetWidth);
+
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Pick a domain.');
+  },
+};

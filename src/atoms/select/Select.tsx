@@ -17,8 +17,10 @@ import { Icon } from '../icon';
  *
  * The field reads like `SearchSelect`'s: the placeholder is `text.subtle` in regular
  * weight, and a chosen value is `text.primary` in medium. A native select shows its
- * placeholder as the selected option, so the grey is `:has(option[value=""]:checked)`
- * on the select itself — pure CSS, no props. The open list is the platform's and
+ * placeholder as the selected option, so the grey is `:has(option[data-placeholder]:checked)`
+ * on the select itself — pure CSS, no props. It keys on the *placeholder option*, never on
+ * an empty `value`: a real "All suppliers" option with `value=""` is a choice, and reads as one.
+ * A disabled select is quieter still: the disabled colour wins over the placeholder grey. The open list is the platform's and
  * stays that way (see docs/select.md); only the option colours are set, so the
  * popup follows the theme where the browser lets it.
  *
@@ -65,8 +67,9 @@ const control = cva(
     'border-0 bg-transparent outline-none',
     'cursor-pointer text-text-primary',
     /* Nothing chosen yet: the hidden placeholder option is the selected one, so it reads as
-       a placeholder — subtle and regular, like SearchSelect's. */
-    "has-[option[value='']:checked]:text-text-subtle",
+       a placeholder — subtle and regular, like SearchSelect's. Keyed on the placeholder option itself
+       (`data-placeholder`), not on an empty value, and only while enabled, so the disabled colour wins. */
+    "enabled:has-[option[data-placeholder]:checked]:text-text-subtle",
     'disabled:cursor-not-allowed disabled:text-text-disabled',
     /* The popup is the platform's; where the browser honours it, give the options the tokens. */
     '[&_option]:bg-surface-elevated [&_option]:text-text-primary [&_optgroup]:text-text-tertiary',
@@ -77,8 +80,8 @@ const control = cva(
     variants: {
       /* A value is medium, the placeholder regular: SearchSelect's pairing. */
       size: {
-        sm: "text-caption-md-medium has-[option[value='']:checked]:text-caption-md-regular",
-        md: "text-body-sm-medium has-[option[value='']:checked]:text-body-sm-regular",
+        sm: "text-caption-md-medium has-[option[data-placeholder]:checked]:text-caption-md-regular",
+        md: "text-body-sm-medium has-[option[data-placeholder]:checked]:text-body-sm-regular",
       },
     },
     defaultVariants: { size: 'md' },
@@ -158,7 +161,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           aria-describedby={describedBy}
         >
           {placeholder && (
-            <option value="" disabled hidden>
+            <option value="" disabled hidden data-placeholder>
               {placeholder}
             </option>
           )}
@@ -186,9 +189,15 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     /* The wrapper exists only when there is a message, so the DOM is unchanged otherwise. */
     if (!error) return field;
     return (
-      <div className={cn('flex flex-col', fullWidth && 'w-full')}>
+      /* A column stretches its children, so the wrapper hugs the field unless the field is full width:
+         a select sized to its content must not jump to its container's width when an error appears. */
+      <div className={cn(fullWidth ? 'flex w-full flex-col' : 'inline-flex flex-col')}>
         {field}
-        <p id={errorId} className="mt-1.5 text-caption-md-medium text-accent-critical-outline-content-default">
+        <p
+          id={errorId}
+          role="alert"
+          className="mt-1.5 text-caption-md-medium text-accent-critical-outline-content-default"
+        >
           {error}
         </p>
       </div>
