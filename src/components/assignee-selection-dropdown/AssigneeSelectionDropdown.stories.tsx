@@ -112,3 +112,16 @@ export const PickingSomeone: Story = {
     await expect(await canvas.findByText(/busy during the selected dates/)).toBeInTheDocument();
   },
 };
+
+/** **Flow:** a screen reader hears what the date pill means: "Cy Park, Free from May 17". The pill shows only the date. */
+export const DatesAreSaid: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => <Controlled {...args} />,
+  play: async ({ canvasElement }) => {
+    await open(canvasElement);
+    const row = within(document.body).getByRole('option', { name: /^Cy Park\s*Free from May 17$/ });
+    await expect(row).toBeVisible();
+    await expect(within(row).getByText('May 17')).toBeVisible();
+  },
+};

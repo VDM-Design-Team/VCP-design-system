@@ -36,7 +36,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Accessibility
 
 - The tooltip reads "John Doe (Assignee, Busy)", and **the same sentence names the avatar** (`role="img"`),
-  so a screen reader hears what a pointer user sees, without hovering.
+  so a screen reader hears what a pointer user sees, without hovering. It hears it **once**: the
+  tooltip is drawn with `describe={false}`, so it does not add the same sentence again as a
+  description.
 - With a tooltip the avatar is a tab stop, so keyboard users get the sentence on focus.
 - The dot is `aria-hidden` here: the sentence carries the status.
 

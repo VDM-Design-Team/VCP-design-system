@@ -80,6 +80,8 @@ export interface AssigneeSelectionDropdownProps
   busyText?: string;
   /** The error under the field when the picked person is unavailable. */
   unavailableText?: string;
+  /** Said before the date pill to a screen reader, which cannot see that it is the day they are free again. */
+  freeFromText?: string;
 }
 
 const ORDER: AssigneeAvailability[] = ['available', 'busy', 'unavailable'];
@@ -92,6 +94,7 @@ export const AssigneeSelectionDropdown = React.forwardRef<HTMLDivElement, Assign
       unknownText = 'Assignee availability is unknown. Select a start date or cycle first to view availability.',
       busyText = 'This assignee is busy during the selected dates, but can still be assigned.',
       unavailableText = 'This assignee is not available during the selected dates and cannot be assigned.',
+      freeFromText = 'Free from',
       value,
       error,
       warning,
@@ -169,6 +172,8 @@ export const AssigneeSelectionDropdown = React.forwardRef<HTMLDivElement, Assign
               <span className="min-w-0 flex-1 truncate">{person.label}</span>
               {availabilityKnown && person.until && person.availability !== 'available' && (
                 <Badge size="sm" tone="neutral">
+                  {/* The pill shows a bare date; a row read aloud says what it is. */}
+                  <span className="sr-only">{`${freeFromText} `}</span>
                   {person.until}
                 </Badge>
               )}

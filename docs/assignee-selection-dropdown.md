@@ -30,6 +30,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `people` | `{ value, label, src?, availability, until? }[]` | required | `availability` is `available \| busy \| unavailable`; `until` is the pill's text ("May 17") |
 | `availabilityKnown` | `boolean` | `true` | `false`: the unknown state — a notice and a plain list |
 | `unknownText` / `busyText` / `unavailableText` | `string` | the design's copy | |
+| `freeFromText` | `string` | `"Free from"` | Read before the date pill by a screen reader ("Cy Park, Free from May 17"); the pill still shows only the date |
 | `searchable` | `boolean` | `false` | The design has no search box (a team's list, not a directory). Turn it on for a longer one |
 | `value`, `onChange`, `placeholder`, … | | | `SearchSelect`'s single-pick props |
 

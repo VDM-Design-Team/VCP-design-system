@@ -851,6 +851,27 @@ export const TabReachesApply: Story = {
   },
 };
 
+/** **Flow:** Escape on Apply closes the panel, puts focus back on the field and discards the draft. */
+export const EscapeFromApply: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { options: STATUSES, multiple: true, searchable: false, confirm: true, placeholder: 'Select status' },
+  render: (args) => <Controlled {...args} aria-label="Status" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('combobox', { name: 'Status' });
+    await userEvent.click(field);
+    await userEvent.click(canvas.getByRole('option', { name: 'Accepted' }));
+    canvas.getByRole('button', { name: 'Apply' }).focus();
+    await userEvent.keyboard('{Escape}');
+    await expect(field).toHaveAttribute('aria-expanded', 'false');
+    await expect(field).toHaveFocus();
+    await expect(args.onChange).not.toHaveBeenCalled();
+    await userEvent.click(field);
+    await expect(canvas.getByRole('option', { name: 'Accepted' })).toHaveAttribute('aria-selected', 'false');
+  },
+};
+
 /** A quote in a label does not crash the field: removing a tag still hands focus to the next ✕. */
 export const QuoteInALabel: Story = {
   tags: ['!dev', '!autodocs'],

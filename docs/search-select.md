@@ -201,7 +201,9 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   and keeps focus. A picked row has `aria-selected`.
 - Keyboard: Enter, Space or ArrowDown on the trigger opens; arrows move (skipping disabled rows);
   Home and End jump (when the trigger has focus); Enter or Space picks the active row; Escape closes and
-  puts focus back on the trigger; Tab closes (with `confirm`, Tab instead walks on into Clear all and Apply, and the panel closes when focus leaves the control); a click away closes. Arrow order is the drawn order: ungrouped rows first, then each group. With `confirm`, Escape and a
+  puts focus back on the trigger, from the trigger, the search box or anything inside the panel (Clear all,
+  Apply, a group heading); Tab closes (with `confirm` or `collapsibleGroups`, Tab instead walks on into the
+  panel, and the panel closes when focus leaves the control); a click away closes. Arrow order is the drawn order: ungrouped rows first, then each group. With `confirm`, Escape and a
   click away discard the draft.
 - **The trigger is named by its label and its value** ("Assignee Amy Lee"): the label through `aria-label`, `aria-labelledby` or a `Field`'s `<label for>`, then the picked text. The active row scrolls into view as the arrows move it.
 - Every click opens the panel, whatever is behind it (a mouse, a screen reader, voice control, `element.click()`); Enter and Space are handled on key down.
