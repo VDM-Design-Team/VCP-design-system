@@ -61,7 +61,8 @@ export interface DetailCardDuplicate {
 
 /** What the card shows. Every field is optional; the card draws the ones its `type` has. ISO `yyyy-mm-dd` for dates. */
 export interface DetailCardValue {
-  initiator?: DetailCardPerson;
+  /** Several people can start an AV. */
+  initiators?: readonly DetailCardPerson[];
   assignees?: readonly DetailCardPerson[];
   startDate?: string;
   dueDate?: string;
@@ -104,22 +105,22 @@ export interface DetailCardOptions {
 /* THE mapping — card type → the fields it has, in order. Off Figma's four `Detail_Card` types. */
 const FIELDS: Record<DetailCardType, readonly DetailCardField[]> = {
   viewing: [
-    'initiator', 'assignees', 'startDate', 'dueDate', 'cycle', 'status', 'urgency', 'type',
+    'initiators', 'assignees', 'startDate', 'dueDate', 'cycle', 'status', 'urgency', 'type',
     'projects', 'category', 'tags', 'capacityPoints', 'deploymentDate', 'dateInitiated',
   ],
   duplicate: [
-    'initiator', 'duplicates', 'status', 'urgency', 'type', 'projects', 'category', 'tags',
+    'initiators', 'duplicates', 'status', 'urgency', 'type', 'projects', 'category', 'tags',
     'deploymentDate', 'dateInitiated',
   ],
   editing: [
-    'initiator', 'assignees', 'startDate', 'dueDate', 'cycle', 'projects', 'category', 'tags',
+    'initiators', 'assignees', 'startDate', 'dueDate', 'cycle', 'projects', 'category', 'tags',
     'type', 'urgency', 'capacityPoints',
   ],
-  new: ['initiator', 'projects', 'category', 'tags', 'type', 'urgency'],
+  new: ['initiators', 'projects', 'category', 'tags', 'type', 'urgency'],
 };
 
 const LABEL: Partial<Record<DetailCardField, string>> = {
-  initiator: 'Initiator',
+  initiators: 'Initiator',
   assignees: 'Assignee',
   startDate: 'Start Date',
   dueDate: 'Due Date',
@@ -221,7 +222,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
 
     const body: Partial<Record<DetailCardField, React.ReactNode>> = {};
 
-    body.initiator = <div className="flex flex-wrap gap-2">{people(value.initiator ? [value.initiator] : [])}</div>;
+    body.initiators = <div className="flex flex-wrap gap-2">{people(value.initiators)}</div>;
     body.assignees = <div className="flex flex-wrap gap-2">{people(value.assignees, 'Assignee')}</div>;
 
     body.startDate = editing ? (
@@ -409,17 +410,17 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
               </div>
             );
           }
-          if (editing && (field === 'initiator' || field === 'assignees')) {
-            const isInitiator = field === 'initiator';
+          if (editing && (field === 'initiators' || field === 'assignees')) {
+            const isInitiator = field === 'initiators';
             return (
               <PeopleField
                 key={field}
                 kind={isInitiator ? 'initiator' : 'assignee'}
                 label={LABEL[field] ?? field}
-                people={isInitiator ? (value.initiator ? [value.initiator] : []) : (value.assignees ?? [])}
+                people={(isInitiator ? value.initiators : value.assignees) ?? []}
                 directory={options?.people ?? []}
                 roles={options?.roles ?? ['QA', 'Design', 'Assignee']}
-                onChange={(list) => (isInitiator ? set({ initiator: list[0] }) : set({ assignees: list }))}
+                onChange={(list) => (isInitiator ? set({ initiators: list }) : set({ assignees: list }))}
                 aside={isInitiator && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
               />
             );
@@ -430,7 +431,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
             <Item
               key={field}
               label={LABEL[field] ?? field}
-              aside={field === 'initiator' && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
+              aside={field === 'initiators' && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
             >
               {node}
             </Item>
@@ -578,7 +579,7 @@ function DateField({
 /**
  * Initiator or Assignee while editing: the chips, each with a pencil (an assignee) and a ✕ on hover or
  * focus, and the + that opens the form for a new person under them. A chip being edited turns into the
- * form in its place. While a form is open the + is dimmed. The Initiator has no pencil: it is removed
+ * form in its place. While a form is open the + is dimmed. There can be several initiators. An initiator has no pencil: it is removed
  * and added again.
  */
 function PeopleField({
@@ -650,7 +651,7 @@ function PeopleField({
           ),
         )}
         {mode?.type === 'add' &&
-          form(undefined, 'Add', (person) => onChange(kind === 'initiator' ? [person] : [...people, person]))}
+          form(undefined, 'Add', (person) => onChange([...people, person]))}
       </div>
     </Item>
   );

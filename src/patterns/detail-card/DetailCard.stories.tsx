@@ -19,7 +19,7 @@ const OPTIONS = {
 };
 
 const VIEWING: DetailCardValue = {
-  initiator: { name: 'Marvin R' },
+  initiators: [{ name: 'Marvin R' }, { name: 'Amy Lee' }],
   assignees: [
     { name: 'John Kestrel', points: 5 },
     { name: 'Jane Doe', points: 5 },
@@ -133,16 +133,17 @@ export const EditingPeople: Story = {
     await expect(form.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await userEvent.click(assignees.getByRole('button', { name: 'Cancel' }));
     await expect(assignees.getByText('John Kestrel')).toBeVisible();
-    /* The Initiator has no pencil. */
+    /* Several initiators; none has a pencil. */
     const initiator = within(canvas.getByRole('group', { name: 'Initiator' }));
     await expect(initiator.queryByRole('button', { name: /^Edit/ })).toBeNull();
     await expect(initiator.getByRole('button', { name: 'Remove Marvin R' })).toBeInTheDocument();
+    await expect(initiator.getByRole('button', { name: 'Remove Amy Lee' })).toBeInTheDocument();
   },
 };
 
 /** An AV being created: only Initiator, Projects, Category, Tags, Type and Urgency. */
 export const NewAV: Story = {
-  args: { type: 'new', value: { initiator: { name: 'Marvin R' }, projects: ['VCP'], category: 'Improvement', tags: ['Development'], type: 'Type 1', urgency: 'Low' }, viewerCount: undefined },
+  args: { type: 'new', value: { initiators: [{ name: 'Marvin R' }], projects: ['VCP'], category: 'Improvement', tags: ['Development'], type: 'Type 1', urgency: 'Low' }, viewerCount: undefined },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('group', { name: 'Due Date' })).toBeNull();
@@ -176,7 +177,7 @@ export const DesignHasNoCycle: Story = {
 export const WithAnError: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { type: 'new', value: { initiator: { name: 'Marvin R' } }, errors: { projects: 'Please select a project before submitting' } },
+  args: { type: 'new', value: { initiators: [{ name: 'Marvin R' }] }, errors: { projects: 'Please select a project before submitting' } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Please select a project before submitting')).toBeVisible();

@@ -42,7 +42,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Field | `viewing` | `duplicate` | `editing` | `new` |
 |---|---|---|---|---|
-| Initiator | ✓ | ✓ | ✓ (+) | ✓ |
+| Initiator (one or several) | ✓ | ✓ | ✓ (+) | ✓ |
 | Assignee | ✓ | | ✓ (+) | |
 | Start Date | ✓ | | ✓ | |
 | Due Date | ✓ | | ✓ | |
@@ -89,7 +89,7 @@ As the design's flow draws it, inside the card:
   into the same form **in its own place**, between the chips before and after it (the second of three stays
   second), with Cancel and Save.
 - **Remove:** the ✕ takes the chip out.
-- **The Initiator** has no pencil: it is removed and added again. Adding replaces it.
+- **Several people can be Initiators.** An initiator has no pencil: it is removed and added again, and adding appends.
 
 The chips are `Chip`'s people recipes (`tone="brand"`; `variant="outline"` with `actions="hover"` while editing). The
 changes come out through `onChange` as the whole `value`; the form's users come from `options.people`.
