@@ -114,7 +114,9 @@ close; with no button the text keeps its 8.
 - The mark-read target is 24, not 40. It sits inside a row that is itself the large
   target, and 24 is the WCAG 2.5.8 floor: a recorded exception, like the table cells.
 - **The preview's** "Show more" is a real button with `aria-expanded` and
-  `aria-controls`. It appears only when the comment really overflows three lines.
+  `aria-controls`. It appears only when the comment really overflows three lines. Its focus
+  ring is drawn inside it, because the preview card clips its overflow and the button sits on
+  the card's bottom edge.
 - Put items in a `<ul>` / `<li>`; the root is a `<div>` so it works in either.
 
 ## Not built yet

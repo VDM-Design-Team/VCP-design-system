@@ -330,7 +330,9 @@ function CommentPreview({ text }: { text: string }) {
           <Button
             variant="tertiary"
             size="sm"
-            className="pointer-events-auto"
+            /* The focus ring is drawn inside the button: the card clips its overflow and the
+               button sits on its bottom edge, so a ring outside showed only its two sides. */
+            className="pointer-events-auto focus-visible:-outline-offset-2"
             aria-expanded={expanded}
             aria-controls={id}
             onClick={() => setExpanded((open) => !open)}

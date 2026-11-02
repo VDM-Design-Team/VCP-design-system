@@ -135,14 +135,15 @@ fonts, so the bug did not show locally. The token names the colour emoji fonts f
   `aria-pressed` and name ("React with thumbs up" / "Remove thumbs up
   reaction"), rather than always announcing the same thing regardless of
   whether the user already reacted.
-- The add-reaction trigger is named "Add reaction" and also carries a
-  visible `Tooltip` with the same text. The tooltip wraps the whole
-  `Popover`, not just the button inside it — `Popover` clones its own
-  `trigger` directly (ref, `onClick`, `aria-expanded`), and nesting
-  `Tooltip` inside that clone would break it. Since the tooltip's text only
-  repeats the button's own `aria-label`, nothing is lost for a screen
-  reader by `aria-describedby` landing on `Popover`'s wrapper instead of
-  the button.
+- The add-reaction trigger is named "Add reaction" and also carries a visible
+  `Tooltip` with the same text. **The tooltip wraps the button and nothing else.**
+  The trigger is a small internal component that puts the `Tooltip` around the real
+  `<button>` and forwards everything `Popover` clones onto it (ref, `onClick`,
+  `aria-expanded`, `aria-controls`), so `aria-describedby` lands on the button
+  itself. It used to wrap the whole `Popover`, and then the open palette counted
+  as hovering the trigger: moving from the button onto the palette crossed the gap
+  (the tooltip hid) and entered the palette (it came back after its delay, then went
+  again), so it showed twice. The `TooltipStaysOnTheButton` story guards that.
 - The palette is a named `group`, containing one labelled `group` per category,
   of "React with X" buttons inside the system `Popover`, which owns open/close, Escape and focus-return.
 - Pills are 24 tall — the pointer-dense exemption; reactions are a

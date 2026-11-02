@@ -306,6 +306,20 @@ export const WithCommentPreview: Story = {
     await expect(less).toHaveAttribute('aria-expanded', 'true');
     await userEvent.click(less);
     await expect(await canvas.findByRole('button', { name: 'Show more' })).toBeVisible();
+    /* Its focus ring shows whole: the card clips anything outside it, so the ring must sit
+       inside the card on every side (it used to show only its left and right). */
+    const shown = canvas.getByRole('button', { name: 'Show more' });
+    shown.focus();
+    const style = getComputedStyle(shown);
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth);
+    const ring = shown.getBoundingClientRect();
+    let clip = shown.parentElement!;
+    while (getComputedStyle(clip).overflow !== 'hidden') clip = clip.parentElement!;
+    const card = clip.getBoundingClientRect();
+    await expect(ring.top - reach).toBeGreaterThanOrEqual(card.top);
+    await expect(ring.bottom + reach).toBeLessThanOrEqual(card.bottom);
+    await expect(ring.left - reach).toBeGreaterThanOrEqual(card.left);
+    await expect(ring.right + reach).toBeLessThanOrEqual(card.right);
   },
 };
 
