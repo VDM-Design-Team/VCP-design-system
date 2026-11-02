@@ -24,11 +24,16 @@ const LONG_COMMENT =
 /* Typed, so Storybook does not read the story args off the decorator: the props are
    a union (`moved` needs `status`), and an untyped decorator collapses every story's
    args to `never`. */
-const column: Decorator = (Story) => (
-  <div className="w-96">
+/* A story's own `decorators` add to this one rather than replace it, so a full-screen story
+   (Light and dark, the contrast check) opts out here instead. */
+const column: Decorator = (Story, { parameters }) =>
+  parameters.layout === 'fullscreen' ? (
     <Story />
-  </div>
-);
+  ) : (
+    <div className="w-96">
+      <Story />
+    </div>
+  );
 
 const meta = {
   title: 'Components/Feedback/NotificationItem',
@@ -222,7 +227,6 @@ export const Read: Story = {
 
 /** Every kind of event, with the sentence the design draws for it. */
 export const Kinds: Story = {
-  decorators: [],
   render: (args) => {
     const rows: { kind: NotificationKind; status?: string; time: string; expect: RegExp }[] = [
       { kind: 'commented', time: 'a few seconds ago', expect: /commented on/ },
@@ -488,7 +492,6 @@ const contrast = (a: number[], b: number[]) => {
  */
 export const MarkersClear3to1: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
     <div>
       {[false, true].map((isDark) => (
@@ -530,13 +533,13 @@ export const MarkersClear3to1: Story = {
 /** Both themes. Every colour is a semantic token, so dark comes for free. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
-    <div className="grid grid-cols-2">
+    /* Side by side once each half has room for its 384 column, stacked below that. */
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
-            <div className="w-96">
+          <div className="flex h-full w-full flex-col items-center bg-surface-canvas p-8">
+            <div className="w-full max-w-96">
             <NotificationItem {...args} />
             <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
             <NotificationItem {...args} preview={LONG_COMMENT} />
@@ -546,4 +549,16 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/** A subject that ends in its own punctuation gets no second full stop ("Is this ready?", not "ready?."). */
+export const SubjectEndsInPunctuation: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { subject: 'Is this ready?' },
+  play: async ({ canvasElement }) => {
+    const text = canvasElement.textContent ?? '';
+    await expect(text).toContain('Is this ready?');
+    await expect(text).not.toContain('ready?.');
+  },
 };
