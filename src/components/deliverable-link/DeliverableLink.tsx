@@ -96,7 +96,7 @@ export const DeliverableLink = React.forwardRef<HTMLDivElement, DeliverableLinkP
             )}
           >
             <IconButton
-              icon="pencil-simple"
+              icon="note-pencil"
               variant="tertiary"
               size="xs"
               label={`Edit Link`}

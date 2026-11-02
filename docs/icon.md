@@ -79,7 +79,7 @@ names from the raw imports, not from that component.
 
 Use **`note-pencil`** (a pen over a square) wherever something means *edit this*: an inline edit
 button, a row's edit action, a menu item, a comment's Edit. It is what Figma draws for Edit across
-the library, and what `Chip`, `InlineEdit` and `DomainItem` already use.
+the library, and what `Chip`, `InlineEdit`, `DetailRow`, `CommentActions` and `DeliverableLink` use.
 
 **Why one.** The same action drawn two ways makes people wonder whether the two controls do
 different things. The pen over a square also reads as "edit" at 16 and 20 px, where a bare pen
