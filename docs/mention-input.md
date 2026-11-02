@@ -73,7 +73,8 @@ ids and labels from either.
 - **A tag is one unit**: Backspace removes it whole.
 - **Plain text and tags only.** The field is `contenteditable="plaintext-only"`: no formatting
   can be typed (Cmd+B does nothing), pasted or dropped in. A paste is always plain text.
-- **Undo and Redo are the field's own** (Cmd/Ctrl+Z, Shift+Cmd+Z, Ctrl+Y). A tag is put in by
+- **Undo and Redo are the field's own**: Cmd+Z and Shift+Cmd+Z on a Mac, Ctrl+Z and Ctrl+Y (or
+  Shift+Ctrl+Z) elsewhere, and Undo from the Edit menu. A tag is put in by
   hand, which the browser's undo cannot track, so every change is a step in the field's own
   history: choosing a member is one step, and a run of typing is one. Undoing a mention gives back
   the `@query` as typed; the caret goes back where it was. Changing `value` from outside
@@ -83,12 +84,12 @@ ids and labels from either.
 
 ## Tokens
 
-Field: `surface.elevated`, `radius.sm`, a 1 `stroke.strong` border (the control boundary,
-as `Input` uses), 16 padding, 100 tall at least,
-`body-sm-regular` `text.primary`; the placeholder `text.subtle`; focus is a 2
+Field: Textarea's box: `surface.elevated`, `radius.md`, a 1 `stroke.strong` border (the
+control boundary, as `Input` uses), 12 padding at the sides and 10 at the top and bottom,
+100 tall at least, `body-sm-regular` `text.primary`; the placeholder `text.subtle`; focus is a 2
 `stroke.focused` outline. Disabled is Textarea's: `surface.neutral.faint`, `stroke.subtle`,
-`text.disabled`. The tag: `surface.brand.faint` with `text.brand.strong`, 14
-medium, `radius.sm`. The list: `surface.elevated`, `stroke.default`, `radius.md`,
+`text.disabled`, the placeholder too. The tag: `surface.brand.faint` with `text.brand.strong`, 14
+medium, `radius.sm`, never broken across two lines. The list: `surface.elevated`, `stroke.default`, `radius.md`,
 `shadow.menu`, rows `label-sm-medium` with the `surface.brand.faint` highlight, as `Menu`.
 No new tokens.
 

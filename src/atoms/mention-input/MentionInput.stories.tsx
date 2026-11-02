@@ -29,12 +29,17 @@ const meta = {
     },
   },
   args: { members: MEMBERS, 'aria-label': 'Reply' },
+  /* A story's own `decorators` add to this one rather than replace it, so a full-screen
+     story (Light and dark) opts out here instead. */
   decorators: [
-    (Story) => (
-      <div className="w-96">
+    (Story, { parameters }) =>
+      parameters.layout === 'fullscreen' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        <div className="w-96">
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<typeof MentionInput>;
 
@@ -168,7 +173,6 @@ export const Disabled: Story = {
 /** Both themes. Every colour is a semantic token, so dark comes for free. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
@@ -237,15 +241,19 @@ export const ListFollowsTheAt: Story = {
   },
 };
 
-const undo = (field: HTMLElement) =>
+/* The platform's Undo and Redo keys, pressed as a person would. */
+const MOD = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ? 'Meta' : 'Control';
+const undo = () => userEvent.keyboard(`{${MOD}>}z{/${MOD}}`);
+const redo = () => userEvent.keyboard(`{${MOD}>}{Shift>}z{/Shift}{/${MOD}}`);
+/** The Edit menu's Undo, which reaches the field as `beforeinput` rather than as keys. */
+const menuUndo = (field: HTMLElement) =>
   field.dispatchEvent(new InputEvent('beforeinput', { inputType: 'historyUndo', bubbles: true, cancelable: true }));
-const redo = (field: HTMLElement) =>
-  field.dispatchEvent(new InputEvent('beforeinput', { inputType: 'historyRedo', bubbles: true, cancelable: true }));
 
 /**
  * Undo and Redo are the field's own, because a tag is put in by hand and the browser's undo cannot
  * track that. Choosing a member is one step: Undo gives back "Hi @ja" (the typing before it intact),
- * Redo the tag, and a further Undo the words alone.
+ * Redo the tag, and a further Undo the words alone. Both work from the keys (Cmd+Z and Shift+Cmd+Z;
+ * Ctrl elsewhere) and Undo from the Edit menu.
  */
 export const UndoAndRedo: Story = {
   render: (args) => <Controlled {...args} />,
@@ -259,18 +267,20 @@ export const UndoAndRedo: Story = {
     await expect(field.querySelector('[data-type="mention"]')).not.toBeNull();
     await typeText(field, 'thanks');
     await expect(readout).toHaveTextContent('Hi @Jane Doe thanks');
-    undo(field);
+    await undo();
     await waitFor(() => expect(readout).toHaveTextContent(/^Hi @Jane Doe · ids: 204/));
-    undo(field);
+    await undo();
     await waitFor(() => expect(readout).toHaveTextContent('Hi @jane · ids: none'));
     await expect(field.querySelector('[data-type="mention"]')).toBeNull();
-    redo(field);
+    await redo();
     await waitFor(() => expect(field.querySelector('[data-type="mention"]')).not.toBeNull());
-    redo(field);
+    await redo();
     await waitFor(() => expect(readout).toHaveTextContent('Hi @Jane Doe thanks'));
     /* Nothing further to redo: unchanged. */
-    redo(field);
+    await redo();
     await expect(readout).toHaveTextContent('Hi @Jane Doe thanks');
+    menuUndo(field);
+    await waitFor(() => expect(readout).toHaveTextContent(/^Hi @Jane Doe · ids: 204/));
   },
 };
 
