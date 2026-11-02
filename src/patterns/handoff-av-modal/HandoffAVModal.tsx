@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Modal } from '../../components/modal';
 import { Banner } from '../../components/banner';
 import { Field } from '../../components/field';
-import { Dropzone } from '../../components/dropzone';
+import { Dropzone } from '../../atoms/dropzone';
 import { FileAttachment } from '../../components/file-attachment';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';

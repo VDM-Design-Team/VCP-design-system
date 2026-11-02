@@ -23,7 +23,7 @@ page, audit batch 5, 11 September 2026.
 | `AvatarGroup` | component |
 | `DataTable` | component |
 | `DueDateTag` | component |
-| `Pagination` | component |
+| `Pagination` | atom |
 | `StatusTag` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.

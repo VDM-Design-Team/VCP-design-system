@@ -27,13 +27,22 @@ import { IconButton } from '../../atoms/icon-button';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-const backdrop = cva([
-  /* Covers the viewport from the portal, above every page-level surface. */
-  'fixed inset-0 z-50',
-  'grid place-items-center',
-  /* surface.overlay — the system's own scrim. It flips in dark for free. */
-  'bg-surface-overlay p-6',
-]);
+const backdrop = cva(
+  [
+    /* Covers the viewport from the portal, above every page-level surface. */
+    'fixed inset-0 z-50',
+    'grid place-items-center',
+    /* surface.overlay — the system's own scrim. It flips in dark for free. */
+    'bg-surface-overlay',
+  ],
+  {
+    variants: {
+      /* A `full` panel takes the whole viewport, so there is no margin to the edge. */
+      full: { true: '', false: 'p-6' },
+    },
+    defaultVariants: { full: false },
+  },
+);
 
 const panel = cva(
   [
@@ -56,6 +65,8 @@ const panel = cva(
         md: 'max-w-128',
         lg: 'max-w-160',
         xl: 'max-w-200',
+        /* The whole viewport: a viewer that is the page while it is open. No corners, no shadow. */
+        full: 'h-full max-w-none rounded-none shadow-none',
       },
     },
     defaultVariants: { size: 'md' },
@@ -492,7 +503,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   return createPortal(
     <div
       ref={portalRef}
-      className={backdrop()}
+      className={backdrop({ full: size === 'full' })}
       onPointerDown={(event) => {
         pointerDownOnBackdrop.current = event.target === event.currentTarget;
       }}

@@ -51,9 +51,10 @@ export function plainText(value: readonly MentionSegment[]): string {
 
 const MENTION_SELECTOR = '[data-type="mention"]';
 
-/** The tag's look, shared by the field (a DOM node) and a posted comment (`MentionTag`). */
+/** The tag's look, shared by the field (a DOM node) and a posted comment (`MentionTag`).
+    `whitespace-nowrap`: a tag at a line's end moves down whole rather than breaking in two. */
 export const MENTION_TAG_CLASS =
-  'mx-px inline-block rounded-sm bg-surface-brand-faint px-1.5 py-0.5 text-body-sm-medium text-text-brand-strong';
+  'mx-px inline-block whitespace-nowrap rounded-sm bg-surface-brand-faint px-1.5 py-0.5 text-body-sm-medium text-text-brand-strong';
 
 /** A mention as it reads in a posted comment: the same tag the field draws. */
 export function MentionTag({ label, id }: { label: string; id?: string }) {
@@ -65,6 +66,9 @@ export function MentionTag({ label, id }: { label: string; id?: string }) {
 }
 const MAX_QUERY = 30;
 const MAX_OPTIONS = 8;
+/* Undo and Redo are Cmd+Z and Shift+Cmd+Z on Apple devices, Ctrl+Z and Ctrl+Y (or
+   Shift+Ctrl+Z) elsewhere. Ctrl+Y on a Mac is the system's "yank", so it is left alone there. */
+const APPLE = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 
 /** Segments out of the field's DOM. A line break is a newline; a tag is a mention. */
 function readSegments(root: HTMLElement): MentionSegment[] {
@@ -411,6 +415,7 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
     React.useEffect(() => {
       const root = rootRef.current;
       if (!root) return;
+      /* The Edit menu's Undo arrives here; the keys are taken on keydown. */
       const onBeforeInput = (event: InputEvent) => {
         if (event.inputType === 'historyUndo') {
           event.preventDefault();
@@ -491,6 +496,15 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
          they pick a candidate, not a member or a line break. 229 is the keyCode older browsers
          send for the same thing. */
       if (event.nativeEvent.isComposing || event.keyCode === 229) return;
+      /* Undo and Redo keys walk the field's own history. They are taken here, not left to
+         `beforeinput`: the field cancels every browser undo, so the browser's own redo list
+         stays empty and it never sends a `historyRedo` for Shift+Cmd+Z or Ctrl+Y. */
+      const key = event.key.toLowerCase();
+      if ((APPLE ? event.metaKey : event.ctrlKey) && !event.altKey && (key === 'z' || (key === 'y' && !APPLE))) {
+        event.preventDefault();
+        travel(key === 'z' && !event.shiftKey ? -1 : 1);
+        return;
+      }
       if (open) {
         if (event.key === 'ArrowDown') {
           event.preventDefault();
@@ -574,15 +588,16 @@ export const MentionInput = React.forwardRef<HTMLDivElement, MentionInputProps>(
           }}
           onPaste={onPaste}
           className={cn(
-            'min-h-25 w-full whitespace-pre-wrap break-words rounded-sm border border-stroke-strong',
-            'bg-surface-elevated p-4 font-sans text-body-sm-regular text-text-primary',
+            /* Textarea's box: its padding and corner. */
+            'min-h-25 w-full whitespace-pre-wrap break-words rounded-md border border-stroke-strong',
+            'bg-surface-elevated px-3 py-2.5 font-sans text-body-sm-regular text-text-primary',
             'focus:outline-2 focus:-outline-offset-2 focus:outline-stroke-focused',
             /* The placeholder: an empty field has no children, so `:empty` matches. */
             'empty:before:pointer-events-none empty:before:text-text-subtle',
             'empty:before:content-[attr(data-placeholder)]',
-            /* As Textarea's disabled look. */
+            /* As Textarea's disabled look, the placeholder faded too. */
             disabled &&
-              'cursor-not-allowed border-stroke-subtle bg-surface-neutral-faint text-text-disabled',
+              'cursor-not-allowed border-stroke-subtle bg-surface-neutral-faint text-text-disabled empty:before:text-text-disabled',
             className,
           )}
         />

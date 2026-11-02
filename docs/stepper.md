@@ -1,4 +1,4 @@
-# Stepper
+# Stepper *(atom)*
 
 A small number chosen by nudging: decrement, a typeable value, increment.
 Capacity points, quantities, retry counts.
