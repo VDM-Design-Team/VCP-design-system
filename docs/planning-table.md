@@ -14,8 +14,8 @@ avatar. `DataTable` specialised, as `AVTable` is. Read off the Figma Planning Pa
 | `CopyText` | atom |
 | `Avatar` | atom |
 | `Icon` | sub-atomic |
-| `Input` | atom |
 | `Pagination` | atom |
+| `Select` | atom |
 | `Tag` | atom |
 | `Tooltip` | atom |
 | `AssigneeWithStatus` | component |
@@ -45,14 +45,20 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onMoveRow` | `(row, from, to) => void` | — | A Backlog row was dropped on a Cycle. The table moves nothing — in the design this opens *Add Required Details*. Backlog rows are draggable with or without it |
 | `onOpen` | `(row) => void` | — | Given, the title is a button. (The ID is click-to-copy, so opening is the title's job) |
 | `onStartChange` / `onDueChange` | `(row, iso) => void` | — | Each date edits in place only if its callback is given |
-| `onPointsChange` | `(row, points) => void` | — | Same, for points |
+| `onPointsChange` | `(row, points) => void` | — | Same, for points — chosen from a dropdown, as the flow draws it |
+| `pointOptions` | `number[]` | `[0, 1, 2, 3, 5, 8, 13]` | The Points dropdown's choices (the capacity scale the detail card uses). A row's own value always stays choosable |
 | `page` / `pageCount` / `onPageChange` | | — | Pagination renders only when all three are given |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | With the pagination: the "Items 50 ▾" selector and the "1-50 of 1,250" range |
 | `hints` | `{ urgency, type, start, points, due, status }` | the product's copy | The header tooltips. Start Date, Points and Due Date are the formula columns (ƒ in a ring, brand blue, as wide as the ⓘ's circle); Urgency, Type and Status use the copy their own pieces own, as `AVTable` does. Pass a string or node to change a column's copy, `''` to drop its glyph |
 | `empty` | `ReactNode` | — | What a section with no rows says |
 
 A row is `{ id, ref, title, domain?, urgency?, type?, initiator?, assignee?, start?, points?, due?, status? }`;
-`start` and `due` are `{ value (ISO), estimated? }`, and an estimated date reads "2026-03-16 (est.)".
+`start` and `due` are `{ value (ISO), estimated?, animated? }`, and an estimated date reads "2026-03-16 (est.)". A row with no date, or no points, reads "-".
+
+**`animated`** marks a date that was just filled in (a Backlog row dropped on a Cycle gets estimated dates): a blue
+sweep crosses the cell and the text flashes black → blue → white → blue → black, one 2.5-second loop played three
+times, and both stop the moment the pointer enters the cell. Not played with reduced motion. Whether a date is
+estimated, and when it stops being, is the caller's (the flow: editing the Start Date makes it a real date).
 
 ## Columns
 
@@ -103,7 +109,6 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
   is tracked with the dialog's PR.
 - **The filter row** above the table (search, status, priority, Reset, View Cycle) is page composition
   and needs a `FilterBar`; it is tracked separately.
-- **The animated cells** (a value that changed draws attention to itself) are tracked for a later pass.
 - **Folding is not animated** yet; the body shows and hides.
 
 ## Dragging

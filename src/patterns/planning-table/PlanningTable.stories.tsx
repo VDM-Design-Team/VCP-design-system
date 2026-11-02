@@ -125,7 +125,7 @@ function Editable(args: React.ComponentProps<typeof PlanningTable>) {
   );
 }
 
-/** Fold a section from its caret, change a row's points in place. */
+/** Fold a section from its caret, pick a row's points from the dropdown. */
 export const FoldingAndEditing: Story = {
   args: { defaultCollapsed: ['backlog'] },
   play: async ({ canvasElement }) => {
@@ -144,9 +144,8 @@ export const FoldingAndEditing: Story = {
     const firstRow = canvas.getAllByRole('row')[1]!;
     await userEvent.hover(firstRow);
     await userEvent.click(within(firstRow).getByRole('button', { name: 'Edit points' }));
-    const field = within(firstRow).getByRole('spinbutton', { name: /Points for/ });
-    await userEvent.clear(field);
-    await userEvent.type(field, '5');
+    const field = within(firstRow).getByRole('combobox', { name: /Points for/ });
+    await userEvent.selectOptions(field, '5');
     await userEvent.click(within(firstRow).getByRole('button', { name: 'Save' }));
     await expect(within(firstRow).getByText('5')).toBeInTheDocument();
   },
@@ -185,5 +184,44 @@ export const MultipleCycles: Story = {
     await fireEvent.drop(next, { dataTransfer: data });
     const [row, from, to] = (args.onMoveRow as ReturnType<typeof fn>).mock.calls[0]!;
     await expect([row.ref, from.id, to.id]).toEqual(['VCP-1234', 'backlog', 'cycle-28']);
+  },
+};
+
+/** A Backlog row has nothing planned yet: no dates, no points — each reads as a hyphen. */
+export const EmptyDates: Story = {
+  args: {
+    sections: [
+      {
+        id: 'backlog',
+        kind: 'backlog',
+        title: 'Backlog',
+        rows: [
+          row(4, { start: undefined, due: undefined, points: undefined, status: { status: 'Backlog' } }),
+          row(5, { start: undefined, due: undefined, status: { status: 'Backlog' } }),
+        ],
+      },
+    ],
+  },
+};
+
+/**
+ * A row just dropped on a Cycle with no dates is given estimated ones, and the cells say so: a sweep crosses
+ * them and the text flashes blue → white, three times — until the pointer enters. (Not with reduced motion.)
+ */
+export const AnimatedDates: Story = {
+  args: {
+    sections: [
+      {
+        ...SECTIONS[0]!,
+        rows: [
+          row(1),
+          row(3, {
+            start: { value: '2026-03-04', estimated: true, animated: true },
+            due: { value: '2026-03-16', estimated: true, animated: true },
+            status: { status: 'Accepted' },
+          }),
+        ],
+      },
+    ],
   },
 };

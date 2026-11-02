@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Icon } from '../../atoms/icon';
 import { CopyText } from '../../atoms/copy-text';
-import { Input } from '../../atoms/input';
+import { Select } from '../../atoms/select';
 import { Pagination } from '../../atoms/pagination';
 import { Tag } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
@@ -56,6 +56,12 @@ export interface PlanningDate {
   value: string;
   /** A computed date, not one a person set — reads "(est.)". */
   estimated?: boolean;
+  /**
+   * Draw attention to a date that was just filled in (a Backlog row dropped on a Cycle gets estimated
+   * dates): a blue sweep crosses the cell and the text flashes through blue to white, 3 times over 7.5
+   * seconds — and stops the moment the pointer enters the cell. Not played with reduced motion.
+   */
+  animated?: boolean;
 }
 
 export interface PlanningRow {
@@ -125,6 +131,8 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   onStartChange?: (row: PlanningRow, iso: string) => void;
   onDueChange?: (row: PlanningRow, iso: string) => void;
   onPointsChange?: (row: PlanningRow, points: number) => void;
+  /** The points a row can take — the Points dropdown's choices. Defaults to the capacity scale. */
+  pointOptions?: readonly number[];
   /** Pagination renders only when all three are given. 1-based. */
   page?: number;
   pageCount?: number;
@@ -161,38 +169,112 @@ function EstimateHint({ estimated, children }: { estimated?: boolean; children: 
   return estimated ? <Tooltip content={ESTIMATE_HINT}>{children}</Tooltip> : children;
 }
 
-/** Points, edited in place: a number field that keeps its own draft until confirmed. */
+/** The capacity scale: the same choices the detail card's Capacity Points dropdown offers. */
+const DEFAULT_POINT_OPTIONS: readonly number[] = [0, 1, 2, 3, 5, 8, 13];
+
+/** What an empty Start Date, Due Date or Points cell reads — the design's hyphen. */
+const Empty = () => (
+  <span className="text-label-sm-medium text-text-tertiary" aria-label="Not set">
+    -
+  </span>
+);
+
+/** Points, edited in place: a dropdown of the point scale that keeps its own draft until confirmed. */
 function PointsCell({
   row,
+  options,
   onChange,
 }: {
   row: PlanningRow;
+  options: readonly number[];
   onChange?: (row: PlanningRow, points: number) => void;
 }) {
   const [draft, setDraft] = React.useState(String(row.points ?? ''));
+  /* A row can carry a value the scale lacks (a legacy 4): it stays choosable rather than vanishing. */
+  const choices = row.points !== undefined && !options.includes(row.points) ? [...options, row.points].sort((a, b) => a - b) : options;
   return (
     <InlineEdit
       label="points"
       disabled={!onChange}
       onEditingChange={(editing) => editing && setDraft(String(row.points ?? ''))}
       onConfirm={() => {
-        const next = Number(draft);
-        if (draft.trim() !== '' && Number.isFinite(next)) onChange?.(row, next);
+        if (draft !== '' && Number.isFinite(Number(draft))) onChange?.(row, Number(draft));
       }}
       editor={
-        <Input
-          type="number"
-          inputMode="numeric"
-          min={0}
+        <Select
+          size="sm"
           aria-label={`Points for ${row.ref}`}
           value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          className="w-16"
+          options={choices.map(String)}
+          onChange={setDraft}
         />
       }
     >
-      <span className="text-label-sm-medium text-text-primary">{row.points ?? '—'}</span>
+      {row.points === undefined ? (
+        <Empty />
+      ) : (
+        <span className="text-label-sm-medium text-text-primary">{row.points}</span>
+      )}
     </InlineEdit>
+  );
+}
+
+/**
+ * Wraps a date cell that can be flagged `animated`: a gradient sweeps across it and the text runs
+ * black → blue → white → blue → black, on one 2.5-second loop played three times (the design's
+ * "animation of cells" flow), and both stop the moment the pointer enters. Web Animations, not CSS
+ * keyframes, so it needs nothing outside this file; colours are the system's tokens, by variable.
+ */
+function AnimatedCell({ animated, children }: { animated?: boolean; children: React.ReactNode }) {
+  const [seen, setSeen] = React.useState(false);
+  const sweep = React.useRef<HTMLSpanElement>(null);
+  const text = React.useRef<HTMLSpanElement>(null);
+  const active = !!animated && !seen;
+
+  React.useEffect(() => {
+    if (!active) return undefined;
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return undefined;
+    }
+    const timing = { duration: 2500, iterations: 3 } as const;
+    const a = sweep.current?.animate(
+      [{ transform: 'translateX(-100%)' }, { transform: 'translateX(100%)' }],
+      { ...timing, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
+    );
+    const b = text.current?.animate(
+      [
+        { color: 'var(--color-text-primary)', offset: 0 },
+        { color: 'var(--color-text-brand-medium)', offset: 0.2 },
+        { color: 'var(--color-text-inverted-primary)', offset: 0.35 },
+        { color: 'var(--color-text-brand-medium)', offset: 0.45 },
+        { color: 'var(--color-text-primary)', offset: 0.75 },
+        { color: 'var(--color-text-primary)', offset: 1 },
+      ],
+      { ...timing, easing: 'linear' },
+    );
+    return () => {
+      a?.cancel();
+      b?.cancel();
+    };
+  }, [active]);
+
+  if (!animated) return <>{children}</>;
+  return (
+    <span
+      className="relative isolate -mx-2 inline-flex overflow-hidden rounded-sm px-2 py-1"
+      onMouseEnter={() => setSeen(true)}
+    >
+      {active && (
+        <span
+          ref={sweep}
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-1/3 -z-10 bg-linear-105 from-transparent from-10% via-action-tertiary-content-default/75 via-50% to-transparent to-90%"
+        />
+      )}
+      <span ref={text} className="relative">
+        {children}
+      </span>
+    </span>
   );
 }
 
@@ -209,6 +291,7 @@ export function PlanningTable({
   onStartChange,
   onDueChange,
   onPointsChange,
+  pointOptions = DEFAULT_POINT_OPTIONS,
   page,
   pageCount,
   onPageChange,
@@ -337,16 +420,20 @@ export function PlanningTable({
       hint: <ColumnHint text={hints.start} column="start date" icon="function" />,
       render: (row) =>
         row.start ? (
-          <EstimateHint estimated={row.start.estimated}>
-            <InlineDateEdit
-              label={`start date for ${row.ref}`}
-              value={row.start.value}
-              format={() => dateText(row.start!)}
-              disabled={!onStartChange}
-              onChange={(iso) => onStartChange?.(row, iso)}
-            />
-          </EstimateHint>
-        ) : null,
+          <AnimatedCell animated={row.start.animated}>
+            <EstimateHint estimated={row.start.estimated}>
+              <InlineDateEdit
+                label={`start date for ${row.ref}`}
+                value={row.start.value}
+                format={() => dateText(row.start!)}
+                disabled={!onStartChange}
+                onChange={(iso) => onStartChange?.(row, iso)}
+              />
+            </EstimateHint>
+          </AnimatedCell>
+        ) : (
+          <Empty />
+        ),
     },
     {
       key: 'points',
@@ -354,7 +441,7 @@ export function PlanningTable({
       width: '6%',
       label: 'Points',
       hint: <ColumnHint text={hints.points} column="points" icon="function" />,
-      render: (row) => <PointsCell row={row} onChange={onPointsChange} />,
+      render: (row) => <PointsCell row={row} options={pointOptions} onChange={onPointsChange} />,
     },
     {
       key: 'due',
@@ -364,17 +451,21 @@ export function PlanningTable({
       hint: <ColumnHint text={hints.due} column="due date" icon="function" />,
       render: (row) =>
         row.due ? (
-          <EstimateHint estimated={row.due.estimated}>
-            <InlineDateEdit
-              label={`due date for ${row.ref}`}
-              value={row.due.value}
-              format={() => dateText(row.due!)}
-              align="right"
-              disabled={!onDueChange}
-              onChange={(iso) => onDueChange?.(row, iso)}
-            />
-          </EstimateHint>
-        ) : null,
+          <AnimatedCell animated={row.due.animated}>
+            <EstimateHint estimated={row.due.estimated}>
+              <InlineDateEdit
+                label={`due date for ${row.ref}`}
+                value={row.due.value}
+                format={() => dateText(row.due!)}
+                align="right"
+                disabled={!onDueChange}
+                onChange={(iso) => onDueChange?.(row, iso)}
+              />
+            </EstimateHint>
+          </AnimatedCell>
+        ) : (
+          <Empty />
+        ),
     },
     {
       key: 'status',
