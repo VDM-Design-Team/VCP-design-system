@@ -62,6 +62,9 @@ const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
   'Type 3': 'info',
 };
 
+/* The glyph follows the tag's size, as the tag docs' table sets it: 20 in the 28 (the default), 16 in the 24, 24 in the 32. */
+const GLYPH_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
+
 export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   type: AVType;
   /** `textual` (default), `tonal` (a pale fill), `faint` (a white fill with a light grey edge: Figma's "Faint Fill", as the Detail card draws it) or `outline` (a bordered pill in the type's hue). */
@@ -71,15 +74,17 @@ export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon'
 }
 
 export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
-  ({ className, type, variant = 'textual', info, ...props }, ref) => {
+  ({ className, type, variant = 'textual', info, size = 'md', ...props }, ref) => {
+    const glyphSize = GLYPH_SIZE[size ?? 'md'];
     const { icon, className: tone } = TYPE[type];
     return (
       <Tag
         ref={ref}
+        size={size}
         variant={variant === 'faint' ? 'outline' : variant}
         tone={variant === 'textual' || variant === 'faint' ? 'neutral' : TYPE_TONE[type]}
         /* Decorative: the word beside it already says which type this is. */
-        icon={<Icon name={icon} size="lg" className={cn('shrink-0', tone)} />}
+        icon={<Icon name={icon} size={glyphSize} className={cn('shrink-0', tone)} />}
         trailingIcon={info ? <Icon name="info" size="md" className="shrink-0 text-text-tertiary" /> : undefined}
         /* The label stays neutral on a fill or a border; the glyph carries the colour. */
         className={cn(

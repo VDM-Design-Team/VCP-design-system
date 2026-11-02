@@ -71,6 +71,9 @@ const URGENCY_TONE: Record<AVUrgency, NonNullable<TagProps['tone']>> = {
   Urgent: 'critical',
 };
 
+/* The glyph follows the tag's size, as the tag docs' table sets it: 20 in the 28 (the default), 16 in the 24, 24 in the 32. */
+const GLYPH_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
+
 export interface UrgencyTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   urgency: AVUrgency;
   /** `textual` (default), `tonal` (a pale fill) or `outline` (a bordered pill), as the design's Urgency_Tag set draws them. */
@@ -78,17 +81,19 @@ export interface UrgencyTagProps extends Omit<TagProps, 'tone' | 'variant' | 'ic
 }
 
 export const UrgencyTag = React.forwardRef<HTMLSpanElement, UrgencyTagProps>(
-  ({ className, urgency, variant = 'textual', ...props }, ref) => {
+  ({ className, urgency, variant = 'textual', size = 'md', ...props }, ref) => {
+    const glyphSize = GLYPH_SIZE[size ?? 'md'];
     const { icon, className: tone } = URGENCY[urgency];
     return (
       <Tag
         ref={ref}
+        size={size}
         variant={variant}
         tone={variant === 'textual' ? 'neutral' : URGENCY_TONE[urgency]}
         /* Decorative: the word beside it already says which urgency this is,
            so naming the glyph too would make every cell announce twice. */
         /* md = Figma's 20 glyph in the 28 tag (was lg, 24). */
-        icon={<Icon name={icon} size="md" className={cn('shrink-0', tone)} />}
+        icon={<Icon name={icon} size={glyphSize} className={cn('shrink-0', tone)} />}
         /* The label stays neutral on a fill or a border; the glyph carries the colour. */
         className={cn(variant !== 'textual' && 'text-text-secondary', className)}
         {...props}
