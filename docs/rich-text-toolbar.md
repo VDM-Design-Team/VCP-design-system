@@ -20,12 +20,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `RichTextToolbar` | Over a rich-text selection — the comment composer, a description editor |
+| `RichTextToolbar` | Over a rich-text selection — a description editor. (The comment box, `CommentComposer`, is plain text and mentions, so it does not use this.) |
 | `SegmentedControl` | A choice of views, not text formatting |
 | Nothing | Plain text fields — a toolbar over a `Textarea` that ignores it is furniture |
 
 The editor itself (contenteditable wiring, document model) is deliberately not here —
-`CommentComposer` (pattern) will marry this to one.
+a rich-text field, such as a description editor, will marry this to one.
 
 ## The three groups
 

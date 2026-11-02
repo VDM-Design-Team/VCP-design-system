@@ -79,7 +79,7 @@ Organisms: 2+ components forming a page section.
 | Page structure | `SettingsSection` |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
-| Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
+| Collaboration | `NotificationItem`, `UserMenu` (comments shipped: `CommentSection`, `CommentReply`, `CommentComposer`) |
 | Marketing | `MarketingHero` |
 
 ## Templates — to port
