@@ -50,6 +50,7 @@ does not ship one yet — until it does, put the content on the page.
 | `content` | `ReactNode` | — | **Required.** The description. Text, or light markup for emphasis and line breaks. **Never interactive** |
 | `children` | `ReactElement` | — | **Required.** Exactly one element, and it must be focusable. It is cloned to receive `aria-describedby` |
 | `placement` | `top \| bottom \| left \| right` | `top` | Static offsets. No collision detection, no flipping — see below |
+| `wide` | `boolean` | `false` | The bubble runs to 384 instead of 256 — for a tooltip that is a short list (each line a row), like the Type column's. Longer text still wraps |
 | `openDelay` | `number` (ms) | `300` | Hover only. **Focus is always immediate** |
 | `defaultOpen` | `boolean` | `false` | Renders it already open. For Storybook, screenshots and visual regression — not a way to pin one open in product |
 | `tooltipId` | `string` | auto (`useId`) | Override the generated id of the bubble. Rarely needed |

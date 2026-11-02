@@ -16,6 +16,7 @@ export * from './comment-section';
 export * from './report-problem-modal';
 export * from './notification-inbox';
 export * from './notification-popover';
+export * from './planning-table';
 export * from './reject-pending-av-modal';
 export * from './review-av-modal';
 export * from './sidebar';
