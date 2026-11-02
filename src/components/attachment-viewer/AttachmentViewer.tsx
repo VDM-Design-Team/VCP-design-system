@@ -66,7 +66,7 @@ const KIND_ICON: Record<AttachmentViewerKind, IconName> = {
 /* The viewer's quiet controls (download, close, zoom) wear the neutral palette, not the brand blue of a
    ghost button: they are chrome around a picture, not actions to invite. */
 const NEUTRAL_GLYPH =
-  'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed';
+  'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed disabled:text-neutral-outline-content-disabled';
 
 const ZOOM_MIN = 25;
 const ZOOM_MAX = 400;
