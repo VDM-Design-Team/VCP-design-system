@@ -11,7 +11,7 @@ Everything sits on an 8px gap (`space.8`).
 |---|---|---|
 | `Icon` | atom | The thumbs-up quick-react, and `smiley-plus` (the add-reaction trigger) |
 | `Popover` | component | The palette panel |
-| `Tooltip` | component | The design's Hover Tooltip, naming who reacted |
+| `Tooltip` | atom | The design's Hover Tooltip, naming who reacted |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

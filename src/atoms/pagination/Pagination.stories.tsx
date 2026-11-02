@@ -4,7 +4,7 @@ import { Pagination } from './Pagination';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
-  title: 'Components/Navigation/Pagination',
+  title: 'Atoms/Pagination',
   component: Pagination,
   parameters: {
     docs: {

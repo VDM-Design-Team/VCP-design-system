@@ -28,7 +28,7 @@ container's width.
 |---|---|---|
 | `Icon` | atom | The `hint` info glyph |
 | `Divider` | atom | The vertical rule between the items of a `StatCardGroup` |
-| `Tooltip` | component | The `hint` explanation |
+| `Tooltip` | atom | The `hint` explanation |
 
 `npm test` checks this list against the real imports.
 

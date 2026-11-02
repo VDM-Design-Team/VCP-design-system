@@ -1,4 +1,4 @@
-# CopyText
+# CopyText *(atom)*
 
 A value that is not a link but is interactive. It underlines on hover; clicking
 it copies the text to the clipboard and shows a "Copied" bubble that goes away

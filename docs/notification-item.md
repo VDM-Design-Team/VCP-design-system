@@ -14,7 +14,7 @@ hover button.
 |---|---|---|
 | `Avatar` | atom | The actor, 36 (`lg`), initials or a photo, with the avatar's white outline (`ring`) as Figma's `Profile_Initials` draws it |
 | `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`) |
-| `Tooltip` | component | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
+| `Tooltip` | atom | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
 | `Icon` | atom | The check-circle in the mark-read button |
 
 ## When to use
