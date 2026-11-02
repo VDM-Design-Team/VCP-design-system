@@ -22,7 +22,6 @@ Read off Figma's `Detail_Card` (`6499:48858`: four types) and its `_Detail_Card_
 | `DueDateTag` | component |
 | `Popover` | component |
 | `SearchSelect` | component |
-| `Stepper` | component |
 | `StatusTag` | component |
 | `TypeTag` | component |
 | `UrgencyTag` | component |
@@ -62,7 +61,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 **`domain`** trims it: **Design has no Cycle**; Development has every field. A field with no value is
 left out of a read card.
 
-Not built here, and tracked for later PRs: **the person's role list** (the form's role dropdown has one option until design says which roles exist), **UI Changes** (the Modify / New UI / No UI section),
+Not built here, and tracked for later PRs:  **UI Changes** (the Modify / New UI / No UI section),
 **Estimated Duration** (drawn, but placed in no card), and **Edit Viewers** (the pill is a placeholder
 that shows a count and reports a press).
 
@@ -74,7 +73,7 @@ that shows a count and reports a press).
 | `domain` | `'design' \| 'development'` | `development` | Design has no Cycle |
 | `value` | `DetailCardValue` | required | Every field optional; the card draws the ones its type has. Dates are ISO `yyyy-mm-dd` |
 | `onChange` | `(value) => void` | — | Editing and new: the whole value, changed |
-| `options` | `{ people, roles, cycles, projects, categories, tags }` | — | The dropdowns' choices. `people` and `roles` feed the add / edit form (roles default to just "Assignee"). A cycle carries its code and dates, so the read card draws a `CycleTag` |
+| `options` | `{ people, roles, cycles, projects, categories, tags }` | — | The dropdowns' choices. `people` and `roles` feed the add / edit form (roles default to QA, Design and Assignee). A cycle carries its code and dates, so the read card draws a `CycleTag` |
 | `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid |
 | `viewerCount`, `onViewers` | `number`, `() => void` | — | The viewers pill (placeholder) on the read cards |
 | `dueSoonWithinDays` | `number` | `3` | Due dates this near or nearer read as due soon |
@@ -85,9 +84,10 @@ that shows a count and reports a press).
 As the design's flow draws it, inside the card:
 
 - **Add:** the + beside Initiator or Assignee opens a small form under the chips: a user, for an assignee a role
-  and capacity points, then Cancel and Add. The + is dimmed while a form is open.
+  and capacity points (the same dropdown), then Cancel and Add. The roles are QA, Design and Assignee. The + is dimmed while a form is open.
 - **Edit:** hovering a chip shows a pencil and a ✕ (they are also there for a keyboard). The pencil turns that chip
-  into the same form in its place, with Cancel and Save.
+  into the same form **in its own place**, between the chips before and after it (the second of three stays
+  second), with Cancel and Save.
 - **Remove:** the ✕ takes the chip out.
 - **The Initiator** has no pencil: it is removed and added again. Adding replaces it.
 
@@ -98,7 +98,7 @@ changes come out through `onChange` as the whole `value`; the form's users come 
 
 Every tag in the card is **large** (28 tall: GDL's Large, our `md`, the default): the date and cycle tags, status, urgency, type, projects, category
 and tags. The people chips are their own size. Urgency is drawn tonal (a pale fill) and type in the "Faint Fill" style (a white fill, a light grey edge) with the ⓘ, as the
-Detail card does in Figma. Capacity Points is a `Badge` (`lg`: 32 tall, 14 type, as Figma draws the number) when read and a `Stepper` (`variant="up-down"`, the stacked caret pair, full width) when edited; dates are an `Input` with a calendar icon and a `DatePicker`. No field is new: each is an existing piece.
+Detail card does in Figma. Capacity Points is a `Badge` (`lg`: 32 tall, 14 type, as Figma draws the number) when read and a `SearchSelect` dropdown of **0, 1, 2, 3, 5, 8, 13** when edited; dates are an `Input` with a calendar icon and a `DatePicker`. No field is new: each is an existing piece.
 
 ## Tokens
 

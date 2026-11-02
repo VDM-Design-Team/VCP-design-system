@@ -8,7 +8,7 @@ const PEOPLE = [{ name: 'Marvin R' }, { name: 'John Kestrel' }, { name: 'Jane Do
 
 const OPTIONS = {
   people: PEOPLE,
-  roles: ['Assignee'],
+  roles: ['QA', 'Design', 'Assignee'],
   cycles: [
     { value: 'c18', code: 'C18', start: '2025-09-20', end: '2026-10-02' },
     { value: 'c19', code: 'C19', start: '2026-10-03', end: '2026-10-16' },
@@ -92,10 +92,11 @@ export const Editing: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     await expect(canvas.queryByRole('group', { name: 'Status' })).toBeNull();
-    /* Capacity points is a Stepper: nudge it up. */
-    const points = canvas.getByRole('textbox', { name: 'Capacity Points' });
-    await userEvent.click(canvas.getByRole('button', { name: 'Increase Capacity Points' }));
-    await expect(points).toHaveValue('11');
+    /* Capacity points is a dropdown of 0, 1, 2, 3, 5, 8, 13. */
+    await userEvent.click(canvas.getByRole('combobox', { name: /^Capacity Points/ }));
+    await expect(within(canvasElement).getAllByRole('option').map((o) => o.textContent)).toEqual(['0', '1', '2', '3', '5', '8', '13']);
+    await userEvent.click(within(canvasElement).getByRole('option', { name: '8' }));
+    await expect(canvas.getByRole('combobox', { name: /^Capacity Points/ })).toHaveTextContent('8');
   },
 };
 
@@ -124,10 +125,14 @@ export const EditingPeople: Story = {
     await userEvent.click(assignees.getByRole('button', { name: 'Remove Amy Lee' }));
     await expect(assignees.queryByText('Amy Lee')).toBeNull();
     /* Edit: the pencil turns a chip into the form, with Save. */
-    await userEvent.click(assignees.getByRole('button', { name: 'Edit Jane Doe' }));
+    await userEvent.click(assignees.getByRole('button', { name: 'Edit John Kestrel' }));
     await expect(assignees.getByRole('button', { name: 'Save' })).toBeVisible();
+    /* In place: the form sits where the first chip was, so the second chip still follows it. */
+    const form = assignees.getByRole('button', { name: 'Save' }).closest('form') as HTMLElement;
+    const second = assignees.getByRole('button', { name: 'Edit Jane Doe' });
+    await expect(form.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await userEvent.click(assignees.getByRole('button', { name: 'Cancel' }));
-    await expect(assignees.getByText('Jane Doe')).toBeVisible();
+    await expect(assignees.getByText('John Kestrel')).toBeVisible();
     /* The Initiator has no pencil. */
     const initiator = within(canvas.getByRole('group', { name: 'Initiator' }));
     await expect(initiator.queryByRole('button', { name: /^Edit/ })).toBeNull();

@@ -12,7 +12,6 @@ import { DatePicker } from '../../components/date-picker';
 import { DueDateTag, dueDateTone } from '../../components/due-date-tag';
 import { Popover } from '../../components/popover';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
-import { Stepper } from '../../components/stepper';
 import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
 import { AV_TYPES, TypeTag, type AVType } from '../../components/type-tag';
 import { AV_URGENCIES, UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
@@ -94,7 +93,7 @@ export interface DetailCardCycle {
 export interface DetailCardOptions {
   /** Who can be added as Initiator or Assignee. */
   people?: readonly DetailCardPerson[];
-  /** The roles an Assignee can be given. Default just "Assignee". */
+  /** The roles an Assignee can be given. Default QA, Design and Assignee. */
   roles?: readonly string[];
   cycles?: readonly DetailCardCycle[];
   projects?: ReadonlyArray<string | SearchSelectOption>;
@@ -174,6 +173,9 @@ export interface DetailCardProps
   /** Due dates this many days away or fewer read as due soon. Default 3. */
   dueSoonWithinDays?: number;
 }
+
+/** The capacity points an AV can be given: the Fibonacci steps the team estimates in. */
+const POINTS = ['0', '1', '2', '3', '5', '8', '13'];
 
 const toOptions = (rows: ReadonlyArray<string | SearchSelectOption> = []) => rows;
 
@@ -364,13 +366,14 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       tagList(value.tags, 'neutral')
     );
     body.capacityPoints = editing ? (
-      <Stepper
-        variant="up-down"
-        className="flex w-full"
-        label="Capacity Points"
-        min={0}
-        value={value.capacityPoints ?? 0}
-        onChange={(v) => set({ capacityPoints: v })}
+      <SearchSelect
+        aria-label="Capacity Points"
+        fullWidth
+        placeholder="Select points"
+        searchable={false}
+        options={POINTS}
+        value={value.capacityPoints === undefined ? '' : String(value.capacityPoints)}
+        onChange={(v: string) => set({ capacityPoints: Number(v) })}
         error={errors?.capacityPoints}
       />
     ) : value.capacityPoints !== undefined ? (
@@ -415,7 +418,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
                 label={LABEL[field] ?? field}
                 people={isInitiator ? (value.initiator ? [value.initiator] : []) : (value.assignees ?? [])}
                 directory={options?.people ?? []}
-                roles={options?.roles ?? ['Assignee']}
+                roles={options?.roles ?? ['QA', 'Design', 'Assignee']}
                 onChange={(list) => (isInitiator ? set({ initiator: list[0] }) : set({ assignees: list }))}
                 aside={isInitiator && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
               />
@@ -620,30 +623,32 @@ function PeopleField({
       addDisabled={mode !== null}
       aside={aside}
     >
-      <div className="flex w-full flex-col items-start gap-2">
-        <div className="flex flex-wrap gap-2">
-          {people.map((p, index) =>
-            mode?.type === 'edit' && mode.index === index ? null : (
-              <Chip
-                key={p.name}
-                size="md"
-                tone="brand"
-                variant="outline"
-                actions="hover"
-                avatar={<Avatar name={p.name} src={p.src} tone="brand" size="sm" />}
-                label={p.name}
-                description={kind === 'assignee' ? (p.description ?? 'Assignee') : undefined}
-                count={p.points}
-                onEdit={kind === 'assignee' ? () => setMode({ type: 'edit', index }) : undefined}
-                onRemove={() => onChange(people.filter((_, i) => i !== index))}
-              />
-            ),
-          )}
-        </div>
-        {mode?.type === 'edit' &&
-          form(people[mode.index], 'Save', (person) =>
-            onChange(people.map((existing, i) => (i === mode.index ? person : existing))),
-          )}
+      {/* One wrapping row. A chip being edited is replaced, in its own place among the others, by the form,
+          which takes a whole row (`w-full`) so the chips before it stay above and the ones after it below. */}
+      <div className="flex w-full flex-wrap gap-2">
+        {people.map((p, index) =>
+          mode?.type === 'edit' && mode.index === index ? (
+            <React.Fragment key={p.name}>
+              {form(p, 'Save', (person) =>
+                onChange(people.map((existing, i) => (i === index ? person : existing))),
+              )}
+            </React.Fragment>
+          ) : (
+            <Chip
+              key={p.name}
+              size="md"
+              tone="brand"
+              variant="outline"
+              actions="hover"
+              avatar={<Avatar name={p.name} src={p.src} tone="brand" size="sm" />}
+              label={p.name}
+              description={kind === 'assignee' ? (p.description ?? 'Assignee') : undefined}
+              count={p.points}
+              onEdit={kind === 'assignee' ? () => setMode({ type: 'edit', index }) : undefined}
+              onRemove={() => onChange(people.filter((_, i) => i !== index))}
+            />
+          ),
+        )}
         {mode?.type === 'add' &&
           form(undefined, 'Add', (person) => onChange(kind === 'initiator' ? [person] : [...people, person]))}
       </div>
@@ -670,7 +675,7 @@ function PersonForm({
   onSubmit: (person: DetailCardPerson) => void;
 }) {
   const [name, setName] = React.useState(initial?.name ?? '');
-  const [role, setRole] = React.useState(initial?.description ?? roles[0] ?? 'Assignee');
+  const [role, setRole] = React.useState(initial?.description ?? (roles.includes('Assignee') ? 'Assignee' : roles[0]) ?? 'Assignee');
   const [points, setPoints] = React.useState(initial?.points !== undefined ? String(initial.points) : '');
   const known = directory.find((p) => p.name === name);
 
@@ -706,14 +711,17 @@ function PersonForm({
             value={role}
             onChange={(v: string) => setRole(v)}
           />
-          <Stepper
-            variant="up-down"
-            className="min-w-0 flex-1"
-            label="Capacity points"
-            min={0}
-            value={points === '' ? 0 : Number(points)}
-            onChange={(v) => setPoints(String(v))}
-          />
+          <div className="min-w-0 flex-1">
+            <SearchSelect
+              aria-label="Capacity points"
+              fullWidth
+              placeholder="Points"
+              searchable={false}
+              options={POINTS}
+              value={points}
+              onChange={(v: string) => setPoints(v)}
+            />
+          </div>
         </div>
       )}
       <div className="flex justify-end gap-2">
