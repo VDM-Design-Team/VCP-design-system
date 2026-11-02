@@ -49,6 +49,10 @@ export type NotificationKind =
  * backlog"). Every sentence ends in a full stop, added here. The strings are the design's; localise by passing your own through a
  * wrapper, not by editing call sites.
  */
+/* A sentence ends in one full stop: none is added after a subject or a status that already
+   ends in its own (a title "Is this ready?" reads "… Is this ready? A few seconds ago"). */
+const endSentence = (text: string) => (/[.!?…]$/.test(text) ? text : `${text}.`);
+
 const NOTIFICATION_PHRASES: Record<
   NotificationKind,
   { verb: string; trail?: (status?: string) => string | undefined }
@@ -155,11 +159,11 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       <>
         {unread && <span className="sr-only">Unread: </span>}
         <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>{' '}
-        <span className="text-body-sm-regular">{trail ? subject : `${subject}.`}</span>
+        <span className="text-body-sm-regular">{trail ? subject : endSentence(subject)}</span>
         {trail && (
           <>
             {!trail.startsWith('.') && ' '}
-            <span className="text-body-sm-bold">{`${trail}.`}</span>
+            <span className="text-body-sm-bold">{endSentence(trail)}</span>
           </>
         )}{' '}
         {/* Capitalised for display: it follows the sentence's full stop, so it starts a
