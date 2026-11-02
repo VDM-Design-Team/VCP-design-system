@@ -15,6 +15,8 @@ const FILES: DeliverableFile[] = [
   { id: 'f1', name: '2)-Current-and-Su....pdf', kind: 'pdf', domain: 'design' },
   { id: 'f2', name: 'image.png', kind: 'image', domain: 'design' },
 ];
+/** The card's width in the page. */
+const CARD_WIDTH = 'w-[26rem] max-w-full';
 
 const meta = {
   title: 'Patterns/DeliverablesCard',
@@ -35,11 +37,15 @@ const meta = {
     mode: { control: 'inline-radio', options: ['view', 'edit'] },
   },
   decorators: [
-    (Story) => (
-      <div className="w-[26rem] max-w-full bg-surface-canvas p-4">
+    /* A story's own `decorators: []` doesn't remove this one, so a fullscreen story is skipped here. */
+    (Story, { parameters }) =>
+      parameters.layout === 'fullscreen' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        <div className={`${CARD_WIDTH} bg-surface-canvas p-4`}>
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<typeof DeliverablesCard>;
 
@@ -118,13 +124,12 @@ export const OpensTheViewer: Story = {
 /** Both themes. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true }, ...SIDE_BY_SIDE },
-  decorators: [],
   render: (args) => (
-    <div className="grid grid-cols-2">
+    <div className="grid min-h-screen grid-cols-1 md:grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="bg-surface-canvas p-6">
-            <DeliverablesCard {...args} mode="edit" />
+          <div className="h-full bg-surface-canvas p-6">
+            <DeliverablesCard {...args} mode="edit" className={`${CARD_WIDTH} mx-auto`} />
           </div>
         </div>
       ))}
