@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
+import { Icon } from '../icon';
 
 /**
  * Dropzone — the file target: click to browse, or drag files onto it. Hands
@@ -14,7 +14,7 @@ import { Icon } from '../../atoms/icon';
  * Drag-and-drop is the pointer bonus on top, never the only way in.
  *
  * Built to Figma's `_Attachment_Drop_Container` (design review, 5 Oct 2026): a
- * 2 dashed border over `surface.neutral.faint`, 24 padding — in `stroke.strong`, not the
+ * 1 dashed edge over `surface.neutral.faint`, 24 padding — in `stroke.strong`, not the
  * design's `stroke.default`, a deliberate exception (see docs/dropzone.md) —
  * 8 between a 32 paperclip in `text.subtle` and two lines — "Upload a file or drag and drop" in
  * 14 regular (the link in link blue, the rest `text.primary`), then the accepted
@@ -28,9 +28,9 @@ import { Icon } from '../../atoms/icon';
  *   swallow clicks meant for whatever sits beside the zone.)
  * - **Error** — the same fill, with a `accent.critical.outline.border` stroke.
  *
- * The dash length is the browser's: a 2 dashed border draws roughly 4 dashes in
- * Chromium, which is what Figma's 4 dash pattern asks for. CSS cannot set it
- * exactly without an SVG border.
+ * The edge is an SVG rectangle, not a CSS border: a CSS dashed border cannot set its dash, and a 1
+ * stroke's come out too short to read as a dash. The dashes are 6 long with 4 between. The stroke is 1
+ * (it was 2), to sit beside the 1 borders of the fields and cards around a drop area.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -126,23 +126,44 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           take(e.dataTransfer.files);
         }}
         className={cn(
-          'relative flex flex-col items-center gap-2 rounded-md border-2 border-dashed p-6 text-center transition-colors',
+          'group/zone relative flex flex-col items-center gap-2 rounded-md p-6 text-center transition-colors',
           'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
           /* The drop's vicinity: a hit area 16 wider on every side, live only
              while a file is being dragged (see the note above). */
           'before:pointer-events-none before:absolute before:-inset-4',
           dragging && !disabled && 'before:pointer-events-auto',
-          over
-            ? 'border-stroke-focused bg-surface-brand-subtle'
-            : error
-              ? 'border-accent-critical-outline-border-default bg-surface-neutral-faint'
-              : 'border-stroke-strong bg-surface-neutral-faint',
-          disabled
-            ? 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'
-            : cn('cursor-pointer', !over && !error && 'hover:border-stroke-focused'),
+          over ? 'bg-surface-brand-subtle' : 'bg-surface-neutral-faint',
+          disabled ? 'cursor-not-allowed bg-surface-neutral-subtle' : 'cursor-pointer',
           className,
         )}
       >
+        {/* The dashed edge, drawn: a CSS dashed border cannot set its dash, and a 1 stroke's are too short.
+            6 long, 4 apart, on a rectangle with `radius.md`'s corners. It takes the state's colour from the
+            zone's text colour (`stroke="currentColor"`), so the state classes below are the only place the
+            colour is chosen. It straddles the zone's edge, half a pixel either side. */}
+        <svg
+          aria-hidden="true"
+          className={cn(
+            'pointer-events-none absolute inset-0 size-full overflow-visible transition-colors',
+            disabled
+              ? 'text-stroke-subtle'
+              : over
+                ? 'text-stroke-focused'
+                : error
+                  ? 'text-accent-critical-outline-border-default'
+                  : 'text-stroke-strong group-hover/zone:text-stroke-focused',
+          )}
+        >
+          <rect
+            width="100%"
+            height="100%"
+            rx="8"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="6 4"
+          />
+        </svg>
         {/* Real and focusable, just not visible — the keyboard path in. */}
         <input
           ref={ref}

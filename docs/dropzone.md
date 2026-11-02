@@ -1,4 +1,4 @@
-# Dropzone
+# Dropzone *(atom)*
 
 The file target: click to browse, or drag files onto it. Hands the caller
 `File[]` and nothing more.
@@ -51,7 +51,7 @@ again (the input resets after each hand-off).
 ## Tokens
 
 Built to Figma's `_Attachment_Drop_Container` (design review, 5 Oct 2026). The
-zone is a 2 dashed border, 24 padding, 8 between the parts, over `radius.md`. A
+zone is a 1 dashed edge, 24 padding, 8 between the parts, over `radius.md`. A
 32 `paperclip` (`text.subtle`, in every state but disabled) sits above two lines: **"Upload a file or drag
 and drop"** in `body-sm-regular` (14 regular) — the link in `text.link.default`,
 underlined (the system's link style), the rest `text.primary` — and the accepted
@@ -78,8 +78,7 @@ swallow clicks meant for what sits beside the zone. The state resets on a drop, 
 in dark. So while a file is dragged over, the link takes the line's own colour
 (`text.primary`) and keeps its underline; the border and fill carry the state.
 
-**The dash.** The 4 dash pattern of Figma's stroke is the browser's: a 2 dashed border
-draws about 4-long dashes in Chromium. CSS cannot set it exactly without an SVG border.
+**The edge.** An SVG rectangle (`radius.md`'s corners) with a 1 stroke, dashes 6 long and 4 apart, not a CSS border: a CSS dashed border cannot set its dash, and a 1 stroke's are too short to read. It was a 2 stroke; 1 sits quietly beside the 1 borders of the fields and cards around it. The colour comes from the zone's state (`stroke.strong` at rest, `stroke.focused` on hover and drag-over, `accent.critical.outline.border` on error, `stroke.subtle` disabled).
 
 | Pair | Light | Dark |
 |---|---|---|
@@ -98,7 +97,7 @@ draws about 4-long dashes in Chromium. CSS cannot set it exactly without an SVG 
 which is 1.42:1 on the resting fill (2.36:1 in dark): well under the 3:1 WCAG 1.4.11 asks of a
 control's boundary. The dropzone is a control a person has to find, so it uses `stroke.strong`
 (slate-500 in light, slate-400 in dark), the token for a control's boundary, which is what the
-earlier `stroke.field` was before it was folded into `strong`. The 2px dashed weight, the fill
+earlier `stroke.field` was before it was folded into `strong`. The dashed style, the fill
 and the hover (`stroke.focused`) are the design's. Decided in review of this PR, October
 2026; if the design is ever "fixed" back to `stroke.default`, this is why it is not.
 (The figures above are for `stroke.strong` as set by the stroke.strong change, slate-500 / slate-400.)
