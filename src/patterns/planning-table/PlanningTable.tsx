@@ -113,7 +113,7 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   /**
    * A Backlog row was dropped on a Cycle. The table moves nothing: it tells you which row went from
    * where to where — in the design that opens the *Add Required Details* dialog, and the move happens
-   * when it is confirmed. With no handler, rows are not draggable.
+   * when it is confirmed. Backlog rows are draggable either way (a drop with no handler does nothing).
    */
   onMoveRow?: (row: PlanningRow, from: PlanningSection, to: PlanningSection) => void;
   /** The sortable key is `title` — the one Figma mark. */
@@ -234,12 +234,14 @@ export function PlanningTable({
     onCollapsedChange?.(next);
   };
 
-  /* Every column hugs its content except the title, which takes what is left and truncates — so the
-     table is as narrow as its content allows and scrolls sideways only below that. */
+  /* No column is narrower than its content (`fit`) except the title (`grow`), which truncates; above
+     those floors the spare room is shared by the `width` weights, so a wide table fills out and
+     only a squeezed one scrolls sideways. */
   const columns: Array<DataTableColumn<PlanningRow>> = [
     {
       key: 'ref',
       fit: true,
+      width: '8%',
       label: 'ID',
       /* Click to copy the reference ("Copied" says so). Opening the Added Value is the title's job. */
       render: (row) => (
@@ -249,6 +251,7 @@ export function PlanningTable({
     {
       key: 'title',
       grow: true,
+      width: '26%',
       label: 'Added Value Title',
       sortable: true,
       render: (row) => (
@@ -279,6 +282,7 @@ export function PlanningTable({
     {
       key: 'urgency',
       fit: true,
+      width: '9%',
       label: 'Urgency',
       hint: <ColumnHint text={hints?.urgency} column="urgency" />,
       render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2 max-w-none" /> : null),
@@ -286,6 +290,7 @@ export function PlanningTable({
     {
       key: 'type',
       fit: true,
+      width: '9%',
       label: 'Type',
       hint: <ColumnHint text={hints?.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2 max-w-none" /> : null),
@@ -293,6 +298,7 @@ export function PlanningTable({
     {
       key: 'initiator',
       fit: true,
+      width: '7%',
       label: 'Initiator',
       render: (row) =>
         row.initiator ? (
@@ -312,6 +318,7 @@ export function PlanningTable({
     {
       key: 'assignee',
       fit: true,
+      width: '8%',
       label: 'Assignee',
       render: (row) =>
         row.assignee ? (
@@ -325,6 +332,7 @@ export function PlanningTable({
     {
       key: 'start',
       fit: true,
+      width: '10%',
       label: 'Start Date',
       hint: <ColumnHint text={hints.start} column="start date" icon="function" />,
       render: (row) =>
@@ -343,6 +351,7 @@ export function PlanningTable({
     {
       key: 'points',
       fit: true,
+      width: '6%',
       label: 'Points',
       hint: <ColumnHint text={hints.points} column="points" icon="function" />,
       render: (row) => <PointsCell row={row} onChange={onPointsChange} />,
@@ -350,6 +359,7 @@ export function PlanningTable({
     {
       key: 'due',
       fit: true,
+      width: '11%',
       label: 'Due Date',
       hint: <ColumnHint text={hints.due} column="due date" icon="function" />,
       render: (row) =>
@@ -369,6 +379,7 @@ export function PlanningTable({
     {
       key: 'status',
       fit: true,
+      width: '8%',
       label: 'Status',
       hint: <ColumnHint text={hints?.status} column="status" />,
       render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
@@ -471,7 +482,7 @@ export function PlanningTable({
                 onSortChange={onSortChange}
                 className="rounded-none border-0"
                 rowProps={
-                  onMoveRow && section.kind === 'backlog'
+                  section.kind === 'backlog'
                     ? (row) => ({
                         draggable: true,
                         onDragStart: (event) => {

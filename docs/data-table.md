@@ -65,20 +65,20 @@ A trap worth naming: **the repo's type ramp and Figma's share names but not
 values.** Figma's `label-sm` is 14px; this repo's is 11px. Read a spec off the
 canvas by *value*, not by token name — 14px medium here is `label-lg`.
 
-### How a column is sized: hug, or take the rest
+### How a column is sized: a floor, then a share
 
-The responsive pattern for every VCP table: **a column is as wide as its content needs and no wider, and
-the one long text column takes the rest.**
+The responsive pattern for every VCP table: **no column is ever narrower than its content, and above that
+the spare room is shared out** — so a wide table fills out, and only a squeezed one scrolls.
 
 | Column option | What it does | Use it for |
 |---|---|---|
-| `fit` | Hugs its widest cell or header — never wrapped, never cut with "…" | Tags, dates, avatars, counts: anything whose length *is* the information |
-| `grow` | Takes what the `fit` columns leave. Its content truncates with "…" as the table narrows, down to 16rem; below that the table scrolls sideways | The one long text column — an Added Value's title, which is almost always longer than its header. Use it once |
+| `fit` | Its floor is its widest cell or header — never wrapped, never cut with "…". Above the floor it takes a share of the spare room by its `width` weight (its content's length without one) | Tags, dates, avatars, counts: anything whose length *is* the information |
+| `grow` | The column that gives way: its content truncates with "…" as the table narrows, down to 16rem, below which the table scrolls sideways. Give it a `width` weight for its share of spare room; with none it takes what the others leave | The one long text column — an Added Value's title. Use it once |
 | neither | The browser sizes it (or `width` does) | Anything else — the generic default |
 
-So as the window narrows the title gives way first; when it cannot give any more the table scrolls
-horizontally (the container, never the page). `AVTable` and `PlanningTable` use it. A tag in a `fit` cell
-needs `max-w-none`: a `Tag` is `max-w-full`, which in a cell sized to its content would clip it.
+So narrowing the window squeezes the title first; when it cannot give any more the table scrolls horizontally (the
+container, never the page). `width` percentages are *weights*, not promises — a floor always wins. `AVTable` and
+`PlanningTable` use it. A tag in a cell needs `max-w-none`: a `Tag` is `max-w-full`, which would clip it.
 
 `DataTableColumn.width` takes CSS widths (`'120px'`, `'30%'`) applied to
 `<col>` — **not** the export's grid tracks; `'1fr'` has no meaning in a table.

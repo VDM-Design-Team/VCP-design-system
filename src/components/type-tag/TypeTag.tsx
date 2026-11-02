@@ -101,7 +101,19 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
         {type}
       </Tag>
     );
-    return tooltip ? <Tooltip content={`${type}: ${AV_TYPE_MEANING[type]}`}>{tag}</Tooltip> : tag;
+    return tooltip ? (
+      <Tooltip
+        content={
+          <>
+            <strong className="text-caption-md-semibold">{type}:</strong> {AV_TYPE_MEANING[type]}
+          </>
+        }
+      >
+        {tag}
+      </Tooltip>
+    ) : (
+      tag
+    );
   },
 );
 TypeTag.displayName = 'TypeTag';

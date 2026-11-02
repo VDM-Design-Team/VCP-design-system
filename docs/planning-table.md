@@ -42,7 +42,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `sections` | `PlanningSection[]` | required | `{ id, kind?, title, dates?, totalCapacity?, remainingCapacity?, rows }` — `kind` is `cycle` or `backlog` |
 | `collapsed` / `defaultCollapsed` / `onCollapsedChange` | `string[]` | — | Folded section ids. Controlled when `collapsed` is given |
 | `sort` / `onSortChange` | `DataTableSort` | — | The sortable key is `title`. **Sorting is a handler, not the table's job**: the header reports the key and direction and the caller (usually the server) returns the rows in that order. The table never reorders rows in the browser |
-| `onMoveRow` | `(row, from, to) => void` | — | A Backlog row was dropped on a Cycle. The table moves nothing — in the design this opens *Add Required Details*. With no handler, rows are not draggable |
+| `onMoveRow` | `(row, from, to) => void` | — | A Backlog row was dropped on a Cycle. The table moves nothing — in the design this opens *Add Required Details*. Backlog rows are draggable with or without it |
 | `onOpen` | `(row) => void` | — | Given, the title is a button. (The ID is click-to-copy, so opening is the title's job) |
 | `onStartChange` / `onDueChange` | `(row, iso) => void` | — | Each date edits in place only if its callback is given |
 | `onPointsChange` | `(row, points) => void` | — | Same, for points |
@@ -106,7 +106,7 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
 
 ## Dragging
 
-With `onMoveRow`, Backlog rows are draggable and each Cycle is a drop target: it takes a blue outline while a row
+Backlog rows are always draggable and each Cycle is a drop target: it takes a blue outline while a row
 is over it. Dropping calls `onMoveRow(row, from, to)`; **nothing moves until you move it** (the design opens a
 dialog first, and the move happens on confirm).
 
@@ -117,9 +117,9 @@ the table's horizontal scroll instead of being clipped by it.
 
 ## Sizing
 
-Every column hugs its content (`fit`) except the title, which takes the rest and truncates (`grow`, minimum
-16rem). Narrow the window and the title gives way first; below that the table scrolls sideways, one scroller
-per section (see `docs/data-table.md`).
+No column is narrower than its content (`fit`) except the title (`grow`), which truncates (floor 16rem). Above
+those floors the spare room is shared by each column's `width` weight, so a wide table fills out; narrow it and the
+title gives way first; below that the table scrolls sideways, one scroller per section (see `docs/data-table.md`).
 
 ## Don't
 

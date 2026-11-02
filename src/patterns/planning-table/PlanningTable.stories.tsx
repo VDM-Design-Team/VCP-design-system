@@ -120,6 +120,7 @@ function Editable(args: React.ComponentProps<typeof PlanningTable>) {
       onStartChange={(r, iso) => patch(r.id, { start: { value: iso } })}
       onDueChange={(r, iso) => patch(r.id, { due: { value: iso } })}
       onPointsChange={(r, points) => patch(r.id, { points })}
+      onMoveRow={args.onMoveRow}
     />
   );
 }

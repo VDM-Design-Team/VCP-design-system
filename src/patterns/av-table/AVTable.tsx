@@ -154,6 +154,7 @@ export function AVTable({
       label: 'Task Title',
       sortable: true,
       grow: true,
+      width: '34%',
       render: (row) => (
         /* 16 top and bottom, Figma's own cell padding. With the two-line title
              block that makes an 81 row, which is what the canvas draws. */
@@ -203,6 +204,7 @@ export function AVTable({
     {
       key: 'due',
       fit: true,
+      width: '12%',
       label: 'Due Date',
       sortable: true,
       render: (row) =>
@@ -213,6 +215,7 @@ export function AVTable({
     {
       key: 'urgency',
       fit: true,
+      width: '11%',
       label: 'Urgency',
       hint: <ColumnHint text={hints.urgency} column="urgency" />,
       /* The tag carries Figma's own 8 of padding, so the cell gives it back to
@@ -222,6 +225,7 @@ export function AVTable({
     {
       key: 'type',
       fit: true,
+      width: '10%',
       label: 'Type',
       hint: <ColumnHint text={hints.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2 max-w-none" /> : null),
@@ -229,6 +233,7 @@ export function AVTable({
     {
       key: 'status',
       fit: true,
+      width: '11%',
       label: 'Status',
       hint: <ColumnHint text={hints.status} column="status" />,
       render: (row) => (row.status ? <StatusTag size="sm" {...row.status} /> : null),
@@ -236,6 +241,7 @@ export function AVTable({
     {
       key: 'members',
       fit: true,
+      width: '11%',
       label: 'Members',
       hint: <ColumnHint text={hints.members} column="members" />,
       render: (row) =>
@@ -246,6 +252,7 @@ export function AVTable({
     {
       key: 'lastUpdated',
       fit: true,
+      width: '12%',
       label: 'Last Updated',
       sortable: true,
       render: (row) => <span className="text-label-sm-medium text-text-tertiary">{row.lastUpdated}</span>,

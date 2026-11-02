@@ -50,16 +50,18 @@ export interface DataTableColumn<Row> {
   /** CSS width for the `<col>` — '120px', '30%'. Unsized columns share the rest. ds-lint-ignore */
   width?: string;
   /**
-   * **Hug the content.** The column is exactly as wide as its widest cell or header (never wrapped,
-   * never cut with "…"), and no wider. Use it for tags, dates, avatars, counts — anything whose
-   * length is the information. If the columns together are wider than the table, it scrolls sideways.
+   * **Never narrower than its content.** Cells and header stay on one line — not wrapped, not cut with
+   * "…" — so the column's floor is its widest cell. Above that floor it shares the table's spare room
+   * like any column (by its `width` weight, or its content's length without one); the table scrolls
+   * sideways only when even the floors do not fit. Use it for tags, dates, avatars, counts: anything
+   * whose length is the information.
    */
   fit?: boolean;
   /**
-   * **Take the room that is left.** The column fills what the `fit` columns leave and its content
-   * truncates with "…" as the table narrows — down to a minimum (16rem) before the table scrolls
-   * instead. Use it once, for the long text (an Added Value's title) that is almost always longer
-   * than its header.
+   * **The column that gives way.** Its content truncates with "…" as the table narrows, down to a floor
+   * (16rem) — below which the table scrolls sideways instead. Use it once, for the long text (an Added
+   * Value's title) that is almost always longer than its header. Give it a `width` weight to say how
+   * much of the spare room it takes; with none it takes what the others leave.
    */
   grow?: boolean;
   sortable?: boolean;
@@ -222,7 +224,7 @@ export function DataTable<Row extends { id?: string | number }>({
           {/* The checkbox column is a fixed 40 gutter. */}
           {selectable && <col style={{ width: '40px' }} /> /* ds-lint-ignore */}
           {columns.map((c) => (
-            <col key={c.key} style={c.width && !c.fit && !c.grow ? { width: c.width } : undefined} />
+            <col key={c.key} style={c.width ? { width: c.width } : undefined} />
           ))}
         </colgroup>
         <thead>
@@ -348,10 +350,11 @@ export function DataTable<Row extends { id?: string | number }>({
 
 /* 56 rows by default, 44 dense — the export's two densities, as min-heights so
    a tall cell can grow. */
-/* `fit`: the narrowest width, with no wrapping, which a table cell stretches to its content. `grow`: the rest of the
-   row, with `max-w-0` so its own content truncates instead of widening the column. */
-const columnSizing = (c: { fit?: boolean; grow?: boolean }) =>
-  c.grow ? 'w-full min-w-64 max-w-0' : c.fit ? 'w-px whitespace-nowrap' : undefined;
+/* `fit`: no wrapping, so the column's floor is its content. `grow`: `max-w-0` so its own content truncates
+   instead of widening the column, with a floor of its own — and the rest of the row unless it was given a
+   `width` weight. */
+const columnSizing = (c: { fit?: boolean; grow?: boolean; width?: string }) =>
+  c.grow ? cn('min-w-64 max-w-0', !c.width && 'w-full') : c.fit ? 'whitespace-nowrap' : undefined;
 
 const cell = (dense?: boolean) =>
   cn(
