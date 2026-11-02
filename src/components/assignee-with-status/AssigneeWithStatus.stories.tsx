@@ -47,3 +47,16 @@ export const SayingItInWords: Story = {
     await expect(await screen.findByRole('tooltip')).toHaveTextContent('John Doe (Assignee, Busy)');
   },
 };
+
+/** **Flow:** the sentence is the avatar's name and is said once: the tooltip shows it but adds no description. */
+export const SaidOnce: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: { status: 'busy' },
+  play: async ({ canvasElement }) => {
+    const avatar = within(canvasElement).getByRole('img', { name: 'John Doe (Assignee, Busy)' });
+    await userEvent.hover(avatar);
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent('John Doe (Assignee, Busy)');
+    await expect(avatar).toHaveAccessibleDescription('');
+  },
+};

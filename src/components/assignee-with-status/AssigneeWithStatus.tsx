@@ -52,7 +52,15 @@ export const AssigneeWithStatus = React.forwardRef<HTMLSpanElement, AssigneeWith
         />
       </span>
     );
-    return tooltip ? <Tooltip content={sentence}>{body}</Tooltip> : body;
+    /* The sentence is already the avatar's name: the tooltip shows it, but does not describe the
+       avatar with it too, or a screen reader would hear it twice. */
+    return tooltip ? (
+      <Tooltip content={sentence} describe={false}>
+        {body}
+      </Tooltip>
+    ) : (
+      body
+    );
   },
 );
 AssigneeWithStatus.displayName = 'AssigneeWithStatus';

@@ -138,6 +138,12 @@ export interface TooltipProps
   defaultOpen?: boolean;
   /** Override the generated id of the bubble. Rarely needed. */
   tooltipId?: string;
+  /**
+   * Wire the trigger to the bubble with `aria-describedby`. Default `true`. Turn it off only when
+   * the trigger's own name already is the tooltip's words (an avatar named "John Doe (Assignee,
+   * Busy)" whose tooltip shows that sentence), so a screen reader does not hear them twice.
+   */
+  describe?: boolean;
 }
 
 export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
@@ -149,6 +155,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       openDelay = DEFAULT_OPEN_DELAY,
       defaultOpen = false,
       tooltipId,
+      describe = true,
       className,
       onMouseEnter,
       onMouseLeave,
@@ -287,7 +294,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const child = React.Children.only(children) as React.ReactElement<{
       'aria-describedby'?: string;
     }>;
-    const describedBy = [child.props['aria-describedby'], id].filter(Boolean).join(' ');
+    const describedBy = [child.props['aria-describedby'], describe && id].filter(Boolean).join(' ') || undefined;
 
     return (
       <span
