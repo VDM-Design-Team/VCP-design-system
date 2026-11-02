@@ -36,7 +36,7 @@ const meta = {
       parameters.layout === 'fullscreen' ? (
         <Story />
       ) : (
-        <div className="w-96">
+        <div className="w-80 sm:w-96">
           <Story />
         </div>
       ),
@@ -174,7 +174,7 @@ export const Disabled: Story = {
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: (args) => (
-    <div className="grid grid-cols-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex flex-col gap-4 bg-surface-canvas p-8">
