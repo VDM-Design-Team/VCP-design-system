@@ -5,6 +5,7 @@ import { IconButton } from '../../atoms/icon-button';
 import { DeliverableLink } from '../../components/deliverable-link';
 import { DeliverableLinkForm, type DeliverableLinkDraft } from '../../components/deliverable-link-form';
 import type { DomainKey } from '../../components/domain-label';
+import { AttachmentViewer } from '../../components/attachment-viewer';
 import { Dropzone, type DropzoneProps } from '../../components/dropzone';
 import { FileAttachment, type FileAttachmentKind } from '../../components/file-attachment';
 
@@ -40,8 +41,10 @@ export interface DeliverableFile {
   id: string;
   name: string;
   kind?: FileAttachmentKind;
-  /** An image's own thumbnail. */
+  /** An image's own thumbnail, for the card and the viewer's strip. */
   thumb?: string;
+  /** The file itself: what the viewer shows when its card is pressed. */
+  src?: string;
   /** The domain it was added from. */
   domain?: DomainKey;
 }
@@ -62,8 +65,8 @@ export interface DeliverablesCardProps extends Omit<React.HTMLAttributes<HTMLEle
   /** Edit: files chosen or dropped. */
   onFiles?: (files: File[]) => void;
   onRemoveFile?: (id: string) => void;
-  /** A file card was pressed: open its preview. */
-  onOpenFile?: (id: string) => void;
+  /** Renders the viewer's download button and fires with the open file's id. The page does the download. */
+  onDownloadFile?: (id: string) => void;
   /** The drop area's own message, for a rejected file. */
   fileError?: DropzoneProps['error'];
   /** The drop area's accepted-types line. */
@@ -86,7 +89,7 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
       onRemoveLink,
       onFiles,
       onRemoveFile,
-      onOpenFile,
+      onDownloadFile,
       fileError,
       fileHint,
       fileAccept,
@@ -96,6 +99,8 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
   ) => {
     const editing = mode === 'edit';
     const headingId = React.useId();
+    /* Which file the viewer has open, if any. A press on any file card opens it, in view or edit. */
+    const [viewing, setViewing] = React.useState<number | null>(null);
 
     return (
       <section
@@ -133,14 +138,14 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
             <h3 className="text-body-sm-medium text-text-primary">Attachments</h3>
             {files.length > 0 && (
               <ul className="flex flex-wrap gap-2.5">
-                {files.map((file) => (
+                {files.map((file, fileIndex) => (
                   <li key={file.id}>
                     <FileAttachment
                       name={file.name}
                       kind={file.kind}
                       thumb={file.thumb}
                       domain={file.domain}
-                      onClick={onOpenFile ? () => onOpenFile(file.id) : undefined}
+                      onClick={() => setViewing(fileIndex)}
                       onRemove={editing ? () => onRemoveFile?.(file.id) : undefined}
                     />
                   </li>
@@ -157,6 +162,22 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
               />
             )}
           </div>
+        )}
+        {files.length > 0 && (
+          <AttachmentViewer
+            open={viewing !== null}
+            index={viewing ?? 0}
+            onIndexChange={setViewing}
+            onClose={() => setViewing(null)}
+            onDownload={onDownloadFile ? (file) => onDownloadFile(file.id) : undefined}
+            files={files.map((f) => ({
+              id: f.id,
+              name: f.name,
+              kind: f.kind ?? 'doc',
+              src: f.src,
+              thumb: f.thumb,
+            }))}
+          />
         )}
       </section>
     );
@@ -190,7 +211,7 @@ function LinkSection({
       <div className="flex items-center gap-2">
         <h3 className="flex items-center gap-1 text-body-sm-medium text-text-primary">
           {title}
-          {titleIcon && <Icon name="film-reel" size="sm" aria-hidden="true" />}
+          {titleIcon && <Icon name="video-camera" size="sm" aria-hidden="true" />}
         </h3>
         {editing && (
           <IconButton

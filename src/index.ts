@@ -26,6 +26,7 @@ export * from './atoms/toggle';
 /* Components — units assembled from atoms (and other components). */
 export * from './components/accordion';
 export * from './components/attachment-preview';
+export * from './components/attachment-viewer';
 export * from './components/avatar-group';
 export * from './components/banner';
 export * from './components/breadcrumb';

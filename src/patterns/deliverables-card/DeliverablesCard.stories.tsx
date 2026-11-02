@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, screen, userEvent, within } from 'storybook/test';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 import { DeliverablesCard, type DeliverableFile, type DeliverableLinkItem } from './DeliverablesCard';
 
@@ -95,6 +95,23 @@ export const EditingDevelopment: Story = {
     await userEvent.type(canvas.getByRole('textbox', { name: 'Link title' }), 'Demo');
     await userEvent.click(canvas.getByRole('button', { name: 'Add' }));
     await expect(args.onAddLinks).toHaveBeenCalledWith('video', [{ url: 'https://video.example.com', title: 'Demo' }]);
+  },
+};
+
+/** A press on a file card opens the viewer, in view or edit: the open file's name, "1 of 2", download and close. */
+export const OpensTheViewer: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { onDownloadFile: fn() },
+  play: async ({ canvasElement, args }) => {
+    /* The card names itself through its caption, whose full text is its title. */
+    await userEvent.click(within(canvasElement).getByTitle('image.png'));
+    const view = within(await screen.findByRole('dialog'));
+    await expect(view.getByRole('heading', { name: 'image.png' })).toBeVisible();
+    await expect(view.getByText('2 of 2')).toBeVisible();
+    /* These files have no `src`, so the stage also offers the download: take the header's. */
+    await userEvent.click(view.getAllByRole('button', { name: 'Download image.png' })[0]!);
+    await expect(args.onDownloadFile).toHaveBeenCalledWith('f2');
   },
 };
 
