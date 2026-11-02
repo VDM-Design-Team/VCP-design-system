@@ -151,12 +151,16 @@ export const KeepsWhatIsTypedWhileSending: Story = {
     box.focus();
     window.getSelection()?.selectAllChildren(box);
     window.getSelection()?.collapseToEnd();
-    for (const char of ' and a second') {
+    for (const char of ' and a') {
       document.execCommand('insertText', false, char);
       await new Promise((resolve) => setTimeout(resolve, 0));
     }
 
+    /* The send settles, and the next keys land at once, before the box has been redrawn: they must
+       not bring the sent words back. */
     finishSend();
+    for (let tick = 0; tick < 5; tick++) await Promise.resolve();
+    for (const char of ' second') document.execCommand('insertText', false, char);
     await waitFor(() => expect(box).toHaveTextContent(/^and a second$/));
   },
 };

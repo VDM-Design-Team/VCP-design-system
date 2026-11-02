@@ -120,13 +120,15 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
       };
     }, []);
 
-    /* What the box holds right now, for a send that settles after more was typed. */
-    const latest = React.useRef(current);
-    latest.current = current;
+    /* A send that has settled while the field may still show its words. Until the field is redrawn,
+       a keystroke reads those words back from it, so `change` takes them off as well. */
+    const settled = React.useRef<readonly MentionSegment[] | null>(null);
     /* After a send clears the box down to what was typed meanwhile, the caret goes back to its end. */
     const field = React.useRef<HTMLDivElement>(null);
     const caretToEnd = React.useRef(false);
     React.useLayoutEffect(() => {
+      /* The field has been redrawn from `inner` (its own layout effect runs first): the sent words are gone. */
+      settled.current = null;
       const box = field.current;
       if (!caretToEnd.current || !box) return;
       caretToEnd.current = false;
@@ -139,8 +141,12 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
     }, [inner]);
 
     const change = (next: MentionSegment[]) => {
-      if (!controlled) setInner(next);
-      onChange?.(next);
+      const rest = settled.current ? afterSent(next, settled.current) : null;
+      if (rest) caretToEnd.current = rest.length > 0;
+      else settled.current = null;
+      const value = rest ?? next;
+      if (!controlled) setInner(value);
+      onChange?.(value);
     };
 
     const submit = async () => {
@@ -155,11 +161,12 @@ export const CommentComposer = React.forwardRef<HTMLDivElement, CommentComposerP
         /* Clear what was sent, and only that: words typed while it was sending stay. If the sent
            words were changed meanwhile, nothing is taken, and the box is left as the person has it. */
         if (mounted.current && !controlled) {
-          const rest = afterSent(latest.current, sent);
-          if (rest !== null) {
-            caretToEnd.current = rest.length > 0;
-            setInner(rest);
-          }
+          settled.current = sent;
+          setInner((now) => {
+            const rest = afterSent(now, sent);
+            caretToEnd.current = !!rest?.length;
+            return rest ?? now;
+          });
         }
       } catch {
         /* Rejected: the text stays, and reporting the error is the caller's. */
