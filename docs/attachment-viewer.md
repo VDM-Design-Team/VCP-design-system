@@ -53,7 +53,7 @@ It is `Modal` at its `full` size (the whole viewport, no corners or shadow). Ins
 the page is (`.dark`), with `surface.canvas`, a `stroke.subtle` rule under the header and over the strip, `text.primary`
 and `text.tertiary` for the name and the count. The arrows are `IconButton` `neutral`; the strip's thumbnails are 56 square
 on `surface.neutral.subtle`, the open one with a `stroke.focused` outline; the zoom group is a `surface.neutral.subtle` pill
-of three `IconButton`s and the percentage. No new tokens.
+of three 40 `IconButton`s and the percentage. No new tokens.
 
 ## Accessibility
 
@@ -64,6 +64,7 @@ of three `IconButton`s and the percentage. No new tokens.
 - The percentage is `aria-live="polite"`, so a zoom is read out. The strip's thumbnails are buttons named "{name}, 2 of 4"
   with `aria-current` on the open one.
 - **Contrast holds on the dark surface**, and a story measures it. Text: the name 17.9:1, the count 12:1, the percentage 10.4:1. Glyphs: download and close 12:1, the arrow 12:1, zoom 7:1 at rest (8.4:1 hovered on its fill, 6.9:1 pressed on its fill), a document thumbnail 7:1. Marks: the arrows' edge 3.75:1, the open thumbnail's outline 7.7:1. Disabled controls (the first file's previous arrow, the reset at 100%) are exempt. Every colour is a semantic token.
+- **Every control is at least 40 to press**: download, close, the arrows and the zoom buttons are 40, the thumbnails 56, and the "Download" link on a file with no preview has a 40 tall target.
 - Everything is reachable by keyboard; the arrow keys and `+ - 0` are shortcuts, not the only way.
 
 ## Don't

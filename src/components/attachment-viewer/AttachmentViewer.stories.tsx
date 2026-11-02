@@ -102,6 +102,22 @@ export const NoPreview: Story = {
   },
 };
 
+/** Every control is at least 40 to press (WCAG 2.5.8 and our touch rule). */
+export const TargetsAre40: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async () => {
+    const dialog = await screen.findByRole('dialog');
+    for (const button of within(dialog).getAllByRole('button')) {
+      const box = button.getBoundingClientRect();
+      await expect({ name: button.getAttribute('aria-label'), ok: box.width >= 40 && box.height >= 40 }).toEqual({
+        name: button.getAttribute('aria-label'),
+        ok: true,
+      });
+    }
+  },
+};
+
 /** Opened from a button: closing returns focus to it (Modal's contract). */
 export const OpenedFromAButton: Story = {
   tags: ['!dev', '!autodocs'],

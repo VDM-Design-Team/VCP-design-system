@@ -243,7 +243,7 @@ export function AttachmentViewer({
               <IconButton
                 icon="minus"
                 variant="tertiary"
-                size="sm"
+                size="md"
                 label="Zoom out"
                 disabled={zoom <= ZOOM_MIN}
                 onClick={() => zoomBy(-ZOOM_STEP)}
@@ -252,7 +252,7 @@ export function AttachmentViewer({
               <IconButton
                 icon="arrows-clockwise"
                 variant="tertiary"
-                size="sm"
+                size="md"
                 label="Reset zoom"
                 disabled={zoom === ZOOM_DEFAULT}
                 onClick={() => setZoom(ZOOM_DEFAULT)}
@@ -261,7 +261,7 @@ export function AttachmentViewer({
               <IconButton
                 icon="plus"
                 variant="tertiary"
-                size="sm"
+                size="md"
                 label="Zoom in"
                 disabled={zoom >= ZOOM_MAX}
                 onClick={() => zoomBy(ZOOM_STEP)}
@@ -298,7 +298,7 @@ function NoPreview({
           <button
             type="button"
             onClick={() => onDownload(file)}
-            className="text-body-sm-medium text-text-link-default underline-offset-2 hover:underline"
+            className="inline-flex min-h-10 items-center rounded-sm px-3 text-body-sm-medium text-text-link-default underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
           >
             Download {file.name}
           </button>
