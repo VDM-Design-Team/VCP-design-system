@@ -25,7 +25,8 @@ Rules of thumb:
 The box and tick with no input behind it, for a row that is itself the control — the
 options in a `multiple` `SearchSelect`, where the row is an `option` named by
 `aria-selected` and an `<input>` inside one would be invalid. Same box, tokens and tick as
-`Checkbox`, so the two never drift. Props: `checked`, `disabled`, `size` (`sm` 16, `md` 20),
+`Checkbox`; the `Mark` story's test compares the two in every state and both themes, so a
+change to one that misses the other fails `npm test`. Props: `checked`, `disabled`, `size` (`sm` 16, `md` 20),
 `className`. It is `aria-hidden`, takes no focus and has no hover or pressed states: the row
 owns those. For a form, use `Checkbox`.
 

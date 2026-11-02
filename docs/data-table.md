@@ -9,7 +9,7 @@ empty slot. A real `<table>`, not a div grid.
 |---|---|
 | `Checkbox` | atom |
 | `Icon` | atom |
-| `Tooltip` | component |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

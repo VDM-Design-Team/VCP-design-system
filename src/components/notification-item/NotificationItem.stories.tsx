@@ -1,8 +1,17 @@
+/* Types `cdp().send` for the pointer below; `vitest.shims.d.ts`, which carries it too,
+   is outside the tsconfig. */
+/// <reference types="@vitest/browser-playwright" />
 import * as React from 'react';
 import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Button } from '../../atoms/button';
 import { NotificationItem, type NotificationKind } from './NotificationItem';
+import { AV_STATUSES } from '../status-tag';
+
+/* What `moved` can move to: the ten spine statuses every domain shares, then each domain's own steps
+   (Design has one, Development five). The domain steps are the domain's data, not the system's, so
+   these are the ones the library draws; `status` takes any label a domain defines. */
+const DOMAIN_STEPS = ['Design Review', 'For review', 'For QA', 'In QA', 'Ready for deploy', 'Confirmed prod'];
 
 const SUBJECT = 'Change the notification layout for testing';
 
@@ -15,11 +24,16 @@ const LONG_COMMENT =
 /* Typed, so Storybook does not read the story args off the decorator: the props are
    a union (`moved` needs `status`), and an untyped decorator collapses every story's
    args to `never`. */
-const column: Decorator = (Story) => (
-  <div className="w-96">
+/* A story's own `decorators` add to this one rather than replace it, so a full-screen story
+   (Light and dark, the contrast check) opts out here instead. */
+const column: Decorator = (Story, { parameters }) =>
+  parameters.layout === 'fullscreen' ? (
     <Story />
-  </div>
-);
+  ) : (
+    <div className="w-96">
+      <Story />
+    </div>
+  );
 
 const meta = {
   title: 'Components/Feedback/NotificationItem',
@@ -32,7 +46,7 @@ const meta = {
           'One line in a list of notifications: who did what to which Added Value, when, and whether ' +
           'it has been read. The eleven kinds of event come from Figma\'s `_Message_Content`, and the ' +
           'component owns the sentence, so the bold and regular runs are the same everywhere. The whole ' +
-          'row is the target (`href` or `onSelect`), the comment preview included; the unread dot makes ' +
+          'row is the target (`href` or `onSelect`), except the comment preview, which does not open it; the unread dot makes ' +
           'way for the mark-read button on hover and on that button\'s focus. Put items in a list.',
       },
     },
@@ -53,6 +67,7 @@ const meta = {
         'commented',
         'mention',
         'moved',
+        'pending',
         'accepted',
         'updated',
         'rejected',
@@ -60,8 +75,14 @@ const meta = {
         'assigned',
         'backlog',
         'handoff',
+        'completed',
         'viewer',
       ] satisfies NotificationKind[],
+    },
+    status: {
+      control: 'select',
+      options: [...AV_STATUSES, ...DOMAIN_STEPS],
+      description: 'For `moved` only: the status it moved to. Any label a domain defines works.',
     },
     unread: { control: 'boolean' },
     onToggleRead: { control: false },
@@ -104,25 +125,47 @@ const hitAt = (el: Element) => {
   return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) as HTMLElement;
 };
 /* `userEvent.hover` fires the events but cannot make CSS `:hover` match, and the dot
-   is driven by `:hover`. Under `npm test` (Vitest's browser mode) Playwright moves a
-   real pointer; in the Storybook UI there is none, so the hover checks skip there. */
+   is driven by `:hover`. Under `npm test` (Vitest's browser mode) the browser's own
+   pointer moves, through the DevTools protocol; in the Storybook UI there is none, so
+   the hover checks skip there.
+   A move is one `Input.dispatchMouseEvent`, not Playwright's `hover()`: that one first
+   waits for its target to be visible, stable and unobstructed, a dozen and more round
+   trips between Vitest and the page, and in a full `npm test`, several pages at
+   once, they ate the test's whole 15s. So the move does not wait for anything, and the
+   stories check where it landed (`:hover`) in the page instead. */
 const realPointer = async () => {
+  let cdp: typeof import('vitest/browser').cdp;
   try {
-    return (await import('vitest/browser')).userEvent;
+    ({ cdp } = await import('vitest/browser'));
   } catch {
     return null;
   }
+  /* The protocol takes the whole page's coordinates, and the story is in Vitest's
+     iframe, scaled to fit: carry the point out through each frame. */
+  const moveTo = (x: number, y: number) => {
+    for (let w: Window = window; w.frameElement; w = w.parent) {
+      const frame = w.frameElement.getBoundingClientRect();
+      const scale = frame.width / w.innerWidth;
+      x = frame.left + x * scale;
+      y = frame.top + y * scale;
+    }
+    return cdp().send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+  };
+  return {
+    /* Onto the middle of an element. */
+    hover: (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return moveTo(r.left + r.width / 2, r.top + r.height / 2);
+    },
+    /* The real pointer stays wherever the last test left it, which can be over this
+       story's row: then the row is already hovered and the dot already gone before the
+       test starts. Park it in the screen's bottom-right corner. Not the top-left: under
+       Vitest the story is not centred, so the row starts there, and its stretched
+       target covers the corner. */
+    park: () => moveTo(window.innerWidth - 1, window.innerHeight - 1),
+  };
 };
-/* The real pointer stays wherever the last test left it, which can be over this story's
-   row: then the row is already hovered and the dot already gone before the test starts.
-   Park it on a spot in the screen's corner first. */
-const parkPointer = async (pointer: NonNullable<Awaited<ReturnType<typeof realPointer>>>) => {
-  const spot = document.createElement('div');
-  spot.className = 'fixed right-0 bottom-0 size-1';
-  document.body.append(spot);
-  await pointer.hover(spot);
-  spot.remove();
-};
+const isHovered = (el: Element) => el.matches(':hover');
 
 /** Unread, a link, with the mark-read button waiting for hover or focus. */
 export const Unread: Story = {
@@ -130,10 +173,10 @@ export const Unread: Story = {
     const canvas = within(canvasElement);
     /* The row is named from its message, and says it is unread. */
     const row = canvas.getByRole('link', {
-      name: 'Unread: John Kestrel commented on Change the notification layout for testing a few seconds ago',
+      name: 'Unread: John Kestrel commented on Change the notification layout for testing. a few seconds ago',
     });
     await expect(row).toHaveAttribute('href', '#av-1');
-    const mark = canvas.getByRole('button', { name: 'Mark as read' });
+    const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     await userEvent.click(mark);
     await expect(args.onToggleRead).toHaveBeenCalledTimes(1);
   },
@@ -142,7 +185,7 @@ export const Unread: Story = {
 /** The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. */
 export const MarkReadTooltip: Story = {
   play: async ({ canvasElement }) => {
-    const mark = within(canvasElement).getByRole('button', { name: 'Mark as read' });
+    const mark = within(canvasElement).getByRole('button', { name: /^Mark as read/ });
     await described(mark);
     await expect(isOpen(mark)).toBe(false);
     /* Tab to the row, then to the button: focus opens it at once. */
@@ -167,10 +210,10 @@ export const Read: Story = {
   args: { unread: false, kind: 'accepted', time: '8 hours ago' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('link', { name: /^John Kestrel accepts/ })).toBeVisible();
+    await expect(canvas.getByRole('link', { name: /^John Kestrel accepted/ })).toBeVisible();
     /* Read: empty on the right at rest. The mark-unread button is there for the
        keyboard, but invisible until the row is hovered or focused. */
-    const mark = canvas.getByRole('button', { name: 'Mark as unread' });
+    const mark = canvas.getByRole('button', { name: /^Mark as unread/ });
     await expect(mark).toBeInTheDocument();
     await expect(getComputedStyle(mark).opacity).toBe('0');
     /* Tab to the row, then to the button: focus brings it in. */
@@ -184,19 +227,20 @@ export const Read: Story = {
 
 /** Every kind of event, with the sentence the design draws for it. */
 export const Kinds: Story = {
-  decorators: [],
   render: (args) => {
     const rows: { kind: NotificationKind; status?: string; time: string; expect: RegExp }[] = [
       { kind: 'commented', time: 'a few seconds ago', expect: /commented on/ },
       { kind: 'mention', time: 'a few seconds ago', expect: /mentioned you in a comment on/ },
       { kind: 'moved', status: 'Confirmed prod', time: '5 minutes ago', expect: /moved .* to Confirmed prod/ },
-      { kind: 'accepted', time: '8 hours ago', expect: /accepts/ },
+      { kind: 'pending', time: '3 hours ago', expect: /submitted .* for approval\. Pending/ },
+      { kind: 'accepted', time: '8 hours ago', expect: /accepted/ },
       { kind: 'updated', time: '38 minutes ago', expect: /made an update to/ },
       { kind: 'rejected', time: '38 minutes ago', expect: /rejected/ },
       { kind: 'rejected-feedback', time: '2 hours ago', expect: /rejected .* with feedback/ },
       { kind: 'assigned', time: '3 hours ago', expect: /assigned you/ },
       { kind: 'backlog', time: '3 hours ago', expect: /moved .* to the backlog/ },
-      { kind: 'handoff', time: '3 hours ago', expect: /completes .*\. Ready for review/ },
+      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review/ },
+      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
@@ -211,9 +255,10 @@ export const Kinds: Story = {
   },
   play: async ({ canvasElement }) => {
     const links = within(canvasElement).getAllByRole('link');
-    await expect(links).toHaveLength(11);
-    await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod');
-    await expect(links[9]).toHaveTextContent(/completes .*testing\. Ready for review/);
+    await expect(links).toHaveLength(13);
+    await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod.');
+    await expect(links[10]).toHaveTextContent(/handed off .*testing\. Ready for Review\./);
+    await expect(links[11]).toHaveTextContent(/accepted & completed .*testing\./);
   },
 };
 
@@ -236,9 +281,9 @@ export const Static: Story = {
     await expect(canvas.queryByRole('link')).toBeNull();
     await expect(canvas.queryByRole('button')).toBeNull();
     /* The sentence is a plain paragraph, with no "Unread:" on a read row. */
-    const message = canvas.getByText(SUBJECT).closest('p') as HTMLElement;
+    const message = canvas.getByText(`${SUBJECT}.`).closest('p') as HTMLElement;
     await expect(message).toHaveTextContent(
-      /^John Kestrel commented on Change the notification layout for testing a few seconds ago$/,
+      /^John Kestrel commented on Change the notification layout for testing. a few seconds ago$/,
     );
     /* Read with nothing to press: nothing on the right at all, the box is empty. */
     await expect(message.nextElementSibling).toBeEmptyDOMElement();
@@ -258,7 +303,7 @@ export const MovedWithoutStatus: Story = {
     void (() => <NotificationItem kind="moved" actor={{ name: 'J' }} subject="S" time="now" />);
     const row = within(canvasElement).getByRole('link');
     await expect(row).toHaveAccessibleName(
-      'John Kestrel moved Change the notification layout for testing a few seconds ago',
+      'John Kestrel moved Change the notification layout for testing. a few seconds ago',
     );
     await expect(row).not.toHaveTextContent(/\[Status\]| to /);
   },
@@ -272,8 +317,8 @@ export const WithCommentPreview: Story = {
   args: { preview: LONG_COMMENT },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    /* The comment is part of the row: the pointer lands on the row's link there. */
-    await expect(hitAt(canvas.getByText(/^Lorem ipsum/))).toBe(canvas.getByRole('link'));
+    /* The comment is not part of the row's target: the pointer lands on the comment, not the link. */
+    await expect(hitAt(canvas.getByText(/^Lorem ipsum/))).not.toBe(canvas.getByRole('link'));
     const more = await canvas.findByRole('button', { name: 'Show more' });
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(more);
@@ -281,6 +326,20 @@ export const WithCommentPreview: Story = {
     await expect(less).toHaveAttribute('aria-expanded', 'true');
     await userEvent.click(less);
     await expect(await canvas.findByRole('button', { name: 'Show more' })).toBeVisible();
+    /* Its focus ring shows whole: the card clips anything outside it, so the ring must sit
+       inside the card on every side (it used to show only its left and right). */
+    const shown = canvas.getByRole('button', { name: 'Show more' });
+    shown.focus();
+    const style = getComputedStyle(shown);
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth);
+    const ring = shown.getBoundingClientRect();
+    let clip = shown.parentElement!;
+    while (getComputedStyle(clip).overflow !== 'hidden') clip = clip.parentElement!;
+    const card = clip.getBoundingClientRect();
+    await expect(ring.top - reach).toBeGreaterThanOrEqual(card.top);
+    await expect(ring.bottom + reach).toBeLessThanOrEqual(card.bottom);
+    await expect(ring.left - reach).toBeGreaterThanOrEqual(card.left);
+    await expect(ring.right + reach).toBeLessThanOrEqual(card.right);
   },
 };
 
@@ -295,10 +354,10 @@ export const ShortCommentPreview: Story = {
 const onReply = fn().mockName('onReply');
 
 /**
- * A click on the comment opens the item, like anywhere else on the row. "Show more"
- * and the caller's `previewActions` keep the pointer and their place in the tab order.
+ * A click on the comment does **not** open the item: the comment is content to read and select. The
+ * row around it still opens, and "Show more" and the caller's `previewActions` respond as controls.
  */
-export const CommentOpensTheItem: Story = {
+export const CommentDoesNotOpenTheItem: Story = {
   args: {
     href: undefined,
     onSelect: fn(),
@@ -315,12 +374,12 @@ export const CommentOpensTheItem: Story = {
     onReply.mockClear();
     const canvas = within(canvasElement);
     const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
-    /* The comment's text: the pointer lands on the row, and the click opens it. */
+    /* The comment's text: the pointer lands on the comment, and the click does nothing to the row. */
     const comment = canvas.getByText(/^Lorem ipsum/);
-    await expect(hitAt(comment)).toBe(row);
+    await expect(hitAt(comment)).not.toBe(row);
     await userEvent.click(hitAt(comment));
-    await expect(args.onSelect).toHaveBeenCalledTimes(1);
-    /* "Show more" and "Reply" take the pointer back, and do not open the row. */
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    /* "Show more" and "Reply" are controls of their own, and do not open the row either. */
     const more = canvas.getByRole('button', { name: 'Show more' });
     await expect(more.contains(hitAt(more))).toBe(true);
     await userEvent.click(more);
@@ -330,10 +389,13 @@ export const CommentOpensTheItem: Story = {
     await expect(reply.contains(hitAt(reply))).toBe(true);
     await userEvent.click(reply);
     await expect(onReply).toHaveBeenCalledTimes(1);
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    /* The row outside the comment still opens the item. */
+    await userEvent.click(row);
     await expect(args.onSelect).toHaveBeenCalledTimes(1);
     /* And the keyboard reaches each in turn: row, mark-read, Show less, Reply. */
     (document.activeElement as HTMLElement | null)?.blur();
-    for (const control of [row, canvas.getByRole('button', { name: 'Mark as read' }), less, reply]) {
+    for (const control of [row, canvas.getByRole('button', { name: /^Mark as read/ }), less, reply]) {
       await userEvent.tab();
       await expect(control).toHaveFocus();
     }
@@ -351,9 +413,12 @@ export const DotMakesWayForMarkRead: Story = {
     const canvas = within(canvasElement);
     const dot = dotIn(canvasElement)!;
     const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
-    const mark = canvas.getByRole('button', { name: 'Mark as read' });
+    const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     const pointer = await realPointer();
-    if (pointer) await parkPointer(pointer);
+    if (pointer) {
+      await pointer.park();
+      await waitFor(() => expect(isHovered(row)).toBe(false));
+    }
     await expect(await opacityOf(dot)).toBe('1');
     /* The row's own focus: the dot stays, and the button stays hidden. */
     await userEvent.tab();
@@ -372,9 +437,10 @@ export const DotMakesWayForMarkRead: Story = {
     /* Hover: the dot makes way for the button. */
     if (pointer) {
       await pointer.hover(row);
+      await waitFor(() => expect(isHovered(row)).toBe(true));
       await expect(await opacityOf(dot)).toBe('0');
       await expect(await opacityOf(mark)).toBe('1');
-      await pointer.unhover(row, { position: { x: 0, y: 0 } });
+      await pointer.park();
     }
   },
 };
@@ -388,14 +454,18 @@ export const DotStaysWithoutMarkRead: Story = {
     const row = canvas.getByRole('link', { name: /^Unread: John Kestrel commented on/ });
     await expect(canvas.queryByRole('button')).toBeNull();
     const pointer = await realPointer();
-    if (pointer) await parkPointer(pointer);
+    if (pointer) {
+      await pointer.park();
+      await waitFor(() => expect(isHovered(row)).toBe(false));
+    }
     await userEvent.tab();
     await expect(row).toHaveFocus();
     await expect(await opacityOf(dot)).toBe('1');
     if (pointer) {
       await pointer.hover(row);
+      await waitFor(() => expect(isHovered(row)).toBe(true));
       await expect(await opacityOf(dot)).toBe('1');
-      await pointer.unhover(row, { position: { x: 0, y: 0 } });
+      await pointer.park();
     }
   },
 };
@@ -422,7 +492,6 @@ const contrast = (a: number[], b: number[]) => {
  */
 export const MarkersClear3to1: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
     <div>
       {[false, true].map((isDark) => (
@@ -464,13 +533,13 @@ export const MarkersClear3to1: Story = {
 /** Both themes. Every colour is a semantic token, so dark comes for free. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
-    <div className="grid grid-cols-2">
+    /* Side by side once each half has room for its 384 column, stacked below that. */
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
-            <div className="w-96">
+          <div className="flex h-full w-full flex-col items-center bg-surface-canvas p-8">
+            <div className="w-full max-w-96">
             <NotificationItem {...args} />
             <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
             <NotificationItem {...args} preview={LONG_COMMENT} />
@@ -480,4 +549,16 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/** A subject that ends in its own punctuation gets no second full stop ("Is this ready?", not "ready?."). */
+export const SubjectEndsInPunctuation: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { subject: 'Is this ready?' },
+  play: async ({ canvasElement }) => {
+    const text = canvasElement.textContent ?? '';
+    await expect(text).toContain('Is this ready?');
+    await expect(text).not.toContain('ready?.');
+  },
 };

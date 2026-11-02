@@ -75,6 +75,20 @@ the same export are unambiguously Phosphor (`ArrowUUpLeft`, `CheckFat`,
 weight prop defaulting to `"regular"`, which is Phosphor's weight system. Take icon
 names from the raw imports, not from that component.
 
+## One glyph for "edit": `note-pencil`
+
+Use **`note-pencil`** (a pen over a square) wherever something means *edit this*: an inline edit
+button, a row's edit action, a menu item, a comment's Edit. It is what Figma draws for Edit across
+the library, and what `Chip`, `InlineEdit`, `DetailRow`, `CommentActions` and `DeliverableLink` use.
+
+**Why one.** The same action drawn two ways makes people wonder whether the two controls do
+different things. The pen over a square also reads as "edit" at 16 and 20 px, where a bare pen
+can be taken for drawing or annotating.
+
+`pencil-simple` stays in the set — an exception can be made for a good reason, such as a control
+that really does mean "draw" or "annotate", or a design that specifies it. Say why in the code
+comment or the PR, so the next person doesn't take it for a slip.
+
 ## Why the set is trimmed
 
 Phosphor ships 1,512 glyphs per weight. A `name`-driven API needs a dynamic lookup
