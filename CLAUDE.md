@@ -54,7 +54,7 @@ internally as decoration (icons are sub-atomic); it never composes another
 piece of the system.
 
 **`src/components/` — components.** One unit assembled *from* atoms (and
-other components): `IconButton`'s wrapping cousins like `Field`, `Chip`,
+other components): `IconButton`'s wrapping cousins like `Field`, `SearchSelect`,
 `Menu`, `DataTable`, `StatusTag` (a `Badge` plus the status mapping). However
 rich inside, if it presents as one control or one display unit, it is a
 component — `DataTable` and `DatePicker` are components, not patterns.
