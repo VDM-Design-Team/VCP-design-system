@@ -1,22 +1,15 @@
+/* Types `cdp().send` for the pointer below; `vitest.shims.d.ts`, which carries it too,
+   is outside the tsconfig. */
+/// <reference types="@vitest/browser-playwright" />
 import * as React from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import {
-  NotificationItem,
-  type NotificationItemBaseProps,
-  type NotificationKind,
-  type NotificationReply,
-} from './NotificationItem';
+import { Button } from '../../atoms/button';
+import { NotificationItem, type NotificationKind, type NotificationReply } from './NotificationItem';
 import { typeText } from '../../lib/story-typing';
 import type { EmojiReaction } from '../emoji-reaction-picker';
 import type { MentionSegment } from '../../atoms/mention-input';
 import { AV_STATUSES } from '../status-tag';
-
-/* The component's props are a union (`moved` requires `status`), which Storybook's `args` typing
-   cannot hold, so the stories take the loose shape. The requirement itself is the component's. */
-const Item = NotificationItem as unknown as React.ComponentType<
-  NotificationItemBaseProps & { kind: NotificationKind; status?: string }
->;
 
 /* What `moved` can move to: the ten spine statuses every domain shares, then each domain's own steps
    (Design has one, Development five). The domain steps are the domain's data, not the system's, so
@@ -31,19 +24,28 @@ const LONG_COMMENT =
   'arcu, tempor id suscipit nec, posuere et enim. Aliquam nunc nulla, consectetur congue sem a, tempor ' +
   'feugiat purus. Ut id arcu vel odio mollis malesuada at vitae sem.';
 
+/* Typed, so Storybook does not read the story args off the decorator: the props are
+   a union (`moved` needs `status`), and an untyped decorator collapses every story's
+   args to `never`. */
+const column: Decorator = (Story) => (
+  <div className="w-96">
+    <Story />
+  </div>
+);
+
 const meta = {
   title: 'Components/Feedback/NotificationItem',
-  component: Item,
+  component: NotificationItem,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
         component:
           'One line in a list of notifications: who did what to which Added Value, when, and whether ' +
-          'it has been read. The thirteen kinds of event come from Figma\'s `_Message_Content`, and the ' +
+          'it has been read. The eleven kinds of event come from Figma\'s `_Message_Content`, and the ' +
           'component owns the sentence, so the bold and regular runs are the same everywhere. The whole ' +
-          'row is the target (`href` or `onSelect`); the unread dot makes way for the mark-read button ' +
-          'on hover and focus. Put items in a list.',
+          'row is the target (`href` or `onSelect`), except the comment preview, which does not open it; the unread dot makes ' +
+          'way for the mark-read button on hover and on that button\'s focus. Put items in a list.',
       },
     },
   },
@@ -51,7 +53,6 @@ const meta = {
     kind: 'commented',
     actor: { name: 'John Kestrel' },
     subject: SUBJECT,
-    status: 'Confirmed prod',
     time: 'a few seconds ago',
     unread: true,
     href: '#av-1',
@@ -85,17 +86,84 @@ const meta = {
     onToggleRead: { control: false },
     onSelect: { control: false },
   },
-  decorators: [
-    (Story) => (
-      <div className="w-128">
-        <Story />
-      </div>
-    ),
-  ],
-} satisfies Meta<typeof Item>;
+  decorators: [column],
+} satisfies Meta<typeof NotificationItem>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/* The tooltip a trigger is described by, and whether it is open, as in
+   `Tooltip.stories`. The bubble is in a portal on `document.body`, and closed is
+   `opacity-0`, not `hidden`, so it is in the DOM either way: finding it proves
+   nothing, its positioner's open class does. */
+const bubbleOf = (trigger: HTMLElement) => {
+  const ids = (trigger.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
+  const bubble = document.getElementById(ids[ids.length - 1] ?? '');
+  if (!bubble) throw new Error('The trigger is not described by a tooltip');
+  return bubble;
+};
+const described = (trigger: HTMLElement) => waitFor(() => bubbleOf(trigger));
+const isOpen = (trigger: HTMLElement) => bubbleOf(trigger).parentElement?.classList.contains('opacity-100');
+
+/* The unread dot (the avatar is `rounded-pill`, so this is the only round span). */
+const dotIn = (root: HTMLElement) => root.querySelector<HTMLElement>('span.rounded-full');
+/* Wait out the 200ms dissolve, then read where it landed. `getAnimations()` brings
+   the style up to date first, so a transition that has just been triggered counts. */
+const opacityOf = async (el: HTMLElement) => {
+  for (let i = 0; i < 5; i++) {
+    const running = el.getAnimations();
+    if (!running.length) break;
+    await Promise.allSettled(running.map((a) => a.finished));
+  }
+  return getComputedStyle(el).opacity;
+};
+/* What the pointer lands on at the middle of an element: the real hit test. */
+const hitAt = (el: Element) => {
+  const r = el.getBoundingClientRect();
+  return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) as HTMLElement;
+};
+/* `userEvent.hover` fires the events but cannot make CSS `:hover` match, and the dot
+   is driven by `:hover`. Under `npm test` (Vitest's browser mode) the browser's own
+   pointer moves, through the DevTools protocol; in the Storybook UI there is none, so
+   the hover checks skip there.
+   A move is one `Input.dispatchMouseEvent`, not Playwright's `hover()`: that one first
+   waits for its target to be visible, stable and unobstructed, a dozen and more round
+   trips between Vitest and the page, and in a full `npm test`, several pages at
+   once, they ate the test's whole 15s. So the move does not wait for anything, and the
+   stories check where it landed (`:hover`) in the page instead. */
+const realPointer = async () => {
+  let cdp: typeof import('vitest/browser').cdp;
+  try {
+    ({ cdp } = await import('vitest/browser'));
+  } catch {
+    return null;
+  }
+  /* The protocol takes the whole page's coordinates, and the story is in Vitest's
+     iframe, scaled to fit: carry the point out through each frame. */
+  const moveTo = (x: number, y: number) => {
+    for (let w: Window = window; w.frameElement; w = w.parent) {
+      const frame = w.frameElement.getBoundingClientRect();
+      const scale = frame.width / w.innerWidth;
+      x = frame.left + x * scale;
+      y = frame.top + y * scale;
+    }
+    return cdp().send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
+  };
+  return {
+    /* Onto the middle of an element. */
+    hover: (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return moveTo(r.left + r.width / 2, r.top + r.height / 2);
+    },
+    /* The real pointer stays wherever the last test left it, which can be over this
+       story's row: then the row is already hovered and the dot already gone before the
+       test starts. Park it in the screen's bottom-right corner. Not the top-left: under
+       Vitest the story is not centred, so the row starts there, and its stretched
+       target covers the corner. */
+    park: () => moveTo(window.innerWidth - 1, window.innerHeight - 1),
+  };
+};
+const isHovered = (el: Element) => el.matches(':hover');
 
 /** Unread, a link, with the mark-read button waiting for hover or focus. */
 export const Unread: Story = {
@@ -109,29 +177,29 @@ export const Unread: Story = {
     const mark = canvas.getByRole('button', { name: /^Mark as read/ });
     await userEvent.click(mark);
     await expect(args.onToggleRead).toHaveBeenCalledTimes(1);
-    /* An unread row draws its dot. */
-    await expect(canvasElement.querySelector('[data-unread-dot]')).not.toBeNull();
   },
 };
 
-/**
- * The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. The bubble
- * is always in the DOM (closed is `opacity-0`, so `aria-describedby` never dangles), so the test
- * reads whether its positioner is open, not whether the bubble exists.
- */
+/** The mark-read button names itself in a tooltip: after a pause on hover, at once on focus. */
 export const MarkReadTooltip: Story = {
   play: async ({ canvasElement }) => {
     const mark = within(canvasElement).getByRole('button', { name: /^Mark as read/ });
-    const bubble = () => document.getElementById(mark.getAttribute('aria-describedby')!)!;
-    const open = () => bubble().parentElement!.classList.contains('opacity-100');
-    await expect(open()).toBe(false);
+    await described(mark);
+    await expect(isOpen(mark)).toBe(false);
+    /* Tab to the row, then to the button: focus opens it at once. */
     await userEvent.tab();
     await userEvent.tab();
     await expect(mark).toHaveFocus();
-    await waitFor(() => expect(open()).toBe(true));
-    await expect(bubble()).toHaveTextContent('Mark as read');
-    await userEvent.keyboard('{Escape}');
-    await waitFor(() => expect(open()).toBe(false));
+    await waitFor(() => expect(isOpen(mark)).toBe(true), { timeout: 100 });
+    await expect(bubbleOf(mark)).toHaveTextContent('Mark as read');
+    /* Focus leaves: it closes. A hover opens it again, after the half-second rest. */
+    await userEvent.tab();
+    await waitFor(() => expect(isOpen(mark)).toBe(false));
+    await userEvent.hover(mark);
+    await expect(isOpen(mark)).toBe(false);
+    await waitFor(() => expect(isOpen(mark)).toBe(true), { timeout: 1500 });
+    await userEvent.unhover(mark);
+    await waitFor(() => expect(isOpen(mark)).toBe(false));
   },
 };
 
@@ -170,15 +238,15 @@ export const Kinds: Story = {
       { kind: 'rejected-feedback', time: '2 hours ago', expect: /rejected .* with feedback/ },
       { kind: 'assigned', time: '3 hours ago', expect: /assigned you/ },
       { kind: 'backlog', time: '3 hours ago', expect: /moved .* to the backlog/ },
-      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review\./ },
-      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing\./ },
+      { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review/ },
+      { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
     ];
     return (
-      <ul className="w-128">
+      <ul className="w-96">
         {rows.map((row) => (
           <li key={row.kind}>
-            <Item {...args} kind={row.kind} status={row.status} time={row.time} />
+            <NotificationItem {...args} kind={row.kind} status={row.status} time={row.time} />
           </li>
         ))}
       </ul>
@@ -207,9 +275,36 @@ export const AsAButton: Story = {
 export const Static: Story = {
   args: { href: undefined, onSelect: undefined, onToggleRead: undefined, unread: false },
   play: async ({ canvasElement }) => {
-    /* Read with nothing to press: nothing on the right at all. */
-    await expect(within(canvasElement).queryByRole('button')).toBeNull();
-    await expect(canvasElement.querySelector('[data-unread-dot]')).toBeNull();
+    const canvas = within(canvasElement);
+    /* Nothing to press: not a link, not a button, no mark-read button. */
+    await expect(canvas.queryByRole('link')).toBeNull();
+    await expect(canvas.queryByRole('button')).toBeNull();
+    /* The sentence is a plain paragraph, with no "Unread:" on a read row. */
+    const message = canvas.getByText(`${SUBJECT}.`).closest('p') as HTMLElement;
+    await expect(message).toHaveTextContent(
+      /^John Kestrel commented on Change the notification layout for testing. a few seconds ago$/,
+    );
+    /* Read with nothing to press: nothing on the right at all, the box is empty. */
+    await expect(message.nextElementSibling).toBeEmptyDOMElement();
+  },
+};
+
+/**
+ * A `moved` row needs its `status`; the types insist. If one arrives without it, the
+ * sentence stops at the subject: never a "[Status]" placeholder in front of a user.
+ */
+export const MovedWithoutStatus: Story = {
+  args: { kind: 'moved', status: undefined, unread: false },
+  play: async ({ canvasElement }) => {
+    /* The compile-time half, checked by `npm run typecheck`: leaving `status` off
+       `moved` is an error. This function is never called. */
+    // @ts-expect-error `status` is required for `moved`
+    void (() => <NotificationItem kind="moved" actor={{ name: 'J' }} subject="S" time="now" />);
+    const row = within(canvasElement).getByRole('link');
+    await expect(row).toHaveAccessibleName(
+      'John Kestrel moved Change the notification layout for testing. a few seconds ago',
+    );
+    await expect(row).not.toHaveTextContent(/\[Status\]| to /);
   },
 };
 
@@ -221,6 +316,8 @@ export const WithCommentPreview: Story = {
   args: { preview: LONG_COMMENT },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    /* The comment is not part of the row's target: the pointer lands on the comment, not the link. */
+    await expect(hitAt(canvas.getByText(/^Lorem ipsum/))).not.toBe(canvas.getByRole('link'));
     const more = await canvas.findByRole('button', { name: 'Show more' });
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(more);
@@ -409,6 +506,125 @@ export const CancelReply: Story = {
   },
 };
 
+const onReply = fn().mockName('onReply');
+
+/**
+ * A click on the comment does **not** open the item: the comment is content to read and select. The
+ * row around it still opens, and "Show more" and the caller's `previewActions` respond as controls.
+ */
+export const CommentDoesNotOpenTheItem: Story = {
+  args: {
+    href: undefined,
+    onSelect: fn(),
+    preview: LONG_COMMENT,
+    previewActions: (
+      <div className="flex gap-2">
+        <Button variant="tertiary" size="sm" onClick={onReply}>
+          Reply
+        </Button>
+      </div>
+    ),
+  },
+  play: async ({ canvasElement, args }) => {
+    onReply.mockClear();
+    const canvas = within(canvasElement);
+    const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
+    /* The comment's text: the pointer lands on the comment, and the click does nothing to the row. */
+    const comment = canvas.getByText(/^Lorem ipsum/);
+    await expect(hitAt(comment)).not.toBe(row);
+    await userEvent.click(hitAt(comment));
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    /* "Show more" and "Reply" are controls of their own, and do not open the row either. */
+    const more = canvas.getByRole('button', { name: 'Show more' });
+    await expect(more.contains(hitAt(more))).toBe(true);
+    await userEvent.click(more);
+    const less = canvas.getByRole('button', { name: 'Show less' });
+    await expect(less).toHaveAttribute('aria-expanded', 'true');
+    const reply = canvas.getByRole('button', { name: 'Reply' });
+    await expect(reply.contains(hitAt(reply))).toBe(true);
+    await userEvent.click(reply);
+    await expect(onReply).toHaveBeenCalledTimes(1);
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    /* The row outside the comment still opens the item. */
+    await userEvent.click(row);
+    await expect(args.onSelect).toHaveBeenCalledTimes(1);
+    /* And the keyboard reaches each in turn: row, mark-read, Show less, Reply. */
+    (document.activeElement as HTMLElement | null)?.blur();
+    for (const control of [row, canvas.getByRole('button', { name: /^Mark as read/ }), less, reply]) {
+      await userEvent.tab();
+      await expect(control).toHaveFocus();
+    }
+  },
+};
+
+/**
+ * The unread dot makes way only for the mark-read button: when the row is hovered or
+ * that button is focused. Focus on the row itself or on "Show more" leaves it, since
+ * nothing would take its place.
+ */
+export const DotMakesWayForMarkRead: Story = {
+  args: { href: undefined, onSelect: fn(), preview: LONG_COMMENT },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dot = dotIn(canvasElement)!;
+    const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
+    const mark = canvas.getByRole('button', { name: /^Mark as read/ });
+    const pointer = await realPointer();
+    if (pointer) {
+      await pointer.park();
+      await waitFor(() => expect(isHovered(row)).toBe(false));
+    }
+    await expect(await opacityOf(dot)).toBe('1');
+    /* The row's own focus: the dot stays, and the button stays hidden. */
+    await userEvent.tab();
+    await expect(row).toHaveFocus();
+    await expect(await opacityOf(dot)).toBe('1');
+    await expect(await opacityOf(mark)).toBe('0');
+    /* The mark-read button's focus: the dot makes way for it. */
+    await userEvent.tab();
+    await expect(mark).toHaveFocus();
+    await expect(await opacityOf(dot)).toBe('0');
+    await expect(await opacityOf(mark)).toBe('1');
+    /* "Show more" is another button, not the dot's replacement: the dot comes back. */
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Show more' })).toHaveFocus();
+    await expect(await opacityOf(dot)).toBe('1');
+    /* Hover: the dot makes way for the button. */
+    if (pointer) {
+      await pointer.hover(row);
+      await waitFor(() => expect(isHovered(row)).toBe(true));
+      await expect(await opacityOf(dot)).toBe('0');
+      await expect(await opacityOf(mark)).toBe('1');
+      await pointer.park();
+    }
+  },
+};
+
+/** With no `onToggleRead` there is no button to make way for, so the dot stays, hovered or focused. */
+export const DotStaysWithoutMarkRead: Story = {
+  args: { onToggleRead: undefined },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dot = dotIn(canvasElement)!;
+    const row = canvas.getByRole('link', { name: /^Unread: John Kestrel commented on/ });
+    await expect(canvas.queryByRole('button')).toBeNull();
+    const pointer = await realPointer();
+    if (pointer) {
+      await pointer.park();
+      await waitFor(() => expect(isHovered(row)).toBe(false));
+    }
+    await userEvent.tab();
+    await expect(row).toHaveFocus();
+    await expect(await opacityOf(dot)).toBe('1');
+    if (pointer) {
+      await pointer.hover(row);
+      await waitFor(() => expect(isHovered(row)).toBe(true));
+      await expect(await opacityOf(dot)).toBe('1');
+      await pointer.park();
+    }
+  },
+};
+
 /* WCAG 1.4.11 asks 3:1 of a graphic that carries meaning. axe does not measure icons or dots, so this does. */
 const rgb = (css: string) => css.match(/\d+/g)!.slice(0, 3).map(Number);
 const hex = (value: string) => {
@@ -438,7 +654,7 @@ export const MarkersClear3to1: Story = {
         <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
           <div className="flex justify-center bg-surface-canvas p-8">
             <div className="w-128">
-              <Item {...args} />
+              <NotificationItem {...args} />
             </div>
           </div>
         </div>
@@ -475,14 +691,14 @@ export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   decorators: [],
   render: (args) => (
-    <div className="flex flex-col">
+    <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
-            <div className="w-128">
-            <Item {...args} />
-            <Item {...args} unread={false} kind="moved" status="Confirmed prod" />
-            <Item {...args} preview={LONG_COMMENT} />
+            <div className="w-96">
+            <NotificationItem {...args} />
+            <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
+            <NotificationItem {...args} preview={LONG_COMMENT} />
             </div>
           </div>
         </div>

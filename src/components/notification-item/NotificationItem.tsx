@@ -19,9 +19,13 @@ import { ReplyCard, ReplyComposer, ReplyControl } from './NotificationReply';
  * the backlog" itself, and the bold and regular runs are the same everywhere.
  *
  * The whole row is the target: pass `href` and it is a link, or `onSelect` and it
- * is a button. The unread dot is on the right until the row is hovered or
- * focused, when it makes way for the design's mark-read / mark-unread button. The
- * comment preview is the design's: three lines, then "Show more".
+ * is a button, and a click anywhere on it opens the item **except on the comment
+ * preview**: the comment is content to read, select and expand, not part of the
+ * target, so only "Show more" / "Show less" (and the caller's `previewActions`)
+ * respond there. The unread dot is on the right until the row is hovered or the
+ * mark-read button is focused, when it makes way for the design's mark-read /
+ * mark-unread button; with no button (no `onToggleRead`) it stays. The comment
+ * preview is the design's: three lines, then "Show more".
  *
  * **Reacting and replying** live under the preview, as the design's
  * `Notification_Popover_Comment_Reply` draws them. The row under the card holds
@@ -59,11 +63,13 @@ export type NotificationKind =
  */
 const NOTIFICATION_PHRASES: Record<
   NotificationKind,
-  { verb: string; trail?: (status?: string) => string }
+  { verb: string; trail?: (status?: string) => string | undefined }
 > = {
   commented: { verb: 'commented on' },
   mention: { verb: 'mentioned you in a comment on' },
-  moved: { verb: 'moved', trail: (s) => `to ${s}` },
+  /* With no status the sentence stops at the subject. The types ask for one, but
+     a placeholder ("to [Status]") must never reach a user. */
+  moved: { verb: 'moved', trail: (s) => (s ? `to ${s}` : undefined) },
   pending: { verb: 'submitted', trail: () => 'for approval. Pending' },
   accepted: { verb: 'accepted' },
   updated: { verb: 'made an update to' },
@@ -81,6 +87,27 @@ export interface NotificationActor {
   /** Photo. Without it the avatar draws initials. */
   src?: string;
 }
+
+/**
+ * What happened: `kind` picks the sentence, and `moved` must also say where to.
+ * Leaving `status` off a `moved` row is a type error. It is typed
+ * `string | undefined` rather than `string` so a row built from data
+ * (`status={event.status}`) still type-checks; an undefined status leaves the
+ * "to …" off at runtime.
+ */
+type NotificationEvent =
+  | {
+      /** What happened. Picks the sentence. */
+      kind: Exclude<NotificationKind, 'moved'>;
+      /** Only `moved` uses it; ignored here. */
+      status?: string;
+    }
+  | {
+      /** What happened. Picks the sentence. */
+      kind: 'moved';
+      /** The status it moved to ("to Confirmed prod"). Required for `moved`. */
+      status: string | undefined;
+    };
 
 export interface NotificationItemBaseProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'onSelect'> {
@@ -103,6 +130,8 @@ export interface NotificationItemBaseProps
   onSelect?: () => void;
   /** The comment, when the event is about one. Drawn as the design's preview card. */
   preview?: string;
+  /** Below the preview and its reply row: any other controls the caller owns. */
+  previewActions?: React.ReactNode;
   /** Reactions under the preview, as `EmojiReactionPicker` takes them. */
   reactions?: readonly EmojiReaction[];
   /** A reaction pill or the thumbs-up button was pressed. */
@@ -134,15 +163,7 @@ export interface NotificationReply {
   value: readonly MentionSegment[];
 }
 
-/**
- * What happened picks the sentence. `moved` is the one that needs more: the status
- * it moved to ("to Confirmed prod"), which is required there and nowhere else.
- */
-export type NotificationItemProps = NotificationItemBaseProps &
-  (
-    | { kind: Exclude<NotificationKind, 'moved'>; status?: never }
-    | { kind: 'moved'; status: string }
-  );
+export type NotificationItemProps = NotificationItemBaseProps & NotificationEvent;
 
 export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationItemProps>(
   function NotificationItem(
@@ -158,6 +179,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       href,
       onSelect,
       preview,
+      previewActions,
       reactions,
       onToggleReaction,
       onSelectEmoji,
@@ -220,6 +242,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         ref={ref}
         data-unread={unread || undefined}
         className={cn(
+          /* A named group, so an outer `group` (a list row, a card) cannot drive
+             the dot and the mark-read button. */
           'group/notification relative flex flex-col gap-2 bg-surface-elevated p-4 font-sans',
           'transition-colors duration-200 ease-out motion-reduce:transition-none',
           interactive && [
@@ -264,15 +288,22 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 className={cn(
                   'size-2 rounded-full bg-surface-brand-strong',
                   'transition-opacity duration-200 ease-out motion-reduce:transition-none',
+                  /* It only makes way for the mark-read button, so it only goes when
+                     there is one, and only for that button's focus: focus on the row
+                     or on "Show more" leaves it, as nothing takes its place. */
                   onToggleRead &&
-                    'group-hover/notification:opacity-0 group-has-[[data-mark]:focus-visible]/notification:opacity-0',
+                    'group-hover/notification:opacity-0 group-has-[[data-read-mark]:focus-visible]/notification:opacity-0',
                 )}
               />
             )}
             {onToggleRead && (
-              /* After a half-second rest, the design's tooltip names the action. The
-                 wrapper fills the box, over the dot, so the button keeps its whole
-                 area. */
+              /* After a half-second rest, the design's tooltip names the action.
+                 The wrapper fills the box, over the dot, so the button inside
+                 keeps the box's whole area. It opens to the left: the button sits on
+                 the row's right edge (and the popover the rows live in on the
+                 screen's), and Tooltip does not flip, so a bubble centred above it
+                 could run off the screen; to the left it covers only its own row,
+                 not the row or the header above. */
               <Tooltip
                 content={unread ? 'Mark as read' : 'Mark as unread'}
                 openDelay={500}
@@ -280,8 +311,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 className="absolute inset-0 z-10 flex"
               >
                 <button
+                  data-read-mark
                   type="button"
-                  data-mark
                   onClick={onToggleRead}
                   aria-label={markLabel}
                   className={cn(
@@ -300,8 +331,9 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         </div>
 
         {preview && (
-          /* Above the row's stretched link on purpose: a click anywhere on the
-             preview does not open the item. Only Show more / less respond. */
+          /* Lifted above the row's stretched target (`z-10`), so a click on the comment does
+             not open the item: the comment can be read and its text selected, and only "Show
+             more", the reply controls and the caller's `previewActions` respond. */
           <div className="relative z-10 flex flex-col gap-3 pr-6 pl-13">
             <div className="flex flex-col gap-1">
               <CommentPreview text={preview} />
@@ -390,6 +422,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 }
               />
             )}
+
+            {previewActions}
           </div>
         )}
       </div>

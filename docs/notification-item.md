@@ -25,6 +25,7 @@ hover button.
 |---|---|
 | `NotificationItem` | A row in the notification popover, or in any list of events about Added Values |
 | `Toast` | A transient message about something the user just did. A notification is a record that stays until read |
+| The same `NotificationItem`, in a page-length list | A full inbox: the page the popover's footer link (`inboxHref`) goes to. The system has no inbox page of its own yet; build one from these rows |
 
 ## The thirteen kinds
 
@@ -36,7 +37,7 @@ the subject is regular.
 |---|---|
 | `commented` | **John commented on** *Title*. |
 | `mention` | **John mentioned you in a comment on** *Title*. |
-| `moved` | **John moved** *Title* **to Status.** (`status`) |
+| `moved` | **John moved** *Title* **to Status.** (`status`, required for this kind) |
 | `pending` | **John submitted** *Title* **for approval. Pending.** |
 | `accepted` | **John accepted** *Title*. |
 | `updated` | **John made an update to** *Title*. |
@@ -81,16 +82,17 @@ Both `rejected` rows use the same sentence for now. `updated` and `rejected-feed
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `kind` | `NotificationKind` | required | Picks the sentence |
+| `kind` | `NotificationKind` | required | Picks the sentence. The props are a union on `kind`: `moved` needs `status` |
 | `actor` | `{ name, src? }` | required | Who did it. The avatar is decorative; the name is in the sentence |
 | `subject` | `string` | required | The Added Value's title |
-| `status` | `string` | — | Required for `moved`, not accepted by any other kind. Any status label: one of the ten shared statuses (`AVStatus`) or a step the Added Value's domain defines (Design Review, For QA, Confirmed prod …). Those steps are the domain's data, so the type is `string` |
+| `status` | `string` | — | For `moved`: the status it moved to. **Required with `moved`**: leaving it off is a type error. It is typed `string \| undefined`, so a row built from data (`status={event.status}`) type-checks; if it is undefined at runtime the sentence ends at the title, with no "to …" and never a placeholder. Ignored on the other kinds. Any status label works: one of the ten shared statuses (`AVStatus`) or a step the Added Value's domain defines (Design Review, For QA, Confirmed prod …), which is the domain's data, so the type is `string` |
 | `time` | `string` | required | Already formatted: "5 minutes ago" |
 | `unread` | `boolean` | `false` | The dot, and "Unread:" in the row's name |
 | `onToggleRead` | `() => void` | — | Renders the mark-read / mark-unread button. Omit for a list that cannot be marked |
 | `href` | `string` | — | The whole row is a link |
 | `onSelect` | `() => void` | — | The whole row is a button, when it does not navigate |
 | `preview` | `string` | — | The comment, as the design's preview card |
+| `previewActions` | `ReactNode` | — | Below the preview and its reply row: any other controls the caller owns |
 | `reactions` | `EmojiReaction[]` | — | Under the preview, as `EmojiReactionPicker` takes them |
 | `onToggleReaction` | `(emoji) => void` | — | A pill, or the thumbs-up button, was pressed |
 | `onSelectEmoji` | `(emoji) => void` | — | An emoji was chosen from the palette |
@@ -112,7 +114,7 @@ sentence is `body-sm-bold` for the bold runs and `body-sm-regular` for the subje
 8, `surface.brand.strong` (Figma binds `text.brand.medium`, the same blue). The
 trailing 40 box (pulled back 8 on every side, so the icon sits where a 24 box would put it) holds a 20 check-circle in `stroke.focused`, `text.brand.strong` on
 hover (a darker blue in light, a lighter one in dark): **outlined** on an unread row (the mark-read button, which the dot dissolves
-into on hover and focus) and **filled** on a read row (the mark-unread button, which
+into on hover and on the button's focus) and **filled** on a read row (the mark-unread button, which
 dissolves in on hover and focus; the box is empty at rest), as `_Mark_Read_Unread` draws
 it. Every change in that box, and the row's fill, is a 200ms dissolve (none under
 reduced motion). The preview is `surface.elevated` with a 1 `stroke.default` border, `radius.md`, 12 / 8 padding, `body-sm-regular`
@@ -125,10 +127,18 @@ close; with no button the text keeps its 8.
 - **The whole row is one target**, a real `<a>` or `<button>` named from the
   sentence: "Unread: John commented on *Title*. a few seconds ago". The unread state
   is in the name as text, not only as a dot.
-- **The mark-read button is a separate control**, named "Mark as read: *Title*" or "Mark
-  as unread: *Title*" (so a list of them is not a list of identical names), reachable by Tab even when it is not visible. On an unread row it
-  dissolves in when the row is hovered or the button focused, in the dot's place; on a read row it dissolves in as the filled
-  check. The right side is empty at rest on a read row. The row never shifts.
+- **The comment preview is not part of that target.** A click on the comment card does **not** open the
+  item: it is content to read and select. Only "Show more" / "Show less" and the controls in `previewActions` respond
+  there, and they stay in the tab order after the row and its mark-read button.
+- **The mark-read button is a separate control**, named "Mark as read: *Title*" or "Mark as
+  unread: *Title*" (so a list of them is not a list of identical names), reachable by Tab even when it is not visible. On an unread row it
+  dissolves in where the dot was when the row is hovered or the button itself is
+  focused; on a read row it dissolves in as the filled check. The right side is empty
+  at rest on a read row. The row never shifts.
+- **The dot only makes way for that button.** Focus on the row, on "Show more" or on a
+  `previewActions` control leaves the dot where it is, and so does hover on a row
+  with no `onToggleRead`: with no button to take its place, it never disappears into
+  nothing.
 - **The check and the dot clear 3:1 in both themes**, against the row at rest and against
   its hover and pressed fills (`stroke.focused` 6.18 / 5.64 / 5.01 in light, 6.33 / 4.48 /
   3.28 in dark; the dot is the same blue). Figma binds the check to `stroke.brand.medium`,
@@ -137,7 +147,7 @@ close; with no button the text keeps its 8.
   light it is darker than Figma's default, which is the cost.
 - **Focus** is the `stroke.focused` ring drawn inside the row, plus Figma's pressed
   fill. The fill alone (1.2:1 against the row) would not be a visible indicator.
-- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus, opening to the left of the button) says the action in short: "Mark as read". The button's own name is longer (it adds the title), so the description is not a repeat.
+- **The tooltip** (`Tooltip`, 500ms on hover, immediate on focus, opening to the left of the button) says the action in short: "Mark as read". It opens to the left because the button sits on the row's right edge, the popover on the screen's, and Tooltip does not flip; to the left it covers only its own row. The button's own name is longer (it adds the title), so the description is not a repeat.
 - The mark-read target is 40, the system's touch minimum, with the 20 icon centred in it. On a
   touch screen there is no hover, so the button is invisible until focused but still tappable;
   the unread dot is what shows there.
@@ -187,5 +197,7 @@ Only "Show more" / "Show less" respond. Everything else on the row is the target
   the same way.
 - **Don't carry unread by colour alone.** The dot is decoration; the name says it.
 - **Don't nest your own link or button in the row.** The row is the target; the only
-  controls inside it are the mark-read button and the reply and reaction controls under a
-  preview.
+  controls inside it are the mark-read button, the reply and reaction controls under a
+  preview, and anything you pass as `previewActions`.
+- **Don't send a `moved` row without its `status`.** The types ask for it; without
+  one the sentence stops at the title.
