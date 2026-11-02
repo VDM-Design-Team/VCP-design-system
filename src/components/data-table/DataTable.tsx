@@ -92,6 +92,11 @@ export interface DataTableProps<Row extends { id?: string | number }>
   dense?: boolean;
   /** Names the table for assistive tech. Strongly encouraged. */
   caption?: string;
+  /**
+   * Extra attributes for a row's `<tr>` — a drag source, a data attribute. `className` is merged with
+   * the row's own; the handlers are yours. The row stays a plain row: nothing here makes it a control.
+   */
+  rowProps?: (row: Row) => React.HTMLAttributes<HTMLTableRowElement>;
 }
 
 const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-4 last:pr-4';
@@ -100,7 +105,7 @@ const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-
 const headerInner = 'flex items-center gap-1.5';
 
 /**
- * The info glyph that explains a column — Figma's header `ⓘ`. Pass it as a
+ * The glyph that explains a column — Figma's header `ⓘ` (or, with `icon="function"`, the ƒ in a ring that marks a formula column). Pass it as a
  * column's `hint`: it sits beside the label, outside the sort button, and opens
  * `text` in a tooltip on hover **and** on keyboard focus. There is no default
  * copy; the product says what the column is for. With no `text` it renders
@@ -118,17 +123,24 @@ export function ColumnHint({
 }) {
   if (!text) return null;
   return (
-    <Tooltip content={text} placement="bottom">
+    <Tooltip
+      content={text.includes('\n') ? text.split('\n').map((line, i) => <span key={i} className="block">{line}</span>) : text}
+      placement="bottom"
+    >
       <button
         type="button"
         aria-label={`About ${column}`}
         className={cn(
-          'grid size-4 shrink-0 place-items-center rounded-sm text-text-tertiary',
-          'hover:text-text-secondary',
+          'grid size-4 shrink-0 place-items-center rounded-sm',
+          /* `function` is the formula columns' mark (Figma's `_function_tooltip_icon`): a ƒ in a ring, in
+             brand blue, where the info glyph is a quiet grey. */
+          icon === 'function'
+            ? 'rounded-pill border border-text-brand-medium text-text-brand-medium hover:border-text-brand-strong hover:text-text-brand-strong'
+            : 'text-text-tertiary hover:text-text-secondary',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
         )}
       >
-        <Icon name={icon} size="sm" />
+        <Icon name={icon} size={icon === 'function' ? 10 : 'sm'} />
       </button>
     </Tooltip>
   );
@@ -147,6 +159,7 @@ export function DataTable<Row extends { id?: string | number }>({
   empty,
   dense,
   caption,
+  rowProps,
   ...props
 }: DataTableProps<Row>) {
   const rowId = (row: Row, index: number) => row.id ?? index;
@@ -266,13 +279,16 @@ export function DataTable<Row extends { id?: string | number }>({
           ) : (
             rows.map((row, i) => {
               const id = rowId(row, i);
+              const extra = rowProps?.(row);
               return (
                 <tr
                   key={id}
+                  {...extra}
                   className={cn(
                     'border-b border-stroke-subtle transition-colors last:border-b-0',
                     'hover:bg-surface-brand-base',
                     selected.includes(id) && 'bg-surface-brand-base',
+                    extra?.className,
                   )}
                 >
                   {selectable && (

@@ -39,15 +39,16 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `sections` | `PlanningSection[]` | required | `{ id, title, dates?, totalCapacity?, remainingCapacity?, rows }` |
+| `sections` | `PlanningSection[]` | required | `{ id, kind?, title, dates?, totalCapacity?, remainingCapacity?, rows }` — `kind` is `cycle` or `backlog` |
 | `collapsed` / `defaultCollapsed` / `onCollapsedChange` | `string[]` | — | Folded section ids. Controlled when `collapsed` is given |
-| `sort` / `onSortChange` | `DataTableSort` | — | The sortable key is `title`. Sorting is the caller's |
+| `sort` / `onSortChange` | `DataTableSort` | — | The sortable key is `title`. **Sorting is a handler, not the table's job**: the header reports the key and direction and the caller (usually the server) returns the rows in that order. The table never reorders rows in the browser |
+| `onMoveRow` | `(row, from, to) => void` | — | A Backlog row was dropped on a Cycle. The table moves nothing — in the design this opens *Add Required Details*. With no handler, rows are not draggable |
 | `onOpen` | `(row) => void` | — | Given, the title is a button. (The ID is click-to-copy, so opening is the title's job) |
 | `onStartChange` / `onDueChange` | `(row, iso) => void` | — | Each date edits in place only if its callback is given |
 | `onPointsChange` | `(row, points) => void` | — | Same, for points |
 | `page` / `pageCount` / `onPageChange` | | — | Pagination renders only when all three are given |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | With the pagination: the "Items 50 ▾" selector and the "1-50 of 1,250" range |
-| `hints` | `{ urgency, type, start, points, due, status }` | the design's copy for `start`, `points`, `due` | The tooltips. Start Date, Points and Due Date are the formula columns (ƒ glyph) and have Figma's copy; Urgency, Type and Status have none in Figma, so omit one and its glyph does not render |
+| `hints` | `{ urgency, type, start, points, due, status }` | the design's copy | The header tooltips. Start Date, Points and Due Date are the formula columns (ƒ in a ring, brand blue); Urgency and Type use Figma's copy; Status has none in Figma and borrows `AVTable`'s story line until the product writes one. Pass a string to change a column's copy, `''` to drop its glyph |
 | `empty` | `ReactNode` | — | What a section with no rows says |
 
 A row is `{ id, ref, title, domain?, urgency?, type?, initiator?, assignee?, start?, points?, due?, status? }`;
@@ -79,6 +80,9 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
 
 | Where | Says |
 |---|---|
+| Urgency ⓘ | "Indicates how urgent or important a task is compared to others" |
+| Type ⓘ | "Type 1: Direct KPI impact with clear ROI / Type 2: Indirect impact, enablement/optimization / Type 3: Non-critical, no meaningful KPI impact" (one line each) |
+| Status ⓘ | "Where this sits in its domain’s flow." (placeholder — not in Figma) |
 | Start Date ƒ | "This column is editable, changing Start Date affects Due Date." |
 | Points ƒ | "This column is editable, changing Points affects Due Date." |
 | Due Date ƒ | "This column is editable, changing Due Date affects Start Date. Due Date = Approx. Start Date + Approx. Working Days + Buffer" |
@@ -90,14 +94,26 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
 
 ## Not here
 
-- **Dragging an Added Value from the Backlog into a Cycle** (which opens the *Add Required Details* modal) —
-  tracked as its own PR with the modal.
+- **The *Add Required Details* dialog** that a drop opens — its own PR. The table only reports the drop.
+- **A keyboard way to move a row.** Dragging is pointer-only; a "Move to cycle…" row action that opens the same dialog
+  is tracked with the dialog's PR.
 - **The filter row** above the table (search, status, priority, Reset, View Cycle) is page composition
   and needs a `FilterBar`; it is tracked separately.
 - **The animated cells** (a value that changed draws attention to itself) are tracked for a later pass.
 - **Folding is not animated** yet; the body shows and hides.
 
+## Dragging
+
+With `onMoveRow`, Backlog rows are draggable and each Cycle is a drop target: it takes a blue outline while a row
+is over it. Dropping calls `onMoveRow(row, from, to)`; **nothing moves until you move it** (the design opens a
+dialog first, and the move happens on confirm).
+
+## Popovers
+
+An inline date picker opens out of its cell, so neither the section card nor the table clips: both are
+`overflow: visible`. The cost is that the table no longer scrolls sideways on its own — the page owns that.
+
 ## Don't
 
 - **Don't re-map statuses, urgencies or availability** to colours here.
-- **Don't sort or page inside the table.** The order of a thousand rows is the server's business.
+- **Don't sort or page inside the table.** Sorting is a handler (`onSortChange`): the order of a thousand rows is the server's business.

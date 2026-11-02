@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fireEvent, fn, userEvent, within } from 'storybook/test';
 import { PlanningTable, type PlanningRow, type PlanningSection } from './PlanningTable';
 import type { DataTableSort } from '../../components/data-table';
 
@@ -26,6 +26,7 @@ const row = (n: number, extra: Partial<PlanningRow> = {}): PlanningRow => ({
 const SECTIONS: PlanningSection[] = [
   {
     id: 'cycle-27',
+    kind: 'cycle',
     title: 'Cycle 27',
     dates: '(Mar 02, 2026 - Mar 16, 2026)',
     totalCapacity: 237,
@@ -36,7 +37,7 @@ const SECTIONS: PlanningSection[] = [
       row(3, { assignee: { name: 'John Doe', availability: 'unavailable' }, due: { value: '2026-03-16', estimated: true } }),
     ],
   },
-  { id: 'backlog', title: 'Backlog', rows: [row(4), row(5)] },
+  { id: 'backlog', kind: 'backlog', title: 'Backlog', rows: [row(4), row(5)] },
 ];
 
 const meta = {
@@ -95,25 +96,18 @@ export const WithPagination: Story = {
 };
 
 /**
- * Start Date, Points and Due Date carry the design's formula tooltips (the ƒ glyph). Urgency, Type and
- * Status have no copy in Figma, so they draw no glyph until the product supplies some.
+ * Every header glyph has the design's tooltip by default: Start Date, Points and Due Date the formula
+ * copy under a ƒ in a ring; Urgency and Type Figma's own; Status a placeholder (Figma has none). Pass a
+ * string to change a column's copy, or `''` to drop its glyph.
  */
 export const WithHints: Story = {
-  args: {
-    defaultCollapsed: ['backlog'],
-    hints: {
-      urgency: 'How soon this needs doing.',
-      type: 'How heavy the change is.',
-      status: 'Where the Added Value is now.',
-    },
-  },
+  args: { defaultCollapsed: ['backlog'], hints: { status: '' } },
 };
 
 export const DarkTheme: Story = { args: { defaultCollapsed: ['backlog'] }, globals: { theme: 'dark' } };
 
 function Editable(args: React.ComponentProps<typeof PlanningTable>) {
   const [sections, setSections] = React.useState(args.sections);
-  const [sort, setSort] = React.useState<DataTableSort | undefined>(args.sort);
   const patch = (id: string, change: Partial<PlanningRow>) =>
     setSections((now) =>
       now.map((s) => ({ ...s, rows: s.rows.map((r) => (r.id === id ? { ...r, ...change } : r)) })),
@@ -121,15 +115,7 @@ function Editable(args: React.ComponentProps<typeof PlanningTable>) {
   return (
     <PlanningTable
       {...args}
-      sections={sections.map((s) => ({
-        ...s,
-        /* Sorting is the caller's: the table reports the key and direction, and this story applies it. */
-        rows: sort
-          ? [...s.rows].sort((a, b) => (sort.direction === 'asc' ? 1 : -1) * a.title.localeCompare(b.title))
-          : s.rows,
-      }))}
-      sort={sort}
-      onSortChange={setSort}
+      sections={sections}
       onStartChange={(r, iso) => patch(r.id, { start: { value: iso } })}
       onDueChange={(r, iso) => patch(r.id, { due: { value: iso } })}
       onPointsChange={(r, points) => patch(r.id, { points })}
@@ -165,19 +151,38 @@ export const FoldingAndEditing: Story = {
   },
 };
 
-/** Sorting is the caller's: the header reports the key and direction, this story applies it (here, per section). */
-export const SortingByTitle: Story = {
-  args: { defaultCollapsed: ['backlog'] },
-  render: (args) => <Editable {...args} />,
-  play: async ({ canvasElement }) => {
+/**
+ * Sorting is a **handler**, not the table's job: the header reports the key and direction through
+ * `onSortChange` and the caller (usually the server) returns the rows in that order. Nothing here
+ * reorders in the browser — which is why no story does.
+ */
+export const SortingIsAHandler: Story = {
+  args: { defaultCollapsed: ['backlog'], sort: { key: 'title', direction: 'asc' }, onSortChange: fn() },
+  play: async ({ canvasElement, args }) => {
+    const header = within(canvasElement).getAllByRole('button', { name: /Added Value Title/ })[0]!;
+    await userEvent.click(header);
+    await expect(args.onSortChange).toHaveBeenCalledWith({ key: 'title', direction: 'desc' });
+  },
+};
+
+/**
+ * Drag a Backlog row onto the Cycle: the Cycle takes a blue outline while it is over, and on the drop
+ * the table calls `onMoveRow` and moves nothing — in the design that opens *Add Required Details*, and
+ * the move happens when it is confirmed. With no `onMoveRow`, rows are not draggable.
+ */
+export const DraggingToACycle: Story = {
+  args: { onMoveRow: fn() },
+  play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const titles = () => canvas.getAllByRole('row').slice(1, 4).map((r) => r.textContent ?? '');
-    const first = (t: string[]) => t[0]!.includes('Automated') ? 'automated' : t[0]!.includes('Billing') ? 'billing' : 'calendar';
-    await expect(first(titles())).toBe('automated');
-    const header = canvas.getAllByRole('button', { name: /Added Value Title/ })[0]!;
-    await userEvent.click(header);
-    await userEvent.click(header);
-    /* Descending: Calendar sync leads. */
-    await expect(first(titles())).toBe('calendar');
+    const source = canvas.getByText('VCP-1234').closest('tr')!;
+    const cycle = canvas.getByRole('region', { name: /Cycle 27/ });
+    const data = new DataTransfer();
+    await fireEvent.dragStart(source, { dataTransfer: data });
+    await fireEvent.dragOver(cycle, { dataTransfer: data });
+    await expect(cycle).toHaveClass('outline-2');
+    await fireEvent.drop(cycle, { dataTransfer: data });
+    await expect(args.onMoveRow).toHaveBeenCalledTimes(1);
+    const [row, from, to] = (args.onMoveRow as ReturnType<typeof fn>).mock.calls[0]!;
+    await expect([row.ref, from.id, to.id]).toEqual(['VCP-1234', 'backlog', 'cycle-27']);
   },
 };

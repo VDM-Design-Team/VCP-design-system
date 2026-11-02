@@ -78,6 +78,8 @@ export interface PlanningRow {
 
 export interface PlanningSection {
   id: string;
+  /** Rows can be dragged out of a `backlog` and dropped on a `cycle`. Left out, a section is neither. */
+  kind?: 'cycle' | 'backlog';
   /** "Cycle 27" or "Backlog". */
   title: string;
   /** "(Mar 02, 2026 - Mar 16, 2026)" — already formatted. Cycles only. */
@@ -89,9 +91,9 @@ export interface PlanningSection {
 }
 
 /**
- * The six columns the design puts a glyph on. **Start Date, Points and Due Date have the design's
- * own copy** (the formula tooltips, default below); Urgency, Type and Status have none in Figma, so
- * those stay silent until the product says something.
+ * The six columns the design puts a glyph on, each with a default (see `FORMULA_HINTS`): Start Date,
+ * Points and Due Date get the ƒ-in-a-ring mark, the other three the quiet ⓘ. Pass a string to
+ * change the copy, or `''` to drop a column's glyph.
  */
 export interface PlanningTableHints {
   urgency?: string;
@@ -108,6 +110,12 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   collapsed?: readonly string[];
   defaultCollapsed?: readonly string[];
   onCollapsedChange?: (collapsed: string[]) => void;
+  /**
+   * A Backlog row was dropped on a Cycle. The table moves nothing: it tells you which row went from
+   * where to where — in the design that opens the *Add Required Details* dialog, and the move happens
+   * when it is confirmed. With no handler, rows are not draggable.
+   */
+  onMoveRow?: (row: PlanningRow, from: PlanningSection, to: PlanningSection) => void;
   /** The sortable key is `title` — the one Figma mark. */
   sort?: DataTableSort;
   onSortChange?: (sort: DataTableSort) => void;
@@ -132,8 +140,14 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   empty?: React.ReactNode;
 }
 
-/** Figma's tooltip copy for the three editable, formula-linked columns. */
+/**
+ * The header tooltips. Start Date, Points and Due Date, Urgency and Type are Figma's own copy; Status has
+ * none there, so it borrows the line `AVTable`'s stories already use until the product writes one.
+ */
 const FORMULA_HINTS = {
+  urgency: 'Indicates how urgent or important a task is compared to others',
+  type: 'Type 1: Direct KPI impact with clear ROI\nType 2: Indirect impact, enablement/optimization\nType 3: Non-critical, no meaningful KPI impact',
+  status: 'Where this sits in its domain’s flow.',
   start: 'This column is editable, changing Start Date affects Due Date.',
   points: 'This column is editable, changing Points affects Due Date.',
   due: 'This column is editable, changing Due Date affects Start Date.\nDue Date = Approx. Start Date + Approx. Working Days + Buffer',
@@ -191,6 +205,7 @@ export function PlanningTable({
   sort,
   onSortChange,
   onOpen,
+  onMoveRow,
   onStartChange,
   onDueChange,
   onPointsChange,
@@ -207,6 +222,10 @@ export function PlanningTable({
 }: PlanningTableProps) {
   const baseId = React.useId();
   const hints = { ...FORMULA_HINTS, ...hintOverrides };
+  /* A Backlog row in the air, and the Cycle it is over. */
+  const [dragging, setDragging] = React.useState<{ rowId: string; fromId: string } | null>(null);
+  const [overId, setOverId] = React.useState<string | null>(null);
+  const sectionById = new Map(sections.map((s) => [s.id, s]));
   const [inner, setInner] = React.useState<readonly string[]>(defaultCollapsed);
   const folded = collapsed ?? inner;
   const toggle = (id: string) => {
@@ -229,7 +248,7 @@ export function PlanningTable({
     },
     {
       key: 'title',
-      width: '24%',
+      width: '21%',
       label: 'Added Value Title',
       sortable: true,
       render: (row) => (
@@ -259,14 +278,14 @@ export function PlanningTable({
     },
     {
       key: 'urgency',
-      width: '11%',
+      width: '12%',
       label: 'Urgency',
       hint: <ColumnHint text={hints?.urgency} column="urgency" />,
       render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
     },
     {
       key: 'type',
-      width: '10%',
+      width: '11%',
       label: 'Type',
       hint: <ColumnHint text={hints?.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
@@ -353,12 +372,46 @@ export function PlanningTable({
         const isFolded = folded.includes(section.id);
         const headingId = `${baseId}-${section.id}-title`;
         const bodyId = `${baseId}-${section.id}-body`;
+        /* A Cycle is a drop target while a Backlog row is being dragged — and lights up when it is over it. */
+        const isDropTarget = !!dragging && section.kind === 'cycle';
+        const isOver = isDropTarget && overId === section.id;
         const hasCapacity = section.totalCapacity !== undefined && section.remainingCapacity !== undefined;
         return (
           <section
             key={section.id}
             aria-labelledby={headingId}
-            className="overflow-hidden rounded-md bg-surface-elevated font-sans"
+            /* No `overflow: hidden`: a date picker opens out of a cell and must not be clipped. */
+            className={cn(
+              'rounded-md bg-surface-elevated font-sans',
+              isOver && 'outline-2 -outline-offset-2 outline-stroke-focused',
+            )}
+            onDragOver={
+              isDropTarget
+                ? (event) => {
+                    event.preventDefault();
+                    setOverId(section.id);
+                  }
+                : undefined
+            }
+            onDragLeave={
+              isDropTarget
+                ? (event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOverId(null);
+                  }
+                : undefined
+            }
+            onDrop={
+              isDropTarget
+                ? (event) => {
+                    event.preventDefault();
+                    const from = sectionById.get(dragging!.fromId);
+                    const row = from?.rows.find((r) => r.id === dragging!.rowId);
+                    setDragging(null);
+                    setOverId(null);
+                    if (from && row) onMoveRow?.(row, from, section);
+                  }
+                : undefined
+            }
           >
             <header className="flex items-center justify-between gap-6 p-6">
               <h2 id={headingId} className="m-0 text-title-md-semibold text-text-primary">
@@ -405,7 +458,27 @@ export function PlanningTable({
                 rows={section.rows}
                 sort={sort}
                 onSortChange={onSortChange}
-                className="rounded-none border-0"
+                /* Not `overflow-x: auto`: that would clip an inline date picker. */
+                className="overflow-visible rounded-none border-0"
+                rowProps={
+                  onMoveRow && section.kind === 'backlog'
+                    ? (row) => ({
+                        draggable: true,
+                        onDragStart: (event) => {
+                          event.dataTransfer.effectAllowed = 'move';
+                          setDragging({ rowId: row.id, fromId: section.id });
+                        },
+                        onDragEnd: () => {
+                          setDragging(null);
+                          setOverId(null);
+                        },
+                        className: cn(
+                          'cursor-grab',
+                          dragging?.rowId === row.id && 'bg-surface-neutral-subtle',
+                        ),
+                      })
+                    : undefined
+                }
                 caption={`${section.title} Added Values`}
                 empty={empty}
               />
