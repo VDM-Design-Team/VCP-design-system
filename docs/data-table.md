@@ -41,6 +41,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `empty` | `ReactNode` | `'Nothing here yet.'` | An `<EmptyState>` fits; its copy rules apply |
 | `dense` | `boolean` | — | 44 rows instead of 56 |
 | `caption` | `string` | — | Visually hidden `<caption>` naming the table. Strongly encouraged |
+| `cellProps` (on a column) | `(row) => HTMLAttributes<td>` | — | Extra attributes for that column's `<td>` in a row — a class that lets something fill the whole cell, a pointer handler on the cell. `className` is merged |
 | `rowProps` | `(row) => HTMLAttributes<tr>` | — | Extra attributes for a row — a drag source, a data attribute. `className` is merged; the row stays a plain row |
 | `className` | `string` | — | On the scrolling container |
 

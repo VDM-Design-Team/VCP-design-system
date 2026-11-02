@@ -257,11 +257,20 @@ export const AnimatedDates: Story = {
         <PlanningTable
           {...args}
           sections={[{ ...SECTIONS[0]!, rows }]}
+          onStartChange={() => {}}
+          onDueChange={() => {}}
           onAnimationDismiss={clear}
         />
       </div>
     );
-  },
+  }
+};
+
+/** The behaviour, tested (hidden): an old flag does not play on load, a new one does, the first touch dismisses, and editing works. */
+export const AnimatedDatesBehaviour: Story = {
+  ...AnimatedDates,
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const playing = () =>
@@ -274,9 +283,16 @@ export const AnimatedDates: Story = {
     await expect((playing()[0]!.effect as KeyframeEffect).getTiming().iterations).toBe(3);
 
     /* Entering a cell dismisses it, and only it. */
-    const [sweepCell] = Array.from(canvasElement.querySelectorAll('span.isolate'));
+    const [sweepCell] = Array.from(canvasElement.querySelectorAll('td.isolate'));
     await userEvent.hover(sweepCell!);
     await waitFor(() => expect(args.onAnimationDismiss).toHaveBeenCalledTimes(1));
     await expect(args.onAnimationDismiss).toHaveBeenCalledWith(expect.objectContaining({ ref: 'VCP-1239' }), 'start');
+
+    /* The cell stays editable while it plays: reaching for its button opens the picker and dismisses it. */
+    const edit = canvas.getByRole('button', { name: 'Change due date for VCP-1239' });
+    await userEvent.click(edit);
+    await expect(edit).toHaveAttribute('aria-expanded', 'true');
+    await waitFor(() => expect(args.onAnimationDismiss).toHaveBeenCalledTimes(2));
+    await expect(args.onAnimationDismiss).toHaveBeenLastCalledWith(expect.objectContaining({ ref: 'VCP-1239' }), 'due');
   },
 };

@@ -63,7 +63,8 @@ loops** — and reports the date seen through `onAnimationDismiss(row, field)`, 
 dismissed when:
 
 - its third loop ends, or
-- the pointer enters the cell, or
+- the pointer enters the cell, or focus moves into it (so editing it — the pen, the picker, the keyboard — is never
+  fought by the animation, and still works while it plays), or
 - the table goes away while it is playing (navigating off the page).
 
 It never comes back: not on refresh, not on sorting, filtering or paging, and **a flag already set when the table first

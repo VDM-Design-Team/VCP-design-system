@@ -75,6 +75,12 @@ export interface DataTableColumn<Row> {
   hint?: React.ReactNode;
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
+  /**
+   * Extra attributes for this column's `<td>` in a row — a class that lets something fill the whole cell
+   * (an animated highlight), a pointer handler on the cell rather than its content. `className` is merged
+   * with the cell's own; the handlers are yours.
+   */
+  cellProps?: (row: Row) => React.HTMLAttributes<HTMLTableCellElement> | undefined;
 }
 
 export interface DataTableSort {
@@ -332,7 +338,11 @@ export function DataTable<Row extends { id?: string | number }>({
                     </td>
                   )}
                   {columns.map((c) => (
-                    <td key={c.key} className={cn(cell(dense), 'text-left', columnSizing(c))}>
+                    <td
+                      key={c.key}
+                      {...c.cellProps?.(row)}
+                      className={cn(cell(dense), 'text-left', columnSizing(c), c.cellProps?.(row)?.className)}
+                    >
                       {c.render
                         ? c.render(row)
                         : ((row as Record<string, unknown>)[c.key] as React.ReactNode)}

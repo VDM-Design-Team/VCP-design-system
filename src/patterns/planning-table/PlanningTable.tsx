@@ -232,11 +232,14 @@ const SWEEP_MS = 1600;
 const SWEEP_PLAYS = 3;
 
 /**
- * Wraps a date cell that is `live` (flagged, new this session, not yet seen): a gradient sweeps across it
- * and the text runs black → blue → white → blue → black, one loop per `SWEEP_MS`, `SWEEP_PLAYS` times. It is
- * dismissed — `onDismiss` — when the third loop ends or the pointer enters, and a new `playKey` (the date
- * changed again) starts the three plays over. Web Animations, not CSS keyframes, so it needs nothing outside
- * this file; colours are the system's tokens, by variable.
+ * The animation inside a date cell that is `live` (flagged, new this session, not yet seen): a gradient sweeps
+ * across **the whole cell** and the text runs black → blue → white → blue → black, one loop per `SWEEP_MS`,
+ * `SWEEP_PLAYS` times. The cell itself is what the gradient fills — the table gives the `<td>` `relative isolate
+ * overflow-hidden` through `cellProps` while it is live — so this renders the sweep layer beside the content,
+ * never around it: the date stays a plain `InlineDateEdit`, and the pen, the picker and the keyboard all work
+ * while it plays (and the first touch of any of them dismisses it). The third loop ending calls `onDismiss`;
+ * a new `playKey` (the value changed again) starts the three plays over. Web Animations, not CSS keyframes, so
+ * it needs nothing outside this file; colours are the system's tokens, by variable.
  */
 function AnimatedCell({
   live,
@@ -261,7 +264,9 @@ function AnimatedCell({
       dismiss.current();
       return undefined;
     }
-    const timing = { duration: SWEEP_MS, iterations: SWEEP_PLAYS } as const;
+    /* `forwards`: when the last loop ends the layers *stay* at their end state until React removes them —
+       without it they snap back to their start for a frame, which reads as one more flash. */
+    const timing = { duration: SWEEP_MS, iterations: SWEEP_PLAYS, fill: 'forwards' } as const;
     const a = sweep.current?.animate(
       [{ transform: 'translateX(-100%)' }, { transform: 'translateX(100%)' }],
       { ...timing, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
@@ -287,23 +292,31 @@ function AnimatedCell({
     };
   }, [live, playKey]);
 
-  if (!live) return <>{children}</>;
+  /* The same tree whether live or not: when the animation is dismissed by the first touch — often the pen
+     being pressed — the date editor must keep its place, or an open picker would be torn down under the
+     user's finger. Only the sweep layer comes and goes. */
   return (
-    <span
-      className="relative isolate -mx-2 inline-flex overflow-hidden rounded-sm px-2 py-1"
-      onMouseEnter={() => dismiss.current()}
-    >
-      <span
-        ref={sweep}
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-1/3 -z-10 bg-linear-105 from-transparent from-10% via-action-tertiary-content-default/75 via-50% to-transparent to-90%"
-      />
+    <>
+      {live && (
+        <span
+          ref={sweep}
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-1/3 -z-10 bg-linear-105 from-transparent from-10% via-action-tertiary-content-default/75 via-50% to-transparent to-90%"
+        />
+      )}
       <span ref={text} className="relative">
         {children}
       </span>
-    </span>
+    </>
   );
 }
+
+/** What a live date's `<td>` needs: to hold the sweep, and to dismiss it on the first touch (pointer or focus). */
+const liveCell = (dismiss: () => void) => ({
+  className: 'relative isolate overflow-hidden',
+  onMouseEnter: dismiss,
+  onFocusCapture: dismiss,
+});
 
 export function PlanningTable({
   className,
@@ -485,6 +498,7 @@ export function PlanningTable({
     },
     {
       key: 'start',
+      cellProps: (row) => (isLive(row, 'start') ? liveCell(() => dismissFlag(row, 'start')) : undefined),
       fit: true,
       width: '10%',
       label: 'Start Date',
@@ -520,6 +534,7 @@ export function PlanningTable({
     },
     {
       key: 'due',
+      cellProps: (row) => (isLive(row, 'due') ? liveCell(() => dismissFlag(row, 'due')) : undefined),
       fit: true,
       width: '11%',
       label: 'Due Date',
