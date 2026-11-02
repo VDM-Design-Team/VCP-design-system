@@ -14,9 +14,10 @@ import { Input } from '../../atoms/input';
  *   Cancel and a red Confirm.
  *
  * The first two are one form with a different noun, so `type` picks the copy
- * and nothing else. The third is a different dialog — a question, not a form —
- * so it is `role="alertdialog"`, has no close ✕, and ignores a backdrop click:
- * a stray click must not delete a domain. Escape and Cancel still close it.
+ * and nothing else (`mode="edit"` reuses it to rename — see `mode`). The third
+ * is a different dialog — a question, not a form — so it is `Modal`'s
+ * `tone="critical"`: an alertdialog with a grey Cancel and a red Confirm, no
+ * close ✕, and no backdrop dismissal, so a stray click cannot delete a domain.
  *
  * There is no general "confirm delete" modal in the system:
  * `ConfirmDeleteAVModal` is an alert layout built around an Added Value's
@@ -39,6 +40,14 @@ export interface TagManagementModalProps {
   onConfirm?: () => void;
   /** Spins the Submit / Confirm button while the request is in flight. */
   loading?: boolean;
+  /**
+   * `edit` renames an existing tag or domain: "Rename Tag", the field starts
+   * as `initialName`, and the button says Save. **Not in the Figma** — the
+   * pencil's dialog isn't drawn — so it is the add dialog, reused.
+   */
+  mode?: 'add' | 'edit';
+  /** The current name, for `mode="edit"`. */
+  initialName?: string;
 }
 
 const NOUN = { tag: 'Tag', domain: 'Domain' } as const;
@@ -50,14 +59,16 @@ export function TagManagementModal({
   onSubmit,
   onConfirm,
   loading,
+  mode = 'add',
+  initialName = '',
 }: TagManagementModalProps) {
   const formId = React.useId();
   const [name, setName] = React.useState('');
 
-  /* A fresh form every time it opens. */
+  /* A fresh form every time it opens — empty to add, the current name to edit. */
   React.useEffect(() => {
-    if (!open) setName('');
-  }, [open]);
+    setName(open && mode === 'edit' ? initialName : '');
+  }, [open, mode, initialName]);
 
   if (type === 'delete-domain') {
     return (
@@ -65,29 +76,19 @@ export function TagManagementModal({
         open={open}
         onClose={onClose}
         title="Are you sure you want to delete this domain?"
-        role="alertdialog"
+        tone="critical"
         size="md"
-        dismissible={false}
-        showClose={false}
-        footer={
-          <>
-            <Button variant="tertiary" size="sm" type="button" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button variant="danger" size="sm" type="button" loading={loading} onClick={onConfirm}>
-              Confirm
-            </Button>
-          </>
-        }
+        actions={{ confirm: { label: 'Confirm', onClick: onConfirm, loading } }}
       />
     );
   }
 
   const noun = NOUN[type];
   const trimmed = name.trim();
+  const editing = mode === 'edit';
 
   return (
-    <Modal open={open} onClose={onClose} title={`Add a new ${noun}`} size="md">
+    <Modal open={open} onClose={onClose} title={editing ? `Rename ${noun}` : `Add a new ${noun}`} size="md">
       <form
         id={formId}
         className="flex flex-col gap-6"
@@ -100,8 +101,8 @@ export function TagManagementModal({
           <Input fullWidth value={name} onChange={(event) => setName(event.target.value)} />
         </Field>
         <div className="flex justify-end">
-          <Button size="sm" type="submit" loading={loading} disabled={!trimmed}>
-            Submit
+          <Button size="sm" type="submit" loading={loading} disabled={!trimmed || (editing && trimmed === initialName.trim())}>
+            {editing ? 'Save' : 'Submit'}
           </Button>
         </div>
       </form>

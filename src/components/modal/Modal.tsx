@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { Button } from '../../atoms/button';
 import { IconButton } from '../../atoms/icon-button';
 
 /**
@@ -285,6 +286,21 @@ interface ModalBaseProps
    */
   footer?: React.ReactNode;
   /**
+   * The standard action row, so a dialog doesn't hand-build it: Cancel (calls
+   * `onClose`) and the one answer. In the default tone they are `secondary` +
+   * `primary`; in the `critical` tone they swap to `neutral` + `danger`.
+   * Ignored when `footer` is set — that is the slot for anything else.
+   */
+  actions?: ModalActions;
+  /**
+   * `critical` is for a dialog whose answer destroys something. It swaps the
+   * `actions` buttons to their critical pair (grey Cancel, red answer) and
+   * defaults the dialog to `role="alertdialog"`, no ✕ and no backdrop dismissal,
+   * so a stray click cannot confirm or cancel by accident. Each default can
+   * still be overridden. Escape always closes.
+   */
+  tone?: 'default' | 'critical';
+  /**
    * `alertdialog` for a destructive confirmation the user must answer. It makes
    * screen readers announce the description immediately, so give one.
    */
@@ -317,6 +333,21 @@ interface ModalBaseProps
  * 3. **`aria-label`** — last resort, for a dialog with no visible heading at
  *    all, like an image preview.
  */
+export interface ModalActions {
+  /** Cancel's label. */
+  cancelLabel?: string;
+  /** The answer: the primary (or, in the critical tone, red) button. */
+  confirm: {
+    label: string;
+    onClick?: () => void;
+    type?: 'button' | 'submit';
+    /** The `id` of a `<form>` to submit, when the form is in the body. */
+    form?: string;
+    loading?: boolean;
+    disabled?: boolean;
+  };
+}
+
 type ModalNameProps =
   | { title: React.ReactNode; 'aria-label'?: string; 'aria-labelledby'?: string }
   | { title?: undefined; 'aria-label': string; 'aria-labelledby'?: string }
@@ -333,10 +364,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     title,
     description,
     footer,
+    actions,
+    tone = 'default',
     size,
-    role = 'dialog',
-    dismissible = true,
-    showClose = true,
+    role = tone === 'critical' ? 'alertdialog' : 'dialog',
+    dismissible = tone !== 'critical',
+    showClose = tone !== 'critical',
     closeLabel = 'Close',
     initialFocusRef,
     returnFocusRef,
@@ -348,6 +381,33 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   },
   ref,
 ) {
+  /* The standard action row, unless the caller brought their own footer. */
+  const footerContent =
+    footer ??
+    (actions && (
+      <>
+        <Button
+          variant={tone === 'critical' ? 'neutral' : 'secondary'}
+          size="sm"
+          type="button"
+          onClick={onClose}
+        >
+          {actions.cancelLabel ?? 'Cancel'}
+        </Button>
+        <Button
+          variant={tone === 'critical' ? 'danger' : 'primary'}
+          size="sm"
+          type={actions.confirm.type ?? 'button'}
+          form={actions.confirm.form}
+          loading={actions.confirm.loading}
+          disabled={actions.confirm.disabled}
+          onClick={actions.confirm.onClick}
+        >
+          {actions.confirm.label}
+        </Button>
+      </>
+    ));
+
   /* SSR-safe: `document` is never read during render, only after mount. */
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
@@ -582,7 +642,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                outside the last control, and the scroll box would clip it at the
                padding edge. The footer's top padding is 4 shorter to compensate,
                so the visible gap stays 20. */
-            hasContent(footer) ? 'pb-1' : 'pb-5',
+            hasContent(footerContent) ? 'pb-1' : 'pb-5',
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
             bodyClassName,
           )}
@@ -595,9 +655,9 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             the same way the header is separated from the body. The padding is
             symmetric, and it is the footer's own, so the gap above the buttons
             is the same 20 whether the body scrolls or not. */}
-        {hasContent(footer) && (
+        {hasContent(footerContent) && (
           <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
-            {footer}
+            {footerContent}
           </footer>
         )}
       </div>

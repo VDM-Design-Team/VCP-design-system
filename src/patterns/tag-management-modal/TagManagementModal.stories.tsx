@@ -32,6 +32,9 @@ export const AddDomain: Story = { args: { type: 'domain' } };
 
 export const DeleteDomain: Story = { args: { type: 'delete-domain' } };
 
+/** Not in the Figma: the pencil's dialog is the add form, reused — name prefilled, Save off until it changes. */
+export const RenameTag: Story = { args: { mode: 'edit', initialName: 'Bug' } };
+
 export const Submitting: Story = { args: { loading: true, type: 'domain' } };
 
 export const DarkTheme: Story = { globals: { theme: 'dark' } };

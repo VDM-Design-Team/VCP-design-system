@@ -36,14 +36,17 @@ alert layout built around an AV. The delete here is the plain dialog Figma draws
 | `onSubmit` | `(name: string) => void` | — | `tag` / `domain`: the trimmed name |
 | `onConfirm` | `() => void` | — | `delete-domain` |
 | `loading` | `boolean` | `false` | Spins Submit / Confirm |
+| `mode` | `add \| edit` | `add` | `edit` renames: "Rename Tag", Save. **Not in Figma** — the add dialog, reused |
+| `initialName` | `string` | `''` | The current name, for `mode="edit"`. Save stays off until it changes |
 
 ## Accessibility
 
 - Add forms: "Tag Name" / "Domain Name" is a real label; Submit is off until the name has
   characters; the form is reset each time it opens.
-- Delete: `role="alertdialog"`, named by the question; no ✕ and a backdrop click does nothing,
-  so a stray click cannot delete a domain. Escape and Cancel still close it.
-- Confirm is the system's red `danger` button; Cancel is `tertiary`, as in the design.
+- Delete: `Modal`'s `tone="critical"` — `role="alertdialog"` named by the question; no ✕ and a
+  backdrop click does nothing, so a stray click cannot delete a domain. Escape and Cancel still close it.
+- Cancel is the system's **neutral** (grey outline) button and Confirm is `danger` (red). Figma draws
+  a plain dark-text Cancel; the neutral outline is the system's critical pair (see `docs/modal.md`).
 
 ## Don't
 
