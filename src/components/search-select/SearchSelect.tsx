@@ -135,7 +135,8 @@ interface SearchSelectBase
    * Search happens on your server: called with the text on every change in the search box (and
    * with `''` when the panel opens), and the component then stops filtering `options` itself, so
    * you pass what matches. Debounce it on your side; pair it with `loading` while the request runs.
-   * Picked values that are not in the current `options` still show, by their value.
+   * A pick keeps its name after it drops out of `options` (the field remembers every option it has
+   * been given); for a value set before any search, include its option in the first `options`.
    */
   onSearch?: (query: string) => void;
   /** What the panel says while `loading`. */
@@ -289,9 +290,15 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const [announce, setAnnounce] = React.useState('');
 
     const all = options.map(normalize);
+    /* Every option this field has been given, by value. With `onSearch` the page swaps `options`
+       for each search, so a pick can drop out of the current list; its name and tone still come
+       from here, not the raw value. */
+    const seen = React.useRef(new Map<string, SearchSelectOption>());
+    all.forEach((o) => seen.current.set(o.value, o));
+    const optionOf = (v: string) => all.find((x) => x.value === v) ?? seen.current.get(v);
     /* What the field, the tags and the announcements say: the short label when there is one. */
     const labelOf = (v: string) => {
-      const o = all.find((x) => x.value === v);
+      const o = optionOf(v);
       return o ? (o.shortLabel ?? o.label) : v;
     };
     const committed: readonly string[] =
@@ -471,6 +478,17 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       });
       setLabelIds((prev) => (prev.join(' ') === ids.join(' ') ? prev : ids));
     });
+    /* A click on the field's `<label>` focuses it, as it does a native `Select`, and does not open
+       the panel: a label passes its click on to the button it names, which would. */
+    React.useEffect(() => {
+      const labels = Array.from(triggerRef.current?.labels ?? []);
+      const onLabelClick = (e: MouseEvent) => {
+        e.preventDefault();
+        triggerRef.current?.focus();
+      };
+      labels.forEach((label) => label.addEventListener('click', onLabelClick));
+      return () => labels.forEach((label) => label.removeEventListener('click', onLabelClick));
+    }, [triggerId]);
     const hasValue = committed.length > 0;
     const nameParts = ariaLabelledBy ? [ariaLabelledBy] : ariaLabel ? [triggerId] : labelIds;
     const triggerName = hasValue && nameParts.length > 0 ? [...nameParts, valueId].join(' ') : ariaLabelledBy;
@@ -639,7 +657,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                     key={v}
                     data-select-tag={v}
                     size="sm"
-                    tone={rows === 'tag' ? (all.find((o) => o.value === v)?.tone ?? 'neutral') : 'neutral'}
+                    tone={rows === 'tag' ? (optionOf(v)?.tone ?? 'neutral') : 'neutral'}
                     onRemove={disabled ? undefined : () => removeTag(v)}
                     className={cn('shrink-0', disabledTag, i >= visible && 'hidden')}
                   >
