@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
+import { Icon } from '../icon';
 
 /**
  * Chip — an interactive pill: a selected filter, a removable tag, a toggleable

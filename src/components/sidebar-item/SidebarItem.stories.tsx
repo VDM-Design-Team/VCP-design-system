@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SidebarItem } from './SidebarItem';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 import { expect, userEvent, within } from 'storybook/test';
 

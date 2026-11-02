@@ -13,7 +13,7 @@ and `_Deliverable_Link_Actions`.
 | `IconButton` | atom |
 | `DeliverableLinkForm` | component |
 | `DomainLabel` | component |
-| `Tooltip` | component |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

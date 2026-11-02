@@ -98,9 +98,7 @@ const REMOVE_STATES: Record<ClassificationVariant, Record<ClassificationTone, st
   },
   filled: {
     neutral: 'hover:bg-surface-neutral-strong active:bg-surface-neutral-strong',
-    /* Pressed keeps the hover fill: in dark, `action.primary.surface.pressed` behind the
-       dark ✕ is 2.23:1. */
-    brand: 'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-hover',
+    brand: 'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed',
     info: 'hover:bg-accent-info-filled-surface-hover active:bg-accent-info-filled-surface-pressed',
     success: 'hover:bg-accent-success-filled-surface-hover active:bg-accent-success-filled-surface-pressed',
     warning: 'hover:bg-accent-warning-filled-surface-hover active:bg-accent-warning-filled-surface-pressed',

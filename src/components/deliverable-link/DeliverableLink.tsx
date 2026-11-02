@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { IconButton } from '../../atoms/icon-button';
 import { DomainLabel, type DomainKey } from '../domain-label';
 import { DeliverableLinkForm, type DeliverableLinkDraft } from '../deliverable-link-form';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * DeliverableLink — one link added to a deliverable: the domain it was added by, and its title as a

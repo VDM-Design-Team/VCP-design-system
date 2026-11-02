@@ -10,7 +10,7 @@ Read off Figma's `_Domain_Label` set (`7119:82657`): six domains, abbreviated, w
 | Piece | Tier |
 |---|---|
 | `Icon` | atom |
-| `Tooltip` | component |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

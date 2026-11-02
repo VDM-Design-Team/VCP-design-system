@@ -9,7 +9,7 @@ import {
 import { StatusTag, type StatusTagProps } from '../../components/status-tag';
 import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
-import { Pagination } from '../../components/pagination';
+import { Pagination } from '../../atoms/pagination';
 import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 import { TypeTag, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';

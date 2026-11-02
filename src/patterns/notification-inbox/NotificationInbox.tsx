@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Toggle } from '../../atoms/toggle';
-import { Pagination, type PaginationProps } from '../../components/pagination';
+import { Pagination, type PaginationProps } from '../../atoms/pagination';
 
 /**
  * NotificationInbox — the full notifications page's content: the controls ("Mark

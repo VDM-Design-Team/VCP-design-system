@@ -12,7 +12,7 @@ The popover's "View notifications inbox" link goes here.
 | Piece | Tier | Role here |
 |---|---|---|
 | `NotificationItem` | component | The rows, passed as children |
-| `Pagination` | component | The pager under the list |
+| `Pagination` | atom | The pager under the list |
 | `Button` | atom | "Mark all as read" (`tertiary`, `sm`) |
 | `Toggle` | atom | "Show unread only" |
 

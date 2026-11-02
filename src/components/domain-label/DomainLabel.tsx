@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * DomainLabel — the small pill that says which domain something came from: a glyph and two

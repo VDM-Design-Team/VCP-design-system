@@ -10,7 +10,7 @@ import { IconButton } from '../../atoms/icon-button';
 import { Input } from '../../atoms/input';
 import { Select } from '../../atoms/select';
 import { Menu, type MenuItem } from '../menu';
-import { CopyText } from '../copy-text';
+import { CopyText } from '../../atoms/copy-text';
 import { InlineEdit, InlineDateEdit } from '../inline-edit';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
