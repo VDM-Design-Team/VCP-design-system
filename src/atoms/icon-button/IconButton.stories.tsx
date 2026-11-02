@@ -25,7 +25,7 @@ const meta = {
       },
     },
   },
-  args: { icon: 'pencil-simple', label: 'Edit deliverable' },
+  args: { icon: 'note-pencil', label: 'Edit deliverable' },
   argTypes: {
     variant: {
       control: 'select',
@@ -47,7 +47,7 @@ export const Variants: Story = {
     <div className="flex items-center gap-3">
       <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" />
       <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" />
-      <IconButton {...args} variant="tertiary" icon="pencil-simple" label="Edit deliverable" />
+      <IconButton {...args} variant="tertiary" icon="note-pencil" label="Edit deliverable" />
       <IconButton {...args} variant="tonal" icon="note-pencil" label="Edit deliverable (tonal)" />
       <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" />
     </div>
@@ -163,7 +163,7 @@ export const LightAndDark: Story = {
       <div className="flex items-center gap-3 bg-surface-canvas p-6">
         <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" />
         <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" />
-        <IconButton {...args} variant="tertiary" icon="pencil-simple" label="Edit deliverable" />
+        <IconButton {...args} variant="tertiary" icon="note-pencil" label="Edit deliverable" />
       <IconButton {...args} variant="tonal" icon="note-pencil" label="Edit deliverable (tonal)" />
         <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" />
         <IconButton {...args} variant="secondary" icon="x" label="Dismiss" disabled />

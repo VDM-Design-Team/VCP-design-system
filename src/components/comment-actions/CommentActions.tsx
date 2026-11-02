@@ -164,7 +164,7 @@ export const CommentActions = React.forwardRef<HTMLDivElement, CommentActionsPro
           </Action>
         )}
         {onEdit && (
-          <Action icon="pencil-simple" aria-label={named('Edit {}')} onClick={onEdit}>
+          <Action icon="note-pencil" aria-label={named('Edit {}')} onClick={onEdit}>
             Edit
           </Action>
         )}
