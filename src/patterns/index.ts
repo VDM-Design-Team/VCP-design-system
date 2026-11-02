@@ -12,6 +12,7 @@ export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
+export * from './in-case-you-missed-it';
 export * from './comment-section';
 export * from './report-problem-modal';
 export * from './notification-inbox';
