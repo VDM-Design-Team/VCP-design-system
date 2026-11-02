@@ -185,33 +185,36 @@ export function PlanningTable({
     onCollapsedChange?.(next);
   };
 
+  /* Every column has a width, so the Cycle's table and the Backlog's line up: they are
+     separate tables, and left to size themselves each would fit its own content. */
   const columns: Array<DataTableColumn<PlanningRow>> = [
     {
       key: 'ref',
+      width: '9%',
       label: 'ID',
       render: (row) =>
         onOpen ? (
           <button
             type="button"
             onClick={() => onOpen(row)}
-            className="rounded-sm text-body-sm-regular text-text-tertiary transition-colors hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+            className="rounded-sm text-body-sm-regular whitespace-nowrap text-text-tertiary transition-colors hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
           >
             {row.ref}
             <span className="sr-only">: {row.title}</span>
           </button>
         ) : (
-          <span className="text-body-sm-regular text-text-tertiary">{row.ref}</span>
+          <span className="text-body-sm-regular whitespace-nowrap text-text-tertiary">{row.ref}</span>
         ),
     },
     {
       key: 'title',
+      width: '24%',
       label: 'Added Value Title',
       sortable: true,
-      width: '30%',
       render: (row) => (
         /* 16 above and below, Figma's own cell padding: with the domain tag that is the 81 row. */
         <div className="flex flex-col items-start gap-1 py-4">
-          <span className="max-w-full truncate text-label-sm-medium text-text-primary" title={row.title}>
+          <span className="block max-w-96 truncate text-label-sm-medium text-text-primary" title={row.title}>
             {row.title}
           </span>
           {row.domain && (
@@ -224,18 +227,21 @@ export function PlanningTable({
     },
     {
       key: 'urgency',
+      width: '11%',
       label: 'Urgency',
       hint: <ColumnHint text={hints?.urgency} column="urgency" />,
       render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2" /> : null),
     },
     {
       key: 'type',
+      width: '10%',
       label: 'Type',
       hint: <ColumnHint text={hints?.type} column="type" />,
       render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2" /> : null),
     },
     {
       key: 'initiator',
+      width: '6%',
       label: 'Initiator',
       render: (row) =>
         row.initiator ? (
@@ -244,6 +250,7 @@ export function PlanningTable({
     },
     {
       key: 'assignee',
+      width: '8%',
       label: 'Assignee',
       render: (row) =>
         row.assignee ? (
@@ -256,6 +263,7 @@ export function PlanningTable({
     },
     {
       key: 'start',
+      width: '9%',
       label: 'Start Date',
       hint: <ColumnHint text={hints?.start} column="start date" />,
       render: (row) =>
@@ -271,12 +279,14 @@ export function PlanningTable({
     },
     {
       key: 'points',
+      width: '5%',
       label: 'Points',
       hint: <ColumnHint text={hints?.points} column="points" />,
       render: (row) => <PointsCell row={row} onChange={onPointsChange} />,
     },
     {
       key: 'due',
+      width: '10%',
       label: 'Due Date',
       hint: <ColumnHint text={hints?.due} column="due date" />,
       render: (row) =>
@@ -321,7 +331,7 @@ export function PlanningTable({
                   aria-expanded={!isFolded}
                   aria-controls={bodyId}
                   onClick={() => toggle(section.id)}
-                  className="flex items-baseline gap-3 rounded-sm text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+                  className="flex items-baseline gap-3 rounded-sm text-left whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
                 >
                   <Icon
                     name={isFolded ? 'caret-down' : 'caret-up'}
@@ -336,7 +346,7 @@ export function PlanningTable({
                 </button>
               </h2>
               {hasCapacity && (
-                <dl className="m-0 flex flex-col text-body-md-regular text-text-primary">
+                <dl className="m-0 flex shrink-0 flex-col text-body-md-regular whitespace-nowrap text-text-primary">
                   <div className="flex gap-1">
                     <dt>Total Capacity:</dt>
                     <dd className="m-0 text-action-tertiary-content-default">{section.totalCapacity} Pts</dd>
@@ -354,6 +364,7 @@ export function PlanningTable({
                 rows={section.rows}
                 sort={sort}
                 onSortChange={onSortChange}
+                className="rounded-none border-0"
                 caption={`${section.title} Added Values`}
                 empty={empty}
               />
