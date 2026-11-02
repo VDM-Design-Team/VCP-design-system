@@ -141,7 +141,9 @@ export const InCaseYouMissedItCard = React.forwardRef<HTMLDivElement, InCaseYouM
         </button>
 
         {onDismiss && (
-          /* 48 to press, a 24 disc to look at: the design's `_Tonal_Remove_Button`. */
+          /* The design's `_Tonal_Remove_Button`: 48 to press, a 24 disc to look at. Hand-built for now — the system's
+             `RemoveButton` atom (tonal: a 20 disc, 40 to press, the same critical tokens) is in #212 and not on `main`
+             yet; swap to it when it lands, so every ✕ in the system is one piece. */
           <button
             type="button"
             aria-label={dismissLabel ?? `Dismiss ${title}`}
