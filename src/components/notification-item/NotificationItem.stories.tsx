@@ -41,7 +41,7 @@ const meta = {
           'One line in a list of notifications: who did what to which Added Value, when, and whether ' +
           'it has been read. The eleven kinds of event come from Figma\'s `_Message_Content`, and the ' +
           'component owns the sentence, so the bold and regular runs are the same everywhere. The whole ' +
-          'row is the target (`href` or `onSelect`), the comment preview included; the unread dot makes ' +
+          'row is the target (`href` or `onSelect`), except the comment preview, which does not open it; the unread dot makes ' +
           'way for the mark-read button on hover and on that button\'s focus. Put items in a list.',
       },
     },
@@ -313,8 +313,8 @@ export const WithCommentPreview: Story = {
   args: { preview: LONG_COMMENT },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    /* The comment is part of the row: the pointer lands on the row's link there. */
-    await expect(hitAt(canvas.getByText(/^Lorem ipsum/))).toBe(canvas.getByRole('link'));
+    /* The comment is not part of the row's target: the pointer lands on the comment, not the link. */
+    await expect(hitAt(canvas.getByText(/^Lorem ipsum/))).not.toBe(canvas.getByRole('link'));
     const more = await canvas.findByRole('button', { name: 'Show more' });
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(more);
@@ -336,10 +336,10 @@ export const ShortCommentPreview: Story = {
 const onReply = fn().mockName('onReply');
 
 /**
- * A click on the comment opens the item, like anywhere else on the row. "Show more"
- * and the caller's `previewActions` keep the pointer and their place in the tab order.
+ * A click on the comment does **not** open the item: the comment is content to read and select. The
+ * row around it still opens, and "Show more" and the caller's `previewActions` respond as controls.
  */
-export const CommentOpensTheItem: Story = {
+export const CommentDoesNotOpenTheItem: Story = {
   args: {
     href: undefined,
     onSelect: fn(),
@@ -356,12 +356,12 @@ export const CommentOpensTheItem: Story = {
     onReply.mockClear();
     const canvas = within(canvasElement);
     const row = canvas.getByRole('button', { name: /^Unread: John Kestrel commented on/ });
-    /* The comment's text: the pointer lands on the row, and the click opens it. */
+    /* The comment's text: the pointer lands on the comment, and the click does nothing to the row. */
     const comment = canvas.getByText(/^Lorem ipsum/);
-    await expect(hitAt(comment)).toBe(row);
+    await expect(hitAt(comment)).not.toBe(row);
     await userEvent.click(hitAt(comment));
-    await expect(args.onSelect).toHaveBeenCalledTimes(1);
-    /* "Show more" and "Reply" take the pointer back, and do not open the row. */
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    /* "Show more" and "Reply" are controls of their own, and do not open the row either. */
     const more = canvas.getByRole('button', { name: 'Show more' });
     await expect(more.contains(hitAt(more))).toBe(true);
     await userEvent.click(more);
@@ -371,6 +371,9 @@ export const CommentOpensTheItem: Story = {
     await expect(reply.contains(hitAt(reply))).toBe(true);
     await userEvent.click(reply);
     await expect(onReply).toHaveBeenCalledTimes(1);
+    await expect(args.onSelect).not.toHaveBeenCalled();
+    /* The row outside the comment still opens the item. */
+    await userEvent.click(row);
     await expect(args.onSelect).toHaveBeenCalledTimes(1);
     /* And the keyboard reaches each in turn: row, mark-read, Show less, Reply. */
     (document.activeElement as HTMLElement | null)?.blur();

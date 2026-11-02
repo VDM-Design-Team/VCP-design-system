@@ -16,8 +16,10 @@ import { Tooltip } from '../tooltip';
  * the backlog" itself, and the bold and regular runs are the same everywhere.
  *
  * The whole row is the target: pass `href` and it is a link, or `onSelect` and it
- * is a button, and a click anywhere on it opens the item, the comment preview
- * included. The unread dot is on the right until the row is hovered or the
+ * is a button, and a click anywhere on it opens the item **except on the comment
+ * preview**: the comment is content to read, select and expand, not part of the
+ * target, so only "Show more" / "Show less" (and the caller's `previewActions`)
+ * respond there. The unread dot is on the right until the row is hovered or the
  * mark-read button is focused, when it makes way for the design's mark-read /
  * mark-unread button; with no button (no `onToggleRead`) it stays. The comment
  * preview is the design's: three lines, then "Show more".
@@ -269,20 +271,12 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         </div>
 
         {preview && (
-          /* Lifted above the row's stretched target so its controls can be pressed,
-             but on an interactive row the pointer passes through everything else:
-             a click on the comment opens the item, like the rest of the row. Only
-             "Show more" and the caller's `previewActions` take the pointer back.
-             (`contents` keeps the caller's controls as direct children of the
-             column; `pointer-events` still inherits through it.) */
-          <div
-            className={cn(
-              'relative z-10 flex flex-col gap-1 pr-6 pl-13',
-              interactive && 'pointer-events-none',
-            )}
-          >
+          /* Lifted above the row's stretched target (`z-10`), so a click on the comment does
+             not open the item: the comment can be read and its text selected, and only "Show
+             more" and the caller's `previewActions` respond. */
+          <div className="relative z-10 flex flex-col gap-1 pr-6 pl-13">
             <CommentPreview text={preview} />
-            {previewActions && <div className="pointer-events-auto contents">{previewActions}</div>}
+            {previewActions}
           </div>
         )}
       </div>
@@ -342,7 +336,6 @@ function CommentPreview({ text }: { text: string }) {
           <Button
             variant="tertiary"
             size="sm"
-            className="pointer-events-auto"
             aria-expanded={expanded}
             aria-controls={id}
             onClick={() => setExpanded((open) => !open)}

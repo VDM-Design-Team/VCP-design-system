@@ -115,11 +115,9 @@ close; with no button the text keeps its 8.
 - **The whole row is one target**, a real `<a>` or `<button>` named from the
   sentence: "Unread: John commented on *Title*. a few seconds ago". The unread state
   is in the name as text, not only as a dot.
-- **The comment preview is part of that target.** A click on the comment card opens
-  the item like a click anywhere else on the row. Only "Show more" and the controls in
-  `previewActions` take the pointer back, and they stay in the tab order after the row
-  and its mark-read button. On a row with neither `href` nor `onSelect` the preview is
-  ordinary text.
+- **The comment preview is not part of that target.** A click on the comment card does **not** open the
+  item: it is content to read and select. Only "Show more" / "Show less" and the controls in `previewActions` respond
+  there, and they stay in the tab order after the row and its mark-read button.
 - **The mark-read button is a separate control**, named "Mark as read: *Title*" or "Mark as
   unread: *Title*" (so a list of them is not a list of identical names), reachable by Tab even when it is not visible. On an unread row it
   dissolves in where the dot was when the row is hovered or the button itself is
