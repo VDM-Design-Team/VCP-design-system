@@ -60,9 +60,9 @@ what you store and what you give back. `mentionedIds(body)` is who to notify.
 | A reply that was just sent opens its thread, so it is seen | Top-level order by `createdAt`, and replies oldest first (by `createdAt` when every reply has it, otherwise as you give them) | Showing an error when a send fails |
 
 **Handlers may be async.** Return a promise from `onAddComment`, `onReply` or `onEdit` and the box
-shows its spinner until it settles. It clears when it resolves and **keeps what was typed if it
-rejects**, so report the failure (a toast, a message) in your own handler. The box only promises not
-to lose the text.
+shows its spinner until it settles. When it resolves it clears what was sent, and only that: anything
+typed while it was sending stays. It **keeps what was typed if it rejects**, so report the failure (a
+toast, a message) in your own handler. The box only promises not to lose the text.
 
 ## Props
 
@@ -117,7 +117,12 @@ apart, as the frame. Every part is a piece of the system.
   to the comments. Give a second section on the same page its own `title`: two landmarks with one
   name are a violation.
 - Each comment is an `<article>`, the replies are a `list`, and the toggle controls it
-  (`aria-expanded`, `aria-controls`). The boxes open focused. The rest is the pieces'.
+  (`aria-controls`, while it is open; its words say whether it is). The boxes open focused. The rest is
+  the pieces'.
+- The focus is never dropped. A reply that is sent, or an edit that is saved or cancelled, hands it back
+  to the Reply or Edit that opened the box. Deleting a comment moves it, once the comment has gone, to
+  the comment that took its place: the next one, else the one before, else the one it replied to, else
+  the new-comment box.
 - Edit and Delete exist only on the user's own comments, not just hidden: the buttons are absent.
 
 ## Don't

@@ -82,7 +82,9 @@ Differences from the frame, each settled elsewhere in the system:
 
 - Each comment is an `<article>`; the time is a `<time>` with `dateTime`.
 - The boxes are named for what they do ("Reply to John Smith", "Edit comment") and open
-  focused, so a keyboard user lands in the field they asked for.
+  focused, so a keyboard user lands in the field they asked for. When a box closes (sent, saved
+  or cancelled) the focus goes back to the Reply or Edit that opened it, unless it has already
+  moved somewhere else.
 - The actions and their names are `CommentActions`'. The thread line is decoration.
 - Edit and Delete exist only when the handlers were given: leave them off for a comment
   that is not the person's own.

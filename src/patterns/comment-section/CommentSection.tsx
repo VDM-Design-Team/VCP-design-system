@@ -131,6 +131,22 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
     const [replyingTo, setReplyingTo] = React.useState<string | null>(null);
     const [editing, setEditing] = React.useState<string | null>(null);
 
+    /* A deleted comment takes the focus with it. Once it has gone from the list, the focus goes
+       to the comment that took its place: the next one, else the one before, else the one it
+       replied to, else the new-comment box. It waits for the comment to go, so a delete the page
+       confirms first, or one that is cancelled, is left alone. */
+    const root = React.useRef<HTMLElement | null>(null);
+    const afterDelete = React.useRef<{ gone: string; next: string | null } | null>(null);
+    React.useEffect(() => {
+      const pending = afterDelete.current;
+      const section = root.current;
+      if (!pending || !section || section.querySelector(`[data-comment-id="${pending.gone}"]`)) return;
+      afterDelete.current = null;
+      if (document.activeElement && document.activeElement !== document.body) return;
+      const target = pending.next ? section.querySelector<HTMLElement>(`[data-comment-id="${pending.next}"]`) : null;
+      (target ?? section.querySelector<HTMLElement>('[role="textbox"]'))?.focus();
+    }, [comments]);
+
     const isOpen = (id: string) => open[id] ?? defaultRepliesOpen;
     const toggle = (id: string) => setOpen((o) => ({ ...o, [id]: !(o[id] ?? defaultRepliesOpen) }));
 
@@ -140,14 +156,25 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
     const Heading = `h${headingLevel}` as const;
 
     /* Replies are a conversation: oldest first, by time when they all carry one. */
-    const replies = (list?: readonly CommentData[]) =>
-      list && (list.every((r) => r.createdAt) ? [...list].sort(byTime('oldest')) : list).map(render);
+    const replies = (list: readonly CommentData[] | undefined, parent: string) =>
+      list &&
+      (list.every((r) => r.createdAt) ? [...list].sort(byTime('oldest')) : list).map((reply, i, shown) =>
+        render(reply, i, shown, parent),
+      );
 
-    const render = (comment: CommentData): React.ReactNode => {
+    /* `shown` is the comment's siblings in the order they are drawn, for where the focus goes after a delete. */
+    const render = (
+      comment: CommentData,
+      i: number,
+      shown: readonly CommentData[],
+      parent: string | null = null,
+    ): React.ReactNode => {
       const mine = comment.author.id === currentUser.id;
       return (
         <CommentReplyThread
           key={comment.id}
+          data-comment-id={comment.id}
+          tabIndex={-1}
           author={comment.author}
           time={comment.time}
           dateTime={comment.createdAt}
@@ -173,7 +200,14 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
                 }
               : undefined
           }
-          onDelete={mine && onDelete ? () => onDelete(comment.id) : undefined}
+          onDelete={
+            mine && onDelete
+              ? () => {
+                  afterDelete.current = { gone: comment.id, next: shown[i + 1]?.id ?? shown[i - 1]?.id ?? parent };
+                  onDelete(comment.id);
+                }
+              : undefined
+          }
           editing={editing === comment.id}
           onCancelEdit={() => setEditing(null)}
           onSubmitEdit={async (body) => {
@@ -197,14 +231,18 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
             setOpen((o) => ({ ...o, [comment.id]: true }));
           }}
         >
-          {replies(comment.replies)}
+          {replies(comment.replies, comment.id)}
         </CommentReplyThread>
       );
     };
 
     return (
       <section
-        ref={ref}
+        ref={(node) => {
+          root.current = node;
+          if (typeof ref === 'function') ref(node);
+          else if (ref) ref.current = node;
+        }}
         aria-labelledby={headingId}
         className={cn('flex flex-col gap-4 font-sans', className)}
         {...props}

@@ -49,7 +49,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 a mention in it is not empty. Ctrl or Cmd + Enter sends; Enter makes a line break.
 
 **`onSubmit` may be async, and the box is honest about it.** Return a promise and the button shows its
-spinner until it settles. The box clears when it resolves and **keeps what was typed if it rejects**:
+spinner until it settles. When it resolves the box clears what was sent, and only that (words typed
+while it was sending stay, the caret at their end), and it **keeps what was typed if it rejects**:
 report the error in your handler, since the box only promises not to lose the text. Return nothing and it
 clears at once. Control `value` yourself and none of this applies.
 
