@@ -89,19 +89,6 @@ export const EmptySection: Story = {
   },
 };
 
-export const WithPagination: Story = {
-  args: {
-    defaultCollapsed: ['backlog'],
-    page: 2,
-    pageCount: 25,
-    onPageChange: () => {},
-    itemCount: 1250,
-    pageSize: 50,
-    pageSizeOptions: [25, 50, 100],
-    onPageSizeChange: () => {},
-  },
-};
-
 /**
  * Every header glyph has the design's tooltip by default: Start Date, Points and Due Date the formula
  * copy under a ƒ in a ring; Urgency and Type Figma's own; Status a placeholder (Figma has none). Pass a

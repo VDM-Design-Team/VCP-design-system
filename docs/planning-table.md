@@ -14,7 +14,6 @@ avatar. `DataTable` specialised, as `AVTable` is. Read off the Figma Planning Pa
 | `CopyText` | atom |
 | `Avatar` | atom |
 | `Icon` | sub-atomic |
-| `Pagination` | atom |
 | `Select` | atom |
 | `Tag` | atom |
 | `Tooltip` | atom |
@@ -48,8 +47,6 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onStartChange` / `onDueChange` | `(row, iso) => void` | — | Each date edits in place only if its callback is given |
 | `onPointsChange` | `(row, points) => void` | — | Same, for points — chosen from a dropdown, as the flow draws it |
 | `pointOptions` | `number[]` | `[0, 1, 2, 3, 5, 8, 13]` | The Points dropdown's choices (the capacity scale the detail card uses). A row's own value always stays choosable |
-| `page` / `pageCount` / `onPageChange` | | — | Pagination renders only when all three are given |
-| `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | With the pagination: the "Items 50 ▾" selector and the "1-50 of 1,250" range |
 | `hints` | `{ urgency, type, start, points, due, status }` | the product's copy | The header tooltips. Start Date, Points and Due Date are the formula columns (ƒ in a ring, brand blue, as wide as the ⓘ's circle); Urgency, Type and Status use the copy their own pieces own, as `AVTable` does. Pass a string or node to change a column's copy, `''` to drop its glyph |
 | `empty` | `ReactNode` | — | What a section with no rows says |
 

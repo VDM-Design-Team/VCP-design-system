@@ -4,7 +4,6 @@ import { Avatar } from '../../atoms/avatar';
 import { Icon } from '../../atoms/icon';
 import { CopyText } from '../../atoms/copy-text';
 import { Select } from '../../atoms/select';
-import { Pagination } from '../../atoms/pagination';
 import { Tag } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
 import type { AssigneeAvailability } from '../../atoms/assignee-status';
@@ -42,7 +41,7 @@ import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../component
  *   callback; give none and the cell just reads. An *estimated* date reads with
  *   "(est.)" after it. The tooltip says what that means.
  * - **It does not sort, fetch or paginate.** `sections` render in the order
- *   given; `sort` and `page` are the caller's, as in `DataTable`.
+ *   given; `sort` is the caller's, as in `DataTable`, and paging is the page's.
  *
  * Not here, by design: the filter row above the table, which is tracked separately.
  *
@@ -141,15 +140,6 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   onAnimationDismiss?: (row: PlanningRow, field: 'start' | 'due') => void;
   /** The points a row can take — the Points dropdown's choices. Defaults to the capacity scale. */
   pointOptions?: readonly number[];
-  /** Pagination renders only when all three are given. 1-based. */
-  page?: number;
-  pageCount?: number;
-  onPageChange?: (page: number) => void;
-  /** With the pagination: the "Items 50 ▾" selector and "1-50 of 1,250" range (`Pagination`'s own props). */
-  itemCount?: number;
-  pageSize?: number;
-  pageSizeOptions?: readonly number[];
-  onPageSizeChange?: (pageSize: number) => void;
   /** Overrides for the info tooltips. The three formula columns default to the design's copy. */
   hints?: PlanningTableHints;
   /** What a section with no rows says. */
@@ -333,13 +323,6 @@ export function PlanningTable({
   onPointsChange,
   onAnimationDismiss,
   pointOptions = DEFAULT_POINT_OPTIONS,
-  page,
-  pageCount,
-  onPageChange,
-  itemCount,
-  pageSize,
-  pageSizeOptions,
-  onPageSizeChange,
   hints: hintOverrides,
   empty,
   ...props
@@ -571,8 +554,6 @@ export function PlanningTable({
     },
   ];
 
-  const paginated = page !== undefined && pageCount !== undefined && onPageChange !== undefined;
-
   return (
     <div className={cn('flex flex-col gap-5', className)} {...props}>
       {sections.map((section) => {
@@ -693,19 +674,6 @@ export function PlanningTable({
         );
       })}
 
-      {paginated && (
-        <div className="flex justify-end">
-          <Pagination
-            page={page}
-            pageCount={pageCount}
-            onChange={onPageChange}
-            itemCount={itemCount}
-            pageSize={pageSize}
-            pageSizeOptions={pageSizeOptions}
-            onPageSizeChange={onPageSizeChange}
-          />
-        </div>
-      )}
     </div>
   );
 }
