@@ -6,15 +6,21 @@ import {
   AssigneeSelectionDropdown,
   type AssigneeOption,
 } from '../../components/assignee-selection-dropdown';
+import { formatCycleRange } from '../../components/cycle-tag';
 import { DateField } from '../../components/date-field';
 import { Field } from '../../components/field';
 import { Modal } from '../../components/modal';
+import { SearchSelect } from '../../components/search-select';
 
 /**
- * AddRequiredDetailsModal — the dialog a Backlog row opens when it is dropped on a Cycle without what the Cycle
+ * MoveAVToCycleModal — the dialog a Backlog row opens when it is dropped on a Cycle without what the Cycle
  * needs: an assignee, a due date, capacity points. Built to Figma's `Add_Required_Details_Planning_List`
  * (`6585:120063`) and the Assignee Availability flows (*Possible ways to fill in the modal*, *Drag and Drop
  * Opens Modal*).
+ *
+ * **Naming.** Named for what it does, like `HandoffAVModal` and `AcceptPendingAVModal`: moving an Added Value into a
+ * Cycle. It was first `AddRequiredDetailsModal`, after Figma's component and the dialog's title — which is
+ * still "Add Required Details" on screen. Search for either name to find it.
  *
  * - **Assignee** (repeatable, the "+" beside its label): a person from `AssigneeSelectionDropdown` — so their
  *   availability for the dates below is on every row — a role, and capacity points, with a ⊖ to remove the
@@ -39,7 +45,7 @@ import { Modal } from '../../components/modal';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
-export interface RequiredDetailsDate {
+export interface MoveAVToCycleDate {
   /** ISO `yyyy-mm-dd`. */
   value: string;
   /** Calculated, not set by a person. */
@@ -54,48 +60,51 @@ interface AssigneeRowDraft {
 }
 
 /** What is on screen — handed to `estimate`, and to `people` when that is a function. */
-export interface AddRequiredDetailsDraft {
+export interface MoveAVToCycleDraft {
   assignees: ReadonlyArray<{ person: string; role: string; points: number | undefined }>;
-  start?: RequiredDetailsDate;
-  due?: RequiredDetailsDate;
+  start?: MoveAVToCycleDate;
+  due?: MoveAVToCycleDate;
   cycle?: string;
   points?: number;
 }
 
-export interface AddRequiredDetailsResult {
+export interface MoveAVToCycleResult {
   assignees: Array<{ person: string; role: string; points: number | undefined }>;
-  start?: RequiredDetailsDate;
-  due?: RequiredDetailsDate;
+  start?: MoveAVToCycleDate;
+  due?: MoveAVToCycleDate;
   cycle?: string;
   points: number;
 }
 
 /** Why Confirm did not go through. */
-export type RequiredDetailsInvalid = 'unavailable-assignee' | 'missing-details';
+export type MoveAVToCycleInvalid = 'unavailable-assignee' | 'missing-details';
 
-export interface AddRequiredDetailsModalProps {
+export interface MoveAVToCycleModalProps {
   open: boolean;
   /** Asked to close: Escape, ✕, Cancel, a backdrop click. */
   onClose: () => void;
   /** The details, once, when they are complete and no assignee is unavailable. You own `open`. */
-  onConfirm: (details: AddRequiredDetailsResult) => void;
+  onConfirm: (details: MoveAVToCycleResult) => void;
   /** Confirm was pressed and could not go through. Where the "Unavailable Assignee" toast belongs. */
-  onInvalid?: (reason: RequiredDetailsInvalid) => void;
+  onInvalid?: (reason: MoveAVToCycleInvalid) => void;
   /** Who can be assigned. A function gets the draft, so availability can follow the dates. */
-  people: ReadonlyArray<AssigneeOption> | ((draft: AddRequiredDetailsDraft) => ReadonlyArray<AssigneeOption>);
-  /** The cycles on offer — `{ value, label }`, the label being "Mar 02, 2026 - Mar 23, 2026". */
-  cycles: ReadonlyArray<{ value: string; label: string }>;
+  people: ReadonlyArray<AssigneeOption> | ((draft: MoveAVToCycleDraft) => ReadonlyArray<AssigneeOption>);
+  /**
+   * The cycles on offer: `{ value, code, start, end }` (dates ISO). A row reads "C36 (Mar 02, 2026 - Mar 23, 2026)" with
+   * the code in bold; the field keeps to the code — `SearchSelect`'s short label, as everywhere a cycle is picked.
+   */
+  cycles: ReadonlyArray<{ value: string; code: string; start: string; end: string }>;
   /** The roles an assignee can take. */
   roles?: readonly string[];
   /** The capacity scale for an assignee's points and the AV's. */
   pointOptions?: readonly number[];
   /** What is known when the dialog opens — a Backlog row's own dates, say. */
-  initial?: { start?: RequiredDetailsDate; due?: RequiredDetailsDate; cycle?: string; points?: number };
+  initial?: { start?: MoveAVToCycleDate; due?: MoveAVToCycleDate; cycle?: string; points?: number };
   /**
    * Calculates the dates the user has not set. Called on every change to the assignees, points or cycle; return
    * the ISO dates you can work out. Whatever it returns is shown "(est.)" in a date a person has not touched.
    */
-  estimate?: (draft: AddRequiredDetailsDraft) => { start?: string; due?: string };
+  estimate?: (draft: MoveAVToCycleDraft) => { start?: string; due?: string };
   /** Spins Confirm while the move is in flight. */
   loading?: boolean;
 }
@@ -107,7 +116,7 @@ let rowCounter = 0;
 const newRow = (role: string): AssigneeRowDraft => ({ id: `row-${(rowCounter += 1)}`, person: '', role, points: '' });
 const asNumber = (v: string) => (v === '' ? undefined : Number(v));
 
-export function AddRequiredDetailsModal({
+export function MoveAVToCycleModal({
   open,
   onClose,
   onConfirm,
@@ -119,10 +128,10 @@ export function AddRequiredDetailsModal({
   initial,
   estimate,
   loading,
-}: AddRequiredDetailsModalProps) {
+}: MoveAVToCycleModalProps) {
   const [rows, setRows] = React.useState<AssigneeRowDraft[]>([]);
-  const [start, setStart] = React.useState<RequiredDetailsDate | undefined>(initial?.start);
-  const [due, setDue] = React.useState<RequiredDetailsDate | undefined>(initial?.due);
+  const [start, setStart] = React.useState<MoveAVToCycleDate | undefined>(initial?.start);
+  const [due, setDue] = React.useState<MoveAVToCycleDate | undefined>(initial?.due);
   const [cycle, setCycle] = React.useState(initial?.cycle ?? '');
   const [points, setPoints] = React.useState(initial?.points === undefined ? '' : String(initial.points));
   const [errors, setErrors] = React.useState<{ assignee?: string; due?: string; points?: string }>({});
@@ -139,7 +148,7 @@ export function AddRequiredDetailsModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const draft: AddRequiredDetailsDraft = {
+  const draft: MoveAVToCycleDraft = {
     assignees: rows.filter((r) => r.person).map((r) => ({ person: r.person, role: r.role, points: asNumber(r.points) })),
     start,
     due,
@@ -280,11 +289,27 @@ export function AddRequiredDetailsModal({
         </Field>
 
         <Field label="Cycle">
-          <Select
+          <SearchSelect
             fullWidth
+            aria-label="Cycle"
             placeholder="Select a cycle"
+            searchPlaceholder="Search cycles"
             value={cycle}
-            options={cycles.map((c) => ({ value: c.value, label: c.label }))}
+            options={cycles.map((c) => ({
+              value: c.value,
+              label: `${c.code} (${formatCycleRange(c.start, c.end)})`,
+              shortLabel: c.code,
+            }))}
+            renderOption={(option) => {
+              const c = cycles.find((x) => x.value === option.value);
+              return c ? (
+                <span className="truncate">
+                  <strong className="text-label-sm-semibold">{c.code}</strong> ({formatCycleRange(c.start, c.end)})
+                </span>
+              ) : (
+                option.label
+              );
+            }}
             onChange={setCycle}
           />
         </Field>
@@ -296,4 +321,4 @@ export function AddRequiredDetailsModal({
     </Modal>
   );
 }
-AddRequiredDetailsModal.displayName = 'AddRequiredDetailsModal';
+MoveAVToCycleModal.displayName = 'MoveAVToCycleModal';

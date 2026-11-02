@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
-import { AddRequiredDetailsModal } from './AddRequiredDetailsModal';
+import { MoveAVToCycleModal } from './MoveAVToCycleModal';
 import type { AssigneeOption } from '../../components/assignee-selection-dropdown';
 
 const PEOPLE: AssigneeOption[] = [
@@ -11,17 +11,17 @@ const PEOPLE: AssigneeOption[] = [
 ];
 
 const CYCLES = [
-  { value: 'c27', label: 'Mar 02, 2026 - Mar 23, 2026' },
-  { value: 'c28', label: 'Mar 24, 2026 - Apr 06, 2026' },
+  { value: 'c27', code: 'C27', start: '2026-03-02', end: '2026-03-23' },
+  { value: 'c28', code: 'C28', start: '2026-03-24', end: '2026-04-06' },
 ];
 
 /** The shape of the flow's calculation, nothing more: once someone is assigned, the due date can be worked out. */
-const estimate: React.ComponentProps<typeof AddRequiredDetailsModal>['estimate'] = (draft) =>
+const estimate: React.ComponentProps<typeof MoveAVToCycleModal>['estimate'] = (draft) =>
   draft.assignees.length ? { due: '2026-03-12' } : {};
 
 const meta = {
-  title: 'Patterns/AddRequiredDetailsModal',
-  component: AddRequiredDetailsModal,
+  title: 'Patterns/MoveAVToCycleModal',
+  component: MoveAVToCycleModal,
   parameters: {
     layout: 'centered',
     docs: {
@@ -42,7 +42,7 @@ const meta = {
     cycles: CYCLES,
     initial: { start: { value: '2026-03-02', estimated: true }, cycle: 'c27' },
   },
-} satisfies Meta<typeof AddRequiredDetailsModal>;
+} satisfies Meta<typeof MoveAVToCycleModal>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

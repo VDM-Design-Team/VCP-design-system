@@ -1,4 +1,8 @@
-# AddRequiredDetailsModal
+# MoveAVToCycleModal
+
+> **Also known as** `AddRequiredDetailsModal` — its first name, taken from Figma's `Add_Required_Details_Planning_List` and the title
+> on screen ("Add Required Details"). Renamed to match the other dialogs (`HandoffAVModal`, `AcceptPendingAVModal`: the action, then the
+> Added Value); search for either name.
 
 The dialog a Backlog row opens when it is dropped on a Cycle without what the Cycle needs: an assignee, a due date, capacity
 points. Built to Figma's `Add_Required_Details_Planning_List` (`6585:120063`) and the Assignee Availability flows.
@@ -14,6 +18,8 @@ points. Built to Figma's `Add_Required_Details_Planning_List` (`6585:120063`) an
 | `DateField` | component |
 | `Field` | component |
 | `Modal` | component |
+| `SearchSelect` | component |
+| `CycleTag` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -21,7 +27,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `AddRequiredDetailsModal` | The step between a drop on a Cycle (`PlanningTable`'s `onMoveRow`) and the move happening |
+| `MoveAVToCycleModal` | The step between a drop on a Cycle (`PlanningTable`'s `onMoveRow`) and the move happening |
 | `ConfirmDeleteAVModal` / `Modal` | Other dialogs |
 
 ## Props
@@ -32,7 +38,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onConfirm` | `(details) => void` | required | `{ assignees: [{ person, role, points }], start?, due?, cycle?, points }` — only when complete and no assignee is unavailable |
 | `onInvalid` | `(reason) => void` | — | `'missing-details'` or `'unavailable-assignee'`: Confirm did not go through. Where the product's "Unavailable Assignee" toast belongs |
 | `people` | `AssigneeOption[] \| (draft) => AssigneeOption[]` | required | A function gets the draft, so availability can follow the dates |
-| `cycles` | `{ value, label }[]` | required | |
+| `cycles` | `{ value, code, start, end }[]` | required | Dates ISO. Picked in a `SearchSelect`: rows read **C36** (Mar 02, 2026 - Mar 23, 2026) with the code in bold, the field shows just the code — as everywhere a cycle is picked |
 | `roles` | `string[]` | `Assignee, QA, Design` | |
 | `pointOptions` | `number[]` | `0, 1, 2, 3, 5, 8, 13` | The capacity scale, for an assignee's points and the AV's |
 | `initial` | `{ start?, due?, cycle?, points? }` | — | What is known on open, e.g. a Backlog row's own dates. `start` / `due` are `{ value, estimated? }` |
