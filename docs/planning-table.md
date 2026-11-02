@@ -62,6 +62,8 @@ Date · Status. The mappings live where they always did: `StatusTag`, `UrgencyTa
 
 ## Sections
 
+The header wraps on a narrow screen: the capacity lines drop under the title rather than running out of the card, and a long date range truncates.
+
 Each is a card: a caret button, the title with its dates, and — for a cycle — Total Capacity and
 Capacity Remaining in points, in the design's blue — `action.tertiary.content`, not `text.brand.medium`, whose dark value is 3.9:1 on the card. The Backlog has neither. The caret is one glyph that turns in place (as `Accordion`'s does), 20 in `text.secondary` — the title is
 the heading, the caret only its hinge. It is a real button inside the heading (`aria-expanded`,
@@ -106,7 +108,7 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
 
 ## Dragging
 
-Backlog rows are always draggable and each Cycle is a drop target: it takes a blue outline while a row
+`sections` is a list, so **any number of Cycles can be on the page at once** (and a Backlog, or none). Backlog rows are always draggable and every Cycle is a drop target: it takes a blue outline while a row
 is over it. Dropping calls `onMoveRow(row, from, to)`; **nothing moves until you move it** (the design opens a
 dialog first, and the move happens on confirm).
 

@@ -152,24 +152,38 @@ export const FoldingAndEditing: Story = {
   },
 };
 
-/**
- * Drag a Backlog row onto the Cycle: the Cycle takes a blue outline while it is over, and on the drop
- * the table calls `onMoveRow` and moves nothing — in the design that opens *Add Required Details*, and
- * the move happens when it is confirmed. With no `onMoveRow`, rows are not draggable.
- */
-export const DraggingToACycle: Story = {
-  args: { onMoveRow: fn() },
+/** More than one Cycle can be on the page at once: each is a drop target, and a Backlog row can go to any of them. */
+export const MultipleCycles: Story = {
+  args: {
+    defaultCollapsed: ['cycle-28'],
+    sections: [
+      SECTIONS[0]!,
+      {
+        id: 'cycle-28',
+        kind: 'cycle',
+        title: 'Cycle 28',
+        dates: '(Mar 16, 2026 - Mar 30, 2026)',
+        totalCapacity: 240,
+        remainingCapacity: 212,
+        rows: [row(6)],
+      },
+      SECTIONS[1]!,
+    ],
+    onMoveRow: fn(),
+  },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const source = canvas.getByText('VCP-1234').closest('tr')!;
-    const cycle = canvas.getByRole('region', { name: /Cycle 27/ });
+    const next = canvas.getByRole('region', { name: /Cycle 28/ });
+    const first = canvas.getByRole('region', { name: /Cycle 27/ });
     const data = new DataTransfer();
     await fireEvent.dragStart(source, { dataTransfer: data });
-    await fireEvent.dragOver(cycle, { dataTransfer: data });
-    await expect(cycle).toHaveClass('outline-2');
-    await fireEvent.drop(cycle, { dataTransfer: data });
-    await expect(args.onMoveRow).toHaveBeenCalledTimes(1);
+    await fireEvent.dragOver(next, { dataTransfer: data });
+    /* Only the Cycle it is over lights up. */
+    await expect(next).toHaveClass('outline-2');
+    await expect(first).not.toHaveClass('outline-2');
+    await fireEvent.drop(next, { dataTransfer: data });
     const [row, from, to] = (args.onMoveRow as ReturnType<typeof fn>).mock.calls[0]!;
-    await expect([row.ref, from.id, to.id]).toEqual(['VCP-1234', 'backlog', 'cycle-27']);
+    await expect([row.ref, from.id, to.id]).toEqual(['VCP-1234', 'backlog', 'cycle-28']);
   },
 };

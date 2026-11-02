@@ -435,14 +435,14 @@ export function PlanningTable({
                 : undefined
             }
           >
-            <header className="flex items-center justify-between gap-6 p-6">
-              <h2 id={headingId} className="m-0 text-title-md-semibold text-text-primary">
+            <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 p-6">
+              <h2 id={headingId} className="m-0 min-w-0 text-title-md-semibold text-text-primary">
                 <button
                   type="button"
                   aria-expanded={!isFolded}
                   aria-controls={bodyId}
                   onClick={() => toggle(section.id)}
-                  className="flex items-baseline gap-3 rounded-sm text-left whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+                  className="flex max-w-full items-baseline gap-3 rounded-sm text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
                 >
                   {/* One glyph that turns in place, as `Accordion`'s caret does — not two swapped.
                       20 in `text.secondary`: the title is the heading, the caret only a hinge. */}
@@ -455,9 +455,9 @@ export function PlanningTable({
                       !isFolded && 'rotate-180',
                     )}
                   />
-                  <span>{section.title}</span>
+                  <span className="whitespace-nowrap">{section.title}</span>
                   {section.dates && (
-                    <span className="text-body-md-regular text-text-primary">{section.dates}</span>
+                    <span className="truncate text-body-md-regular text-text-primary">{section.dates}</span>
                   )}
                 </button>
               </h2>
