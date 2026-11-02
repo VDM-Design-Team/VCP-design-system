@@ -30,7 +30,9 @@ import { Icon, type IconName } from '../icon';
  *
  * The name lives on the `<button>`. The `Icon` inside stays decorative — it is
  * rendered without a `label`, so `Icon` marks it `aria-hidden`. Naming both
- * makes the control announce itself twice.
+ * makes the control announce itself twice. For the same reason the name and the
+ * native hover hint are one attribute, never two: alone, `title` is both; under a
+ * `Tooltip`, it is `aria-label` and there is no `title`.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -149,13 +151,16 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
        bubble on top of it, which the caller has no way to suppress. */
     const marked = props as { 'aria-describedby'?: string; 'data-tooltip'?: string };
     const describedBy = marked['aria-describedby'] || marked['data-tooltip'];
+    /* Alone, `title` is the name as well as the hint. Beside an `aria-label`, a
+       title the name didn't come from is read again as the description:
+       "Add deliverable, button, Add deliverable". */
     return (
       <button
         ref={ref}
         className={cn(iconButton({ variant, size, shape }), className)}
         /* The name sits here and stays put through the loading state, so the
            control never changes identity mid-announcement. */
-        aria-label={label}
+        aria-label={describedBy ? label : undefined}
         title={describedBy ? undefined : label}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
