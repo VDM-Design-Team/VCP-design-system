@@ -39,7 +39,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The quiet destructive control — a row's bin. A red glyph; tonal red on hover. */
+/** The quiet destructive control — a row's bin. A red glyph; only its colour changes on hover and press, like `tertiary`. */
 export const Critical: Story = {
   args: { variant: 'critical', icon: 'trash-simple', label: 'Delete tag' },
 };

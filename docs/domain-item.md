@@ -44,7 +44,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Type | Name | Right side | Notes |
 |---|---|---|---|
-| `default` | `text.primary` | pencil-in-square, red bin | The bin is `IconButton` `critical` — a red glyph, tonal red on hover |
+| `default` | `text.primary` | pencil-in-square, red bin | Both buttons are textual: the bin is `IconButton` `critical`, the pencil `tertiary`; only the glyph colour changes on hover and press |
 | `locked` | `text.tertiary` | "Default" `Tag` (`sm`, neutral) | Built-in value: cannot be edited, deleted or moved |
 | `draggable` | `text.primary` | pencil-in-square, red bin | A 24 grip at the left (`dots-six-vertical`) |
 

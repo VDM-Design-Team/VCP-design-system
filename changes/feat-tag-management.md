@@ -13,4 +13,4 @@ New, built to Figma's Tag Management page.
 
 **`TagManagementModal`** — `mode="edit"` + `initialName` rename a tag or domain (not drawn in Figma; the add dialog, reused).
 
-**`IconButton`** — new `critical` variant: a red glyph with no fill, tonal red on hover (`accent.critical.outline.content` + `accent.critical.tonal.surface`). The quiet destructive control, for a row's bin; `danger` stays the loud filled one.
+**`IconButton`** — new `critical` variant: textual like `tertiary` but red — only the glyph colour changes on hover and press (`accent.critical.outline.content`). The quiet destructive control, for a row's bin; `danger` stays the loud filled one.

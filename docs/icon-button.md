@@ -33,7 +33,7 @@ it needs a visible label, not a better icon.
 | `tertiary` | Toolbars, table rows, card affordances | **The default.** `docs/button.md` already assigns icon-only actions to the ghost treatment |
 | `secondary` | A bordered icon action that must read as a control on a busy surface | |
 | `primary` | The one filled icon action on a screen — a compose or add FAB | At most one |
-| `critical` | A quiet destructive control — a row's bin | A red glyph with no fill, tonal red on hover. Many per screen is fine; pair with a confirmation |
+| `critical` | A quiet destructive control — a row's bin | Textual, like `tertiary` but red: only the glyph colour changes on hover and press. Many per screen is fine; pair with a confirmation |
 | `danger` | Destructive, irreversible actions only | At most one. Pair with a confirmation |
 
 ## Props
@@ -86,7 +86,7 @@ class.
 | `secondary` content | `action.secondary.content.{default,disabled}` | `text-action-secondary-content-*` |
 | `tertiary` surface | `action.tertiary.surface.default` | `bg-action-tertiary-surface-default` |
 | `tertiary` content | `action.tertiary.content.{default,hover,pressed,disabled}` | `text-action-tertiary-content-*` |
-| `critical` content / hover fill | `accent.critical.outline.content.{default,hover,pressed,disabled}`, `accent.critical.tonal.surface.{default,hover}` | `text-accent-critical-outline-content-*`, `bg-accent-critical-tonal-surface-*` |
+| `critical` content | `accent.critical.outline.content.{default,hover,pressed,disabled}` | `text-accent-critical-outline-content-*` |
 | `danger` surface | `accent.critical.filled.surface.{default,hover,pressed,disabled}` | `bg-accent-critical-filled-surface-*` |
 | `danger` content | `accent.critical.filled.content.default` | `text-accent-critical-filled-content-default` |
 | Size | Tailwind numeric scale | `size-6` (24) / `size-9` (36) / `size-10` (40) / `size-12` (48) |
