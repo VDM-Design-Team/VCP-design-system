@@ -52,7 +52,6 @@ export * from './components/date-field';
 export * from './components/date-picker';
 export * from './components/detail-row';
 export * from './components/dropdown-stepper';
-export * from './components/budget-period-picker';
 export * from './components/domain-budget-summary';
 export * from './components/domain-label';
 export * from './components/deliverable-link';

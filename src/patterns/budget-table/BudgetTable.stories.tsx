@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { BudgetTable, type BudgetRow } from './BudgetTable';
 import { Button } from '../../atoms/button';
-import { BudgetPeriodPicker } from '../../components/budget-period-picker';
-import type { Quarter } from '../../components/domain-budget-summary';
+import { Select } from '../../atoms/select';
+import { SegmentedControl } from '../../atoms/segmented-control';
 import { ToastProvider, ToastViewport, useToast } from '../../components/toast';
 
 const LOREM =
@@ -204,7 +204,7 @@ function SavePage({ fail, ...args }: React.ComponentProps<typeof BudgetTable> & 
   const { toast } = useToast();
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(() => JSON.stringify(args.rows));
-  const [period, setPeriod] = React.useState<{ quarter: Quarter; year: number }>({ quarter: 1, year: 2026 });
+  const [quarter, setQuarter] = React.useState('Q1');
   const dirty = JSON.stringify(state.rows) !== saved;
 
   /* Unsaved changes: ask the browser to confirm leaving. */
@@ -233,14 +233,16 @@ function SavePage({ fail, ...args }: React.ComponentProps<typeof BudgetTable> & 
   };
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <BudgetPeriodPicker
-          {...period}
-          years={[2026, 2025, 2024]}
-          disabled={saving}
-          onQuarterChange={(quarter) => setPeriod((p) => ({ ...p, quarter }))}
-          onYearChange={(year) => setPeriod((p) => ({ ...p, year }))}
+      <div className="flex items-center justify-end gap-3">
+        {/* Both 40 high — the segmented control at `lg`, the select at `md` — so they sit as one row. */}
+        <SegmentedControl
+          size="lg"
+          aria-label="Quarter"
+          options={['Q1', 'Q2', 'Q3', 'Q4'].map((q) => ({ value: q, label: q, disabled: saving }))}
+          value={quarter}
+          onChange={setQuarter}
         />
+        <Select size="md" aria-label="Year" defaultValue="2026" options={['2026', '2025', '2024']} disabled={saving} />
       </div>
       <BudgetTable {...args} {...state} disabled={saving} />
       <div className="flex justify-end">
@@ -274,6 +276,9 @@ export const OnThePage: Story = {
   render: page(false),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    /* The quarter control and the year select are the same height: 40. */
+    await expect(Math.round(canvas.getByRole('radiogroup', { name: 'Quarter' }).getBoundingClientRect().height)).toBe(40);
+    await expect(Math.round(canvas.getByRole('combobox', { name: 'Year' }).parentElement!.getBoundingClientRect().height)).toBe(40);
     /* Nothing changed: leaving is free. An edit: the browser is asked to confirm. */
     await expect(asksBeforeLeaving()).toBe(false);
     await userEvent.click(canvas.getByRole('button', { name: 'Increase Content allocated points' }));
