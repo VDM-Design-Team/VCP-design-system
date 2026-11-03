@@ -35,7 +35,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Name** | The avatar, the name and, under it, the email (`UserLabel`). Sortable |
 | **Status** | A `Tag` in the words the page gives ("approved"). Sortable. **This table owns the tone**: `approved` green, `pending` yellow, `rejected` / `suspended` / `inactive` red, anything else grey |
 | **Date Added** | **Already formatted** — "4 months ago". Sortable |
-| **Actions** | **+ New User** in the header (the column keeps "Actions" as its hidden name — `DataTableColumn.action`) and **View** on each row, named for the person ("View John") |
+| **Actions** | **+ New User** in the header (the column keeps "Actions" as its hidden name — `DataTableColumn.action`) and **View** on each row, named for the person ("View John"). **Right-aligned**; the header has room above and below the button |
 
 ## Props
 

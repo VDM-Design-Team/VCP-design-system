@@ -21,7 +21,7 @@ import { UserLabel } from '../../components/user-label';
  *   `approved` is green, `pending` is yellow, `rejected`, `suspended` and `inactive` are red, and anything else is grey — so
  *   call sites never choose a colour.
  * - **Date Added** — already formatted ("4 months ago"). Sortable.
- * - **Actions** — **+ New User** in the header and **View** on each row, named for the person ("View John").
+ * - **Actions** — **+ New User** in the header and **View** on each row, named for the person ("View John"). Both sit at the end of the column.
  *
  * **It is controlled and does nothing itself.** The caller filters by `search`, sorts by `sort`, pages by `page`, and handles
  * `onNewUser` and `onView` — which only *ask*: the page opens `UserAccountModal` (Create New User / View User).
@@ -134,9 +134,11 @@ export function UsersTable({
         </Button>
       ),
       render: (row) => (
-        <Button size="sm" type="button" aria-label={`View ${row.name}`} onClick={() => onView?.(row)}>
-          View
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" type="button" aria-label={`View ${row.name}`} onClick={() => onView?.(row)}>
+            View
+          </Button>
+        </div>
       ),
     },
   ];

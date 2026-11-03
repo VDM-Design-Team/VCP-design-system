@@ -31,7 +31,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, fit?, grow?, sortable?, hint?, action?, render? }`; `action` is a control in the header (the Users table's "+ New User") in place of the visible label, which stays as the column's hidden name |
+| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, fit?, grow?, sortable?, hint?, action?, render? }`; `action` is a control in the header (the Users table's "+ New User") in place of the visible label, which stays as the column's hidden name; **an `action` column sits at the end** (right-aligned, with room above and below the control in the header — its cells align themselves) |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
