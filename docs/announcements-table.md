@@ -36,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Type** | A `Tag`. **This table owns the tone**: `Feature` is blue, anything else grey until design names the others |
 | **Date** | **Already formatted** — "May 20, 2026" |
 | **Features** | What shipped, joined with commas, cut with "…" |
-| **Actions** | A "More actions" menu named for the row ("Actions for Faster search"): **Edit**, **Delete** |
+| **Actions** | A "More actions" menu named for the row ("Actions for Faster search"): **Edit**, **Delete** — plain items, no icons (`Menu` adds a warning glyph to any `danger` item, so Delete is not one; the confirmation dialog is what guards it) |
 
 ## Props
 
