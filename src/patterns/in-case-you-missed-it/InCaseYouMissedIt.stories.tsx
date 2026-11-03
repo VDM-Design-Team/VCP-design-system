@@ -96,7 +96,7 @@ export const DraggingTheRow: Story = {
     const canvas = within(canvasElement);
     const row = canvas.getAllByRole('list')[0]!;
     await expect(row.scrollLeft).toBe(0);
-    const card = canvas.getAllByRole('button', { name: /^John Smith/ })[0]!;
+    const card = canvas.getAllByRole('button', { name: TITLE })[0]!;
     const box = card.getBoundingClientRect();
     await userEvent.pointer([
       { keys: '[MouseLeft>]', target: card, coords: { clientX: box.left + 250, clientY: box.top + 40 } },
@@ -106,5 +106,39 @@ export const DraggingTheRow: Story = {
     ]);
     await waitFor(() => expect(row.scrollLeft).toBeGreaterThan(50));
     await expect(args.onOpen).not.toHaveBeenCalled();
+  },
+};
+
+/**
+ * Dismissing never drops focus: it goes to the card that took the dismissed one's place, else the one before it, else the
+ * heading, over "You’re all caught up." (hidden: tested).
+ */
+export const DismissingByKeyboard: Story = {
+  args: { items: ITEMS.slice(0, 3) },
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => <Dismissable {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const faces = () => canvas.getAllByRole('button', { name: TITLE });
+    const dismiss = (index: number) => canvas.getAllByRole('button', { name: /^Dismiss/ })[index]!;
+
+    /* The first: the next card takes its place and gets focus. */
+    dismiss(0).focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(faces()).toHaveLength(2));
+    await expect(faces()[0]).toHaveFocus();
+
+    /* The last: the one before it. */
+    dismiss(1).focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(faces()).toHaveLength(1));
+    await expect(faces()[0]).toHaveFocus();
+
+    /* None left: the heading, and the strip says so. */
+    dismiss(0).focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(canvas.getByRole('heading', { name: 'In Case You Missed it' })).toHaveFocus());
+    await expect(canvas.getByText('You’re all caught up.')).toBeInTheDocument();
   },
 };

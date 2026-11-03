@@ -21,7 +21,10 @@ import {
  * - **It owns no state.** `items` in, `onOpen(item)` and `onDismiss(item)` out. A dismissed card must stay away, the
  *   design says, "even after logging out and in and after a refresh", while it keeps its current status — so the
  *   caller removes it from `items` and remembers it; this strip cannot.
- * - **No items, no strip.** Nothing missed is nothing to show, so it renders nothing rather than an empty card.
+ * - **Dismissing never drops focus.** The ✕ you pressed goes with its card, so focus moves to the card that took its place (the next
+ *   one, else the one before); when none is left it goes to the heading, over "You're all caught up.".
+ * - **No items, no strip** — from the start. A strip that begins empty renders nothing; one that has just been emptied by
+ *   dismissals stays, with its heading, so there is somewhere for focus to land.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -42,6 +45,8 @@ export interface InCaseYouMissedItProps extends Omit<React.HTMLAttributes<HTMLEl
   title?: string;
   /** What the ⓘ says. */
   hint?: string;
+  /** What the strip says once its last card has been dismissed. */
+  caughtUpText?: string;
 }
 
 export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedItProps>(
@@ -53,12 +58,29 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
       onDismiss,
       title = 'In Case You Missed it',
       hint = 'Added Values that have been waiting for a while and may need your attention.',
+      caughtUpText = 'You’re all caught up.',
       ...props
     },
     ref,
   ) => {
     const headingId = React.useId();
+    const headingRef = React.useRef<HTMLHeadingElement>(null);
     const scroller = React.useRef<HTMLUListElement>(null);
+    /* Has it ever shown a card? Only then does an empty strip stay, to hold focus and say it is caught up. */
+    const hadItems = React.useRef(items.length > 0);
+    if (items.length > 0) hadItems.current = true;
+    /* The card whose ✕ was pressed, and where focus goes once it has left `items`: its neighbour, or the heading. */
+    const afterDismiss = React.useRef<{ gone: string; to: string | null } | null>(null);
+
+    React.useEffect(() => {
+      const pending = afterDismiss.current;
+      if (!pending || items.some((item) => item.id === pending.gone)) return;
+      afterDismiss.current = null;
+      const target = pending.to
+        ? scroller.current?.querySelector<HTMLElement>(`[data-item-id="${pending.to}"] button`)
+        : null;
+      (target ?? headingRef.current)?.focus();
+    }, [items]);
     const [edges, setEdges] = React.useState({ start: true, end: true });
 
     /* Which arrows make sense: none at an end the row cannot go past, none when it all fits. */
@@ -97,7 +119,7 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
       setDragging(false);
     };
 
-    if (items.length === 0) return null;
+    if (items.length === 0 && !hadItems.current) return null;
 
     /* A 40 press area around a 32 disc: one size down from the design's `_ICYMI_Arrow_Button` (48 around 40), which read as
        too big beside the cards, with the same 40 minimum target. */
@@ -114,7 +136,12 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
         {...props}
       >
         <div className="flex items-center gap-1 p-2">
-          <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
+          <h2
+            ref={headingRef}
+            id={headingId}
+            tabIndex={-1}
+            className="m-0 text-title-sm-semibold text-text-primary focus:outline-none"
+          >
             {title}
           </h2>
           <Tooltip content={hint} placement="bottom">
@@ -128,7 +155,9 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
           </Tooltip>
         </div>
 
-        <div className="group/strip relative">
+        {items.length === 0 && <p className="m-0 p-2 text-body-sm-regular text-text-tertiary">{caughtUpText}</p>}
+
+        <div className={cn('group/strip relative', items.length === 0 && 'hidden')}>
           <ul
             ref={scroller}
             onScroll={measure}
@@ -160,7 +189,7 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
             )}
           >
             {items.map((item) => (
-              <li key={item.id} className="w-85 shrink-0 snap-start">
+              <li key={item.id} data-item-id={item.id} className="w-85 shrink-0 snap-start">
                 <InCaseYouMissedItCard
                   type={item.type}
                   title={item.title}
@@ -168,7 +197,16 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
                   created={item.created}
                   days={item.days}
                   onOpen={onOpen ? () => onOpen(item) : undefined}
-                  onDismiss={onDismiss ? () => onDismiss(item) : undefined}
+                  onDismiss={
+                    onDismiss
+                      ? () => {
+                          const at = items.findIndex((x) => x.id === item.id);
+                          const neighbour = items[at + 1] ?? items[at - 1] ?? null;
+                          afterDismiss.current = { gone: item.id, to: neighbour?.id ?? null };
+                          onDismiss(item);
+                        }
+                      : undefined
+                  }
                 />
               </li>
             ))}

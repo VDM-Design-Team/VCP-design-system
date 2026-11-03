@@ -26,10 +26,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `items` | `{ id, type, title, user, created, days }[]` | required | The cards, in order. **Empty renders nothing** |
+| `items` | `{ id, type, title, user, created, days }[]` | required | The cards, in order. **A strip that starts empty renders nothing**; one emptied by dismissals stays, with its heading and "You’re all caught up." |
 | `onOpen` | `(item) => void` | — | A card was pressed |
 | `onDismiss` | `(item) => void` | — | A ✕ was pressed. Omit it and the cards have none |
 | `title` | `string` | "In Case You Missed it" | |
+| `caughtUpText` | `string` | "You’re all caught up." | What the strip says once its last card has been dismissed |
 | `hint` | `string` | "Added Values that have been waiting for a while and may need your attention." | The ⓘ's tooltip |
 
 ## Behaviour
@@ -46,6 +47,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 - Cards are `w-85` (340 with their padding), snap to the start, and keep their size however wide the page.
 
 ## Accessibility
+
+- **Dismissing never drops focus.** The ✕ you pressed goes with its card, so focus moves to the card that took its place (the next
+  one, else the one before); when none is left it goes to the heading, with "You're all caught up." beneath it.
+- **Each card is named by its title** (who, when, the type and the message are its description), so a list of cards reads as a list of
+  titles.
 
 - A `<section>` named by its heading; the cards are a list. The ⓘ is a real button that opens its tooltip on hover **and** focus.
 - The arrows are named "Previous" / "Next" and are in the tab order while shown.

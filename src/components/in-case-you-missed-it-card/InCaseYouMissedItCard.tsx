@@ -23,6 +23,8 @@ import { Tag, type TagTone } from '../../atoms/tag';
  *
  * - **The card opens the Added Value** (`onOpen`): the whole face is one button, with a hover lift
  *   (`shadow.elevation.2`) and a pressed fill. It sits in 8 of padding so that shadow is never clipped by a scroller.
+ * - **Its accessible name is the title** (who and when, and the type and message, are its description), so a list of cards
+ *   reads as a list of titles.
  * - **The ✕ dismisses it** (`onDismiss`): a tonal red disc in the top-right corner, a sibling of the face (never
  *   inside it — a button does not contain a button), shown on hover and on focus, always on touch. Whether a
  *   dismissed card stays away across a refresh is the caller's: the design says it must, "even after logging out
@@ -101,6 +103,12 @@ export interface InCaseYouMissedItCardProps
 export const InCaseYouMissedItCard = React.forwardRef<HTMLDivElement, InCaseYouMissedItCardProps>(
   ({ className, type, title, user, created, days: count, onOpen, onDismiss, dismissLabel, ...props }, ref) => {
     const t = TYPE[type];
+    /* The face is named by its title, and described by who/when and the type/message, so a list of cards reads as a list of
+       titles and the rest comes second. */
+    const ids = React.useId();
+    const titleId = `${ids}-title`;
+    const metaId = `${ids}-meta`;
+    const statusId = `${ids}-status`;
     return (
       <div
         ref={ref}
@@ -111,13 +119,22 @@ export const InCaseYouMissedItCard = React.forwardRef<HTMLDivElement, InCaseYouM
         <button
           type="button"
           onClick={onOpen}
+          aria-labelledby={titleId}
+          aria-describedby={`${metaId} ${statusId}`}
           className={cn(
             'flex w-full flex-col gap-3 rounded-sm border border-stroke-default bg-surface-elevated p-4 text-left transition-shadow',
             'hover:shadow-elevation-2 active:bg-surface-neutral-faint active:shadow-none',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
           )}
         >
-          <span className="flex items-center justify-between gap-2 text-caption-md-regular text-text-tertiary">
+          {/* With a ✕ the time keeps clear of its corner: the disc reaches about 30 in from the face's right edge, and the face's own padding is 16. */}
+          <span
+            id={metaId}
+            className={cn(
+              'flex items-center justify-between gap-2 text-caption-md-regular text-text-tertiary',
+              onDismiss && 'pr-6',
+            )}
+          >
             <span className="flex min-w-0 items-center gap-1">
               <Avatar name={user.name} src={user.src} size="xs" aria-hidden="true" />
               <span className="truncate">{user.name}</span>
@@ -125,9 +142,11 @@ export const InCaseYouMissedItCard = React.forwardRef<HTMLDivElement, InCaseYouM
             <span className="shrink-0 whitespace-nowrap">{created}</span>
           </span>
 
-          <span className="line-clamp-2 text-label-sm-semibold text-text-secondary">{title}</span>
+          <span id={titleId} className="line-clamp-2 text-label-sm-semibold text-text-secondary">
+            {title}
+          </span>
 
-          <span className="flex flex-col gap-3">
+          <span id={statusId} className="flex flex-col gap-3">
             <Divider />
             <span className="flex items-center gap-2">
               <Tag tone={t.tone} size="sm" icon={<Icon name={t.icon} size="sm" />}>
@@ -142,7 +161,7 @@ export const InCaseYouMissedItCard = React.forwardRef<HTMLDivElement, InCaseYouM
 
         {onDismiss && (
           /* The design's `_Tonal_Remove_Button`: 48 to press, a 24 disc to look at. Hand-built for now — the system's
-             `RemoveButton` atom (tonal: a 20 disc, 40 to press, the same critical tokens) is in #212 and not on `main`
+             `RemoveButton` atom (tonal: a 20 disc, 40 to press, the same critical tokens) is in PR 212 and not on `main`
              yet; swap to it when it lands, so every ✕ in the system is one piece. */
           <button
             type="button"

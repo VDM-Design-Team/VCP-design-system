@@ -51,6 +51,8 @@ You pass `days`; it writes the sentence ("1 day" / "3 days"), so no call site wo
 
 ## Behaviour
 
+- With a ✕ the header row keeps its right side clear, so the time is never under the ✕'s corner.
+
 - **The whole face is one button** (open). Hover lifts it (`shadow.elevation.2`); pressed fills it (`surface.neutral.faint`).
 - **The ✕ is a sibling of the face**, never inside it: a tonal red disc (24 to look at, 48 to press) in the top-right corner,
   shown on card hover and on focus, always on touch.
@@ -59,7 +61,8 @@ You pass `days`; it writes the sentence ("1 day" / "3 days"), so no call site wo
 
 ## Accessibility
 
-- Two real buttons: the card (named by its text — who, when, title, type, message) and the ✕ ("Dismiss Revamp customer onboarding
+- Two real buttons: the card (named by its **title**; who, when, the type and the message are its description, so a list of cards reads as a
+  list of titles) and the ✕ ("Dismiss Revamp customer onboarding
   documentation").
 - The tag carries the type in words; colour is never the only signal. The avatar is decorative (the name is beside it).
 - The ✕ is revealed by hover **and** focus, so a keyboard user always reaches it.

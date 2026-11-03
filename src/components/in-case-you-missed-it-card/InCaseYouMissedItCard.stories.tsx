@@ -69,13 +69,16 @@ export const OpeningAndDismissing: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: /^John Smith/ }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Revamp customer onboarding documentation' }));
     await expect(args.onOpen).toHaveBeenCalledTimes(1);
     await expect(args.onDismiss).not.toHaveBeenCalled();
     await userEvent.click(canvas.getByRole('button', { name: 'Dismiss Revamp customer onboarding documentation' }));
     await expect(args.onDismiss).toHaveBeenCalledTimes(1);
     await expect(args.onOpen).toHaveBeenCalledTimes(1);
-    /* The message is written for the type. */
+    /* The message is written for the type, and it is the face's description: the name is the title alone. */
     await expect(canvas.getByText('since 3 days ago')).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Revamp customer onboarding documentation' })).toHaveAccessibleDescription(
+      /John Smith.*6 months ago.*Overdue.*since 3 days ago/,
+    );
   },
 };
