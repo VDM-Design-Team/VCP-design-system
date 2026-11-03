@@ -8,3 +8,5 @@ New pattern **`UsersTable`**, built to Figma's `Settings_Users`: search, Name / 
 `UserAccountModal` becomes the one user dialog for Accounts and Settings: `roles` swaps the Domain Access table for a Roles checklist (`draft.roles`, `initial.roles`), `onRemoveAvatar` gives the photo **Change** and **Remove**, and `domains` is now optional. Existing callers are unchanged.
 
 `DataTableColumn` gains `action`: a control in the header in place of the visible label (the label stays as the hidden name).
+
+Its empty table is an `EmptyState`, with the words searched when a search is active.

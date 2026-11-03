@@ -14,6 +14,7 @@ the Actions header, and the pages beneath. Built to Figma's `Settings_Users`.
 | `Skeleton` | atom |
 | `Tag` | atom |
 | `DataTable` | component |
+| `EmptyState` | component |
 | `UserLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -60,7 +61,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Empty
 
-"No users yet.", or while a search is typed, **No users match “…”.**
+In an `EmptyState`: "No users yet.", or while a search is typed, **No users match “…”.** with a hint.
 
 ## Tokens
 
