@@ -56,7 +56,11 @@ import { Tooltip } from '../../atoms/tooltip';
  * variables. If you need a value that isn't here, add the token in `tokens/`
  * first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type StatCardAccent = 'neutral' | 'brand' | 'info' | 'success' | 'critical' | 'warning';
+/**
+ * The tone of a card's stripe (and icon). `warning-subtle` is a lighter yellow than `warning`'s brown, for a figure that is
+ * more cosmetic than urgent — the dashboard's Pending, which should not compete with Overdue.
+ */
+export type StatCardAccent = 'neutral' | 'brand' | 'info' | 'success' | 'critical' | 'warning' | 'warning-subtle';
 export type StatCardVariant = 'default' | 'superadmin';
 
 interface StatCardContent {
@@ -117,6 +121,8 @@ const STRIPE: Record<StatCardAccent, string> = {
   success: 'bg-accent-success-outline-border-default',
   critical: 'bg-accent-critical-outline-border-default',
   warning: 'bg-accent-warning-outline-border-default',
+  /* A lighter yellow: the warning family's tonal fill at its pressed step (yellow-300), a step up from the pale tonal tint. */
+  'warning-subtle': 'bg-accent-warning-tonal-surface-pressed',
 };
 const ICON_TONE: Record<StatCardAccent, string> = {
   neutral: 'text-neutral-outline-border-default',
@@ -125,6 +131,7 @@ const ICON_TONE: Record<StatCardAccent, string> = {
   success: 'text-accent-success-outline-border-default',
   critical: 'text-accent-critical-outline-border-default',
   warning: 'text-accent-warning-outline-border-default',
+  'warning-subtle': 'text-accent-warning-tonal-surface-pressed',
 };
 
 /* What differs between the two looks — all on Tailwind's numeric scale. The

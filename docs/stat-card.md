@@ -52,7 +52,7 @@ container's width.
 | `icon` | `ReactNode` | — | An `<Icon size="lg" />` before the label — Figma draws it in the `-fill` style. Decorative; takes the `accent` colour |
 | `hint` | `string` | — | Explanation behind an info glyph after the label. Omit it and there's no glyph |
 | `variant` | `default \| superadmin` | `default` | Which dashboard's card: `default` is the Value_Card (admin and user — left-aligned, 100 high), `superadmin` the super admin card (centred, 150 high) |
-| `accent` | `neutral \| brand \| info \| success \| critical \| warning` | `neutral` | The tone: the left stripe's colour, and the icon's. `brand` is the brand blue Value_Card uses for In Review / In Progress |
+| `accent` | `neutral \| brand \| info \| success \| critical \| warning \| warning-subtle` | `neutral` | The tone: the left stripe's colour, and the icon's. `brand` is the brand blue Value_Card uses for In Review / In Progress. `warning-subtle` is a lighter yellow (`accent.warning.tonal.surface.pressed`) for a figure that is more cosmetic than urgent — the dashboard's Pending |
 | `className` | `string` | — | Merged via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | The card |
 

@@ -88,7 +88,7 @@ export const AdminAndUserDashboard: Story = {
           ['Completed', '12', 'success'],
           ['Overdue', '3', 'critical'],
           ['In Progress', '8', 'brand'],
-          ['Pending', '4', 'warning'],
+          ['Pending', '4', 'warning-subtle'],
           ['Draft', '5', 'neutral'],
         ] as const
       ).map(([label, value, accent]) => (
@@ -347,7 +347,7 @@ export const SixAcrossWithoutWrapping: Story = {
   render: () => (
     <div className="flex w-296 flex-wrap gap-3">
       {['Completed', 'In Review', 'Overdue', 'In Progress', 'Pending', 'Draft'].map((label) => (
-        <StatCard key={label} className="flex-1" label={label} value="12" accent="brand" />
+        <StatCard key={label} className="flex-1" label={label} value="12" accent={label === 'Pending' ? 'warning-subtle' : 'brand'} />
       ))}
     </div>
   ),
