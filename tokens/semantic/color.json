@@ -414,16 +414,16 @@
       "outline": {
         "border": {
           "default": {
-            "$value": "{color.yellow.500}"
+            "$value": "{color.yellow.700}"
           },
           "disabled": {
             "$value": "{color.yellow.300}"
           },
           "hover": {
-            "$value": "{color.yellow.600}"
+            "$value": "{color.yellow.800}"
           },
           "pressed": {
-            "$value": "{color.yellow.700}"
+            "$value": "{color.yellow.900}"
           }
         },
         "content": {

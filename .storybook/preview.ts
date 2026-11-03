@@ -1,5 +1,6 @@
 import './storybook.css';
 import type { Preview } from '@storybook/react-vite';
+import { A11Y_CONFIG } from '../src/lib/story-a11y';
 
 const preview: Preview = {
   tags: ['autodocs'],
@@ -31,8 +32,9 @@ const preview: Preview = {
     /* Every story is an axe test since the Vitest addon landed (9 Sep 2026),
        and a violation fails `npm test`. A side-by-side story that renders two
        landmarks on purpose spreads `SIDE_BY_SIDE` from src/lib/story-a11y
-       into its parameters; nothing else is exempt. */
-    a11y: { test: 'error' },
+       into its parameters; nothing else is exempt. The house rule from the
+       same file runs too: a description must not repeat its element's name. */
+    a11y: { test: 'error', config: A11Y_CONFIG },
     options: {
       storySort: { order: ['Foundations', 'Actions', '*'] },
     },

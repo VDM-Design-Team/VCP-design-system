@@ -58,7 +58,7 @@ const positioner = cva(
        around it. The coordinates arrive as an inline style (they are measured, not
        a design value); the transform pulls the bubble to the right side of that
        point. */
-    'fixed z-50 flex w-max max-w-64',
+    'fixed z-50 flex w-max',
     'transition-opacity duration-150 motion-reduce:transition-none',
   ],
   {
@@ -76,8 +76,13 @@ const positioner = cva(
         true: 'opacity-100',
         false: 'pointer-events-none opacity-0',
       },
+      /* 256 by default; `wide` is 384, for a tooltip that is a short list rather than a sentence. */
+      wide: {
+        true: 'max-w-96',
+        false: 'max-w-64',
+      },
     },
-    defaultVariants: { placement: 'top', open: false },
+    defaultVariants: { placement: 'top', open: false, wide: false },
   },
 );
 
@@ -129,6 +134,11 @@ export interface TooltipProps
    * link, an input. It is cloned to receive `aria-describedby`.
    */
   children: React.ReactElement;
+  /**
+   * Let the bubble run to 384 instead of 256 — for a tooltip that is a short list (each line on its own
+   * row) rather than a sentence. Text is still wrapped past that.
+   */
+  wide?: boolean;
   /** Hover open delay in ms. Focus is always immediate. */
   openDelay?: number;
   /**
@@ -151,6 +161,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     {
       content,
       placement = 'top',
+      wide = false,
       children,
       openDelay = DEFAULT_OPEN_DELAY,
       defaultOpen = false,
@@ -293,8 +304,12 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
 
     const child = React.Children.only(children) as React.ReactElement<{
       'aria-describedby'?: string;
+      'data-tooltip'?: string;
     }>;
     const describedBy = [child.props['aria-describedby'], describe && id].filter(Boolean).join(' ') || undefined;
+    /* A trigger that is not described still has a tooltip, and some pieces need to know: `IconButton`
+       drops its native `title` under one, or the browser would draw a second bubble over ours. */
+    const marker = describe ? {} : { 'data-tooltip': id };
 
     return (
       <span
@@ -312,11 +327,11 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         onBlur={handleBlur}
         {...props}
       >
-        {React.cloneElement(child, { 'aria-describedby': describedBy })}
+        {React.cloneElement(child, { 'aria-describedby': describedBy, ...marker })}
         {host &&
           createPortal(
             <span
-              className={positioner({ placement, open })}
+              className={positioner({ placement, open, wide })}
               style={anchor ? { top: anchor.top, left: anchor.left } : undefined}
             >
               {/* The described element: `role="tooltip"` *and* the id that

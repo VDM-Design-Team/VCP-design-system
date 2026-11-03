@@ -110,8 +110,10 @@ export const TargetsAre40: Story = {
     const dialog = await screen.findByRole('dialog');
     for (const button of within(dialog).getAllByRole('button')) {
       const box = button.getBoundingClientRect();
-      await expect({ name: button.getAttribute('aria-label'), ok: box.width >= 40 && box.height >= 40 }).toEqual({
-        name: button.getAttribute('aria-label'),
+      /* A bare IconButton is named by its title; one under a Tooltip, by aria-label. */
+      const name = button.getAttribute('aria-label') ?? button.title;
+      await expect({ name, ok: box.width >= 40 && box.height >= 40 }).toEqual({
+        name,
         ok: true,
       });
     }

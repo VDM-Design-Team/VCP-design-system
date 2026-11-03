@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconButton } from './IconButton';
 import { Button } from '../button';
+import { Tooltip } from '../tooltip';
+import { expect, within } from 'storybook/test';
 
 const meta = {
   title: 'Atoms/IconButton',
@@ -176,5 +178,36 @@ export const LightAndDark: Story = {
         <div className="dark">{set}</div>
       </div>
     );
+  },
+};
+
+/**
+ * **Flow:** one hover bubble, never two, and the name said once. Alone, the button's `title` is the hint *and*
+ * the name: beside an `aria-label` it would be read a second time, as the description ("Edit alone, button,
+ * Edit alone"). Under a `Tooltip`, whether it describes the button or only shows its name (`describe={false}`),
+ * the name is the `aria-label` and the native `title` is dropped, or the browser would draw its own bubble over
+ * ours.
+ */
+export const OneHintNotTwo: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => (
+    <div className="flex items-center gap-4">
+      <IconButton icon="note-pencil" label="Edit alone" variant="tonal" />
+      <Tooltip content="Archive the deliverable">
+        <IconButton icon="trash" label="Archive" variant="tonal" />
+      </Tooltip>
+      <Tooltip content="Edit" describe={false}>
+        <IconButton icon="note-pencil" label="Edit owner" variant="tonal" />
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const alone = canvas.getByRole('button', { name: 'Edit alone' });
+    await expect(alone).toHaveAttribute('title', 'Edit alone');
+    await expect(alone).not.toHaveAttribute('aria-label');
+    await expect(canvas.getByRole('button', { name: 'Archive' })).not.toHaveAttribute('title');
+    await expect(canvas.getByRole('button', { name: 'Edit owner' })).not.toHaveAttribute('title');
   },
 };

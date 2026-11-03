@@ -111,7 +111,7 @@ export const ForComments: Story = {
        stay the rightmost pair. */
     const names = within(canvas.getByRole('toolbar'))
       .getAllByRole('button')
-      .map((b) => b.getAttribute('aria-label'));
+      .map((b) => b.title);
     await expect(names.slice(-4)).toEqual(['Code block', 'Insert image', 'Undo', 'Redo']);
   },
 };
@@ -124,7 +124,7 @@ export const PickedCommands: Story = {
   args: { commands: ['bold', 'italic', 'link'] },
   play: async ({ canvasElement }) => {
     const toolbar = within(canvasElement).getByRole('toolbar');
-    await expect(within(toolbar).getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
+    await expect(within(toolbar).getAllByRole('button').map((b) => b.title)).toEqual([
       'Bold',
       'Italic',
       'Link',
