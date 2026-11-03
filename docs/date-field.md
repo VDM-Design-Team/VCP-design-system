@@ -26,13 +26,22 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `value` | `string` | — | ISO `yyyy-mm-dd`. Empty shows the placeholder |
-| `onChange` | `(iso) => void` | — | The chosen day; the calendar then closes |
-| `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it |
+| `mode` | `'day' \| 'month'` | `'day'` | What it picks: a day, or a month with no day (see below). `DatePicker`'s own prop |
+| `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder |
+| `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
+| `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
 | `placeholder` | `string` | `-` | While there is no date |
 | `invalid` / `disabled` | `boolean` | — | As `Input` |
 | `picker` | `DatePickerProps` | — | `min`, `max`, `today` … go to the calendar |
 | `id`, `aria-describedby`, `aria-label` | | | From a `Field` (it hands them over), or name it yourself |
+
+## Month mode
+
+`mode="month"` is the same field for a month with no day — a reporting period, a billing month. It keeps the calendar glyph and
+everything else, and changes three things: the field **reads "September 2026"** (`formatMonth`, read in UTC so no time zone can move
+the month), the calendar opens on `DatePicker`'s **month grid**, and `onChange` gets the **first of the month**. `estimated` means
+nothing for a month and is ignored. Use it where Figma draws a month selector (the super admin dashboard's); use `Select` for a
+short list of named choices.
 
 ## Accessibility
 

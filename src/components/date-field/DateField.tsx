@@ -4,6 +4,17 @@ import { Input } from '../../atoms/input';
 import { DatePicker, type DatePickerProps } from '../date-picker';
 import { Popover } from '../popover';
 
+/** "2026-09-14" → "September 2026". Read in UTC, so no time zone can move the month. */
+export const formatMonth = (iso: string): string => {
+  const [year, month] = iso.split('-').map(Number);
+  if (!year || !month) return '';
+  return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+};
+
 /**
  * DateField — a date in a form: a field that shows it, and a calendar that picks it. Built to Figma's date
  * fields (a calendar glyph, then `2026-03-02`) in the Add Required Details dialog and the detail card.
@@ -13,6 +24,10 @@ import { Popover } from '../popover';
  * expanded state the popover sets). The calendar opens with `strategy="fixed"`, so a scrolling dialog or table
  * cannot clip it, and picking a day closes it.
  *
+ * **`mode="month"`** is the same field for a month with no day (a reporting period): it reads "September 2026", the
+ * calendar opens on `DatePicker`'s month grid, and `onChange` gets the first of the chosen month. `estimated` means
+ * nothing for a month and is ignored. `mode` is `DatePicker`'s own prop, so the two read alike.
+ *
  * **Estimated dates.** `estimated` writes "(est.)" after the date — a value the system calculated rather than
  * a person set, as the Planning table writes it. Picking a day yourself is the caller's cue to clear it.
  *
@@ -21,11 +36,15 @@ import { Popover } from '../popover';
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
 export interface DateFieldProps {
-  /** The date, ISO `yyyy-mm-dd`. Empty shows the placeholder. */
+  /**
+   * What the field picks: a `day` (the default) or a `month` — "September 2026", reported as the first of the month.
+   */
+  mode?: 'day' | 'month';
+  /** The date, ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder. */
   value?: string;
-  /** Fires with the chosen ISO date; the calendar then closes. */
+  /** Fires with the chosen ISO date (in month mode, the first of the month); the calendar then closes. */
   onChange?: (iso: string) => void;
-  /** A calculated date, not one a person set — reads "(est.)". */
+  /** A calculated date, not one a person set — reads "(est.)". Day mode only. */
   estimated?: boolean;
   /** Shown while there is no date. */
   placeholder?: string;
@@ -44,6 +63,7 @@ export interface DateFieldProps {
 export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
   (
     {
+      mode = 'day',
       value,
       onChange,
       estimated,
@@ -82,13 +102,15 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             aria-describedby={describedBy}
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
             placeholder={placeholder}
-            value={value ? `${value}${estimated ? ' (est.)' : ''}` : ''}
+            value={
+              !value ? '' : mode === 'month' ? formatMonth(value) : `${value}${estimated ? ' (est.)' : ''}`
+            }
             onClick={() => !disabled && setOpen(true)}
           />
         }
         content={
           <DatePicker
-            mode="day"
+            mode={mode}
             value={value}
             onChange={(iso) => {
               onChange?.(iso);

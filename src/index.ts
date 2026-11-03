@@ -62,7 +62,6 @@ export * from './components/field';
 export * from './components/file-attachment';
 export * from './components/inline-edit';
 export * from './components/menu';
-export * from './components/month-field';
 export * from './components/modal';
 export * from './components/notification-bell';
 export * from './components/notification-item';

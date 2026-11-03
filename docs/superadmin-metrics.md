@@ -10,7 +10,7 @@ Built to Figma's `SuperAdmin_Dashboard_Metrics` (the `SuperAdmin Dashboard` page
 | `Icon` | atom |
 | `Select` | atom |
 | `Skeleton` | atom |
-| `MonthField` | component |
+| `DateField` | component (`mode="month"`) |
 | `StatCard` | component |
 
 `StatCardGroup` is `StatCard`'s sibling in the same module. Generated from the real imports — `npm test` fails if this list drifts.
@@ -28,7 +28,7 @@ Built to Figma's `SuperAdmin_Dashboard_Metrics` (the `SuperAdmin Dashboard` page
 
 | Row | Cards | Accent and icon |
 |---|---|---|
-| Filters, top right | A domain `Select` and a `MonthField`, both 40 high and 14rem wide | |
+| Filters, top right | A domain `Select` and a `DateField` in `month` mode, both 40 high and 14rem wide | |
 | Single cards | **Values Created** | `info`, `note-pencil-fill` |
 | | **Values Completed** | `success`, `check-square-fill` |
 | | **Overdue Value Rate** (`%`) | `critical`, `calendar-x-fill` |
@@ -63,9 +63,10 @@ That is Figma's empty state: counts at 0, the rest at "--", users "0 / 0".
 
 ## Layout
 
-A container query, so it follows the section, not the viewport: the four single cards are four across from 64rem, two by two from
-36rem, then stacked; the grouped cards sit side by side from 48rem, then stack. The cards share the row equally. (Figma draws the users
-card narrower; equal widths keep the row simple and the same on every screen.)
+A container query, so it follows the section, not the viewport. The single cards are a wrapping row: **Values Created, Values Completed
+and Overdue Value Rate share the width equally** (each at least 15rem), and **Active / Total Users is a fixed 16.5rem** (Figma's 264) —
+the least important figure, so the narrow one, never wider than the row. As the row runs out of room the cards wrap. The grouped
+cards sit side by side from 48rem, then stack.
 
 ## Tokens
 

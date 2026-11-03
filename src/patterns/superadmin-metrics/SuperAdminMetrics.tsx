@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { Select } from '../../atoms/select';
 import { Skeleton } from '../../atoms/skeleton';
-import { MonthField } from '../../components/month-field';
+import { DateField } from '../../components/date-field';
 import { StatCard, StatCardGroup } from '../../components/stat-card';
 
 /**
@@ -11,13 +11,15 @@ import { StatCard, StatCardGroup } from '../../components/stat-card';
  * work is going, how reviews end. Built to Figma's `SuperAdmin_Dashboard_Metrics` (the `SuperAdmin Dashboard` page of
  * `VCP Pages & Flows`).
  *
- * - **The filters,** top right: a domain `Select` and a `MonthField`, both 40 high and 14rem wide.
+ * - **The filters,** top right: a domain `Select` and a month `DateField`, both 40 high and 14rem wide.
  * - **Four cards** of single figures — Values Created, Values Completed, Overdue Value Rate, Active / Total Users — as
  *   `StatCard`s in their `superadmin` look, each with its accent stripe, icon and tooltip.
  * - **Two grouped cards** — Avg. Time (In Pending, In Review) and Review (Acceptance Rate, Values Rejected) — as
  *   `StatCardGroup`s.
- * - **It reflows with its own width** (a container query): four across, two by two, then stacked; the grouped cards
- *   side by side, then stacked.
+ * - **The users card is the quiet one.** It is the least important figure, so it is a fixed 16.5rem where the other
+ *   three share the rest of the row, and never wider than the row.
+ * - **It reflows with its own width** (a container query): the cards wrap as they run out of room; the grouped cards
+ *   sit side by side, then stack.
  *
  * **It owns no numbers.** Every figure arrives in `metrics`; what "overdue" or "active" means, and the arithmetic, are
  * the product's (the tooltips say so). A figure that cannot be worked out yet is `null` and reads "--": the Overdue
@@ -117,11 +119,12 @@ export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetrics
             options={domains}
             onChange={onDomainChange}
           />
-          <MonthField aria-label="Month" className="w-56" value={month} onChange={onMonthChange} />
+          <DateField mode="month" aria-label="Month" className="w-56" value={month} onChange={onMonthChange} />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @5xl:grid-cols-4">
+        <div className="flex flex-wrap gap-4">
           <StatCard
+            className="min-w-60 flex-1"
             variant="superadmin"
             accent="info"
             label="Values Created"
@@ -130,6 +133,7 @@ export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetrics
             value={value(metrics.valuesCreated)}
           />
           <StatCard
+            className="min-w-60 flex-1"
             variant="superadmin"
             accent="success"
             label="Values Completed"
@@ -138,6 +142,7 @@ export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetrics
             value={value(metrics.valuesCompleted)}
           />
           <StatCard
+            className="min-w-60 flex-1"
             variant="superadmin"
             accent="critical"
             label="Overdue Value Rate"
@@ -147,6 +152,7 @@ export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetrics
             unit="%"
           />
           <StatCard
+            className="w-66 max-w-full flex-none"
             variant="superadmin"
             accent="neutral"
             label="Active / Total Users"

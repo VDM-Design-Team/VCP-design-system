@@ -84,6 +84,11 @@ export const Default: Story = {
       await expect(c.getAllByText(figure).length).toBeGreaterThan(0);
     }
     await expect(c.getByText('/ 15')).toBeVisible();
+    /* The users card is the quiet one: fixed and narrower than the three that share the row. */
+    const width = (label: string) =>
+      c.getByText(label, { selector: 'span' }).closest('div.relative')!.getBoundingClientRect().width;
+    await expect(width('Active / Total Users')).toBeLessThan(width('Values Created'));
+    await expect(width('Values Created')).toBeCloseTo(width('Values Completed'), 0);
     /* Every figure explains itself. */
     for (const name of ['Values Created', 'Overdue Value Rate', 'Active / Total Users', 'In Pending', 'Values Rejected']) {
       await expect(c.getByRole('button', { name: `About ${name}` })).toBeVisible();
