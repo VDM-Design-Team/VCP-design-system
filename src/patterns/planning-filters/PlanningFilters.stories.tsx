@@ -63,6 +63,13 @@ export const Default: Story = { render: (args) => <Controlled {...args} /> };
 export const Filled: Story = {
   args: { value: { search: 'planning', status: 'In Progress', priority: 'Normal' } },
   render: (args) => <Controlled {...args} />,
+  /* Filters read regular weight, so a row of them sits quietly. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: RegExp) => Number(getComputedStyle(c.getByRole('combobox', { name })).fontWeight);
+    await expect(weight(/^Status/)).toBe(400);
+    await expect(weight(/^Priority/)).toBe(400);
+  },
 };
 
 /** No `onViewCycle`, no button. */
