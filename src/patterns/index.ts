@@ -24,3 +24,5 @@ export * from './reject-pending-av-modal';
 export * from './review-av-modal';
 export * from './sidebar';
 export * from './top-bar';
+export * from './child-part-modal';
+export * from './multipart-section';
