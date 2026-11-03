@@ -108,7 +108,7 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
         {/* The name is right there, so the avatar is decoration. */}
         <div className="flex flex-col items-center gap-2">
           <Avatar size="lg" name={user.name} src={user.src} />
-          <span className="text-body-sm-medium text-text-primary">{user.name}</span>
+          <span className="text-body-sm-regular text-text-primary">{user.name}</span>
         </div>
         <Divider orientation="vertical" className="self-stretch" />
         <div className="flex items-center gap-6">

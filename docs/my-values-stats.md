@@ -22,7 +22,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## What it shows
 
-- **Who.** The avatar over the person's name, then a vertical divider.
+- **Who.** The avatar over the person's name (`body-sm-regular`), then a vertical divider.
 - **Two headline figures.** **Total AVs**, and **Completed** with its green dot.
 - **The breakdown.** One segment per status, **as wide as its count** and never narrower than 100, so a status with nothing in it
   is still a visible, labelled stop. Under each bar: the count, then the status's name. A segment with a count is **filled** in its

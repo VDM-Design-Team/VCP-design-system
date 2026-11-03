@@ -43,6 +43,8 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByRole('region', { name: 'My Values statistics' })).toBeVisible();
     await expect(c.getByText('Username')).toBeVisible();
+    /* The name is regular weight; the labels and figures around it are medium. */
+    await expect(getComputedStyle(c.getByText('Username')).fontWeight).toBe('400');
     await expect(c.getByText('Total AVs')).toBeVisible();
     await expect(c.getByText('65')).toBeVisible();
     await expect(c.getByText('47')).toBeVisible();
