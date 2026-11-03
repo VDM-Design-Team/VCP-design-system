@@ -10,7 +10,7 @@ Figma's `VCP Pages & Flows` file (5 Oct 2026) and set by `variant`:
 | Figma | `Value_Card` (node `947:306362`, "Value Cards") | `_SuperAdmin_Metric_Card_Coloured` (node `3:4848`) |
 | Stripe | 8 wide | 8 wide |
 | Alignment | **Left** | **Centred** |
-| Size | Exactly 100 high, at least 16.5rem wide | Exactly 150 high |
+| Size | Exactly 100 high, at least 11rem wide | Exactly 150 high |
 | Title | Label only (Figma draws no icon or hint) | Accent icon, label, info hint |
 | Value | 32 **bold** (`heading-xl-bold`) | 32 **semibold** (`heading-xl-semibold`), plus a 24 unit |
 
@@ -70,7 +70,7 @@ Items have no padding, hug their height and share the width equally.
 
 ## Laying cards out
 
-A default card has a minimum width (16.5rem), so a fixed-column grid can force
+A default card has a minimum width (11rem, Figma's 175), so a fixed-column grid can force
 cards past their cell and into each other when the space is tight. Put a row of
 them in a **wrapping flex container** — `flex flex-wrap gap-4` — and give each
 card `className="flex-1"` so they share the row and drop onto the next one when
@@ -89,7 +89,7 @@ centred content centres in the space beside the stripe — as Figma draws it.
 
 **Single, `default` (Value_Card):** an 8 stripe; `space.16` either side of the
 content, left-aligned and centred vertically; no gap between the label and the
-value. Exactly 100 high and at least 16.5rem wide (`h-25 min-w-66`; Figma's own minimum is 175, widened so the card stays readable). The value
+value. Exactly 100 high and at least 11rem wide (`h-25 min-w-44`, Figma's own minimum of 175: it was 16.5rem, which made a row of cards wrap early — six fit a 1187 row in Figma, and now here). The value
 is bold on a 44 line.
 
 **Single, `superadmin`:** an 8 stripe — the same as the Value_Card's (design review, October 2026; it was 12); `space.24` either side, content centred

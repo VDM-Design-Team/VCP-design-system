@@ -304,7 +304,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="grid grid-cols-2 gap-4 bg-surface-canvas p-8">
-            {/* Default cards are at least 16.5rem wide, so they sit in a wrapping row. */}
+            {/* Default cards are at least 11rem wide, so they sit in a wrapping row. */}
             <div className="col-span-2 flex flex-wrap gap-4">
               <StatCard className="flex-1" label="Completed" value="12" accent="success" />
               <StatCard className="flex-1" label="In Progress" value="8" accent="brand" />
@@ -338,4 +338,23 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/** Figma's dashboard row: six cards across 1187 without wrapping (hidden: tested). */
+export const SixAcrossWithoutWrapping: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div className="flex w-296 flex-wrap gap-3">
+      {['Completed', 'In Review', 'Overdue', 'In Progress', 'Pending', 'Draft'].map((label) => (
+        <StatCard key={label} className="flex-1" label={label} value="12" accent="brand" />
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const cards = Array.from(canvasElement.querySelectorAll<HTMLElement>('[class*="h-25"]'));
+    await expect(cards).toHaveLength(6);
+    /* One row: every card starts at the same height. */
+    await expect(new Set(cards.map((c) => c.offsetTop)).size).toBe(1);
+  },
 };
