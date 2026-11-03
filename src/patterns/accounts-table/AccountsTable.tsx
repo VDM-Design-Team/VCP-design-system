@@ -7,6 +7,7 @@ import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { Tag } from '../../atoms/tag';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
+import { EmptyState } from '../../components/empty-state';
 import { UserLabel } from '../../components/user-label';
 
 /**
@@ -192,9 +193,13 @@ export function AccountsTable({
         empty={
           empty ??
           (search.trim() ? (
-            <span>No accounts match “{search.trim()}”.</span>
+            <EmptyState
+              icon={<Icon name="magnifying-glass" size="lg" />}
+              title={`No accounts match “${search.trim()}”.`}
+              description="Try a different name, email or role."
+            />
           ) : (
-            <span>No accounts yet.</span>
+            <EmptyState icon={<Icon name="users" size="lg" />} title="No accounts yet." />
           ))
         }
       />
