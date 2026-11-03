@@ -86,17 +86,30 @@ export const Validation: Story = {
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     await userEvent.click(c.getByRole('button', { name: 'Save' }));
-    await expect(c.getByText('Enter your name.')).toBeVisible();
-    await expect(c.getByText('Enter your email address.')).toBeVisible();
+    /* Figma's own words for the Error variant. */
+    await expect(c.getByText('Name is required')).toBeVisible();
+    await expect(c.getByText('Email is required')).toBeVisible();
     await expect(args.onSave).not.toHaveBeenCalled();
     await expect(c.getByRole('textbox', { name: 'Name' })).toHaveFocus();
     /* Fixing a field clears what was said about it. */
     await userEvent.type(c.getByRole('textbox', { name: 'Name' }), 'Ada');
-    await expect(c.queryByText('Enter your name.')).toBeNull();
+    await expect(c.queryByText('Name is required')).toBeNull();
     await userEvent.type(c.getByRole('textbox', { name: 'Email' }), 'ada@');
     await userEvent.click(c.getByRole('button', { name: 'Save' }));
     await expect(c.getByText(/Enter a valid email address/)).toBeVisible();
     await expect(args.onSave).not.toHaveBeenCalled();
+  },
+};
+
+/** Figma's disabled Email: shown, but not editable here — and not checked, since it is not the person's to fix. */
+export const EmailDisabled: Story = {
+  args: { emailDisabled: true },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    await expect(c.getByRole('textbox', { name: 'Email' })).toBeDisabled();
+    await expect(c.getByRole('textbox', { name: 'Email' })).toHaveValue('ada@vdm.technology');
+    await userEvent.click(c.getByRole('button', { name: 'Save' }));
+    await expect(args.onSave).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@vdm.technology' });
   },
 };
 

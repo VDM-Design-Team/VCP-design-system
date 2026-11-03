@@ -15,8 +15,12 @@ import { Field } from '../../components/field';
  *   page's knowledge, not this form's.
  *
  * **It keeps its own draft** (from `initial`) and hands the whole of it to `onSave` — it saves nothing itself. Name and Email are
- * required and Email must look like one: Save says what is wrong under the field, moves focus to the first problem and does not go
- * through; fixing a field clears what was said. `errors` carries what only the server knows. `saving` spins Save and locks the fields.
+ * required ("Name is required", as Figma's Error variant words it) and Email must look like one: Save says what is wrong under the
+ * field, moves focus to the first problem and does not go through; fixing a field clears what was said. `errors` carries what only the
+ * server knows. `saving` spins Save and locks the fields. **`emailDisabled`** is Figma's disabled Email: shown, but not editable (an
+ * email an admin or a single sign-on owns).
+ *
+ * Figma draws no tooltips on this tab.
  *
  * The Jira card only reports its press (`jira.onConnect`): what connecting does — a redirect, a popup — is the page's.
  *
@@ -54,6 +58,8 @@ export interface PersonalInfoFormProps
   jira?: PersonalInfoJira;
   /** Save is in flight: it spins and the fields lock. */
   saving?: boolean;
+  /** The email is shown but cannot be changed here — Figma's disabled Email. */
+  emailDisabled?: boolean;
   /** What only the server knows, per field. */
   errors?: Partial<Record<keyof PersonalInfoValues, string>>;
 }
@@ -66,6 +72,7 @@ export function PersonalInfoForm({
   onSave,
   jira,
   saving,
+  emailDisabled,
   errors,
   ...props
 }: PersonalInfoFormProps) {
@@ -82,9 +89,12 @@ export function PersonalInfoForm({
 
   const submit = () => {
     const next: typeof invalid = {};
-    if (!draft.name.trim()) next.name = 'Enter your name.';
-    if (!draft.email.trim()) next.email = 'Enter your email address.';
-    else if (!EMAIL.test(draft.email.trim())) next.email = 'Enter a valid email address, like name@company.com.';
+    if (!draft.name.trim()) next.name = 'Name is required';
+    /* A disabled email is not the person's to fix here, so it is not checked. */
+    if (!emailDisabled) {
+      if (!draft.email.trim()) next.email = 'Email is required';
+      else if (!EMAIL.test(draft.email.trim())) next.email = 'Enter a valid email address, like name@company.com.';
+    }
     setInvalid(next);
     /* Not through: hand focus to the first field that needs fixing. */
     if (next.name) return nameInput.current?.focus();
@@ -120,7 +130,7 @@ export function PersonalInfoForm({
             type="email"
             autoComplete="email"
             value={draft.email}
-            disabled={saving}
+            disabled={saving || emailDisabled}
             onChange={(event) => set('email', event.target.value)}
           />
         </Field>

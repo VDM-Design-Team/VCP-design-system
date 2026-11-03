@@ -36,13 +36,17 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onSave` | `(values) => void` | required | Valid, it gets the whole draft (trimmed). **Saves nothing itself** |
 | `jira` | `PersonalInfoJira` | — | `{ accountId?, logo, status, actionLabel?, onConnect?, connecting? }`. Left out, there is no Jira section |
 | `saving` | `boolean` | — | Save spins and every field (and the Jira button) locks |
+| `emailDisabled` | `boolean` | — | Figma's disabled Email: shown, not editable here (an email an admin or a single sign-on owns). It is then not validated |
 | `errors` | `{ name?, email? }` | — | What only the server knows, shown under the field |
 
 ## The draft and the validation
 
 It **keeps its own draft** and hands the whole of it to `onSave`. Name and Email are required and Email must look like one: Save then says what is wrong
-under the field, **moves focus to the first problem** and does not call `onSave`; fixing a field clears what was said about it. (Figma draws no error
-states; this is an addition.)
+under the field, **moves focus to the first problem** and does not call `onSave`; fixing a field clears what was said about it. The messages are
+Figma's own words where it draws them (its Error variant of Name reads "Name is required"; Email's matches: "Email is required"). Figma draws no
+Error variant for Email, and none for a wrongly shaped address, so those are additions.
+
+**No tooltips.** Figma draws none on this tab.
 
 ## Jira
 
