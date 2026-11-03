@@ -185,6 +185,58 @@ export const HoldFromEmpty: Story = {
   },
 };
 
+/**
+ * `commitDelay` commits what is typed after a pause in typing, without leaving the field — so whatever is derived from the
+ * value (a total, a bar) follows while it is typed. Off by default: a stepper commits on blur or Enter.
+ */
+export const CommitAfterAPause: Story = {
+  args: { variant: 'up-down', value: 10, label: 'Allocated points', commitDelay: 250 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(10);
+    return (
+      <div className="flex items-center gap-4">
+        <Stepper {...args} value={value} onChange={setValue} />
+        <span className="font-sans text-caption-md-medium text-text-tertiary">
+          Committed: <output aria-label="Committed value">{value}</output>
+        </span>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' });
+    await userEvent.clear(field);
+    await userEvent.type(field, '45');
+    /* Still typing: nothing has been committed yet… */
+    await expect(c.getByLabelText('Committed value')).toHaveTextContent('10');
+    /* …after the pause it is, and the field keeps focus. */
+    await waitFor(() => expect(c.getByLabelText('Committed value')).toHaveTextContent('45'));
+    await expect(field).toHaveFocus();
+  },
+};
+
+/** Only a number can be typed: letters are dropped as they are typed, and a minus only where the range goes below zero. */
+export const OnlyNumbers: Story = {
+  args: { variant: 'up-down', value: 0, label: 'Points' },
+  render: (args) => (
+    <div className="flex items-center gap-4">
+      <Stepper {...args} label="Points" min={0} value={0} />
+      <Stepper {...args} label="Balance" min={-50} value={0} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const points = c.getByRole('textbox', { name: 'Points' });
+    await userEvent.clear(points);
+    await userEvent.type(points, 'a1b2-3.');
+    await expect(points).toHaveValue('123');
+    const balance = c.getByRole('textbox', { name: 'Balance' });
+    await userEvent.clear(balance);
+    await userEvent.type(balance, '-4x2');
+    await expect(balance).toHaveValue('-42');
+  },
+};
+
 /** The buttons die at the ends; the value can still be typed and re-clamped. */
 export const AtTheEnds: Story = {
   render: (args) => {
