@@ -79,6 +79,35 @@ export const UpDown: Story = {
   },
 };
 
+/**
+ * A field with no value yet shows its placeholder ("Set Budget") in italic `text.tertiary`. Nudging up gives it the
+ * minimum; down has nothing to go to. Clearing the field and leaving it takes the value back to nothing (`onClear`).
+ */
+export const EmptyUntilSet: Story = {
+  args: { variant: 'up-down', size: 'sm', value: null, label: 'Allocated points', placeholder: 'Set Budget', min: 0 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(null);
+    return <Stepper {...args} value={value} onChange={setValue} onClear={() => setValue(null)} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' });
+    await expect(field).toHaveValue('');
+    await expect(field).toHaveAttribute('placeholder', 'Set Budget');
+    /* Nothing to step down to. */
+    await expect(c.getByRole('button', { name: 'Decrease Allocated points' })).toBeDisabled();
+    await userEvent.click(c.getByRole('button', { name: 'Increase Allocated points' }));
+    await expect(field).toHaveValue('0');
+    await userEvent.clear(field);
+    await userEvent.type(field, '120{Enter}');
+    await expect(field).toHaveValue('120');
+    /* Cleared and committed, it is empty again. */
+    await userEvent.clear(field);
+    await userEvent.tab();
+    await expect(field).toHaveValue('');
+  },
+};
+
 /** The buttons die at the ends; the value can still be typed and re-clamped. */
 export const AtTheEnds: Story = {
   render: (args) => {

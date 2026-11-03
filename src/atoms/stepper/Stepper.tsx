@@ -64,11 +64,22 @@ const shell = cva(
 export interface StepperProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>,
     VariantProps<typeof shell> {
-  value: number;
+  /** The number, or `null` for a field with no value yet — it then shows `placeholder`. */
+  value: number | null;
   min?: number;
   max?: number;
   step?: number;
   onChange?: (value: number) => void;
+  /**
+   * What an empty field says — "Set Budget". Shown only while `value` is `null`, in italic `text.tertiary`: it
+   * is a prompt, not a value, and not a name (`label` still names the field).
+   */
+  placeholder?: string;
+  /**
+   * Called when the field is committed empty (cleared, then blur or Enter). Give it to let a person take a
+   * value back to `null`; without it an empty commit just restores the number, as before.
+   */
+  onClear?: () => void;
   /** Inline unit after the value — 'pts', 'days'. Decorative. */
   suffix?: React.ReactNode;
   /**
@@ -100,6 +111,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       max = 999,
       step = 1,
       onChange,
+      placeholder,
+      onClear,
       suffix,
       label,
       invalid,
@@ -118,20 +131,26 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const [draft, setDraft] = React.useState<string | null>(null);
 
     const clamp = (v: number) => Math.max(min, Math.min(max, v));
+    /* An empty field nudges up to the minimum — the first number it can have — and has nothing to nudge down to. */
     const nudge = (dir: -1 | 1) => {
       setDraft(null);
+      if (value === null) {
+        if (dir > 0) onChange?.(clamp(min));
+        return;
+      }
       onChange?.(clamp(value + dir * step));
     };
     const commit = () => {
       if (draft !== null) {
         const n = Number(draft);
-        if (draft.trim() !== '' && !Number.isNaN(n)) onChange?.(clamp(n));
+        if (draft.trim() === '') onClear?.();
+        else if (!Number.isNaN(n)) onChange?.(clamp(n));
         setDraft(null);
       }
     };
 
     const nudgeButton = (dir: -1 | 1) => {
-      const dead = disabled || (dir < 0 ? value <= min : value >= max);
+      const dead = disabled || (dir < 0 ? value === null || value <= min : value !== null && value >= max);
       const name = dir < 0 ? 'Decrease' : 'Increase';
       const upDown = variant === 'up-down';
       return (
@@ -179,7 +198,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           aria-label={label}
           aria-invalid={isInvalid || undefined}
           aria-describedby={hasError ? errorId : undefined}
-          value={draft ?? String(value)}
+          value={draft ?? (value === null ? '' : String(value))}
+          placeholder={placeholder}
           disabled={disabled}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
@@ -193,6 +213,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             variant === 'up-down' ? 'w-20 flex-1 px-3 text-left' : 'w-14 text-center',
             'min-w-0 border-0 bg-transparent outline-none',
             'font-numeric text-caption-md-medium text-text-primary',
+            'placeholder:font-sans placeholder:italic placeholder:text-text-tertiary',
             'disabled:cursor-not-allowed disabled:text-text-disabled',
           )}
         />
