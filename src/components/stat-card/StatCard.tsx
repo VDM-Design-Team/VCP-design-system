@@ -15,9 +15,9 @@ import { Tooltip } from '../../atoms/tooltip';
  *
  * - **`default`** — the `Value_Card` on the admin and user dashboards (node
  *   `947:306362`, "Value Cards"). An 8 stripe, **left-aligned**, label over a
- *   32 bold value, exactly 100 high and at least 16.5rem wide (Figma's own
- *   minimum is 175; this one is wider so the card stays readable and drops onto
- *   the next row, in a wrapping flex container, before it gets cramped). Figma draws it with
+ *   32 bold value, exactly 100 high and at least 11rem wide — Figma's own 175, so
+ *   a row of six (Figma's dashboard) fits at 1187 before any card drops onto the
+ *   next row, in a wrapping flex container. Figma draws it with
  *   no icon and no hint; the slots still work if a dashboard needs them.
  * - **`superadmin`** — `_SuperAdmin_Metric_Card_Coloured` on the super admin
  *   dashboard (node `3:4848`). An 8 stripe, **centred**, a title row (accent
@@ -56,7 +56,11 @@ import { Tooltip } from '../../atoms/tooltip';
  * variables. If you need a value that isn't here, add the token in `tokens/`
  * first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type StatCardAccent = 'neutral' | 'brand' | 'info' | 'success' | 'critical' | 'warning';
+/**
+ * The tone of a card's stripe (and icon). `yellow` is the categorical yellow (`accent.yellow.medium`), brighter than
+ * `warning`'s brown — Figma's Pending, which is more cosmetic than urgent.
+ */
+export type StatCardAccent = 'neutral' | 'brand' | 'info' | 'success' | 'critical' | 'warning' | 'yellow';
 export type StatCardVariant = 'default' | 'superadmin';
 
 interface StatCardContent {
@@ -117,6 +121,7 @@ const STRIPE: Record<StatCardAccent, string> = {
   success: 'bg-accent-success-outline-border-default',
   critical: 'bg-accent-critical-outline-border-default',
   warning: 'bg-accent-warning-outline-border-default',
+  yellow: 'bg-accent-yellow-medium',
 };
 const ICON_TONE: Record<StatCardAccent, string> = {
   neutral: 'text-neutral-outline-border-default',
@@ -125,6 +130,7 @@ const ICON_TONE: Record<StatCardAccent, string> = {
   success: 'text-accent-success-outline-border-default',
   critical: 'text-accent-critical-outline-border-default',
   warning: 'text-accent-warning-outline-border-default',
+  yellow: 'text-accent-yellow-medium',
 };
 
 /* What differs between the two looks — all on Tailwind's numeric scale. The
@@ -144,7 +150,7 @@ const VARIANT: Record<
   { card: string; stripe: string; content: string; gap: string; valueType: string; align: Align }
 > = {
   default: {
-    card: 'h-25 min-w-66',
+    card: 'h-25 min-w-44',
     stripe: 'w-2',
     content: 'px-4',
     gap: 'gap-0',
