@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { BudgetTable, type BudgetRow } from './BudgetTable';
 import { Button } from '../../atoms/button';
-import { Select } from '../../atoms/select';
-import { SegmentedControl } from '../../atoms/segmented-control';
+import { BudgetPeriodPicker } from '../../components/budget-period-picker';
+import type { Quarter } from '../../components/domain-budget-summary';
 import { ToastProvider, ToastViewport, useToast } from '../../components/toast';
 
 const LOREM =
@@ -33,7 +33,7 @@ const meta = {
         component:
           'Where an admin sets each domain’s point budget for a quarter: an allocation field with a stepper, the points ' +
           'consumed against it as a bar, what remains, and an optional note. Remaining and the bar are derived, so they ' +
-          'follow the allocation as it is typed.',
+          'follow the allocation: at once for a nudge, after a brief pause for typing.',
       },
     },
   },
@@ -144,6 +144,33 @@ export const NotesGrowOnFocus: Story = {
   },
 };
 
+/** Typing an allocation commits after a brief pause, so Remaining and the bar follow it without leaving the field. */
+export const FollowsTyping: Story = {
+  render: (args) => {
+    const state = useRows(args.rows);
+    return <BudgetTable {...args} {...state} commitDelay={150} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const dev = canvas.getByRole('textbox', { name: 'Development allocated points' });
+    await userEvent.clear(dev);
+    await userEvent.type(dev, '100');
+    await waitFor(() => expect(canvas.getByText('40 pts')).toBeVisible());
+    await expect(dev).toHaveFocus();
+  },
+};
+
+/** While the budgets load: the headers stay, each cell is a placeholder, and one status says what is happening. */
+export const Loading: Story = {
+  args: { loading: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('status')).toHaveTextContent('Loading domain budget');
+    await expect(canvas.getByRole('columnheader', { name: /Allocated Points/ })).toBeVisible();
+    await expect(canvas.queryByRole('textbox')).toBeNull();
+  },
+};
+
 /** While a save is in flight every field is locked. */
 export const Saving: Story = {
   args: { disabled: true },
@@ -170,24 +197,50 @@ export const CustomHints: Story = {
 };
 
 /* The page around the table, as Figma's `Domain Budget Edit` flow draws it: the quarter and year, the table, and
-   "Save Changes", which spins while it saves and ends in a "Changes Saved" toast. */
-function SavePage(args: React.ComponentProps<typeof BudgetTable>) {
+   "Save Changes", which spins while it saves and ends in a toast. A save can fail: the table keeps what was typed, and an
+   error toast says so. Leaving with unsaved changes is the browser's own prompt. */
+function SavePage({ fail, ...args }: React.ComponentProps<typeof BudgetTable> & { fail?: boolean }) {
   const state = useRows(args.rows);
   const { toast } = useToast();
   const [saving, setSaving] = React.useState(false);
-  const [quarter, setQuarter] = React.useState('Q1');
+  const [saved, setSaved] = React.useState(() => JSON.stringify(args.rows));
+  const [period, setPeriod] = React.useState<{ quarter: Quarter; year: number }>({ quarter: 1, year: 2026 });
+  const dirty = JSON.stringify(state.rows) !== saved;
+
+  /* Unsaved changes: ask the browser to confirm leaving. */
+  React.useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
+
   const save = () => {
     setSaving(true);
     window.setTimeout(() => {
       setSaving(false);
+      if (fail) {
+        toast({
+          tone: 'critical',
+          title: 'Changes not saved',
+          description: 'Something went wrong. Your changes are still here — try again.',
+        });
+        return;
+      }
+      setSaved(JSON.stringify(state.rows));
       toast({ tone: 'success', title: 'Changes Saved', description: 'Your updates have been saved successfully!' });
     }, 300);
   };
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-end gap-3">
-        <SegmentedControl aria-label="Quarter" options={['Q1', 'Q2', 'Q3', 'Q4']} value={quarter} onChange={setQuarter} />
-        <Select size="sm" aria-label="Year" defaultValue="2026" options={['2026', '2025', '2024']} />
+      <div className="flex justify-end">
+        <BudgetPeriodPicker
+          {...period}
+          years={[2026, 2025, 2024]}
+          disabled={saving}
+          onQuarterChange={(quarter) => setPeriod((p) => ({ ...p, quarter }))}
+          onYearChange={(year) => setPeriod((p) => ({ ...p, year }))}
+        />
       </div>
       <BudgetTable {...args} {...state} disabled={saving} />
       <div className="flex justify-end">
@@ -199,21 +252,56 @@ function SavePage(args: React.ComponentProps<typeof BudgetTable>) {
   );
 }
 
+const page = (fail: boolean): Story['render'] =>
+  function Render(args) {
+    return (
+      <ToastProvider position="top-right">
+        <SavePage {...args} fail={fail} />
+        <ToastViewport />
+      </ToastProvider>
+    );
+  };
+
+/** Would the browser ask before leaving? It does when the page has called `preventDefault` on `beforeunload`. */
+const asksBeforeLeaving = () => {
+  const event = new Event('beforeunload', { cancelable: true });
+  window.dispatchEvent(event);
+  return event.defaultPrevented;
+};
+
 /** The whole edit page: Save Changes locks the table while it saves, then a toast says it worked. */
 export const OnThePage: Story = {
-  render: (args) => (
-    <ToastProvider position="top-right">
-      <SavePage {...args} />
-      <ToastViewport />
-    </ToastProvider>
-  ),
+  render: page(false),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    /* Nothing changed: leaving is free. An edit: the browser is asked to confirm. */
+    await expect(asksBeforeLeaving()).toBe(false);
+    await userEvent.click(canvas.getByRole('button', { name: 'Increase Content allocated points' }));
+    await waitFor(() => expect(asksBeforeLeaving()).toBe(true));
+
     await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }));
     await expect(canvas.getByRole('button', { name: 'Save Changes' })).toHaveAttribute('aria-busy', 'true');
     await expect(canvas.getByRole('textbox', { name: 'Development allocated points' })).toBeDisabled();
     await waitFor(() => expect(within(document.body).getByText('Changes Saved')).toBeVisible(), { timeout: 3000 });
     await expect(canvas.getByRole('textbox', { name: 'Development allocated points' })).toBeEnabled();
+    /* Saved: nothing left to lose. */
+    await waitFor(() => expect(asksBeforeLeaving()).toBe(false));
+  },
+};
+
+/** A save that fails: an error toast, the table unlocked and exactly as it was left, Save still there to try again. */
+export const SaveFails: Story = {
+  render: page(true),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Increase Content allocated points' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }));
+    await waitFor(() => expect(within(document.body).getByText('Changes not saved')).toBeVisible(), { timeout: 3000 });
+    await expect(canvas.getByRole('textbox', { name: 'Content allocated points' })).toHaveValue('0');
+    await expect(canvas.getByRole('textbox', { name: 'Content allocated points' })).toBeEnabled();
+    await expect(canvas.getByRole('button', { name: 'Save Changes' })).toBeEnabled();
+    /* Still unsaved, so still worth a warning. */
+    await waitFor(() => expect(asksBeforeLeaving()).toBe(true));
   },
 };
 

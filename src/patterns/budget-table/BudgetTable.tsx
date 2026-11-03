@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { ProgressBar } from '../../atoms/progress-bar';
+import { Skeleton } from '../../atoms/skeleton';
 import { Stepper } from '../../atoms/stepper';
 import { Textarea } from '../../atoms/textarea';
 import { ColumnHint, DataTable, type DataTableColumn } from '../../components/data-table';
@@ -17,20 +18,23 @@ import type { ProgressBarProps } from '../../atoms/progress-bar';
  * column sizing; this adds the five columns and the editing.
  *
  * - **Allocated** is the `Stepper` atom's `up-down` variant, with its empty state: a domain with no budget yet shows
- *   "Set Budget", and clearing the field takes it back to unset. Typing commits (clamped) on blur or Enter; Arrow
- *   Up and Down nudge.
+ *   "Set Budget", and clearing the field takes it back to unset. A nudge commits at once; typing commits after a brief
+ *   pause (`commitDelay`, 600 ms) or on blur or Enter, clamped. Only a number can be typed.
  * - **Consumed** is the points used and a bar of how much of the allocation they are. **The bar's status is the
  *   Domain Budget card's** (`budgetStatus`: under 75% brand blue, 75–99% warning, 100% and over critical) — one
  *   owner, so the table and the summary above it never disagree.
  * - **Remaining** is `allocated − consumed`, derived here so the three never disagree, and red when it goes negative.
  *   A domain with no allocation counts as 0.
- * - **Remaining and the bar update as the allocation is typed** — they are derived from the row, not stored.
+ * - **Remaining and the bar follow the allocation** — they are derived from the row, not stored, so they update the
+ *   moment the allocation does: at once for a nudge, after the pause for typing.
  * - **Optional Notes** is one line until it is focused, then grows to show everything written. Cleared, it says
  *   "Optional Note".
+ * - **Loading** (`loading`) keeps the headers and shows placeholder rows, announced once as "Loading domain budget".
  *
  * It is controlled and saves nothing: rows come in, `onAllocatedChange` and `onNotesChange` report an edit. The
- * "Save Changes" button, its loading state and the "Changes Saved" toast belong to the page — compose them with
- * `Button`'s `loading` and `Toast` (the page story shows it).
+ * "Save Changes" button, its loading state, the "Changes Saved" toast and the error toast for a save that fails belong
+ * to the page — compose them with `Button`'s `loading` and `Toast`, and lock the table with `disabled` while it saves
+ * (the page stories show both outcomes). Leaving with unsaved changes is the browser's own prompt (`beforeunload`).
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add
  * the token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -69,6 +73,12 @@ export interface BudgetTableProps
   maxAllocated?: number;
   /** Locks every field — while a save is in flight. */
   disabled?: boolean;
+  /** Placeholder rows instead of `rows` — while the budgets load. The headers stay. */
+  loading?: boolean;
+  /** How many placeholder rows `loading` shows. */
+  loadingRows?: number;
+  /** ms of quiet after typing in an allocation before it commits (the table follows it). */
+  commitDelay?: number;
   hints?: BudgetTableHints;
   /** The table's accessible name. */
   caption?: string;
@@ -128,6 +138,9 @@ export function BudgetTable({
   onNotesChange,
   maxAllocated = 9999,
   disabled,
+  loading,
+  loadingRows = 6,
+  commitDelay = 600,
   hints,
   caption = 'Domain budget',
   ...props
@@ -157,6 +170,7 @@ export function BudgetTable({
           placeholder="Set Budget"
           value={row.allocated}
           max={maxAllocated}
+          commitDelay={commitDelay}
           disabled={disabled}
           onChange={(n) => onAllocatedChange?.(row.id, n)}
           onClear={() => onAllocatedChange?.(row.id, null)}
@@ -219,5 +233,35 @@ export function BudgetTable({
     },
   ];
 
-  return <DataTable caption={caption} columns={columns} rows={rows} {...props} />;
+  if (!loading) return <DataTable caption={caption} columns={columns} rows={rows} {...props} />;
+
+  /* Loading: the same columns and headers, a placeholder in each cell. The skeletons are hidden from assistive tech,
+     so one status says what is happening. */
+  const placeholders: BudgetRow[] = Array.from({ length: loadingRows }, (_, i) => ({
+    id: `loading-${i}`,
+    domain: '',
+    allocated: null,
+    consumed: 0,
+  }));
+  const LOADING_CELL: Record<string, React.ReactNode> = {
+    domain: <Skeleton width={96} textStyle="body-sm" />,
+    allocated: <Skeleton width={112} height={32} />,
+    consumed: <Skeleton textStyle="body-sm" />,
+    remaining: <Skeleton width={48} textStyle="body-sm" />,
+    notes: <Skeleton height={36} />,
+  };
+  return (
+    <>
+      <span role="status" className="sr-only">
+        Loading domain budget
+      </span>
+      <DataTable
+        caption={caption}
+        aria-busy="true"
+        columns={columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] }))}
+        rows={placeholders}
+        {...props}
+      />
+    </>
+  );
 }

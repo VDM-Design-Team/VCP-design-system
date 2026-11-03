@@ -11,6 +11,7 @@ field with an up/down stepper), what is consumed against it as a bar, what remai
 | `DataTable` | component |
 | `DomainBudgetSummary` | component |
 | `ProgressBar` | atom |
+| `Skeleton` | atom |
 | `Stepper` | atom |
 | `Textarea` | atom |
 
@@ -33,25 +34,35 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onNotesChange` | `(id, notes: string) => void` | — | A note was edited |
 | `maxAllocated` | `number` | `9999` | The largest allocation a domain can be given |
 | `disabled` | `boolean` | — | Locks every field — while a save is in flight |
+| `loading` / `loadingRows` | `boolean` / `number` | — / `6` | Placeholder rows instead of `rows` while the budgets load; the headers stay. One status says "Loading domain budget" and the table is `aria-busy` |
+| `commitDelay` | `number` (ms) | `600` | The quiet after typing in an allocation before it commits, so Remaining and the bar follow while it is typed. A nudge commits at once |
 | `hints` | `{ allocated?, consumed?, remaining? }` | Figma's copy | What each column's ⓘ says (`BUDGET_COLUMN_HINTS` are the defaults) |
 | `caption` | `string` | `Domain budget` | The table's accessible name |
 
-It is **controlled and saves nothing**. The "Save Changes" button, its loading state and the "Changes Saved" toast belong to
-the page: compose them with `Button`'s `loading` and `Toast` (the `OnThePage` story shows it). Lock the table with
-`disabled` while saving. The quarter and year pickers are the page's too.
+It is **controlled and saves nothing**. The page owns the save, and the stories show the whole flow:
+
+| Moment | What the page does |
+|---|---|
+| Saving | `Button` `loading` on "Save Changes", and `disabled` on the table and the `BudgetPeriodPicker` |
+| Saved | A success `Toast` — "Changes Saved" |
+| **The save fails** | A `critical` `Toast` ("Changes not saved … your changes are still here — try again"); unlock the table and **keep what was typed**, so Save can be tried again (`SaveFails`) |
+| Leaving with unsaved changes | The browser's own prompt: while there are edits, call `preventDefault()` on `beforeunload`, and stop once saved. The table has no prompt of its own |
+
+The quarter and year are chosen with `BudgetPeriodPicker`, also the page's.
 
 ## The columns
 
 | Column | What it is |
 |---|---|
 | Domain | The name. Never narrower than its text (`fit`) |
-| Allocated Points | `Stepper` `up-down`, `sm`. Empty ("Set Budget") for a domain with no budget; clearing the field takes it back to unset. Arrow Up and Down nudge; typing commits, clamped, on blur or Enter |
+| Allocated Points | `Stepper` `up-down`, `sm`. Empty ("Set Budget") for a domain with no budget; clearing the field takes it back to unset. Only a number can be typed. A nudge commits at once; typing commits, clamped, after a brief pause (`commitDelay`) or on blur or Enter |
 | Consumed | The points used, then a `ProgressBar` of how much of the allocation that is |
 | Remaining | `allocated − consumed`, red when negative. A domain with no allocation counts as 0 |
 | Optional Notes | One line, clipped, until it has focus; then it grows to show everything written. Empty, it says "Optional Note" |
 
-**Remaining and the bar are derived from the row**, so they follow the allocation as it is typed, with no second state to
-keep in step.
+**Remaining and the bar are derived from the row**, with no second state to keep in step, so they update the moment the
+allocation does: at once for a nudge, after the brief pause (`commitDelay`) for typing — not on every keystroke, and not only
+on blur.
 
 ## The bar's status
 
@@ -86,4 +97,5 @@ textarea can't truncate with one, and the field has to be a textarea to grow. Ve
 - **Don't keep Remaining or the bar in state.** Derive them from `allocated` and `consumed`.
 - **Don't map a number to a bar tone at the call site.** The bands live in `budgetStatus`.
 - **Don't put Save in the table.** One button for the whole page, with `disabled` on the table while it saves.
+- **Don't clear the table when a save fails.** Keep what was typed and say so in the toast.
 - **Don't use it to read a budget.** That is `DomainBudgetSummary`.
