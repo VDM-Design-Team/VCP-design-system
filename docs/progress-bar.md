@@ -56,6 +56,8 @@ Fill against track, measured (3:1 is the bar for meaningful graphics):
 | `pending` | **2.27:1** ⚠ | **4.11:1** |
 | `caution` | **1.28:1** ⚠ | **7.66:1** |
 
+The track carries an inset `stroke.subtle` hairline: in dark, `surface.track` is the very slate of `surface.elevated`, so on a card the unfilled part of the bar disappeared. The ring sits under the fill and changes none of the ratios above.
+
 The trade: the track itself whispers against surfaces (1.23:1 light on base,
 and in dark it matches `surface.base` exactly). That is deliberate — the
 *fill* carries the boundary, in both themes, in every tone, and the announced
