@@ -131,7 +131,7 @@ export function AccountsTable({
       fit: true,
       width: '10%',
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <IconButton
             variant="tertiary"
             shape="square"
