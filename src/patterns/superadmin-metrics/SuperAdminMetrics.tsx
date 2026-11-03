@@ -11,7 +11,8 @@ import { StatCard, StatCardGroup } from '../../components/stat-card';
  * work is going, how reviews end. Built to Figma's `SuperAdmin_Dashboard_Metrics` (the `SuperAdmin Dashboard` page of
  * `VCP Pages & Flows`).
  *
- * - **The filters,** top right: a domain `Select` and a month `DateField`, both 40 high and 14rem wide.
+ * - **The filters,** top right: a domain `Select` and a month `DateField`, both 40 high and 14rem wide, in **regular**
+ *   weight (`emphasis="regular"`) — a filter sits quietly; a chosen value in a form is medium.
  * - **Four cards** of single figures — Values Created, Values Completed, Overdue Value Rate, Active / Total Users — as
  *   `StatCard`s in their `superadmin` look, each with its accent stripe, icon and tooltip.
  * - **Two grouped cards** — Avg. Time (In Pending, In Review) and Review (Acceptance Rate, Values Rejected) — as
@@ -113,13 +114,14 @@ export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetrics
         <div className="flex flex-wrap items-center justify-end gap-3">
           <Select
             size="md"
+            emphasis="regular"
             aria-label="Domain"
             className="w-56"
             value={domain}
             options={domains}
             onChange={onDomainChange}
           />
-          <DateField mode="month" aria-label="Month" className="w-56" value={month} onChange={onMonthChange} />
+          <DateField mode="month" emphasis="regular" aria-label="Month" className="w-56" value={month} onChange={onMonthChange} />
         </div>
 
         <div className="flex flex-wrap gap-4">

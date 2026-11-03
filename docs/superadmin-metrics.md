@@ -28,7 +28,7 @@ Built to Figma's `SuperAdmin_Dashboard_Metrics` (the `SuperAdmin Dashboard` page
 
 | Row | Cards | Accent and icon |
 |---|---|---|
-| Filters, top right | A domain `Select` and a `DateField` in `month` mode, both 40 high and 14rem wide | |
+| Filters, top right | A domain `Select` and a `DateField` in `month` mode, both 40 high, 14rem wide and **regular weight** (`emphasis="regular"`: filters sit quietly) | |
 | Single cards | **Values Created** | `info`, `note-pencil-fill` |
 | | **Values Completed** | `success`, `check-square-fill` |
 | | **Overdue Value Rate** (`%`) | `critical`, `calendar-x-fill` |

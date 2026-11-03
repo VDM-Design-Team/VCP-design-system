@@ -29,6 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `mode` | `'day' \| 'month'` | `'day'` | What it picks: a day, or a month with no day (see below). `DatePicker`'s own prop |
 | `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder |
 | `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
+| `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
 | `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
 | `placeholder` | `string` | `-` | While there is no date |
 | `invalid` / `disabled` | `boolean` | — | As `Input` |
@@ -38,7 +39,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Weight
 
 The chosen date is **medium** weight and the placeholder regular (`Input`'s `emphasis="medium"`) — the rule `Select` and `SearchSelect`
-follow, so a date field reads the same as the selects beside it. (It was regular until November 2026.)
+follow, so a date field reads the same as the selects beside it. (It was regular until November 2026.) **A filter passes
+`emphasis="regular"`**, as its `Select`s and `SearchSelect`s do, so a row of filters sits quietly.
 
 ## Month mode
 

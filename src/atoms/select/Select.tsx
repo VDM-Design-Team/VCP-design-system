@@ -78,13 +78,25 @@ const control = cva(
   ],
   {
     variants: {
-      /* A value is medium, the placeholder regular: SearchSelect's pairing. */
-      size: {
-        sm: "text-caption-md-medium has-[option[data-placeholder]:checked]:text-caption-md-regular",
-        md: "text-body-sm-medium has-[option[data-placeholder]:checked]:text-body-sm-regular",
-      },
+      size: { sm: '', md: '' },
+      /* A value is medium and the placeholder regular (SearchSelect's pairing) — or, for a filter, regular throughout. */
+      emphasis: { medium: '', regular: '' },
     },
-    defaultVariants: { size: 'md' },
+    compoundVariants: [
+      {
+        size: 'sm',
+        emphasis: 'medium',
+        className: 'text-caption-md-medium has-[option[data-placeholder]:checked]:text-caption-md-regular',
+      },
+      {
+        size: 'md',
+        emphasis: 'medium',
+        className: 'text-body-sm-medium has-[option[data-placeholder]:checked]:text-body-sm-regular',
+      },
+      { size: 'sm', emphasis: 'regular', className: 'text-caption-md-regular' },
+      { size: 'md', emphasis: 'regular', className: 'text-body-sm-regular' },
+    ],
+    defaultVariants: { size: 'md', emphasis: 'medium' },
   },
 );
 
@@ -117,6 +129,11 @@ export interface SelectProps
   error?: React.ReactNode;
   /** Escape hatch for `<optgroup>` — replaces `options` when given. */
   children?: React.ReactNode;
+  /**
+   * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
+   * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** Merged onto the shell, not the inner `<select>`. */
   className?: string;
 }
@@ -126,6 +143,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     {
       className,
       size,
+      emphasis,
       invalid,
       error,
       fullWidth,
@@ -156,7 +174,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           defaultValue={
             defaultValue ?? (placeholder && props.value === undefined ? '' : undefined)
           }
-          className={control({ size })}
+          className={control({ size, emphasis })}
           {...props}
           aria-describedby={describedBy}
         >

@@ -25,7 +25,8 @@ export const formatMonth = (iso: string): string => {
  * cannot clip it, and picking a day closes it.
  *
  * The chosen date is **medium** weight and the placeholder regular — the rule `Select` and `SearchSelect` follow — so a date
- * field reads the same as the selects beside it.
+ * field reads the same as the selects beside it. A **filter** passes `emphasis="regular"` (as its `Select`s do), so a row of
+ * filters sits quietly.
  *
  * **`mode="month"`** is the same field for a month with no day (a reporting period): it reads "September 2026", the
  * calendar opens on `DatePicker`'s month grid, and `onChange` gets the first of the chosen month. `estimated` means
@@ -47,6 +48,11 @@ export interface DateFieldProps {
   value?: string;
   /** Fires with the chosen ISO date (in month mode, the first of the month); the calendar then closes. */
   onChange?: (iso: string) => void;
+  /**
+   * The weight of the chosen date: `medium` (the default, as `Select`'s value) or `regular` — what a **filter** uses so a
+   * row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** A calculated date, not one a person set — reads "(est.)". Day mode only. */
   estimated?: boolean;
   /** Shown while there is no date. */
@@ -67,6 +73,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
   (
     {
       mode = 'day',
+      emphasis = 'medium',
       value,
       onChange,
       estimated,
@@ -98,7 +105,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             id={id}
             readOnly
             role="combobox"
-            emphasis="medium"
+            emphasis={emphasis}
             fullWidth
             disabled={disabled}
             invalid={invalid}

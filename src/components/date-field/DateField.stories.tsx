@@ -118,7 +118,7 @@ export const FormatsInUTC: Story = {
   },
 };
 
-/** The chosen date is medium weight and the placeholder regular — as `Select` — in both modes. */
+/** The chosen date is medium weight and the placeholder regular — as `Select` — in both modes; a filter says `regular`. */
 export const ValueWeight: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
@@ -127,6 +127,7 @@ export const ValueWeight: Story = {
       <DateField aria-label="Day" value="2026-03-02" />
       <DateField aria-label="Month" mode="month" value="2026-09-01" />
       <DateField aria-label="Empty" />
+      <DateField aria-label="Filter" mode="month" emphasis="regular" value="2026-09-01" />
     </div>
   ),
   play: async ({ canvasElement }) => {
@@ -135,5 +136,7 @@ export const ValueWeight: Story = {
     await expect(weight('Day')).toBe(500);
     await expect(weight('Month')).toBe(500);
     await expect(weight('Empty')).toBe(400);
+    /* A filter passes `emphasis="regular"`. */
+    await expect(weight('Filter')).toBe(400);
   },
 };
