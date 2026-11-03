@@ -49,6 +49,7 @@ export * from './components/comment-sort-chip';
 export * from './components/cycle-tag';
 export * from './components/data-table';
 export * from './components/date-field';
+export * from './components/cycle-summary';
 export * from './components/date-picker';
 export * from './components/detail-row';
 export * from './components/dropdown-stepper';
