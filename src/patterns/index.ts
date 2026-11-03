@@ -13,6 +13,7 @@ export * from './av-table';
 export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
 export * from './confirm-delete-modal';
+export * from './contacts-table';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
 export * from './comment-section';
