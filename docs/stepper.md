@@ -29,6 +29,7 @@ stepper.
 | `value` | `number \| null` | required | Controlled — there is no uncontrolled mode; a nudger without state is meaningless. `null` is a field with no value yet: it shows `placeholder` |
 | `onChange` | `(value: number) => void` | — | Fires clamped, from buttons, arrows, and commits |
 | `placeholder` | `string` | — | What an empty field says ("Set Budget"), in italic `text.tertiary`. It is a prompt, not a name: `label` still names the field |
+| `commitDelay` | `number` (ms) | — | Commit what is typed after this long without a keystroke, without leaving the field, so whatever is derived from the value follows while it is typed. **Off by default** — a stepper commits on blur or Enter. See below |
 | `onClear` | `() => void` | — | Called when the field is committed empty (cleared, then blur or Enter), so a person can take a value back to `null`. Without it an empty commit restores the number, as before |
 | `min` / `max` / `step` | `number` | `0` / `999` / `1` | Buttons snap by `step`; typed values clamp but do not snap |
 | `label` | `string` | — | The accessible name — "Capacity points". The buttons fold it in: "Decrease Capacity points" |
@@ -68,6 +69,19 @@ until the pointer is released or the value reaches the end it is heading for (`m
 button disables. A single click is still one step, and holding up from an empty field gives it its first number and carries on.
 The repeat is for the pointer; the keyboard path is Arrow Up and Down in the field, which repeat as the browser's key repeat
 does, and Enter or Space on a focused button is one step.
+
+## Only numbers
+
+A stepper holds a number, so only one can be typed: digits, a leading minus when the range goes below zero (`min < 0`), and a
+point when the steps are fractional. Anything else is dropped as it is typed, instead of being left to fail at commit.
+
+## Committing after a pause
+
+`commitDelay` commits what is typed after that many milliseconds without a keystroke, **without leaving the field** — "validated
+after a brief pause". Use it where something is derived from the value and should follow it while it is typed (a budget's
+Remaining and bar). It is **opt-in per stepper**: left off, a stepper commits on blur or Enter as above. An empty field or a lone
+"-" waits for blur. A half-typed number is clamped like any other commit, so with a high `min` a pause after "1" commits "10":
+leave it off where that would bite.
 
 ## Typing is draft-based
 
