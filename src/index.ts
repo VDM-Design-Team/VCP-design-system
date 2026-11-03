@@ -55,6 +55,7 @@ export * from './components/dropdown-stepper';
 export * from './components/domain-label';
 export * from './components/deliverable-link';
 export * from './components/deliverable-link-form';
+export * from './components/password-field';
 export * from './components/password-strength';
 export * from './components/due-date-tag';
 export * from './components/emoji-reaction-picker';
