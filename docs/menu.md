@@ -59,7 +59,7 @@ carry a label and an action cannot accidentally be a rule.
 |---|---|---|---|
 | `key` | `string` | — | What `onSelect` receives |
 | `label` | `ReactNode` | — | **Required on an action.** A string also enables type-ahead for that item |
-| `icon` | `IconName` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative |
+| `icon` | `IconName \| null` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative. `null` on a `danger` item leaves out its fallback `warning` glyph |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
 | `tone` | `default \| danger` | `default` | `danger` is for destructive, irreversible actions. See below |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
@@ -184,7 +184,9 @@ three signals, only one of which is colour:
 1. **Colour** — the `accent.critical.outline` content and hover fill.
 2. **A glyph.** A danger item always renders an icon. If you gave one (`trash`)
    it is used; if you gave none, it falls back to `warning`. Shape distinguishes
-   the row from its neighbours whether or not colour is perceived.
+   the row from its neighbours whether or not colour is perceived. Pass
+   `icon: null` to leave a danger item without one, when its label names the
+   act itself ("Delete"); colour and the hidden words still say it.
 3. **Words, in the accessible name.** The item's name ends with a visually
    hidden "destructive action", so a screen reader announces
    *"Delete deliverable, destructive action, menu item"*. This is the signal that

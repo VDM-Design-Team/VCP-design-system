@@ -60,7 +60,7 @@ export const Default: Story = {
     /* The menu closes on choosing; only then open it again. */
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
     await userEvent.click(c.getByRole('button', { name: 'Actions for Fixes for the planning table' }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Delete' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /^Delete/ }));
     await expect(args.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 4 }));
   },
 };
