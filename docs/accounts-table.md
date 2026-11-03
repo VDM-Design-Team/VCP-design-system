@@ -14,6 +14,7 @@ button on every row, and the pages beneath. Built to Figma's `Accounts_Page_Cont
 | `Skeleton` | atom |
 | `Tag` | atom |
 | `DataTable` | component |
+| `EmptyState` | component |
 | `UserLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -64,7 +65,7 @@ follows, and the `OnThePage` story shows the whole of it:
 
 ## Empty
 
-With no rows it says so: "No accounts yet." — or, while a search is typed, **No accounts match “…”.** with the words searched. Pass `empty` to say
+With no rows it says so in an `EmptyState` (the system's empty look): "No accounts yet." — or, while a search is typed, **No accounts match “…”.** with the words searched and a hint. Pass `empty` to say
 something else.
 
 ## Tokens
@@ -88,7 +89,7 @@ same `Input type="search"` with a leading magnifying glass that `PlanningFilters
 
 - A real `<table>` named by `caption`, with `scope="col"` headers and `aria-sort` on the sorted one (`DataTable`'s).
 - Every row button is named for its person, so a screen reader never meets thirty "Edit" buttons.
-- The search is a labelled `searchbox` ("Search accounts"); the empty message is text.
+- The search is a labelled `searchbox` ("Search accounts"); the empty message is a heading.
 - Loading: the table is `aria-busy` and one `status` says so; the skeletons are hidden from assistive tech.
 
 ## Don't
