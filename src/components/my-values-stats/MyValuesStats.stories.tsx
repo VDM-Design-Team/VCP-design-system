@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, waitFor, within } from 'storybook/test';
 import { MyValuesStats, type MyValuesStatsSegment } from './MyValuesStats';
 
 /* The breakdown Figma draws: Draft, Pending (none), Accepted, Active, Overdue. */
@@ -84,13 +84,41 @@ export const ThreeStatuses: Story = {
   },
 };
 
-/** When the card is too narrow for one row, the breakdown drops to its own line, full width. */
-export const Narrow: Story = {
+/** Too narrow for what it shows, it does not wrap or squeeze: the whole strip scrolls sideways. */
+export const ScrollsWhenTooNarrow: Story = {
   render: (args) => (
     <div className="w-136">
       <MyValuesStats {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole('region', { name: 'My Values statistics' });
+    await expect(card.scrollWidth).toBeGreaterThan(card.clientWidth);
+    await expect(getComputedStyle(card).overflowX).toBe('auto');
+    /* A scrolling region is reachable by keyboard — only while it scrolls. */
+    await waitFor(() => expect(card).toHaveAttribute('tabindex', '0'));
+    /* Still one row: the profile and the breakdown share a line. */
+    const profile = within(card).getByText('Username');
+    const breakdown = within(card).getByRole('list', { name: 'Status breakdown' });
+    await expect(Math.abs(profile.getBoundingClientRect().top - breakdown.getBoundingClientRect().top)).toBeLessThan(80);
+  },
+};
+
+/** With room, it fits and does not scroll. */
+export const FitsWhenThereIsRoom: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div className="w-280">
+      <MyValuesStats {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole('region', { name: 'My Values statistics' });
+    await expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth);
+    /* It fits, so it adds no tab stop. */
+    await expect(card).not.toHaveAttribute('tabindex');
+  },
 };
 
 /** Tokens only, so dark comes for free. */

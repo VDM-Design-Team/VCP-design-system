@@ -50,9 +50,9 @@ derived state) — so the segments arrive as data and `StatusTag` keeps owning t
 
 ## Layout
 
-A container query, so it follows the card, not the screen. With room, the profile, the two figures and the breakdown share one row;
-when the breakdown (at least 24rem) does not fit beside them it drops to its own line, full width. Segments share the breakdown's
-width **in proportion to their counts**, each at least 100.
+Everything stays on **one row**: the profile and the two figures, then the breakdown, which takes the width that is left, split
+**in proportion to the counts**, each segment at least 100. When even those floors do not fit, nothing wraps or shrinks further:
+**the whole strip scrolls sideways** (`overflow-x: auto`). Segments never drop to a second line.
 
 ## Tokens
 
@@ -74,6 +74,7 @@ Contrast on the card: `text.primary` **20.17:1** light / **14.63:1** dark; `text
 - A `section` named "My Values statistics". The breakdown is a **list** ("Status breakdown"), one item per status reading its
   count then its name, so the bar's meaning is in the text. The bars are decorative and hidden — colour is never the only signal.
 - The avatar is decoration (the name is beside it), the green dot likewise.
+- A strip that scrolls sideways is **keyboard-focusable while it overflows** (Tab to it, then the arrow keys scroll), and adds no tab stop when it fits.
 
 ## Don't
 

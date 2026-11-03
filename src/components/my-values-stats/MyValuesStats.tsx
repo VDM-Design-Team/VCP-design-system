@@ -19,8 +19,8 @@ import { Divider } from '../../atoms/divider';
  * groupings and a derived state, not statuses), so the segments come in as data. It does no arithmetic: the totals are the
  * caller's (Total is not the sum of the segments — it includes what is completed).
  *
- * **It reflows with the card, not the screen.** Everything on one row when there is room; the breakdown drops to its own
- * line, full width, when there is not.
+ * **It never squeezes past what it needs.** Everything stays on one row; the breakdown shares the width that is left, and
+ * each segment keeps its 100 floor. Narrower than that, nothing wraps or shrinks further: the whole strip scrolls sideways.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -94,55 +94,78 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
       ...props
     },
     ref,
-  ) => (
-    <section
-      ref={ref}
-      aria-label={ariaLabel}
-      className={cn(
-        '@container flex flex-wrap items-center gap-x-6 gap-y-4 rounded-md border border-stroke-subtle bg-surface-elevated p-4 font-sans',
-        className,
-      )}
-      {...props}
-    >
-      <div className="flex items-center gap-6">
-        {/* The name is right there, so the avatar is decoration. */}
-        <div className="flex flex-col items-center gap-2">
-          <Avatar size="lg" name={user.name} src={user.src} />
-          <span className="text-body-sm-regular text-text-primary">{user.name}</span>
-        </div>
-        <Divider orientation="vertical" className="self-stretch" />
-        <div className="flex items-center gap-6">
-          <Figure label={totalLabel}>{total}</Figure>
-          <Figure label={completedLabel}>
-            {completed}
-            <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
-          </Figure>
-        </div>
-      </div>
+  ) => {
+    /* A region that scrolls sideways has to be reachable by keyboard — but only while it actually overflows, so a strip
+       that fits adds no tab stop. */
+    const own = React.useRef<HTMLElement | null>(null);
+    const [overflowing, setOverflowing] = React.useState(false);
+    React.useLayoutEffect(() => {
+      const el = own.current;
+      if (!el) return;
+      const measure = () => setOverflowing(el.scrollWidth > el.clientWidth);
+      measure();
+      const observer = new ResizeObserver(measure);
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, [segments]);
+    const setRef = (node: HTMLElement | null) => {
+      own.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    };
 
-      <ul aria-label="Status breakdown" className="m-0 flex min-w-96 flex-1 list-none gap-1 p-0">
-        {segments.map((segment) => {
-          const filled = segment.count > 0;
-          return (
-            <li
-              key={segment.id}
-              /* As wide as its count, never narrower than 100. The width is data, so it is the one inline style. */
-              style={{ flexGrow: Math.max(segment.count, 0) }}
-              className="flex min-w-25 basis-0 flex-col gap-2"
-            >
-              <span
-                aria-hidden="true"
-                className={cn('block h-2 rounded-pill', filled ? FILL[segment.tone] : cn('border', OUTLINE[segment.tone]))}
-              />
-              <div className="flex flex-col">
-                <span className="text-body-lg-medium text-text-primary">{segment.count}</span>
-                <span className="text-body-sm-medium text-text-tertiary">{segment.label}</span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  ),
+    return (
+      <section
+        ref={setRef}
+        aria-label={ariaLabel}
+        tabIndex={overflowing ? 0 : undefined}
+        className={cn(
+          'flex items-center gap-6 overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated p-4 font-sans',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+          className,
+        )}
+        {...props}
+      >
+        <div className="flex shrink-0 items-center gap-6">
+          {/* The name is right there, so the avatar is decoration. */}
+          <div className="flex flex-col items-center gap-2">
+            <Avatar size="lg" name={user.name} src={user.src} />
+            <span className="text-body-sm-regular text-text-primary">{user.name}</span>
+          </div>
+          <Divider orientation="vertical" className="self-stretch" />
+          <div className="flex items-center gap-6">
+            <Figure label={totalLabel}>{total}</Figure>
+            <Figure label={completedLabel}>
+              {completed}
+              <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
+            </Figure>
+          </div>
+        </div>
+
+        <ul aria-label="Status breakdown" className="m-0 flex flex-1 list-none gap-1 p-0">
+          {segments.map((segment) => {
+            const filled = segment.count > 0;
+            return (
+              <li
+                key={segment.id}
+                /* As wide as its count, never narrower than 100. The width is data, so it is the one inline style. */
+                style={{ flexGrow: Math.max(segment.count, 0) }}
+                className="flex min-w-25 basis-0 flex-col gap-2"
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn('block h-2 rounded-pill', filled ? FILL[segment.tone] : cn('border', OUTLINE[segment.tone]))}
+                />
+                <div className="flex flex-col">
+                  <span className="text-body-lg-medium text-text-primary">{segment.count}</span>
+                  <span className="text-body-sm-medium text-text-tertiary">{segment.label}</span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    );
+  },
 );
 MyValuesStats.displayName = 'MyValuesStats';
