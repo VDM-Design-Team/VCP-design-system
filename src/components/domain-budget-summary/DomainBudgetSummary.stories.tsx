@@ -118,7 +118,12 @@ export const Hints: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     for (const name of ['Allocated', 'Consumed', 'Remaining']) {
-      await expect(canvas.getByRole('button', { name: `About ${name}` })).toBeVisible();
+      const hint = canvas.getByRole('button', { name: `About ${name}` });
+      await expect(hint).toBeVisible();
+      /* A 20 glyph, but a 40 press area. */
+      const after = getComputedStyle(hint, '::after');
+      await expect(Number.parseFloat(after.width)).toBeGreaterThanOrEqual(40);
+      await expect(Number.parseFloat(after.height)).toBeGreaterThanOrEqual(40);
     }
   },
 };
@@ -165,6 +170,8 @@ export const Interactive: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Go to Current Quarter' }));
     await expect(canvas.getByText('Current Quarter')).toBeVisible();
     await expect(canvas.queryByRole('button', { name: 'Go to Current Quarter' })).toBeNull();
+    /* The button that had focus is gone: focus moves to the quarter picker rather than dropping to the page. */
+    await expect(canvas.getByRole('combobox', { name: 'Quarter' })).toHaveFocus();
   },
 };
 

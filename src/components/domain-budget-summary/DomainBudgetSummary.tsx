@@ -134,7 +134,8 @@ function Points({
             type="button"
             aria-label={`About ${label}`}
             className={cn(
-              'grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary',
+              /* A 20 glyph with a 40 press area (the repo's after:-inset-2.5 pattern, as PageTitle). */
+              'relative grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary after:absolute after:-inset-2.5',
               'hover:text-text-secondary',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
@@ -170,6 +171,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
     ref,
   ) => {
     const headingId = React.useId();
+    const quarterRef = React.useRef<HTMLSelectElement>(null);
     const remaining = allocated - consumed;
     const status = budgetStatus(consumed, allocated);
 
@@ -188,12 +190,21 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
             </h2>
             <div className="flex items-center gap-3">
               {period.kind !== 'current' && (
-                <Button variant="secondary" size="sm" onClick={onGoToCurrent}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    onGoToCurrent?.();
+                    /* The button goes away once the current quarter shows, taking focus with it: hand it to the quarter picker. */
+                    quarterRef.current?.focus();
+                  }}
+                >
                   Go to Current Quarter
                 </Button>
               )}
               <Select
                 size="sm"
+                ref={quarterRef}
                 aria-label="Quarter"
                 value={String(quarter)}
                 options={QUARTER_OPTIONS}

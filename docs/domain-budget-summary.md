@@ -78,6 +78,14 @@ The card is `surface.elevated`, `radius.md`, `space.24` all round, no outline �
 | "pts", quarter value, dates | 24 medium | `text.secondary` for the details; the figure's colour for "pts" |
 | Detail labels | `body-sm-medium` | `text.tertiary` |
 
+| Pair, on the card (`surface.elevated`) | Light | Dark |
+|---|---|---|
+| Figures (`text.primary`) | **20.17:1** | **14.63:1** |
+| Point labels, quarter and dates (`text.secondary`) | **10.35:1** | **11.87:1** |
+| Detail labels (`text.tertiary`) | **7.58:1** | **9.85:1** |
+| Remaining, in budget (`accent.success.outline.content`) | **4.95:1** | **6.60:1** |
+| Remaining, overspent (`accent.critical.outline.content`) | **4.77:1** | **5.06:1** |
+
 **Differences from Figma, on purpose.** The figure is `heading-xl-bold` (32), not Figma's 28, which has no step on the
 ramp — the same call `StatCard` made. The 24 medium for "pts" and the details has no step either (`heading-lg` ships bold,
 semibold and regular), so it is the one marked exception, as in `StatCard`. The bar is `ProgressBar`'s 8 high, not Figma's 12 (its label row is below the bar, as Figma draws it, but in the atom's caption type), and its
@@ -88,7 +96,8 @@ moved to yellow-700 for contrast in November and Figma still shows the old one.
 
 - A `section` named by its heading, so a screen reader announces "Domain Budget, region".
 - Each info glyph is a real, focusable `button` named "About Allocated" (and so on) wrapping the system `Tooltip` — the definition is
-  reachable by keyboard, not only on hover.
+  reachable by keyboard, not only on hover. The glyph is 20, with a 40 press area.
+- "Go to Current Quarter" goes away once the current quarter shows, so focus moves to the quarter picker instead of dropping to the page.
 - The bar is a `role="progressbar"` named "Budget Usage", with its value in percent, so what is announced is what is shown.
   The status is also in the numbers beside it (a negative Remaining, "100%"): colour is never the only signal.
 - The pickers are native selects named "Quarter" and "Year".
