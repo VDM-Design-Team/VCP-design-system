@@ -73,6 +73,11 @@ export interface DataTableColumn<Row> {
    * keyboard.
    */
   hint?: React.ReactNode;
+  /**
+   * A control that lives in the header instead of a visible label — the Users table's "+ New User". The `label` stays as
+   * the column's name for assistive tech, visually hidden. Not for sortable columns.
+   */
+  action?: React.ReactNode;
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
   /**
@@ -275,6 +280,11 @@ export function DataTable<Row extends { id?: string | number }>({
                       >
                         {c.label}
                       </button>
+                    ) : c.action ? (
+                      <>
+                        <span className="sr-only">{c.label}</span>
+                        {c.action}
+                      </>
                     ) : (
                       <span className="text-label-sm-medium text-text-secondary">{c.label}</span>
                     )}

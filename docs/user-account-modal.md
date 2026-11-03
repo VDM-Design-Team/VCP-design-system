@@ -9,6 +9,7 @@ the empty "Add New User").
 |---|---|
 | `Avatar` | atom |
 | `Button` | atom |
+| `Checkbox` | atom |
 | `Divider` | atom |
 | `Input` | atom |
 | `Select` | atom |
@@ -44,14 +45,20 @@ Both share the body: a photo with **Upload**, **Status**, **Name**, **Email**, *
 | `open` / `onClose` | `boolean` / `() => void` | required | You own `open`; the dialog asks to close on Escape and the ✕ |
 | `mode` | `new \| edit` | `new` | |
 | `initial` | `{ status, name, email, proficiency, capacityPoints, avatarSrc }` | — | The starting values. The dialog keeps its own draft |
-| `domains` | `DomainAccessRow[]` | required | The domains and what the user can do in each |
+| `domains` | `DomainAccessRow[]` | — | The domains and what the user can do in each: the Domain Access & Admin Rights table |
+| `roles` | `{ value, label }[]` | — | **Instead of `domains`**: a Roles checklist (the Settings Users tab's dialog). Ticked values are `initial.roles` and `draft.roles` |
 | `statusOptions` / `proficiencyOptions` | `Array<string \| { value, label }>` | required | **The page passes these in**: what they are is the product's |
 | `onSubmit` | `(draft) => void` | required | Valid, it gets the whole draft — the fields (trimmed) and every domain's access. Saves nothing itself |
 | `onSaveCapacity` | `(points: number \| null) => void` | — | Edit only: the Save beside Capacity Points, which saves **the points alone** |
 | `onUploadAvatar` | `(file: File) => void` | — | A photo was chosen |
+| `onRemoveAvatar` | `() => void` | — | Remove was pressed. Passing it turns Upload into **Change** + **Remove** once there is a photo; without it, Upload only |
 | `submitting` | `boolean` | — | The button spins and every field locks |
 | `errors` | `Partial<Record<'status' \| 'name' \| 'email' \| 'proficiency', string>>` | — | What only the server knows, shown under the field |
 | `title` | `string` | name / "User" | |
+
+## One dialog for Accounts and Settings
+
+Settings' "Create New User" / "View User" is this dialog with two options: **`roles`** (a Roles checklist in place of the domain table) and **`onRemoveAvatar`** (Change and Remove for the photo). Give it a `title` ("Create New User") where Figma's differs. Figma's View User draws both Proficiency and Roles; whether they are redundant is a question for design.
 
 ## The draft
 

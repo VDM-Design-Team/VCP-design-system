@@ -27,3 +27,4 @@ export * from './review-av-modal';
 export * from './sidebar';
 export * from './top-bar';
 export * from './user-account-modal';
+export * from './users-table';

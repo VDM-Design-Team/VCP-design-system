@@ -209,3 +209,51 @@ export const DarkTheme: Story = {
   globals: { theme: 'dark' },
   play: undefined,
 };
+
+const ROLES = [
+  { value: 'junior', label: 'Junior Product Designer' },
+  { value: 'designer', label: 'Product Designer' },
+  { value: 'senior', label: 'Senior Product Designer' },
+];
+
+/** The Settings Users tab's dialog: a Roles checklist stands in for the Domain Access table. Ticking is the user's draft. */
+export const WithRoles: Story = {
+  args: {
+    mode: 'edit',
+    domains: undefined,
+    roles: ROLES,
+    initial: { name: 'John', email: 'john@vdm.technology', status: 'Approved', proficiency: 'Senior', capacityPoints: 10, roles: ['senior'] },
+  },
+  play: async ({ args }) => {
+    const d = within(body().getByRole('dialog', { name: 'John' }));
+    await expect(d.queryByRole('heading', { name: 'Domain Access & Admin Rights' })).toBeNull();
+    await expect(d.getByRole('group', { name: 'Roles' })).toBeVisible();
+    await expect(d.getByRole('checkbox', { name: 'Senior Product Designer' })).toBeChecked();
+    await userEvent.click(d.getByRole('checkbox', { name: 'Product Designer' }));
+    await userEvent.click(d.getByRole('checkbox', { name: 'Senior Product Designer' }));
+    await userEvent.click(d.getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(args.onSubmit).toHaveBeenCalledWith(expect.objectContaining({ roles: ['designer'] })));
+  },
+};
+
+/** With `onRemoveAvatar`, a photo is Changed or Removed (Upload while there is none); focus lands on the button that is left. */
+export const ChangeAndRemovePhoto: Story = {
+  args: {
+    mode: 'edit',
+    domains: undefined,
+    roles: ROLES,
+    title: 'John',
+    initial: { name: 'John', email: 'john@vdm.technology', avatarSrc: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' },
+    onRemoveAvatar: fn(),
+  },
+  play: async ({ args }) => {
+    const d = within(body().getByRole('dialog', { name: 'John' }));
+    await expect(d.getByRole('button', { name: 'Change profile photo' })).toBeVisible();
+    await userEvent.click(d.getByRole('button', { name: 'Remove profile photo' }));
+    await expect(args.onRemoveAvatar).toHaveBeenCalledTimes(1);
+    /* No photo: Upload, and no Remove — and focus did not fall to the page. */
+    await waitFor(() => expect(d.getByRole('button', { name: 'Upload profile photo' })).toHaveFocus());
+    await expect(d.queryByRole('button', { name: 'Remove profile photo' })).toBeNull();
+  },
+};
+
