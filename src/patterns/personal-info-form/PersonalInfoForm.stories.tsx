@@ -57,6 +57,7 @@ export const Development: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
+    /* Before the account is linked: greyed out, with its note and an example in the placeholder. */
     const id = c.getByRole('textbox', { name: 'Jira Account ID' });
     await expect(id).toBeDisabled();
     await expect(id).toHaveAttribute('placeholder', 'e.g. 712020:abc123...');
@@ -75,8 +76,31 @@ export const JiraConnected: Story = {
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await expect(c.getByRole('textbox', { name: 'Jira Account ID' })).toHaveValue('712020:abc123def456');
+    const id = c.getByRole('textbox', { name: 'Jira Account ID' });
+    await expect(id).toHaveValue('712020:abc123def456');
+    /* After: a plain field (not greyed out, still read-only) and the note is gone. */
+    await expect(id).toBeEnabled();
+    await expect(id).toHaveAttribute('readonly');
+    await expect(c.queryByText('Auto populated after Jira connection')).toBeNull();
     await expect(c.getByRole('button', { name: 'Disconnect Jira' })).toBeVisible();
+  },
+};
+
+/**
+ * `accountIdEditable`: the id can be typed by hand as well as filled in by the connection (Figma does not say whether it can). It is then an
+ * ordinary input, and `onSave` hands its value back as `jiraAccountId`.
+ */
+export const JiraIdEditable: Story = {
+  args: { jira: { logo: LOGO, status: 'Not connected', accountIdEditable: true } },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    const id = c.getByRole('textbox', { name: 'Jira Account ID' });
+    await expect(id).toBeEnabled();
+    await expect(id).not.toHaveAttribute('readonly');
+    await expect(c.queryByText('Auto populated after Jira connection')).toBeNull();
+    await userEvent.type(id, '  712020:typed ');
+    await userEvent.click(c.getByRole('button', { name: 'Save' }));
+    await expect(args.onSave).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@vdm.technology', jiraAccountId: '712020:typed' });
   },
 };
 

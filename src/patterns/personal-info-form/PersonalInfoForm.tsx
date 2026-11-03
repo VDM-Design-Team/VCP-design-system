@@ -10,9 +10,12 @@ import { Field } from '../../components/field';
  * account that is linked to you. Built to Figma's `Settings_Personal_Info` (`Domain=Design` and `Domain=Development`).
  *
  * - **Name** and **Email** are the two fields every domain has, then **Save**.
- * - **Jira** (`jira`) is the Development domain's extra: a read-only **Jira Account ID** ("Auto populated after Jira connection") and a
- *   `ConnectionCard` to link the account. Give it `jira` and the section shows; leave it out for Design. *Which* domains have it is the
- *   page's knowledge, not this form's.
+ * - **Jira** (`jira`) is the Development domain's extra: a **Jira Account ID** and a `ConnectionCard` to link the account. Give it
+ *   `jira` and the section shows; leave it out for Design. *Which* domains have it is the page's knowledge, not this form's.
+ *   Figma draws two states for the id: **before** the account is linked it is greyed out with the note "Auto populated after Jira
+ *   connection" and an example in its placeholder; **after**, a normal white field holding the id, with no note. Is the id ever typed by
+ *   hand? Figma does not say, so it is a prop: `accountIdEditable` (off by default — the connection fills it, and the field is
+ *   read-only) turns it into an ordinary input whose value `onSave` hands back as `jiraAccountId`.
  *
  * **It keeps its own draft** (from `initial`) and hands the whole of it to `onSave` — it saves nothing itself. Name and Email are
  * required ("Name is required", as Figma's Error variant words it) and Email must look like one: Save says what is wrong under the
@@ -31,11 +34,19 @@ import { Field } from '../../components/field';
 export interface PersonalInfoValues {
   name: string;
   email: string;
+  /** Only when the Jira id is editable (`jira.accountIdEditable`). */
+  jiraAccountId?: string;
 }
 
 export interface PersonalInfoJira {
-  /** The linked account's id, once there is one. Read-only: it is filled in by the connection. */
+  /** The linked account's id, once there is one. Filled in by the connection, so by default the field is read-only. */
   accountId?: string;
+  /**
+   * The id can be typed by hand as well as filled in by the connection. Off by default: the field is read-only (greyed out and
+   * labelled "Auto populated after Jira connection" until there is an id, then plain and read-only). On, it is an ordinary
+   * input, and `onSave` gets its value as `jiraAccountId`.
+   */
+  accountIdEditable?: boolean;
   /** The service's mark for the card. */
   logo: React.ReactNode;
   /** Where the link stands: "Not connected". */
@@ -77,6 +88,11 @@ export function PersonalInfoForm({
   ...props
 }: PersonalInfoFormProps) {
   const [draft, setDraft] = React.useState<PersonalInfoValues>({ name: initial?.name ?? '', email: initial?.email ?? '' });
+  const [jiraId, setJiraId] = React.useState(jira?.accountId ?? '');
+  /* A connection that lands later fills the id in; a person's own typing is not overwritten while it is being edited. */
+  React.useEffect(() => {
+    if (!jira?.accountIdEditable) setJiraId(jira?.accountId ?? '');
+  }, [jira?.accountId, jira?.accountIdEditable]);
   const [invalid, setInvalid] = React.useState<Partial<Record<keyof PersonalInfoValues, string>>>({});
   const nameInput = React.useRef<HTMLInputElement>(null);
   const emailInput = React.useRef<HTMLInputElement>(null);
@@ -99,7 +115,11 @@ export function PersonalInfoForm({
     /* Not through: hand focus to the first field that needs fixing. */
     if (next.name) return nameInput.current?.focus();
     if (next.email) return emailInput.current?.focus();
-    onSave({ name: draft.name.trim(), email: draft.email.trim() });
+    onSave({
+      name: draft.name.trim(),
+      email: draft.email.trim(),
+      ...(jira?.accountIdEditable ? { jiraAccountId: jiraId.trim() } : {}),
+    });
   };
 
   return (
@@ -137,8 +157,19 @@ export function PersonalInfoForm({
 
         {jira && (
           <>
-            <Field label="Jira Account ID" helper="Auto populated after Jira connection">
-              <Input fullWidth disabled placeholder="e.g. 712020:abc123..." value={jira.accountId ?? ''} readOnly />
+            {/* Figma's two states. Empty and filled by the connection: greyed out with its note. Filled: a plain field. */}
+            <Field
+              label="Jira Account ID"
+              helper={jira.accountIdEditable || jiraId ? undefined : 'Auto populated after Jira connection'}
+            >
+              <Input
+                fullWidth
+                placeholder="e.g. 712020:abc123..."
+                value={jiraId}
+                disabled={saving || (!jira.accountIdEditable && !jiraId)}
+                readOnly={!jira.accountIdEditable}
+                onChange={(event) => setJiraId(event.target.value)}
+              />
             </Field>
             <ConnectionCard
               name="Jira"
