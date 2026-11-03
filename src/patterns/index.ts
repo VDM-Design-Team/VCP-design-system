@@ -11,6 +11,7 @@ export * from './av-header';
 export * from './av-table';
 export * from './changelog-modal';
 export * from './confirm-delete-av-modal';
+export * from './confirm-delete-modal';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
 export * from './comment-section';
