@@ -166,92 +166,95 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
       <section
         ref={ref}
         aria-labelledby={headingId}
-        className={cn('@container rounded-md bg-surface-elevated p-6 font-sans', className)}
+        className={cn('@container overflow-x-auto rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5">
-          <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
-            {title}
-          </h2>
-          <div className="flex items-center gap-3">
-            {period.kind !== 'current' && (
-              <Button variant="secondary" size="sm" onClick={onGoToCurrent}>
-                Go to Current Quarter
-              </Button>
-            )}
-            <Select
-              size="sm"
-              aria-label="Quarter"
-              value={`Q${quarter}`}
-              options={QUARTERS}
-              onChange={(v) => onQuarterChange?.(Number(v.slice(1)) as 1 | 2 | 3 | 4)}
-            />
-            <Select
-              size="sm"
-              aria-label="Year"
-              value={String(year)}
-              options={years.map(String)}
-              onChange={(v) => onYearChange?.(Number(v))}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 gap-3 @5xl:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
-            <div className="flex min-w-0 items-center gap-9 rounded-md border border-stroke-default px-6 py-3 @5xl:min-w-116">
-              <Points label="Allocated" hint={HINTS.allocated} value={allocated} />
-              <Divider orientation="vertical" className="self-stretch" />
-              <Points label="Consumed" hint={HINTS.consumed} value={consumed} />
-              <Divider orientation="vertical" className="self-stretch" />
-              <Points
-                label="Remaining"
-                hint={HINTS.remaining}
-                value={remaining}
-                toneClassName={
-                  remaining < 0 ? 'text-accent-critical-outline-content-default' : 'text-accent-success-outline-content-default'
-                }
+        {/* Never squeezed below what its figures need: narrower than this, the whole card scrolls sideways. */}
+        <div className="min-w-lg">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5">
+            <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
+              {title}
+            </h2>
+            <div className="flex items-center gap-3">
+              {period.kind !== 'current' && (
+                <Button variant="secondary" size="sm" onClick={onGoToCurrent}>
+                  Go to Current Quarter
+                </Button>
+              )}
+              <Select
+                size="sm"
+                aria-label="Quarter"
+                value={`Q${quarter}`}
+                options={QUARTERS}
+                onChange={(v) => onQuarterChange?.(Number(v.slice(1)) as 1 | 2 | 3 | 4)}
+              />
+              <Select
+                size="sm"
+                aria-label="Year"
+                value={String(year)}
+                options={years.map(String)}
+                onChange={(v) => onYearChange?.(Number(v))}
               />
             </div>
-
-            <div className="flex min-w-0 items-center gap-9 px-4 py-3 @5xl:min-w-112">
-              <div className="flex min-w-fit flex-1 flex-col gap-2">
-                <Badge size="md" className="self-start">
-                  {TAG_LABEL[period.kind]}
-                </Badge>
-                <span className={cn('whitespace-nowrap text-text-secondary', MEDIUM_24)}>
-                  Q{quarter} {year}
-                </span>
-              </div>
-              <Divider orientation="vertical" className="self-stretch" />
-              {period.kind === 'current' && (
-                <>
-                  <Detail label="Ends on">{period.endsOn}</Detail>
-                  <Divider orientation="vertical" className="self-stretch" />
-                  <Detail label="Days left">
-                    <span>{period.daysLeft}</span>
-                    <span aria-hidden="true">/{period.daysTotal}</span>
-                    <span className="sr-only">of {period.daysTotal}</span>
-                  </Detail>
-                </>
-              )}
-              {period.kind === 'past' && (
-                <>
-                  <Detail label="Started On">{period.startedOn}</Detail>
-                  <Divider orientation="vertical" className="self-stretch" />
-                  <Detail label="Ended On">{period.endedOn}</Detail>
-                </>
-              )}
-              {period.kind === 'upcoming' && (
-                <>
-                  <Detail label="Starts On">{period.startsOn}</Detail>
-                  <Divider orientation="vertical" className="self-stretch" />
-                  <Detail label="Ends On">{period.endsOn}</Detail>
-                </>
-              )}
-            </div>
           </div>
 
-          <ProgressBar label="Budget Usage" showValue labelPlacement="below" tone={TONE[status]} value={budgetUsage(consumed, allocated)} />
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-3 @5xl:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
+              <div className="flex min-w-0 items-center gap-9 rounded-md border border-stroke-default px-6 py-3 @5xl:min-w-116">
+                <Points label="Allocated" hint={HINTS.allocated} value={allocated} />
+                <Divider orientation="vertical" className="self-stretch" />
+                <Points label="Consumed" hint={HINTS.consumed} value={consumed} />
+                <Divider orientation="vertical" className="self-stretch" />
+                <Points
+                  label="Remaining"
+                  hint={HINTS.remaining}
+                  value={remaining}
+                  toneClassName={
+                    remaining < 0 ? 'text-accent-critical-outline-content-default' : 'text-accent-success-outline-content-default'
+                  }
+                />
+              </div>
+
+              <div className="flex min-w-0 items-center gap-9 px-4 py-3 @5xl:min-w-112">
+                <div className="flex min-w-fit flex-1 flex-col gap-2">
+                  <Badge size="md" className="self-start">
+                    {TAG_LABEL[period.kind]}
+                  </Badge>
+                  <span className={cn('whitespace-nowrap text-text-secondary', MEDIUM_24)}>
+                    Q{quarter} {year}
+                  </span>
+                </div>
+                <Divider orientation="vertical" className="self-stretch" />
+                {period.kind === 'current' && (
+                  <>
+                    <Detail label="Ends on">{period.endsOn}</Detail>
+                    <Divider orientation="vertical" className="self-stretch" />
+                    <Detail label="Days left">
+                      <span>{period.daysLeft}</span>
+                      <span aria-hidden="true">/{period.daysTotal}</span>
+                      <span className="sr-only">of {period.daysTotal}</span>
+                    </Detail>
+                  </>
+                )}
+                {period.kind === 'past' && (
+                  <>
+                    <Detail label="Started On">{period.startedOn}</Detail>
+                    <Divider orientation="vertical" className="self-stretch" />
+                    <Detail label="Ended On">{period.endedOn}</Detail>
+                  </>
+                )}
+                {period.kind === 'upcoming' && (
+                  <>
+                    <Detail label="Starts On">{period.startsOn}</Detail>
+                    <Divider orientation="vertical" className="self-stretch" />
+                    <Detail label="Ends On">{period.endsOn}</Detail>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <ProgressBar label="Budget Usage" showValue labelPlacement="below" tone={TONE[status]} value={budgetUsage(consumed, allocated)} />
+          </div>
         </div>
       </section>
     );

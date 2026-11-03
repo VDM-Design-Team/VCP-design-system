@@ -171,13 +171,31 @@ export const AllLevels: Story = {
   ),
 };
 
-/** Narrower than the side-by-side layout needs (Figma’s 512): points on top, the quarter’s details beneath. */
+/** Narrower than the side-by-side layout needs (560, the narrowest it stays whole at): points on top, the quarter's details beneath. */
 export const Narrow: Story = {
   render: (args) => (
-    <div className="w-128">
+    <div className="w-140">
       <DomainBudgetSummary {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole('region', { name: 'Domain Budget' });
+    await expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth);
+  },
+};
+
+/** Narrower than that, nothing is squeezed further: the whole card scrolls sideways. */
+export const ScrollsWhenTooNarrow: Story = {
+  render: (args) => (
+    <div className="w-96">
+      <DomainBudgetSummary {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole('region', { name: 'Domain Budget' });
+    await expect(card.scrollWidth).toBeGreaterThan(card.clientWidth);
+    await expect(getComputedStyle(card).overflowX).toBe('auto');
+  },
 };
 
 /** Tokens only, so dark comes for free. */
