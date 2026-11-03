@@ -48,8 +48,9 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
             label={toggleLabel}
             aria-pressed={shown}
             disabled={disabled}
-            /* A 24 glyph button with a 40 press area, as `PageTitle`'s does: the field is 40 high, the control inside it need not be. */
-            className="relative after:absolute after:-inset-2"
+            /* A 24 glyph button with a 40 press area, as `PageTitle`'s does: the field is 40 high, the control inside it need not be.
+               Grey, not brand blue: it sits inside the field, so it should not read as a call to action. */
+            className="relative text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed disabled:text-neutral-outline-content-disabled after:absolute after:-inset-2"
             onClick={() => {
               setOwn(!shown);
               onVisibleChange?.(!shown);

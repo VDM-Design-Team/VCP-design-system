@@ -1,14 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { ChangePasswordForm, type PasswordVerdict } from './ChangePasswordForm';
-
-/* A toy rule — the page's real one is product policy. The same shape as PasswordStrength's story. */
-const getStrength = (v: string): PasswordVerdict => {
-  const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter((r) => r.test(v)).length;
-  const points = (v.length >= 8 ? 1 : 0) + (v.length >= 12 ? 1 : 0) + classes - 1;
-  const strength = (['very-weak', 'weak', 'fair', 'good', 'strong'] as const)[Math.max(0, Math.min(4, points))];
-  return { strength, message: strength === 'very-weak' || strength === 'weak' ? 'Add a number or a symbol' : undefined };
-};
+import { ChangePasswordForm } from './ChangePasswordForm';
+import { scorePassword } from '../../lib/password-strength';
 
 const meta = {
   title: 'Patterns/ChangePasswordForm',
@@ -23,7 +16,7 @@ const meta = {
       },
     },
   },
-  args: { onSubmit: fn(), getStrength },
+  args: { onSubmit: fn() },
   decorators: [
     (Story) => (
       <div className="bg-surface-canvas p-6">
@@ -76,9 +69,9 @@ export const StrengthMeter: Story = {
     const c = within(canvasElement);
     await expect(c.queryByRole('meter')).toBeNull();
     await type(c, 'New Password', 'abc');
-    /* The meter is rendered a beat after the keystrokes. */
+    /* Scored 300ms after the last keystroke. */
     await expect(await c.findByRole('meter')).toHaveAttribute('aria-valuetext', 'Very Weak');
-    await expect(await c.findByText('Add a number or a symbol')).toBeVisible();
+    await expect(await c.findByText('Your password is too simple')).toBeVisible();
     await userEvent.clear(c.getByLabelText('New Password', { selector: 'input' }));
     await type(c, 'New Password', 'Correct-horse-9-battery');
     await waitFor(() => expect(c.getByRole('meter')).toHaveAttribute('aria-valuetext', 'Strong'));
@@ -88,15 +81,37 @@ export const StrengthMeter: Story = {
   },
 };
 
-/** No `getStrength`, no meter. */
+/** `getStrength={null}`: no meter. */
 export const WithoutAMeter: Story = {
-  args: { getStrength: undefined },
+  args: { getStrength: null },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await type(c, 'New Password', 'abc');
     /* Give a would-be meter its beat to appear, then check it did not. */
     await expect(c.getByLabelText('New Password', { selector: 'input' })).toHaveValue('abc');
     await expect(c.queryByRole('meter')).toBeNull();
+  },
+};
+
+/** VCP's score: length + (kinds − 1) − 2 for a common password, clamped to 0–4. */
+export const Scoring: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async () => {
+    const cases: Array<[string, number, string | undefined]> = [
+      ['abc', 0, 'Your password is too simple'],
+      ['abcdefgh', 1, 'Your password is too simple'],
+      ['abcdefg1', 2, undefined],
+      ['Abcdefg1', 3, undefined],
+      ['abcdefghijkl', 2, undefined],
+      ['Abcdefghijk1!', 4, undefined],
+      ['PASSWORD', 0, 'Your password contains common patterns'],
+      ['Password', 0, 'Your password contains common patterns'],
+    ];
+    for (const [password, score, message] of cases) {
+      const verdict = scorePassword(password);
+      await expect([password, verdict.score, verdict.message]).toEqual([password, score, message]);
+    }
   },
 };
 
@@ -113,6 +128,19 @@ export const Validation: Story = {
     /* Fixing a field clears what was said about it. */
     await type(c, 'Old Password', 'x');
     await waitFor(() => expect(c.queryByText('Old password is required')).toBeNull());
+  },
+};
+
+/** Eight characters at least; strength is advice, not a gate. */
+export const TooShort: Story = {
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    await type(c, 'Old Password', 'old-secret');
+    await type(c, 'New Password', 'Ab1!');
+    await type(c, 'Confirm Password', 'Ab1!');
+    await userEvent.click(c.getByRole('button', { name: 'Set Password' }));
+    await expect(await c.findByText('Password must be at least 8 characters')).toBeVisible();
+    await expect(args.onSubmit).not.toHaveBeenCalled();
   },
 };
 

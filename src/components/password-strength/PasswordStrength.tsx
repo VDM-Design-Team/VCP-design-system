@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { ProgressBar } from '../../atoms/progress-bar';
+import type { PasswordStrengthLevel } from '../../lib/password-strength';
 
 /**
  * PasswordStrength — how strong the password being typed is, as a labelled
@@ -31,7 +32,7 @@ import { ProgressBar } from '../../atoms/progress-bar';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type PasswordStrengthLevel = 'very-weak' | 'weak' | 'fair' | 'good' | 'strong';
+export type { PasswordStrengthLevel };
 
 const LEVELS = {
   'very-weak': { text: 'Very Weak', step: 1, tone: 'critical', weak: true },

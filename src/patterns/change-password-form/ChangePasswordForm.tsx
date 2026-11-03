@@ -3,7 +3,10 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Field } from '../../components/field';
 import { PasswordField } from '../../components/password-field';
-import { PasswordStrength, type PasswordStrengthLevel } from '../../components/password-strength';
+import { PasswordStrength } from '../../components/password-strength';
+import { MIN_PASSWORD_LENGTH, scorePassword, type PasswordVerdict } from '../../lib/password-strength';
+
+export type { PasswordVerdict };
 
 /**
  * ChangePasswordForm — the Password tab of Settings: your current password, the new one, the new one again, and Set Password. Built to
@@ -35,25 +38,19 @@ export interface ChangePasswordValues {
 
 export type ChangePasswordField = 'oldPassword' | 'newPassword' | 'confirmPassword';
 
-export interface PasswordVerdict {
-  strength: PasswordStrengthLevel;
-  /** One line under the meter — why it scored this way, or how to improve it. */
-  message?: string;
-}
-
 export interface ChangePasswordFormProps
   extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'children' | 'onSubmit'> {
   /** Set Password, once the three fields are filled and the new one is confirmed. Gets the old and new passwords; changes nothing itself. */
   onSubmit: (values: ChangePasswordValues) => void;
-  /** Scores the new password as it is typed. The policy is the page's. Left out, there is no meter. */
-  getStrength?: (password: string) => PasswordVerdict;
+  /** Scores the new password as it is typed, 300ms after the last keystroke. Defaults to VCP's `scorePassword`; `null` leaves the meter out. */
+  getStrength?: ((password: string) => PasswordVerdict) | null;
   /** Set Password is in flight: the button spins and the fields lock. */
   saving?: boolean;
   /** What only the server knows, per field. */
   errors?: Partial<Record<ChangePasswordField, string>>;
 }
 
-export function ChangePasswordForm({ className, onSubmit, getStrength, saving, errors, ...props }: ChangePasswordFormProps) {
+export function ChangePasswordForm({ className, onSubmit, getStrength = scorePassword, saving, errors, ...props }: ChangePasswordFormProps) {
   const [draft, setDraft] = React.useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
   const [invalid, setInvalid] = React.useState<Partial<Record<ChangePasswordField, string>>>({});
   const refs = {
@@ -73,6 +70,7 @@ export function ChangePasswordForm({ className, onSubmit, getStrength, saving, e
     const next: typeof invalid = {};
     if (!draft.oldPassword) next.oldPassword = 'Old password is required';
     if (!draft.newPassword) next.newPassword = 'New password is required';
+    else if (draft.newPassword.length < MIN_PASSWORD_LENGTH) next.newPassword = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
     if (!draft.confirmPassword) next.confirmPassword = 'Password confirmation is required';
     else if (draft.newPassword && draft.confirmPassword !== draft.newPassword) next.confirmPassword = 'Passwords do not match';
     setInvalid(next);
@@ -82,7 +80,14 @@ export function ChangePasswordForm({ className, onSubmit, getStrength, saving, e
     onSubmit({ oldPassword: draft.oldPassword, newPassword: draft.newPassword });
   };
 
-  const verdict = getStrength && draft.newPassword ? getStrength(draft.newPassword) : undefined;
+  /* Scored a beat after typing stops, so the meter does not flicker through every keystroke; emptied at once. */
+  const [scored, setScored] = React.useState<{ password: string; verdict: PasswordVerdict }>();
+  React.useEffect(() => {
+    if (!getStrength || !draft.newPassword) return setScored(undefined);
+    const timer = setTimeout(() => setScored({ password: draft.newPassword, verdict: getStrength(draft.newPassword) }), 300);
+    return () => clearTimeout(timer);
+  }, [draft.newPassword, getStrength]);
+  const verdict = draft.newPassword ? scored?.verdict : undefined;
 
   return (
     <form

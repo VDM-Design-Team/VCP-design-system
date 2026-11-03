@@ -25,8 +25,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## What it shows
 
 - **Old Password**, **New Password** and **Confirm Password** — each a `PasswordField`: dots, with an eye to show what you typed.
-- **Under New Password, a `PasswordStrength` meter** says how strong it is while you type. **The page scores it** (`getStrength`): what makes a password Fair or
-  Strong is product policy. Left out, there is no meter. The meter is advice, not a gate.
+- **Under New Password, a `PasswordStrength` meter** says how strong it is while you type, scored 300ms after the last keystroke and only while the field is not empty. The score is `scorePassword` (`src/lib/password-strength.ts`): length (8–11 → +1, 12+ → +2), plus one point per character kind (lower, upper, number, special) beyond the first, minus 2 for an exact match of a common password, clamped to 0–4 (Very Weak → Strong). Below Fair it says "Your password is too simple"; a common password says "Your password contains common patterns". The meter is advice, not a gate.
+- **The only rules are 8 characters at least** ("Password must be at least 8 characters") **and a matching confirmation.** No minimum strength.
 - **Set Password** hands the old and new passwords to `onSubmit`. It changes nothing itself.
 
 ## Props
@@ -34,7 +34,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `onSubmit` | `({ oldPassword, newPassword }) => void` | required | Valid, it gets the old and new passwords. **Changes nothing itself** |
-| `getStrength` | `(password) => { strength, message? }` | — | The page's rule: `strength` is a `PasswordStrengthLevel`, `message` the line under the meter. Left out, no meter |
+| `getStrength` | `(password) => { score, strength, message? } \| null` | `scorePassword` | Replaces VCP's score; `null` leaves the meter out |
 | `saving` | `boolean` | — | The button spins and every field (and eye) locks |
 | `errors` | `{ oldPassword?, newPassword?, confirmPassword? }` | — | What only the server knows ("Old password is incorrect") |
 
@@ -63,6 +63,6 @@ None of its own: `Field`, `PasswordField` (`Input`'s shell, 40 high) and `Button
 
 ## Don't
 
-- **Don't score the password inside it.** `getStrength` is the page's policy.
+- **Don't copy the scoring into a page.** Use `scorePassword`, or pass `getStrength` if a product really differs.
 - **Don't treat the meter as the rule.** It advises; the server enforces.
 - **Don't keep the passwords after a change.** Give the form a new `key`.
