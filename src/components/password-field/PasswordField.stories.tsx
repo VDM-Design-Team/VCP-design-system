@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { PasswordField } from './PasswordField';
 import { Field } from '../field';
 
@@ -39,11 +39,11 @@ export const Default: Story = {
     await expect(field).toHaveAttribute('type', 'password');
     await expect(eye).toHaveAttribute('aria-pressed', 'false');
     await userEvent.click(eye);
-    await expect(field).toHaveAttribute('type', 'text');
+    await waitFor(() => expect(field).toHaveAttribute('type', 'text'));
     await expect(field).toHaveValue('correct horse battery');
     await expect(c.getByRole('button', { name: 'Show password' })).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(c.getByRole('button', { name: 'Show password' }));
-    await expect(field).toHaveAttribute('type', 'password');
+    await waitFor(() => expect(field).toHaveAttribute('type', 'password'));
   },
 };
 
@@ -57,7 +57,7 @@ export const Keyboard: Story = {
     const eye = c.getByRole('button', { name: 'Show password' });
     await expect(eye).toHaveFocus();
     await userEvent.keyboard('{Enter}');
-    await expect(c.getByLabelText('Password')).toHaveAttribute('type', 'text');
+    await waitFor(() => expect(c.getByLabelText('Password')).toHaveAttribute('type', 'text'));
     /* A 24 button with a 40 press area (its ::after reaches 8 past it on every side). */
     const after = getComputedStyle(eye, '::after');
     await expect(Number.parseFloat(after.width)).toBeGreaterThanOrEqual(40);
@@ -109,8 +109,8 @@ export const Controlled: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await userEvent.click(c.getAllByRole('button', { name: 'Show password' })[0]);
-    await expect(c.getByLabelText('New password')).toHaveAttribute('type', 'text');
-    await expect(c.getByLabelText('Confirm password')).toHaveAttribute('type', 'text');
+    await waitFor(() => expect(c.getByLabelText('New password')).toHaveAttribute('type', 'text'));
+    await waitFor(() => expect(c.getByLabelText('Confirm password')).toHaveAttribute('type', 'text'));
   },
 };
 
