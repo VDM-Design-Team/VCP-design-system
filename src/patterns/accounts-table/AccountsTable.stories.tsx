@@ -115,14 +115,12 @@ export const Default: Story = {
     await expect(args.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 'john' }));
     await userEvent.click(c.getByRole('button', { name: 'Delete Michael' }));
     await expect(args.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: 'michael' }));
-    /* The row buttons are a glyph and nothing else at rest — no outline — and wash on hover. */
+    /* The row buttons are the plain glyph-only IconButton: no outline, no fill. The delete glyph is the critical red. */
     const edit = c.getByRole('button', { name: 'Edit Sarah' });
+    const bin = c.getByRole('button', { name: 'Delete Sarah' });
     await expect(getComputedStyle(edit).borderTopWidth).toBe('0px');
     await expect(/, 0\)$/.test(getComputedStyle(edit).backgroundColor)).toBe(true);
-    /* (`:hover` cannot be driven from a test, so the wash is checked as what it is: the hover and press classes.) */
-    await expect(edit.className).toContain('hover:bg-action-secondary-surface-hover');
-    await expect(edit.className).toContain('active:bg-action-secondary-surface-pressed');
-    await expect(c.getByRole('button', { name: 'Delete Sarah' }).className).toContain('hover:bg-accent-critical-outline-surface-hover');
+    await expect(getComputedStyle(bin).color).not.toBe(getComputedStyle(edit).color);
     /* Both sortable columns have a sort button; Domains and Actions do not. */
     await expect(c.getByRole('button', { name: /Name/ })).toBeVisible();
     await expect(c.getByRole('button', { name: /Date Added/ })).toBeVisible();

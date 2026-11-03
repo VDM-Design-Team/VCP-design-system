@@ -65,13 +65,9 @@ export interface AccountsTableProps
   caption?: string;
 }
 
-/* The row's two buttons are a glyph and nothing else at rest — the edit glyph in the brand blue, the delete glyph in the critical
-   red, as the Deliverable Link's pair is — and take a soft wash of their own colour on hover and press (the tints the outlined
-   buttons use for those states). `tertiary` is the glyph-only button; the washes are set here. */
-const EDIT_BUTTON =
-  'text-action-tertiary-content-default hover:text-action-tertiary-content-hover hover:bg-action-secondary-surface-hover active:bg-action-secondary-surface-pressed';
-const DELETE_BUTTON =
-  'text-accent-critical-outline-content-default hover:text-accent-critical-outline-content-hover hover:bg-accent-critical-outline-surface-hover active:bg-accent-critical-outline-surface-pressed';
+/* The row's two buttons are the plain `IconButton` (`tertiary`, the glyph-only one) and nothing more, exactly as the Deliverable
+   Link's pair is: the edit glyph is the button's own brand blue, and the delete glyph takes the critical red. */
+const DELETE_GLYPH = 'text-accent-critical-outline-content-default hover:text-accent-critical-outline-content-hover';
 
 export function AccountsTable({
   className,
@@ -131,21 +127,12 @@ export function AccountsTable({
       fit: true,
       width: '10%',
       render: (row) => (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <IconButton icon="note-pencil" label={`Edit ${row.name}`} onClick={() => onEdit?.(row)} />
           <IconButton
-            variant="tertiary"
-            shape="square"
-            icon="note-pencil"
-            label={`Edit ${row.name}`}
-            className={EDIT_BUTTON}
-            onClick={() => onEdit?.(row)}
-          />
-          <IconButton
-            variant="tertiary"
-            shape="square"
             icon="trash"
             label={`Delete ${row.name}`}
-            className={DELETE_BUTTON}
+            className={DELETE_GLYPH}
             onClick={() => onDelete?.(row)}
           />
         </div>
