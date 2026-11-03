@@ -52,7 +52,7 @@ container's width.
 | `icon` | `ReactNode` | — | An `<Icon size="lg" />` before the label — Figma draws it in the `-fill` style. Decorative; takes the `accent` colour |
 | `hint` | `string` | — | Explanation behind an info glyph after the label. Omit it and there's no glyph |
 | `variant` | `default \| superadmin` | `default` | Which dashboard's card: `default` is the Value_Card (admin and user — left-aligned, 100 high), `superadmin` the super admin card (centred, 150 high) |
-| `accent` | `neutral \| brand \| info \| success \| critical \| warning \| warning-subtle` | `neutral` | The tone: the left stripe's colour, and the icon's. `brand` is the brand blue Value_Card uses for In Review / In Progress. `warning-subtle` is a lighter yellow (`accent.warning.tonal.surface.pressed`) for a figure that is more cosmetic than urgent — the dashboard's Pending |
+| `accent` | `neutral \| brand \| info \| success \| critical \| warning \| yellow` | `neutral` | The tone: the left stripe's colour, and the icon's. `brand` is the brand blue Value_Card uses for In Review / In Progress. `yellow` (`accent.yellow.medium`) is the dashboard's Pending: brighter than `warning`'s brown, which Figma's Pending stripe matches more closely |
 | `className` | `string` | — | Merged via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | The card |
 
@@ -110,7 +110,7 @@ on the baseline. Both `text.primary`, Poppins.
 
 **Tone.** The stripe and the icon read the same token, so they are the same
 colour: `neutral.outline.border.default` for `neutral`,
-`accent.{info,success,critical,warning}.outline.border.default`, and
+`accent.{info,success,critical,warning}.outline.border.default`, `accent.yellow.medium` for `yellow`, and
 `surface.brand.strong` for `brand` (Value_Card's In Review and In Progress use the
 brand blue, which is not in the accent families) — as a `bg-*`
 fill on the stripe (not a `border-l`, so it can't lose a cascade fight with the
