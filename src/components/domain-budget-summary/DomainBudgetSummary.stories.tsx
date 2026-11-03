@@ -1,9 +1,21 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { DomainBudgetSummary, budgetStatus, budgetUsage, type DomainBudgetSummaryProps } from './DomainBudgetSummary';
+import {
+  DomainBudgetSummary,
+  budgetStatus,
+  budgetUsage,
+  type DomainBudgetSummaryProps,
+  type Quarter,
+} from './DomainBudgetSummary';
 
 const YEARS = [2026, 2025, 2024, 2023];
+
+const LEVELS: ReadonlyArray<{ label: string; consumed: number }> = [
+  { label: 'Fine', consumed: 70 },
+  { label: 'Warning', consumed: 90 },
+  { label: 'Over budget', consumed: 170 },
+];
 
 const meta = {
   title: 'Components/Display/DomainBudgetSummary',
@@ -125,8 +137,8 @@ export const Pickers: Story = {
 /** A working example: pick a quarter and the card follows, as the dashboard will wire it. */
 export const Interactive: Story = {
   render: (args) => {
-    const current = { quarter: 1 as const, year: 2026 };
-    const [view, setView] = React.useState<{ quarter: 1 | 2 | 3 | 4; year: number }>(current);
+    const current: { quarter: Quarter; year: number } = { quarter: 1, year: 2026 };
+    const [view, setView] = React.useState(current);
     const isCurrent = view.quarter === current.quarter && view.year === current.year;
     const before = view.year < current.year || (view.year === current.year && view.quarter < current.quarter);
     const period: DomainBudgetSummaryProps['period'] = isCurrent
@@ -160,12 +172,8 @@ export const Interactive: Story = {
 export const AllLevels: Story = {
   render: (args) => (
     <div className="flex flex-col gap-6">
-      {[
-        ['Fine', 70],
-        ['Warning', 90],
-        ['Over budget', 170],
-      ].map(([label, consumed]) => (
-        <DomainBudgetSummary key={label} {...args} title={`Domain Budget — ${label}`} consumed={consumed as number} />
+      {LEVELS.map(({ label, consumed }) => (
+        <DomainBudgetSummary key={label} {...args} title={`Domain Budget — ${label}`} consumed={consumed} />
       ))}
     </div>
   ),

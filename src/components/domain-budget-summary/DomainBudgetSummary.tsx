@@ -4,7 +4,7 @@ import { Badge } from '../../atoms/badge';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
-import { ProgressBar } from '../../atoms/progress-bar';
+import { ProgressBar, type ProgressBarProps } from '../../atoms/progress-bar';
 import { Select } from '../../atoms/select';
 import { Tooltip } from '../../atoms/tooltip';
 
@@ -36,6 +36,9 @@ import { Tooltip } from '../../atoms/tooltip';
 
 export type BudgetStatus = 'fine' | 'warning' | 'over';
 
+/** A calendar quarter, 1–4. */
+export type Quarter = 1 | 2 | 3 | 4;
+
 /** The share of the budget used, 0–100, capped. No allocation means nothing to measure against: 0, or 100 if anything was consumed. */
 export const budgetUsage = (consumed: number, allocated: number): number => {
   if (allocated <= 0) return consumed > 0 ? 100 : 0;
@@ -63,12 +66,12 @@ export interface DomainBudgetSummaryProps
   /** Points used by planned Added Values. */
   consumed: number;
   /** The quarter shown, 1–4. */
-  quarter: 1 | 2 | 3 | 4;
+  quarter: Quarter;
   year: number;
   /** The years the year picker offers. */
   years: readonly number[];
   period: DomainBudgetPeriod;
-  onQuarterChange?: (quarter: 1 | 2 | 3 | 4) => void;
+  onQuarterChange?: (quarter: Quarter) => void;
   onYearChange?: (year: number) => void;
   /** Called by "Go to Current Quarter", which only shows while a past or upcoming quarter is being viewed. */
   onGoToCurrent?: () => void;
@@ -82,15 +85,23 @@ const HINTS = {
   remaining: 'Remaining = Allocated - Consumed points for the cycle. Negative values indicate overspend.',
 } as const;
 
-const TONE = { fine: 'brand', warning: 'warning', over: 'critical' } as const;
+const TONE = { fine: 'brand', warning: 'warning', over: 'critical' } as const satisfies Record<
+  BudgetStatus,
+  NonNullable<ProgressBarProps['tone']>
+>;
 
-const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
+const QUARTERS: readonly Quarter[] = [1, 2, 3, 4];
+const QUARTER_OPTIONS = QUARTERS.map((q) => ({ value: String(q), label: `Q${q}` }));
 
 /* The one exception to the type ramp — the same one `StatCard` marks: 24 medium has no step (`heading-lg` ships
    bold, semibold and regular only). It is the unit beside a figure and the quarter details' values. */
 const MEDIUM_24 = 'text-[24px] font-medium leading-9'; // ds-lint-ignore — no heading-lg-medium in the ramp
 
-const TAG_LABEL = { current: 'Current Quarter', past: 'Past Quarter', upcoming: 'Upcoming Quarter' } as const;
+const TAG_LABEL: Record<DomainBudgetPeriod['kind'], string> = {
+  current: 'Current Quarter',
+  past: 'Past Quarter',
+  upcoming: 'Upcoming Quarter',
+};
 
 /* A label over a value, in the quarter details. */
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
@@ -184,16 +195,22 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
               <Select
                 size="sm"
                 aria-label="Quarter"
-                value={`Q${quarter}`}
-                options={QUARTERS}
-                onChange={(v) => onQuarterChange?.(Number(v.slice(1)) as 1 | 2 | 3 | 4)}
+                value={String(quarter)}
+                options={QUARTER_OPTIONS}
+                onChange={(v) => {
+                  const picked = QUARTERS.find((q) => String(q) === v);
+                  if (picked) onQuarterChange?.(picked);
+                }}
               />
               <Select
                 size="sm"
                 aria-label="Year"
                 value={String(year)}
                 options={years.map(String)}
-                onChange={(v) => onYearChange?.(Number(v))}
+                onChange={(v) => {
+                  const picked = years.find((y) => String(y) === v);
+                  if (picked !== undefined) onYearChange?.(picked);
+                }}
               />
             </div>
           </div>

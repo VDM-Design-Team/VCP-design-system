@@ -32,10 +32,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `allocated` / `consumed` | `number` | required | Points. Remaining is `allocated − consumed`, derived here so the three never disagree |
-| `quarter` / `year` | `1–4` / `number` | required | The quarter shown. Controlled |
+| `quarter` / `year` | `Quarter` (`1 \| 2 \| 3 \| 4`) / `number` | required | The quarter shown. Controlled |
 | `years` | `readonly number[]` | required | What the year picker offers |
 | `period` | `DomainBudgetPeriod` | required | `current` (`endsOn`, `daysLeft`, `daysTotal`), `past` (`startedOn`, `endedOn`) or `upcoming` (`startsOn`, `endsOn`). Dates are strings the caller has formatted ("Mar 31") |
-| `onQuarterChange` / `onYearChange` | `(n) => void` | — | A pick in the pickers |
+| `onQuarterChange` / `onYearChange` | `(Quarter) => void` / `(number) => void` | — | A pick in the pickers. Only a value the pickers offer is ever reported |
 | `onGoToCurrent` | `() => void` | — | "Go to Current Quarter", which shows only for a past or upcoming `period` |
 | `title` | `string` | `Domain Budget` | The heading |
 | `className`, `ref` | | | On the section |
