@@ -74,3 +74,24 @@ export const PickingADay: Story = {
     await expect(field).toHaveValue('2026-03-15');
   },
 };
+
+/** The chosen date is medium weight and the placeholder regular — as `Select` — a filter says `regular`. */
+export const ValueWeight: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div className="flex w-64 flex-col gap-3">
+      <DateField aria-label="Day" value="2026-03-02" />
+      <DateField aria-label="Empty" />
+      <DateField aria-label="Filter" emphasis="regular" value="2026-03-02" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: string) => Number(getComputedStyle(c.getByRole('combobox', { name })).fontWeight);
+    await expect(weight('Day')).toBe(500);
+    await expect(weight('Empty')).toBe(400);
+    /* A filter passes `emphasis="regular"`. */
+    await expect(weight('Filter')).toBe(400);
+  },
+};

@@ -1,6 +1,794 @@
 # Changelog
 
-## 0.1.0 — unreleased
+## 0.1.0 — 2026-11-03
+
+### Package — three more components importable, no stories in the tarball (November 2026)
+
+- **`InlineEdit` / `InlineDateEdit`, `RejectionReason` and `StatusProgression` are now exported** from `@vdm-design-team/vcp-design-system`, with their props types and the constants that go with them (`PENDING_REJECTION_REASONS`, `HANDOFF_REJECTION_REASONS`, `avTransitions`). They were already inside `PlanningTable`, the two rejection modals and `AVHeader`, and each has its own docs page, but an app couldn't import them on their own.
+- **The package no longer ships stories, the story-test helpers or the team's process docs** (`handoff`, `workflow`, `inventory` and the two Figma audit notes). The component docs an app's AI agent reads from `node_modules/…/docs/` are all still there.
+
+### `IconButton`, `RichTextToolbar` — the name is heard once (November 2026)
+
+Fix: an `IconButton` with no `Tooltip` carried its label twice, as `aria-label` and as `title`. A `title` the name
+didn't come from is the description, so a screen reader heard "Add deliverable, button, Add deliverable".
+`RichTextToolbar`'s buttons did the same. Now the `title` alone names the button and is still its hover hint;
+under a `Tooltip` the name stays `aria-label`, with no `title`, as before. The story check
+`vcp-description-repeats-name` now also fails a `title` that repeats an `aria-label`: it found this in 153 stories.
+
+Nothing changes on screen, and the props are the same. A test that finds a bare `IconButton` by its `aria-label`
+attribute (`[aria-label="…"]`, `getByLabelText`) finds it by role and name instead:
+`getByRole('button', { name: '…' })`.
+
+### `MoveAVToCycleModal` — focus follows the assignee rows, and an unavailable assignee is said once (November 2026)
+
+Fix: removing an assignee row took the focused ⊖ with it and left the focus on the page itself. It now goes to the row
+that took its place (its ⊖, or its assignee when only one row is left); "Add assignee" now goes to the new row's
+assignee, ready to fill in.
+
+Fix: an unavailable assignee showed two red messages for one problem, the person's field's own and a second under
+the group. Only the field's stays; Confirm moves focus to that field, so a screen reader hears it.
+
+### Say it once: nothing on a screen reader repeats its own name (November 2026)
+
+Fix: in ten places a screen reader heard the same words twice, as an element's name and again as its
+description. A new story check (`vcp-description-repeats-name`, run with axe on every story) now fails that,
+and these are fixed:
+
+- **Tooltips that only showed the trigger's name** no longer describe it too (`describe={false}`):
+  `EmojiReactionPicker`'s "Add reaction", `NotificationItem`'s "Mark as read" / "Mark as unread",
+  `Sidebar`'s rows when collapsed, `InlineEdit`'s "Edit" pen (in `DataTable` and `PlanningTable`),
+  `DomainLabel`'s "Added by …" (also in `DeliverableLink` and `DeliverablesCard`).
+- **Hints that were in a name *and* a description**: a `RadioGroup` option with a `hint`, and `Dropzone`'s
+  file types or error (also in `DeliverablesCard` and `HandoffAVModal`). Each control is now named by its own
+  words and described by the hint, so "Starter, Up to 3 seats" is heard once, not "Starter Up to 3 seats, Up
+  to 3 seats".
+
+`Tooltip` marks a trigger it does not describe with `data-tooltip`, and `IconButton` drops its native `title` under
+either mark, so the pen never gets the browser's own bubble on top of ours.
+
+Nothing changes on screen. No API change.
+
+### `PlanningTable` — the initiator said once, and an empty cell reads "Not set" (November 2026)
+
+Fix: the initiator avatar is named "Initiator: Marvin Reed" and its tooltip described it again as "Marvin Reed",
+so a screen reader heard the name twice; the tooltip now shows without describing (`describe={false}`). An empty
+Start Date, Due Date or Points cell put "Not set" in an `aria-label` on a plain `span`, which ARIA does not allow
+and most screen readers skip, reading "dash"; the hyphen is now hidden from them and "Not set" is the cell's text.
+
+### `accent.warning.outline.border` — a step darker in light: yellow-700 (November 2026)
+
+The warning edge and glyph colour was yellow-500, **1.91:1** on white: too faint for the edge of a field
+(`SearchSelect`'s `warning`, the busy assignee), which needs 3:1. It is now yellow-700, **4.93:1** on white,
+4.71:1 on the canvas and 4.59:1 on the warning tint; hover and pressed move with it (800, 900), and disabled
+stays at 300. The dark theme is unchanged.
+
+Everything drawn in it darkens a little in light: `SearchSelect`'s warning border, `Banner`'s warning edge
+and glyph, `Tag`'s warning outline, `Toast`'s warning glyph and bar, `StatCard`'s warning stripe and the busy
+`AssigneeStatus` dot. The figures in `docs/banner.md`, `docs/toast.md` and `docs/stat-card.md` follow. Figma's
+`accent/warning/outline/border` variables want the same values.
+
+### `PlanningFilters` — the row above the Planning list (November 2026)
+
+New pattern, built to Figma's `_Planning_Filters`: a search box, status and priority filters (`SearchSelect`), Reset and the View Cycle button. Only what the Planning page needs; the library's larger filter bar (tags, period, users, Filters toggle, mobile) is a separate piece. The bar holds no state — `value` in, `onChange` out.
+
+### `MoveAVToCycleModal` and `DateField` — the dialog a Backlog drop opens (November 2026)
+
+New, built to Figma's `Add_Required_Details_Planning_List` and the Assignee Availability flows. Named for the action, like `HandoffAVModal`; first called `AddRequiredDetailsModal` (and still titled "Add Required Details" on screen), so search for either.
+
+- **`MoveAVToCycleModal`** (pattern) — repeatable assignee rows (person with availability, role, points), Start and Due Date, Cycle (a `SearchSelect`, written as `CycleTag` writes it: "C36 (Mar 02, 2026 - Mar 23, 2026)", the code bold in the rows), Capacity Points. With `estimate`, the dates the system calculates fill in "(est.)" and a date a person sets is never overwritten. Confirm will not go through with an unavailable assignee (`onInvalid`).
+- **`DateField`** (component) — a read-only field with a calendar glyph and a `DatePicker` in a fixed-position `Popover`; `estimated` reads "(est.)".
+
+Stacked on the Planning table PR (it uses `Popover`'s `strategy="fixed"`).
+
+### `AssigneeWithStatus`, `Tooltip`, `AssigneeSelectionDropdown`, `SearchSelect` — said once, dates with words, Escape noted (November 2026)
+
+Follow-ups to the assignee availability pieces.
+
+- **`AssigneeWithStatus`** — the sentence ("John Doe (Assignee, Busy)") is the avatar's name, and the tooltip
+  used to add it again as a description, so a screen reader heard it twice. The tooltip still shows it; it no
+  longer describes. **`Tooltip`** gains `describe` (default `true`) for this: off, the bubble shows but is not
+  wired to the trigger with `aria-describedby`.
+- **`AssigneeSelectionDropdown`** — new `freeFromText` (default "Free from"). A busy or unavailable row's date
+  pill shows only the date; a screen reader now hears what it is ("Cy Park, Free from May 17").
+- **`SearchSelect`** — a behaviour change that came with `collapsibleGroups` and was not noted: **Escape closes
+  the panel from anything inside it** (Clear all, Apply, a group heading), putting focus back on the trigger. It
+  used to do nothing there. With `confirm`, Escape discards the draft, as a click away does.
+
+### `CommentSection`, `CommentReply`, `CommentComposer` — focus is never dropped, and nothing typed is lost (November 2026)
+
+Fix: closing a reply or edit box (sent, saved or cancelled) and deleting a comment used to leave the
+focus on the page itself, so a keyboard or screen-reader user started again from the top. A closed box
+now hands the focus back to the Reply or Edit that opened it, and a deleted comment's focus goes to the
+comment that took its place (the next, else the one before, else the one it replied to, else the
+new-comment box). Each comment's `<article>` takes the focus with a ring when it is put there.
+
+Fix: a send that settled cleared the whole box, including anything typed while it was in flight. It now
+clears what was sent and keeps the rest, with the caret at its end. `CommentActions`' Edit, Delete and
+Reply carry `data-action` so the comment can find them. No API change.
+
+### `PlanningTable` — the Planning list (November 2026)
+
+New pattern, built to Figma's Planning Page: Added Values in collapsible Cycle and Backlog sections (caret, title, dates, Total Capacity and Capacity Remaining), ten columns, `DataTable` specialised as `AVTable` is. Start Date, Points and Due Date edit in place (`InlineEdit`, `InlineDateEdit`); the assignee shows their availability dot and tooltip (`AssigneeWithStatus`). Points edit from a dropdown (the capacity scale); empty dates and points read "-"; a date flagged `animated` plays the design's sweep-and-flash (1.6s, three loops) once, as a signal for this session's auto-calculation: it stops on the third loop or on hover, is reported through `onAnimationDismiss`, and never replays on load, sort, filter or refresh. Not included: the filter row, tracked separately.
+
+`DataTable` columns can `fit` (hug their content) or `grow` (take the rest and truncate): the responsive pattern for every VCP table, applied to `AVTable` and `PlanningTable`. `Popover` gains `strategy="fixed"` (used by `InlineDateEdit`, so a date picker is not clipped by a scrolling table). `Tooltip` gains `wide`. `DataTable` gains `rowProps` (extra attributes for a row's `<tr>`) and `ColumnHint` an `icon` prop (the ƒ-in-a-ring for formula columns); both additive. `TypeTag` gains a hover tooltip (`tooltip`, on by default) and exports `AV_TYPE_MEANING` and `TYPE_COLUMN_HINT`; `UrgencyTag` and `StatusTag` export their column hints; `AVTable`'s Urgency, Type and Status headers now default to that copy. Sorting is a handler (`onSortChange`) — the table never reorders rows itself. Backlog rows can be dragged onto a Cycle (`onMoveRow`; the table moves nothing).
+
+Stacked on the assignee availability PR (it uses `AssigneeWithStatus`).
+
+### `DeliverablesCard`, `UserMenu`, `NotificationPopover` — the Light and dark stories render whole (November 2026)
+
+Stories only. Each Light and dark story cleared the meta's decorators with `decorators: []`, which
+doesn't remove them, so the meta's frame still wrapped both themes:
+
+- **DeliverablesCard:** both themes were squeezed into one 26rem card's width, so the link titles
+  vanished and the drop area wrapped a word per line. Each theme now gets its own half (stacked on a
+  narrow screen) with the card at its page width.
+- **UserMenu:** both themes were squeezed into the 288×256 frame and the open menus hung off the dark
+  panel. The story now spans the page, as in the top bar.
+- **NotificationPopover:** the themes were stacked, so the lower bell had no room below it on most
+  screens and its panel opened upward over the upper one. They now sit side by side, so both panels
+  open downward; a canvas narrower than both scrolls sideways.
+
+The meta decorators now skip those stories (`layout: 'fullscreen'` in DeliverablesCard and UserMenu;
+`frame: 'none'` in NotificationPopover, where every story is fullscreen).
+
+### `DeliverableLink` — Edit Link uses `note-pencil` (November 2026)
+
+`DeliverableLink` arrived just before the one-glyph-for-Edit rule and still drew "Edit Link" with the
+bare pen (`pencil-simple`). It now uses `note-pencil`, the pen over a square, like every other Edit.
+`docs/icon.md` lists the pieces that use it today, rather than one that hasn't landed yet.
+
+### Assignee availability — `AssigneeStatus`, `AssigneeWithStatus`, `AssigneeSelectionDropdown`; `SearchSelect` collapsible groups (November 2026)
+
+Built to Figma's Assignee Availability page and flow.
+
+- **`AssigneeStatus`** (atom) — the green / amber / red dot, at the table (10) and menu (12) sizes. Owns the status → colour mapping and the status words.
+- **`AssigneeWithStatus`** (component) — an avatar with the dot on its corner and a tooltip, "John Doe (Assignee, Busy)", which also names the avatar for a screen reader.
+- **`AssigneeSelectionDropdown`** (component) — assignees grouped under collapsible Available / Busy / Unavailable headings with a date `Badge` on busy and unavailable rows; unavailable people cannot be picked; an unknown state for when the dates are not set yet; a warning (busy) or error (unavailable) on the field after the pick.
+- **`SearchSelect`** — new `collapsibleGroups`, `defaultCollapsedGroups`, `renderGroupHeading`, `panelNotice` and `warning` props. Additive: nothing changes without them.
+
+### `DetailRow`, `CommentActions` — one glyph for Edit: `note-pencil` (November 2026)
+
+Edit was drawn two ways: the pen over a square (`note-pencil`) in `Chip`, `InlineEdit` and the
+Figma library, and a bare pen (`pencil-simple`) in `DetailRow` and `CommentActions`. Both now use
+`note-pencil`, and the stories and examples follow.
+
+**Why.** One action drawn two ways invites the question of whether the controls differ, and the pen
+over a square holds up as "edit" at 16 and 20 px where a bare pen can read as draw or annotate.
+`docs/icon.md` now records the rule. `pencil-simple` stays in the set, and an exception can be made
+for a good reason (say why in the code comment).
+
+### `NotificationItem` — one full stop, and the Light and dark story reads (November 2026)
+
+Fix: a subject that already ends in its own punctuation no longer gets a second full stop. A title "Is this ready?" read "… Is this ready?. A few seconds ago"; it now reads "… Is this ready? A few seconds ago". The same holds for a status at the end of the sentence.
+
+Stories: *Light and dark* and *Markers clear 3:1* were squeezed into the 384px column every NotificationItem story sits in (a story's `decorators: []` adds to the meta's instead of replacing it), so the two halves of Light and dark overlapped. The column now steps aside for full-screen stories, and Light and dark stacks its halves below 1024px. No API change.
+
+### `Stepper`, `Chip`, `CopyText`, `Tooltip`, `Pagination` move to atoms (October 2026)
+
+Each is one self-contained element a designer would name as one thing on a canvas, and each imports nothing from the system but `Icon`, so by the composition rule they are atoms. They move from `src/components/<name>` to `src/atoms/<name>`, and their Storybook titles become `Atoms/<Name>`. Nothing about how they look or behave changes. `CopyText` is now exported from the package root (it was not before).
+
+Migration: import them from the package root as before (`import { Chip } from '@vcp/design-system'`). Inside this repo, change `components/<name>` to `atoms/<name>` in relative imports (`../../components/tooltip` → `../../atoms/tooltip`, `../tooltip` → `../../atoms/tooltip`). Branches that import these from `components/` need the same one-line change.
+
+### `Dropzone` moves to atoms; its edge is a 1 dashed stroke (October 2026)
+
+`Dropzone` imports nothing but `Icon`, so by the composition rule it is an atom: it moves from `src/components/dropzone` to `src/atoms/dropzone` (Storybook title `Atoms/Dropzone`). The dashed edge is now drawn in SVG, 1 thick with 6-long dashes and 4 between (it was a 2 CSS dashed border, whose dash cannot be set), in the same state colours.
+
+Migration: import it from the package root as before (`import { Dropzone } from '@vcp/design-system'`); inside this repo, change `../../components/dropzone` to `../../atoms/dropzone`. The props and behaviour are unchanged.
+
+### `NotificationItem` — "Show more" shows its whole focus ring (November 2026)
+
+Fix: on a long comment preview, the keyboard focus ring around "Show more" / "Show less" was cut off at the top and bottom by the preview card, which clips its overflow, so only its two sides showed, like brackets. The ring is now drawn inside the button, so it shows whole. No API change.
+
+### `SearchSelect` — a pick keeps its name with server search; the label focuses (November 2026)
+
+Fix: with `onSearch`, a pick that dropped out of the current `options` (the search moved on, or the panel reopened and the page reset its list) showed its raw value in the field and its tag, "carl" for Carl Baker. The field now remembers every option it has been given, so the name and the tag's tone stay. For a value set before any search, include its option in the first `options`.
+
+Clicking a `Field` label now focuses SearchSelect without opening the panel, as it does a native `Select` (the label used to pass its click on to the button and open it).
+
+Stories: a visible *Sizes, full width and loading* story shows `size`, `fullWidth` and `loading`, which were only in hidden tests; *Rows* is wide enough for its switcher to read in full; *Light and dark* fills the page side by side instead of overflowing the 240px frame. The docs no longer call server search a future option. No API change.
+
+### `Tag`'s filled brand ✕ shows its pressed fill (November 2026)
+
+Fix: since the dark `action.primary` pressed fill now gets lighter, a filled brand tag's ✕ takes `action.primary.surface.pressed` when pressed, like every other filled tone, instead of holding its hover fill. The Button story *Filled text contrast, both themes* now fills the page, so its dark half no longer stops short under the buttons. No API change.
+
+### `DomainLabel` — the domain pill (October 2026)
+
+New component, to Figma's `_Domain_Label`: the small pill that says which domain something came from, a glyph and two letters ("DS", "DV", "GV", "CN", "PT", "QA"), with an optional "Added by {domain}" tooltip. It owns the domain → glyph, code and name mapping. `FileAttachment`'s corner badge now draws through it (unchanged to look at).
+
+### `DeliverableLinkForm`, `DeliverableLink`, `DeliverablesCard` — what an Added Value delivers (October 2026)
+
+New, to Figma's `Deliverables_Card`. **`DeliverableLinkForm`** (component) takes links: a URL and a title, "+ Add another link", Cancel and Add or Save, checked when pressed ("Please enter a link title", "Please enter a valid URL starting with https://"). **`DeliverableLink`** (component) is one added link: its domain label and a hyperlink, with a pencil and a bin on hover that turn it into the form in place. **`DeliverablesCard`** (pattern) is the card: `domain` picks Links (Design) or Video Links and Links (Development), both with Attachments (`FileAttachment`s and a `Dropzone`); `mode` is `view` or `edit`.
+
+### `AttachmentViewer` — open an attached file full screen (October 2026)
+
+New component: a full-screen gallery for attached files, built on `Modal`. Header with the file's glyph, name and "2 of 4", download and close; previous and next arrows; a strip of thumbnails; an image can be zoomed (− + reset, with the percentage; the keys `+ - 0`), a PDF shows in the browser's own viewer, a video plays, and anything else says there is no preview and offers the download. `DeliverablesCard` opens it from a file card, in view or edit. **`Modal` gains `size="full"`** (the whole viewport, no corners). Icons gain `video-camera` (Video Links) and `arrows-clockwise` (reset zoom).
+
+### `NotificationItem` stories — the hover tests no longer time out in a full `npm test` (November 2026)
+
+Stories only; the component is unchanged. `DotMakesWayForMarkRead` and `DotStaysWithoutMarkRead` move the browser's real pointer, because the unread dot is driven by CSS `:hover`. They moved it with Playwright's `hover()`, which first waits for its target to be visible, stable and unobstructed. That is a dozen or more round trips between Vitest and the page, and in a full `npm test` (several pages at once) they could take the test's whole 15 seconds, so one of the two timed out now and then. Each move is now a single DevTools `Input.dispatchMouseEvent`, and the stories check in the page that the row is, or is not, hovered before they read the dot. The pointer now parks in the screen's bottom-right corner between tests. It used to finish at the top-left, which under Vitest is on the story's row.
+
+### `action.primary` (dark) — hover and pressed get lighter, not darker (November 2026)
+
+In dark, the primary action's label is near-black, but its fill got darker on hover and press, so the label fell to 3.26:1 hovered and 2.23:1 pressed, under the 4.5:1 text rule. The dark `action.primary.surface` states now step lighter, as every dark `accent.*.filled` fill already does: hover `vcp-blue.300` (was `.500`), pressed `vcp-blue.200` (was `.600`), and selected follows hover to `vcp-blue.300`. The label now reads 8.73:1 hovered and 13.69:1 pressed. Everything on these tokens changes with it in dark: primary `Button` and `IconButton`, a checked `Checkbox` and a switched-on `Toggle` when hovered or pressed, the selected `RadioGroup` ring when hovered, and `Field`'s "+" button. Their hover fills and rings also now clear 3:1 against the page (were 2.37:1 on `surface.base`). Light is unchanged. No API change.
+
+### `Tag`'s ✕ keeps its contrast on hover; `CheckboxMark` is tested against `Checkbox` (November 2026)
+
+Fix: on a tag of any tone but neutral, the ✕ dimmed to 70% on hover, which took eight of the 48 style and tone pairs under the 3:1 a control needs (down to 2.74:1, on light tonal warning). Hover and pressed now take the tag's own hover and pressed tokens, which only move away from the background, and a filled tag shows its tone's hover fill behind the ✕. A new *Removable everywhere* story shows the removable tag at every size and in every style and tone in both themes, and its test checks the ✕ at 3:1 at rest, hovered and pressed on all of them. `docs/tag.md` now says to move focus when a tag is removed.
+
+`CheckboxMark`'s story now shows both themes, and its test compares every mark with a real `Checkbox` in the same state, so the two cannot drift apart unnoticed. No API change.
+
+### `MentionInput` — Redo from the keyboard, Textarea's box (November 2026)
+
+Fix: Redo works from the keyboard: Shift+Cmd+Z on a Mac, Ctrl+Y or Shift+Ctrl+Z elsewhere. It did nothing before, because the browser only sends its redo on to a field whose own redo list has something in it, and this field keeps its own. Undo and Redo are now taken from the keys directly; Undo from the Edit menu still works.
+
+The field now has Textarea's box: 12px padding at the sides and 10px at the top and bottom (was 16px all round) and Textarea's rounder corner. Its placeholder fades when disabled, as Textarea's does. A mention tag at the end of a line moves down whole instead of breaking in two. The Light and dark story uses the full width (stacked on a phone), and the other stories fit a phone screen.
+
+### `NotificationItem` — copy, two new kinds, a larger mark-read target (October 2026)
+
+Follow-up to the review fixes in #209, covering what it left for design review. The copy is past tense (`accepted`, `handed off … Ready for Review`), and every sentence ends in a full stop with the time shown capitalised after it ("A few seconds ago"). Two kinds are added, `pending` ("submitted … for approval. Pending") and `completed` ("accepted & completed"), making thirteen, with `pending` listed before `accepted`. The mark-read / mark-unread button has a 40 click area (the 20 icon is unchanged and the text and icon stay where they were), and is named "Mark as read: *Title*" so it is not a repeat of the tooltip. `docs/notification-item.md` records who gets each notification, whether it raises the red dot, and the status it follows. In Storybook the `status` control picks from the shared and domain statuses.
+
+A click on the comment preview does **not** open the item (the comment is content to read and select; only "Show more" / "Show less" and the caller's `previewActions` respond there). This reverses the click-through added in #209, per design.
+
+### `NotificationInbox` — no "Mark all as read" without a handler (October 2026)
+
+Fix: "Mark all as read" was always drawn, so a page that did not pass `onMarkAllRead` showed a button that did nothing when pressed, and a screen reader announced it as a working control. It is now drawn only when `onMarkAllRead` is given, as it already was in `NotificationPopover`. "Show unread only" is unchanged. No API change.
+
+### `Tag` can be removable; `CheckboxMark` (October 2026)
+
+`Tag` gains `onRemove` and `removeLabel`: a ✕ button after the label, for a value picked into a field (also an AV's tags in edit mode). The ✕ is the only interactive part; a Tag without `onRemove` is unchanged. A tag that toggles or opens something is still a `Chip`. The ✕ is 20, the largest that fits inside the 24 tall small tag, so it is under the 40 touch minimum, the exception `TagEditor` already makes; its left margin cancels the tag's gap (`-ml-1` on `xs` / `sm`, `-ml-1.5` on `md` / `lg`).
+
+`Checkbox` gains a `CheckboxMark` export: the box and tick with no input behind it, for rows that are themselves the control. Same box, tokens and tick as `Checkbox`.
+
+### `NotificationItem` — review fixes: the unread dot, `moved` without a status, clicks on the comment (October 2026)
+
+Fixes from the PR #175 review, which reached `main` in PR #176 before they were made:
+
+- **The unread dot only makes way for the mark-read button.** It used to vanish whenever any button in the row had focus (the row itself, "Show more") and on hover even with no `onToggleRead`, leaving nothing in its place. It now goes only on hover or on the mark-read button's own focus, and only when that button exists. The row is now a named group (`group/notification`), so an outer `group` cannot trigger it.
+- **`moved` needs its `status`.** The props are now a union on `kind`, so `kind="moved"` without `status` is a type error. At runtime a missing status ends the sentence at the title, and "[Status]" never shows. `status` stays `string | undefined` on `moved`, so a row built from data (`status={event.status}`) still type-checks. `NotificationItemProps` is now a type alias, not an interface, so an `interface … extends NotificationItemProps` no longer compiles. Nothing in the system does that.
+- **A click on the comment preview opens the item.** The preview sat above the row's target, so a click on the comment's text did nothing. It now lets clicks through to the row. "Show more" and `previewActions` still take the pointer and keep their place in the tab order.
+- Stories: `Static` and `MarkReadTooltip` now test something real. New stories cover each fix: `MovedWithoutStatus`, `CommentOpensTheItem`, `DotMakesWayForMarkRead` and `DotStaysWithoutMarkRead`. The docs' accessible name now matches the real one, and the docs no longer name the unmerged `NotificationInbox`. The note on the tooltip's left placement now gives a reason that still holds.
+
+### `NotificationPopover` / `Popover` — on a short screen, the header and inbox link stay (October 2026)
+
+Fix: on a screen too short for the notification panel above or below the bell, the whole panel scrolled, with its list scrolling inside it, and "View notifications inbox" was pushed out of view. Now the header and the inbox link stay in view and only the list gives way and scrolls. `Popover` makes this possible: while it has shortened a panel, it remembers the panel's full height, so content that shrinks to fit (instead of scrolling) no longer makes it flicker between the two heights. Every other popover behaves as before.
+
+Also: the `LightAndDark` story stacks the two themes so their open panels no longer overlap, `MarkAllRead` shows its rows marked read, and the `NotificationPopover` changelog entry gives the panel's real width (528, not 500). No API change.
+
+### `DropdownStepper` — a disabled control looks disabled (October 2026)
+
+Fix: with `disabled` set, only the text and arrows turned grey. The control kept its enabled white fill and `stroke.strong` border and a normal cursor, so next to a disabled `Stepper`, `Input` or `Select` it looked like the only enabled one. It now takes the Input family's disabled look, the same as `Stepper`: `surface.neutral.subtle` fill, `stroke.subtle` border, a not-allowed cursor. The look follows the `disabled` prop only. An arrow that dies at the end of the list still leaves the control looking enabled. No API change.
+
+### `Popover` — a panel with no room on either side scrolls instead of flickering (October 2026)
+
+Fix: when a popover's panel was too tall for the space both above and below its trigger, it flickered between its full height and its shortened, scrolling height on every frame, about 130 times a second, and never settled. It now settles on the roomier side at the shortened height and scrolls inside. While it scrolls, the panel is in the tab order and shows the standard focus ring, so a keyboard user can reach it, see it, and scroll it with the arrow keys even when nothing inside it is focusable. Everything built on `Popover` gets the fix: `Menu`, `UserMenu`, `EmojiReactionPicker`. No API change.
+
+### `Modal` / `Popover` — Escape closes the open popup first, then the dialog (October 2026)
+
+Fix: with a `Popover` or a `Menu` open inside a dialog, Escape closed the whole dialog. Now the first Escape closes only the popup and the dialog stays open; the next Escape closes the dialog. A dialog over a dialog still closes the inner one first.
+
+The rule any popup follows to get the same: when your popup is open and Escape closes it, call `event.preventDefault()`, and the dialog skips that Escape. `Popover` (and so `Menu`) and `InlineEdit` do. See "Escape and the popups inside" in `docs/modal.md`. No API change.
+
+### Package — `@vdm-design-team/vcp-design-system`, installable by a Next.js app (October 2026)
+
+A Next.js (App Router) app that runs its own Tailwind v4, shadcn/ui included, can now install the system from GitHub Packages and import its components and theme.
+
+- **The package is renamed `@vdm-design-team/vcp-design-system`** (was `@vcp/design-system`). GitHub Packages only publishes a package under its owner's scope, so the old name could never have been published. The new one sits beside GDL's `@vdm-design-team/gdl`.
+- **`npm run build` produces the package**: ESM for the `.` and `./tokens` entries, with type declarations. The `./theme.css`, `./tokens.css` and `./tokens.json` paths are unchanged.
+- **Every component is a client component.** `dist/index.js` starts with `"use client"`, so Server Components can import and render them. Helpers exported alongside, such as `cn`, can only be called in client code. `./tokens` has no directive, so server code can read token values.
+- **`theme.css` no longer imports Tailwind.** The app's own `@import "tailwindcss"` comes first and `theme.css` follows it. `theme.css` now registers the component bundle as a Tailwind source itself, so the app needs no `@source` line.
+- `playwright` moves to `devDependencies`. Only the story tests use it, so apps no longer install it.
+
+Migration: install `@vdm-design-team/vcp-design-system` in place of `@vcp/design-system`, with `@vdm-design-team:registry=https://npm.pkg.github.com` in the app's `.npmrc`. Change every `'@vcp/design-system'` import, and its `/theme.css`, `/tokens.css`, `/tokens` and `/tokens.json` subpaths, to `'@vdm-design-team/vcp-design-system'`. In the app's root CSS, put `@import "tailwindcss";` above the theme import and delete the `@source "../node_modules/@vcp/design-system/dist";` line.
+
+### `LegendItem` — new atom; `DonutChart` — `segmented` (October 2026)
+
+`LegendItem` is one entry in a chart legend — a colour swatch and its word — in
+two sizes (`md`: 12 swatch + 12 caption for dashboard charts; `sm`: 8 dot + 10
+caption for the Gantt chart) on `ProgressBar`'s tones, so a legend can't drift
+from its chart. The swatch is `aria-hidden`; the label is the item.
+
+`DonutChart` gains `segmented`: flat ends and a gap between the filled arc and
+the remainder (a quarter of `thickness`) instead of a round-capped fill over a
+full track — the flat Cycle Summary gauge. Existing rings are unchanged.
+
+`DonutChart` also gains `fillClassName` for a one-off token colour, and
+`size="icon"` (a 20 box around a 16 ring, no numeral — the table-row glyph) and an empty `label` (`null`) to draw the ring alone at any size. `LegendItem`
+gets `swatchClassName`, and its gap now scales with
+the swatch (4 on `sm`, 6 on `md`). No new tokens.
+
+### `DropdownStepper` — new component (October 2026)
+
+One choice from an ordered list — previous / next arrows around a `Menu`
+dropdown — ported from Figma's `_Dropdown_with_Stepper`. Controlled or
+uncontrolled, `wrap` for cycles, disabled options skipped by the arrows, `sm`/`md`
+= 32/40, a polite live region for every change. Composed of `Icon` and `Menu`; no
+new tokens.
+
+`invalid` and an optional `error` caption are included: critical border, and a
+`role="alert"` caption tied to the dropdown with `aria-describedby`.
+
+### `Stepper` — `up-down` variant and an error state (October 2026)
+
+New `variant` prop: `plus-minus` (default, unchanged) or `up-down`, the number-input
+layout from Figma's `_Number_Input_Step` — the value left-aligned like an
+`Input` with one up/down caret pair stacked at the end. Same props and behaviour
+(draft-based typing, clamping, disabled-at-the-ends); the carets leave the tab
+order and Arrow Up/Down covers the keyboard. No new tokens.
+
+Also fixes `Stepper`'s shell greying out as if disabled whenever a nudge button
+disabled at `min`/`max`; the disabled treatment now follows the `<input>` only.
+
+`invalid` and an optional `error` caption are new: critical border, `aria-invalid`,
+and a `role="alert"` caption tied to the input with `aria-describedby`. `className`
+and `ref` now land on an outer wrapper that holds the field and its caption.
+
+### `CommentComposer`, `CommentSection` — the box to write a comment, and a whole comment list (October 2026)
+
+Two new pieces, restructuring the comment set into the right tiers. **`CommentComposer`** (a component) is the box a comment is written in: an optional avatar, the `MentionInput` field and the send button with an optional Cancel. It is also the reply box and the edit box under a comment, so there is one box to learn. Its `onSubmit` may be async: the button shows its spinner, the box clears when the promise resolves and keeps what was typed if it rejects. **`CommentSection`** (a pattern) is the piece to reach for: the title with the sort switch, the new-comment box, and every comment with its replies. Give it the comments as data (a tree) and say what to do on add, reply, edit, delete and react; it holds which threads are open and which box is showing, shows Edit and Delete only on the current user's own comments, and draws the thread lines. `CommentReply` now uses `CommentComposer` for its reply and edit boxes (their `onSubmit` handlers may be async too), and the unreleased `NewComment` pattern is removed, replaced by these two. `Popover` and everything built on it now opens on the side that has room (see `feat-popover-flip`).
+
+### `Popover` — it opens on the side that has room (October 2026)
+
+`Popover` used to open exactly where `placement` and `align` said, even off the screen. They are now what the panel prefers: it is measured as it opens (and when the window or the panel is resized), and if the preferred side is cut off and the other has more room it opens there: above instead of below, or the other way round. A left-flush panel that would run off the right edge turns right-flush. If neither side has room the panel keeps the roomier one and scrolls inside it. It does not re-measure on page scroll, so an open panel never jumps. Everything built on `Popover` gets this: `Menu`, `UserMenu`, `EmojiReactionPicker`, the filter bar's period field. Nothing changes where there is room. No API change.
+
+### `CommentReply`, `CommentReplyThread` — a posted comment and its thread (October 2026)
+
+Two new components, read off the Figma `Comment_Reply` and `Comment_Reply_Thread`. `CommentReply` is one posted comment: the author and time, the text (the `MentionInput` segments, with mentions drawn as `MentionTag`), the `CommentActions` row, and the two boxes you open from it: **replying** (Reply and Cancel under the actions) and **editing** (the box takes the comment's place, filled with it, Save and Cancel). Both boxes open focused, their send button is dim while empty, and `replying` and `editing` are controlled by the caller. `CommentReplyThread` is a comment with its replies as `children` (a `CommentReply`, or a `CommentReplyThread` for a sub-thread), with the thread line drawn: it runs from the avatar into the replies, each reply takes a corner off it, and the line stops at the last one's. The replies are a labelled list that the toggle controls. No new tokens, and no change to the pieces they compose.
+
+### `EmojiReactionPicker` — the "Add reaction" tooltip no longer shows twice (October 2026)
+
+Hovering the add-reaction button showed its tooltip, and then moving down onto the open palette brought the tooltip back a second time before it went away. The tooltip wrapped the whole `Popover`, so the palette, a child of that wrapper, counted as hovering the button. The tooltip now wraps the button alone, which also puts `aria-describedby` on the button itself. No API change, and no change to how the palette opens, closes or returns focus.
+
+### `CommentActions`, `CommentFormActions`, `CommentSortChip` — the comment controls (October 2026)
+
+Three new components for the comments, read off the Figma `_Comment_Control`, `_Comment_Controls` and `_Comment_Filter_chip` sets. `CommentActions` is the row under a posted comment: show or hide replies, Edit, Delete, Reply (or Cancel Reply), Copy Link and a slot for the reactions (`EmojiReactionPicker`). An action shows when it is given a handler, so someone else's comment simply gets no `onEdit` or `onDelete`. Copy Link copies, and only once that has worked turns its glyph into the design's green check and says "Link copied" to a live region; if the clipboard refuses it shows a warning and says so, and with no `link` it claims nothing. `subject` gives each button a name with context ("Reply to Amy Lee's comment"); the replies toggle changes its words, so it does not also carry `aria-expanded`. `CommentFormActions` is the Add Comment, Reply or Save button and its Cancel, as one arrangement of the system's small `Button`, with the dim and loading states. Its one choice is `variant` (`comment`, `reply` or `save`), which fixes the words and whether there is a Cancel; the words are not props. Neither button submits a surrounding form unless you set `type="submit"` on the send button (Cancel is always `type="button"`), and both are 40 tall on a coarse pointer. Cancel is the outlined `secondary` button, as in the system's modals, and the gap between the two is 8. `CommentSortChip` is the "Newest First" / "Oldest First" switch, built on `Chip` (its rounded pill, not the frame's rectangle). No new tokens, and no change to `Button`, `Icon` or `EmojiReactionPicker`.
+
+### `Tag` — two more sizes, `xs` and `lg`, and GDL's updated spacing (October 2026)
+
+`Tag` gains `size="xs"` (20 tall, 10 type) and `size="lg"` (32 tall, 16 type), the smallest and largest sizes of the General Design Library `Tag`. The sizes take the system's usual `xs | sm | md | lg` names in order, so nothing is renamed: GDL's "Medium" is `sm` here and its "Large" is `md`.
+
+GDL also updated the spacing, and the existing sizes follow it. Side padding is 6 on `xs` and `sm` (it was 8 on `sm`) and 8 on `md` and `lg`; the gap between a glyph and the label is 4 on `xs` and `sm` and 6 on `md` and `lg` (it was 8 on `md`). So every `sm` tag is 4px narrower, and a `md` tag with a glyph (`TypeTag`, `UrgencyTag`) is 2px narrower per glyph. Heights and type are unchanged. `docs/tag.md` has the full table, with the icon size for each. Components that pass `size` through, like `DueDateTag`, accept the new values too.
+
+### `SourceTag`, `CycleTag` — the Figma `Source_Tag` and `Cycle_Tag` (October 2026)
+
+Two new components, both a `Tag` wearing one fixed look. `SourceTag` shows where an Added Value came from: the source's name (`source`) in the info tonal fill with the info outline border, as the design draws it. `CycleTag` shows its cycle: `code`, `start` and `end` (ISO dates), written "C18 (Sep 20, 2025 - Oct 02, 2026)", outlined with the lighter `stroke.default` border, at `Tag`'s 28 tall size. The dates are formatted from the string, with no `Date` or time zone. `formatCycleRange` is exported for anything that lists cycles. No new tokens, and no change to `Tag`.
+
+### Tokens — GDL 1.0.0: the pink and teal ramps no longer ship (October 2026)
+
+VCP now builds on `@vdm-design-team/gdl` 1.0.0, still pinned exactly.
+GDL 1.0.0 keeps its placeholder brand-slot ramps, `color.primary.*` (pink)
+and `color.secondary.*` (teal), to itself, the same way GDL's Figma library
+already hides them from publishing.
+
+- `dist/` loses their 22 variables (`--color-primary-{50…950}` and
+  `--color-secondary-{50…950}`) and the utilities built on them
+  (`bg-primary-500`, `text-secondary-*`, …).
+- Nothing in VCP used them, and no semantic token pointed at them. Every
+  other token, variable and utility is unchanged.
+- They only arrived with VCP's move onto GDL 0.1.0, which hasn't been
+  released yet, so no released version of VCP ever shipped them.
+
+Also from GDL 1.0.0: `npm run check:contract` now fails a semantic token that
+points at `{color.primary.*}` or `{color.secondary.*}`. Use `vcp-blue` instead.
+
+### `UserLabel` — a person, named in place (October 2026)
+
+New component, to Figma's `Profile_Image_Name_Label`: an avatar, a name and, under it, an optional description ("John" / "Assignee", the `description` prop, named as `Chip`'s second line is), in Figma's two sizes (`md`, a 32 avatar with body type; `sm`, a 24 avatar with caption type). It is display only: a person you can press or remove is a `Chip`. The avatar beside the visible name is decoration, so there is one announcement.
+
+The description line is pulled up directly under the name so the two sit close, matching the Assignee chip.
+
+### `Chip` — the Initiator and Assignee chips, as options (October 2026)
+
+Figma's `_User_Chip_Initiator` and `_User_Chip_Assignee` are `Chip` with more options, not a second component. New, all opt-in: `size="md"` (36 tall), `tone="brand"` (text in `text.brand.strong`), `variant="outline"` (the editing look: a brand border and no fill), `description` (the "Assignee" line under a name), `onEdit` and `editLabel` (a pencil button beside the ✕), `actions="hover"` (the edit and remove buttons appear while the pointer is over the chip or focus is inside it, and are always shown on a touch screen), and `disabled`. Every default leaves a chip exactly as it was; the `Initiator` and `Assignee` stories draw the two recipes.
+
+In an `outline` chip the edit and remove buttons are tonal round buttons (brand and critical) with 2 between them; the divider before a count is `stroke.default`; a role line (`description`) is `text.tertiary`, directly under the name; and the right padding is 12 at rest and 6 once the buttons show, animated with them so nothing jumps. `Avatar` gains `tone="brand"` (initials on `surface.brand.subtle`), used by the people chips.
+
+### `UserMenu` — the signed-in person and their account menu; `TopBar` renders it (October 2026)
+
+New component, to Figma's `User_Menu`: the user's avatar, name and a caret, opening the system's `Menu` of account links. The trigger is `TopBar`'s existing reviewed user chip, moved into a shared piece; the menu holds Settings and Logout by default, and the rest is yours (`items`, `onSelect(key)`), so what Logout does and which links an admin sees stay with the app. The trigger hugs its content in height, and its caret turns up while the menu is open.
+
+`TopBar` takes `userMenuItems` and `onUserMenuSelect`: with either the user chip becomes a `UserMenu`. `onUserMenu` still works as before for an app that opens its own menu, and is ignored when `userMenuItems` is given.
+
+### `Select` — the field reads like `SearchSelect`'s; a new `error` prop (October 2026)
+
+The placeholder is now `text.subtle` in regular weight and a chosen value is `text.primary` in medium, matching `SearchSelect`'s field (the grey is CSS only, via `:has(option[value=""]:checked)`). The native options get explicit surface and text tokens so the popup follows the theme where the browser allows. New optional `error` prop puts a message under the select in the critical colour and announces it with the select; inside a `Field`, keep using the `Field`'s `error`.
+
+The open list stays the browser's, on purpose: `docs/select.md` records why, and points at `SearchSelect` (with `searchable={false}`) for the styled panel. Nothing breaks: the element is still a plain `<select>`, and the DOM is unchanged unless `error` is set.
+
+### `SearchSelect` — rebuilt as the one searchable select (October 2026)
+
+`SearchSelect` is now the system's single dropdown for picking from a list that is too long or too rich for `Select`: a field that shows the value and a panel with an optional search box over the rows, in the look of Figma's Edit Viewers dropdown. **Search lives in the panel, never in the field**; the reasons are recorded in `docs/search-select.md` so they are not reversed by accident.
+
+- **One or several.** A pick closes the panel and the picked row carries a trailing check; with `multiple` a pick toggles, the panel stays open and each row leads with a checkbox. The field shows the name, "3 selected", or with `display="tags"` a removable tag per pick. Tags stay on one line: the ones that fit show and a "+N" stands for the rest; "+N" opens the field out so every tag shows and can be removed in place, and it folds back on a click away, Escape, Tab out or "Show less" (never because a tag was removed). Long labels are cut with "…" and keep their ✕. In a disabled field the tags get an outline so they do not blend into the fill.
+- **Rows** can sit under group headings (`group`) and be disabled, and say what they are with `rows`: plain `text` (the default), `avatar` (initials or a photo, and an "Unassigned" glyph), `icon` (a glyph and text) or `tag` (each row a `Tag` in the option's `tone`). `renderOption` draws a row's content when no preset fits; the checkbox, states and ARIA stay the component's.
+- **`shortLabel`** on an option is what the field, tags and announcements say when the row's `label` is too long for them (search still matches the full label).
+- **`error`** puts a message under the field in the critical colour and announces it with the field.
+- **The panel grows to fit its longest row**, at least the field's width and at most 24rem, so a narrow field does not cut its options off.
+- **The panel** is `Menu`'s dropdown (surface, edge, radius, shadow, padding, item rows); a click inside it that lands on nothing does nothing.
+- **`confirm`** (multiple) drafts the ticks behind a Clear all / Apply footer, as Figma's status menu.
+- **`size`** (`sm` / `md`), **`fullWidth`** (off by default, as `Input` and `Select`) **`loading`** (a spinner for the caret and "Loading…" for the rows) and **`onSearch`** for a list searched on the server (the component stops filtering and hands the page the text).
+- **`searchable={false}`** drops the search box for a short list; the trigger is then the select-only combobox.
+
+Migration: the old `SearchSelect` was a text input that searched in the field. Its `placeholder` now labels the field (the search box takes `searchPlaceholder`); `renderOption` now receives `(option, { selected, active })` and draws only a row's content; the `avatars` prop and the option's `avatar` field are gone (avatars used to be on by default): pass `rows="avatar"` for a list of people, with `src` or `unassigned` on the option; `onChange` receives a `string` for a single pick and a `string[]` with `multiple` (the old `string & string[]` hybrid is gone). Nothing in this repository imported it.
+
+Builds on the removable `Tag` (`onRemove`) and `CheckboxMark`, which are in their own PR (#210).
+
+### `Tooltip` — the bubble floats above the page (October 2026)
+
+The bubble is now drawn in a portal, `position: fixed` from the trigger's coordinates, instead of as an absolutely-positioned child of the trigger. It can no longer widen a scrolling container it sits in (a tooltip on a button at a row's right edge made the notification popover's list scroll sideways), and no container that clips or scrolls can cut it off. It goes into the nearest `.dark` ancestor when there is one, so a themed wrapper still themes it, and follows the trigger on scroll and resize while open. Placement is unchanged: the same four sides, the same gap, no flipping. The API is unchanged.
+
+### `MentionInput` — a text field with @-mentions (October 2026)
+
+New component: a text field where typing `@` opens a list of members, more letters filter it, and choosing one turns the text into a tag, as in comments. Plain text and tags only; a paste is plain text. The value is segments (text, or a mention with its `id` and `label`), with `mentionedIds` and `plainText` helpers, and a tag in the DOM is the markup TipTap's mention extension writes. The list is a combobox listbox, drawn like `Menu`: ↑ ↓ move, Enter or Tab choose, Escape closes. It opens under the `@` being typed (above it when the screen cuts the bottom off, and never past the screen's edges), not under the whole field. Input-method (IME) and some mobile keyboards are not promised.
+
+The field is plain text only (`contenteditable="plaintext-only"`), has its own undo and redo (a chosen mention is one step), ignores Enter and the arrows while an IME is composing, treats an `@` followed by a space as text, and draws its list in a portal so a scrolling parent cannot cut it off; the highlighted option scrolls into view.
+
+MentionInput is an atom (`src/atoms/mention-input`): it composes nothing, so it sits beside `Textarea`, and its disabled look is Textarea's. `Field` now gives its label an id and passes it to the control as `aria-labelledby` (never over an existing name), and clicking the label focuses a custom control such as MentionInput.
+
+### `NotificationInbox` — the full notifications page (October 2026)
+
+New pattern, to Figma's `Notification_Inbox_Content`: "Mark all as read", "Show unread only", the rows and the pager. The rows are `NotificationItem`, the same component the popover uses (Figma draws a separate inbox row, but it is the same thing in a wider list). Controls and pager are right-aligned; "Mark all as read" is always shown, and the pager is the large one with the Items select (`pageSize`, `pageSizeOptions`, `onPageSizeChange`). It reports the switch and page changes and leaves the filtering and paging to the caller.
+
+### `NotificationPopover` — the bell and the panel that opens from it (October 2026)
+
+New pattern, to Figma's `Notification_Popover`: the `NotificationBell` that opens a 528-wide panel with the All / Mentions filter, the "Unread only" switch, an overflow menu with "Mark all as read", the list of `NotificationItem`s (passed as children), and a "View notifications inbox" link. It reports filter and unread-only changes and leaves the filtering to the caller. Also exports `NotificationBell` and `NotificationItem` from the package index.
+
+Also adds the `dots-three-outline-vertical` and `dots-three-outline-vertical-fill` glyphs, which the popover's overflow menu button uses (filled).
+
+### `NotificationItem` — one row in a list of notifications (October 2026)
+
+New component, to Figma's `Notification_Item`: the actor's avatar, a sentence for each of the design's eleven kinds of event (commented, mention, moved, accepted, updated, rejected, rejected with feedback, assigned, backlog, handoff, viewer) with the design's bold and regular runs and the time, and a trailing check: the unread dot on an unread row, which dissolves into an outlined check-circle (mark as read) on hover and focus, and, on a read row, nothing at rest and a filled check-circle (mark as unread) that dissolves in on hover and focus. The whole row is the target (`href` or `onSelect`). An optional comment preview shows three lines in a bordered card with "Show more", with no bottom padding on the text while the button follows. The reply and emoji controls under a preview are not built; `previewActions` is where they go.
+
+The mark-read button has the design's tooltip after a half-second hover ("Mark as read" / "Mark as unread").
+
+### `NotificationBell` — the bell and its unread dot, as a piece of its own (October 2026)
+
+New component: the notification bell, an `IconButton` with the design's red dot (10 on a 20 glyph, in `accent.critical.filled.surface.default`, with a halo that pulses three times, 1.5s each, when the count changes, then stops; reduced motion removes it). The count is in the button's name ("Notifications, 3 unread"); the dot is decoration. It passes every prop to its button, so it works as a `Menu` or `Popover` trigger. `TopBar` now uses it instead of drawing the bell inline: nothing changes visually or in `TopBar`'s props.
+
+### Status tones — `danger` is now `critical`, matching the token family and Figma (October 2026)
+
+The severity tone was called `danger` in the props but `accent.critical` in the tokens and `Critical` in Figma. The props now say `critical`. It changes on the components that colour by severity: `Badge`, `Tag`, `StatusTag` and `DueDateTag` (through the shared classification tones), `Toast` and `useToast`, `Banner`, `ProgressBar`, `DonutChart`, `DatePicker` markers and `Timeline`.
+
+The **destructive-action** names are unchanged: `Button` and `IconButton` `variant="danger"`, `Menu` item `tone: 'danger'` and the status-progression Reject variant all mean "this action destroys something", which is not the same word as a severity, and they stay `danger`.
+
+Migration: replace `danger` with `critical` wherever it is a tone, type or marker on the components above: `tone="danger"` becomes `tone="critical"` on `Badge`, `Tag`, `Banner`, `ProgressBar` and `DonutChart`; `toast({ tone: 'danger' })` becomes `toast({ tone: 'critical' })`; `markers={{ '2026-09-22': 'danger' }}` becomes `'critical'`; the `Timeline` item `tone: 'danger'` becomes `'critical'`; and the exported types `ToastTone`, `BannerTone`, `TimelineTone`, `ClassificationTone` and `DatePickerMarker` now list `'critical'` in place of `'danger'`. Leave `Button`, `IconButton` and `Menu` alone.
+
+### Tokens — VCP builds on GDL, the parent design system (October 2026)
+
+VCP's shared scales now come from `@vdm-design-team/gdl` 0.1.0, the same way
+the VCP Figma library subscribes to the GDL library.
+`tokens/` keeps only what is VCP's own:
+
+- the `vcp-blue` ramp and `brand.navy`
+- the UI face (`font.family.sans` → Poppins) and the emoji stack
+- radius, shadow and border-width names
+- the semantic colours
+
+The rest comes from GDL: the colour families, spacing, Inter and the
+weights, and the 47-style type ramp. The build uses GDL's formats.
+`npm run check:contract` (in `npm test` and CI) checks the semantic colours
+against GDL's contract.
+
+Every utility and variable components use is unchanged, except one value:
+
+- **`color.green.800` is `#016630`.** It was `#008236`, a copy of `green.700`.
+- It feeds `accent.green.strong` and `accent.success.{filled.surface,outline.content}.hover`
+  in light mode.
+- In dark mode it feeds `accent.green.faint`, `accent.success.tonal.surface.hover`,
+  and the success tonal and outline disabled content.
+- Every pair gains contrast:
+  - The `green` tone in Avatar and TagEditor (dark): 4.50:1 → 6.49:1.
+  - Banner and Toast success hover (dark): 4.10:1 → 5.91:1. It now passes AA.
+
+New from GDL, all additive:
+
+- **Colour ramps:** `color.orange.*`, plus GDL's brand-slot ramps
+  `color.primary.*` (pink) and `color.secondary.*` (teal). VCP doesn't use
+  the brand-slot ramps; keep using `vcp-blue`.
+- **Shape:** px-named `radius.{0…64,full}`, `shadow.elevation.{1…7}` (light
+  and dark), `stroke-width.*`.
+- **Spacing:** `space.{0,44,80,128,256}`.
+- **Type:** the `font-inter`, `font-poppins`, `font-gotham-pro`, `font-montserrat`
+  and `font-gotham-rounded` families, `font.weight.light`, and `font.size.*`.
+- **Desktop type:** `dist/typography.desktop.css`, desktop type sizes behind
+  `data-type-scale="desktop"`. Opt-in, and not wired into the ramp.
+
+Two changes to build output that nothing in VCP reads:
+
+- `dist/tokens.css` no longer repeats the dark theme as `--dark-*` variables
+  in `:root`. The dark theme is `dist/tokens.dark.css`, unchanged.
+- `type.body-md-regular` and `type.label-md-medium` lose their `$description`
+  in `tokens.json` and `tokens.ts`.
+
+Contributors: `npm install` now needs a GitHub token with `read:packages`,
+once per machine (see the README).
+
+### `ReviewAVModal` — 14px labels and values, and a 20px checkbox (October 2026)
+
+The field labels are 14 regular in `text.tertiary` (they were 12 medium in `text.secondary`) and the values under them are 14 medium in `text.primary` (they were 14 regular). The domain option checkbox is the 20px size.
+
+### `TopBar` / `Toggle` — a switch for the left side, the divider, the bell, and a sun and moon switch (October 2026)
+
+`TopBar` gains `showLeftSide` (default `true`): `false` leaves the left side empty (no action, no logo), for screens like the AV editor that show nothing there. A vertical divider now sits between the bell and the mode and user group. The bell is neutral instead of brand blue, with a 10px dot (it was 8) in `accent.critical.filled.surface.default`. A halo pulses behind it three times, 1.5s each, when the unread count changes, then stops; reduced motion removes it. `Toggle` gains `knobIcons`, a glyph in the knob for each state, and the mode switch uses it for the sun (light) and moon (dark). Adds the `sun`, `sun-fill`, `moon` and `moon-fill` glyphs.
+
+The user chip had 4px of padding all round, and its caret drew 7px from the right edge while the avatar sat 4px from the left. The chip now has 8px left and right (4 top and bottom), and the caret's box is pulled 3px into the padding, so both sides measure 8. The mode switch and the user chip are now one group with an 8px gap between them (the bar's other gaps are 16).
+
+### `Sidebar` — the bottom row keeps a gap above it (October 2026)
+
+Design review: "Report a problem" is pinned to the bottom of the rail, but in a rail with no
+room to spare it sat straight under the last nav item and read as one of them. It now keeps
+at least 32 above it (`mt-8`); a rail with room to spare is unchanged. The Every User Type
+and Both Widths stories are sized to their rails' content instead of the window, so a short
+preview no longer pushes items out past the rail's border. No API change.
+
+### `Sidebar` — the domain selector is Figma's dropdown, built on `Menu` (October 2026)
+
+The domain switcher was a native `Select`, bordered like a form field. It is now Figma's `_Domain_Selection_Dropdown`: a filled trigger with an up-down caret and a `neutral.outline.border` stroke (default, hover, pressed and disabled states). The caret follows the border's colour. The trigger opens the system's `Menu` at the trigger's width, and is 40px tall, the minimum target.
+
+`Menu` gains a `selected` flag on its items, which renders `role="menuitemradio"` with `aria-checked` and a check icon, so the current choice is announced and shown without relying on colour. The Sidebar passes the current domain, so the open list marks it. It is additive: items that do not set it are unchanged.
+
+The props (`showDomainSelector`, `domain`, `domains`, `onDomainChange`) are unchanged. The trigger's accessible name is now "Domain: <current>. Change domain".
+
+### `font.family.emoji` — emoji take a colour emoji font (October 2026)
+
+**New** (minor): the core token `font.family.emoji` (utility `font-emoji`) —
+`Apple Color Emoji`, `Segoe UI Emoji`, `Noto Color Emoji`, `Twemoji Mozilla`, then
+`sans-serif`. It names the colour emoji fonts first, so a platform's text-style fallback
+cannot claim an emoji's code point before them.
+
+`EmojiReactionPicker` uses it on the palette cells and on the pills' emoji. Why: in
+Chromatic (which renders on Linux) the picker's 😄 😅 😂 😮 😊 rendered as monochrome
+outline faces while the rest rendered in colour (design review of build 41 on #124).
+macOS and Windows already chose a colour font, so it never showed locally. No API change.
+
+### `FileAttachment` and `Dropzone` — the attachments elements, to the design (October 2026)
+
+Follow-up to #126; built to Figma's attachments elements.
+
+**`FileAttachment`**
+- **New `domain` prop** — the corner badge for an AV handed over from another domain, with
+  its glyph and code: Design DS, Development DV, Governance GV, Content CN, Partners PT,
+  QA QA. The mapping is owned by the component. `domainLabel` / `domainIcon` stay for a code
+  outside the six. New icon: `file-magnifying-glass`, with its `-fill` partner (every glyph ships both weights).
+- The remove button sits **2 in from the top-right corner** (was flush).
+- **Fixed:** a short name was pushed to the card's right edge; it now stays centred under the glyph.
+- A remove-only card (`onRemove`, no `onClick`) takes the hover fill, as edit mode draws it.
+
+**`Dropzone`**
+- **2 dashed `stroke.strong` border** (was 1 dashed `stroke.strong`) on `surface.neutral.faint`
+  (was `surface.elevated`); **24 padding, 8 gap**; a **32 `paperclip`** in `text.subtle` (was a 24 cloud).
+- **Copy:** the label defaults to **"Upload a file"** (was "Choose files") and the hint to
+  "PNG, JPG, GIF, DOCX, CSV and PDF file up to 10MB"; line one is 14 regular `text.primary`
+  with an underlined link-blue verb, the hint `caption-md-regular`.
+- **States:** drag-over is `stroke.focused` on `surface.brand.subtle` (was `brand.base`), and a
+  drag **within 16 of the zone** counts; error keeps the **regular fill** with a critical
+  stroke (was a red-tinted fill and a warning glyph).
+- `HandoffAVModal` takes the new copy by dropping its "Attach Files" override.
+
+Migration: callers that relied on "Choose files" or the 1 `stroke.strong` border pass `label` or
+restyle; nothing else.
+
+**`Dropzone` border, a deliberate exception:** the resting dashed border is `stroke.strong`, not the design's `stroke.default` (1.42:1), so a control's boundary clears 3:1. The weight, fill and states are the design's.
+
+### `Menu` — opening with a pointer no longer highlights the first item (October 2026)
+
+Opening a `Menu` moves focus to its first item, and the item highlight rode plain `:focus`,
+so the first item looked hovered the moment a mouse opened the menu. The highlight now rides
+`:hover` and `:focus-visible`: a pointer-opened menu is clean; a keyboard-opened one (or any
+arrow-key move) still highlights the focused item, with the focus ring on top. Danger items
+likewise. Focus still moves into the list on open; only how it is drawn changes. No API change.
+
+### `Icon` — nine sizes, and a fill for every glyph (October 2026)
+
+- **Sizes:** `size` takes 10, 12, 16, 20, 24, 28, 32, 40 or 48 — the sizes Figma draws every icon at — instead of only
+  `sm` / `md` / `lg`. Those three still work as 16 / 20 / 24 (default stays `md`, 20). Exports `ICON_SIZES`, `IconSize`.
+  The glyph already sits centred with a margin from the edges (Phosphor's own 256 artboard), at every size.
+- **Regular and fill:** every glyph now ships both. 83 `-fill` glyphs added from Phosphor, plus `check-square` (it had
+  only a fill), `caret-triple-up-fill` (built like the regular) and `smiley-plus-fill` (Figma, node 3605:1853). Still without
+  a fill: the in-house `assigned-value` and `rectangle-stack`, which Figma doesn't draw filled. `rectangle-group-fill` comes from Figma
+  (node 3129:61076).
+- **Figma's own glyphs override Phosphor's** for `user`, `user-check`, `user-plus`, `user-minus`, `user-sound`, `users`,
+  `users-three` and `fire` (Regular and Fill). Same names, redrawn shapes; `user-plus`, `user-minus` and `user-sound` are new.
+
+### `PageTitle` — back arrow and title (October 2026)
+
+- The arrow and the title share a centre line (the title sat above the arrow).
+- **The back arrow is neutral** (`neutral.outline.content`, with hover and pressed) instead of the action blue, and **hugs its
+  20 × 20 glyph** — no padding either side — with 8 to the title. A `::after` keeps the pointer target 40 × 40. The band with a back
+  arrow is now 74, not 88. `onBack` renders a plain `button`, no longer an `IconButton`.
+- **New `size` prop** — `md` (default) is the title at 18 semibold, `sm` at 14 medium; both `text.secondary` (was 20
+  semibold `text.primary`). The title is smaller than before by default.
+
+### `DataTable` cells — copy, inline edit, column hints, always left-aligned (October 2026)
+
+- **`InlineEdit` is reworked to Figma's buttons** (`_Planning_Table_Icon_Button`): cancel on the left, confirm on the right, 24 tonal discs, the pen a
+  `note-pencil` with an "Edit" tooltip. **New `InlineDateEdit`**: a date with a calendar button that opens a `DatePicker` in a popover; picking a
+  day commits it, no confirm. The Inline Editing story now shows all three kinds: type, choose, calendar.
+- **`InlineEdit`: clicking outside an editing cell cancels it; the pen and the calendar button are drawn on hover or keyboard focus only (they stayed
+  drawn after a mouse click closed the editor); the control sits 6 from the cancel and confirm buttons, and the two buttons are 4 apart.**
+- **`IconButton` gains `variant="tonal"` and `size="xs"` (24, 16 glyph).** New tokens `neutral.tonal.surface.{hover,pressed,disabled}` and
+  `neutral.tonal.content.{hover,pressed,disabled}`, from Figma's `colors/neutral/tonal/*`.
+- **New `CopyText`**: a non-link value that underlines on hover and, on click, copies itself and shows "Copied" for 800ms
+  (Figma `_AV_Table_ID`, `7247:39763`). **New `InlineEdit`**: a value with a pen that swaps to a caller-supplied control with confirm and
+  cancel buttons, Enter/Escape and focus handling.
+- **Header order: label, hint, then the sort arrows** ("Supplier ⓘ ⇅"). The sort button is now the label alone, with an overlay that makes
+  the arrows clickable too, and the hint raised above it; still one tab stop per control.
+- **`ColumnHint`** is exported from `DataTable` — the header info glyph with a tooltip, formerly private to `AVTable` (which now uses it).
+- **Breaking:** `DataTableColumn.align` is removed. Cell values and headers are always left-aligned. Migration: delete `align: 'right'`;
+  nothing in the repo used it outside the DataTable story.
+- New stories: Actions Column (a `Menu` on a `dots-three` — horizontal — button), Column Tooltips, Copyable Column, Inline Editing; and a
+  "How developers customise it" section in `docs/data-table.md`.
+- **Known limit:** a `Menu` in a row is clipped by the table's scroll container (no portal); the story uses `className="overflow-visible"`.
+
+### `Banner` — aligned with Figma (October 2026)
+
+Read off the General Design Library's `Banner` (`3494:1336`), design review.
+
+- **Title 16 semibold** (`title-sm-semibold`; was 14 medium); body stays 14 regular. **Padding 16 all round** (was 14 / 12), **8** between the icon
+  and the text (was 12), 2 between title and message (was 4).
+- **Icons are `fill`, 20 × 20**, and the tones follow Figma's shapes: **warning is the exclamation in a circle** (`warning-circle-fill`, was
+  the triangle), **danger/critical is the exclamation in a triangle** (`warning-fill`, was the cross-circle), info is `info-fill`, success keeps
+  `check-circle-fill`. New icons: `info-fill`, `warning-circle-fill`.
+- **The glyph is the tone's `outline.border.default`** (Figma's bright colour; was the dark text colour) and is **vertically centred on the title line**
+  (`mt-0.5`: 20 glyph on a 24 line). It is below 3:1 on the tint (1.78–3.12:1 light, 1.98–2.95:1 dark): a recorded exception, see `docs/banner.md`.
+- **The stroke is Figma's `outline.border.default`** (was `outline.content.default`): red-500, yellow-500, blue-500, green-500. It is cosmetic, and
+  no longer clears 3:1 on the page; `docs/banner.md` has the figures.
+- **New `showIcon` prop** (default `true`): the tone glyph is optional. Off, the tone word is announced from visually hidden text, so assistive tech keeps it.
+- **Storybook:** the Default story has *icon*, *action button* and *dismiss button* controls, so both optional elements can be added or removed live.
+  The component API is unchanged — they are still optional (`actionLabel` + `onAction`, `onDismiss` + `dismissLabel`).
+
+### `StatCard` — the super admin card's stripe is 8 (October 2026)
+
+The super admin dashboard's single cards now draw the same 8 left stripe as the Value_Card (was 12). `StatCardGroup` is unchanged: it has no stripe. No API change.
+
+### `stroke.strong` is the control boundary; `stroke.field` is removed (October 2026)
+
+`stroke.field` was a token too specific to earn its place — named for a component, with `stroke.strong` sitting unused beside it. Making `strong` the control-boundary
+colour keeps the variables streamlined and meets WCAG AA (1.4.11) for a control's boundary.
+
+- **`stroke.strong` now holds the control-boundary colour:** slate-500 in light (was slate-400), slate-400 in dark (was slate-500) — the values `stroke.field` held. It clears
+  WCAG 1.4.11's 3:1 in both themes (4.76:1 / 4.55:1 on white / canvas in light; 5.71:1 / 6.96:1 in dark). Nothing used the old `strong`.
+- **Breaking: `stroke.field` is removed.** Migration: `border-stroke-field` → `border-stroke-strong` (Input, Select, Textarea, Checkbox, RadioGroup, Dropzone,
+  SearchSelect, Stepper — all migrated here, so **nothing changes visually**). Figma's `stroke/strong` was set to match.
+- `stroke.default` stays the decorative everyday border (1.48:1). `scripts/import-figma-tokens.mjs` now pins `stroke.strong` instead of adding `stroke.field`.
+- `docs/color-tokens.md` documents the roles.
+
+### `Avatar` and `AvatarGroup` — four sizes, and the stack's order (October 2026)
+
+Design review of build 20 (#121).
+
+- **`Avatar` has four sizes**, each with its own type: `xs` 16 / 10 (`caption-sm-medium`),
+  `sm` 24 / 12 (`caption-md-medium`), `md` 32 / 12 (`caption-md-medium`) and
+  `lg` 36 / 14 (`label-sm-medium`). **Two things change for existing callers:** `md`
+  text goes from 14 to 12, and `lg` goes from 40 to 36. `xs` is new. Nobody in the
+  repo uses `lg` today; the `TopBar` and `AVTable` avatars are `md`, so their initials
+  get smaller.
+- **No size is 40 any more**, so none meets the 40 minimum target on its own. An avatar
+  wrapped in a control needs padding on the control (documented in `docs/avatar.md`).
+- **`AvatarGroup` takes the same four sizes** (its `+N` chip and overlap follow), and
+  **the leftmost person is now on top** with each one after them behind (it was the
+  reverse). Set with `z-index`; the markup and reading order are unchanged.
+
+Migration: none required for `sm`/`md` callers beyond the smaller `md` text.
+
+### `AVHeader` — a brand hover on the back arrow, and 32 padding at the sides (October 2026)
+
+Design review of build 8 (#122).
+
+- **The back arrow hovers to `text.brand.medium`** (was `action.tertiary.content.hover`, a
+  navy too close to its near-black resting colour to read as a change). Both the link and
+  the `IconButton` forms.
+- **The header's side padding is 32** (`px-8`, was 16), matching `PageTitle` and the page
+  body, so the title sits on the same left edge as the content below it. Top (32) and
+  bottom (16) are unchanged.
+
+### `RadioGroup` — 8px between the radio and its label (October 2026)
+
+The gap was 10. It is 8 now, matching `Checkbox` and `Toggle`, so every control-to-label gap in the system is the same.
+
+### `SegmentedControl` — five sizes, strokes (October 2026)
+
+- **Sizes** follow Figma's `Segmented_Control`: `xs` / `sm` / `md` / `lg` / `xl` = 28 / 32 / 36 / 40 / 48 high, track padding exactly 4 (the stroke is an inset ring and takes no room), segments fill
+  20 / 24 / 28 / 32 / 40 with 6 / 8 / 12 / 12 / 16 either side, type 12 / 14 / 14 / 14 / 16 medium. **`xl` is the default.**
+- **Strokes:** the track and the selected segment each draw a 1px `stroke.default`; the selected segment keeps its `shadow.card`,
+  the lightest elevation.
+- **No gap between segments** (was 2px) — Figma's item spacing is 0.
+- **`Field`'s error message** (the caption under an invalid control, e.g. a failed save) is now `accent.critical.outline.content.default`,
+  the colour of the invalid border, instead of `.tonal.content.default`. The required marker is unchanged.
+- **Breaking:** `size` was `sm | md` (default `md`). Migration: old `sm` (32 segment) is now `lg`; old `md` (40 segment, the default)
+  is now `xl`. Callers that pass no `size` get `xl`, a little taller than before (48 vs 46).
+
+### `Accordion` — even padding on the open content (October 2026)
+
+The expanded panel's content now has 12 above and 12 below (`py-3`), the header row's own padding, so the paragraph sits as far from the header as from the card's bottom edge. It was 14 below with nothing above. The sides are unchanged: 14 on the right, 40 on the left. No API change.
+
+### `Checkbox` / `AcceptPendingAVModal` — a 20px checkbox, and the multipart card's type (October 2026)
+
+`Checkbox` gains `size`: `sm` (16, the default and unchanged) and `md` (20, with a 14 glyph and a 10px padding that keeps the 40 target). The Accept Pending AV modal's multipart card uses `md`, and both its title and its explanation are now 14 medium (`body-sm-medium`), in `text.primary` and `text.tertiary`. They were 12 medium.
+
+The multipart card no longer overrides the checkbox's gap: box to label is 8, the same as every checkbox and toggle.
+
+### `Carousel` — neutral arrows (October 2026)
+
+The left and right arrows are `neutral.outline.content` (default, hover, pressed, disabled) instead of the action blue. No API change.
+
+### Breaking: `StatusPill` → `StatusTag`, `DueDatePill` → `DueDateTag` (October 2026)
+
+Both have been built on `Tag` (the rounded rectangle) since #134 — design called them tags, not pills — but kept their old names
+so that change stayed visual-only. The names now match what they are. **No behaviour, prop or token changes.**
+
+- **Migration:** rename the imports and types. `StatusPill` → `StatusTag`, `StatusPillProps` → `StatusTagProps`, `DueDatePill` →
+  `DueDateTag`, `DueDatePillProps` → `DueDateTagProps`; the import paths `components/status-pill` and `components/due-date-pill` become
+  `components/status-tag` and `components/due-date-tag`. Everything else exported (`AVStatus`, `DueDateProximity`, `dueDateTone`, …) keeps its name.
+- Also renamed: the Storybook titles (`Components/Display/StatusTag`, `…/DueDateTag`), `docs/status-tag.md`, `docs/due-date-tag.md`, and every
+  mention in the docs, `CLAUDE.md` and the plugin's project notes. Earlier changelog entries and `docs/figma-audit.md` keep the old names — they
+  describe how things were. No caller in the repo outside `AVTable`, `AVHeader`, `StatusProgression` and the stories used them.
+
+### `RichTextToolbar` — the floating selection toolbar, to the design (October 2026)
+
+Rebuilt from the design's toolbar markup, on tokens, with our toolbar accessibility kept.
+
+- **A floating card, not a strip:** `surface.elevated`, `stroke.subtle`, `shadow.menu`, 8 corners, 6 padding, 4 between controls. The editor places it over
+  the selection (a new **Floating On Selection** story shows how); the component does no positioning. Pressing a button no longer collapses the selection
+  (`mousedown` is swallowed).
+- **32 buttons with 16 line icons** (were 28, with the letters B I U S): `text-b`, `text-italic`, `text-underline`, `text-strikethrough`. Glyphs `neutral.outline.content`; hover
+  `surface.neutral.subtle`, press `surface.neutral.medium`; 24-high dividers.
+- **Three groups, the design's order:** text styles · numbered list, bulleted list · link, **unlink**, **block quote**, **code block**, undo, redo.
+- **Breaking:** the `file` command is removed (VCP has no such function); `quote`, `code` and `unlink` are added. `image` stays, **opt-in**: the default set is the twelve,
+  and the comment editor adds it. `ol` now comes before `ul`; undo and
+  redo are in the last group. Migration: drop any `file` handling (`image` is now opt-in via `commands`); add `quote`, `code`, `unlink` to the `onCommand` switch.
+- **The glyphs are `neutral.outline.content`** (default, hover, pressed, disabled) instead of `text.secondary`; the hover moves from the brand tint (`surface.brand.base`) to neutral `surface.neutral.subtle`, with a new `surface.neutral.medium` press fill. 7.58:1 at rest in light, 9.85:1 in dark; the lowest is 4.34:1 (dark, pressed).
+- **Insert image sits left of undo and redo** (undo/redo stay the rightmost pair), and **new `useSelectionToolbar` hook**: shows the toolbar over a finished selection and hides it
+  the moment there is none — on any click, key or programmatic change (it listens to `selectionchange`), not only clicks inside the editor.
+- **`commands` prop** — the editor declares which commands to show (`DEFAULT_RICH_TEXT_COMMANDS`, `ALL_RICH_TEXT_COMMANDS` exported); `[...DEFAULT_RICH_TEXT_COMMANDS, 'image']` for comments. Order and groups
+  are fixed; empty groups drop their divider.
+- **`open` prop and motion:** the toolbar dissolves in with a 4px drop and fades out before leaving the DOM (150ms; none under reduced motion). The card is an inner layer so the editor's
+  positioning is not animated.
+- **Undo and redo** are disabled by the editor through `disabledCommands` (`{ undo: !canUndo, redo: !canRedo }`); the Default story demonstrates a live history.
+- **Keyboard:** the arrows now skip disabled buttons (they used to land on one and strand the tab stop). Dividers are `role="separator"`.
+- New icons (each with its fill): `text-b`, `text-italic`, `text-underline`, `text-strikethrough`, `link-break`, `quotes`.
+
+### `Tooltip` — a light card, as Figma draws it (October 2026)
+
+The bubble was a dark inverted surface (`surface.neutral.stronger` + `text.inverted.primary`) — the original export's look, carried over when the component was rebuilt on tokens. Figma
+draws a light bubble, and our own figma-audit note ("dark-on-light per the design … consistent with what we ship") had it backwards. It is now `surface.elevated` with `text.primary`, a
+1px `stroke.default` edge, the menu shadow and 12 / 8 of padding (sides / top and bottom; was 10 / 6) — the `Popover` / `Menu` / `Toast` family. It flips with the theme like them (white in light, `#1e293b` in
+dark): 20.17:1 / 14.63:1. Every tooltip in the system changes (column hints, the StatCard hint, the sidebar, the emoji picker). No API change.
+
+### `TagEditor` — flagged: no Figma source (October 2026)
+
+Docs and Storybook only. `TagEditor` was ported from the original export and has no Figma source; checked against the *Tag Management* page, it matches no part of it (that page is cards of rows
+with Add New / edit / delete buttons plus add and delete modals — no tone swatches, coloured tags or inline form). Flagged in `docs/tag-editor.md`, the Storybook description,
+`docs/inventory.md` and `docs/figma-audit.md`. No code change; nothing in the repo imports it.
+
+### `Toast` — the Figma design: a neutral card, tone in the icon and timer bar (October 2026)
+
+The tinted card is gone. A Toast is a white `surface.elevated` card with a `stroke.subtle` border, 16 padding, the `md` radius and 8 gaps (all the Banner's), and it hugs its content up to `max-w-sm`. The tone shows only in the filled glyph and the solid timer bar (the accent's `outline.border.default`): `info-fill`, `check-circle-fill`, `warning-circle-fill` for warning and `warning-fill` for critical. Title is 14 semibold `text.primary`, the message is 14 medium `text.secondary`. The action is the standard small secondary Button, top-aligned just left of the close control, which is a neutral round icon button. Adds the `info-fill` and `warning-circle-fill` glyphs.
+
+Also: `ToastViewport` packs the stack against the edge it is anchored to (flush right for the right positions, centred for the centred ones). A short toast no longer sits at the left of the 384px column, and toasts of mixed widths line up.
+
+Also: a toast with only a title (or only a message) centres its row, so the glyph, text, action and X share a midline. With both a title and a message the controls stay on the first line.
+
+Also: a blank `title`, message or `actionLabel` (absent, `false` or an empty string) renders nothing, so clearing a control in Storybook no longer leaves an empty description box. No new props.
+
+### `Modal` — focus-ring room, scroll clearance, one header gap, no empty parts (October 2026)
+
+Fix: the last field's focus ring was clipped at the bottom of the body. The body now keeps 4px of bottom padding with a footer, and the footer's top padding is 4px shorter, so the visible gap stays 20.
+
+Fix: on long, scrolling content the body ran hard against the subtitle. Part of the header-to-body gap now lives in the header, so it stays put while the content scrolls.
+
+Change: the gap between the header and the body is one fixed 12, whether or not there is a subtitle and whatever the body opens with. It was 20, and briefly depended on the body's first element. Split as the header's 8 plus the body's own 4.
+
+Change: an optional part that is empty renders nothing. A blank `description` or `footer` (absent, `false` or an empty string) leaves no empty caption or action row holding space, and a blank `title` no empty heading. No API change: there are no new props.
+
+### Changelog entries are one file per PR (October 2026)
+
+Each PR now adds its changelog entry as its own file in `changes/`, instead of
+editing this file, so a merge no longer makes every other open PR conflict
+here. `npm run changelog` folds the files into this file at release and sets
+the version from their `bump` (`patch`, `minor` or `major`). `npm test` and CI
+fail a PR that changes `src/` or `tokens/` without an entry, or that edits
+`CHANGELOG.md` directly. The format is in `changes/README.md`. No change to
+the components or tokens.
 
 ### `Sidebar` / `Logo` — the rail's logo keeps its size and sits on the glyph axis (October 2026)
 
@@ -805,7 +1593,6 @@ No breaking change — additive only.
   status with a Handoff action.
 - `docs/status-progression.md` updated: the "Not modelled" table is gone,
   replaced with how each of the seven resolved.
-
 
 Initial system, seeded from the VCP Figma Variables export (Aug 2026).
 

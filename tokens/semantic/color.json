@@ -253,6 +253,112 @@
         }
       }
     },
+    "pending": {
+      "filled": {
+        "content": {
+          "default": {
+            "$value": "{color.monochrome.white}"
+          },
+          "disabled": {
+            "$value": "{color.monochrome.white}"
+          },
+          "hover": {
+            "$value": "{color.monochrome.white}"
+          },
+          "pressed": {
+            "$value": "{color.monochrome.white}"
+          }
+        },
+        "surface": {
+          "default": {
+            "$value": "{color.orange.700}"
+          },
+          "disabled": {
+            "$value": "{color.orange.300}"
+          },
+          "hover": {
+            "$value": "{color.orange.800}"
+          },
+          "pressed": {
+            "$value": "{color.orange.900}"
+          }
+        }
+      },
+      "outline": {
+        "border": {
+          "default": {
+            "$value": "{color.orange.500}"
+          },
+          "disabled": {
+            "$value": "{color.orange.300}"
+          },
+          "hover": {
+            "$value": "{color.orange.600}"
+          },
+          "pressed": {
+            "$value": "{color.orange.700}"
+          }
+        },
+        "content": {
+          "default": {
+            "$value": "{color.orange.700}"
+          },
+          "disabled": {
+            "$value": "{color.orange.400}"
+          },
+          "hover": {
+            "$value": "{color.orange.800}"
+          },
+          "pressed": {
+            "$value": "{color.orange.900}"
+          }
+        },
+        "surface": {
+          "default": {
+            "$value": "{color.monochrome.transparent}"
+          },
+          "disabled": {
+            "$value": "{color.monochrome.transparent}"
+          },
+          "hover": {
+            "$value": "{color.orange.50}"
+          },
+          "pressed": {
+            "$value": "{color.orange.100}"
+          }
+        }
+      },
+      "tonal": {
+        "content": {
+          "default": {
+            "$value": "{color.orange.700}"
+          },
+          "disabled": {
+            "$value": "{color.orange.300}"
+          },
+          "hover": {
+            "$value": "{color.orange.800}"
+          },
+          "pressed": {
+            "$value": "{color.orange.900}"
+          }
+        },
+        "surface": {
+          "default": {
+            "$value": "{color.orange.100}"
+          },
+          "disabled": {
+            "$value": "{color.orange.50}"
+          },
+          "hover": {
+            "$value": "{color.orange.200}"
+          },
+          "pressed": {
+            "$value": "{color.orange.300}"
+          }
+        }
+      }
+    },
     "red": {
       "base": {
         "$value": "{color.red.50}"

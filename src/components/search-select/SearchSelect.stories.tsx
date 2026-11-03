@@ -224,6 +224,33 @@ export const Single: Story = {
   },
 };
 
+/**
+ * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
+ * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
+ */
+export const RegularForFilters: Story = {
+  render: () => {
+    const options = [
+      { value: 'open', label: 'Open' },
+      { value: 'closed', label: 'Closed' },
+    ];
+    return (
+      <div className="flex w-56 flex-col gap-3">
+        <SearchSelect aria-label="Form field" searchable={false} options={options} value="open" />
+        <SearchSelect aria-label="Filter" searchable={false} emphasis="regular" options={options} value="open" />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* The trigger's name is its label and the chosen value: "Form field Open". */
+    const weight = (name: string) =>
+      Number(getComputedStyle(canvas.getByRole('combobox', { name: new RegExp(`^${name}`) })).fontWeight);
+    await expect(weight('Form field')).toBe(500);
+    await expect(weight('Filter')).toBe(400);
+  },
+};
+
 /** The search box is the combobox: arrows move, Enter picks, Escape closes and returns focus. */
 export const Keyboard: Story = {
   tags: ['!dev', '!autodocs'],

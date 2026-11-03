@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test';
 import { Stepper } from './Stepper';
 import { Field } from '../../components/field';
 
@@ -76,6 +76,164 @@ export const UpDown: Story = {
     await expect(field).toHaveValue('12');
     /* Carets are a pointer affordance, not extra tab stops. */
     await expect(c.getAllByRole('button', { name: 'Decrease Capacity points' })[0]).toHaveAttribute('tabindex', '-1');
+  },
+};
+
+/**
+ * A field with no value yet shows its placeholder ("Set Budget") in italic `text.tertiary`. Nudging up gives it the
+ * minimum; down has nothing to go to. Clearing the field and leaving it takes the value back to nothing (`onClear`).
+ */
+export const EmptyUntilSet: Story = {
+  args: { variant: 'up-down', size: 'sm', value: null, label: 'Allocated points', placeholder: 'Set Budget', min: 0 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(null);
+    return <Stepper {...args} value={value} onChange={setValue} onClear={() => setValue(null)} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' });
+    await expect(field).toHaveValue('');
+    await expect(field).toHaveAttribute('placeholder', 'Set Budget');
+    /* Nothing to step down to. */
+    await expect(c.getByRole('button', { name: 'Decrease Allocated points' })).toBeDisabled();
+    await userEvent.click(c.getByRole('button', { name: 'Increase Allocated points' }));
+    await expect(field).toHaveValue('0');
+    await userEvent.clear(field);
+    await userEvent.type(field, '120{Enter}');
+    await expect(field).toHaveValue('120');
+    /* Cleared and committed, it is empty again. */
+    await userEvent.clear(field);
+    await userEvent.tab();
+    await expect(field).toHaveValue('');
+  },
+};
+
+/**
+ * Hold a button and it keeps stepping: once at once, then — after a beat — repeatedly until it is let go. A single
+ * click is still a single step, and the keyboard is unchanged.
+ */
+export const HoldToRepeat: Story = {
+  args: { variant: 'up-down', value: 0, label: 'Capacity points', max: 60 },
+  render: (args) => {
+    const [value, setValue] = React.useState(0);
+    return <Stepper {...args} value={value} onChange={setValue} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Capacity points' }) as HTMLInputElement;
+    const up = c.getByRole('button', { name: 'Increase Capacity points' });
+
+    /* A click is one step — the press steps, and the click that follows it does not step again. */
+    await userEvent.click(up);
+    await expect(field).toHaveValue('1');
+
+    /* Held: the press steps at once, then carries on after the pause. */
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(field).toHaveValue('2'));
+    await waitFor(() => expect(Number(field.value)).toBeGreaterThan(5), { timeout: 3000 });
+    fireEvent.pointerUp(up, { button: 0, pointerType: 'mouse' });
+
+    /* Let go, it stops. */
+    const stopped = field.value;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await expect(field.value).toBe(stopped);
+
+    /* The keyboard is untouched: Enter on a focused caret is one step. */
+    up.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(Number(field.value)).toBe(Number(stopped) + 1);
+  },
+};
+
+/** Held to the end, it stops there: the caret is dead at the maximum and the value never passes it. */
+export const HoldStopsAtTheEnd: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { variant: 'up-down', value: 0, label: 'Capacity points', max: 3 },
+  render: (args) => {
+    const [value, setValue] = React.useState(0);
+    return <Stepper {...args} value={value} onChange={setValue} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Capacity points' });
+    const up = c.getByRole('button', { name: 'Increase Capacity points' });
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(field).toHaveValue('3'), { timeout: 3000 });
+    await expect(up).toBeDisabled();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await expect(field).toHaveValue('3');
+  },
+};
+
+/** Held up from an empty field, it gives it its first number and carries on from there. */
+export const HoldFromEmpty: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { variant: 'up-down', value: null, label: 'Allocated points', placeholder: 'Set Budget', max: 60 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(null);
+    return <Stepper {...args} value={value} onChange={setValue} onClear={() => setValue(null)} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' }) as HTMLInputElement;
+    const up = c.getByRole('button', { name: 'Increase Allocated points' });
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(Number(field.value)).toBeGreaterThan(4), { timeout: 3000 });
+    fireEvent.pointerUp(up, { button: 0, pointerType: 'mouse' });
+  },
+};
+
+/**
+ * `commitDelay` commits what is typed after a pause in typing, without leaving the field — so whatever is derived from the
+ * value (a total, a bar) follows while it is typed. Off by default: a stepper commits on blur or Enter.
+ */
+export const CommitAfterAPause: Story = {
+  args: { variant: 'up-down', value: 10, label: 'Allocated points', commitDelay: 250 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(10);
+    return (
+      <div className="flex items-center gap-4">
+        <Stepper {...args} value={value} onChange={setValue} />
+        <span className="font-sans text-caption-md-medium text-text-tertiary">
+          Committed: <output aria-label="Committed value">{value}</output>
+        </span>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' });
+    await userEvent.clear(field);
+    await userEvent.type(field, '45');
+    /* Still typing: nothing has been committed yet… */
+    await expect(c.getByLabelText('Committed value')).toHaveTextContent('10');
+    /* …after the pause it is, and the field keeps focus. */
+    await waitFor(() => expect(c.getByLabelText('Committed value')).toHaveTextContent('45'));
+    await expect(field).toHaveFocus();
+  },
+};
+
+/** Only a number can be typed: letters are dropped as they are typed, and a minus only where the range goes below zero. */
+export const OnlyNumbers: Story = {
+  args: { variant: 'up-down', value: 0, label: 'Points' },
+  render: (args) => (
+    <div className="flex items-center gap-4">
+      <Stepper {...args} label="Points" min={0} value={0} />
+      <Stepper {...args} label="Balance" min={-50} value={0} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const points = c.getByRole('textbox', { name: 'Points' });
+    await userEvent.clear(points);
+    await userEvent.type(points, 'a1b2-3.');
+    await expect(points).toHaveValue('123');
+    const balance = c.getByRole('textbox', { name: 'Balance' });
+    await userEvent.clear(balance);
+    await userEvent.type(balance, '-4x2');
+    await expect(balance).toHaveValue('-42');
   },
 };
 
