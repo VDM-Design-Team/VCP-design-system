@@ -76,7 +76,7 @@ The card is `surface.elevated`, `radius.md`, `space.24` all round, no outline â€
 
 **Differences from Figma, on purpose.** The figure is `heading-xl-bold` (32), not Figma's 28, which has no step on the
 ramp â€” the same call `StatCard` made. The 24 medium for "pts" and the details has no step either (`heading-lg` ships bold,
-semibold and regular), so it is the one marked exception, as in `StatCard`. The bar is `ProgressBar`'s 8 high, not Figma's 12, and its
+semibold and regular), so it is the one marked exception, as in `StatCard`. The bar is `ProgressBar`'s 8 high, not Figma's 12 (its label row is below the bar, as Figma draws it, but in the atom's caption type), and its
 warning fill is the atom's accessible `accent.warning.filled` rather than Figma's bright yellow: the warning border token
 moved to yellow-700 for contrast in November and Figma still shows the old one.
 

@@ -25,8 +25,9 @@ that is a pattern asking to be written.
 | `max` | `number` | `100` | The whole. The announced value stays in real units (34 of 40); only the painted width is a percentage |
 | `tone` | `brand \| success \| warning \| critical` | `brand` | See above — status, not decoration |
 | `size` | `sm \| md` | `md` | 4 / 8 tall. `sm` for dense table rows |
-| `label` | `string` | — | Visible name above the bar, wired via `aria-labelledby` |
+| `label` | `string` | — | Visible name beside the percentage, above the bar by default, wired via `aria-labelledby` |
 | `showValue` | `boolean` | — | Rounded percentage at the row's end, in the numeric face |
+| `labelPlacement` | `above \| below` | `above` | Which side of the bar the label row sits on. `below` is what Figma draws for the Domain Budget bar |
 | `className` | `string` | — | Merged via `cn()`; the root is the wrapping `<div>` |
 
 The export's `height?: number` became the `size` variant and its `showLabel`

@@ -26,7 +26,7 @@ import { Tooltip } from '../../atoms/tooltip';
  * It is controlled: the quarter and year come in as props and `onQuarterChange` / `onYearChange` report a pick. Which
  * quarter is "current", its dates and its days left are the caller's — a date calculation is not this card's to make.
  *
- * Differences from Figma, on purpose: the bar is the `ProgressBar` atom's 8 high (Figma draws 12); the warning fill is the
+ * Differences from Figma, on purpose: the bar is the `ProgressBar` atom's 8 high (Figma draws 12), and its label row takes the atom's caption type; the warning fill is the
  * atom's accessible `accent.warning.filled` token rather than Figma's bright yellow; the figures sit on the type ramp
  * (`heading-xl-bold`, Figma's 28 has no step), as `StatCard`'s do.
  *
@@ -251,7 +251,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
             </div>
           </div>
 
-          <ProgressBar label="Budget Usage" showValue tone={TONE[status]} value={budgetUsage(consumed, allocated)} />
+          <ProgressBar label="Budget Usage" showValue labelPlacement="below" tone={TONE[status]} value={budgetUsage(consumed, allocated)} />
         </div>
       </section>
     );

@@ -66,6 +66,8 @@ export interface ProgressBarProps
   label?: string;
   /** Paints the rounded percentage after the label row, in the numeric face. */
   showValue?: boolean;
+  /** Which side of the bar the label row sits on. Above by default; Domain Budget draws it below. */
+  labelPlacement?: 'above' | 'below';
 }
 
 export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
@@ -78,6 +80,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
       size,
       label,
       showValue,
+      labelPlacement = 'above',
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledby,
       ...props
@@ -88,18 +91,18 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     const clamped = Math.max(0, Math.min(max, value));
     const pct = max > 0 ? (clamped / max) * 100 : 0;
 
+    const row = (label || showValue) && (
+      <div className="flex items-baseline justify-between gap-2 font-sans text-caption-md-regular text-text-tertiary">
+        {/* The span renders (empty) even without a label so a lone
+            percentage still right-aligns. */}
+        <span id={label ? labelId : undefined}>{label}</span>
+        {showValue && <span className="font-numeric text-caption-md-medium">{Math.round(pct)}%</span>}
+      </div>
+    );
+
     return (
       <div ref={ref} className={cn('flex w-full flex-col gap-1.5', className)} {...props}>
-        {(label || showValue) && (
-          <div className="flex items-baseline justify-between gap-2 font-sans text-caption-md-regular text-text-tertiary">
-            {/* The span renders (empty) even without a label so a lone
-                percentage still right-aligns. */}
-            <span id={label ? labelId : undefined}>{label}</span>
-            {showValue && (
-              <span className="font-numeric text-caption-md-medium">{Math.round(pct)}%</span>
-            )}
-          </div>
-        )}
+        {labelPlacement === 'above' && row}
         <div
           role="progressbar"
           aria-valuemin={0}
@@ -113,6 +116,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
         >
           <div className={fill({ tone })} style={{ width: `${pct}%` }} />
         </div>
+        {labelPlacement === 'below' && row}
       </div>
     );
   },
