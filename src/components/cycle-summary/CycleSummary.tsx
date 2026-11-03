@@ -133,7 +133,7 @@ export const CycleSummary = React.forwardRef<HTMLElement, CycleSummaryProps>(
               tone={style.tone}
               aria-label={has ? `${completionLabel} ${rate}%` : `${completionLabel}: no rate yet`}
               label={
-                <span className={cn('text-heading-xl-bold', style.text)}>{has ? `${rate}%` : '-%'}</span>
+                <span className={style.text}>{has ? `${rate}%` : '-%'}</span>
               }
               caption={completionLabel}
             />
