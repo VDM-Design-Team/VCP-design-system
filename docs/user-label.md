@@ -41,7 +41,7 @@ name-less variant — avatar alone is `Avatar`.
 | Gap, avatar to text | 8 (`gap-2`) | 4 (`gap-1`) |
 | Name | `body-sm-medium`, `text.primary` | `caption-md-medium`, `text.primary` |
 | Role | `caption-md-medium`, `text.tertiary` | `caption-sm-medium`, `text.tertiary` |
-| Role position | 4 below the name (`mt-1`) | pulled up directly under it: 4 (`-mt-1`) |
+| Role position | 2 below the name (`mt-0.5`) | pulled up directly under it: 4 (`-mt-1`) |
 
 `text.primary` on `surface.elevated` is 20.17:1 light / 14.63:1 dark; `text.tertiary` is 7.58:1 / 9.85:1. No new tokens.
 
@@ -53,8 +53,8 @@ name-less variant — avatar alone is `Avatar`.
 
 ## Differences from the design
 
-- **The description's spacing differs from Figma's stack, by size.** On `md` it sits **4 below** the name (Figma stacks the two lines with
-  none; design asked for the 4). On `sm` it is pulled up 4 so the two lines touch visually, as the Assignee chip's do; `cn()` drops a
+- **The description's spacing differs from Figma's stack, by size.** On `md` it sits **2 below** the name (Figma stacks the two lines with
+  none; design asked for the 2). On `sm` it is pulled up 4 so the two lines touch visually, as the Assignee chip's do; `cn()` drops a
   `leading-none` that sits beside a type class, so a margin does it.
 - **The description is an optional prop, and there is no name-less variant.** Figma has Name and Role booleans; hiding
   the name leaves an avatar with a floating description, which is not a use the design draws.

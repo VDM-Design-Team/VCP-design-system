@@ -72,7 +72,7 @@ something else.
 The card is `surface.elevated`, `radius.md`, `space.16`. The name is `body-sm-medium` `text.primary` with the email in `caption-md-medium`
 `text.tertiary`; Date Added is `body-sm-medium` `text.tertiary` (7.58:1 light / 9.85:1 dark); the domain `Tag`s are `sm`, neutral tonal. The
 row buttons are the plain `IconButton` (`tertiary`, glyph only — **no outline**): the edit glyph in `action.tertiary.content`, the delete glyph in
-`accent.critical.outline.content` — exactly the Deliverable Link's pair, nothing added. The name and email sit 4 apart (`UserLabel`). The search is the
+`accent.critical.outline.content` — exactly the Deliverable Link's pair, nothing added. The name and email sit 2 apart (`UserLabel`). The search is the
 same `Input type="search"` with a leading magnifying glass that `PlanningFilters` uses.
 
 **Differences from Figma, on purpose.**
