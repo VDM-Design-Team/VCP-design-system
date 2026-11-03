@@ -13,8 +13,15 @@
   "files": [
     "dist",
     "src",
+    "!src/**/*.stories.tsx",
+    "!src/lib/story-*.ts",
     "tokens",
-    "docs"
+    "docs",
+    "!docs/figma-annotations.md",
+    "!docs/figma-audit.md",
+    "!docs/handoff.md",
+    "!docs/inventory.md",
+    "!docs/workflow.md"
   ],
   "exports": {
     ".": {
