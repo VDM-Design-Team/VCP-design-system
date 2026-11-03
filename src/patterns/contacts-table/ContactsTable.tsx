@@ -1,9 +1,11 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
+import { EmptyState } from '../../components/empty-state';
 
 /**
  * ContactsTable — the Contact List page: the messages people have sent through the contact form, one row each — who, what about,
@@ -62,7 +64,7 @@ export function ContactsTable({
   pageSizeOptions,
   onPageSizeChange,
   loading,
-  empty = 'No messages yet.',
+  empty = <EmptyState icon={<Icon name="chat-centered-text" size="lg" />} title="No messages yet." />,
   caption = 'Contact messages',
   ...props
 }: ContactsTableProps) {
