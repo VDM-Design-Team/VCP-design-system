@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { Input } from './Input';
 
 const meta = {
@@ -50,6 +51,28 @@ export const Default: Story = {};
 
 export const Placeholder: Story = {
   args: { placeholder: 'Search by title or ID' },
+};
+
+/**
+ * `emphasis="medium"` sets a *chosen* value in medium — what `Select`, `SearchSelect` and `DateField` do — while the
+ * placeholder stays regular. The default is regular.
+ */
+export const MediumValue: Story = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-3">
+      <Input aria-label="Regular" defaultValue="Development" />
+      <Input aria-label="Medium" emphasis="medium" defaultValue="Development" />
+      <Input aria-label="Medium, empty" emphasis="medium" placeholder="Choose a domain" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: string) => Number(getComputedStyle(c.getByRole('textbox', { name })).fontWeight);
+    await expect(weight('Regular')).toBe(400);
+    await expect(weight('Medium')).toBe(500);
+    /* Nothing chosen yet: the placeholder is regular whatever the emphasis. */
+    await expect(weight('Medium, empty')).toBe(400);
+  },
 };
 
 export const Sizes: Story = {

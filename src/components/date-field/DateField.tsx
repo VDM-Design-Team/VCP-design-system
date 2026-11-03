@@ -13,6 +13,10 @@ import { Popover } from '../popover';
  * expanded state the popover sets). The calendar opens with `strategy="fixed"`, so a scrolling dialog or table
  * cannot clip it, and picking a day closes it.
  *
+ * The chosen date is **medium** weight and the placeholder regular — the rule `Select` and `SearchSelect` follow — so a date
+ * field reads the same as the selects beside it. A **filter** passes `emphasis="regular"` (as its `Select`s do), so a row of
+ * filters sits quietly.
+ *
  * **Estimated dates.** `estimated` writes "(est.)" after the date — a value the system calculated rather than
  * a person set, as the Planning table writes it. Picking a day yourself is the caller's cue to clear it.
  *
@@ -25,6 +29,11 @@ export interface DateFieldProps {
   value?: string;
   /** Fires with the chosen ISO date; the calendar then closes. */
   onChange?: (iso: string) => void;
+  /**
+   * The weight of the chosen date: `medium` (the default, as `Select`'s value) or `regular` — what a **filter** uses so a
+   * row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** A calculated date, not one a person set — reads "(est.)". */
   estimated?: boolean;
   /** Shown while there is no date. */
@@ -44,6 +53,7 @@ export interface DateFieldProps {
 export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
   (
     {
+      emphasis = 'medium',
       value,
       onChange,
       estimated,
@@ -75,6 +85,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             id={id}
             readOnly
             role="combobox"
+            emphasis={emphasis}
             fullWidth
             disabled={disabled}
             invalid={invalid}

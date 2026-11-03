@@ -124,6 +124,11 @@ interface SearchSelectBase
   disabled?: boolean;
   /** `sm` 32 tall, `md` 40 (default), as `Select`. */
   size?: 'sm' | 'md';
+  /**
+   * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
+   * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
   fullWidth?: boolean;
   /**
@@ -269,6 +274,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       renderOption,
       disabled,
       size = 'md',
+      emphasis = 'medium',
       fullWidth = false,
       loading,
       onSearch,
@@ -799,7 +805,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 size === 'sm' ? 'h-6' : 'h-8',
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
-                  ? 'text-body-sm-medium text-text-primary'
+                  ? cn('text-text-primary', emphasis === 'medium' ? 'text-body-sm-medium' : 'text-body-sm-regular')
                   : 'text-body-sm-regular text-text-subtle',
                 size === 'sm' && 'text-caption-md-regular',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',
