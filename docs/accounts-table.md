@@ -8,6 +8,7 @@ button on every row, and the pages beneath. Built to Figma's `Accounts_Page_Cont
 | Piece | Tier |
 |---|---|
 | `IconButton` | atom |
+| `Icon` | atom |
 | `Input` | atom |
 | `Pagination` | atom |
 | `Skeleton` | atom |
@@ -33,7 +34,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Name** | The avatar, the name and, under it, the email (`UserLabel`). Sortable |
 | **Domains** | One neutral `Tag` per domain they are in. None reads empty |
 | **Date Added** | **Already formatted** — "7 days ago". This table does not do relative time. Sortable |
-| **Actions** | **Edit** and **delete**, each named for the person ("Edit John", "Delete John") |
+| **Actions** | **Edit** and **delete**, each named for the person ("Edit John", "Delete John"). A glyph and nothing else at rest; a soft wash of its own colour on hover and press |
 
 ## Props
 
@@ -70,12 +71,16 @@ something else.
 
 The card is `surface.elevated`, `radius.md`, `space.16`. The name is `body-sm-medium` `text.primary` with the email in `caption-md-medium`
 `text.tertiary`; Date Added is `body-sm-medium` `text.tertiary` (7.58:1 light / 9.85:1 dark); the domain `Tag`s are `sm`, neutral tonal. The
-row buttons are `IconButton` `neutral` squares (the outline), the edit glyph in `action.tertiary.content` and the delete glyph in
-`accent.critical.outline.content` — the Deliverable Link's pair.
+row buttons are `IconButton` `tertiary` squares — **no outline**: the edit glyph in `action.tertiary.content`, the delete glyph in
+`accent.critical.outline.content` (the Deliverable Link's pair), and on hover and press a wash of their own colour
+(`action.secondary.surface.hover` / `.pressed`, `accent.critical.outline.surface.hover` / `.pressed`). The search is the same `Input type="search"`
+with a leading magnifying glass that `PlanningFilters` uses.
 
 **Differences from Figma, on purpose.**
 
-- The row buttons are 40 (`md`, the touch minimum), not Figma's 32.
+- The row buttons are 40 (`md`, the touch minimum), not Figma's 32, and have **no outline** (Figma draws a bordered white square; no such
+  button exists in the system, so design asked for the glyph alone with a wash on hover).
+- The search has a magnifying glass, as `PlanningFilters`' does; Figma's Accounts search has none.
 - The Actions column has a visible "Actions" header, as `AVTable`'s does; Figma leaves it blank. A header with no words has no accessible name.
 - The edit glyph is `note-pencil`, the system's edit icon (Figma's is `PencilSimple`).
 - When `IconButton` gets a `critical` variant (open with the Tag Management PR), the delete button should move to it.

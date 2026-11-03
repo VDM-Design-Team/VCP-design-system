@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Input } from '../../atoms/input';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
@@ -64,10 +65,13 @@ export interface AccountsTableProps
   caption?: string;
 }
 
-/* The row's two buttons: outlined squares, the edit glyph in the brand blue and the delete glyph in the critical red, as the
-   Deliverable Link's pair is. `neutral` gives the outline; the glyph colours are set here. */
-const EDIT_GLYPH = 'text-action-tertiary-content-default hover:text-action-tertiary-content-hover';
-const DELETE_GLYPH = 'text-accent-critical-outline-content-default hover:text-accent-critical-outline-content-hover';
+/* The row's two buttons are a glyph and nothing else at rest — the edit glyph in the brand blue, the delete glyph in the critical
+   red, as the Deliverable Link's pair is — and take a soft wash of their own colour on hover and press (the tints the outlined
+   buttons use for those states). `tertiary` is the glyph-only button; the washes are set here. */
+const EDIT_BUTTON =
+  'text-action-tertiary-content-default hover:text-action-tertiary-content-hover hover:bg-action-secondary-surface-hover active:bg-action-secondary-surface-pressed';
+const DELETE_BUTTON =
+  'text-accent-critical-outline-content-default hover:text-accent-critical-outline-content-hover hover:bg-accent-critical-outline-surface-hover active:bg-accent-critical-outline-surface-pressed';
 
 export function AccountsTable({
   className,
@@ -129,19 +133,19 @@ export function AccountsTable({
       render: (row) => (
         <div className="flex items-center gap-2">
           <IconButton
-            variant="neutral"
+            variant="tertiary"
             shape="square"
             icon="note-pencil"
             label={`Edit ${row.name}`}
-            className={EDIT_GLYPH}
+            className={EDIT_BUTTON}
             onClick={() => onEdit?.(row)}
           />
           <IconButton
-            variant="neutral"
+            variant="tertiary"
             shape="square"
             icon="trash"
             label={`Delete ${row.name}`}
-            className={DELETE_GLYPH}
+            className={DELETE_BUTTON}
             onClick={() => onDelete?.(row)}
           />
         </div>
@@ -180,6 +184,7 @@ export function AccountsTable({
         type="search"
         aria-label="Search accounts"
         placeholder={searchPlaceholder}
+        leadingIcon={<Icon name="magnifying-glass" size="sm" />}
         className="w-full max-w-108"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
