@@ -26,8 +26,10 @@ stepper.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `value` | `number` | required | Controlled — there is no uncontrolled mode; a nudger without state is meaningless |
+| `value` | `number \| null` | required | Controlled — there is no uncontrolled mode; a nudger without state is meaningless. `null` is a field with no value yet: it shows `placeholder` |
 | `onChange` | `(value: number) => void` | — | Fires clamped, from buttons, arrows, and commits |
+| `placeholder` | `string` | — | What an empty field says ("Set Budget"), in italic `text.tertiary`. It is a prompt, not a name: `label` still names the field |
+| `onClear` | `() => void` | — | Called when the field is committed empty (cleared, then blur or Enter), so a person can take a value back to `null`. Without it an empty commit restores the number, as before |
 | `min` / `max` / `step` | `number` | `0` / `999` / `1` | Buttons snap by `step`; typed values clamp but do not snap |
 | `label` | `string` | — | The accessible name — "Capacity points". The buttons fold it in: "Decrease Capacity points" |
 | `suffix` | `ReactNode` | — | Inline unit ('pts'). Decorative, `aria-hidden` |
@@ -52,6 +54,20 @@ the field tall, so it is a pointer affordance: in `up-down` the carets are
 `tabIndex={-1}` and Arrow Up/Down in the field is the keyboard path. Colours
 are `neutral.textual.content` (hover `neutral.textual.content.hover`) on a
 `neutral.outline.surface.hover` wash.
+
+## An empty field
+
+`value={null}` is a number not chosen yet — an unset budget. The field shows its `placeholder`; nudging **up** gives it the
+minimum (the first number it can have) and the down caret is disabled, since there is nothing to step down to. Clearing the
+field and leaving it calls `onClear`; the caller sets the value back to `null`.
+
+## Holding a button
+
+Press and hold a nudge button and it keeps stepping: it steps once as the press lands, waits 400 ms, then repeats every 70 ms
+until the pointer is released or the value reaches the end it is heading for (`min` going down, `max` going up), where the
+button disables. A single click is still one step, and holding up from an empty field gives it its first number and carries on.
+The repeat is for the pointer; the keyboard path is Arrow Up and Down in the field, which repeat as the browser's key repeat
+does, and Enter or Space on a focused button is one step.
 
 ## Typing is draft-based
 

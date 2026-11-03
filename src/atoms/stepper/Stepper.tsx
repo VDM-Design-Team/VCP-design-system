@@ -68,11 +68,22 @@ const HOLD_INTERVAL = 70;
 export interface StepperProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>,
     VariantProps<typeof shell> {
-  value: number;
+  /** The number, or `null` for a field with no value yet — it then shows `placeholder`. */
+  value: number | null;
   min?: number;
   max?: number;
   step?: number;
   onChange?: (value: number) => void;
+  /**
+   * What an empty field says — "Set Budget". Shown only while `value` is `null`, in italic `text.tertiary`: it
+   * is a prompt, not a value, and not a name (`label` still names the field).
+   */
+  placeholder?: string;
+  /**
+   * Called when the field is committed empty (cleared, then blur or Enter). Give it to let a person take a
+   * value back to `null`; without it an empty commit just restores the number, as before.
+   */
+  onClear?: () => void;
   /** Inline unit after the value — 'pts', 'days'. Decorative. */
   suffix?: React.ReactNode;
   /**
@@ -104,6 +115,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       max = 999,
       step = 1,
       onChange,
+      placeholder,
+      onClear,
       suffix,
       label,
       invalid,
@@ -122,14 +135,20 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const [draft, setDraft] = React.useState<string | null>(null);
 
     const clamp = (v: number) => Math.max(min, Math.min(max, v));
+    /* An empty field nudges up to the minimum — the first number it can have — and has nothing to nudge down to. */
     const nudge = (dir: -1 | 1) => {
       setDraft(null);
+      if (value === null) {
+        if (dir > 0) onChange?.(clamp(min));
+        return;
+      }
       onChange?.(clamp(value + dir * step));
     };
     const commit = () => {
       if (draft !== null) {
         const n = Number(draft);
-        if (draft.trim() !== '' && !Number.isNaN(n)) onChange?.(clamp(n));
+        if (draft.trim() === '') onClear?.();
+        else if (!Number.isNaN(n)) onChange?.(clamp(n));
         setDraft(null);
       }
     };
@@ -140,7 +159,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     React.useEffect(() => {
       nudgeRef.current = nudge;
     });
-    const hold = React.useRef<{ delay?: number; repeat?: number }>({});
+    const hold = React.useRef<{ dir?: -1 | 1; delay?: number; repeat?: number }>({});
     const stopHold = React.useCallback(() => {
       window.clearTimeout(hold.current.delay);
       window.clearInterval(hold.current.repeat);
@@ -150,6 +169,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     }, []);
     const startHold = (dir: -1 | 1) => {
       stopHold();
+      hold.current.dir = dir;
       nudgeRef.current(dir);
       hold.current.delay = window.setTimeout(() => {
         hold.current.repeat = window.setInterval(() => nudgeRef.current(dir), HOLD_INTERVAL);
@@ -158,15 +178,17 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       window.addEventListener('pointercancel', stopHold);
     };
     React.useEffect(() => stopHold, [stopHold]);
-    /* At either end the button disables, and a disabled button never sees the release: stop on arrival. */
-    const atMin = value <= min;
-    const atMax = value >= max;
+    /* At the end it is heading for, the button disables, and a disabled button never sees the release: stop on
+       arrival. (An empty field is at neither end: holding up from empty carries on past its first step.) */
+    const atMin = value !== null && value <= min;
+    const atMax = value !== null && value >= max;
     React.useEffect(() => {
-      if (atMin || atMax || disabled) stopHold();
+      const { dir } = hold.current;
+      if ((dir === -1 && atMin) || (dir === 1 && atMax) || disabled) stopHold();
     }, [atMin, atMax, disabled, stopHold]);
 
     const nudgeButton = (dir: -1 | 1) => {
-      const dead = disabled || (dir < 0 ? value <= min : value >= max);
+      const dead = disabled || (dir < 0 ? value === null || value <= min : value !== null && value >= max);
       const name = dir < 0 ? 'Decrease' : 'Increase';
       const upDown = variant === 'up-down';
       return (
@@ -221,7 +243,8 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           aria-label={label}
           aria-invalid={isInvalid || undefined}
           aria-describedby={hasError ? errorId : undefined}
-          value={draft ?? String(value)}
+          value={draft ?? (value === null ? '' : String(value))}
+          placeholder={placeholder}
           disabled={disabled}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
@@ -235,6 +258,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
             variant === 'up-down' ? 'w-20 flex-1 px-3 text-left' : 'w-14 text-center',
             'min-w-0 border-0 bg-transparent outline-none',
             'font-numeric text-caption-md-medium text-text-primary',
+            'placeholder:font-sans placeholder:italic placeholder:text-text-tertiary',
             'disabled:cursor-not-allowed disabled:text-text-disabled',
           )}
         />

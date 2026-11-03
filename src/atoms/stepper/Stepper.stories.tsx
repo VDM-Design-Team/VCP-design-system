@@ -80,6 +80,35 @@ export const UpDown: Story = {
 };
 
 /**
+ * A field with no value yet shows its placeholder ("Set Budget") in italic `text.tertiary`. Nudging up gives it the
+ * minimum; down has nothing to go to. Clearing the field and leaving it takes the value back to nothing (`onClear`).
+ */
+export const EmptyUntilSet: Story = {
+  args: { variant: 'up-down', size: 'sm', value: null, label: 'Allocated points', placeholder: 'Set Budget', min: 0 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(null);
+    return <Stepper {...args} value={value} onChange={setValue} onClear={() => setValue(null)} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' });
+    await expect(field).toHaveValue('');
+    await expect(field).toHaveAttribute('placeholder', 'Set Budget');
+    /* Nothing to step down to. */
+    await expect(c.getByRole('button', { name: 'Decrease Allocated points' })).toBeDisabled();
+    await userEvent.click(c.getByRole('button', { name: 'Increase Allocated points' }));
+    await expect(field).toHaveValue('0');
+    await userEvent.clear(field);
+    await userEvent.type(field, '120{Enter}');
+    await expect(field).toHaveValue('120');
+    /* Cleared and committed, it is empty again. */
+    await userEvent.clear(field);
+    await userEvent.tab();
+    await expect(field).toHaveValue('');
+  },
+};
+
+/**
  * Hold a button and it keeps stepping: once at once, then — after a beat — repeatedly until it is let go. A single
  * click is still a single step, and the keyboard is unchanged.
  */
@@ -134,6 +163,25 @@ export const HoldStopsAtTheEnd: Story = {
     await expect(up).toBeDisabled();
     await new Promise((resolve) => setTimeout(resolve, 300));
     await expect(field).toHaveValue('3');
+  },
+};
+
+/** Held up from an empty field, it gives it its first number and carries on from there. */
+export const HoldFromEmpty: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { variant: 'up-down', value: null, label: 'Allocated points', placeholder: 'Set Budget', max: 60 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(null);
+    return <Stepper {...args} value={value} onChange={setValue} onClear={() => setValue(null)} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' }) as HTMLInputElement;
+    const up = c.getByRole('button', { name: 'Increase Allocated points' });
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(Number(field.value)).toBeGreaterThan(4), { timeout: 3000 });
+    fireEvent.pointerUp(up, { button: 0, pointerType: 'mouse' });
   },
 };
 
