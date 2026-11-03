@@ -35,6 +35,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `picker` | `DatePickerProps` | — | `min`, `max`, `today` … go to the calendar |
 | `id`, `aria-describedby`, `aria-label` | | | From a `Field` (it hands them over), or name it yourself |
 
+## Weight
+
+The chosen date is **medium** weight and the placeholder regular (`Input`'s `emphasis="medium"`) — the rule `Select` and `SearchSelect`
+follow, so a date field reads the same as the selects beside it. (It was regular until November 2026.)
+
 ## Month mode
 
 `mode="month"` is the same field for a month with no day — a reporting period, a billing month. It keeps the calendar glyph and

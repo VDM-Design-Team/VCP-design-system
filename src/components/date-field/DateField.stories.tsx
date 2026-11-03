@@ -117,3 +117,23 @@ export const FormatsInUTC: Story = {
     await expect(formatMonth('')).toBe('');
   },
 };
+
+/** The chosen date is medium weight and the placeholder regular — as `Select` — in both modes. */
+export const ValueWeight: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div className="flex w-64 flex-col gap-3">
+      <DateField aria-label="Day" value="2026-03-02" />
+      <DateField aria-label="Month" mode="month" value="2026-09-01" />
+      <DateField aria-label="Empty" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: string) => Number(getComputedStyle(c.getByRole('combobox', { name })).fontWeight);
+    await expect(weight('Day')).toBe(500);
+    await expect(weight('Month')).toBe(500);
+    await expect(weight('Empty')).toBe(400);
+  },
+};

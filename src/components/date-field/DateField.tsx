@@ -24,6 +24,9 @@ export const formatMonth = (iso: string): string => {
  * expanded state the popover sets). The calendar opens with `strategy="fixed"`, so a scrolling dialog or table
  * cannot clip it, and picking a day closes it.
  *
+ * The chosen date is **medium** weight and the placeholder regular — the rule `Select` and `SearchSelect` follow — so a date
+ * field reads the same as the selects beside it.
+ *
  * **`mode="month"`** is the same field for a month with no day (a reporting period): it reads "September 2026", the
  * calendar opens on `DatePicker`'s month grid, and `onChange` gets the first of the chosen month. `estimated` means
  * nothing for a month and is ignored. `mode` is `DatePicker`'s own prop, so the two read alike.
@@ -95,6 +98,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             id={id}
             readOnly
             role="combobox"
+            emphasis="medium"
             fullWidth
             disabled={disabled}
             invalid={invalid}

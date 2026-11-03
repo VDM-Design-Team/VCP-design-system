@@ -71,6 +71,12 @@ export const Default: Story = {
     await expect(c.getByRole('region', { name: 'Domain metrics' })).toBeVisible();
     await expect(c.getByRole('combobox', { name: 'Domain' })).toHaveValue('Development Domain');
     await expect(c.getByRole('combobox', { name: 'Month' })).toHaveValue('September 2026');
+    /* The two filters read alike: the same size and weight. */
+    const type = (name: string) => {
+      const style = getComputedStyle(c.getByRole('combobox', { name }));
+      return [style.fontSize, style.fontWeight, style.color];
+    };
+    await expect(type('Domain')).toEqual(type('Month'));
     for (const [label, figure] of [
       ['Values Created', '25'],
       ['Values Completed', '31'],
