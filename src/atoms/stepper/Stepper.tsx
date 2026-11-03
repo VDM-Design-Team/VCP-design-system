@@ -84,6 +84,13 @@ export interface StepperProps
    * value back to `null`; without it an empty commit just restores the number, as before.
    */
   onClear?: () => void;
+  /**
+   * Commit what is typed after this many ms without a keystroke, without leaving the field — "validated after a brief
+   * pause" — so whatever is derived from the value follows while it is typed. Off by default: a stepper commits on blur or
+   * Enter. A half-typed number is clamped like any other commit, so with a high `min` a pause after "1" gives "10" — keep
+   * it off where that would bite. An empty or lone "-" field waits for blur.
+   */
+  commitDelay?: number;
   /** Inline unit after the value — 'pts', 'days'. Decorative. */
   suffix?: React.ReactNode;
   /**
@@ -117,6 +124,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       onChange,
       placeholder,
       onClear,
+      commitDelay,
       suffix,
       label,
       invalid,
@@ -152,6 +160,25 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
         setDraft(null);
       }
     };
+
+    /* `commitDelay`: a pause in typing commits the draft. The timer calls the latest `commit` through a ref, so it
+       never commits a stale draft. */
+    const commitRef = React.useRef(commit);
+    React.useEffect(() => {
+      commitRef.current = commit;
+    });
+    React.useEffect(() => {
+      if (!commitDelay || draft === null || draft.trim() === '' || Number.isNaN(Number(draft))) return;
+      const timer = window.setTimeout(() => commitRef.current(), commitDelay);
+      return () => window.clearTimeout(timer);
+    }, [draft, commitDelay]);
+
+    /* Only a number can be typed: digits, a leading minus when the range goes below zero, a point when the steps are
+       fractional. Anything else is dropped as it is typed rather than left to fail at commit. */
+    const typing = React.useMemo(
+      () => new RegExp(`^${min < 0 ? '-?' : ''}\\d*${Number.isInteger(step) && Number.isInteger(min) ? '' : '(\\.\\d*)?'}$`),
+      [min, step],
+    );
 
     /* Hold a button and it keeps stepping, after a beat. The repeat reads the latest `nudge` through a ref, so each
        step starts from the value the last one produced rather than the one the press began with. */
@@ -246,7 +273,9 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           value={draft ?? (value === null ? '' : String(value))}
           placeholder={placeholder}
           disabled={disabled}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            if (typing.test(e.target.value)) setDraft(e.target.value);
+          }}
           onBlur={commit}
           onKeyDown={(e) => {
             if (e.key === 'Enter') commit();
