@@ -24,3 +24,4 @@ export * from './reject-pending-av-modal';
 export * from './review-av-modal';
 export * from './sidebar';
 export * from './top-bar';
+export * from './manuals-table';
