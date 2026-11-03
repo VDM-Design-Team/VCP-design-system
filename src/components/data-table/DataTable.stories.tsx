@@ -10,7 +10,7 @@ import { IconButton } from '../../atoms/icon-button';
 import { Input } from '../../atoms/input';
 import { Select } from '../../atoms/select';
 import { Menu, type MenuItem } from '../menu';
-import { CopyText } from '../copy-text';
+import { CopyText } from '../../atoms/copy-text';
 import { InlineEdit, InlineDateEdit } from '../inline-edit';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
@@ -188,7 +188,7 @@ export const LightAndDark: Story = {
 /* ---- Recipes: how a column becomes something other than text ---- */
 
 const ROW_ACTIONS: MenuItem[] = [
-  { key: 'edit', label: 'Edit', icon: 'pencil-simple' },
+  { key: 'edit', label: 'Edit', icon: 'note-pencil' },
   { key: 'duplicate', label: 'Duplicate' },
   { divider: true },
   { key: 'delete', label: 'Delete', icon: 'trash', tone: 'danger' },

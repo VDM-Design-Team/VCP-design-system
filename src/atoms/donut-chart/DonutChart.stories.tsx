@@ -19,8 +19,12 @@ const meta = {
   argTypes: {
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     half: { control: 'boolean' },
-    size: { control: 'number' },
+    segmented: { control: 'boolean' },
+    size: { control: 'select', options: ['icon', 72, 140, 200] },
     thickness: { control: 'number' },
+    /* Text, not the inferred object editor: the centre is a string. Empty hides it. */
+    label: { control: 'text' },
+    caption: { control: 'text' },
   },
 } satisfies Meta<typeof DonutChart>;
 
@@ -48,6 +52,39 @@ export const HalfGauge: Story = {
 };
 
 /** `label` swaps the centred text; the meter still announces the numbers. */
+/**
+ * `segmented` — flat ends and a gap between fill and remainder, thin ring: the
+ * Cycle Summary gauge. The tone is still the caller's call (here: on track,
+ * slipping, behind).
+ */
+export const SegmentedGauge: Story = {
+  args: { half: true, segmented: true, size: 200, thickness: 8, max: 100 },
+  render: (args) => (
+    <div className="flex flex-wrap items-end gap-8">
+      <DonutChart {...args} value={92} tone="success" caption="on track" />
+      <DonutChart {...args} value={74} tone="warning" caption="slipping" />
+      <DonutChart {...args} value={40} tone="critical" caption="behind" />
+      <DonutChart {...args} value={0} tone="critical" caption="not started" />
+    </div>
+  ),
+};
+
+/** A colour no tone covers, through `fillClassName` (a token class). */
+export const CustomColour: Story = {
+  args: { value: 30, max: 40, fillClassName: 'stroke-accent-blue-medium', caption: 'custom' },
+};
+
+/** `size="icon"`: the 20 box with a 16 ring, no numeral. An empty `label` does the same at any size. */
+export const Icon: Story = {
+  render: (args) => (
+    <div className="flex items-center gap-4">
+      <DonutChart {...args} value={25} max={100} size="icon" aria-label="25% done" />
+      <DonutChart {...args} value={70} max={100} size="icon" tone="success" aria-label="70% done" />
+      <DonutChart {...args} value={40} max={100} size={72} thickness={10} label={null} caption={undefined} tone="warning" aria-label="40% done" />
+    </div>
+  ),
+};
+
 export const CustomLabel: Story = {
   args: { label: '26 / 40', caption: 'points' },
 };

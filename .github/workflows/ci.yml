@@ -26,8 +26,17 @@ jobs:
       - name: Fail if dist/ is stale
         run: git diff --exit-code dist/ || (echo "::error::dist/ is out of date — run 'npm run tokens' and commit." && exit 1)
       - run: npm run lint:tokens
+      # These two were in `npm test` but not here, so a PR whose author skipped `npm test` could merge past them.
+      - name: Composed of lists match the imports; imports flow downward
+        run: npm run lint:composition
+      - name: The plugin states one version
+        run: npm run lint:plugin-version
+      - name: 'Stories have no `decorators: []` (it removes nothing)'
+        run: npm run lint:stories
       - name: Semantic colours meet GDL's contract
         run: npm run check:contract
+      - name: Field edges clear 3:1 in both themes
+        run: npm run check:field-contrast
       - name: Changelog entry in changes/, not CHANGELOG.md
         run: npm run lint:changes
       - run: npm run typecheck

@@ -15,7 +15,21 @@ import { cn } from '../../lib/cn';
  *   rules on this); the caller sets `tone`, brand by default.
  * - **`tone` no longer takes arbitrary colour strings.** Tokens only.
  *
- * `size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
+ * `segmented` is the flat-ended gauge Figma draws for the Cycle Summary: butt
+ * caps instead of round ones, and a small gap between the filled arc and the
+ * remainder, so a 90% ring reads as two pieces rather than one bar with a
+ * darker end. The gap scales with `thickness`. Round-capped rings stay the default.
+ *
+ * Colour is a `tone` first. For one a tone does not cover, `fillClassName` takes a
+semantic `stroke-*` token class — a token class, never a hex.
+
+`size="icon"` is the small decorative one from the table rows: a 20 box with
+the ring 16 across inside it, thin, and never any text. Any other size goes the same
+way with an empty `label` (`null` or `""`): with no numeral and no caption the
+text layer is not rendered at all, just the ring. Either way it is still a
+meter, so give it an `aria-label`.
+
+`size` and `thickness` are SVG geometry (numbers, not CSS) — a chart is
  * measured, not stepped, which is also why the centre numeral scales with the
  * ring instead of sitting on the type ramp. It is set in the numeric face.
  *
@@ -42,13 +56,24 @@ export interface DonutChartProps
   value: number;
   /** The whole. The announced value stays in real units. */
   max?: number;
-  /** Outer diameter in SVG units. */
-  size?: number;
-  /** Ring thickness in SVG units. */
+  /** Outer diameter in SVG units, or `"icon"`: a 20 box around a 16 ring, no text. */
+  size?: number | 'icon';
+  /** Ring thickness in SVG units. Defaults to 16, or 2 for `size="icon"`. */
   thickness?: number;
   /** Half-donut gauge — the Cycle Summary treatment. */
   half?: boolean;
-  /** Replaces the centred percentage. Visual only — the meter announces numbers. */
+  /**
+   * Flat ends and a gap between the filled arc and the remainder, instead of a
+   * round-capped fill over a full track. Pair it with a thin `thickness`.
+   */
+  segmented?: boolean;
+  /** Token `stroke-*` class for the filled arc; wins over `tone`. */
+  fillClassName?: string;
+  /**
+   * Replaces the centred percentage. Visual only — the meter announces numbers.
+   * Empty (`null` or `""`) removes the numeral; with no caption either, the ring
+   * is drawn alone. `size="icon"` never draws text.
+   */
   label?: React.ReactNode;
   /** Small line under the number — "of 40 pts". */
   caption?: React.ReactNode;
@@ -60,9 +85,11 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
       className,
       value,
       max = 100,
-      size = 140,
-      thickness = 16,
+      size: sizeProp = 140,
+      thickness: thicknessProp,
       half,
+      segmented,
+      fillClassName,
       label,
       caption,
       tone,
@@ -73,11 +100,30 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
     const clamped = Math.max(0, Math.min(max, value));
     const pct = max > 0 ? clamped / max : 0;
 
+    const icon = sizeProp === 'icon';
+    /* The icon is a 20 box with the ring 16 across inside it; every other
+       size is the ring itself. */
+    const box = icon ? 20 : sizeProp;
+    const size = icon ? 16 : sizeProp;
+    const thickness = thicknessProp ?? (icon ? 2 : 16);
+    const numeral = label === undefined ? `${Math.round(pct * 100)}%` : label;
+    const hasNumeral = numeral !== null && numeral !== false && numeral !== '';
+
     const r = (size - thickness) / 2;
-    const c = size / 2;
+    const c = box / 2;
     const circumference = 2 * Math.PI * r;
     const sweep = half ? circumference / 2 : circumference;
-    const height = half ? c + thickness / 2 : size;
+    const height = half ? c + thickness / 2 : box;
+
+    /* Segmented: the fill and the remainder are separate arcs with a gap
+       between them, not a fill laid over a full track. */
+    const gap = thickness / 4;
+    const filled = sweep * pct;
+    const split = segmented && pct > 0 && pct < 1;
+    const fillLength = split ? Math.max(0, filled - gap / 2) : filled;
+    const trackLength = split ? Math.max(0, sweep - filled - gap / 2) : sweep;
+    const trackStart = split ? filled + gap / 2 : 0;
+    const turn = half ? 180 : -90;
 
     return (
       <div
@@ -93,9 +139,9 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
         {...props}
       >
         <svg
-          width={size}
+          width={box}
           height={height}
-          viewBox={`0 0 ${size} ${height}`}
+          viewBox={`0 0 ${box} ${height}`}
           aria-hidden="true"
           className="block"
         >
@@ -106,9 +152,16 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             r={r}
             fill="none"
             strokeWidth={thickness}
-            strokeLinecap="round"
-            strokeDasharray={half ? `${sweep} ${circumference}` : undefined}
-            transform={half ? `rotate(180 ${c} ${c})` : undefined}
+            strokeLinecap={segmented ? 'butt' : 'round'}
+            strokeDasharray={
+              segmented
+                ? `${trackLength} ${circumference}`
+                : half
+                  ? `${sweep} ${circumference}`
+                  : undefined
+            }
+            strokeDashoffset={segmented ? -trackStart : undefined}
+            transform={segmented || half ? `rotate(${turn} ${c} ${c})` : undefined}
             className="stroke-surface-track"
           />
           <circle
@@ -117,30 +170,34 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
             r={r}
             fill="none"
             strokeWidth={thickness}
-            strokeLinecap="round"
-            strokeDasharray={`${sweep * pct} ${circumference}`}
-            transform={`rotate(${half ? 180 : -90} ${c} ${c})`}
-            className={fill({ tone })}
+            strokeLinecap={segmented ? 'butt' : 'round'}
+            strokeDasharray={`${fillLength} ${circumference}`}
+            transform={`rotate(${turn} ${c} ${c})`}
+            className={cn(fill({ tone }), fillClassName)}
           />
         </svg>
-        <div
-          aria-hidden="true"
-          className={cn(
-            'pointer-events-none absolute inset-0 flex flex-col items-center',
-            half ? 'justify-end pb-1' : 'justify-center',
-          )}
-        >
-          <span
-            className="font-numeric font-semibold text-text-primary"
-            /* Scales with the ring — geometry, not the type ramp. */
-            style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
+        {!icon && (hasNumeral || caption) && (
+          <div
+            aria-hidden="true"
+            className={cn(
+              'pointer-events-none absolute inset-0 flex flex-col items-center',
+              half ? 'justify-end pb-1' : 'justify-center',
+            )}
           >
-            {label ?? `${Math.round(pct * 100)}%`}
-          </span>
-          {caption && (
-            <span className="mt-1 font-sans text-caption-md-medium text-text-tertiary">{caption}</span>
-          )}
-        </div>
+            {hasNumeral && (
+              <span
+                className="font-numeric font-semibold text-text-primary"
+                /* Scales with the ring — geometry, not the type ramp. */
+                style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
+              >
+                {numeral}
+              </span>
+            )}
+            {caption && (
+              <span className="mt-1 font-sans text-caption-md-medium text-text-tertiary">{caption}</span>
+            )}
+          </div>
+        )}
       </div>
     );
   },

@@ -6,6 +6,7 @@ import { Modal } from './Modal';
 import { Button } from '../../atoms/button';
 import { Field } from '../field';
 import { Input } from '../../atoms/input';
+import { Popover } from '../popover';
 
 const meta = {
   title: 'Components/Overlays/Modal',
@@ -692,5 +693,68 @@ export const NestedDialog: Story = {
     /* A second Escape closes it. */
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  },
+};
+
+/**
+ * A popup inside a dialog takes Escape first — a `Popover` here, and the same
+ * goes for a select panel, a suggestion list or a `Menu`. The first Escape
+ * closes the popup and leaves the dialog standing, with focus back on the
+ * popup's trigger. Only an Escape that nothing inside used closes the dialog.
+ *
+ * Until 29 October 2026 the first Escape closed the dialog and the popup with
+ * it: the dialog heard the key before anything inside it did.
+ */
+export const EscapeClosesPopupFirst: Story = {
+  args: { open: false },
+  render: (args) => (
+    <Background>
+      <Trigger label="Publish claim">
+        {({ open, onClose }) => (
+          <Modal {...args} open={open} onClose={onClose} footer={<ConfirmFooter onClose={onClose} />}>
+            <div className="flex flex-col items-start gap-4">
+              <Popover
+                width="sm"
+                trigger={<Button variant="secondary">Who is notified?</Button>}
+                content="The supplier’s claims contact, by email, as soon as you publish."
+              />
+              {/* Long enough to sit under the open panel: the body scrolls, so a
+                  panel that ran past its end would be clipped. */}
+              <p>
+                Once published, the supplier is notified and the claim can no longer be edited.
+                Corrections after that go through a credit note on the next statement, and the
+                audit trail records who published it and when.
+              </p>
+            </div>
+          </Modal>
+        )}
+      </Trigger>
+    </Background>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Publish claim' });
+
+    await userEvent.click(trigger);
+    const dialog = await screen.findByRole('dialog');
+
+    const popoverTrigger = within(dialog).getByRole('button', { name: 'Who is notified?' });
+    await userEvent.click(popoverTrigger);
+    await expect(popoverTrigger).toHaveAttribute('aria-expanded', 'true');
+    await expect(within(dialog).getByText(/claims contact/)).toBeVisible();
+
+    /* The first Escape is the popover's: it closes, focus goes back to its
+       trigger, and the dialog stays open. It used to close the dialog. */
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(popoverTrigger).toHaveAttribute('aria-expanded', 'false'));
+    await expect(within(dialog).queryByText(/claims contact/)).not.toBeInTheDocument();
+    await expect(screen.getByRole('dialog')).toBe(dialog);
+    await expect(popoverTrigger).toHaveFocus();
+
+    /* Nothing inside has a popup open now, so the next Escape closes the
+       dialog and focus goes back to what opened it. */
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await expect(trigger).toHaveFocus();
   },
 };

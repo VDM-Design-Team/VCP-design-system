@@ -78,6 +78,8 @@ Never show both. `error` wins whenever it is set.
 
 ## Accessibility
 
+- **A custom control** (a `contenteditable` field, which `<label for>` cannot name) receives the label's id as `aria-labelledby`, unless it already has `aria-labelledby` or `aria-label`; the function form gets it in its props. Clicking the label focuses such a control.
+
 - The label is a real `<label htmlFor>`. Clicking it focuses the control.
 - `error` renders with `role="alert"`, so it is announced the moment it appears.
   Both `helper` and `error` are referenced by the control's `aria-describedby`.

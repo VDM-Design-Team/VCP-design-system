@@ -12,7 +12,7 @@ Read off the Figma `Changelog_Update_Modal` (`7211:1060`) and
 |---|---|---|
 | `Modal` | component | The dialog |
 | `Carousel` | component | The arrows, the keyboard, and announcing the move |
-| `Tooltip` | component | What the info glyph beside the title explains |
+| `Tooltip` | atom | What the info glyph beside the title explains |
 | `Badge` | atom | The version |
 | `Button` | atom | "View Change Log" and "Got It" |
 | `Icon` | atom | The kind's glyph, and the info glyph |

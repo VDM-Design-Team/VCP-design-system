@@ -76,6 +76,11 @@ export interface FieldControlProps {
   id: string;
   'aria-describedby'?: string;
   'aria-invalid'?: true;
+  /**
+   * The label's id, when there is a label. `<label for>` only names a native control; a
+   * custom one (a `contenteditable` field) takes this as `aria-labelledby`.
+   */
+  'aria-labelledby'?: string;
 }
 
 export interface FieldProps
@@ -127,6 +132,7 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
     const generatedId = React.useId();
     const controlId = htmlFor ?? `${generatedId}-control`;
     const messageId = `${generatedId}-message`;
+    const labelId = `${generatedId}-label`;
 
     const hasLabel = label !== undefined && label !== null && label !== false;
     const hasLabelRow = hasLabel || Boolean(onAdd);
@@ -138,6 +144,7 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
       id: controlId,
       'aria-describedby': hasMessage ? messageId : undefined,
       'aria-invalid': invalid || undefined,
+      'aria-labelledby': hasLabel ? labelId : undefined,
     };
 
     let control: React.ReactNode;
@@ -149,6 +156,10 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
         id: existing.id ?? controlProps.id,
         'aria-describedby': existing['aria-describedby'] ?? controlProps['aria-describedby'],
         'aria-invalid': existing['aria-invalid'] ?? controlProps['aria-invalid'],
+        /* Not over a name the control already has. */
+        'aria-labelledby':
+          existing['aria-labelledby'] ??
+          (existing['aria-label'] ? undefined : controlProps['aria-labelledby']),
       });
     } else {
       control = children;
@@ -165,7 +176,17 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
           /* The "+" is interactive, so it sits beside the <label>, never inside it. */
           <div className={fieldLabel({ variant, size })}>
             {hasLabel && (
-              <label htmlFor={controlId} className="flex items-center gap-1.5">
+              <label
+                id={labelId}
+                htmlFor={controlId}
+                className="flex items-center gap-1.5"
+                /* A native control takes focus from its label; a `contenteditable` one
+                   does not, so the label does it. */
+                onClick={() => {
+                  const control = document.getElementById(controlId);
+                  if (control && !('labels' in control)) control.focus();
+                }}
+              >
                 <span>{label}</span>
                 {required && (
                   <>

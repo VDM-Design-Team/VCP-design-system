@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { Divider } from '../../atoms/divider';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * StatCard — one number that matters, on a card: open claims, points

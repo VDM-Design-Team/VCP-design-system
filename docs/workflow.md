@@ -224,16 +224,21 @@ What runs on every PR **today**:
 | Check | What it catches |
 |---|---|
 | Token rebuild + stale-`dist/` | Generated files that don't match `tokens/` |
-| `lint:tokens` | Hardcoded colors, px values, arbitrary Tailwind classes |
+| `lint:tokens` | Hardcoded colors, px values, arbitrary Tailwind classes (a PR number like `#212` in a comment is not a colour) |
+| `lint:composition` | A "Composed of" section that doesn't match the real imports, an import that points up a tier, a pattern built from fewer than two pieces |
+| `lint:plugin-version` | The plugin's two version lines disagreeing: a half-done release bump |
+| `lint:stories` | A story with `decorators: []`, which removes nothing (a story's decorators add to the meta's) |
+| `check:contract` | Semantic colour names that drift from GDL's contract |
+| `check:field-contrast` | A field edge under 3:1 in either theme: at rest, in error, with a warning, focused |
+| `lint:changes` | A PR that touches `src/` or `tokens/` with no `changes/` entry, an edit to `CHANGELOG.md`, an entry with no valid `bump` or `###` heading, a `major` with no `Migration:` note |
 | Typecheck | Type errors across components and stories |
-| Story tests (`test:flows`) | Every story renders in a real Chromium; a story's `play` function runs as an interaction test; axe checks each story and reports violations |
+| Story tests (`test:flows`) | Every story renders in a real Chromium; a story's `play` function runs as an interaction test; axe checks each story and **fails** it on a violation, including the house rule that a description must not repeat the name (`vcp-description-repeats-name`) |
 | Chromatic | Storybook builds, visual diffs vs `main`, posts the 🔍 Visual review comment |
 
 The story tests are the Storybook Vitest addon in browser mode. Run them
-locally with `npm run test:flows`, or from the Storybook sidebar. The axe
-check currently **reports** rather than fails: twenty-two stories had
-violations when the runner landed and are being fixed separately, after which
-it flips to failing.
+locally with `npm run test:flows`, or from the Storybook sidebar. `npm test`
+runs every check above except the `dist/` check and Chromatic; if you changed
+`tokens/`, run `npm run tokens` first and commit what it rebuilds.
 
 Deliberately deferred, with the trigger that un-defers them:
 
