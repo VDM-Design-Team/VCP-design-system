@@ -12,3 +12,5 @@ New pattern **`UsersTable`**, built to Figma's `Settings_Users`: search, Name / 
 Its empty table is an `EmptyState`, with the words searched when a search is active.
 
 An `action` column sits at the end: right-aligned, with room above and below the header control (Users table's + New User and View).
+
+The photo's buttons follow Figma on every user dialog: **Upload** with no photo, **Change** + **Remove** once there is one (a freshly chosen image counts). `onRemoveAvatar` is now just the callback.

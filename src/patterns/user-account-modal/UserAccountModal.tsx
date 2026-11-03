@@ -38,8 +38,8 @@ import { Modal } from '../../components/modal';
  *
  * - **`roles`** swaps the Domain Access table for a **Roles** checklist (`draft.roles`, the ticked values). Pass `roles` and the table
  *   goes; pass `domains` and the checklist goes. Roles and Proficiency overlap in Figma's design (a question for design).
- * - **`onRemoveAvatar`** gives the photo a **Change** and a **Remove** (Upload while there is none). Without it, the photo only
- *   has Upload, as on the Accounts page.
+ * - **The photo's buttons follow Figma on both pages**: **Upload** while there is no photo, **Change** and **Remove** once there is one (a
+ *   chosen image counts at once). **Remove** clears the picture and calls `onRemoveAvatar`, so the page can delete it.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -84,7 +84,7 @@ export interface UserAccountModalProps {
   onSaveCapacity?: (points: number | null) => void;
   /** A photo was chosen. There is no crop. */
   onUploadAvatar?: (file: File) => void;
-  /** Remove was pressed. Passing it turns Upload into **Change** and **Remove** once there is a photo. The page deletes the image. */
+  /** Remove was pressed: the page deletes the image. Once there is a photo the buttons are **Change** and **Remove**; with none, **Upload**. */
   onRemoveAvatar?: () => void;
   /** Submit is in flight: the button spins and the dialog's fields lock. */
   submitting?: boolean;
@@ -220,12 +220,12 @@ export function UserAccountModal({
             size="sm"
             type="button"
             disabled={locked}
-            aria-label={onRemoveAvatar && shownPhoto ? 'Change profile photo' : 'Upload profile photo'}
+            aria-label={shownPhoto ? 'Change profile photo' : 'Upload profile photo'}
             onClick={() => fileInput.current?.click()}
           >
-            {onRemoveAvatar && shownPhoto ? 'Change' : 'Upload'}
+            {shownPhoto ? 'Change' : 'Upload'}
           </Button>
-          {onRemoveAvatar && shownPhoto && (
+          {shownPhoto && (
             <Button
               variant="secondary"
               size="sm"
@@ -235,7 +235,7 @@ export function UserAccountModal({
               onClick={() => {
                 setPhoto(undefined);
                 setRemoved(true);
-                onRemoveAvatar();
+                onRemoveAvatar?.();
                 /* The button that had focus is gone: Change is what took its place. */
                 photoButton.current?.focus();
               }}

@@ -145,6 +145,11 @@ export const UploadsAPhoto: Story = {
     await userEvent.upload(input, file);
     await expect(args.onUploadAvatar).toHaveBeenCalledWith(file);
     await waitFor(() => expect(dialog.querySelector('img')?.getAttribute('src')).toMatch(/^blob:/));
+    /* A photo is there: Upload becomes Change, and Remove appears; Remove puts Upload back and keeps focus. */
+    await expect(await within(dialog).findByRole('button', { name: 'Change profile photo' })).toBeVisible();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Remove profile photo' }));
+    await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Upload profile photo' })).toHaveFocus());
+    await expect(within(dialog).queryByRole('button', { name: 'Remove profile photo' })).toBeNull();
   },
 };
 
