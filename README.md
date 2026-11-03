@@ -8,7 +8,7 @@ consumes it as a versioned npm package. Nothing is hand-copied between the two.
 tokens/core/       raw values      — VCP's own: color.vcp-blue.*, color.brand.navy
                                     (shared scales and the type ramp come from GDL,
                                     @vdm-design-team/gdl — the parent design system)
-tokens/semantic/   intent          — surface.brand, content.muted, line.default
+tokens/semantic/   intent          — surface.canvas, text.subtle, stroke.default
 dist/              GENERATED       — theme.css, tokens.css, tokens.ts, tokens.flat.json;
                                     npm run build adds index.js and types/
 src/components/    React + Tailwind components
@@ -51,7 +51,7 @@ for UI and Inter for numerics, but doesn't load them, so the app loads both.
 Every token is now a Tailwind utility:
 
 ```jsx
-<div className="bg-surface-subtle text-content-muted p-md rounded-lg border border-line-default shadow-sm" />
+<div className="bg-surface-base text-text-subtle text-body-md-regular p-4 rounded-md border border-stroke-default shadow-card" />
 ```
 
 **2. Use the components.**
@@ -72,7 +72,8 @@ isn't a client module.
 
 > UI must be built from `@vdm-design-team/vcp-design-system`. Check `node_modules/@vdm-design-team/vcp-design-system/docs/`
 > for component usage before writing any new UI. Never hardcode colors or spacing —
-> use the token utilities (`bg-surface-*`, `text-content-*`, `border-line-*`, `p-*`, `gap-*`).
+> use the token utilities (`bg-surface-*`, `text-text-*`, `border-stroke-*`, `text-body-md-regular`-style type, and
+> Tailwind's numeric spacing: `p-4` is 16px).
 
 Because the package is in `node_modules`, Claude Code reads the tokens, types, and
 docs directly — no MCP required. For *querying* the system ("what variants does
