@@ -61,6 +61,10 @@ const shell = cva(
   },
 );
 
+/* Holding a nudge button: it steps once at once, waits, then repeats. */
+const HOLD_DELAY = 400;
+const HOLD_INTERVAL = 70;
+
 export interface StepperProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'>,
     VariantProps<typeof shell> {
@@ -149,6 +153,40 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       }
     };
 
+    /* Hold a button and it keeps stepping, after a beat. The repeat reads the latest `nudge` through a ref, so each
+       step starts from the value the last one produced rather than the one the press began with. */
+    const nudgeRef = React.useRef(nudge);
+    React.useEffect(() => {
+      nudgeRef.current = nudge;
+    });
+    const hold = React.useRef<{ dir?: -1 | 1; delay?: number; repeat?: number }>({});
+    const stopHold = React.useCallback(() => {
+      window.clearTimeout(hold.current.delay);
+      window.clearInterval(hold.current.repeat);
+      hold.current = {};
+      window.removeEventListener('pointerup', stopHold);
+      window.removeEventListener('pointercancel', stopHold);
+    }, []);
+    const startHold = (dir: -1 | 1) => {
+      stopHold();
+      hold.current.dir = dir;
+      nudgeRef.current(dir);
+      hold.current.delay = window.setTimeout(() => {
+        hold.current.repeat = window.setInterval(() => nudgeRef.current(dir), HOLD_INTERVAL);
+      }, HOLD_DELAY);
+      window.addEventListener('pointerup', stopHold);
+      window.addEventListener('pointercancel', stopHold);
+    };
+    React.useEffect(() => stopHold, [stopHold]);
+    /* At the end it is heading for, the button disables, and a disabled button never sees the release: stop on
+       arrival. (An empty field is at neither end: holding up from empty carries on past its first step.) */
+    const atMin = value !== null && value <= min;
+    const atMax = value !== null && value >= max;
+    React.useEffect(() => {
+      const { dir } = hold.current;
+      if ((dir === -1 && atMin) || (dir === 1 && atMax) || disabled) stopHold();
+    }, [atMin, atMax, disabled, stopHold]);
+
     const nudgeButton = (dir: -1 | 1) => {
       const dead = disabled || (dir < 0 ? value === null || value <= min : value !== null && value >= max);
       const name = dir < 0 ? 'Decrease' : 'Increase';
@@ -159,9 +197,16 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           aria-label={label ? `${name} ${label}` : name}
           disabled={dead}
           tabIndex={upDown ? -1 : undefined}
-          onClick={() => nudge(dir)}
+          /* A pointer press steps (and starts the hold) on `pointerdown`; the `click` that follows it is skipped.
+             A keyboard activation has no pointer press, so its `click` (detail 0) is the step. */
+          onPointerDown={(e) => {
+            if (e.button === 0) startHold(dir);
+          }}
+          onClick={(e) => {
+            if (e.detail === 0) nudge(dir);
+          }}
           className={cn(
-            'grid shrink-0 place-items-center transition-colors',
+            'grid shrink-0 select-none place-items-center transition-colors',
             'disabled:pointer-events-none',
             /* The shell clips and carries the shared ring; this ring draws
                inward so it survives the clipping. */

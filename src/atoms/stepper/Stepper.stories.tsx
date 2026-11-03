@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fireEvent, userEvent, waitFor, within } from 'storybook/test';
 import { Stepper } from './Stepper';
 import { Field } from '../../components/field';
 
@@ -105,6 +105,83 @@ export const EmptyUntilSet: Story = {
     await userEvent.clear(field);
     await userEvent.tab();
     await expect(field).toHaveValue('');
+  },
+};
+
+/**
+ * Hold a button and it keeps stepping: once at once, then — after a beat — repeatedly until it is let go. A single
+ * click is still a single step, and the keyboard is unchanged.
+ */
+export const HoldToRepeat: Story = {
+  args: { variant: 'up-down', value: 0, label: 'Capacity points', max: 60 },
+  render: (args) => {
+    const [value, setValue] = React.useState(0);
+    return <Stepper {...args} value={value} onChange={setValue} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Capacity points' }) as HTMLInputElement;
+    const up = c.getByRole('button', { name: 'Increase Capacity points' });
+
+    /* A click is one step — the press steps, and the click that follows it does not step again. */
+    await userEvent.click(up);
+    await expect(field).toHaveValue('1');
+
+    /* Held: the press steps at once, then carries on after the pause. */
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(field).toHaveValue('2'));
+    await waitFor(() => expect(Number(field.value)).toBeGreaterThan(5), { timeout: 3000 });
+    fireEvent.pointerUp(up, { button: 0, pointerType: 'mouse' });
+
+    /* Let go, it stops. */
+    const stopped = field.value;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await expect(field.value).toBe(stopped);
+
+    /* The keyboard is untouched: Enter on a focused caret is one step. */
+    up.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(Number(field.value)).toBe(Number(stopped) + 1);
+  },
+};
+
+/** Held to the end, it stops there: the caret is dead at the maximum and the value never passes it. */
+export const HoldStopsAtTheEnd: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { variant: 'up-down', value: 0, label: 'Capacity points', max: 3 },
+  render: (args) => {
+    const [value, setValue] = React.useState(0);
+    return <Stepper {...args} value={value} onChange={setValue} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Capacity points' });
+    const up = c.getByRole('button', { name: 'Increase Capacity points' });
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(field).toHaveValue('3'), { timeout: 3000 });
+    await expect(up).toBeDisabled();
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await expect(field).toHaveValue('3');
+  },
+};
+
+/** Held up from an empty field, it gives it its first number and carries on from there. */
+export const HoldFromEmpty: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { variant: 'up-down', value: null, label: 'Allocated points', placeholder: 'Set Budget', max: 60 },
+  render: (args) => {
+    const [value, setValue] = React.useState<number | null>(null);
+    return <Stepper {...args} value={value} onChange={setValue} onClear={() => setValue(null)} />;
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('textbox', { name: 'Allocated points' }) as HTMLInputElement;
+    const up = c.getByRole('button', { name: 'Increase Allocated points' });
+    fireEvent.pointerDown(up, { button: 0, pointerType: 'mouse' });
+    await waitFor(() => expect(Number(field.value)).toBeGreaterThan(4), { timeout: 3000 });
+    fireEvent.pointerUp(up, { button: 0, pointerType: 'mouse' });
   },
 };
 

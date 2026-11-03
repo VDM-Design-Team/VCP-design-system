@@ -61,6 +61,14 @@ are `neutral.textual.content` (hover `neutral.textual.content.hover`) on a
 minimum (the first number it can have) and the down caret is disabled, since there is nothing to step down to. Clearing the
 field and leaving it calls `onClear`; the caller sets the value back to `null`.
 
+## Holding a button
+
+Press and hold a nudge button and it keeps stepping: it steps once as the press lands, waits 400 ms, then repeats every 70 ms
+until the pointer is released or the value reaches the end it is heading for (`min` going down, `max` going up), where the
+button disables. A single click is still one step, and holding up from an empty field gives it its first number and carries on.
+The repeat is for the pointer; the keyboard path is Arrow Up and Down in the field, which repeat as the browser's key repeat
+does, and Enter or Space on a focused button is one step.
+
 ## Typing is draft-based
 
 The export clamped every keystroke — with `min=10`, typing "15" was
