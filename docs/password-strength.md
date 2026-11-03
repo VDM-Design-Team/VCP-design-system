@@ -42,7 +42,7 @@ the copy belongs to whoever owns the rule.
 |---|---|---|---|
 | `very-weak` | 20% | `critical` | `accent.critical.filled.surface` |
 | `weak` | 40% | `pending` | `accent.pending.outline.border` |
-| `fair` | 60% | `caution` | `accent.warning.outline.border` |
+| `fair` | 60% | `caution` | `accent.yellow.medium` |
 | `good` | 80% | `info` | `accent.info.filled.surface` |
 | `strong` | 100% | `success` | `accent.success.filled.surface` |
 
@@ -51,10 +51,11 @@ message under it stays 12px. The track and the other fills are `ProgressBar`'s, 
 `docs/progress-bar.md` apply.
 
 **Weak and Fair do not pass on the light track.** Both use the bright
-`outline.border` shades the Figma file paints — Weak
+shades the Figma file paints — Weak
 `accent.pending.outline.border.default` (**2.27:1** light, 4.11:1 dark) and Fair
-`accent.warning.outline.border.default` (**1.55:1** light, 4.98:1 dark) — under
-the 3:1 a meaningful graphic should reach. That is kept deliberately: the level
+`accent.yellow.medium` (**1.28:1** light, 7.66:1 dark) — under
+the 3:1 a meaningful graphic should reach. (Fair is not `accent.warning.outline.border`: that token
+moved to yellow-700 in November for contrast and reads brown in this bar, where Figma draws a bright yellow.) That is kept deliberately: the level
 is printed at the end of the label row and read out as `aria-valuetext`, so the
 fill's colour is never the only signal. Don't copy this choice to a bar that has
 no words beside it.
@@ -68,10 +69,13 @@ core orange scale).
   real `aria-valuenow`, and `aria-valuetext` carrying the word ("Weak"), so a
   screen reader says the level rather than "2".
 - The meter is named by the visible `label` via `aria-labelledby`.
+- **Wire the field to the meter.** A meter is not announced as it changes, so give the password `Input` `aria-describedby` pointing at the
+  `PasswordStrength`'s `id` (it accepts one): focusing the field then reads the strength and the message. The `WithAPasswordField` story does.
 - Colour is never the only signal: the status word is printed at the right and
   read out as `aria-valuetext`.
-- `message` is `aria-live="polite"`, so a change from "too simple" to nothing is
-  not silent. Keep it to one short sentence.
+- `message` sits in an `aria-live="polite"` region that is **always in the DOM** (visually hidden while
+  empty), so a message that appears later, or changes to nothing, is announced — a region inserted
+  already holding text often is not. Keep it to one short sentence.
 - The bar's width eases over 300ms (`ProgressBar`'s); it does not animate from
   zero on mount.
 

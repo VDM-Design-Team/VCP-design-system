@@ -21,9 +21,9 @@ import { ProgressBar } from '../../atoms/progress-bar';
  * same: the copy ("Your password is too simple") belongs to whoever owns the
  * rule.
  *
- * Weak is the orange `pending` tone and Fair the bright amber `caution` tone —
- * both the bright outline-border shades, which sit below the 3:1 a graphic
- * should reach against the light track (2.27:1 and 1.55:1). That is kept on
+ * Weak is the orange `pending` tone and Fair the bright yellow `caution` tone
+ * (`accent.yellow.medium`) — bright shades that sit below the 3:1 a graphic
+ * should reach against the light track (2.27:1 and 1.28:1). That is kept on
  * purpose: the level is always written out beside the bar, so the colour never
  * carries the meaning alone.
  *
@@ -71,17 +71,17 @@ export const PasswordStrength = React.forwardRef<HTMLDivElement, PasswordStrengt
           max={STEPS}
           tone={level.tone}
         />
-        {message && (
-          <span
-            aria-live="polite"
-            className={cn(
-              'text-caption-md-regular',
-              level.weak ? 'text-accent-critical-outline-content-default' : 'text-text-tertiary',
-            )}
-          >
-            {message}
-          </span>
-        )}
+        {/* The live region is always in the DOM, so a message that arrives later is announced: a region
+            inserted already holding text is often not. Empty, it is visually hidden and takes no gap. */}
+        <span
+          aria-live="polite"
+          className={cn(
+            message ? 'text-caption-md-regular' : 'sr-only',
+            level.weak ? 'text-accent-critical-outline-content-default' : 'text-text-tertiary',
+          )}
+        >
+          {message}
+        </span>
       </div>
     );
   },

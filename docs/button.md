@@ -49,6 +49,10 @@ holding and the border needs a stronger token.
   Small button, design audit 3 Sep 2026) — still under 40, so only use it
   where a pointer is guaranteed.
 - Focus ring is `outline-stroke-focused` at 2px with 2px offset. Never remove it.
+- The filled variants (`primary`, `danger`) keep their label at 4.5:1 at rest,
+  hovered and pressed, in both themes. In dark the label is dark, so the fill
+  gets **lighter** on hover and press, never darker. The story **Filled text
+  contrast, both themes** tests it.
 - `loading` sets `aria-busy` and disables the control; put the outcome in the label ("Saving…") if the wait exceeds ~1s.
 - Icon-only buttons **must** have an `aria-label`.
 

@@ -258,7 +258,8 @@ export const RichTextToolbar = React.forwardRef<HTMLDivElement, RichTextToolbarP
                       }}
                       type="button"
                       tabIndex={open && spec.command === stop ? 0 : -1}
-                      aria-label={spec.name}
+                      /* The title is the name and the hover hint in one: beside an
+                         aria-label it would be read a second time, as the description. */
                       title={spec.name}
                       aria-pressed={TOGGLABLE.has(spec.command) ? on : undefined}
                       disabled={disabledCommands[spec.command]}

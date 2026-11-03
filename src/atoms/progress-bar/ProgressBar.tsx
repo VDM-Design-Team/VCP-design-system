@@ -36,10 +36,11 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
          like `caution`: 2.27:1 on the light track, so only beside a written
          value. */
       pending: 'bg-accent-pending-outline-border-default',
-      /* accent.warning.outline.border — the bright amber. A deliberate exception
-         to the filled family: 1.55:1 on the light track, so use it only where the
-         value is also written out (valueLabel), never as the only signal. */
-      caution: 'bg-accent-warning-outline-border-default',
+      /* accent.yellow.medium — the bright yellow. (Not `accent.warning.outline.border`: that went to yellow-700
+         in November for contrast, and reads brown here.) A deliberate exception to the filled family: 1.28:1 on
+         the light track, so use it only where the value is also written out (valueLabel), never as the only
+         signal. */
+      caution: 'bg-accent-yellow-medium',
       /* accent.info.filled.surface — a level that is neither good nor bad, just
          "further along": password strength's Good. */
       info: 'bg-accent-info-filled-surface-default',

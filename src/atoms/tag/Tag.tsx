@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { Icon } from '../icon';
 import {
   CLASSIFICATION_STYLE,
   type ClassificationTone,
@@ -27,8 +28,12 @@ import {
  * the way `StatusTag`/`DueDateTag` compose it, never a new
  * hand-rolled shell.
  *
- * Tag is not a control: it takes no focus and fires no events, same as
- * `Badge`. If it needs to be clickable or removable, it is a `Chip`.
+ * Tag is not a control by default: it takes no focus and fires no events, same
+ * as `Badge`. The one exception is **`onRemove`**, which adds a ✕ button at the
+ * end — a value picked into a field (`SearchSelect`'s selections, an AV's tags in
+ * edit mode). The button is the only focusable part, a sibling of the label,
+ * and the tag itself still never takes a click. A tag that should toggle or
+ * open something is a `Chip`.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -58,6 +63,49 @@ const tag = cva(
   },
 );
 
+/* The ✕'s hover and pressed look, per style and tone. Each takes the hover and pressed
+   tokens of the tag's own colours, which only ever move away from the background (darker
+   on light, lighter on dark), so the ✕ never reads worse than at rest. A neutral tag that
+   is not filled uses `neutral.textual.content`; a filled tag cannot darken its pale ✕, so
+   it shows its tone's hover fill behind it instead. */
+const NEUTRAL_REMOVE =
+  'text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed';
+const BRAND_REMOVE = 'hover:text-text-brand-stronger active:text-text-brand-stronger';
+const REMOVE_STATES: Record<ClassificationVariant, Record<ClassificationTone, string>> = {
+  textual: {
+    neutral: NEUTRAL_REMOVE,
+    brand: BRAND_REMOVE,
+    info: 'hover:text-accent-info-outline-content-hover active:text-accent-info-outline-content-pressed',
+    success: 'hover:text-accent-success-outline-content-hover active:text-accent-success-outline-content-pressed',
+    warning: 'hover:text-accent-warning-outline-content-hover active:text-accent-warning-outline-content-pressed',
+    critical: 'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
+  },
+  outline: {
+    neutral: NEUTRAL_REMOVE,
+    brand: BRAND_REMOVE,
+    info: 'hover:text-accent-info-outline-content-hover active:text-accent-info-outline-content-pressed',
+    success: 'hover:text-accent-success-outline-content-hover active:text-accent-success-outline-content-pressed',
+    warning: 'hover:text-accent-warning-outline-content-hover active:text-accent-warning-outline-content-pressed',
+    critical: 'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
+  },
+  tonal: {
+    neutral: NEUTRAL_REMOVE,
+    brand: BRAND_REMOVE,
+    info: 'hover:text-accent-info-tonal-content-hover active:text-accent-info-tonal-content-pressed',
+    success: 'hover:text-accent-success-tonal-content-hover active:text-accent-success-tonal-content-pressed',
+    warning: 'hover:text-accent-warning-tonal-content-hover active:text-accent-warning-tonal-content-pressed',
+    critical: 'hover:text-accent-critical-tonal-content-hover active:text-accent-critical-tonal-content-pressed',
+  },
+  filled: {
+    neutral: 'hover:bg-surface-neutral-strong active:bg-surface-neutral-strong',
+    brand: 'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed',
+    info: 'hover:bg-accent-info-filled-surface-hover active:bg-accent-info-filled-surface-pressed',
+    success: 'hover:bg-accent-success-filled-surface-hover active:bg-accent-success-filled-surface-pressed',
+    warning: 'hover:bg-accent-warning-filled-surface-hover active:bg-accent-warning-filled-surface-pressed',
+    critical: 'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
+  },
+};
+
 export type TagVariant = ClassificationVariant;
 export type TagTone = ClassificationTone;
 
@@ -77,16 +125,44 @@ export interface TagProps
   icon?: React.ReactNode;
   /** Decorative glyph after the label. Same rules as `icon`. */
   trailingIcon?: React.ReactNode;
+  /**
+   * Renders a ✕ button after the label and calls this when it is pressed. The
+   * button is the only interactive part of the tag. The ✕ leaves with the tag,
+   * so move focus yourself afterwards: to the next tag's ✕, or the field.
+   */
+  onRemove?: () => void;
+  /**
+   * Accessible name for the ✕. Defaults to `Remove ${children}` when the
+   * label is a plain string; **required in practice** when it is not.
+   */
+  removeLabel?: string;
 }
 
 export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
   (
-    { className, variant = 'tonal', tone = 'neutral', size, icon, trailingIcon, children, ...props },
+    {
+      className,
+      variant = 'tonal',
+      tone = 'neutral',
+      size,
+      icon,
+      trailingIcon,
+      onRemove,
+      removeLabel,
+      children,
+      ...props
+    },
     ref,
   ) => (
     <span
       ref={ref}
-      className={cn(tag({ size }), CLASSIFICATION_STYLE[variant][tone], className)}
+      className={cn(
+        tag({ size }),
+        CLASSIFICATION_STYLE[variant][tone],
+        /* The ✕ sits closer to the edge than a label would. */
+        onRemove && 'pr-1',
+        className,
+      )}
       {...props}
     >
       {icon && <Adornment>{icon}</Adornment>}
@@ -94,6 +170,30 @@ export const Tag = React.forwardRef<HTMLSpanElement, TagProps>(
         <span className="min-w-0 truncate">{children}</span>
       )}
       {trailingIcon && <Adornment>{trailingIcon}</Adornment>}
+      {onRemove && (
+        <button
+          type="button"
+          aria-label={removeLabel ?? (typeof children === 'string' ? `Remove ${children}` : 'Remove')}
+          onClick={onRemove}
+          className={cn(
+            'grid size-5 shrink-0 place-items-center rounded-full transition-colors motion-reduce:transition-none',
+            /* Cancels the tag's own gap, so the ✕ sits against the label; a
+               leading icon keeps its gap. The button's own room around the
+               glyph is all that is left between them. Not on `filled`: its
+               hover fill is a circle the size of the button, which would
+               touch the label's last letter without the gap. */
+            variant !== 'filled' && (size === 'xs' || size === 'sm' ? '-ml-1' : '-ml-1.5'),
+            /* A neutral tag that is not filled gives the ✕ `neutral.textual.content`;
+               any other keeps the tag's own ink, since a grey ✕ would clash with it.
+               Hover and pressed: see `REMOVE_STATES`. */
+            REMOVE_STATES[variant][tone],
+            /* Drawn inside the button: the tag clips its overflow. */
+            'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
+          )}
+        >
+          <Icon name="x" className="size-3.5" />
+        </button>
+      )}
     </span>
   ),
 );

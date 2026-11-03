@@ -647,13 +647,13 @@
             "$value": "{color.vcp-blue.700}"
           },
           "hover": {
-            "$value": "{color.vcp-blue.500}"
+            "$value": "{color.vcp-blue.300}"
           },
           "pressed": {
-            "$value": "{color.vcp-blue.600}"
+            "$value": "{color.vcp-blue.200}"
           },
           "selected": {
-            "$value": "{color.vcp-blue.500}"
+            "$value": "{color.vcp-blue.300}"
           }
         }
       },

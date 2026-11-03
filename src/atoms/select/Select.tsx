@@ -7,13 +7,25 @@ import { Icon } from '../icon';
  * Select — a choice from a fixed list, on the native `<select>`. Native on
  * purpose: the popup, keyboard model, type-ahead, and mobile pickers come from
  * the platform, correct on every device, for free. When the list needs search,
- * that is `SearchSelect` (to port), which pays the custom-listbox tax.
+ * that is `SearchSelect`, which pays the custom-listbox tax.
  *
  * The shell is `Input`'s, class for class: the same `stroke.strong` border,
  * `focus-within` ring, `invalid` treatment, disabled surface, and the same
  * `sm`/`md` = 32/40 heights. Sits beside an Input in a form and nothing
  * betrays which is which until it opens. The export's `small`/`large` size
  * names became `sm`/`md` to match every other component.
+ *
+ * The field reads like `SearchSelect`'s: the placeholder is `text.subtle` in regular
+ * weight, and a chosen value is `text.primary` in medium. A native select shows its
+ * placeholder as the selected option, so the grey is `:has(option[data-placeholder]:checked)`
+ * on the select itself — pure CSS, no props. It keys on the *placeholder option*, never on
+ * an empty `value`: a real "All suppliers" option with `value=""` is a choice, and reads as one.
+ * A disabled select is quieter still: the disabled colour wins over the placeholder grey. The open list is the platform's and
+ * stays that way (see docs/select.md); only the option colours are set, so the
+ * popup follows the theme where the browser lets it.
+ *
+ * `error` puts a message under the select in the critical colour, as
+ * `SearchSelect` does. Inside a `Field`, let the `Field` carry the message.
  *
  * The caret is the system's own glyph, not the export's data-URI SVG — a
  * pointer-events-none sibling, so clicks land on the control beneath it.
@@ -54,15 +66,37 @@ const control = cva(
     'min-w-0 flex-1 appearance-none font-sans',
     'border-0 bg-transparent outline-none',
     'cursor-pointer text-text-primary',
+    /* Nothing chosen yet: the hidden placeholder option is the selected one, so it reads as
+       a placeholder — subtle and regular, like SearchSelect's. Keyed on the placeholder option itself
+       (`data-placeholder`), not on an empty value, and only while enabled, so the disabled colour wins. */
+    "enabled:has-[option[data-placeholder]:checked]:text-text-subtle",
     'disabled:cursor-not-allowed disabled:text-text-disabled',
+    /* The popup is the platform's; where the browser honours it, give the options the tokens. */
+    '[&_option]:bg-surface-elevated [&_option]:text-text-primary [&_optgroup]:text-text-tertiary',
     /* Room for the caret on the right. */
     'py-0 pl-3 pr-9',
   ],
   {
     variants: {
-      size: { sm: 'text-caption-md-regular', md: 'text-body-sm-regular' },
+      size: { sm: '', md: '' },
+      /* A value is medium and the placeholder regular (SearchSelect's pairing) — or, for a filter, regular throughout. */
+      emphasis: { medium: '', regular: '' },
     },
-    defaultVariants: { size: 'md' },
+    compoundVariants: [
+      {
+        size: 'sm',
+        emphasis: 'medium',
+        className: 'text-caption-md-medium has-[option[data-placeholder]:checked]:text-caption-md-regular',
+      },
+      {
+        size: 'md',
+        emphasis: 'medium',
+        className: 'text-body-sm-medium has-[option[data-placeholder]:checked]:text-body-sm-regular',
+      },
+      { size: 'sm', emphasis: 'regular', className: 'text-caption-md-regular' },
+      { size: 'md', emphasis: 'regular', className: 'text-body-sm-regular' },
+    ],
+    defaultVariants: { size: 'md', emphasis: 'medium' },
   },
 );
 
@@ -85,10 +119,21 @@ export interface SelectProps
    * "no selection" choice, add an explicit option ("All suppliers") instead.
    */
   placeholder?: string;
-  /** Critical border + `aria-invalid`. Always pair with a visible error message. */
+  /** Critical border + `aria-invalid`. Always pair with a visible error message (or use `error`). */
   invalid?: boolean;
+  /**
+   * An error message under the select, in the critical colour. Implies `invalid` and is
+   * announced with the select (`aria-describedby`). Inside a `Field`, use the `Field`'s `error`
+   * instead, not both.
+   */
+  error?: React.ReactNode;
   /** Escape hatch for `<optgroup>` — replaces `options` when given. */
   children?: React.ReactNode;
+  /**
+   * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
+   * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** Merged onto the shell, not the inner `<select>`. */
   className?: string;
 }
@@ -98,7 +143,9 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     {
       className,
       size,
+      emphasis,
       invalid,
+      error,
       fullWidth,
       options = [],
       onChange,
@@ -109,44 +156,70 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       ...props
     },
     ref,
-  ) => (
-    <div className={cn(shell({ size, invalid, fullWidth }), className)}>
-      <select
-        ref={ref}
-        disabled={disabled}
-        aria-invalid={invalid || undefined}
-        onChange={(e) => onChange?.(e.target.value)}
-        /* An uncontrolled select with a placeholder starts on it. */
-        defaultValue={
-          defaultValue ?? (placeholder && props.value === undefined ? '' : undefined)
-        }
-        className={control({ size })}
-        {...props}
-      >
-        {placeholder && (
-          <option value="" disabled hidden>
-            {placeholder}
-          </option>
-        )}
-        {children ??
-          options.map((raw) => {
-            const o = typeof raw === 'string' ? { value: raw, label: raw } : raw;
-            return (
-              <option key={o.value} value={o.value} disabled={o.disabled}>
-                {o.label}
-              </option>
-            );
-          })}
-      </select>
-      {/* Decorative, and transparent to the pointer — clicks fall through to
-          the select. text.tertiary matches Input's adornments. */}
-      <Icon
-        name="caret-down"
-        size="sm"
-        aria-hidden="true"
-        className="pointer-events-none absolute right-3 text-text-tertiary"
-      />
-    </div>
-  ),
+  ) => {
+    const errorId = React.useId();
+    const isInvalid = !!invalid || !!error;
+    /* Keep a describedby a `Field` already set, and add the error's. */
+    const describedBy =
+      [props['aria-describedby'], error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
+
+    const field = (
+      <div className={cn(shell({ size, invalid: isInvalid, fullWidth }), className)}>
+        <select
+          ref={ref}
+          disabled={disabled}
+          aria-invalid={isInvalid || undefined}
+          onChange={(e) => onChange?.(e.target.value)}
+          /* An uncontrolled select with a placeholder starts on it. */
+          defaultValue={
+            defaultValue ?? (placeholder && props.value === undefined ? '' : undefined)
+          }
+          className={control({ size, emphasis })}
+          {...props}
+          aria-describedby={describedBy}
+        >
+          {placeholder && (
+            <option value="" disabled hidden data-placeholder>
+              {placeholder}
+            </option>
+          )}
+          {children ??
+            options.map((raw) => {
+              const o = typeof raw === 'string' ? { value: raw, label: raw } : raw;
+              return (
+                <option key={o.value} value={o.value} disabled={o.disabled}>
+                  {o.label}
+                </option>
+              );
+            })}
+        </select>
+        {/* Decorative, and transparent to the pointer — clicks fall through to
+            the select. text.tertiary matches Input's adornments. */}
+        <Icon
+          name="caret-down"
+          size="sm"
+          aria-hidden="true"
+          className="pointer-events-none absolute right-3 text-text-tertiary"
+        />
+      </div>
+    );
+
+    /* The wrapper exists only when there is a message, so the DOM is unchanged otherwise. */
+    if (!error) return field;
+    return (
+      /* A column stretches its children, so the wrapper hugs the field unless the field is full width:
+         a select sized to its content must not jump to its container's width when an error appears. */
+      <div className={cn(fullWidth ? 'flex w-full flex-col' : 'inline-flex flex-col')}>
+        {field}
+        <p
+          id={errorId}
+          role="alert"
+          className="mt-1.5 text-caption-md-medium text-accent-critical-outline-content-default"
+        >
+          {error}
+        </p>
+      </div>
+    );
+  },
 );
 Select.displayName = 'Select';

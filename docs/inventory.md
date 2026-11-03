@@ -29,14 +29,18 @@ record of when each piece landed.
 | atom | `Icon` | PR #10 |
 | atom | `Avatar`, `Badge`, `Divider`, `IconButton`, `Skeleton`, `Spinner` | PR #15 |
 | component | `AvatarGroup` | PR #15 |
-| component | `Popover`, `Menu`, `Modal`, `Tooltip`, `Toast`, `Banner` | PR #16 |
+| component | `Popover`, `Menu`, `Modal`, `Toast`, `Banner` | PR #16 |
+| atom | `Tooltip` | PR #16 (moved from components) |
 | atom | `ProgressBar` | PR #38 |
-| component | `Chip`, `EmptyState`, `DetailRow` | PR #38 |
+| component | `EmptyState`, `DetailRow` | PR #38 |
+| atom | `Chip` | PR #38 (moved from components) |
 | atom | `PaginationDots` | PR #39 |
-| component | `Breadcrumb`, `Pagination`, `Accordion` | PR #39 |
+| component | `Breadcrumb`, `Accordion` | PR #39 |
+| atom | `Pagination` | PR #39 (moved from components) |
 | component | `DataTable` | PR #43 |
 | atom | `Select` | PR #46 |
-| component | `Stepper`, `Dropzone` | PR #46 |
+| atom | `Stepper` | PR #46 (moved from components) |
+| atom | `Dropzone` | PR #46 (moved from components) |
 | atom | `DonutChart` | PR #47 |
 | component | `Timeline`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
@@ -79,7 +83,7 @@ Organisms: 2+ components forming a page section.
 | Page structure | `SettingsSection` |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
-| Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
+| Collaboration | `NotificationItem`, `UserMenu` (comments shipped: `CommentSection`, `CommentReply`, `CommentComposer`) |
 | Marketing | `MarketingHero` |
 
 ## Templates — to port

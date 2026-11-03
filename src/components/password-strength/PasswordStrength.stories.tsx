@@ -45,8 +45,8 @@ const LEVELS: Array<[PasswordStrengthLevel, string, string?]> = [
 ];
 
 /**
- * Five steps, 20% each. Very Weak and Weak both use `critical`; the length
- * tells them apart. Only the two weak levels colour the message.
+ * Five steps, 20% each: red, orange, yellow, blue, green. The level is always written out beside the bar,
+ * so the colour is never the only signal. Only the two weak levels colour the message.
  */
 export const Levels: Story = {
   render: () => (
@@ -62,11 +62,51 @@ export const Levels: Story = {
       LEVELS.map(([, text]) => text),
     );
     expect(meters.map((m) => m.getAttribute('aria-valuenow'))).toEqual(['1', '2', '3', '4', '5']);
+    /* Fair is the bright yellow (`accent.yellow.medium`), not the brown `accent.warning.outline.border` became. */
+    const fill = (m: HTMLElement) => getComputedStyle(m.firstElementChild as HTMLElement).backgroundColor;
+    expect(fill(meters[2])).toBe('rgb(253, 199, 0)');
+    expect(fill(meters[2])).not.toBe(fill(meters[1]));
+  },
+};
+
+/**
+ * The message's live region is always in the DOM — visually hidden while empty — so a message that arrives later is
+ * announced (a region inserted already holding text often is not).
+ */
+export const LiveRegion: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => {
+    const [message, setMessage] = React.useState<string | undefined>(undefined);
+    return (
+      <div className="w-96">
+        <PasswordStrength strength="weak" message={message} />
+        <button type="button" onClick={() => setMessage('Add a number or a symbol')}>
+          Say something
+        </button>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const live = () => canvasElement.querySelector('[aria-live="polite"]') as HTMLElement;
+    /* Present and empty before there is anything to say. */
+    await expect(live()).not.toBeNull();
+    await expect(live()).toHaveTextContent('');
+    const region = live();
+    await within(canvasElement).getByRole('button', { name: 'Say something' }).click();
+    /* The same element now holds the message: changed in place, not inserted. */
+    await expect(live()).toBe(region);
+    await expect(live()).toHaveTextContent('Add a number or a symbol');
   },
 };
 
 /** The caller owns the scoring: here, a toy rule driving the meter as you type. */
 export const WithAPasswordField: Story = {
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByLabelText('New password');
+    /* Focusing the field reads the strength: it is described by the meter. */
+    expect(field.getAttribute('aria-describedby')).toBe(canvasElement.querySelector('[role="meter"]')?.closest('[id]')?.id);
+  },
   render: () => {
     const [value, setValue] = React.useState('');
     const score = (v: string): PasswordStrengthLevel => {
@@ -77,6 +117,7 @@ export const WithAPasswordField: Story = {
       ];
     };
     const strength = score(value);
+    const meterId = React.useId();
     return (
       <div className="flex w-96 flex-col gap-3">
         <label className="flex flex-col gap-1.5 text-label-sm-medium text-text-primary">
@@ -87,9 +128,12 @@ export const WithAPasswordField: Story = {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             autoComplete="new-password"
+            /* So focusing the field reads out how strong it is — the meter is not announced on its own. */
+            aria-describedby={meterId}
           />
         </label>
         <PasswordStrength
+          id={meterId}
           strength={strength}
           message={
             strength === 'very-weak' || strength === 'weak' ? 'Your password is too simple' : undefined

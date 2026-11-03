@@ -12,7 +12,7 @@ The popover's "View notifications inbox" link goes here.
 | Piece | Tier | Role here |
 |---|---|---|
 | `NotificationItem` | component | The rows, passed as children |
-| `Pagination` | component | The pager under the list |
+| `Pagination` | atom | The pager under the list |
 | `Button` | atom | "Mark all as read" (`tertiary`, `sm`) |
 | `Toggle` | atom | "Show unread only" |
 
@@ -33,7 +33,7 @@ the two lists cannot drift apart.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `unreadOnly` / `onUnreadOnlyChange` | `boolean` | `false` | Uncontrolled when `unreadOnly` is omitted. Reports the wish; filters nothing |
-| `onMarkAllRead` | `() => void` | — | Fires on "Mark all as read". The button is always shown |
+| `onMarkAllRead` | `() => void` | — | Draws "Mark all as read" and fires when it is pressed. Without it the button is not drawn, as in `NotificationPopover` |
 | `pagination` | `{ page, pageCount, onChange?, itemCount?, pageSize?, pageSizeOptions?, onPageSizeChange?, variant? }` | — | The large pager: numbers, range and Items select. Shown whenever given, even on one page |
 | `children` | `ReactNode` | — | The `NotificationItem`s. Each is wrapped in a `<li>` |
 | `emptyLabel` | `string` | `No notifications` | What an empty list says |

@@ -55,6 +55,8 @@ All colour comes from semantic tokens, so the dark theme (`.dark`) works for fre
 ## Accessibility
 
 - **Real radios.** Each option is an `<input type="radio">` sharing one `name`.
+  An option with a `hint` is **named by its label** (`aria-labelledby`) and **described by its hint**
+  (`aria-describedby`): the row's `<label>` wraps both, and named by it alone the hint was read twice.
   Arrow keys move and select within the group, Space selects, and the browser
   gives the group a **single tab stop** (the checked radio, or the first enabled
   one when nothing is checked) — no hand-rolled roving `tabindex`.

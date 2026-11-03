@@ -1,5 +1,6 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { Tag } from './Tag';
 import { Icon } from '../icon';
 
@@ -13,8 +14,8 @@ const meta = {
     docs: {
       description: {
         component:
-          'A small, non-interactive, rounded-rectangle label that classifies the thing beside ' +
-          'it — a different shape from `Badge`\'s pill, even though they share the same four ' +
+          'A small, rounded-rectangle label that classifies the thing beside it (or, with ' +
+          '`onRemove`, a value you can take back out) — a different shape from `Badge`\'s pill, even though they share the same four ' +
           'styles and six tones (`../../lib/classification-tones`). ' +
           '`TypeTag` and `UrgencyTag` compose this rather than each hand-rolling their own shell ' +
           '— introducing a new contextual tag means composing `Tag`, not building a second one.',
@@ -135,6 +136,130 @@ export const WithLeadingIcon: Story = {
       </Tag>
     </div>
   ),
+};
+
+/**
+ * `onRemove` adds a ✕ at the end — a value picked into a field, or an AV's tag in edit mode.
+ * The ✕ is the only focusable part, named `Remove ${label}`.
+ */
+export const Removable: Story = {
+  args: { onRemove: fn() },
+  render: function Render(args) {
+    const [tags, setTags] = React.useState(['VCP', 'OfferPump', 'WHU']);
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        {tags.map((t) => (
+          <Tag
+            key={t}
+            {...args}
+            size="sm"
+            onRemove={() => {
+              setTags((l) => l.filter((x) => x !== t));
+              args.onRemove?.();
+            }}
+          >
+            {t}
+          </Tag>
+        ))}
+        <Tag {...args} variant="outline" tone="success" onRemove={args.onRemove}>
+          Approved
+        </Tag>
+      </div>
+    );
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    /* Keyboard-reachable: Tab lands on the first ✕, Enter removes it. */
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Remove VCP' })).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onRemove).toHaveBeenCalledTimes(1);
+    await expect(canvas.queryByText('VCP')).toBeNull();
+    await expect(canvas.getByText('OfferPump')).toBeVisible();
+  },
+};
+
+const rgb =(value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 4).map(Number);
+const luminance = ([r, g, b]: number[]) => {
+  const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/**
+ * Removable at every size, and in every style and tone in both themes. The ✕ holds 3:1 at rest,
+ * hovered and pressed on all of them: its hover and pressed colours are the tag's own hover and
+ * pressed tokens, which only move away from the background (a filled tag shows its hover fill
+ * behind the ✕ instead). The test reads those colours from the classes each ✕ renders.
+ */
+export const RemovableEverywhere: Story = {
+  name: 'Removable everywhere',
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2">
+      {[false, true].map((isDark) => (
+        <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
+          <div className="flex h-full flex-col gap-3 bg-surface-canvas p-8">
+            <div className="flex flex-wrap items-center gap-2">
+              {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
+                <Tag key={size} size={size} onRemove={() => {}}>
+                  {size}
+                </Tag>
+              ))}
+            </div>
+            {VARIANTS.map((variant) => (
+              <div key={variant} className="flex flex-wrap gap-2">
+                {TONES.map((tone) => (
+                  <Tag key={tone} variant={variant} tone={tone} onRemove={() => {}} data-case={`${variant} ${tone}`}>
+                    {tone}
+                  </Tag>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const under3to1: string[] = [];
+    for (const tag of Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-case]'))) {
+      const theme = tag.closest('[data-theme-case]')!.getAttribute('data-theme-case');
+      const remove = tag.querySelector('button')!;
+      /* What the tag sits on: its own fill, or the canvas behind a textual or clear outline tag. */
+      let behind: HTMLElement = tag;
+      while (rgb(getComputedStyle(behind).backgroundColor)[3] === 0 && behind.parentElement) behind = behind.parentElement;
+      const fill = rgb(getComputedStyle(behind).backgroundColor);
+      const ink = rgb(getComputedStyle(remove).color);
+      /* The colour a `hover:` or `active:` class on the ✕ resolves to here, or undefined. */
+      const state = (prefix: string) => {
+        const token = remove.className.split(/\s+/).find((c) => c.startsWith(prefix))?.slice(prefix.length);
+        if (!token) return undefined;
+        const probe = document.createElement('span');
+        probe.style.color = `var(--color-${token})`;
+        tag.append(probe);
+        const value = rgb(getComputedStyle(probe).color);
+        probe.remove();
+        return value;
+      };
+      /* A `hover:opacity-…` or `active:opacity-…` fades the ✕ into what is behind it. */
+      const opacity = (prefix: string) =>
+        Number(remove.className.split(/\s+/).find((c) => c.startsWith(prefix))?.slice(prefix.length) ?? 100) / 100;
+      const fade = (fg: number[], bg: number[], alpha: number) => fg.slice(0, 3).map((c, i) => c * alpha + bg[i] * (1 - alpha));
+      for (const [name, fg, bg, alpha] of [
+        ['at rest', ink, fill, 1],
+        ['hovered', state('hover:text-') ?? ink, state('hover:bg-') ?? fill, opacity('hover:opacity-')],
+        ['pressed', state('active:text-') ?? ink, state('active:bg-') ?? fill, opacity('active:opacity-')],
+      ] as const) {
+        const ratio = contrast(fade(fg, bg, alpha), bg);
+        if (ratio < 3) under3to1.push(`${theme} ${tag.dataset.case}, ${name}: ${ratio.toFixed(2)}:1`);
+      }
+    }
+    await expect(under3to1).toEqual([]);
+  },
 };
 
 /** Rounded-rectangle beside Badge's pill — the shape difference the two share nothing else in common on. */
