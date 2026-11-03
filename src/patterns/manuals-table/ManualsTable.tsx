@@ -144,7 +144,7 @@ export function ManualsTable({
         rows={loading ? placeholders : rows}
         sort={sort}
         onSortChange={onSortChange}
-        empty={empty ?? <EmptyState icon={<Icon name="database" />} title="No items." />}
+        empty={empty ?? <EmptyState icon={<Icon name="database" size="lg" />} title="No items." />}
       />
 
       <div className="flex justify-end">
