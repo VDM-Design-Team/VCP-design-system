@@ -19,8 +19,9 @@ import { Divider } from '../../atoms/divider';
  * groupings and a derived state, not statuses), so the segments come in as data. It does no arithmetic: the totals are the
  * caller's (Total is not the sum of the segments — it includes what is completed).
  *
- * **It never squeezes past what it needs.** Everything stays on one row; the breakdown shares the width that is left, and
- * each segment keeps its 100 floor. Narrower than that, nothing wraps or shrinks further: the whole strip scrolls sideways.
+ * **It wraps first, then scrolls.** With room, everything is on one row. When the breakdown no longer fits beside the
+ * profile it drops to its own line, full width. Each segment keeps its 100 floor, so once the breakdown alone is as narrow
+ * as it can be and cannot wrap any further, the whole strip scrolls sideways.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -120,7 +121,7 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
         aria-label={ariaLabel}
         tabIndex={overflowing ? 0 : undefined}
         className={cn(
-          'flex items-center gap-6 overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated p-4 font-sans',
+          'flex flex-wrap items-center gap-x-6 gap-y-4 overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated p-4 font-sans',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
           className,
         )}

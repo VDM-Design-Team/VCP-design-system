@@ -50,9 +50,10 @@ derived state) — so the segments arrive as data and `StatusTag` keeps owning t
 
 ## Layout
 
-Everything stays on **one row**: the profile and the two figures, then the breakdown, which takes the width that is left, split
-**in proportion to the counts**, each segment at least 100. When even those floors do not fit, nothing wraps or shrinks further:
-**the whole strip scrolls sideways** (`overflow-x: auto`). Segments never drop to a second line.
+**It wraps first, then scrolls.** With room, the profile, the two figures and the breakdown share one row. When the breakdown no
+longer fits beside them it **drops to its own line, full width**. The segments share it **in proportion to their counts**, each at
+least 100, so the breakdown alone has a narrowest width (100 a segment). Once it is that narrow and cannot wrap any further,
+**the whole strip scrolls sideways** (`overflow-x: auto`).
 
 ## Tokens
 

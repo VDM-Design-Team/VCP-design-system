@@ -84,10 +84,31 @@ export const ThreeStatuses: Story = {
   },
 };
 
-/** Too narrow for what it shows, it does not wrap or squeeze: the whole strip scrolls sideways. */
-export const ScrollsWhenTooNarrow: Story = {
+/**
+ * Too narrow for one row, it wraps first: the breakdown drops to its own line, full width. It still fits, so it does not
+ * scroll.
+ */
+export const Wraps: Story = {
   render: (args) => (
-    <div className="w-136">
+    <div className="w-144">
+      <MyValuesStats {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const card = within(canvasElement).getByRole('region', { name: 'My Values statistics' });
+    const profile = within(card).getByText('Username');
+    const breakdown = within(card).getByRole('list', { name: 'Status breakdown' });
+    /* The breakdown is on a line of its own, below the profile. */
+    await expect(breakdown.getBoundingClientRect().top).toBeGreaterThan(profile.getBoundingClientRect().bottom - 1);
+    await expect(card.scrollWidth).toBeLessThanOrEqual(card.clientWidth);
+    await expect(card).not.toHaveAttribute('tabindex');
+  },
+};
+
+/** Once it has wrapped and the breakdown cannot get any narrower (each segment at its floor), the whole strip scrolls. */
+export const ScrollsWhenItCannotWrapAnyMore: Story = {
+  render: (args) => (
+    <div className="w-96">
       <MyValuesStats {...args} />
     </div>
   ),
@@ -97,10 +118,10 @@ export const ScrollsWhenTooNarrow: Story = {
     await expect(getComputedStyle(card).overflowX).toBe('auto');
     /* A scrolling region is reachable by keyboard — only while it scrolls. */
     await waitFor(() => expect(card).toHaveAttribute('tabindex', '0'));
-    /* Still one row: the profile and the breakdown share a line. */
+    /* It wrapped before it scrolled: the breakdown is on its own line. */
     const profile = within(card).getByText('Username');
     const breakdown = within(card).getByRole('list', { name: 'Status breakdown' });
-    await expect(Math.abs(profile.getBoundingClientRect().top - breakdown.getBoundingClientRect().top)).toBeLessThan(80);
+    await expect(breakdown.getBoundingClientRect().top).toBeGreaterThan(profile.getBoundingClientRect().bottom - 1);
   },
 };
 
