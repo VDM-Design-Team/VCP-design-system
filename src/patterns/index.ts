@@ -7,6 +7,7 @@
  */
 export * from './accept-pending-av-modal';
 export * from './move-av-to-cycle-modal';
+export * from './move-to-backlog-modal';
 export * from './av-header';
 export * from './av-table';
 export * from './changelog-modal';
