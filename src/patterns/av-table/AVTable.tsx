@@ -16,6 +16,8 @@ import { Tag } from '../../atoms/tag';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
+import { MultipartParentChip } from '../../components/multipart-parent-chip';
+import { MultipartTableTag } from '../../components/multipart-table-tag';
 
 /**
  * AVTable — the Added Value table: the list every VCP workspace is built
@@ -48,12 +50,25 @@ import { Icon } from '../../atoms/icon';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
+/**
+ * A multipart Added Value is split into parts. In the table, **a child** says which part it is and links to its parent, and **a parent** says how
+ * many of its parts are done. Figma's `_AV_Table_Item_AV_Title_Multipart` (`Multipart Parent=No` / `=Yes`).
+ */
+export type AVMultipart =
+  | { kind: 'child'; /** Which part: 1 of `total`. */ position: number; total: number; /** The parent's reference, "VCP-4321". */ parentRef: string }
+  | { kind: 'parent'; /** How many parts are completed. */ completed: number; total: number };
+
 export interface AVTableRow {
   /** The row's identity — used for selection. Give it the AV's real id. */
   id: string;
   /** The human reference, "VCP-12345". Clickable when `onOpen` is given. */
   ref: string;
   title: string;
+  /**
+   * Makes it a multipart row: a tag under the reference (the child's "1/3" or the parent's progress ring), a **Parent: VCP-4321** chip on a child, and a
+   * coloured edge on a parent. See `AVMultipart`.
+   */
+  multipart?: AVMultipart;
   /** The domain badge beside the title — "VCP", "Design". */
   domain?: string;
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
@@ -100,6 +115,8 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   onSelectedChange?: (ids: string[]) => void;
   /** Opens an AV. Given, the reference becomes a button; omitted, it is text. */
   onOpen?: (row: AVTableRow) => void;
+  /** A child's **Parent: …** chip was pressed. Given, the chip is a button; the page opens the parent. */
+  onOpenParent?: (row: AVTableRow) => void;
   /** Adds the trailing Actions column. Figma's Action Column row variant. */
   actions?: (row: AVTableRow) => React.ReactNode;
   /** Shown above the pagination when something is selected. */
@@ -136,6 +153,7 @@ export function AVTable({
   selected = [],
   onSelectedChange,
   onOpen,
+  onOpenParent,
   actions,
   onDeleteSelected,
   deleteSelectedLabel = (count) => `Delete Selected (${count})`,
@@ -155,51 +173,85 @@ export function AVTable({
       sortable: true,
       grow: true,
       width: '34%',
-      render: (row) => (
+      /* The metadata (tag, domain, parent chip, counts) never shrinks or is cut, so a multipart row's cell cannot be narrower than that: the
+         column's floor rises to fit it, and below it the table scrolls sideways. */
+      /* A multipart parent also has a brand edge on its left (Figma's `Multipart Parent=Yes`: a 6 border in surface.brand.medium). It is drawn over this cell,
+         not as a border on the row: a border on a row of a collapsed table nudges the whole table (the header too) to make room for it, and a
+         pseudo-element on the row itself is taken for an extra cell. With `selectable` it sits at the title's left edge, after the checkbox. */
+      cellProps: (row) =>
+        row.multipart
+          ? {
+              className: cn(
+                'min-w-md',
+                row.multipart.kind === 'parent' && 'relative before:absolute before:inset-y-0 before:start-0 before:w-1.5 before:bg-surface-brand-medium',
+              ),
+            }
+          : undefined,
+      render: (row) => {
+        const multipart = row.multipart;
+        const reference = onOpen ? (
+          /* The reference opens the AV. A button, not a whole-row click
+             target: `DataTable` refuses those, and rightly — a row-wide
+             target hides the real action from keyboards and screen readers. */
+          <button
+            type="button"
+            onClick={() => onOpen(row)}
+            className={cn(
+              'shrink-0 rounded-sm text-body-sm-regular text-text-tertiary transition-colors',
+              'hover:text-text-brand-medium hover:underline',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+            )}
+          >
+            {row.ref}
+            <span className="sr-only">: {row.title}</span>
+          </button>
+        ) : (
+          <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
+        );
+        /* One line, ellipsed. The full title is the `title` attribute so a
+           truncated row is still readable on hover. */
+        const title = (
+          <span className="min-w-0 truncate text-label-sm-medium text-text-primary" title={row.title}>
+            {row.title}
+          </span>
+        );
+        const details = (multipart || row.domain || row.attachments || row.comments) && (
+          <div className="flex w-max items-center gap-2">
+            {multipart && (
+              <MultipartTableTag
+                kind={multipart.kind}
+                total={multipart.total}
+                position={multipart.kind === 'child' ? multipart.position : undefined}
+                parentRef={multipart.kind === 'child' ? multipart.parentRef : undefined}
+                completed={multipart.kind === 'parent' ? multipart.completed : undefined}
+              />
+            )}
+            {row.domain && (
+              <Tag tone="brand" size="sm">
+                {row.domain}
+              </Tag>
+            )}
+            {multipart?.kind === 'child' && (
+              <MultipartParentChip parentRef={multipart.parentRef} onOpen={onOpenParent ? () => onOpenParent(row) : undefined} />
+            )}
+            <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
+            <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
+          </div>
+        );
+
         /* 16 top and bottom, Figma's own cell padding. With the two-line title
              block that makes an 81 row, which is what the canvas draws. */
-        <div className="flex flex-col gap-1 py-4">
-          <div className="flex items-center gap-2">
-            {/* The reference opens the AV. A button, not a whole-row click
-                target: `DataTable` refuses those, and rightly — a row-wide
-                target hides the real action from keyboards and screen readers. */}
-            {onOpen ? (
-              <button
-                type="button"
-                onClick={() => onOpen(row)}
-                className={cn(
-                  'shrink-0 rounded-sm text-body-sm-regular text-text-tertiary transition-colors',
-                  'hover:text-text-brand-medium hover:underline',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                )}
-              >
-                {row.ref}
-                <span className="sr-only">: {row.title}</span>
-              </button>
-            ) : (
-              <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
-            )}
-            <Divider orientation="vertical" className="h-4 shrink-0" />
-            {/* One line, ellipsed. The full title is the `title` attribute so a
-                truncated row is still readable on hover. */}
-            <span className="truncate text-label-sm-medium text-text-primary" title={row.title}>
-              {row.title}
-            </span>
-          </div>
-
-          {(row.domain || row.attachments || row.comments) && (
+        return (
+          <div className="flex flex-col gap-1 py-4">
             <div className="flex items-center gap-2">
-              {row.domain && (
-                <Tag tone="brand" size="sm">
-                  {row.domain}
-                </Tag>
-              )}
-              <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
-              <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
+              {reference}
+              <Divider orientation="vertical" className="h-4 shrink-0" />
+              {title}
             </div>
-          )}
-        </div>
-      ),
+            {details}
+          </div>
+        );
+      },
     },
     {
       key: 'due',

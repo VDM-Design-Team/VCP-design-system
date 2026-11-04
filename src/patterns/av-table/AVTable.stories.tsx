@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { AVTable, type AVTableRow } from './AVTable';
 import { IconButton } from '../../atoms/icon-button';
 import type { DataTableSort } from '../../components/data-table';
@@ -268,3 +268,70 @@ export const SparseRows: Story = {
     </div>
   ),
 };
+
+/* A multipart AV and its three parts: the parent shows its progress, each child says which part it is and links back. */
+const MULTIPART_ROWS: AVTableRow[] = [
+  {
+    id: 'mp-parent',
+    ref: 'VCP-4321',
+    title: '[VCP] Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard',
+    domain: 'VCP',
+    attachments: 3,
+    comments: 1,
+    multipart: { kind: 'parent', completed: 1, total: 3 },
+    due: { label: 'October 1, 2025', proximity: 'due-soon' },
+    urgency: 'Normal',
+    type: 'Type 3',
+    status: { custom: 'Ready for Deploy' },
+    members: ['Ali Rahman'],
+    lastUpdated: '7 days ago',
+  },
+  ...[1, 2, 3].map(
+    (position): AVTableRow => ({
+      id: `mp-child-${position}`,
+      ref: `VCP-4321-${position}`,
+      title: `(${position}/3) [VCP] Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard`,
+      domain: 'VCP',
+      attachments: position === 1 ? 3 : undefined,
+      comments: position === 1 ? 1 : undefined,
+      multipart: { kind: 'child', position, total: 3, parentRef: 'VCP-4321' },
+      due: { label: 'October 1, 2025' },
+      urgency: 'Normal',
+      type: 'Type 3',
+      status: position === 2 ? { status: 'Completed' } : { custom: 'Ready for Deploy' },
+      members: ['Ali Rahman'],
+      lastUpdated: '7 days ago',
+    }),
+  ),
+];
+
+/**
+ * Multipart (Figma's `Multipart in AV Table`). **The parent** has a brand edge on its left and a tag under its reference that shows how many of
+ * its parts are done; **each child** has a tag with its place ("2/3") and a **Parent: VCP-4321** chip that opens the parent. The tags' tooltips say
+ * what they mean, on hover and on keyboard focus.
+ */
+export const Multipart: Story = {
+  args: { rows: MULTIPART_ROWS, onOpenParent: fn() },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    /* The tags say, in words, what the glyph and the ring only draw. */
+    await expect(canvas.getByText('Multipart parent, 1 of 3 parts completed')).toBeInTheDocument();
+    await expect(canvas.getByText('Multipart child, part 2 of 3')).toBeInTheDocument();
+    /* Each child links back to the parent. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Parent: VCP-4321' })[0]);
+    await expect(args.onOpenParent).toHaveBeenCalledWith(expect.objectContaining({ id: 'mp-child-1' }));
+    /* The parent carries the edge; a child does not. */
+    const rows = canvas.getAllByRole('row');
+    await expect(rows[1].children[0].className).toContain('before:bg-surface-brand-medium');
+    await expect(rows[2].children[0].className).not.toContain('before:bg-surface-brand-medium');
+    /* And it takes no room: every row's first cell starts at the table's left edge, header included. */
+    const left = (el: Element) => Math.round(el.getBoundingClientRect().left);
+    await expect(new Set([...rows].map((row) => left(row.children[0]))).size).toBe(1);
+  },
+};
+
