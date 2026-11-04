@@ -25,6 +25,8 @@ page, audit batch 5, 11 September 2026.
 | `DueDateTag` | component |
 | `Pagination` | atom |
 | `StatusTag` | component |
+| `MultipartParentChip` | component |
+| `MultipartTableTag` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -125,6 +127,19 @@ every table says the same thing:
 
 **Members has no copy** — Figma draws the glyph and writes nothing — so it renders only for a hint you supply.
 Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
+
+## Multipart rows
+
+An Added Value split into parts shows in the table (Figma's `Multipart in AV Table`, `_AV_Table_Item_AV_Title_Multipart`). Give a row `multipart`:
+
+| `multipart` | What the row shows |
+|---|---|
+| `{ kind: 'parent', completed, total }` | **The parent.** A `MultipartTableTag` under its reference with a progress ring of how many parts are done, and **a 6 brand edge on the left** (`surface.brand.medium`) |
+| `{ kind: 'child', position, total, parentRef }` | **A part.** A `MultipartTableTag` with its place ("2/3"), and a **Parent: VCP-4321** chip (`MultipartParentChip`) among the details. `onOpenParent` is called when the chip is pressed |
+
+**The metadata never shrinks or is cut** (the tag, domain tag, parent chip, counts): it hugs its content. So a multipart row's title column has a floor of 28rem, and below it the table scrolls sideways; only the title itself gives way, ending in "…". A multipart row has the same two lines as any other: the reference, a rule and the title on top, and under them **the multipart tag first, then the domain tag, the parent chip, the attachments and the comments, 8 apart** (the tags are the same 24 high). Figma draws the details under the title, apart from the tag; they are one line here. **Why the tag is smaller and the gap is gone:** we reduced the multipart tag's size (24 high, metadata type), which let us remove the gap: the tag is now aligned with the rest of the metadata, in one line. This also avoids large gaps from very long IDs, because the metadata used to follow where the title begins (Figma's layout), so a long ID pushed it far to the right.
+
+**The parent's edge is drawn over its title cell**, not as a border on the row: a border on a row of a collapsed table nudges the whole table (the header too) to make room for it. With `selectable`, it sits at the title's left edge, after the checkbox.
 
 ## Accessibility
 
