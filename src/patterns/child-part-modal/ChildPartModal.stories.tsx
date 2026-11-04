@@ -24,7 +24,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const body = () => within(document.body);
-const dialog = () => within(body().getByRole('dialog', { name: 'Add a New Child Part to Multipart AV' }));
+const dialog = (name = 'Add a New Child Part to Multipart AV') => within(body().getByRole('dialog', { name }));
 
 /** Figma's dialog: one Title field and Cancel / Confirm. The placeholder says a blank title is fine. */
 export const Default: Story = {
@@ -56,6 +56,33 @@ export const StatusWillChange: Story = {
     const d = dialog();
     await expect(d.getByText('Status will change')).toBeVisible();
     await expect(d.getByText(/The status of this AV is Completed\. If a new child part is added, the AV will be returned to In Progress\./)).toBeVisible();
+  },
+};
+
+/** Figma's third variant: renaming a part. The field shows the current title, and the action is **Save**. */
+export const EditTitle: Story = {
+  args: { mode: 'edit', initialTitle: 'Current child part title is shown here' },
+  play: async ({ args }) => {
+    const d = dialog('Edit Child Part Title');
+    await expect(d.getByRole('textbox', { name: 'Title' })).toHaveValue('Current child part title is shown here');
+    await expect(d.queryByText('Status will change')).toBeNull();
+    await userEvent.clear(d.getByRole('textbox', { name: 'Title' }));
+    await userEvent.type(d.getByRole('textbox', { name: 'Title' }), 'Backend work');
+    await userEvent.click(d.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(args.onConfirm).toHaveBeenCalledWith('Backend work'));
+  },
+};
+
+/** Clearing the title and saving is allowed: it asks with an empty title, and the page puts the default back ("(X/X) Parent AV Title"). */
+export const EditTitleBlank: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { mode: 'edit', initialTitle: 'Old title' },
+  play: async ({ args }) => {
+    const d = dialog('Edit Child Part Title');
+    await userEvent.clear(d.getByRole('textbox', { name: 'Title' }));
+    await userEvent.click(d.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(args.onConfirm).toHaveBeenCalledWith(''));
   },
 };
 

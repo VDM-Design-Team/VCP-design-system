@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { MultipartRow, MultipartRowGroup } from './MultipartRow';
 
 const meta = {
@@ -23,10 +23,11 @@ const meta = {
     dueDate: 'October 1, 2025',
     customStatus: 'Ready for Deploy',
     onOpen: fn(),
+    onEditTitle: fn(),
   },
   /* A row is a subgrid: it always lives in a `MultipartRowGroup`. */
   render: (args) => (
-    <div className="max-w-3xl">
+    <div className="max-w-5xl">
       <MultipartRowGroup>
         <MultipartRow {...args} />
       </MultipartRowGroup>
@@ -86,17 +87,53 @@ export const LongTitle: Story = {
   args: { title: '(1/3) Parent AV title that is far too long to fit beside everything else in this row of the section' },
 };
 
+/**
+ * Hovering the row shows an edit button after the title (Figma's `_Edit_Child_Part_Title_IconButton`); it also shows when anything in the row has
+ * focus, and always on a touch screen. It only asks: the page opens `ChildPartModal`.
+ */
+export const EditButton: Story = {
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    const edit = c.getByRole('button', { name: 'Edit title of part 1' });
+    const wrapper = edit.parentElement as HTMLElement;
+    const title = c.getByRole('button', { name: 'Part 1: Some custom title' });
+    /* Not shown at rest, and taking no room: the title has the whole cell. */
+    await expect(getComputedStyle(wrapper).opacity).toBe('0');
+    await expect(wrapper.getBoundingClientRect().width).toBe(0);
+    const restWidth = title.getBoundingClientRect().width;
+    /* A keyboard user reaches it, and focus reveals it (so do hover and a touch screen — CSS `:hover` cannot be driven from here): it opens to 24. */
+    await userEvent.tab();
+    await userEvent.tab();
+    await expect(edit).toHaveFocus();
+    await waitFor(() => expect(getComputedStyle(wrapper).opacity).toBe('1'));
+    await expect(Math.round(wrapper.getBoundingClientRect().width)).toBe(24);
+    await expect(title.getBoundingClientRect().width).toBeLessThanOrEqual(restWidth);
+    await userEvent.click(edit);
+    await expect(args.onEditTitle).toHaveBeenCalled();
+  },
+};
+
+/** Without `onEditTitle` there is no edit button. */
+export const NoEditButton: Story = {
+  args: { onEditTitle: undefined },
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).queryByRole('button', { name: /Edit title/ })).toBeNull();
+  },
+};
+
 /** Without `onOpen` the title is plain text. */
 export const NotOpenable: Story = {
   args: { onOpen: undefined },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).queryByRole('button')).toBeNull();
+    await expect(within(canvasElement).queryByRole('button', { name: /^Part 1:/ })).toBeNull();
   },
 };
 
 /**
  * Together, rows share their columns: whatever the status or the points, each column starts at the same place in every row, and the
- * status column is only as wide as the widest tag.
+ * status tags are right-aligned in a column only as wide as the widest.
  */
 export const Aligned: Story = {
   render: (args) => (
@@ -113,9 +150,10 @@ export const Aligned: Story = {
     const left = (el: HTMLElement) => Math.round(el.getBoundingClientRect().left);
     /* "Due Date:" starts in the same column in every row, whatever the points before it... */
     await expect(new Set(c.getAllByText('Due Date:').map(left)).size).toBe(1);
-    /* ...and so do the status tags, whatever their width. */
+    /* ...and the status tags end at the same edge, whatever their width (they are right-aligned in their column). */
+    const right = (el: HTMLElement) => Math.round(el.getBoundingClientRect().right);
     const tags = ['Ready for Deploy', 'Completed', 'Accepted'].map((t) => c.getByText(t));
-    await expect(new Set(tags.map(left)).size).toBe(1);
+    await expect(new Set(tags.map(right)).size).toBe(1);
   },
 };
 

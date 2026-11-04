@@ -6,9 +6,11 @@ import { Field } from '../../components/field';
 import { Modal } from '../../components/modal';
 
 /**
- * ChildPartModal — asks for the title of a new part before it is added to a multipart Added Value: "Add a New Child Part to Multipart AV",
- * one **Title** field, **Cancel** and **Confirm**. Built to Figma's `Multipart_Child_Part_Modal` (both variants).
+ * ChildPartModal — asks for the title of a part of a multipart Added Value: either a new one ("Add a New Child Part to Multipart AV", **Confirm**) or an
+ * existing one ("Edit Child Part Title", **Save**, the field showing the current title). One **Title** field, **Cancel** and the action. Built to
+ * Figma's `Multipart_Child_Part_Modal` (all three variants: `Type=New Child Part Default`, `New Child Completed Repoened` and `Edit Child Part Title`).
  *
+ * - **`mode`** is `new` (the default) or `edit`. In `edit` the field starts as `initialTitle`, and `statusChange` is not used.
  * - **A blank title is allowed**: the placeholder says so ("Enter a title, or leave blank for “Part (X/X) Parent Title”."), and `onConfirm` gets
  *   an empty string. **Working out the default title is the page's**, because it knows the part count and the parent's title.
  * - **A completed Added Value changes status when a part is added.** Pass `statusChange` ({ from: "Completed", to: "In Progress" }) and a warning
@@ -22,7 +24,11 @@ import { Modal } from '../../components/modal';
 export interface ChildPartModalProps {
   open: boolean;
   onClose: () => void;
-  /** Confirm. Gets the typed title, trimmed — empty means "use the default". */
+  /** `new` ("Add a New Child Part…", Confirm) or `edit` ("Edit Child Part Title", Save). */
+  mode?: 'new' | 'edit';
+  /** `edit`: the part's current title, which the field starts with. */
+  initialTitle?: string;
+  /** Confirm / Save. Gets the typed title, trimmed — empty means "use the default". */
   onConfirm: (title: string) => void;
   /** When adding a part changes the Added Value's status. Shows the "Status will change" warning. */
   statusChange?: { from: string; to: string };
@@ -32,20 +38,31 @@ export interface ChildPartModalProps {
   error?: string;
 }
 
-export function ChildPartModal({ open, onClose, onConfirm, statusChange, confirming, error }: ChildPartModalProps) {
+export function ChildPartModal({
+  open,
+  onClose,
+  mode = 'new',
+  initialTitle = '',
+  onConfirm,
+  statusChange,
+  confirming,
+  error,
+}: ChildPartModalProps) {
+  const editing = mode === 'edit';
   const formId = React.useId();
   const [title, setTitle] = React.useState('');
 
-  /* A fresh dialog every time it opens. */
+  /* A fresh dialog every time it opens: empty, or the part's current title. */
   React.useEffect(() => {
-    if (open) setTitle('');
-  }, [open]);
+    if (open) setTitle(editing ? initialTitle : '');
+    /* On open only: a changing `initialTitle` must not wipe what is being typed. */
+  }, [open]); // eslint-disable-line
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title="Add a New Child Part to Multipart AV"
+      title={editing ? 'Edit Child Part Title' : 'Add a New Child Part to Multipart AV'}
       size="md"
       showClose={false}
       footer={
@@ -54,7 +71,7 @@ export function ChildPartModal({ open, onClose, onConfirm, statusChange, confirm
             Cancel
           </Button>
           <Button size="sm" type="submit" form={formId} loading={confirming}>
-            Confirm
+            {editing ? 'Save' : 'Confirm'}
           </Button>
         </>
       }
@@ -67,7 +84,7 @@ export function ChildPartModal({ open, onClose, onConfirm, statusChange, confirm
           onConfirm(title.trim());
         }}
       >
-        {statusChange && (
+        {statusChange && !editing && (
           <Banner tone="warning" title="Status will change" live="off">
             The status of this AV is {statusChange.from}. If a new child part is added, the AV will be returned to {statusChange.to}.
           </Banner>

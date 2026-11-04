@@ -20,7 +20,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `MultipartSection` | An AV's list of parts, viewing or editing |
-| `ChildPartModal` | What **Add Part** should open |
+| `ChildPartModal` | What **Add Part** (`new`) and a row's edit button (`edit`) should open |
 | `MultipartRow` | One part, anywhere else |
 
 ## Props
@@ -30,6 +30,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `parts` | `MultipartPart[]` | required | In order: the first is part 1. `id`, `title`, `assignee?`, `capacityPoints?`, `dueDate?`, `dueProximity?`, `status?`, `customStatus?`, `completed?` |
 | `hint` | `string` | — | The info glyph's words. **Figma draws the glyph, not its text**; without `hint` there is no glyph |
 | `onOpenPart` | `(part) => void` | — | A title was pressed. Opening it is the page's |
+| `onEditPartTitle` | `(part) => void` | — | A row's edit button (shown on hover or focus) was pressed. Renaming is the page's: open `ChildPartModal` in `edit` mode |
 | `onAddPart` | `() => void` | — | **Add Part** (editing). Leave it out to hide the button |
 
 ## Progress is worked out here
@@ -40,12 +41,20 @@ A part is done when `completed` is true, or its `status` is `Completed`. The per
 ## Layout
 
 The rows share one grid (`MultipartRowGroup`): the points, the dates and the status tags line up in columns, and the status column is only as wide as
-the widest tag. **Under 56rem wide the rows stack** (number and title on top, the rest beneath) rather than scroll.
+the widest tag. **Under 48rem wide the rows stack** (number and title on top, the rest beneath) rather than scroll.
+
+## The flows (the `OnThePage` story)
+
+| Press | What the page does |
+|---|---|
+| **Add Part** | Opens `ChildPartModal` (`new`; with `statusChange` when the AV is completed). Confirm adds the part, with the default title "(4/4) Parent AV Title" if the field was blank |
+| A row's **edit button** | Opens it (`edit`) with the current title. Save renames the part; a blank title puts the default back |
 
 ## Tokens
 
-`surface.elevated`, `radius.md`, `space.16`; heading `body-md-semibold`, the summary `body-sm-regular` `text.tertiary`; the bar is `ProgressBar`'s
-brand tone; **Add Part** is the `secondary` `Button`, full width.
+`surface.elevated`, `radius.md`, `space.16` all round and between the header and the rows. The heading is `title-sm-semibold` (16) `text.primary` with a 16 info glyph;
+the summary is `label-sm-medium` (14) `text.tertiary`; the bar is `ProgressBar`'s (8 high, brand fill), 8 under the heading. The rows are 12 apart, and **Add Part** (the `secondary`
+`Button`, full width) is 12 under them.
 
 ## Accessibility
 

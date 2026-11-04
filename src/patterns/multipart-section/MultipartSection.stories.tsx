@@ -1,7 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { MultipartSection, type MultipartPart } from './MultipartSection';
+import { ChildPartModal } from '../child-part-modal';
 
 const PARTS: MultipartPart[] = [
   { id: 1, title: '(1/3) Parent AV Title is Here', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: 'October 1, 2025', customStatus: 'Ready for Deploy' },
@@ -22,10 +23,10 @@ const meta = {
       },
     },
   },
-  args: { parts: PARTS, hint: 'An Added Value split into parts, each with its own assignee, due date and capacity points.', onOpenPart: fn() },
+  args: { parts: PARTS, hint: 'An Added Value split into parts, each with its own assignee, due date and capacity points.', onOpenPart: fn(), onEditPartTitle: fn() },
   decorators: [
     (Story) => (
-      <div className="max-w-3xl bg-surface-canvas p-6">
+      <div className="max-w-5xl bg-surface-canvas p-6">
         <Story />
       </div>
     ),
@@ -73,6 +74,92 @@ export const AllDone: Story = {
   },
 };
 
+/* ---- The flows: add a part, and rename one — what the section asks for, and what the page does about it. ---- */
+
+const PARENT = 'Parent AV Title is Here';
+
+function EditingPage({ completed }: { completed?: boolean }) {
+  const [parts, setParts] = React.useState<MultipartPart[]>(PARTS.map((part) => ({ ...part })));
+  const [adding, setAdding] = React.useState(false);
+  const [renaming, setRenaming] = React.useState<MultipartPart | null>(null);
+
+  /* The default title is the page's to work out: "(X/X) Parent AV Title". */
+  const defaultTitle = (position: number, of: number) => `(${position}/${of}) ${PARENT}`;
+
+  return (
+    <>
+      <MultipartSection parts={parts} onOpenPart={fn()} onAddPart={() => setAdding(true)} onEditPartTitle={setRenaming} />
+      <ChildPartModal
+        open={adding}
+        onClose={() => setAdding(false)}
+        statusChange={completed ? { from: 'Completed', to: 'In Progress' } : undefined}
+        onConfirm={(title) => {
+          const total = parts.length + 1;
+          setParts((all) => [...all, { id: total, title: title || defaultTitle(total, total), status: 'Accepted' }]);
+          setAdding(false);
+        }}
+      />
+      <ChildPartModal
+        open={renaming !== null}
+        mode="edit"
+        initialTitle={renaming?.title}
+        onClose={() => setRenaming(null)}
+        onConfirm={(title) => {
+          if (!renaming) return;
+          const position = parts.findIndex((part) => part.id === renaming.id) + 1;
+          setParts((all) => all.map((part) => (part.id === renaming.id ? { ...part, title: title || defaultTitle(position, all.length) } : part)));
+          setRenaming(null);
+        }}
+      />
+    </>
+  );
+}
+
+/**
+ * Figma's flows. **Add Part** opens the dialog; a blank title becomes "(4/4) Parent AV Title is Here" and the new part reads "- CP". **Hovering a row
+ * shows its edit button**, which opens the same dialog to rename it; a blank title there puts the default back. The section only asked.
+ */
+export const OnThePage: Story = {
+  decorators: [(Story) => <Story />],
+  render: () => <EditingPage />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    /* Add Part, with the title left blank: the default is used. */
+    await userEvent.click(c.getByRole('button', { name: 'Add Part' }));
+    const add = await screen.findByRole('dialog', { name: 'Add a New Child Part to Multipart AV' });
+    await userEvent.click(within(add).getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(c.getByRole('button', { name: 'Part 4: (4/4) Parent AV Title is Here' })).toBeVisible());
+    await expect(c.getByText('- CP')).toBeVisible();
+
+    /* Rename part 2 through its edit button. */
+    await userEvent.click(c.getByRole('button', { name: 'Edit title of part 2' }));
+    const edit = await screen.findByRole('dialog', { name: 'Edit Child Part Title' });
+    await expect(within(edit).getByRole('textbox', { name: 'Title' })).toHaveValue('Some Parent AV Title');
+    await userEvent.clear(within(edit).getByRole('textbox', { name: 'Title' }));
+    await userEvent.type(within(edit).getByRole('textbox', { name: 'Title' }), 'Backend{Enter}');
+    await waitFor(() => expect(c.getByRole('button', { name: 'Part 2: Backend' })).toBeVisible());
+
+    /* Rename it again, leaving the title blank: the default is back. */
+    await userEvent.click(c.getByRole('button', { name: 'Edit title of part 2' }));
+    const again = await screen.findByRole('dialog', { name: 'Edit Child Part Title' });
+    await userEvent.clear(within(again).getByRole('textbox', { name: 'Title' }));
+    await userEvent.click(within(again).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(c.getByRole('button', { name: 'Part 2: (2/4) Parent AV Title is Here' })).toBeVisible());
+  },
+};
+
+/** Adding a part to a **completed** Added Value: the dialog warns that its status will change. */
+export const AddingToACompletedAV: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <EditingPage completed />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Add Part' }));
+    const add = await screen.findByRole('dialog', { name: 'Add a New Child Part to Multipart AV' });
+    await expect(within(add).getByText('Status will change')).toBeVisible();
+  },
+};
+
 /** Squeezed, the rows stack: the number and title on top, the rest beneath, left-aligned. Nothing scrolls sideways. */
 export const Narrow: Story = {
   decorators: [
@@ -91,7 +178,7 @@ export const Narrow: Story = {
   },
 };
 
-/** Wide, the rows share one grid: "Due Date:" starts in the same column and the status tags start at the same edge. */
+/** Wide, the rows share one grid: "Due Date:" starts in the same column and the status tags end at the same edge. */
 export const Wide: Story = {
   decorators: [
     (Story) => (
@@ -104,8 +191,9 @@ export const Wide: Story = {
     const c = within(canvasElement);
     const left = (el: HTMLElement) => Math.round(el.getBoundingClientRect().left);
     await expect(new Set(c.getAllByText('Due Date:').map(left)).size).toBe(1);
+    const right = (el: HTMLElement) => Math.round(el.getBoundingClientRect().right);
     const tags = ['Ready for Deploy', 'Completed', 'Accepted'].map((t) => c.getByText(t));
-    await expect(new Set(tags.map(left)).size).toBe(1);
+    await expect(new Set(tags.map(right)).size).toBe(1);
   },
 };
 

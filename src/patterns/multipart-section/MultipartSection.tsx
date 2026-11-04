@@ -14,10 +14,10 @@ import { MultipartRow, MultipartRowGroup, type MultipartRowProps } from '../../c
  * - **The progress is the parts'**: a part is done when its `completed` is true, or when its `status` is `Completed`. The summary and the
  *   bar are worked out here from `parts`, so they can never disagree with the rows.
  * - **The rows share one grid** (`MultipartRowGroup`), so their points, dates and status tags line up in columns, and the status column is only
- *   as wide as the widest tag. **Under 56rem wide the rows stack** instead (number and title on top, the rest beneath).
+ *   as wide as the widest tag. **Under 48rem wide the rows stack** instead (number and title on top, the rest beneath).
  * - **`hint`** is the info glyph's words. Figma draws the glyph but not its text, so without `hint` there is no glyph.
- * - **It does nothing itself.** `onOpenPart` and `onAddPart` only ask: opening the part, and asking for the new part's title
- *   (`ChildPartModal`), are the page's.
+ * - **It does nothing itself.** `onOpenPart`, `onEditPartTitle` and `onAddPart` only ask: opening the part, and asking for a part's title
+ *   (`ChildPartModal`, to add one or to rename one), are the page's.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -37,11 +37,13 @@ export interface MultipartSectionProps extends Omit<React.HTMLAttributes<HTMLEle
   hint?: string;
   /** A part's title was pressed. Opening it is the page's. */
   onOpenPart?: (part: MultipartPart) => void;
+  /** A part's edit button (shown when its row is hovered or focused) was pressed. Asking for the new title (`ChildPartModal`, `edit`) is the page's. */
+  onEditPartTitle?: (part: MultipartPart) => void;
   /** **Add Part** was pressed (editing only: leave it out to hide the button). Asking for the title is the page's. */
   onAddPart?: () => void;
 }
 
-export function MultipartSection({ className, parts, hint, onOpenPart, onAddPart, ...props }: MultipartSectionProps) {
+export function MultipartSection({ className, parts, hint, onOpenPart, onEditPartTitle, onAddPart, ...props }: MultipartSectionProps) {
   const total = parts.length;
   const done = parts.filter((part) => part.completed ?? part.status === 'Completed').length;
   const percent = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -54,59 +56,64 @@ export function MultipartSection({ className, parts, hint, onOpenPart, onAddPart
       className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
       {...props}
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5">
-          <h2 id={headingId} className="m-0 text-body-md-semibold text-text-primary">
-            Multipart
-          </h2>
-          {hint && (
-            <Tooltip content={hint}>
-              <button
-                type="button"
-                aria-label="About Multipart"
-                className={cn(
-                  'grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary',
-                  'hover:text-text-secondary',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                )}
-              >
-                <Icon name="info" size="md" />
-              </button>
-            </Tooltip>
-          )}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1">
+            <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
+              Multipart
+            </h2>
+            {hint && (
+              <Tooltip content={hint}>
+                <button
+                  type="button"
+                  aria-label="About Multipart"
+                  className={cn(
+                    'grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary',
+                    'hover:text-text-secondary',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                  )}
+                >
+                  <Icon name="info" size="sm" />
+                </button>
+              </Tooltip>
+            )}
+          </div>
+          <span className="text-label-sm-medium text-text-tertiary">{summary}</span>
         </div>
-        <span className="text-body-sm-regular text-text-tertiary">{summary}</span>
+        <ProgressBar value={percent} aria-label={`Multipart progress: ${summary}`} />
       </div>
-      <ProgressBar value={percent} aria-label={`Multipart progress: ${summary}`} />
-      <MultipartRowGroup>
-        {parts.map((part, index) => (
-          <MultipartRow
-            key={part.id}
-            number={index + 1}
-            title={part.title}
-            assignee={part.assignee}
-            capacityPoints={part.capacityPoints}
-            dueDate={part.dueDate}
-            dueProximity={part.dueProximity}
-            status={part.status}
-            customStatus={part.customStatus}
-            completed={part.completed}
-            onOpen={onOpenPart ? () => onOpenPart(part) : undefined}
-          />
-        ))}
-      </MultipartRowGroup>
-      {onAddPart && (
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          fullWidth
-          iconLeft={<Icon name="plus" size="sm" />}
-          onClick={onAddPart}
-        >
-          Add Part
-        </Button>
-      )}
+      <div className="flex flex-col gap-3">
+        <MultipartRowGroup>
+          {parts.map((part, index) => (
+            <MultipartRow
+              key={part.id}
+              number={index + 1}
+              title={part.title}
+              assignee={part.assignee}
+              capacityPoints={part.capacityPoints}
+              dueDate={part.dueDate}
+              dueProximity={part.dueProximity}
+              status={part.status}
+              customStatus={part.customStatus}
+              completed={part.completed}
+              onOpen={onOpenPart ? () => onOpenPart(part) : undefined}
+              onEditTitle={onEditPartTitle ? () => onEditPartTitle(part) : undefined}
+            />
+          ))}
+        </MultipartRowGroup>
+        {onAddPart && (
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            fullWidth
+            iconLeft={<Icon name="plus" size="sm" />}
+            onClick={onAddPart}
+          >
+            Add Part
+          </Button>
+        )}
+      </div>
     </section>
   );
 }

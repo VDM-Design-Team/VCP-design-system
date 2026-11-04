@@ -1,6 +1,6 @@
 # ChildPartModal *(pattern)*
 
-Asks for the title of a new part before it is added to a multipart Added Value. Built to Figma's `Multipart_Child_Part_Modal` (both variants).
+Asks for the title of a part of a multipart Added Value: a new one (before it is added) or an existing one (to rename it). Built to Figma's `Multipart_Child_Part_Modal` (all three variants).
 
 ## Composed of
 
@@ -18,7 +18,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `ChildPartModal` | **Add Part** on a multipart AV |
+| `ChildPartModal` | **Add Part** on a multipart AV (`new`), and a part's edit button (`edit`) |
 | `MultipartSection` | What opens it |
 
 ## Props
@@ -26,8 +26,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `open` / `onClose` | `boolean` / `() => void` | required | You own `open`; Escape and Cancel ask to close |
-| `onConfirm` | `(title: string) => void` | required | The typed title, trimmed. **Empty means "use the default"** |
-| `statusChange` | `{ from, to }` | — | Shows the **Status will change** warning: "The status of this AV is Completed. If a new child part is added, the AV will be returned to In Progress." |
+| `mode` | `new \| edit` | `new` | `new`: "Add a New Child Part to Multipart AV", **Confirm**. `edit`: "Edit Child Part Title", **Save** |
+| `initialTitle` | `string` | — | `edit`: the current title, which the field starts with |
+| `onConfirm` | `(title: string) => void` | required | The typed title, trimmed. **Empty means "use the default"** (also when renaming) |
+| `statusChange` | `{ from, to }` | — | `new` only. Shows the **Status will change** warning: "The status of this AV is Completed. If a new child part is added, the AV will be returned to In Progress." |
 | `confirming` | `boolean` | — | Confirm spins; the field and Cancel lock |
 | `error` | `string` | — | What only the server knows |
 
