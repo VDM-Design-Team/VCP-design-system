@@ -2,6 +2,10 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Field } from './Field';
 import { Button } from '../../atoms/button';
+import { Input } from '../../atoms/input';
+import { Select } from '../../atoms/select';
+import { Textarea } from '../../atoms/textarea';
+import { expect, within } from 'storybook/test';
 
 /**
  * A plain control used only to demonstrate Field. Replace with the real
@@ -218,4 +222,31 @@ export const LightAndDark: Story = {
       </div>
     </div>
   ),
+};
+
+/**
+ * A `Field` with an `error` turns its control's **edge red** as well as showing the message: the control is `aria-invalid`, and `Input`, `Select`, `Textarea` and `SearchSelect` draw the critical border for
+ * that — nothing to pass but the `error`.
+ */
+export const ErrorTurnsTheEdgeRed: Story = {
+  render: () => (
+    <div className="flex w-96 flex-col gap-6">
+      <Field label="Name" error="Enter a name.">
+        <Input />
+      </Field>
+      <Field label="Type" error="Select a type.">
+        <Select placeholder="Select a type" options={['One', 'Two']} />
+      </Field>
+      <Field label="Notes" error="Add a note.">
+        <Textarea />
+      </Field>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const edge = (el: HTMLElement) => el.closest('[class*="border-accent-critical-outline-border-default"]') ?? el;
+    await expect(edge(c.getByRole('textbox', { name: 'Name' })).className).toContain('border-accent-critical-outline-border-default');
+    await expect(edge(c.getByRole('combobox', { name: 'Type' })).className).toContain('border-accent-critical-outline-border-default');
+    await expect(c.getByRole('textbox', { name: 'Notes' }).className).toContain('border-accent-critical-outline-border-default');
+  },
 };

@@ -63,6 +63,8 @@ export interface DateFieldProps {
   id?: string;
   'aria-describedby'?: string;
   invalid?: boolean;
+  /** From a `Field` with an error: the field is invalid, as `invalid` says. */
+  'aria-invalid'?: boolean | 'true' | 'false';
   disabled?: boolean;
   /** `min`, `max`, `today` and the rest go to the `DatePicker`. */
   picker?: Omit<DatePickerProps, 'value' | 'onChange' | 'mode' | 'clearable' | 'onClear' | 'clearLabel'>;
@@ -79,7 +81,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       estimated,
       placeholder = '-',
       id,
-      invalid,
+      invalid: invalidProp,
+      'aria-invalid': ariaInvalid,
       disabled,
       picker,
       className,
@@ -89,6 +92,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    const invalid = invalidProp || ariaInvalid === true || ariaInvalid === 'true';
     return (
       <Popover
         open={open}
