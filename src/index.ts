@@ -37,6 +37,7 @@ export * from './components/assignee-selection-dropdown';
 export * from './components/assignee-with-status';
 export * from './components/attachment-viewer';
 export * from './components/avatar-group';
+export * from './components/changelog-item';
 export * from './components/banner';
 export * from './components/breadcrumb';
 export * from './components/carousel';
