@@ -106,6 +106,29 @@ export const MonthModeReportsTheFirst: Story = {
   },
 };
 
+/** The calendar has no Clear button, in either mode: there is nothing for it to do in a field. */
+export const NoClearButton: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div className="flex w-64 flex-col gap-3">
+      <DateField aria-label="Day" value="2026-03-12" />
+      <DateField aria-label="Month" mode="month" value="2026-09-01" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const body = within(document.body);
+    await userEvent.click(c.getByRole('combobox', { name: 'Day' }));
+    await body.findByRole('button', { name: /^15\b/ });
+    await expect(body.queryByRole('button', { name: 'Clear' })).toBeNull();
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(c.getByRole('combobox', { name: 'Month' }));
+    await body.findByRole('button', { name: 'March 2026' });
+    await expect(body.queryByRole('button', { name: 'Clear' })).toBeNull();
+  },
+};
+
 /** `formatMonth` reads in UTC, so no time zone can move the month. */
 export const FormatsInUTC: Story = {
   tags: ['!dev', '!autodocs'],

@@ -123,6 +123,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
           <DatePicker
             mode={mode}
             value={value}
+            /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
+            clearable={false}
             onChange={(iso) => {
               onChange?.(iso);
               setOpen(false);
