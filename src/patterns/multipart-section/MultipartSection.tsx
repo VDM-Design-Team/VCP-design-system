@@ -4,7 +4,7 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { ProgressBar } from '../../atoms/progress-bar';
 import { Tooltip } from '../../atoms/tooltip';
-import { MultipartRow, type MultipartRowProps } from '../../components/multipart-row';
+import { MultipartRow, MultipartRowGroup, type MultipartRowProps } from '../../components/multipart-row';
 
 /**
  * MultipartSection — the card on an Added Value's page that lists its parts: a **Multipart** heading (with an info hint), "33% (1/3 parts
@@ -13,8 +13,8 @@ import { MultipartRow, type MultipartRowProps } from '../../components/multipart
  *
  * - **The progress is the parts'**: a part is done when its `completed` is true, or when its `status` is `Completed`. The summary and the
  *   bar are worked out here from `parts`, so they can never disagree with the rows.
- * - **It scrolls sideways when it is squeezed**, as Figma's "Small Screen Width": the rows keep a floor width and the list gets a scrollbar,
- *   and is a focusable region (arrow keys scroll) only while it actually overflows.
+ * - **The rows share one grid** (`MultipartRowGroup`), so their points, dates and status tags line up in columns, and the status column is only
+ *   as wide as the widest tag. **Under 56rem wide the rows stack** instead (number and title on top, the rest beneath).
  * - **`hint`** is the info glyph's words. Figma draws the glyph but not its text, so without `hint` there is no glyph.
  * - **It does nothing itself.** `onOpenPart` and `onAddPart` only ask: opening the part, and asking for the new part's title
  *   (`ChildPartModal`), are the page's.
@@ -48,24 +48,10 @@ export function MultipartSection({ className, parts, hint, onOpenPart, onAddPart
   const summary = `${percent}% (${done}/${total} parts completed)`;
   const headingId = React.useId();
 
-  /* The list scrolls sideways when the rows cannot fit; it is a focusable region only then (an unfocusable scroller fails axe). */
-  const scroller = React.useRef<HTMLDivElement>(null);
-  const [overflowing, setOverflowing] = React.useState(false);
-  React.useEffect(() => {
-    const el = scroller.current;
-    if (!el) return undefined;
-    const measure = () => setOverflowing(el.scrollWidth > el.clientWidth + 1);
-    measure();
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [total]);
-
   return (
     <section
       aria-labelledby={headingId}
-      className={cn('flex flex-col gap-2 rounded-md bg-surface-elevated p-4 font-sans', className)}
+      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
       {...props}
     >
       <div className="flex items-center justify-between gap-4">
@@ -92,32 +78,23 @@ export function MultipartSection({ className, parts, hint, onOpenPart, onAddPart
         <span className="text-body-sm-regular text-text-tertiary">{summary}</span>
       </div>
       <ProgressBar value={percent} aria-label={`Multipart progress: ${summary}`} />
-      <div
-        ref={scroller}
-        className="overflow-x-auto pb-2"
-        tabIndex={overflowing ? 0 : undefined}
-        role={overflowing ? 'region' : undefined}
-        aria-label={overflowing ? 'Parts, scrolls sideways' : undefined}
-      >
-        <ul className="m-0 flex list-none flex-col gap-3 p-0">
-          {parts.map((part, index) => (
-            <li key={part.id} className="list-none">
-              <MultipartRow
-                number={index + 1}
-                title={part.title}
-                assignee={part.assignee}
-                capacityPoints={part.capacityPoints}
-                dueDate={part.dueDate}
-                dueProximity={part.dueProximity}
-                status={part.status}
-                customStatus={part.customStatus}
-                completed={part.completed}
-                onOpen={onOpenPart ? () => onOpenPart(part) : undefined}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
+      <MultipartRowGroup>
+        {parts.map((part, index) => (
+          <MultipartRow
+            key={part.id}
+            number={index + 1}
+            title={part.title}
+            assignee={part.assignee}
+            capacityPoints={part.capacityPoints}
+            dueDate={part.dueDate}
+            dueProximity={part.dueProximity}
+            status={part.status}
+            customStatus={part.customStatus}
+            completed={part.completed}
+            onOpen={onOpenPart ? () => onOpenPart(part) : undefined}
+          />
+        ))}
+      </MultipartRowGroup>
       {onAddPart && (
         <Button
           type="button"

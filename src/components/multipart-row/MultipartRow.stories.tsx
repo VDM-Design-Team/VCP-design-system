@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { MultipartRow } from './MultipartRow';
+import { MultipartRow, MultipartRowGroup } from './MultipartRow';
 
 const meta = {
   title: 'Components/Data Display/MultipartRow',
@@ -24,9 +24,17 @@ const meta = {
     customStatus: 'Ready for Deploy',
     onOpen: fn(),
   },
+  /* A row is a subgrid: it always lives in a `MultipartRowGroup`. */
+  render: (args) => (
+    <div className="max-w-3xl">
+      <MultipartRowGroup>
+        <MultipartRow {...args} />
+      </MultipartRowGroup>
+    </div>
+  ),
   decorators: [
     (Story) => (
-      <div className="max-w-3xl bg-surface-canvas p-6">
+      <div className="bg-surface-canvas p-6">
         <Story />
       </div>
     ),
@@ -83,6 +91,31 @@ export const NotOpenable: Story = {
   args: { onOpen: undefined },
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).queryByRole('button')).toBeNull();
+  },
+};
+
+/**
+ * Together, rows share their columns: whatever the status or the points, each column starts at the same place in every row, and the
+ * status column is only as wide as the widest tag.
+ */
+export const Aligned: Story = {
+  render: (args) => (
+    <div className="w-[72rem]">
+      <MultipartRowGroup>
+        <MultipartRow {...args} number={1} title="Some Parent Title Here (1/3)" customStatus="Ready for Deploy" />
+        <MultipartRow {...args} number={2} title="Some Parent Title Here (2/3)" customStatus={undefined} status="Completed" capacityPoints={5} />
+        <MultipartRow {...args} number={3} title="Some Parent Title Here (3/3)" customStatus={undefined} status="Accepted" dueDate="Oct 1, 2025" />
+      </MultipartRowGroup>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const left = (el: HTMLElement) => Math.round(el.getBoundingClientRect().left);
+    /* "Due Date:" starts in the same column in every row, whatever the points before it... */
+    await expect(new Set(c.getAllByText('Due Date:').map(left)).size).toBe(1);
+    /* ...and so do the status tags, whatever their width. */
+    const tags = ['Ready for Deploy', 'Completed', 'Accepted'].map((t) => c.getByText(t));
+    await expect(new Set(tags.map(left)).size).toBe(1);
   },
 };
 

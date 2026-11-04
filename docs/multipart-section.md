@@ -37,10 +37,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 A part is done when `completed` is true, or its `status` is `Completed`. The percentage, "(1/3 parts completed)" and the bar all come from
 `parts`, so they cannot disagree with the rows.
 
-## Narrow
+## Layout
 
-Rows keep a floor width; below it the list scrolls sideways (Figma's "Small Screen Width"). The scroller is a focusable region (arrow keys)
-**only while it overflows**.
+The rows share one grid (`MultipartRowGroup`): the points, the dates and the status tags line up in columns, and the status column is only as wide as
+the widest tag. **Under 56rem wide the rows stack** (number and title on top, the rest beneath) rather than scroll.
 
 ## Tokens
 

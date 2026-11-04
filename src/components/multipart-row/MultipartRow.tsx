@@ -10,8 +10,14 @@ import { StatusTag, type AVStatus } from '../status-tag';
  * status. Built to Figma's `Multipart_Section` rows (`_Multipart_Row_*`).
  *
  * Left to right: **the number** (a grey disc; **green when the part is completed**), **the title** (cut with "…" when long, and the button
- * that opens the part when `onOpen` is given), **the assignee's avatar**, **capacity points** ("10 CP"), **"Due Date:"** with the date, a
- * rule, and **the status**. A part with no points or date yet reads "- CP" and "-" (Figma's empty child).
+ * that opens the part when `onOpen` is given), **the assignee's avatar**, **capacity points** ("10 CP"), **"Due Date:"**, **the date**, a rule,
+ * and **the status**. A part with no points or date yet reads "- CP" and "-" (Figma's empty child).
+ *
+ * **Rows line up with each other because they share one grid.** A row is a *subgrid* of its `MultipartRowGroup`: every column (number, title,
+ * avatar, points, "Due Date:", date, rule, status) is as wide as its widest cell across *all* the rows, so the points, the dates and the status
+ * tags sit in straight columns, and the status column is only as wide as the widest tag. The title takes the spare room and is cut with "…".
+ * **Below a container width of 56rem the rows stack** (the number and title on top, the rest beneath, left-aligned) and the grid goes away.
+ * A row must be inside a `MultipartRowGroup`; `MultipartSection` does that for you.
  *
  * - **Status** is a spine status (`status`, "Completed") or a domain step's own words (`customStatus`, "Ready for Deploy"); `StatusTag` owns
  *   the colour either way.
@@ -19,13 +25,14 @@ import { StatusTag, type AVStatus } from '../status-tag';
  * - **It does nothing itself.** `onOpen` only asks; the page opens the part.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
- * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
+ * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. The one arbitrary class is the group's column list
+ * (a grid template has no token). ds-lint-ignore
  */
-export interface MultipartRowProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+export interface MultipartRowProps extends Omit<React.LiHTMLAttributes<HTMLLIElement>, 'title'> {
   /** The part's place in the sequence: 1, 2, 3. */
   number: number;
   title: string;
-  /** The assigned person. Without one the avatar's place stays empty. */
+  /** The assigned person. Without one the avatar's column stays empty. */
   assignee?: { name: string; src?: string };
   /** Capacity points. `null` or left out reads "- CP". */
   capacityPoints?: number | null;
@@ -42,7 +49,31 @@ export interface MultipartRowProps extends Omit<React.HTMLAttributes<HTMLDivElem
   onOpen?: () => void;
 }
 
-export const MultipartRow = React.forwardRef<HTMLDivElement, MultipartRowProps>(
+/**
+ * MultipartRowGroup — the list the rows live in, and the grid their columns are shared on: number, title (the spare room), avatar, points,
+ * "Due Date:", date, rule, status. Wider than 56rem (its own width, not the viewport's) it is that grid; narrower, a plain column of stacked rows.
+ */
+export const MultipartRowGroup = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
+  ({ className, ...props }, ref) => (
+    <div className="@container">
+      <ul
+        ref={ref}
+        className={cn(
+          'm-0 flex list-none flex-col gap-4 p-0',
+          '@4xl:grid @4xl:grid-cols-[2rem_minmax(16rem,1fr)_2rem_max-content_max-content_max-content_1.5rem_max-content] @4xl:gap-y-5',
+          className,
+        )}
+        {...props}
+      />
+    </div>
+  ),
+);
+MultipartRowGroup.displayName = 'MultipartRowGroup';
+
+/* Stacked, a cell after the title sits under it in the second column; on the grid it is its own column. */
+const STACKED = 'col-start-2 justify-self-start @4xl:col-auto';
+
+export const MultipartRow = React.forwardRef<HTMLLIElement, MultipartRowProps>(
   (
     {
       className,
@@ -61,12 +92,19 @@ export const MultipartRow = React.forwardRef<HTMLDivElement, MultipartRowProps>(
     ref,
   ) => {
     const done = completed ?? status === 'Completed';
+    const name = (
+      <>
+        <span className="sr-only">Part {number}: </span>
+        {title}
+      </>
+    );
     return (
-      <div
+      <li
         ref={ref}
         className={cn(
-          'flex min-w-160 items-center gap-4 rounded-sm border border-stroke-default bg-surface-elevated px-4 py-3 font-sans',
+          'grid list-none grid-cols-[2rem_1fr] items-center gap-x-4 gap-y-3 rounded-sm border border-stroke-default bg-surface-elevated p-4 font-sans',
           'transition-colors hover:bg-surface-brand-base',
+          '@4xl:col-span-full @4xl:grid-cols-subgrid @4xl:gap-y-0 @4xl:px-4 @4xl:py-0 @4xl:min-h-20',
           className,
         )}
         {...props}
@@ -74,7 +112,7 @@ export const MultipartRow = React.forwardRef<HTMLDivElement, MultipartRowProps>(
         <span
           aria-hidden="true"
           className={cn(
-            'grid size-6 shrink-0 place-items-center rounded-full text-caption-md-medium',
+            'grid size-8 place-items-center rounded-full text-label-sm-medium',
             done
               ? 'bg-accent-success-filled-surface-default text-accent-success-filled-content-default'
               : 'bg-surface-neutral-subtle text-text-secondary',
@@ -87,38 +125,35 @@ export const MultipartRow = React.forwardRef<HTMLDivElement, MultipartRowProps>(
             type="button"
             onClick={onOpen}
             className={cn(
-              'min-w-0 flex-1 truncate rounded-sm text-left text-body-sm-medium text-text-primary',
+              'min-w-0 truncate rounded-sm text-left text-body-md-semibold text-text-primary',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
           >
-            <span className="sr-only">Part {number}: </span>
-            {title}
+            {name}
           </button>
         ) : (
-          <span className="min-w-0 flex-1 truncate text-body-sm-medium text-text-primary">
-            <span className="sr-only">Part {number}: </span>
-            {title}
-          </span>
+          <span className="min-w-0 truncate text-body-md-semibold text-text-primary">{name}</span>
         )}
         {assignee ? (
           /* The name is read out here for a screen reader; the picture is decoration. */
-          <span className="shrink-0">
+          <span className={cn('flex justify-center', STACKED)}>
             <Avatar size="md" name={assignee.name} src={assignee.src} standalone />
           </span>
         ) : (
-          <span aria-hidden="true" className="size-8 shrink-0" />
+          <span aria-hidden="true" className="hidden @4xl:block" />
         )}
-        <Badge size="lg" className="shrink-0">
+        <Badge size="lg" className={STACKED}>
           {capacityPoints == null ? '-' : capacityPoints} CP
         </Badge>
-        <span className="flex shrink-0 items-center gap-2 text-body-sm-regular text-text-tertiary">
-          Due Date:
-          <DueDateTag proximity={dueProximity}>{dueDate ?? '-'}</DueDateTag>
-        </span>
-        <span className="flex w-44 shrink-0 items-center justify-end self-stretch border-s border-stroke-default ps-4">
+        <span className={cn('whitespace-nowrap text-body-sm-regular text-text-tertiary', STACKED)}>Due Date:</span>
+        <DueDateTag proximity={dueProximity} className={STACKED}>
+          {dueDate ?? '-'}
+        </DueDateTag>
+        <span aria-hidden="true" className="hidden h-11 w-px justify-self-center bg-stroke-default @4xl:block" />
+        <span className={cn('flex justify-end', STACKED)}>
           {customStatus ? <StatusTag custom={customStatus} /> : status ? <StatusTag status={status} /> : null}
         </span>
-      </div>
+      </li>
     );
   },
 );

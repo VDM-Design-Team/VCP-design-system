@@ -18,7 +18,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `MultipartRow` | A part of a multipart AV, in a list of parts |
+| `MultipartRow` | A part of a multipart AV, inside a `MultipartRowGroup` |
 | `MultipartSection` | The whole card of them, with progress |
 
 ## Props
@@ -35,15 +35,20 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `completed` | `boolean` | `status === 'Completed'` | Turns the number green |
 | `onOpen` | `() => void` | — | The title was pressed. It **asks**: the page opens the part |
 
-## Layout
+## Layout — rows share one grid
 
-Number, title (takes the spare room), avatar, points, "Due Date:" and the date, a rule, then the status in a cell of **fixed width, right-aligned**,
-so the columns line up from row to row. A floor width (`min-w-160`) keeps it from crushing; the section scrolls sideways below it.
+A row is a **subgrid** of its `MultipartRowGroup` (the list; `MultipartSection` uses it). The columns are: number, title, avatar, points,
+"Due Date:", date, a rule, status. **Each column is as wide as its widest cell across all the rows**, so the points, the dates and the status
+tags start in straight columns whatever their content, and the status column is only as wide as the widest tag. The title takes the spare room
+(at least 16rem) and is cut with "…".
+
+**Under 56rem wide (the group's own width, not the viewport's) the rows stack**: the number and title on top, the avatar, points, due date and
+status beneath, left-aligned, with no rule. A row must be inside a `MultipartRowGroup`: `<MultipartRowGroup><MultipartRow … /></MultipartRowGroup>`.
 
 ## Tokens
 
-`surface.elevated`, `stroke.default` border, `radius.sm`; hover `surface.brand.base`. The number: `surface.neutral.subtle` on `text.secondary`, or
-`accent.success.filled` when done. Title `body-sm-medium` `text.primary`; "Due Date:" `body-sm-regular` `text.tertiary`.
+`surface.elevated`, `stroke.default` border, `radius.sm`; hover `surface.brand.base`. The number (32): `surface.neutral.subtle` on `text.secondary`, or
+`accent.success.filled` when done. Title `body-md-semibold` `text.primary`; "Due Date:" `body-sm-regular` `text.tertiary`.
 
 ## Accessibility
 

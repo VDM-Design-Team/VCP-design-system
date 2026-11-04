@@ -73,7 +73,7 @@ export const AllDone: Story = {
   },
 };
 
-/** Squeezed: the rows keep a floor width and the list scrolls sideways — and is a focusable region only while it does. */
+/** Squeezed, the rows stack: the number and title on top, the rest beneath, left-aligned. Nothing scrolls sideways. */
 export const Narrow: Story = {
   decorators: [
     (Story) => (
@@ -84,7 +84,28 @@ export const Narrow: Story = {
   ],
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await expect(await c.findByRole('region', { name: 'Parts, scrolls sideways' })).toHaveAttribute('tabindex', '0');
+    const row = c.getAllByRole('listitem')[0];
+    await expect(getComputedStyle(row).gridTemplateColumns.split(' ')).toHaveLength(2);
+    const list = row.parentElement as HTMLElement;
+    await expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth + 1);
+  },
+};
+
+/** Wide, the rows share one grid: "Due Date:" starts in the same column and the status tags start at the same edge. */
+export const Wide: Story = {
+  decorators: [
+    (Story) => (
+      <div className="w-[72rem] bg-surface-canvas p-6">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const left = (el: HTMLElement) => Math.round(el.getBoundingClientRect().left);
+    await expect(new Set(c.getAllByText('Due Date:').map(left)).size).toBe(1);
+    const tags = ['Ready for Deploy', 'Completed', 'Accepted'].map((t) => c.getByText(t));
+    await expect(new Set(tags.map(left)).size).toBe(1);
   },
 };
 
