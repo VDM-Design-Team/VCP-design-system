@@ -163,3 +163,34 @@ export const ValueWeight: Story = {
     await expect(weight('Filter')).toBe(400);
   },
 };
+
+/**
+ * Range mode: two clicks on a two-month calendar, then **Apply**. Nothing reaches the page until then; **Clear** empties it. The field reads the range in the day format it is given.
+ */
+export const RangeMode: Story = {
+  render: () => {
+    const [range, setRange] = React.useState<{ start?: string; end?: string }>({});
+    return (
+      <DateField
+        mode="range"
+        placeholder="Select period"
+        value={range.start}
+        rangeEnd={range.end}
+        formatDate={(iso) => iso.split('-').reverse().join('/')}
+        onRangeChange={(start, end) => setRange({ start: start || undefined, end })}
+        picker={{ today: '2026-05-01' }}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole('combobox');
+    await userEvent.click(field);
+    const body = within(document.body);
+    const first = within(await body.findByRole('group', { name: 'First calendar' }));
+    await userEvent.click(first.getByRole('button', { name: /^4 / }));
+    await expect(field).toHaveValue('');
+    await userEvent.click(first.getByRole('button', { name: /^6 / }));
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await expect(field).toHaveValue('04/05/2026 - 06/05/2026');
+  },
+};

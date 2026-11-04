@@ -14,6 +14,7 @@ export * from './change-password-form';
 export * from './confirm-delete-av-modal';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
+export * from './holiday-modal';
 export * from './in-case-you-missed-it';
 export * from './comment-section';
 export * from './planning-filters';

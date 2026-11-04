@@ -16,6 +16,7 @@ import { IconButton } from '../../atoms/icon-button';
  *   range can start in June and end in September with both ends visible.
  * - `mobile` — the touch layout: 40-point day targets (`h-10`), full width, presets as a
  *   scrolling row across the top instead of a column down the side.
+ * - an optional **Apply** button (`onApply`) beside Clear, for a picker that commits only when told.
  * - the footer **Clear** button (Figma's `Button=Yes`) is **on by default**;
  *   `clearable={false}` turns it off, `onClear` is what it does and `clearLabel`
  *   renames it (Figma's range variant says "Cancel").
@@ -96,6 +97,10 @@ export interface DatePickerProps
   onClear?: () => void;
   /** The footer button's label. Default "Clear". */
   clearLabel?: string;
+  /** **Apply**: a primary button beside Clear that commits what is picked (Figma's range picker in the Holiday modal). Omit it and there is none — a pick commits as it is made. */
+  onApply?: () => void;
+  /** The Apply button's label. Default "Apply". */
+  applyLabel?: string;
   /** ISO date → dot tone under the day. Meaning is the caller's — pair with a legend. */
   markers?: Record<string, DatePickerMarker>;
   /** ISO dates tinted as unavailable-but-selectable — holidays, freezes. */
@@ -555,6 +560,8 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
       clearable = true,
       onClear,
       clearLabel = 'Clear',
+      onApply,
+      applyLabel = 'Apply',
       markers = {},
       flagged = [],
       min,
@@ -731,11 +738,18 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           </div>
           {/* Outside `calendar()`, so it is the same button in the same place in
               the day and month views. */}
-          {clearable && (
-            <div className="flex justify-end">
-              <Button variant="secondary" size="sm" onClick={onClear} className="cursor-pointer">
-                {clearLabel}
-              </Button>
+          {(clearable || onApply) && (
+            <div className="flex justify-end gap-2">
+              {clearable && (
+                <Button variant="secondary" size="sm" onClick={onClear} className="cursor-pointer">
+                  {clearLabel}
+                </Button>
+              )}
+              {onApply && (
+                <Button size="sm" onClick={onApply} className="cursor-pointer">
+                  {applyLabel}
+                </Button>
+              )}
             </div>
           )}
         </div>

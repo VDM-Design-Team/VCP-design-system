@@ -28,6 +28,8 @@ export const formatMonth = (iso: string): string => {
  * field reads the same as the selects beside it. A **filter** passes `emphasis="regular"` (as its `Select`s do), so a row of
  * filters sits quietly.
  *
+ * **`mode="range"`** picks a period: two clicks on a two-month calendar, then **Apply** (or **Clear**). The field reads "01/05/2026 - 02/05/2026" (give `formatDate` for the day format); `value` is the start and `rangeEnd` the end.
+ *
  * **`mode="month"`** is the same field for a month with no day (a reporting period): it reads "September 2026", the
  * calendar opens on `DatePicker`'s month grid, and `onChange` gets the first of the chosen month. `estimated` means
  * nothing for a month and is ignored. `mode` is `DatePicker`'s own prop, so the two read alike.
@@ -43,11 +45,20 @@ export interface DateFieldProps {
   /**
    * What the field picks: a `day` (the default) or a `month` — "September 2026", reported as the first of the month.
    */
-  mode?: 'day' | 'month';
+  mode?: 'day' | 'range' | 'month';
   /** The date, ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder. */
   value?: string;
   /** Fires with the chosen ISO date (in month mode, the first of the month); the calendar then closes. */
   onChange?: (iso: string) => void;
+  /** Range mode: the end of the range (ISO). `value` is the start. */
+  rangeEnd?: string;
+  /**
+   * Range mode: fires with the start and end when **Apply** is pressed (one day picked is a period of one: its end is its start; nothing picked applies nothing), and with `('', undefined)` when **Clear** is pressed. Nothing
+   * reaches the page while the range is being picked.
+   */
+  onRangeChange?: (start: string, end?: string) => void;
+  /** How a date reads in the field. Default is the ISO date as it is; a page may want `dd/mm/yyyy`. Month mode ignores it. */
+  formatDate?: (iso: string) => string;
   /**
    * The weight of the chosen date: `medium` (the default, as `Select`'s value) or `regular` — what a **filter** uses so a
    * row of filters sits quietly. The placeholder is regular either way.
@@ -65,7 +76,7 @@ export interface DateFieldProps {
   invalid?: boolean;
   disabled?: boolean;
   /** `min`, `max`, `today` and the rest go to the `DatePicker`. */
-  picker?: Omit<DatePickerProps, 'value' | 'onChange' | 'mode' | 'clearable' | 'onClear' | 'clearLabel'>;
+  picker?: Omit<DatePickerProps, 'value' | 'onChange' | 'mode' | 'clearable' | 'onClear' | 'clearLabel' | 'rangeEnd' | 'onRangeChange' | 'onApply' | 'applyLabel' | 'dualView'>;
   className?: string;
 }
 
@@ -76,6 +87,9 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       emphasis = 'medium',
       value,
       onChange,
+      rangeEnd,
+      onRangeChange,
+      formatDate,
       estimated,
       placeholder = '-',
       id,
@@ -89,6 +103,12 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    /* Range mode: what is being picked, kept apart from the page's value until Apply. */
+    const [draft, setDraft] = React.useState<{ start?: string; end?: string }>({});
+    React.useEffect(() => {
+      if (open) setDraft({ start: value || undefined, end: rangeEnd || undefined });
+    }, [open]); // eslint-disable-line
+    const show = (iso: string) => (formatDate ? formatDate(iso) : iso);
     return (
       <Popover
         open={open}
@@ -114,23 +134,53 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
             placeholder={placeholder}
             value={
-              !value ? '' : mode === 'month' ? formatMonth(value) : `${value}${estimated ? ' (est.)' : ''}`
+              !value
+                ? ''
+                : mode === 'month'
+                  ? formatMonth(value)
+                  : mode === 'range'
+                    ? rangeEnd && rangeEnd !== value
+                      ? `${show(value)} - ${show(rangeEnd)}`
+                      : show(value)
+                    : `${show(value)}${estimated ? ' (est.)' : ''}`
             }
             onClick={() => !disabled && setOpen(true)}
           />
         }
         content={
-          <DatePicker
-            mode={mode}
-            value={value}
-            /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
-            clearable={false}
-            onChange={(iso) => {
-              onChange?.(iso);
-              setOpen(false);
-            }}
-            {...picker}
-          />
+          mode === 'range' ? (
+            <DatePicker
+              mode="range"
+              dualView
+              value={draft.start}
+              rangeEnd={draft.end}
+              onRangeChange={(start, end) => setDraft({ start, end })}
+              onClear={() => {
+                setDraft({});
+                onRangeChange?.('', undefined);
+                setOpen(false);
+              }}
+              /* Nothing picked, nothing to apply. One day picked is a period of one: its end is its start. */
+              onApply={() => {
+                if (!draft.start) return;
+                onRangeChange?.(draft.start, draft.end ?? draft.start);
+                setOpen(false);
+              }}
+              {...picker}
+            />
+          ) : (
+            <DatePicker
+              mode={mode}
+              value={value}
+              /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
+              clearable={false}
+              onChange={(iso) => {
+                onChange?.(iso);
+                setOpen(false);
+              }}
+              {...picker}
+            />
+          )
         }
       />
     );
