@@ -94,7 +94,7 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
         variant="textual"
         tone="neutral"
         /* Decorative: the word beside it already says which type this is. */
-        icon={<Icon name={icon} size="lg" className={cn('shrink-0', tone)} />}
+        icon={<Icon name={icon} size="md" className={cn('shrink-0', tone)} />}
         className={className}
         {...props}
       >
