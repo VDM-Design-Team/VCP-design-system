@@ -10,6 +10,7 @@ avatar. `DataTable` specialised, as `AVTable` is. Read off the Figma Planning Pa
 
 | Piece | Tier |
 |---|---|
+| `TruncatedText` | component |
 | `AssigneeStatus` | atom |
 | `CopyText` | atom |
 | `Avatar` | atom |

@@ -14,6 +14,7 @@ page, audit batch 5, 11 September 2026.
 
 | Piece | Tier |
 |---|---|
+| `TruncatedText` | component |
 | `Button` | atom |
 | `Divider` | atom |
 | `Icon` | sub-atomic |
