@@ -56,14 +56,18 @@ export interface TextareaProps
 }
 
 export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, invalid, fullWidth, rows = 4, ...props }, ref) => (
-    <textarea
-      ref={ref}
-      rows={rows}
-      aria-invalid={invalid || undefined}
-      className={cn(textarea({ invalid, fullWidth }), className)}
-      {...props}
-    />
-  ),
+  ({ className, invalid: invalidProp, fullWidth, rows = 4, ...props }, ref) => {
+    /* Invalid by the prop, or by the `aria-invalid` a `Field` with an `error` puts on its control. */
+    const invalid = invalidProp || props['aria-invalid'] === true || props['aria-invalid'] === 'true';
+    return (
+      <textarea
+        ref={ref}
+        rows={rows}
+        aria-invalid={invalid || undefined}
+        className={cn(textarea({ invalid, fullWidth }), className)}
+        {...props}
+      />
+    );
+  },
 );
 Textarea.displayName = 'Textarea';

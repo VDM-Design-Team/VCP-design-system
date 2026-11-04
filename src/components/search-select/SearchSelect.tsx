@@ -280,6 +280,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       onSearch,
       loadingText = 'Loading…',
       invalid,
+      'aria-invalid': ariaInvalid,
       error,
       warning,
       collapsibleGroups,
@@ -339,7 +340,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const committed: readonly string[] =
       value === undefined ? inner : multiple ? (value as readonly string[]) : value ? [value as string] : [];
     const shown = multiple && confirm && open ? draft : committed;
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || ariaInvalid === true || ariaInvalid === 'true';
     const isWarning = !isInvalid && !!warning;
     const [collapsedGroups, setCollapsedGroups] = React.useState<readonly string[]>(
       defaultCollapsedGroups ?? [],
