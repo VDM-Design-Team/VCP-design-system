@@ -2,13 +2,13 @@ import * as React from 'react';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
-import { Select } from '../../atoms/select';
 import { Toggle } from '../../atoms/toggle';
 import { Tooltip } from '../../atoms/tooltip';
 import { DateField } from '../../components/date-field';
 import { Field } from '../../components/field';
 import { HOLIDAY_TYPES, holidayTypeLabel, type HolidayType } from '../../components/holiday-type-tag';
 import { Modal } from '../../components/modal';
+import { SearchSelect } from '../../components/search-select';
 import { formatDayMonthYear } from '../../lib/format-date';
 
 /**
@@ -59,7 +59,7 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
   const [errors, setErrors] = React.useState<{ name?: string; date?: string; type?: string }>({});
   const nameRef = React.useRef<HTMLInputElement>(null);
   const dateRef = React.useRef<HTMLInputElement>(null);
-  const typeRef = React.useRef<HTMLSelectElement>(null);
+  const typeRef = React.useRef<HTMLDivElement>(null);
   const recurringLabel = React.useId();
 
   /* Each time it opens: the holiday being changed, or an empty one. */
@@ -80,7 +80,7 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
     setErrors(next);
     if (next.name) return nameRef.current?.focus();
     if (next.date) return dateRef.current?.focus();
-    if (next.type) return typeRef.current?.focus();
+    if (next.type) return typeRef.current?.querySelector('button')?.focus();
     onSubmit({ name: draft.name.trim(), recurring: draft.recurring, start: draft.start, end: draft.end, type: draft.type as HolidayType });
   };
 
@@ -146,11 +146,13 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
         </Field>
 
         <Field label="Holiday Type" error={errors.type}>
-          <Select
+          <SearchSelect
             ref={typeRef}
             fullWidth
+            searchable={false}
             placeholder="Select Holiday Type"
-            options={HOLIDAY_TYPES.map((type) => ({ value: type, label: holidayTypeLabel(type) }))}
+            /* The list says "Public Holiday"; the field, once chosen, says "Public" (Figma's two states). */
+            options={HOLIDAY_TYPES.map((type) => ({ value: type, label: `${holidayTypeLabel(type)} Holiday`, shortLabel: holidayTypeLabel(type) }))}
             value={draft.type}
             onChange={(type) => {
               setDraft({ ...draft, type: type as HolidayType });

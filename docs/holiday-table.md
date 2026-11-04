@@ -15,6 +15,7 @@ Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty
 | `Badge` | atom |
 | `Tag` | atom |
 | `Tooltip` | atom |
+| `TruncatedText` | component |
 | `AvatarGroup` | component |
 | `DataTable` | component |
 | `DatePicker` | component |
@@ -35,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## The row
 
-**Name** (a flagged one wears a warning glyph; its tooltip says Hubstaff already includes the entry), **Date** (one day or a range, `dd/mm/yyyy`, then a blue pill with the day count), **Holiday Type**, **Applies to** (a stack of people),
+**Name** (cut with "…" when it does not fit, and says the whole name on hover and focus; a flagged one wears a warning glyph; its tooltip says Hubstaff already includes the entry), **Date** (one day or a range, `dd/mm/yyyy`, then a blue pill with the day count), **Holiday Type**, **Applies to** (a stack of people),
 **All Day** (or Partial Day), **Recurring** (Yearly / One-Time), **Added By** ("System", or the person), **Source**; and for an admin **Actions** (edit, delete). A holiday the system added can be deleted but not edited.
 
 ## Props

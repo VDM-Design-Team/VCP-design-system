@@ -10,13 +10,13 @@ Built to Figma's `Holiday_Registry_Modal` (`6169:75761`) and the Admin Actions f
 | `Button` | atom |
 | `Icon` | sub-atomic |
 | `Input` | atom |
-| `Select` | atom |
 | `Toggle` | atom |
 | `Tooltip` | atom |
 | `DateField` | component |
 | `Field` | component |
 | `HolidayTypeTag` | component |
 | `Modal` | component |
+| `SearchSelect` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

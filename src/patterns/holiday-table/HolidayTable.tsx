@@ -15,6 +15,7 @@ import { EmptyState } from '../../components/empty-state';
 import { HOLIDAY_TYPES, HolidayTypeTag, holidayTypeLabel, type HolidayType } from '../../components/holiday-type-tag';
 import { HolidaySourceBadge, type HolidaySource } from '../../components/holiday-source-badge';
 import { PeriodSelect, type Period } from '../../components/period-select';
+import { TruncatedText } from '../../components/truncated-text';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
 import { formatDayMonthYear } from '../../lib/format-date';
 
@@ -139,7 +140,7 @@ export function HolidayTable({
               </span>
             </Tooltip>
           )}
-          <span className="min-w-0">{row.name}</span>
+          <TruncatedText>{row.name}</TruncatedText>
         </span>
       ),
     },

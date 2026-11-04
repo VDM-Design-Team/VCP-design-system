@@ -110,7 +110,9 @@ export const DuplicateOfHubstaff: Story = {
     await userEvent.tab();
     const flag = within(canvasElement).getByRole('img', { name: 'Duplicate of a Hubstaff entry' });
     flag.focus();
-    await expect(await screen.findByRole('tooltip')).toHaveTextContent('Hubstaff already includes this entry. Remove it from VCP to avoid duplicate coverage.');
+    /* Other cells keep their own (closed) tooltips in the page, so the one wanted is found by what it says. */
+    const tip = await screen.findByText('Hubstaff already includes this entry. Remove it from VCP to avoid duplicate coverage.');
+    await waitFor(() => expect(tip).toBeVisible());
   },
 };
 
@@ -181,7 +183,8 @@ export const OnThePage: Story = {
     const first = within(await within(document.body).findByRole('group', { name: 'First calendar' }));
     await userEvent.click(first.getByRole('button', { name: /^10 / }));
     await userEvent.click(within(document.body).getByRole('button', { name: 'Apply' }));
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'Holiday Type' }), 'Team');
+    await userEvent.click(d.getByRole('combobox', { name: 'Holiday Type' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Team Holiday' }));
     await userEvent.click(d.getByRole('button', { name: 'Add' }));
     await waitFor(() => expect(c.getByText('Company Day')).toBeVisible());
   },

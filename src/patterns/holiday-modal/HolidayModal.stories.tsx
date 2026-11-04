@@ -71,7 +71,8 @@ export const FillingItIn: Story = {
     await userEvent.click(first.getByRole('button', { name: /^10 / }));
     await userEvent.click(first.getByRole('button', { name: /^12 / }));
     await userEvent.click(body.getByRole('button', { name: 'Apply' }));
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'Holiday Type' }), 'Team');
+    await userEvent.click(d.getByRole('combobox', { name: 'Holiday Type' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Team Holiday' }));
     await userEvent.click(d.getByRole('button', { name: 'Add' }));
     await waitFor(() => expect(args.onSubmit).toHaveBeenCalled());
     const draft = (args.onSubmit as ReturnType<typeof fn>).mock.calls[0][0];
