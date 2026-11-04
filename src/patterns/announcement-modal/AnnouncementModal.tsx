@@ -13,7 +13,7 @@ import { Modal } from '../../components/modal';
  *
  * One dialog, two modes (`mode`): **`new`** ("Create Announcement", **Create**) and **`edit`** ("Edit Announcement", **Save**, the fields
  * filled from `initial`). The body is the same: **Title** and **Version** (both required), **Description**, **Changelog Document URL**,
- * **Announcement Type** (required) and a **Features** list — one line each, with a delete beside it and **Add Features** beneath.
+ * **Announcement Type** (required) and a **Features** list — one line each, with a remove beside it and **Add Features** beneath.
  *
  * - **Version** takes semantic versioning ("v1.0.0"; the "v" is optional). Under it, `latestVersion` reads "Latest version: v1.18.1", so
  *   the next one is easy to pick.
@@ -74,7 +74,6 @@ const blank = (initial: AnnouncementModalProps['initial']) => ({
   type: initial?.type ?? '',
 });
 
-const DELETE_GLYPH = 'text-accent-critical-outline-content-default hover:text-accent-critical-outline-content-hover';
 
 export function AnnouncementModal({
   open,
@@ -262,9 +261,9 @@ export function AnnouncementModal({
                 }
               />
               <IconButton
-                icon="trash"
+                /* A row in a form still being filled in, so the minus in a circle (as the assignee and demo-link rows) — not the trash of a saved thing (docs/icon.md). */
+                icon="minus-circle"
                 label={`Remove feature ${index + 1}`}
-                className={DELETE_GLYPH}
                 disabled={locked}
                 onClick={() => removeLine(index)}
               />

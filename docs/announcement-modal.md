@@ -42,7 +42,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Description** | A multi-line `Textarea` |
 | **Changelog Document URL** | Optional; when given it must be an `http(s)` address |
 | **Announcement Type** * | A list the page passes in (`typeOptions`) |
-| **Features** | One line each, a delete beside each, **Add Features** beneath. Blank lines are dropped on submit |
+| **Features** | One line each, a remove (the minus in a circle) beside each, **Add Features** beneath. Blank lines are dropped on submit |
 
 ## Props
 
@@ -66,12 +66,11 @@ nothing is submitted. **Figma draws none of these messages; the words are ours.*
 ## Features
 
 **Add Features** adds a line and focuses it. Removing a line moves focus to the next one, else the one before, else **Add Features** —
-focus never falls to the page. Each input is named "Feature 1", "Feature 2"…; each delete "Remove feature 1"…
+focus never falls to the page. Each input is named "Feature 1", "Feature 2"…; each remove "Remove feature 1"…
 
 ## Tokens
 
-`Modal` (`md`); fields as `Field`; the Latest version text is `text.link.default` (the blue that clears 4.5:1 as small text in both themes); the delete glyphs are `accent.critical.outline.content` (the
-plain `IconButton`, as `AccountsTable`'s delete). **Add Features** is the `secondary` `Button` with a plus.
+`Modal` (`md`); fields as `Field`; the Latest version text is `text.link.default` (the blue that clears 4.5:1 as small text in both themes); the remove glyphs are the plain `IconButton` `minus-circle`, in its default colour (as the assignee rows of `MoveAVToCycleModal`; the trash is for deleting a saved thing, docs/icon.md). **Add Features** is the `secondary` `Button` with a plus.
 
 **Differences from Figma, on purpose.** Figma centres the title and draws no ✕; this is `Modal`'s own header (left title, ✕). The placeholder
 "Use semantic versioning…" is kept, and the rule is also said in the error. The footer is **Cancel** (`secondary`) beside **Create** / **Save** (`primary`); Figma draws Cancel as plain text.
@@ -81,7 +80,7 @@ plain `IconButton`, as `AccountsTable`'s delete). **Add Features** is the `secon
 - A `dialog` named by its title; focus is trapped, Escape closes, focus returns to what opened it (`Modal`'s).
 - Required fields carry the required marker and "(required)" for screen readers (`Field`'s).
 - Errors sit under their field and are announced; focus goes to the first.
-- The trash buttons are named for their line; the inputs have names too.
+- The remove buttons are named for their line; the inputs have names too.
 
 ## Don't
 
