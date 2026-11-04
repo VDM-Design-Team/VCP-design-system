@@ -50,10 +50,11 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
 });
 
 const track = cva(
-  /* surface.track — added for this component: the quiet grey that keeps every
-     tone's fill ≥3.8:1 against it in BOTH themes. No pre-existing token could;
-     the closest (surface.neutral.medium) dropped the critical fill to 1.25:1 in
-     dark. The track whispers, the fill carries the boundary. */
+  /* surface.track — added for this component: the quiet grey under the fill.
+     Light keeps every filled tone ≥3.8:1 against it. Dark is one step above
+     surface.elevated so the track shows on a card; critical, info and pending
+     fall under 3:1 against it there, and keep 3.84:1 against the card around
+     the bar. The track whispers, the fill carries the boundary. */
   'w-full overflow-hidden rounded-full bg-surface-track',
   {
     variants: {

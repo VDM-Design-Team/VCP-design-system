@@ -948,7 +948,7 @@
     },
     "track": {
       "$value": "{color.slate.200}",
-      "$description": "Meter/progress track: quiet against surfaces, ≥3.8:1 under every accent filled surface in both themes"
+      "$description": "Meter/progress track: quiet against surfaces, ≥3.8:1 under every accent filled surface in light (dark: see color.dark.json)"
     }
   },
   "text": {
