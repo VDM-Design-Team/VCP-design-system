@@ -42,6 +42,8 @@ export const Default: Story = {
     /* Dots until an eye is pressed; each field has its own. */
     await expect(c.getByLabelText('Old Password', { selector: 'input' })).toHaveAttribute('type', 'password');
     await expect(c.getAllByRole('button', { name: 'Show password' })).toHaveLength(3);
+    /* The one rule is said before Set Password, and the field is described by it. */
+    await expect(c.getByLabelText('New Password', { selector: 'input' })).toHaveAccessibleDescription('At least 8 characters');
 
     await type(c, 'Old Password', 'old-secret');
     await type(c, 'New Password', 'Correct-horse-9');
@@ -125,9 +127,15 @@ export const Validation: Story = {
     await expect(await c.findByText('Password confirmation is required')).toBeVisible();
     await expect(args.onSubmit).not.toHaveBeenCalled();
     await waitFor(() => expect(c.getByLabelText('Old Password', { selector: 'input' })).toHaveFocus());
-    /* Fixing a field clears what was said about it. */
+    /* Each field's edge turns critical with its message, not just its `aria-invalid`. */
+    const edge = (name: string) => c.getByLabelText(name, { selector: 'input' }).closest('div');
+    for (const name of ['Old Password', 'New Password', 'Confirm Password']) {
+      await expect(edge(name)).toHaveClass('border-accent-critical-outline-border-default');
+    }
+    /* Fixing a field clears what was said about it, and its edge with it. */
     await type(c, 'Old Password', 'x');
     await waitFor(() => expect(c.queryByText('Old password is required')).toBeNull());
+    await expect(edge('Old Password')).not.toHaveClass('border-accent-critical-outline-border-default');
   },
 };
 

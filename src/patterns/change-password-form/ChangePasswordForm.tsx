@@ -13,8 +13,9 @@ export type { PasswordVerdict };
  * Figma's `Settings_Password` (the `_Password_Item_*` items).
  *
  * - **Old Password**, **New Password** and **Confirm Password** are each a `PasswordField` — dots, with an eye to show what you typed.
- * - **Under New Password, a `PasswordStrength` meter** (`getStrength`) says how strong it is while you type. **The page scores it**: what makes a
- *   password Fair or Strong is product policy, so `getStrength` is the page's rule. Left out, there is no meter. The meter is advice, not a gate.
+ * - **New Password says its one rule under the field**, "At least 8 characters" (`MIN_PASSWORD_LENGTH`), so it is known before Set Password.
+ * - **Under New Password, a `PasswordStrength` meter** says how strong it is while you type, scored by VCP's `scorePassword` unless the page
+ *   passes its own `getStrength`; `getStrength={null}` leaves the meter out. The meter is advice, not a gate.
  * - **Set Password** hands the old and new passwords to `onSubmit`. It changes nothing itself.
  *
  * **Validation, with Figma's own words** (its Error variants): each field is required — "Old password is required", "New password is required",
@@ -88,6 +89,8 @@ export function ChangePasswordForm({ className, onSubmit, getStrength = scorePas
     return () => clearTimeout(timer);
   }, [draft.newPassword, getStrength]);
   const verdict = draft.newPassword ? scored?.verdict : undefined;
+  /* What is wrong with a field: the server's word first, then the form's. Its edge turns critical with it. */
+  const problem = (key: ChangePasswordField) => errors?.[key] ?? invalid[key];
 
   return (
     <form
@@ -100,20 +103,25 @@ export function ChangePasswordForm({ className, onSubmit, getStrength = scorePas
       }}
     >
       <div className="flex max-w-lg flex-col gap-4">
-        <Field label="Old Password" error={errors?.oldPassword ?? invalid.oldPassword}>
+        <Field label="Old Password" error={problem('oldPassword')}>
           <PasswordField
             ref={refs.oldPassword}
             fullWidth
             autoComplete="current-password"
             placeholder="Enter your current password"
             value={draft.oldPassword}
+            invalid={Boolean(problem('oldPassword'))}
             disabled={saving}
             onChange={(event) => set('oldPassword', event.target.value)}
           />
         </Field>
 
         <div className="flex flex-col gap-2">
-          <Field label="New Password" error={errors?.newPassword ?? invalid.newPassword}>
+          <Field
+            label="New Password"
+            helper={`At least ${MIN_PASSWORD_LENGTH} characters`}
+            error={problem('newPassword')}
+          >
             {(control) => (
               <PasswordField
                 ref={refs.newPassword}
@@ -121,6 +129,7 @@ export function ChangePasswordForm({ className, onSubmit, getStrength = scorePas
                 autoComplete="new-password"
                 placeholder="Enter a strong password"
                 value={draft.newPassword}
+                invalid={Boolean(problem('newPassword'))}
                 disabled={saving}
                 onChange={(event) => set('newPassword', event.target.value)}
                 {...control}
@@ -132,13 +141,14 @@ export function ChangePasswordForm({ className, onSubmit, getStrength = scorePas
           {verdict && <PasswordStrength id={meterId} strength={verdict.strength} message={verdict.message} />}
         </div>
 
-        <Field label="Confirm Password" error={errors?.confirmPassword ?? invalid.confirmPassword}>
+        <Field label="Confirm Password" error={problem('confirmPassword')}>
           <PasswordField
             ref={refs.confirmPassword}
             fullWidth
             autoComplete="new-password"
             placeholder="Confirm your new password"
             value={draft.confirmPassword}
+            invalid={Boolean(problem('confirmPassword'))}
             disabled={saving}
             onChange={(event) => set('confirmPassword', event.target.value)}
           />

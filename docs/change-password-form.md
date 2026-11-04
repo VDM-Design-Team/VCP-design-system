@@ -27,6 +27,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 - **Old Password**, **New Password** and **Confirm Password** — each a `PasswordField`: dots, with an eye to show what you typed.
 - **Under New Password, a `PasswordStrength` meter** says how strong it is while you type, scored 300ms after the last keystroke and only while the field is not empty. The score is `scorePassword` (`src/lib/password-strength.ts`): length (8–11 → +1, 12+ → +2), plus one point per character kind (lower, upper, number, special) beyond the first, minus 2 for an exact match of a common password, clamped to 0–4 (Very Weak → Strong). Below Fair it says "Your password is too simple"; a common password says "Your password contains common patterns". The meter is advice, not a gate.
 - **The only rules are 8 characters at least** ("Password must be at least 8 characters") **and a matching confirmation.** No minimum strength.
+  New Password says the first one under the field before anything is typed, **"At least 8 characters"** (`Field`'s `helper`, so it describes the
+  field), and the error replaces it if Set Password finds it broken. Figma draws no hint; it was added so the one rule that can block you is known first.
 - **Set Password** hands the old and new passwords to `onSubmit`. It changes nothing itself.
 
 ## Props
@@ -44,7 +46,8 @@ It keeps its own draft. **After a successful change, clear it by giving the form
 
 Each field is required, with the words Figma's Error variants use: **"Old password is required"**, **"New password is required"**, **"Password confirmation is
 required"**. A confirmation that is not the new password — **"Passwords do not match"** — is an addition. Set Password then says what is wrong under the field,
-**moves focus to the first problem** and does not call `onSubmit`; fixing a field clears what was said about it. Figma's empty-state placeholders are used: "Enter your
+**moves focus to the first problem** and does not call `onSubmit`; fixing a field clears what was said about it. A field with a problem (the form's or the server's)
+also turns its edge critical, as Figma's Error variants draw it. Figma's empty-state placeholders are used: "Enter your
 current password", "Enter a strong password", "Confirm your new password".
 
 **The strength is not a gate:** a weak password is allowed through by this form. A rule the server enforces comes back in `errors`.
@@ -63,6 +66,7 @@ None of its own: `Field`, `PasswordField` (`Input`'s shell, 40 high) and `Button
 
 ## Don't
 
-- **Don't copy the scoring into a page.** Use `scorePassword`, or pass `getStrength` if a product really differs.
+- **Don't copy the scoring into a page.** Import `scorePassword` and `MIN_PASSWORD_LENGTH` from the package, or pass `getStrength` if a product
+  really differs.
 - **Don't treat the meter as the rule.** It advises; the server enforces.
 - **Don't keep the passwords after a change.** Give the form a new `key`.

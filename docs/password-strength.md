@@ -42,7 +42,7 @@ the copy belongs to whoever owns the rule.
 |---|---|---|---|
 | `very-weak` | 20% | `critical` | `accent.critical.filled.surface` |
 | `weak` | 40% | `pending` | `accent.pending.outline.border` |
-| `fair` | 60% | `caution` | `accent.yellow.medium` |
+| `fair` | 60% | `warning` | `accent.warning.filled.surface` |
 | `good` | 80% | `info` | `accent.info.filled.surface` |
 | `strong` | 100% | `success` | `accent.success.filled.surface` |
 
@@ -50,13 +50,12 @@ The label row is `ProgressBar`'s `labelSize="md"` (14px, as Figma draws it); the
 message under it stays 12px. The track and the other fills are `ProgressBar`'s, so the contrast figures in
 `docs/progress-bar.md` apply.
 
-**Weak and Fair do not pass on the light track.** Both use the bright
-shades the Figma file paints — Weak
-`accent.pending.outline.border.default` (**2.27:1** light, 2.91:1 dark) and Fair
-`accent.yellow.medium` (**1.28:1** light, 5.42:1 dark) — under
-the 3:1 a meaningful graphic should reach. (Fair is not `accent.warning.outline.border`: that token
-moved to yellow-700 in November for contrast and reads brown in this bar, where Figma draws a bright yellow.)
-**In dark, Very weak, Weak and Good fall under it too** (critical 2.72:1, pending 2.91:1, info 2.75:1), since
+**Weak does not pass on the light track.** It uses the bright orange the Figma file paints,
+`accent.pending.outline.border.default` (**2.27:1** light, 2.91:1 dark), under the 3:1 a meaningful graphic should reach.
+**Fair is brown**, `accent.warning.filled.surface` (4.00:1 light, 5.42:1 dark), as Figma's `_Password_Item_Strength`
+draws it. (Until November 2026 it was the bright `accent.yellow.medium`, at 1.28:1 on the light track, on the reading
+that Figma drew a bright yellow; the strength frame draws brown.)
+**In dark, Very weak, Weak and Good fall under 3:1** (critical 2.72:1, pending 2.91:1, info 2.75:1), since
 the dark track moved up to slate-700 in November so it shows on a card. That is kept deliberately: the level
 is printed at the end of the label row and read out as `aria-valuetext`, so the
 fill's colour is never the only signal. Don't copy this choice to a bar that has

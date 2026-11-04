@@ -22,11 +22,11 @@ import type { PasswordStrengthLevel } from '../../lib/password-strength';
  * same: the copy ("Your password is too simple") belongs to whoever owns the
  * rule.
  *
- * Weak is the orange `pending` tone and Fair the bright yellow `caution` tone
- * (`accent.yellow.medium`) — bright shades that sit below the 3:1 a graphic
- * should reach against the light track (2.27:1 and 1.28:1). That is kept on
- * purpose: the level is always written out beside the bar, so the colour never
- * carries the meaning alone.
+ * Weak is the orange `pending` tone, a bright shade that sits below the 3:1 a
+ * graphic should reach against the light track (2.27:1). Fair is the brown
+ * `warning` tone, as Figma's `_Password_Item_Strength` draws it (4.00:1). The
+ * level is always written out beside the bar, so the colour never carries the
+ * meaning alone.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -37,7 +37,7 @@ export type { PasswordStrengthLevel };
 const LEVELS = {
   'very-weak': { text: 'Very Weak', step: 1, tone: 'critical', weak: true },
   weak: { text: 'Weak', step: 2, tone: 'pending', weak: true },
-  fair: { text: 'Fair', step: 3, tone: 'caution', weak: false },
+  fair: { text: 'Fair', step: 3, tone: 'warning', weak: false },
   good: { text: 'Good', step: 4, tone: 'info', weak: false },
   strong: { text: 'Strong', step: 5, tone: 'success', weak: false },
 } as const;
