@@ -122,7 +122,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
         content={
           <DatePicker
             mode={mode}
-            value={value}
+            /* An empty string is no date, as `undefined` is: the calendar opens on today's month either way. */
+            value={value || undefined}
             onChange={(iso) => {
               onChange?.(iso);
               setOpen(false);
