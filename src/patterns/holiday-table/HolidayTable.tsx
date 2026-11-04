@@ -5,6 +5,7 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Pagination } from '../../atoms/pagination';
+import { Badge } from '../../atoms/badge';
 import { Tag } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
@@ -12,7 +13,7 @@ import { DataTable, type DataTableColumn, type DataTableSort } from '../../compo
 import type { DatePickerPreset } from '../../components/date-picker';
 import { EmptyState } from '../../components/empty-state';
 import { HOLIDAY_TYPES, HolidayTypeTag, holidayTypeLabel, type HolidayType } from '../../components/holiday-type-tag';
-import { HolidaySourceTag, type HolidaySource } from '../../components/holiday-source-tag';
+import { HolidaySourceBadge, type HolidaySource } from '../../components/holiday-source-badge';
 import { PeriodSelect, type Period } from '../../components/period-select';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
 import { formatDayMonthYear } from '../../lib/format-date';
@@ -21,7 +22,7 @@ import { formatDayMonthYear } from '../../lib/format-date';
  * HolidayTable — the Holiday Registry: the filter row (holiday type, period, who it applies to) with **Add Holiday** and **Import from Hubstaff** for an admin, the table of holidays,
  * and the pagination beneath. Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty Table = Yes`) and `Holiday_Registry_Row` (`8048:120056`: Admin and Normal user).
  *
- * It is `DataTable` specialised, as `AVTable` is. **It owns no mapping** — `HolidayTypeTag` and `HolidaySourceTag` own their vocabularies, `AvatarGroup` the stack of people — and it does not
+ * It is `DataTable` specialised, as `AVTable` is. **It owns no mapping** — `HolidayTypeTag` and `HolidaySourceBadge` own their vocabularies, `AvatarGroup` the stack of people — and it does not
  * sort, filter, fetch or paginate: `rows` are rendered in the order given, `filters` and `sort` are the caller's, and so is the paging.
  *
  * **The row**, left to right: **Name** (a flagged one wears a warning glyph whose tooltip says Hubstaff already has the entry), **Date** (one day, or a range, then a blue pill with how many days),
@@ -126,6 +127,8 @@ export function HolidayTable({
       key: 'name',
       label: 'Name',
       width: '20%',
+      /* 184: a name is not squeezed into three lines before the table scrolls. */
+      minWidth: '11.5rem',
       render: (row) => (
         <span className="flex items-center gap-2 text-label-sm-medium text-text-primary">
           {row.duplicateOfHubstaff && (
@@ -153,9 +156,9 @@ export function HolidayTable({
             {formatDayMonthYear(row.start)}
             {end && ` – ${formatDayMonthYear(end)}`}
             {/* The info tonal fill with the info outline around it (as `SourceTag`): the outline-only style falls under 4.5:1 in dark at this size. */}
-            <Tag variant="tonal" tone="info" size="xs" className="border border-accent-info-outline-border-default">
+            <Badge variant="tonal" tone="info" size="md" className="border border-accent-info-outline-border-default">
               {days === 1 ? '1 day' : `${days} days`}
-            </Tag>
+            </Badge>
           </span>
         );
       },
@@ -172,7 +175,7 @@ export function HolidayTable({
       label: 'All Day',
       fit: true,
       render: (row) => (
-        <Tag variant="tonal" tone={row.allDay ? 'success' : 'neutral'} size="xs">
+        <Tag variant="tonal" tone={row.allDay ? 'success' : 'neutral'} size="sm">
           {row.allDay ? 'All Day' : 'Partial Day'}
         </Tag>
       ),
@@ -181,7 +184,7 @@ export function HolidayTable({
       key: 'recurring',
       label: 'Recurring',
       fit: true,
-      render: (row) => <span className="text-label-sm-semibold text-text-primary">{row.recurring ? 'Yearly' : 'One-Time'}</span>,
+      render: (row) => <span className="text-label-sm-medium text-text-primary">{row.recurring ? 'Yearly' : 'One-Time'}</span>,
     },
     {
       key: 'addedBy',
@@ -194,7 +197,7 @@ export function HolidayTable({
           <Avatar name={row.addedBy.name} src={row.addedBy.src} size="md" standalone />
         ),
     },
-    { key: 'source', label: 'Source', fit: true, render: (row) => <HolidaySourceTag source={row.source} /> },
+    { key: 'source', label: 'Source', fit: true, render: (row) => <HolidaySourceBadge source={row.source} /> },
   ];
 
   if (admin) {

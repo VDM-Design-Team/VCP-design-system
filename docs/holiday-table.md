@@ -12,6 +12,7 @@ Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty
 | `Icon` | sub-atomic |
 | `IconButton` | atom |
 | `Pagination` | atom |
+| `Badge` | atom |
 | `Tag` | atom |
 | `Tooltip` | atom |
 | `AvatarGroup` | component |
@@ -19,7 +20,7 @@ Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty
 | `DatePicker` | component |
 | `EmptyState` | component |
 | `HolidayTypeTag` | component |
-| `HolidaySourceTag` | component |
+| `HolidaySourceBadge` | component |
 | `PeriodSelect` | component |
 | `SearchSelect` | component |
 
@@ -55,7 +56,7 @@ An empty `rows` shows "No holidays have been added yet." under the headers; the 
 
 ## Tokens
 
-None new. The duration pill is the info tonal `Tag` with the info outline (the outline-only style falls under 4.5:1 in dark at this size).
+None new. The day count is a `Badge` (pill, 12): the info tonal fill with the info outline, since the outline-only style falls under 4.5:1 in dark. All Day / Partial Day are `Tag`s at 12 (`sm`), as Figma's Medium. The Name column has a 184 floor (`minWidth`); Recurring is medium weight, like Added By.
 
 ## Accessibility
 
@@ -66,5 +67,5 @@ None new. The duration pill is the info tonal `Tag` with the info outline (the o
 ## Don't
 
 - **Don't filter, sort or page inside the table.**
-- **Don't map a type or a source here**: `HolidayTypeTag` and `HolidaySourceTag` own them.
+- **Don't map a type or a source here**: `HolidayTypeTag` and `HolidaySourceBadge` own them.
 - **Don't offer Edit on a system entry.**

@@ -1,13 +1,13 @@
-# HolidaySourceTag *(component)*
+# HolidaySourceBadge *(component)*
 
-Where a Holiday Registry entry came from: **Manual Entry** (a pencil, after the word), **Google Calendar** (a calendar before it) or **In Hubstaff** (a link after). The owner of that vocabulary and its look.
-Read off Figma's `_Holiday_Registry_Source_Badges` (`8048:125076`).
+Where a Holiday Registry entry came from: **Manual Entry** (a pencil), **Google Calendar** (a calendar) or **In Hubstaff** (a link), each a `Badge` with its glyph before the word. The owner of that vocabulary and its look.
+Read off Figma's `_Holiday_Registry_Source_Badges` (`8048:125076`, revised November 2026: Badges, not Tags).
 
 ## Composed of
 
 | Piece | Tier |
 |---|---|
-| `Tag` | atom |
+| `Badge` | atom |
 | `Icon` | sub-atomic |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -16,7 +16,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `HolidaySourceTag` | The Source column of the Holiday Registry |
+| `HolidaySourceBadge` | The Source column of the Holiday Registry |
 | `SourceTag` | Where an *Added Value* came from — free text, a different thing |
 
 ## Props
@@ -28,7 +28,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Tokens
 
-Tonal `Tag` (`md`, 28): Manual Entry in the info tone, Google Calendar and In Hubstaff in the success tone. No new tokens.
+Tonal `Badge` (`md`: pill, 12 medium): Manual Entry in the info tone, Google Calendar and In Hubstaff in the success tone. No new tokens.
 
 ## Accessibility
 

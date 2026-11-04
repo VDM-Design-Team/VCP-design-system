@@ -86,7 +86,7 @@ export * from './components/toast';
 export * from './components/user-menu';
 export * from './components/type-tag';
 export * from './components/holiday-type-tag';
-export * from './components/holiday-source-tag';
+export * from './components/holiday-source-badge';
 export * from './components/period-select';
 export * from './components/urgency-tag';
 export * from './components/user-label';

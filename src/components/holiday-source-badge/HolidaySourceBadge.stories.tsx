@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
-import { HolidaySourceTag } from './HolidaySourceTag';
+import { HolidaySourceBadge } from './HolidaySourceBadge';
 
 const meta = {
-  title: 'Components/Data Display/HolidaySourceTag',
-  component: HolidaySourceTag,
-  parameters: { docs: { description: { component: 'Where a Holiday Registry entry came from: Manual Entry (a pencil), Google Calendar (a calendar) or In Hubstaff (a link).' } } },
+  title: 'Components/Data Display/HolidaySourceBadge',
+  component: HolidaySourceBadge,
+  parameters: { docs: { description: { component: 'Where a Holiday Registry entry came from: Manual Entry (a pencil), Google Calendar (a calendar) or In Hubstaff (a link), as pill badges.' } } },
   args: { source: 'manual' },
-} satisfies Meta<typeof HolidaySourceTag>;
+} satisfies Meta<typeof HolidaySourceBadge>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -20,9 +20,9 @@ export const InHubstaff: Story = { args: { source: 'hubstaff' } };
 export const AllSources: Story = {
   render: () => (
     <div className="flex flex-col items-start gap-3">
-      <HolidaySourceTag source="manual" />
-      <HolidaySourceTag source="google-calendar" />
-      <HolidaySourceTag source="hubstaff" />
+      <HolidaySourceBadge source="manual" />
+      <HolidaySourceBadge source="google-calendar" />
+      <HolidaySourceBadge source="hubstaff" />
     </div>
   ),
   play: async ({ canvasElement }) => {

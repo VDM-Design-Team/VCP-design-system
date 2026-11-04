@@ -684,7 +684,11 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
           'flex shrink-0',
           mobile
             ? 'overflow-x-auto border-b border-stroke-default py-1'
-            : 'w-35 flex-col justify-center border-r border-stroke-default py-1',
+            : cn(
+                /* As wide as its longest name (a sprint's dates are longer than "Today"), and in month mode — where the list stands beside a year of months — it starts at the top. */
+                'min-w-35 flex-col border-r border-stroke-default py-1',
+                mode === 'month' ? 'justify-start' : 'justify-center',
+              ),
         )}
       >
         {visiblePresets.map((p) => (
