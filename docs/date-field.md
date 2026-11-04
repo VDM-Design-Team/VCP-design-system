@@ -26,10 +26,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `value` | `string` | — | ISO `yyyy-mm-dd`. Empty shows the placeholder |
-| `onChange` | `(iso) => void` | — | The chosen day; the calendar then closes |
+| `mode` | `'day' \| 'month'` | `'day'` | What it picks: a day, or a month with no day (see below). `DatePicker`'s own prop |
+| `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder |
+| `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
 | `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
-| `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it |
+| `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
 | `placeholder` | `string` | `-` | While there is no date |
 | `invalid` / `disabled` | `boolean` | — | As `Input` |
 | `picker` | `DatePickerProps` | — | `min`, `max`, `today` … go to the calendar |
@@ -40,6 +41,14 @@ Generated from the real imports — `npm test` fails if this list drifts.
 The chosen date is **medium** weight and the placeholder regular (`Input`'s `emphasis="medium"`) — the rule `Select` and `SearchSelect`
 follow, so a date field reads the same as the selects beside it. (It was regular until November 2026.) **A filter passes
 `emphasis="regular"`**, as its `Select`s and `SearchSelect`s do, so a row of filters sits quietly.
+
+## Month mode
+
+`mode="month"` is the same field for a month with no day — a reporting period, a billing month. It keeps the calendar glyph and
+everything else, and changes three things: the field **reads "September 2026"** (`formatMonth`, read in UTC so no time zone can move
+the month), the calendar opens on `DatePicker`'s **month grid**, and `onChange` gets the **first of the month**. `estimated` means
+nothing for a month and is ignored. Use it where Figma draws a month selector (the super admin dashboard's); use `Select` for a
+short list of named choices.
 
 ## Accessibility
 

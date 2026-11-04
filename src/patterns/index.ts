@@ -23,4 +23,5 @@ export * from './planning-table';
 export * from './reject-pending-av-modal';
 export * from './review-av-modal';
 export * from './sidebar';
+export * from './superadmin-metrics';
 export * from './top-bar';
