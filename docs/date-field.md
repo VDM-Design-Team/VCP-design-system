@@ -59,5 +59,6 @@ short list of named choices.
 
 ## Don't
 
-- **Don't type into it.** It is read-only on purpose; offer a way to clear it separately if the date is optional.
+- **Don't type into it.** It is read-only on purpose, and its calendar has no Clear button (the picker's own one had nothing
+  to clear in a field: until November 2026 it showed and did nothing). Offer a way to clear it separately if the date is optional.
 - **Don't leave "(est.)" on a date a person picked.**
