@@ -12,6 +12,7 @@ Read off the Figma `Confirm_Delete_AV_Popup` (`7829:105404`, audit batch 4,
 | `Modal` | component | The dialog itself — portal, focus trap, Escape, inert background |
 | `Field` | component | Labels the read-only AV title |
 | `Input` | atom | Shows the AV title, read-only |
+| `Textarea` | atom | Shows several AV titles, one per line, read-only (`avTitles`) |
 | `Button` | atom | Cancel, and the destructive answer |
 | `Icon` | atom | The warning glyph above the question |
 
@@ -33,7 +34,8 @@ list drifts, and fails a pattern composing fewer than two pieces.
 | `open` | `boolean` | required | You own it. The dialog never closes itself |
 | `onClose` | `() => void` | required | Escape or Cancel. **Never** a backdrop click |
 | `onConfirm` | `() => void` | required | The user answered yes |
-| `avTitle` | `string` | required | Shown read-only, so nobody deletes the wrong AV |
+| `avTitle` | `string` | one of the two | Shown read-only, so nobody deletes the wrong AV (a single one). Use `avTitles` for several |
+| `avTitles` | `string[]` | — | **Deleting several at once** (the bulk action bar's Delete): one line each, "VCP-12345 Added Value Title Here", in a read-only field that **grows to eight lines** and then scrolls (the dialog scrolls too when the window is too short). Instead of `avTitle` |
 | `title` | `string` | "Are you sure you want to delete?" | The question, **and** the accessible name |
 | `description` | `ReactNode` | the consequence sentence | Wired to `aria-describedby` |
 | `confirmLabel` | `string` | `'Delete'` | See the deviation below |

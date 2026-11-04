@@ -332,3 +332,63 @@ export const SelectCloses: Story = {
     await expect(trigger).toHaveFocus();
   },
 };
+
+/** A heading over the items, in the library's category style (small bold type in the quiet grey, a rule beneath) without its caret. It names the menu. */
+export const WithAHeading: Story = {
+  args: { heading: 'Urgency', items: [{ key: 'low', label: 'Low' }, { key: 'normal', label: 'Normal' }, { key: 'high', label: 'High' }] },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Urgency</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Urgency' }));
+    const menu = await screen.findByRole('menu', { name: 'Urgency' });
+    /* The heading is not an item. */
+    await expect(within(menu).getAllByRole('menuitem')).toHaveLength(3);
+    await expect(within(menu).getByText('Urgency')).toBeVisible();
+  },
+};
+
+/**
+ * A submenu: an item with `items` shows a right caret and opens its choices beside it — on hover, on click or with ArrowRight. The parent keeps the highlight (brand blue, bold)
+ * while it is open, and the submenu has its own heading. Only the submenu's items are choices. ArrowLeft or Escape closes just the submenu and returns focus to its parent.
+ */
+export const WithASubmenu: Story = {
+  args: {
+    heading: 'Move to Status',
+    items: [
+      { key: 'draft', label: 'Save as Draft' },
+      {
+        key: 'pending',
+        label: 'Pending Review',
+        items: [
+          { key: 'pending-accept', label: 'Accept' },
+          { key: 'pending-reject', label: 'Reject' },
+        ],
+      },
+      { key: 'progress', label: 'In Progress' },
+    ],
+    onSelect: fn(),
+  },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />,
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const menu = await screen.findByRole('menu', { name: 'Move to Status' });
+    const parent = within(menu).getByRole('menuitem', { name: 'Pending Review' });
+    await expect(parent).toHaveAttribute('aria-haspopup', 'menu');
+    await expect(parent).toHaveAttribute('aria-expanded', 'false');
+    /* Opening it by keyboard: ArrowRight, with focus going into the submenu. */
+    parent.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    await expect(parent).toHaveAttribute('aria-expanded', 'true');
+    await waitFor(() => expect(within(sub).getByRole('menuitem', { name: 'Accept' })).toHaveFocus());
+    /* ArrowLeft closes only the submenu, and focus goes back to its parent. */
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(screen.queryByRole('menu', { name: 'Pending Review' })).toBeNull());
+    await expect(parent).toHaveFocus();
+    await expect(screen.getByRole('menu', { name: 'Move to Status' })).toBeVisible();
+    /* Choosing from it asks with the submenu item's own key, and closes everything. */
+    await userEvent.click(parent);
+    await userEvent.click(await within(await screen.findByRole('menu', { name: 'Pending Review' })).findByRole('menuitem', { name: 'Reject' }));
+    await expect(args.onSelect).toHaveBeenCalledWith('pending-reject');
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  },
+};

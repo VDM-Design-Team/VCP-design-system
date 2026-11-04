@@ -46,6 +46,8 @@ navigation pattern, not behind an ellipsis.
 | `defaultOpen` | `boolean` | `false` | Uncontrolled starting state |
 | `onOpenChange` | `(open: boolean) => void` | — | Fires on every open and close, including Escape, outside click, tabbing out and selecting |
 | `align` | `left \| right` | `right` | Which edge of the menu lines up with the trigger's |
+| `heading` | `string` | — | A heading over the items ("Move to Status", "Urgency"), in the library's **category** style without its caret: 40 high, small bold type in `text.tertiary`, a rule beneath. It names the menu (`aria-label`) and is not an item: arrows and type-ahead step over it |
+| `placement` | `top \| bottom` | `bottom` | Which side the menu prefers. It still flips when there is no room — set `top` for a trigger at the bottom of the window (the bulk action bar) |
 | `className` | `string` | — | Merged onto the wrapper via `cn()` |
 | `panelClassName` | `string` | — | Merged onto the `role="menu"` panel via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | Points at the positioning wrapper |
@@ -62,6 +64,8 @@ carry a label and an action cannot accidentally be a rule.
 | `icon` | `IconName` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
 | `tone` | `default \| danger` | `default` | `danger` is for destructive, irreversible actions. See below |
+| `items` (on an item) | `MenuActionItem[]` | — | **A submenu.** The item shows a right caret (`caret-right`), opens its choices beside it on hover, click or ArrowRight, and keeps the brand-blue highlight while open. Only the submenu's items are choices; `onSelect` gets their own `key`. ArrowLeft or Escape closes just the submenu |
+| `heading` (on an item) | `string` | the item's label | The submenu's own heading |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
 | `disabled` | `boolean` | `false` | Stays visible and announced, but the keyboard steps over it |
 | `onClick` | `() => void` | — | Runs before `onSelect` |
@@ -119,6 +123,12 @@ The dark theme comes for free — every colour above is a semantic token that
 - **`shadow.menu` has no dark-theme override**, so in dark the panel's edge is
   carried by `stroke.default` alone.
 - **No motion tokens** for the colour transition.
+
+## Submenus
+
+An item with `items` is a parent, not a choice: it shows a right caret, is `aria-haspopup="menu"`, and its `aria-expanded` follows the submenu. Hover opens it (without taking focus), a click or ArrowRight opens it **and moves
+into it**. The submenu hangs to the right of the parent with its first choice level with the parent (it starts one category row above), is fixed to the screen so a scrolling menu cannot clip it, and has its own heading. ArrowUp and
+ArrowDown move inside it; **ArrowLeft or Escape closes only the submenu** and puts focus back on the parent; a choice closes everything. One level only.
 
 ## Accessibility
 
