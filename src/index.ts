@@ -66,6 +66,7 @@ export * from './components/file-attachment';
 export * from './components/in-case-you-missed-it-card';
 export * from './components/inline-edit';
 export * from './components/menu';
+export * from './components/metric-tile';
 export * from './components/modal';
 export * from './components/notification-bell';
 export * from './components/notification-item';
