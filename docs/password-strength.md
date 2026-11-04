@@ -52,10 +52,12 @@ message under it stays 12px. The track and the other fills are `ProgressBar`'s, 
 
 **Weak and Fair do not pass on the light track.** Both use the bright
 shades the Figma file paints — Weak
-`accent.pending.outline.border.default` (**2.27:1** light, 4.11:1 dark) and Fair
-`accent.yellow.medium` (**1.28:1** light, 7.66:1 dark) — under
+`accent.pending.outline.border.default` (**2.27:1** light, 2.91:1 dark) and Fair
+`accent.yellow.medium` (**1.28:1** light, 5.42:1 dark) — under
 the 3:1 a meaningful graphic should reach. (Fair is not `accent.warning.outline.border`: that token
-moved to yellow-700 in November for contrast and reads brown in this bar, where Figma draws a bright yellow.) That is kept deliberately: the level
+moved to yellow-700 in November for contrast and reads brown in this bar, where Figma draws a bright yellow.)
+**In dark, Very weak, Weak and Good fall under it too** (critical 2.72:1, pending 2.91:1, info 2.75:1), since
+the dark track moved up to slate-700 in November so it shows on a card. That is kept deliberately: the level
 is printed at the end of the label row and read out as `aria-valuetext`, so the
 fill's colour is never the only signal. Don't copy this choice to a bar that has
 no words beside it.

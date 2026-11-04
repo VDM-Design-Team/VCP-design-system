@@ -50,13 +50,12 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
 });
 
 const track = cva(
-  /* surface.track — added for this component: the quiet grey that keeps every
-     tone's fill ≥3.8:1 against it in BOTH themes. No pre-existing token could;
-     the closest (surface.neutral.medium) dropped the critical fill to 1.25:1 in
-     dark. The track whispers, the fill carries the boundary. The inset hairline
-     is for dark, where the track is the same slate as a card (`surface.elevated`)
-     and would vanish; it sits under the fill, so it changes no contrast. */
-  'w-full overflow-hidden rounded-full bg-surface-track ring-1 ring-inset ring-stroke-subtle',
+  /* surface.track — added for this component: the quiet grey under the fill.
+     Light keeps every filled tone ≥3.8:1 against it. Dark is one step above
+     surface.elevated so the track shows on a card; critical, info and pending
+     fall under 3:1 against it there, and keep 3.84:1 against the card around
+     the bar. The track whispers, the fill carries the boundary. */
+  'w-full overflow-hidden rounded-full bg-surface-track',
   {
     variants: {
       /* 4 for dense table rows, 8 as the default the export shipped at. */
