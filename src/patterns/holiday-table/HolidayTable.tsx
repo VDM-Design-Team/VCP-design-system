@@ -9,12 +9,12 @@ import { Badge } from '../../atoms/badge';
 import { Tag } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
+import { DateField } from '../../components/date-field';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
 import type { DatePickerPreset } from '../../components/date-picker';
 import { EmptyState } from '../../components/empty-state';
 import { HOLIDAY_TYPES, HolidayTypeTag, holidayTypeLabel, type HolidayType } from '../../components/holiday-type-tag';
 import { HolidaySourceBadge, type HolidaySource } from '../../components/holiday-source-badge';
-import { PeriodSelect, type Period } from '../../components/period-select';
 import { TruncatedText } from '../../components/truncated-text';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
 import { formatDayMonthYear } from '../../lib/format-date';
@@ -57,10 +57,16 @@ export interface HolidayRow {
   source: HolidaySource;
 }
 
+/** A period the Period filter holds: ISO start and end (inclusive). A month is its first and last day. */
+export interface HolidayPeriod {
+  start: string;
+  end: string;
+}
+
 export interface HolidayFilters {
   /** `''` is all types. */
   type: HolidayType | '';
-  period: Period | null;
+  period: HolidayPeriod | null;
   /** The picked user's `value`; `'all'` is everyone. */
   user: string;
 }
@@ -94,6 +100,13 @@ export interface HolidayTableProps extends Omit<React.HTMLAttributes<HTMLDivElem
 
 const DUPLICATE_TIP = 'Hubstaff already includes this entry. Remove it from VCP to avoid duplicate coverage.';
 const ALL_USERS = 'all';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+/** The last day of the month `iso` is in. */
+const lastDayOf = (iso: string) => {
+  const [year, month] = iso.split('-').map(Number);
+  return `${year}-${pad(month)}-${pad(new Date(year, month, 0).getDate())}`;
+};
 
 const dayCount = (start: string, end: string) => {
   const ms = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
@@ -248,7 +261,20 @@ export function HolidayTable({
             value={filters.type}
             onChange={(type) => onFiltersChange({ ...filters, type: type as HolidayType | '' })}
           />
-          <PeriodSelect className="w-60" value={filters.period} presets={periodPresets} onChange={(period) => onFiltersChange({ ...filters, period })} />
+          {/* The existing month picker with the sprints passed in as its presets: a month picks the month, a sprint its own dates, Clear empties the filter. */}
+          <DateField
+            className="w-60"
+            mode="month"
+            emphasis="regular"
+            placeholder="Select Period"
+            aria-label="Period"
+            value={filters.period?.start}
+            rangeEnd={filters.period?.end}
+            picker={{ presets: periodPresets }}
+            onChange={(first) => onFiltersChange({ ...filters, period: { start: first, end: lastDayOf(first) } })}
+            onRangeChange={(start, end) => onFiltersChange({ ...filters, period: { start, end: end ?? lastDayOf(start) } })}
+            onClear={() => onFiltersChange({ ...filters, period: null })}
+          />
           <SearchSelect
             className="w-60"
             emphasis="regular"

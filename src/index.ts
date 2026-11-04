@@ -87,7 +87,6 @@ export * from './components/user-menu';
 export * from './components/type-tag';
 export * from './components/holiday-type-tag';
 export * from './components/holiday-source-badge';
-export * from './components/period-select';
 export * from './components/truncated-text';
 export * from './components/urgency-tag';
 export * from './components/user-label';

@@ -22,7 +22,7 @@ Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty
 | `EmptyState` | component |
 | `HolidayTypeTag` | component |
 | `HolidaySourceBadge` | component |
-| `PeriodSelect` | component |
+| `DateField` | component |
 | `SearchSelect` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -46,7 +46,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `rows` | `HolidayRow[]` | required | `{ id, name, duplicateOfHubstaff?, start, end?, type, appliesTo, allDay, recurring, addedBy, source }`. Rendered in the order given |
 | `filters` / `onFiltersChange` | `HolidayFilters` / `(f) => void` | required | `{ type: '' \| HolidayType, period: Period \| null, user }`. The page filters; the table does not |
 | `users` | `SearchSelectOption[]` | required | After "All Users" in the Applies to filter |
-| `periodPresets` | `DatePickerPreset[]` | — | The sprints down the left of the Period filter |
+| `periodPresets` | `DatePickerPreset[]` | — | The sprints, passed in as the Period filter's presets (`{ label, value: start, rangeEnd: end }`) down the left of the month picker |
 | `sort` / `onSortChange` | `DataTableSort` | — | Date sorts; the page sorts |
 | `admin` | `boolean` | `false` | Add Holiday, Import from Hubstaff and Actions |
 | `onAdd` / `onImport` / `onEdit` / `onDelete` | | | Only report; the page opens `HolidayModal` or confirms the removal |

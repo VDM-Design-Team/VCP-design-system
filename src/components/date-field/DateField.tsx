@@ -57,6 +57,11 @@ export interface DateFieldProps {
    * reaches the page while the range is being picked.
    */
   onRangeChange?: (start: string, end?: string) => void;
+  /**
+   * Day and month mode: shows the picker's own **Clear** button, which empties the field (this fires) and closes the calendar. Range mode always has its Clear. Without it a day or month is changed,
+   * not cleared — a form field usually is not optional; a **filter** is, and passes this.
+   */
+  onClear?: () => void;
   /** How a date reads in the field. Default is the ISO date as it is; a page may want `dd/mm/yyyy`. Month mode ignores it. */
   formatDate?: (iso: string) => string;
   /**
@@ -89,6 +94,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       onChange,
       rangeEnd,
       onRangeChange,
+      onClear,
       formatDate,
       estimated,
       placeholder = '-',
@@ -137,7 +143,11 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
               !value
                 ? ''
                 : mode === 'month'
-                  ? formatMonth(value)
+                  ? /* A named period from the picker's `presets` (a sprint) reads after its month: "May 2026, Sprint 34 (19-22 May)". */
+                    (() => {
+                      const named = picker?.presets?.find((p) => p.rangeEnd && p.value === value && p.rangeEnd === rangeEnd);
+                      return named ? `${formatMonth(value)}, ${named.label}` : formatMonth(value);
+                    })()
                   : mode === 'range'
                     ? rangeEnd && rangeEnd !== value
                       ? `${show(value)} - ${show(rangeEnd)}`
@@ -172,10 +182,20 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             <DatePicker
               mode={mode}
               value={value}
-              /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
-              clearable={false}
+              /* Month mode with named periods (`presets` that have an end): picking one reports its start and end. */
+              rangeEnd={mode === 'month' ? rangeEnd : undefined}
+              /* The picker's Clear is shown only when the page says what clearing does. */
+              clearable={Boolean(onClear)}
+              onClear={() => {
+                onClear?.();
+                setOpen(false);
+              }}
               onChange={(iso) => {
                 onChange?.(iso);
+                setOpen(false);
+              }}
+              onRangeChange={(start, end) => {
+                onRangeChange?.(start, end);
                 setOpen(false);
               }}
               {...picker}

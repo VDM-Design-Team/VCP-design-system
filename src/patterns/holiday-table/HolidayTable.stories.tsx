@@ -127,9 +127,9 @@ export const PickingAPeriod: Story = {
   render: (args) => <Live {...args} />,
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await userEvent.click(c.getByRole('combobox', { name: 'Select Period' }));
+    await userEvent.click(c.getByRole('combobox', { name: 'Period' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Sprint 33 (1-15 May)' }));
-    await expect(c.getByRole('combobox', { name: 'Select Period' })).toHaveValue('May 2026, Sprint 33 (1-15 May)');
+    await expect(c.getByRole('combobox', { name: 'Period' })).toHaveValue('May 2026, Sprint 33 (1-15 May)');
   },
 };
 

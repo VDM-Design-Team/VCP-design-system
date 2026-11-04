@@ -194,3 +194,37 @@ export const RangeMode: Story = {
     await expect(field).toHaveValue('04/05/2026 - 06/05/2026');
   },
 };
+
+/** A filter's Period: month mode with named periods (sprints) passed in as presets, and Clear. A sprint reads after its month. */
+export const MonthWithSprints: Story = {
+  render: () => {
+    const [period, setPeriod] = React.useState<{ start: string; end: string } | null>(null);
+    return (
+      <DateField
+        mode="month"
+        emphasis="regular"
+        placeholder="Select Period"
+        value={period?.start}
+        rangeEnd={period?.end}
+        picker={{
+          presets: [
+            { label: 'Sprint 34 (19-22 May)', value: '2026-05-19', rangeEnd: '2026-05-22' },
+            { label: 'Sprint 33 (1-15 May)', value: '2026-05-01', rangeEnd: '2026-05-15' },
+          ],
+        }}
+        onChange={(first) => setPeriod({ start: first, end: first })}
+        onRangeChange={(start, end) => setPeriod(end ? { start, end } : null)}
+        onClear={() => setPeriod(null)}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole('combobox');
+    await userEvent.click(field);
+    await userEvent.click(await within(document.body).findByRole('button', { name: 'Sprint 33 (1-15 May)' }));
+    await expect(field).toHaveValue('May 2026, Sprint 33 (1-15 May)');
+    await userEvent.click(field);
+    await userEvent.click(await within(document.body).findByRole('button', { name: 'Clear' }));
+    await expect(field).toHaveValue('');
+  },
+};
