@@ -64,6 +64,11 @@ export interface DataTableColumn<Row> {
    * much of the spare room it takes; with none it takes what the others leave.
    */
   grow?: boolean;
+  /**
+   * A floor for the column's width, as a CSS length (`'11.5rem'`): the table scrolls sideways before it goes narrower. For a column that is not `fit` (it may wrap) and not `grow` (it does not
+   * truncate), like a name that should not be squeezed into three lines. ds-lint-ignore
+   */
+  minWidth?: string;
   sortable?: boolean;
   /**
    * Rendered after the label and **before** the sort arrows — a tooltip
@@ -255,6 +260,7 @@ export function DataTable<Row extends { id?: string | number }>({
                     sorted ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined
                   }
                   className={cn(headerCell, columnSizing(c))}
+                  style={c.minWidth ? { minWidth: c.minWidth } : undefined}
                 >
                   {/* Label, then the hint, then the sort arrows — in that order, as
                       Figma draws a header that has both. The sort button is the
@@ -341,6 +347,7 @@ export function DataTable<Row extends { id?: string | number }>({
                     <td
                       key={c.key}
                       {...c.cellProps?.(row)}
+                      style={c.minWidth ? { ...c.cellProps?.(row)?.style, minWidth: c.minWidth } : c.cellProps?.(row)?.style}
                       className={cn(cell(dense), 'text-left', columnSizing(c), c.cellProps?.(row)?.className)}
                     >
                       {c.render

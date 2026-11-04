@@ -26,7 +26,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `mode` | `'day' \| 'month'` | `'day'` | What it picks: a day, or a month with no day (see below). `DatePicker`'s own prop |
+| `mode` | `'day' \| 'range' \| 'month'` | `'day'` | What it picks: a day, a period, or a month with no day (see below). `DatePicker`'s own prop |
+| `rangeEnd` / `onRangeChange` | `string` / `(start, end?) => void` | — | Range mode: `value` is the start, `rangeEnd` the end. `onRangeChange` fires on **Apply** (one day picked is a period of one) and with `('', undefined)` on **Clear** |
+| `onClear` | `() => void` | — | Day and month mode: shows the picker's own **Clear**, which empties the field and closes. A **filter** passes it; a required form field does not |
+| `formatDate` | `(iso) => string` | ISO as is | How a date reads in the field (the Holiday Registry draws `dd/mm/yyyy`) |
 | `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder |
 | `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
 | `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
@@ -41,6 +44,15 @@ Generated from the real imports — `npm test` fails if this list drifts.
 The chosen date is **medium** weight and the placeholder regular (`Input`'s `emphasis="medium"`) — the rule `Select` and `SearchSelect`
 follow, so a date field reads the same as the selects beside it. (It was regular until November 2026.) **A filter passes
 `emphasis="regular"`**, as its `Select`s and `SearchSelect`s do, so a row of filters sits quietly.
+
+## Range mode
+
+`mode="range"` picks a period on a two-month calendar. Two clicks choose the ends; **Apply** commits them and closes, **Clear** empties the field and closes. Nothing reaches the page while the range is being picked,
+so the field never holds half a range. Used by the Holiday modal's Date.
+
+## Month mode with named periods
+
+Pass `picker={{ presets }}` with presets that have a `rangeEnd` (sprints, cycles) and the month grid shows them down the left. Picking one reports its start and end through `onRangeChange` (and the field reads "May 2026, Sprint 34 (19-22 May)"); picking a month still reports its first day through `onChange`. The Holiday Registry's Period filter is this.
 
 ## Month mode
 
