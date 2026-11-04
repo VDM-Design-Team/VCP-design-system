@@ -56,6 +56,7 @@ export * from './components/domain-access-table';
 export * from './components/domain-label';
 export * from './components/deliverable-link';
 export * from './components/deliverable-link-form';
+export * from './components/password-field';
 export * from './components/password-strength';
 export * from './components/due-date-tag';
 export * from './components/emoji-reaction-picker';
@@ -92,3 +93,5 @@ export * from './patterns';
 export * from './templates';
 
 export { cn } from './lib/cn';
+/* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
+export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';

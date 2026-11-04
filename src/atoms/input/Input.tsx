@@ -72,6 +72,11 @@ export interface InputProps
   leadingIcon?: React.ReactNode;
   /** Decorative adornment after the value — 16 icons only. ds-lint-ignore */
   trailingIcon?: React.ReactNode;
+  /**
+   * A **control** at the field's end — a show/hide toggle, a clear button — where `trailingIcon` is only decoration. It is a real, focusable
+   * element the caller names (an `IconButton` with a label), not hidden from assistive tech, and it keeps its own colours.
+   */
+  trailingAction?: React.ReactNode;
   /** Critical border + `aria-invalid`. Always pair with a visible error message. */
   invalid?: boolean;
   /**
@@ -85,7 +90,7 @@ export interface InputProps
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, size, invalid, emphasis, fullWidth, leadingIcon, trailingIcon, disabled, type = 'text', ...props },
+    { className, size, invalid, emphasis, fullWidth, leadingIcon, trailingIcon, trailingAction, disabled, type = 'text', ...props },
     ref,
   ) => (
     <div className={cn(field({ size, invalid, fullWidth }), className)}>
@@ -99,6 +104,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {...props}
       />
       {trailingIcon && <Adornment disabled={disabled}>{trailingIcon}</Adornment>}
+      {trailingAction && <span className="-mr-1 flex shrink-0 items-center">{trailingAction}</span>}
     </div>
   ),
 );

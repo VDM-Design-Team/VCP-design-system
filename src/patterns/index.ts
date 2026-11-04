@@ -10,6 +10,7 @@ export * from './move-av-to-cycle-modal';
 export * from './av-header';
 export * from './av-table';
 export * from './changelog-modal';
+export * from './change-password-form';
 export * from './confirm-delete-av-modal';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
