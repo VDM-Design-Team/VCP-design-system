@@ -31,6 +31,8 @@ export interface BulkAction {
   heading?: string;
   /** The choices. The page owns what they are (statuses differ by domain; cycles by date). */
   items: MenuItem[];
+  /** A search box over the choices (the Cycle menu has one: there are many cycles). */
+  searchable?: boolean;
   /** A choice was made: the item's `key`. It only asks; the page confirms. */
   onSelect: (itemKey?: string) => void;
 }
@@ -79,6 +81,7 @@ export function BulkActionBar({ className, count, onClear, actions, onDelete, ..
             /* Fixed to the screen, so the bar's own scrolling cannot clip the menu. */
             strategy="fixed"
             heading={action.heading ?? action.label}
+            searchable={action.searchable}
             items={action.items}
             onSelect={action.onSelect}
             trigger={

@@ -66,7 +66,7 @@ const actionsFor = (statuses: MenuItem[], onSelect: (property: string, key?: str
   { key: 'status', label: 'Status', heading: 'Move to Status', items: statuses, onSelect: (key) => onSelect('Status', key) },
   { key: 'urgency', label: 'Urgency', items: URGENCIES.map((u) => ({ key: u, label: u })), onSelect: (key) => onSelect('Urgency', key) },
   { key: 'type', label: 'Type', items: TYPES.map((t) => ({ key: t, label: t })), onSelect: (key) => onSelect('Type', key) },
-  { key: 'cycle', label: 'Cycle', items: CYCLES.map((c) => ({ key: c.key, label: c.label })), onSelect: (key) => onSelect('Cycle', key) },
+  { key: 'cycle', label: 'Cycle', searchable: true, items: CYCLES.map((c) => ({ key: c.key, label: c.label })), onSelect: (key) => onSelect('Cycle', key) },
 ];
 
 const choose = fn();
@@ -228,7 +228,12 @@ const labelOf = (items: MenuItem[], key: string): string => {
 /* Which confirmation a choice opens: just the action and the list, as the pattern asks. The Status menu's keys say which flow (Figma draws Backlog, Accept and Reject). */
 function ConfirmFor({ pending, items, onClose, onConfirm }: { pending: Pending; items: { ref: string; title: string }[]; onClose: () => void; onConfirm: () => void }) {
   const common = { open: true, onClose, onConfirm, items };
-  const reasons = ['Duplicate', 'Out of scope', 'Needs more information'];
+  const reasons = [
+    { value: 'incomplete', label: 'Incomplete or Unclear Submission', explanation: 'Missing key details or not clear enough to review and proceed.' },
+    { value: 'duplicate', label: 'Duplicate', explanation: 'This Added Value already exists.' },
+    { value: 'out-of-scope', label: 'Out of Scope', explanation: 'This is outside what the team can take on.' },
+    { value: 'other', label: 'Other', other: true },
+  ];
   if (pending.property === 'Urgency') return <BulkActionConfirmModal {...common} action="urgency" value={pending.key as AVUrgency} />;
   if (pending.property === 'Type') return <BulkActionConfirmModal {...common} action="type" value={pending.key as AVType} />;
   if (pending.property === 'Cycle') {

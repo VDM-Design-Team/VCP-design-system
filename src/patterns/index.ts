@@ -28,3 +28,4 @@ export * from './top-bar';
 export * from './bulk-action-bar';
 export * from './bulk-action-confirm-modal';
 export * from './bulk-action-failed-modal';
+export * from './bulk-action-handoff-modal';

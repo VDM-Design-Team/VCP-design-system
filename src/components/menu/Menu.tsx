@@ -3,6 +3,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
+import { Input } from '../../atoms/input';
 import { Divider } from '../../atoms/divider';
 import { Popover, type PopoverAlign } from '../popover';
 
@@ -127,6 +128,15 @@ export interface MenuProps
    * not an item, so arrows and type-ahead step over it.
    */
   heading?: string;
+  /**
+   * **A search box at the top** (Figma's `_Menu_Item_Search`): typing narrows the items to the ones whose label contains the text. The box has focus when the menu opens; ArrowDown goes
+   * into the list, ArrowUp from the first item comes back, and Enter chooses the first match. Items with a non-text label always stay.
+   */
+  searchable?: boolean;
+  /** The search box's placeholder and name. */
+  searchPlaceholder?: string;
+  /** What the list says when nothing matches. */
+  emptyText?: string;
   /** Which side of the trigger the menu prefers: `bottom` (the default) or `top`. It still flips when there is no room. */
   placement?: 'top' | 'bottom';
   /**
@@ -221,13 +231,16 @@ function SubMenu({
 
 export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
   {
-    items = [],
+    items: allItems = [],
     onSelect,
     trigger,
     open,
     defaultOpen = false,
     onOpenChange,
     heading,
+    searchable,
+    searchPlaceholder = 'Search...',
+    emptyText = 'No results',
     placement,
     strategy,
     align = 'right',
@@ -239,6 +252,18 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
 ) {
   const [uncontrolled, setUncontrolled] = React.useState(defaultOpen);
   const isOpen = open !== undefined ? open : uncontrolled;
+
+  /* Searching narrows the list; every index below is into what is shown. */
+  const [query, setQuery] = React.useState('');
+  const searchRef = React.useRef<HTMLInputElement>(null);
+  const needle = query.trim().toLowerCase();
+  const items =
+    searchable && needle
+      ? allItems.filter((item) => isAction(item) && (typeof item.label !== 'string' || item.label.toLowerCase().includes(needle)))
+      : allItems;
+  React.useEffect(() => {
+    if (!isOpen) setQuery('');
+  }, [isOpen]);
 
   const setOpen = React.useCallback(
     (next: boolean) => {
@@ -299,8 +324,9 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
      focus in the list on open, and what moves it on every arrow key. */
   React.useEffect(() => {
     if (!isOpen) return;
-    itemRefs.current[activeIndex]?.focus();
-  }, [isOpen, activeIndex]);
+    if (activeIndex < 0 && searchable) searchRef.current?.focus();
+    else itemRefs.current[activeIndex]?.focus();
+  }, [isOpen, activeIndex, searchable]);
 
   /* A menu always opens on its first item unless the key that opened it asked for
      the last one, so closing it forgets where the user was. Opening from anywhere
@@ -308,7 +334,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
      flipped by the caller — then starts at the top. */
   const wasOpen = React.useRef(isOpen);
   React.useEffect(() => {
-    if (isOpen && !wasOpen.current && !selectable(activeIndex)) setActiveIndex(firstSelectable);
+    if (isOpen && !wasOpen.current && !selectable(activeIndex)) setActiveIndex(searchable ? -1 : firstSelectable);
     if (!isOpen && wasOpen.current) setActiveIndex(-1);
     wasOpen.current = isOpen;
   });
@@ -351,6 +377,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
      on the list container rather than an item. Enter and Space are left alone:
      the items are real buttons and the browser already turns both into a click. */
   const onPanelKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const inSearch = event.target === searchRef.current;
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
@@ -358,18 +385,29 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
         break;
       case 'ArrowUp':
         event.preventDefault();
-        move(-1);
+        /* From the first item, back up into the search box. */
+        if (searchable && activeIndex === firstSelectable) setActiveIndex(-1);
+        else if (!inSearch) move(-1);
+        break;
+      case 'Enter':
+        if (inSearch && needle && firstSelectable >= 0) {
+          event.preventDefault();
+          const first = items[firstSelectable];
+          if (isAction(first)) activate(first);
+        }
         break;
       case 'Home':
+        if (inSearch) break;
         event.preventDefault();
         setActiveIndex(firstSelectable);
         break;
       case 'End':
+        if (inSearch) break;
         event.preventDefault();
         setActiveIndex(lastSelectable);
         break;
       default:
-        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        if (!inSearch && event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
           typeahead(event.key);
         }
     }
@@ -417,6 +455,30 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
           <div key="heading" aria-hidden="true" className={CATEGORY}>
             {heading}
           </div>
+        ),
+        searchable && (
+          <div key="search" className="px-1 pb-1">
+            <Input
+              ref={searchRef}
+              fullWidth
+              size="sm"
+              role="searchbox"
+              aria-label={searchPlaceholder}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              leadingIcon={<Icon name="magnifying-glass" size="sm" />}
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setActiveIndex(-1);
+              }}
+            />
+          </div>
+        ),
+        searchable && needle && items.length === 0 && (
+          <p key="empty" className="m-0 px-3 py-2 text-body-sm-regular text-text-tertiary">
+            {emptyText}
+          </p>
         ),
         ...items.map((item, i) => {
         if (!isAction(item)) {

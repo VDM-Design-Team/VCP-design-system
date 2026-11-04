@@ -23,10 +23,11 @@ import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
  * | `backlog` | "Move 2 Added Values to Backlog" | **Feedback** (optional) | `{ value, overrides }` — a reason, text |
  * | `accept-pending` | "Accept 2 Pending Added Values" | `domain="development"`: **Multipart Value** checkbox; otherwise nothing | `{ value, overrides }` (boolean), or `null` |
  * | `accept` | "Accept 2 Added Values" | `development`: **Require Cypress Test Script**; `design`: **Copy to Dev**; otherwise nothing | `{ value, overrides }` (boolean), or `null` |
- * | `reject-pending`, `reject` | "Reject 2 Pending Added Values" / "Reject 2 Added Values" | **Rejection Reason** (a select of your `reasons`), required; Confirm is red for `reject` | `{ value, overrides }` — the chosen reason |
+ * | `reject-pending`, `reject` | "Reject 2 Pending Added Values" / "Reject 2 Added Values" | **Rejection Reason** (a select of your `reasons`), required; Confirm is red for `reject` | `{ value, overrides, detail?, overrideDetails? }` — the chosen reason, and the note typed under Other |
  *
  * - **A bulk field and one per Added Value.** The bulk field "will be applied to all selected Added Values unless overridden below": in the list each Added Value has its own, which
  *   starts as the bulk one and, once changed, **overrides** it. `onConfirm` gets `{ value, overrides }`: the bulk value, and `overrides[ref]` for each Added Value that differs.
+ * - **A reason's `explanation` shows under the select once it is chosen; the reason marked `other` shows an optional note field there instead** (Figma's "Specify the rejection reason (optional)").
  * - **A reason is required to reject**: Confirm says so under the field ("Select a rejection reason, or one for each Added Value.") and does not go through until every Added Value has one.
  * - **It does nothing itself.** `onConfirm` is the page's cue to make the change, then close, and say so (a toast, or `BulkActionFailedModal` for the ones that failed).
  *   Handoff is not here: it is its own multi-step popup.
@@ -53,6 +54,18 @@ export type BulkDomain = 'development' | 'design' | 'other';
 export interface BulkChoice<T> {
   value: T;
   overrides: Record<string, T>;
+  /** Rejecting only: what was typed under **Other** for the bulk reason (it is optional, so it may be empty). */
+  detail?: string;
+  /** Rejecting only: the same, for an Added Value (by `ref`) whose own reason is Other. */
+  overrideDetails?: Record<string, string>;
+}
+
+/** One rejection reason. `explanation` is what the select says once it is chosen; the reason with `other` asks for an optional note instead. */
+export interface BulkRejectionReason {
+  value: string;
+  label: string;
+  explanation?: string;
+  other?: boolean;
 }
 
 interface BaseProps {
@@ -70,13 +83,29 @@ export type BulkActionConfirmModalProps = BaseProps &
   (
     | { action: 'urgency'; value: AVUrgency; onConfirm: () => void }
     | { action: 'type'; value: AVType; onConfirm: () => void }
-    | { action: 'cycle'; value: { code: string; start: string; end: string }; onConfirm: () => void }
+    | {
+        action: 'cycle';
+        value: { code: string; start: string; end: string };
+        onConfirm: () => void;
+      }
     /** Any other status the Status menu offers (In Progress, For QA…): Figma draws no popup for these, so this is the plain "Change Status" one. */
     | { action: 'status'; value: string; onConfirm: () => void }
     | { action: 'backlog'; onConfirm: (choice: BulkChoice<string>) => void }
-    | { action: 'accept-pending'; domain: BulkDomain; onConfirm: (choice: BulkChoice<boolean> | null) => void }
-    | { action: 'accept'; domain: BulkDomain; onConfirm: (choice: BulkChoice<boolean> | null) => void }
-    | { action: 'reject-pending' | 'reject'; reasons: ReadonlyArray<string | SelectOption>; onConfirm: (choice: BulkChoice<string>) => void }
+    | {
+        action: 'accept-pending';
+        domain: BulkDomain;
+        onConfirm: (choice: BulkChoice<boolean> | null) => void;
+      }
+    | {
+        action: 'accept';
+        domain: BulkDomain;
+        onConfirm: (choice: BulkChoice<boolean> | null) => void;
+      }
+    | {
+        action: 'reject-pending' | 'reject';
+        reasons: readonly BulkRejectionReason[];
+        onConfirm: (choice: BulkChoice<string>) => void;
+      }
   );
 
 const HELPER = 'This will be applied to all selected Added Values unless overridden below.';
@@ -107,15 +136,30 @@ const titleFor = (props: BulkActionConfirmModalProps, n: number): string => {
 };
 
 type Spec =
-  | { kind: 'text'; label: string; placeholder: string; itemPlaceholder: string }
+  | {
+      kind: 'text';
+      label: string;
+      placeholder: string;
+      itemPlaceholder: string;
+    }
   | { kind: 'check'; label: string; description?: string }
-  | { kind: 'select'; label: string; placeholder: string; options: SelectOption[] };
+  | {
+      kind: 'select';
+      label: string;
+      placeholder: string;
+      options: SelectOption[];
+    };
 
 /** The one field an action collects, if it collects any. */
 const specFor = (props: BulkActionConfirmModalProps): Spec | null => {
   switch (props.action) {
     case 'backlog':
-      return { kind: 'text', label: 'Feedback', placeholder: 'Enter a reason (optional)', itemPlaceholder: 'Uses bulk reason unless overridden' };
+      return {
+        kind: 'text',
+        label: 'Feedback',
+        placeholder: 'Enter a reason (optional)',
+        itemPlaceholder: 'Uses bulk reason unless overridden',
+      };
     case 'accept-pending':
       return props.domain === 'development'
         ? {
@@ -125,18 +169,14 @@ const specFor = (props: BulkActionConfirmModalProps): Spec | null => {
           }
         : null;
     case 'accept':
-      return props.domain === 'development'
-        ? { kind: 'check', label: 'Require Cypress Test Script' }
-        : props.domain === 'design'
-          ? { kind: 'check', label: 'Copy to Dev' }
-          : null;
+      return props.domain === 'development' ? { kind: 'check', label: 'Require Cypress Test Script' } : props.domain === 'design' ? { kind: 'check', label: 'Copy to Dev' } : null;
     case 'reject-pending':
     case 'reject':
       return {
         kind: 'select',
         label: 'Rejection Reason',
         placeholder: 'Select Rejection Reason',
-        options: props.reasons.map((r) => (typeof r === 'string' ? { value: r, label: r } : r)),
+        options: props.reasons.map((r) => ({ value: r.value, label: r.label })),
       };
     default:
       return null;
@@ -152,6 +192,8 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
   const [bulk, setBulk] = React.useState<Value>(spec?.kind === 'check' ? false : '');
   const [overrides, setOverrides] = React.useState<Record<string, Value>>({});
   const [error, setError] = React.useState<string | null>(null);
+  /* Rejecting: the optional note under **Other**, for the bulk reason (`''`) and per Added Value (by `ref`). */
+  const [details, setDetails] = React.useState<Record<string, string>>({});
   const listId = React.useId();
   const bulkRef = React.useRef<HTMLSelectElement>(null);
 
@@ -161,6 +203,7 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
     setExpanded(defaultExpanded);
     setBulk(spec?.kind === 'check' ? false : '');
     setOverrides({});
+    setDetails({});
     setError(null);
     /* On open only. */
   }, [open]); // eslint-disable-line
@@ -187,11 +230,30 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
         bulkRef.current?.focus();
         return;
       }
-      props.onConfirm({ value: bulk as string, overrides: overrides as Record<string, string> });
+      const reasons = props.reasons;
+      const isOther = (value: Value) => Boolean(reasons.find((r) => r.value === value)?.other);
+      const overrideDetails: Record<string, string> = {};
+      for (const [ref, value] of Object.entries(overrides)) if (isOther(value) && details[ref]) overrideDetails[ref] = details[ref];
+      props.onConfirm({
+        value: bulk as string,
+        overrides: overrides as Record<string, string>,
+        detail: isOther(bulk) ? (details[''] ?? '') : undefined,
+        overrideDetails,
+      });
     } else if (props.action === 'backlog') {
-      props.onConfirm({ value: bulk as string, overrides: overrides as Record<string, string> });
+      props.onConfirm({
+        value: bulk as string,
+        overrides: overrides as Record<string, string>,
+      });
     } else if (props.action === 'accept' || props.action === 'accept-pending') {
-      props.onConfirm(spec ? { value: bulk as boolean, overrides: overrides as Record<string, boolean> } : null);
+      props.onConfirm(
+        spec
+          ? {
+              value: bulk as boolean,
+              overrides: overrides as Record<string, boolean>,
+            }
+          : null,
+      );
     } else {
       /* urgency, type, cycle, status: nothing was collected. */
       (props.onConfirm as () => void)();
@@ -209,6 +271,26 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
     ) : props.action === 'status' ? (
       <Tag>{props.value}</Tag>
     ) : null;
+
+  /* Under a chosen rejection reason: its explanation, or — for Other — an optional note in its place. */
+  const reasonExtra = (value: Value, key: string, label: string) => {
+    if (props.action !== 'reject' && props.action !== 'reject-pending') return null;
+    const reason = props.reasons.find((r) => r.value === value);
+    if (!reason) return null;
+    if (reason.other) {
+      return (
+        <Input
+          fullWidth
+          autoComplete="off"
+          aria-label={label}
+          placeholder="Specify the rejection reason (optional)"
+          value={details[key] ?? ''}
+          onChange={(event) => setDetails((current) => ({ ...current, [key]: event.target.value }))}
+        />
+      );
+    }
+    return reason.explanation ? <p className="m-0 text-caption-md-regular text-text-tertiary">{reason.explanation}</p> : null;
+  };
 
   const states = spec?.kind === 'check' ? effectiveAll() : [];
   const allOn = states.length > 0 && states.every(Boolean);
@@ -237,24 +319,27 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
       <p className="m-0 text-caption-md-regular text-text-tertiary">{HELPER}</p>
     </div>
   ) : (
-    <Field label={spec.label} helper={HELPER} error={error ?? undefined}>
-      {spec.kind === 'text' ? (
-        <Input fullWidth autoComplete="off" placeholder={spec.placeholder} value={bulk as string} onChange={(event) => setBulk(event.target.value)} />
-      ) : (
-        <Select
-          ref={bulkRef}
-          fullWidth
-          emphasis="regular"
-          placeholder={spec.placeholder}
-          options={spec.options}
-          value={bulk as string}
-          onChange={(next) => {
-            setError(null);
-            setBulk(next);
-          }}
-        />
-      )}
-    </Field>
+    <div className="flex flex-col gap-2">
+      <Field label={spec.label} helper={HELPER} error={error ?? undefined}>
+        {spec.kind === 'text' ? (
+          <Input fullWidth autoComplete="off" placeholder={spec.placeholder} value={bulk as string} onChange={(event) => setBulk(event.target.value)} />
+        ) : (
+          <Select
+            ref={bulkRef}
+            fullWidth
+            emphasis="regular"
+            placeholder={spec.placeholder}
+            options={spec.options}
+            value={bulk as string}
+            onChange={(next) => {
+              setError(null);
+              setBulk(next);
+            }}
+          />
+        )}
+      </Field>
+      {spec.kind === 'select' && reasonExtra(bulk, '', 'Other rejection reason')}
+    </div>
   );
 
   const itemField = (item: BulkActionAV) => {
@@ -284,15 +369,18 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
       );
     }
     return (
-      <Select
-        fullWidth
-        emphasis="regular"
-        aria-label={`Rejection reason for ${item.ref}`}
-        placeholder={spec.placeholder}
-        options={spec.options}
-        value={(overrides[item.ref] as string) ?? ''}
-        onChange={(next) => setOverride(item.ref, next)}
-      />
+      <div className="flex flex-col gap-2">
+        <Select
+          fullWidth
+          emphasis="regular"
+          aria-label={`Rejection reason for ${item.ref}`}
+          placeholder={spec.placeholder}
+          options={spec.options}
+          value={(overrides[item.ref] as string) ?? ''}
+          onChange={(next) => setOverride(item.ref, next)}
+        />
+        {reasonExtra((overrides[item.ref] as string) ?? '', item.ref, `Other rejection reason for ${item.ref}`)}
+      </div>
     );
   };
 

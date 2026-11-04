@@ -7,7 +7,23 @@ const ITEMS = [
   { href: '#/added-values/VCP-12345', ref: 'VCP-12345', title: 'Added Value Title Here (if the title is super long, just truncate it so that the row keeps its shape in the list)' },
   { href: '#/added-values/VCP-12346', ref: 'VCP-12346', title: 'Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard' },
 ];
-const REASONS = ['Duplicate', 'Out of scope', 'Needs more information'];
+/** Figma's reasons for rejecting a Pending Added Value. */
+const REASONS = [
+  { value: 'incomplete', label: 'Incomplete or Unclear Submission', explanation: 'Missing key details or not clear enough to review and proceed.' },
+  { value: 'duplicate', label: 'Duplicate', explanation: 'This Added Value already exists.' },
+  { value: 'out-of-scope', label: 'Out of Scope', explanation: 'This is outside what the team can take on.' },
+  { value: 'needs-refinement', label: 'Needs Refinement', explanation: 'The request needs more definition before it can be accepted.' },
+  { value: 'other', label: 'Other', other: true },
+];
+/** Figma's reasons for rejecting a handed-off Added Value. */
+const HANDOFF_REASONS = [
+  { value: 'functionality', label: 'Functionality', explanation: 'The delivery is complete but missing something that was requested in the Value outcome, interaction, or required deliverable.' },
+  { value: 'design-mismatch', label: 'Design Mismatch', explanation: 'The delivery does not match the approved design.' },
+  { value: 'execution-refinement', label: 'Execution Refinement', explanation: 'The idea is right but the execution needs polish.' },
+  { value: 'request-refinement', label: 'Request Refinement', explanation: 'The original request needs to be clarified or adjusted.' },
+  { value: 'misalignment', label: 'Misalignment / Not Needed', explanation: 'The delivery does not line up with what is needed, or it is no longer needed.' },
+  { value: 'other', label: 'Other', other: true },
+];
 
 /* One mock per story that reads what `onConfirm` is handed. */
 const backlogConfirm = fn();
@@ -147,19 +163,26 @@ export const RejectPending: Story = {
     await userEvent.click(d.getByRole('button', { name: 'Confirm' }));
     await expect(await d.findByText('Select a rejection reason, or one for each Added Value.')).toBeVisible();
     await expect(rejectConfirm).not.toHaveBeenCalled();
-    /* One for all, and a different one for the second. */
+    /* One for all (its explanation shows), and Other for the second (a note field shows instead). */
     await userEvent.selectOptions(d.getByRole('combobox', { name: 'Rejection Reason' }), 'Duplicate');
-    await userEvent.selectOptions(d.getByRole('combobox', { name: 'Rejection reason for VCP-12346' }), 'Out of scope');
+    await expect(await d.findByText('This Added Value already exists.')).toBeVisible();
+    await userEvent.selectOptions(d.getByRole('combobox', { name: 'Rejection reason for VCP-12346' }), 'Other');
+    await userEvent.type(d.getByRole('textbox', { name: 'Other rejection reason for VCP-12346' }), 'Not ours');
     await userEvent.click(d.getByRole('button', { name: 'Confirm' }));
     await waitFor(() =>
-      expect(rejectConfirm).toHaveBeenCalledWith({ value: 'Duplicate', overrides: { 'VCP-12346': 'Out of scope' } }),
+      expect(rejectConfirm).toHaveBeenCalledWith({
+        value: 'duplicate',
+        overrides: { 'VCP-12346': 'other' },
+        detail: undefined,
+        overrideDetails: { 'VCP-12346': 'Not ours' },
+      }),
     );
   },
 };
 
 /** Reject: the same, with a red Confirm — it is the destructive one. */
 export const Reject: Story = {
-  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="reject" reasons={REASONS} items={ITEMS} />,
+  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="reject" reasons={HANDOFF_REASONS} items={ITEMS} />,
   play: async () => {
     const d = dialog('Reject 2 Added Values');
     const confirm = d.getByRole('button', { name: 'Confirm' });
@@ -189,5 +212,5 @@ export const Confirming: Story = {
 /** Tokens only, so dark comes for free. */
 export const DarkTheme: Story = {
   globals: { theme: 'dark' },
-  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="reject" reasons={REASONS} items={ITEMS} defaultExpanded />,
+  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="reject" reasons={HANDOFF_REASONS} items={ITEMS} defaultExpanded />,
 };

@@ -14,6 +14,7 @@ component is still a component — see the tiering rules in `CLAUDE.md`.
 | `Divider` | atom |
 | `Icon` | atom |
 | `IconButton` | atom |
+| `Input` | atom |
 | `Popover` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -47,6 +48,7 @@ navigation pattern, not behind an ellipsis.
 | `onOpenChange` | `(open: boolean) => void` | — | Fires on every open and close, including Escape, outside click, tabbing out and selecting |
 | `align` | `left \| right` | `right` | Which edge of the menu lines up with the trigger's |
 | `heading` | `string` | — | A heading over the items ("Move to Status", "Urgency"), in the library's **category** style without its caret: 40 high, small bold type in `text.tertiary`, a rule beneath. It names the menu (`aria-label`) and is not an item: arrows and type-ahead step over it |
+| `searchable` | `boolean` | `false` | A search box at the top (Figma's `_Menu_Item_Search`): typing narrows the items by label, it has focus on open, ArrowDown enters the list, ArrowUp from the first item comes back, Enter chooses the first match. `searchPlaceholder` ("Search...") and `emptyText` ("No results") |
 | `placement` | `top \| bottom` | `bottom` | Which side the menu prefers. It still flips when there is no room — set `top` for a trigger at the bottom of the window (the bulk action bar) |
 | `className` | `string` | — | Merged onto the wrapper via `cn()` |
 | `panelClassName` | `string` | — | Merged onto the `role="menu"` panel via `cn()` |

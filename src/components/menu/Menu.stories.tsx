@@ -392,3 +392,32 @@ export const WithASubmenu: Story = {
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
   },
 };
+
+/**
+ * `searchable` puts Figma's search item at the top (the Cycle menu): focus starts in the box, typing narrows the list, ArrowDown goes into it, ArrowUp from the first item comes back,
+ * and Enter chooses the first match.
+ */
+export const Searchable: Story = {
+  args: {
+    items: ['C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39'].map((code) => ({ key: code, label: `${code} (May 25, 2026 - Jun 08, 2026)` })),
+    onSelect: fn(),
+  },
+  render: (args) => <Menu {...args} searchable trigger={<Button variant="secondary">Cycle</Button>} />,
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Cycle' }));
+    const search = await screen.findByRole('searchbox', { name: 'Search...' });
+    await waitFor(() => expect(search).toHaveFocus());
+    await userEvent.type(search, 'c3');
+    await userEvent.clear(search);
+    await userEvent.type(search, '37');
+    const menu = screen.getByRole('menu');
+    await expect(within(menu).getAllByRole('menuitem')).toHaveLength(1);
+    await userEvent.clear(search);
+    await userEvent.type(search, 'zzz');
+    await expect(within(menu).getByText('No results')).toBeVisible();
+    await userEvent.clear(search);
+    await userEvent.type(search, '38');
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onSelect).toHaveBeenCalledWith('C38');
+  },
+};

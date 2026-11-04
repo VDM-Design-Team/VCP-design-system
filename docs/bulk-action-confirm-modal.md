@@ -42,11 +42,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `type` | `value` (`'Type 1'`…) | Change Type for 2 Added Values | …as a `TypeTag` | nothing |
 | `cycle` | `value` `{ code, start, end }` | Change Cycle for 2 Added Values | …as a `CycleTag` ("C18 (Sep 20, 2025 - Oct 02, 2026)") | nothing |
 | `status` | `value` (the status) | Change Status for 2 Added Values | …as a `Tag`. **Figma draws no popup for the other statuses** (In Progress, For QA…); this is the plain one | nothing |
-| `backlog` | — | Move 2 Added Values to Backlog | **Feedback** (optional), and per Added Value "Uses bulk reason unless overridden" | `{ value: string, overrides }` |
+| `backlog` | — | Move 2 Added Values to Backlog | **Feedback** (optional), and per Added Value "Uses bulk reason unless overridden" | `{ value, overrides, detail?, overrideDetails? }` |
 | `accept-pending` | `domain` | Accept 2 Pending Added Values | `development`: a **Multipart Value** checkbox (with its description), bulk and per Added Value. Otherwise nothing | `{ value: boolean, overrides }`, or `null` |
 | `accept` | `domain` | Accept 2 Added Values | `development`: **Require Cypress Test Script**; `design`: **Copy to Dev**; otherwise nothing | `{ value: boolean, overrides }`, or `null` |
-| `reject-pending` | `reasons` | Reject 2 Pending Added Values | **Rejection Reason** (a select of your `reasons`), bulk and per Added Value. **Required** | `{ value: string, overrides }` |
-| `reject` | `reasons` | Reject 2 Added Values | The same, with a **red Confirm** | `{ value: string, overrides }` |
+| `reject-pending` | `reasons` | Reject 2 Pending Added Values | **Rejection Reason** (a select of your `reasons`: `{ value, label, explanation?, other? }`; the chosen reason's `explanation` shows under it, and the one marked `other` shows an optional note field instead), bulk and per Added Value. **Required** | `{ value, overrides, detail?, overrideDetails? }` |
+| `reject` | `reasons` | Reject 2 Added Values | The same, with a **red Confirm** | `{ value, overrides, detail?, overrideDetails? }` |
 
 `domain` is `development`, `design` or `other`; a single Added Value reads singular ("Accept 1 Pending Added Value").
 
