@@ -14,6 +14,7 @@ Handing several Added Values on at once: **"Handoff 4 Added Values"**, one page 
 | `PaginationDots` | atom |
 | `Input` | atom |
 | `Select` | atom |
+| `AttachmentViewer` | component |
 | `Banner` | component |
 | `DateField` | component |
 | `DeliverableLinkForm` | component |
@@ -47,7 +48,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 - **Handoff is disabled until every Added Value is complete** (Figma's "All Handoff Details Filled = No"): each needs a **Handoff Date**, a late one needs its **Overdue Reason**, and a link that is typed must be a valid `https://` URL. Its description says how many are missing. *Which other details are mandatory is for design to confirm.*
 - **The date starts blank** and is chosen from a calendar (`DateField`); `defaultDate` (ISO) is there for a caller that has one.
 - **Links are checked** with `DeliverableLinkForm`'s rule once the box is left: "Please enter a valid URL starting with https://". An empty link is fine. Extra links have a **Remove** button (the minus in a circle, as `MoveAVToCycleModal` removes an assignee); the first is cleared, not removed. (Figma draws no remove button here.)
-- **Attachments are `FileAttachment` cards**: the files already on the Added Value and the ones just picked, each reacting on hover and with its own remove ✕.
+- **Attachments are `FileAttachment` cards**: the files already on the Added Value and the ones just picked, each reacting on hover and with its own remove ✕. **Clicking one opens its preview** (`AttachmentViewer`) over the popup; Escape closes only the preview. *A modal over a modal: design to confirm.*
 - **The pager is pinned beside the buttons**, so it does not scroll with the form.
 - **Stepping loses nothing**: arrows or dots move between Added Values and each keeps what was typed. It resets when the popup opens.
 - **The reference is a blue link that opens the Added Value in a new tab** when it has an `href`; otherwise plain grey text.

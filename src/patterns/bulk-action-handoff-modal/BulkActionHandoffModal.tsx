@@ -8,6 +8,7 @@ import { Input } from '../../atoms/input';
 import { PaginationDots } from '../../atoms/pagination-dots';
 import { Select } from '../../atoms/select';
 import { Banner } from '../../components/banner';
+import { AttachmentViewer } from '../../components/attachment-viewer';
 import { DateField } from '../../components/date-field';
 import { isValidLinkUrl, LINK_URL_ERROR } from '../../components/deliverable-link-form';
 import { Field } from '../../components/field';
@@ -85,20 +86,20 @@ const kindOf = (file: File): FileAttachmentKind =>
   file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : file.type === 'application/pdf' ? 'pdf' : file.type === 'text/csv' ? 'csv' : 'doc';
 
 /* The neutral palette, as `Carousel`'s arrows: the colour of a control that is not an action. */
-const ARROW =
-  'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed disabled:text-neutral-outline-content-disabled';
+const ARROW = 'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed disabled:text-neutral-outline-content-disabled';
 
-/** A card for a file just picked. An image shows a small crop of itself, not only the glyph; the preview address is let go when the card goes. */
-function PickedFile({ file, onRemove }: { file: File; onRemove: () => void }) {
-  const [thumb, setThumb] = React.useState<string>();
+/** An address for each picked image, so its card can show a crop of it and the viewer can open it. Let go when the files change or the popup goes. */
+function useFileUrls(files: readonly File[]): Array<string | undefined> {
+  const [urls, setUrls] = React.useState<Array<string | undefined>>([]);
   React.useEffect(() => {
-    if (!file.type.startsWith('image/')) return undefined;
-    const url = URL.createObjectURL(file);
-    setThumb(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-  return <FileAttachment name={file.name} kind={kindOf(file)} thumb={thumb} onRemove={onRemove} />;
+    const made = files.map((file) => (file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined));
+    setUrls(made);
+    return () => made.forEach((url) => url && URL.revokeObjectURL(url));
+  }, [files]);
+  return urls;
 }
+
+const NO_FILES: File[] = [];
 
 const blank = (item: BulkHandoffAV): Entry => ({ date: item.defaultDate ?? '', links: [''], files: [], removed: [], publish: false, overdueReason: '', notes: '' });
 
@@ -112,6 +113,8 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
   const [page, setPage] = React.useState(0);
   const [entries, setEntries] = React.useState<Record<string, Entry>>({});
   const missingId = React.useId();
+  /* The card whose preview is open, as an index into this page's attachments. */
+  const [viewing, setViewing] = React.useState<number | null>(null);
   /* Which link boxes have been left (blurred), so a half-typed URL is not shouted at while it is typed. */
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
 
@@ -119,15 +122,37 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
   React.useEffect(() => {
     if (!open) return;
     setPage(0);
+    setViewing(null);
     setTouched({});
     setEntries(Object.fromEntries(items.map((item) => [item.ref, blank(item)])));
     /* On open only. */
   }, [open]); // eslint-disable-line
 
   const item = items[Math.min(page, items.length - 1)];
-  if (!item) return null;
-  const entry = entries[item.ref] ?? blank(item);
+  const entry = (item && entries[item.ref]) ?? (item ? blank(item) : undefined);
+  const pickedUrls = useFileUrls(entry?.files ?? NO_FILES);
+  if (!item || !entry) return null;
   const patch = (change: Partial<Entry>) => setEntries((current) => ({ ...current, [item.ref]: { ...(current[item.ref] ?? blank(item)), ...change } }));
+
+  /* One list for the preview and the cards: what is already attached, then what was just picked. */
+  const cards = [
+    ...(item.attachments ?? [])
+      .filter((file) => !entry.removed.includes(file.name))
+      .map((file) => ({
+        id: `existing-${file.name}`,
+        name: file.name,
+        kind: 'image' as FileAttachmentKind,
+        thumb: file.thumb,
+        remove: () => patch({ removed: [...entry.removed, file.name] }),
+      })),
+    ...entry.files.map((file, fileIndex) => ({
+      id: `new-${fileIndex}-${file.name}`,
+      name: file.name,
+      kind: kindOf(file),
+      thumb: pickedUrls[fileIndex],
+      remove: () => patch({ files: entry.files.filter((_, i) => i !== fileIndex) }),
+    })),
+  ];
 
   const missing = items.filter((each) => !complete(each, entries[each.ref] ?? blank(each))).length;
   const n = items.length;
@@ -149,156 +174,150 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={`Handoff ${n} Added Value${n === 1 ? '' : 's'}`}
-      size="md"
-      showClose={false}
-      footer={
-        <>
-          {/* Pinned with the buttons, so stepping does not scroll away. A full row of its own above them. */}
-          {n > 1 && (
-            <div className="flex basis-full items-center justify-center gap-2">
-              <IconButton icon="caret-left" label="Previous Added Value" variant="tertiary" className={ARROW} disabled={page <= 0} onClick={() => setPage(page - 1)} />
-              <PaginationDots count={n} index={page} onChange={setPage} label="Added Values" />
-              <IconButton icon="caret-right" label="Next Added Value" variant="tertiary" className={ARROW} disabled={page >= n - 1} onClick={() => setPage(page + 1)} />
-            </div>
-          )}
-          <Button variant="secondary" size="sm" type="button" disabled={loading} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm" type="button" disabled={missing > 0} loading={loading} aria-describedby={missing > 0 ? missingId : undefined} onClick={submit}>
-            Handoff
-          </Button>
-          {missing > 0 && (
-            <span id={missingId} className="sr-only">
-              {`${missing} of ${n} Added Values still need their handoff details.`}
-            </span>
-          )}
-        </>
-      }
-    >
-      <div key={item.ref} className="flex flex-col gap-6">
-        <p className="m-0 flex min-w-0 gap-2 text-body-sm-regular" data-testid="handoff-av">
-          {item.href ? (
-            <a
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 rounded-sm text-text-link-default hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-            >
-              {item.ref}
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
-          ) : (
-            <span className="shrink-0 text-text-tertiary">{item.ref}</span>
-          )}
-          <span className="min-w-0 truncate text-body-sm-semibold text-text-primary" title={item.title}>
-            {item.title}
-          </span>
-        </p>
-
-        {item.overdueDays != null && (
-          <Banner tone="warning">
-            This value is <strong>Overdue</strong> by{' '}
-            <strong>
-              {item.overdueDays} {item.overdueDays === 1 ? 'day' : 'days'}
-            </strong>
-            .
-          </Banner>
-        )}
-
-        <Field label="Handoff Date">
-          {(c) => (
-          <DateField {...c} value={entry.date || undefined} onChange={(iso) => patch({ date: iso })} placeholder="Select a date" />
-          )}
-        </Field>
-
-        {item.overdueDays != null && (
+    <>
+      <Modal
+        open={open}
+        onClose={onClose}
+        title={`Handoff ${n} Added Value${n === 1 ? '' : 's'}`}
+        size="md"
+        showClose={false}
+        footer={
           <>
-            <Field label="Overdue Reason">
-              <Select
-                fullWidth
-                options={OVERDUE_REASONS.map((reason) => ({ value: reason.value, label: `${reason.label}: ${reason.description}` }))}
-                value={entry.overdueReason}
-                onChange={(value) => patch({ overdueReason: value })}
-                placeholder="Select a reason"
-              />
-            </Field>
-            <Field label="Additional Notes (optional)">
-              <Input fullWidth value={entry.notes} onChange={(event) => patch({ notes: event.target.value })} />
-            </Field>
+            {/* Pinned with the buttons, so stepping does not scroll away. A full row of its own above them. */}
+            {n > 1 && (
+              <div className="flex basis-full items-center justify-center gap-2">
+                <IconButton icon="caret-left" label="Previous Added Value" variant="tertiary" className={ARROW} disabled={page <= 0} onClick={() => setPage(page - 1)} />
+                <PaginationDots count={n} index={page} onChange={setPage} label="Added Values" />
+                <IconButton icon="caret-right" label="Next Added Value" variant="tertiary" className={ARROW} disabled={page >= n - 1} onClick={() => setPage(page + 1)} />
+              </div>
+            )}
+            <Button variant="secondary" size="sm" type="button" disabled={loading} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button size="sm" type="button" disabled={missing > 0} loading={loading} aria-describedby={missing > 0 ? missingId : undefined} onClick={submit}>
+              Handoff
+            </Button>
+            {missing > 0 && (
+              <span id={missingId} className="sr-only">
+                {`${missing} of ${n} Added Values still need their handoff details.`}
+              </span>
+            )}
           </>
-        )}
+        }
+      >
+        <div key={item.ref} className="flex flex-col gap-6">
+          <p className="m-0 flex min-w-0 gap-2 text-body-sm-regular" data-testid="handoff-av">
+            {item.href ? (
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 rounded-sm text-text-link-default hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+              >
+                {item.ref}
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            ) : (
+              <span className="shrink-0 text-text-tertiary">{item.ref}</span>
+            )}
+            <span className="min-w-0 truncate text-body-sm-semibold text-text-primary" title={item.title}>
+              {item.title}
+            </span>
+          </p>
 
-        <Field label="Demo Links">
-          <div className="flex flex-col items-start gap-2">
-            {entry.links.map((link, index) => {
-              const key = `${item.ref}-${index}`;
-              const bad = touched[key] && link.trim() !== '' && !isValidLinkUrl(link);
-              return (
-                <div key={index} className="flex w-full flex-col gap-1">
-                  <div className="flex w-full items-center gap-2">
-                    <Input
-                      fullWidth
-                      value={link}
-                      aria-label={`Demo link ${index + 1}`}
-                      placeholder="Paste Link Here"
-                      invalid={bad}
-                      aria-describedby={bad ? `${missingId}-link-${index}` : undefined}
-                      onBlur={() => setTouched((current) => ({ ...current, [key]: true }))}
-                      onChange={(event) => patch({ links: entry.links.map((value, i) => (i === index ? event.target.value : value)) })}
-                    />
-                    {/* The first box is cleared, not removed: there is always one to type in. */}
-                    {entry.links.length > 1 && (
-                      <IconButton
-                        icon="minus-circle"
-                        label={`Remove demo link ${index + 1}`}
-                        onClick={() => patch({ links: entry.links.filter((_, i) => i !== index) })}
+          {item.overdueDays != null && (
+            <Banner tone="warning">
+              This value is <strong>Overdue</strong> by{' '}
+              <strong>
+                {item.overdueDays} {item.overdueDays === 1 ? 'day' : 'days'}
+              </strong>
+              .
+            </Banner>
+          )}
+
+          <Field label="Handoff Date">{(c) => <DateField {...c} value={entry.date || undefined} onChange={(iso) => patch({ date: iso })} placeholder="Select a date" />}</Field>
+
+          {item.overdueDays != null && (
+            <>
+              <Field label="Overdue Reason">
+                <Select
+                  fullWidth
+                  options={OVERDUE_REASONS.map((reason) => ({ value: reason.value, label: `${reason.label}: ${reason.description}` }))}
+                  value={entry.overdueReason}
+                  onChange={(value) => patch({ overdueReason: value })}
+                  placeholder="Select a reason"
+                />
+              </Field>
+              <Field label="Additional Notes (optional)">
+                <Input fullWidth value={entry.notes} onChange={(event) => patch({ notes: event.target.value })} />
+              </Field>
+            </>
+          )}
+
+          <Field label="Demo Links">
+            <div className="flex flex-col items-start gap-2">
+              {entry.links.map((link, index) => {
+                const key = `${item.ref}-${index}`;
+                const bad = touched[key] && link.trim() !== '' && !isValidLinkUrl(link);
+                return (
+                  <div key={index} className="flex w-full flex-col gap-1">
+                    <div className="flex w-full items-center gap-2">
+                      <Input
+                        fullWidth
+                        value={link}
+                        aria-label={`Demo link ${index + 1}`}
+                        placeholder="Paste Link Here"
+                        invalid={bad}
+                        aria-describedby={bad ? `${missingId}-link-${index}` : undefined}
+                        onBlur={() => setTouched((current) => ({ ...current, [key]: true }))}
+                        onChange={(event) => patch({ links: entry.links.map((value, i) => (i === index ? event.target.value : value)) })}
                       />
+                      {/* The first box is cleared, not removed: there is always one to type in. */}
+                      {entry.links.length > 1 && <IconButton icon="minus-circle" label={`Remove demo link ${index + 1}`} onClick={() => patch({ links: entry.links.filter((_, i) => i !== index) })} />}
+                    </div>
+                    {bad && (
+                      <p id={`${missingId}-link-${index}`} role="alert" className="m-0 text-caption-md-medium text-accent-critical-outline-content-default">
+                        {LINK_URL_ERROR}
+                      </p>
                     )}
                   </div>
-                  {bad && (
-                    <p id={`${missingId}-link-${index}`} role="alert" className="m-0 text-caption-md-medium text-accent-critical-outline-content-default">
-                      {LINK_URL_ERROR}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-            <Button type="button" size="sm" iconLeft={<Icon name="plus" size="sm" />} onClick={() => patch({ links: [...entry.links, ''] })}>
-              Add Another Link
-            </Button>
-          </div>
-        </Field>
+                );
+              })}
+              <Button type="button" size="sm" iconLeft={<Icon name="plus" size="sm" />} onClick={() => patch({ links: [...entry.links, ''] })}>
+                Add Another Link
+              </Button>
+            </div>
+          </Field>
 
-        <Field label="Attachments">
-          <div className="flex flex-col gap-3">
-            {/* The files already on it and the ones just picked, each a card that reacts and can be removed. */}
-            {((item.attachments ?? []).some((file) => !entry.removed.includes(file.name)) || entry.files.length > 0) && (
-              <ul className="m-0 flex list-none flex-wrap gap-2.5 p-0">
-                {(item.attachments ?? [])
-                  .filter((file) => !entry.removed.includes(file.name))
-                  .map((file) => (
-                    <li key={`existing-${file.name}`}>
-                      <FileAttachment name={file.name} thumb={file.thumb} kind="image" onRemove={() => patch({ removed: [...entry.removed, file.name] })} />
+          <Field label="Attachments">
+            <div className="flex flex-col gap-3">
+              {/* The files already on it and the ones just picked, each a card that reacts, previews on click and can be removed. */}
+              {cards.length > 0 && (
+                <ul className="m-0 flex list-none flex-wrap gap-2.5 p-0">
+                  {cards.map((card, cardIndex) => (
+                    <li key={card.id}>
+                      <FileAttachment name={card.name} kind={card.kind} thumb={card.thumb} onClick={() => setViewing(cardIndex)} onRemove={card.remove} />
                     </li>
                   ))}
-                {entry.files.map((file, fileIndex) => (
-                  <li key={`new-${fileIndex}-${file.name}`}>
-                    <PickedFile file={file} onRemove={() => patch({ files: entry.files.filter((_, i) => i !== fileIndex) })} />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Dropzone multiple onFiles={(picked) => patch({ files: [...entry.files, ...picked] })} />
-          </div>
-        </Field>
+                </ul>
+              )}
+              <Dropzone multiple onFiles={(picked) => patch({ files: [...entry.files, ...picked] })} />
+            </div>
+          </Field>
 
-        {domain === 'development' && <Checkbox label="Publish" checked={entry.publish} onChange={(checked) => patch({ publish: checked })} />}
-
-      </div>
-    </Modal>
+          {domain === 'development' && <Checkbox label="Publish" checked={entry.publish} onChange={(checked) => patch({ publish: checked })} />}
+        </div>
+      </Modal>
+      {/* A second modal over the first — the Escape that closes it must not also close the handoff. */}
+      {cards.length > 0 && (
+        <AttachmentViewer
+          open={viewing !== null}
+          index={viewing ?? 0}
+          onIndexChange={setViewing}
+          onClose={() => setViewing(null)}
+          files={cards.map((card) => ({ id: card.id, name: card.name, kind: card.kind, src: card.thumb, thumb: card.thumb }))}
+        />
+      )}
+    </>
   );
 }

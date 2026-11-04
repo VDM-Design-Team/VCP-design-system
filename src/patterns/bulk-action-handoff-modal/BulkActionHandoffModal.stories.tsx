@@ -93,6 +93,20 @@ export const InvalidLink: Story = {
   },
 };
 
+/** Clicking an attachment opens its preview on top of the popup; Escape closes only the preview. (A modal over a modal: design to confirm.) */
+export const PreviewingAnAttachment: Story = {
+  args: { items: FILLED },
+  play: async () => {
+    const d = dialog();
+    await userEvent.click(await d.findByText(/image/, { selector: 'button *' }));
+    const viewer = await within(document.body).findByRole('dialog', { name: 'Attachment: image.png' });
+    await expect(viewer).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(within(document.body).queryByRole('dialog', { name: 'Attachment: image.png' })).toBeNull());
+    await expect(within(document.body).getByRole('dialog', { name: 'Handoff 4 Added Values' })).toBeVisible();
+  },
+};
+
 /** The `Overdue` variant: a banner, a required reason, and notes. The Added Value is late, so Handoff waits for the reason. */
 export const Overdue: Story = {
   args: { items: FILLED.map((item, i) => (i === 0 ? { ...item, overdueDays: 5 } : item)) },
