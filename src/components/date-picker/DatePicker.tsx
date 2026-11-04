@@ -669,8 +669,9 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
       !p.filter && p.value === value && (p.rangeEnd ?? undefined) === (rangeEnd ?? undefined);
 
     /* A single date has one quick pick — Today. The ranges (last 7 days, this
-       month, overdue…) only make sense when the picker takes a range. */
-    const visiblePresets = presets?.filter((p) => mode === 'range' || (!p.rangeEnd && !p.filter));
+       month, overdue…) only make sense when the picker takes a range — or, as a named stretch beside the
+       months (the Holiday Registry's sprints), in month mode. A filter preset is for ranges alone. */
+    const visiblePresets = presets?.filter((p) => mode === 'range' || (mode === 'month' && !p.filter) || (!p.rangeEnd && !p.filter));
 
     /* The desktop list is drawn like the system's dropdown menu (Menu_Dropdown):
        a 4 inset, square full-width rows 40 high with 12 either side, brand
