@@ -16,7 +16,7 @@ Read off Figma's `Detail_Card` (`6499:48858`: four types) and its `_Detail_Card_
 | `Icon` | atom |
 | `Input` | atom |
 | `Tag` | atom |
-| `Chip` | component |
+| `Chip` | atom |
 | `CycleTag` | component |
 | `DatePicker` | component |
 | `DueDateTag` | component |

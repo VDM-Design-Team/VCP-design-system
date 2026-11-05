@@ -124,6 +124,11 @@ interface SearchSelectBase
   disabled?: boolean;
   /** `sm` 32 tall, `md` 40 (default), as `Select`. */
   size?: 'sm' | 'md';
+  /**
+   * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
+   * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
   fullWidth?: boolean;
   /**
@@ -135,7 +140,8 @@ interface SearchSelectBase
    * Search happens on your server: called with the text on every change in the search box (and
    * with `''` when the panel opens), and the component then stops filtering `options` itself, so
    * you pass what matches. Debounce it on your side; pair it with `loading` while the request runs.
-   * Picked values that are not in the current `options` still show, by their value.
+   * A pick keeps its name after it drops out of `options` (the field remembers every option it has
+   * been given); for a value set before any search, include its option in the first `options`.
    */
   onSearch?: (query: string) => void;
   /** What the panel says while `loading`. */
@@ -147,6 +153,30 @@ interface SearchSelectBase
    * announced with the field (`aria-describedby`).
    */
   error?: React.ReactNode;
+  /**
+   * A caution under the field, in the warning colour: the pick is allowed but worth a second
+   * look ("This assignee is busy during the selected dates, but can still be assigned"). The
+   * border turns warning; `error` wins if both are set.
+   */
+  warning?: React.ReactNode;
+  /**
+   * Groups fold: each heading becomes a button (`aria-expanded`) with a caret, and a folded
+   * group's rows leave the list — and the arrow keys. While there is a search query every group
+   * with a match shows, folded or not, so a search never hides its own results.
+   */
+  collapsibleGroups?: boolean;
+  /** Group names that start folded, with `collapsibleGroups`. */
+  defaultCollapsedGroups?: readonly string[];
+  /**
+   * Draws a group heading's content yourself (a status dot beside the name), replacing the
+   * plain name. The button, caret and ARIA stay the component's.
+   */
+  renderGroupHeading?: (name: string, state: { collapsed: boolean }) => React.ReactNode;
+  /**
+   * A line above the rows, inside the panel, with a divider under it — "Availability is unknown.
+   * Pick a start date first." Rows still follow it.
+   */
+  panelNotice?: React.ReactNode;
   /** Id of the trigger button, for a `Field` label's `htmlFor`. */
   id?: string;
   'aria-label'?: string;
@@ -244,12 +274,19 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       renderOption,
       disabled,
       size = 'md',
+      emphasis = 'medium',
       fullWidth = false,
       loading,
       onSearch,
       loadingText = 'Loading…',
       invalid,
+      'aria-invalid': ariaInvalid,
       error,
+      warning,
+      collapsibleGroups,
+      defaultCollapsedGroups,
+      renderGroupHeading,
+      panelNotice,
       id,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
@@ -289,15 +326,26 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const [announce, setAnnounce] = React.useState('');
 
     const all = options.map(normalize);
+    /* Every option this field has been given, by value. With `onSearch` the page swaps `options`
+       for each search, so a pick can drop out of the current list; its name and tone still come
+       from here, not the raw value. */
+    const seen = React.useRef(new Map<string, SearchSelectOption>());
+    all.forEach((o) => seen.current.set(o.value, o));
+    const optionOf = (v: string) => all.find((x) => x.value === v) ?? seen.current.get(v);
     /* What the field, the tags and the announcements say: the short label when there is one. */
     const labelOf = (v: string) => {
-      const o = all.find((x) => x.value === v);
+      const o = optionOf(v);
       return o ? (o.shortLabel ?? o.label) : v;
     };
     const committed: readonly string[] =
       value === undefined ? inner : multiple ? (value as readonly string[]) : value ? [value as string] : [];
     const shown = multiple && confirm && open ? draft : committed;
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || ariaInvalid === true || ariaInvalid === 'true';
+    const isWarning = !isInvalid && !!warning;
+    const [collapsedGroups, setCollapsedGroups] = React.useState<readonly string[]>(
+      defaultCollapsedGroups ?? [],
+    );
 
     /* Rows in the order they are drawn: ungrouped first, then each group in the order first seen.
        Arrow keys, Home / End and the active row all index this list, so they match the screen. */
@@ -310,16 +358,25 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       return [...rows.filter((o) => !o.group), ...names.flatMap((name) => rows.filter((o) => o.group === name))];
     };
     const arranged = arrange(all);
-    const list = arrange(
+    /* Everything the search lets through, folded or not: the headings are drawn from this. */
+    const shownRows = arrange(
       searchable && query && !onSearch
         ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
         : all,
     );
+    /* A folded group's rows are not on screen, so they are not in the list the keys walk. A search
+       unfolds everything it matched. */
+    const folded = (o: SearchSelectOption) =>
+      !!collapsibleGroups && !!o.group && !query && collapsedGroups.includes(o.group);
+    const list = shownRows.filter((o) => !folded(o));
     const firstEnabled = (rows: SearchSelectOption[]) => Math.max(0, rows.findIndex((o) => !o.disabled));
     const activeIndex = Math.min(active, list.length - 1);
     const activeOption = list[activeIndex];
     /* Index-based ids: values are arbitrary strings. */
     const optionId = (i: number) => `${listId}-opt-${i}`;
+    /* With foldable groups the heading is a button, and a listbox may hold only options, so each
+       group is its own listbox with its heading beside it and the field controls all of them. */
+    const groupListId = (gi: number) => `${listId}-g${gi}`;
 
     const commit = (next: string[]) => {
       if (value === undefined) setInner(next);
@@ -423,7 +480,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         case 'Tab':
           /* With Clear all / Apply the panel is a stop on the way: Tab walks on into it, and
              the panel closes when focus leaves the whole control. Without them Tab just leaves. */
-          if (!(multiple && confirm)) closePanel();
+          if (!(multiple && confirm) && !collapsibleGroups) closePanel();
           break;
       }
     };
@@ -443,14 +500,33 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
 
     /* Groups from the rows that survive the search; ungrouped lead. */
     const groups: Array<{ name?: string; rows: Array<{ option: SearchSelectOption; index: number }> }> = [];
-    list.forEach((option, index) => {
+    shownRows.forEach((option) => {
       let g = groups.find((x) => x.name === option.group);
       if (!g) {
         g = { name: option.group, rows: [] };
         groups.push(g);
       }
-      g.rows.push({ option, index });
+      if (!folded(option)) g.rows.push({ option, index: list.indexOf(option) });
     });
+    const controlsIds = collapsibleGroups ? groups.map((_, gi) => groupListId(gi)).join(' ') : listId;
+    /* A foldable group's rows are their own listbox, named by its heading (see `groupListId`). */
+    const wrapRows = (g: { name?: string; rows: unknown[] }, gi: number, nodes: React.ReactNode) =>
+      !collapsibleGroups ? (
+        nodes
+      ) : (
+        <div
+          role="listbox"
+          id={groupListId(gi)}
+          aria-labelledby={g.name ? `${listId}-grp-${gi}` : undefined}
+          aria-label={g.name ? undefined : ariaLabel}
+          aria-multiselectable={multiple || undefined}
+          hidden={g.rows.length === 0}
+        >
+          {nodes}
+        </div>
+      );
+    const toggleGroup = (name: string) =>
+      setCollapsedGroups((now) => (now.includes(name) ? now.filter((n) => n !== name) : [...now, name]));
     const ordered = groups;
 
     const summary =
@@ -471,6 +547,17 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       });
       setLabelIds((prev) => (prev.join(' ') === ids.join(' ') ? prev : ids));
     });
+    /* A click on the field's `<label>` focuses it, as it does a native `Select`, and does not open
+       the panel: a label passes its click on to the button it names, which would. */
+    React.useEffect(() => {
+      const labels = Array.from(triggerRef.current?.labels ?? []);
+      const onLabelClick = (e: MouseEvent) => {
+        e.preventDefault();
+        triggerRef.current?.focus();
+      };
+      labels.forEach((label) => label.addEventListener('click', onLabelClick));
+      return () => labels.forEach((label) => label.removeEventListener('click', onLabelClick));
+    }, [triggerId]);
     const hasValue = committed.length > 0;
     const nameParts = ariaLabelledBy ? [ariaLabelledBy] : ariaLabel ? [triggerId] : labelIds;
     const triggerName = hasValue && nameParts.length > 0 ? [...nameParts, valueId].join(' ') : ariaLabelledBy;
@@ -596,6 +683,10 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         onKeyDown={(e) => {
           onWrapperKeyDown?.(e);
           /* Escape folds an opened-out field back (an open panel takes Escape first). */
+          if (e.key === 'Escape' && open && e.target !== triggerRef.current && e.target !== searchRef.current) {
+            e.preventDefault();
+            closePanel(true);
+          }
           if (e.key === 'Escape' && expanded && !open) {
             e.preventDefault();
             setOpenedOut(false);
@@ -620,7 +711,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
               isInvalid
                 ? 'border-accent-critical-outline-border-default'
-                : 'border-stroke-strong focus-within:border-stroke-focused',
+                : isWarning
+                  ? 'border-accent-warning-outline-border-default'
+                  : 'border-stroke-strong focus-within:border-stroke-focused',
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
               disabled && 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle',
             )}
@@ -639,7 +732,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                     key={v}
                     data-select-tag={v}
                     size="sm"
-                    tone={rows === 'tag' ? (all.find((o) => o.value === v)?.tone ?? 'neutral') : 'neutral'}
+                    tone={rows === 'tag' ? (optionOf(v)?.tone ?? 'neutral') : 'neutral'}
                     onRemove={disabled ? undefined : () => removeTag(v)}
                     className={cn('shrink-0', disabledTag, i >= visible && 'hidden')}
                   >
@@ -691,14 +784,14 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               role={triggerIsCombobox ? 'combobox' : undefined}
               aria-haspopup="listbox"
               aria-expanded={open}
-              aria-controls={listId}
+              aria-controls={controlsIds}
               aria-activedescendant={
                 triggerIsCombobox && open && activeOption ? optionId(activeIndex) : undefined
               }
               aria-label={ariaLabel}
               aria-labelledby={triggerName}
               aria-invalid={isInvalid || undefined}
-              aria-describedby={error ? errorId : undefined}
+              aria-describedby={error || isWarning ? errorId : undefined}
               disabled={disabled}
               onKeyDown={(e) => onKeyDown(e, false)}
               /* Enter and Space are handled on keydown, which also stops the click the browser
@@ -714,7 +807,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 size === 'sm' ? 'h-6' : 'h-8',
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
-                  ? 'text-body-sm-medium text-text-primary'
+                  ? cn('text-text-primary', emphasis === 'medium' ? 'text-body-sm-medium' : 'text-body-sm-regular')
                   : 'text-body-sm-regular text-text-subtle',
                 size === 'sm' && 'text-caption-md-regular',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',
@@ -763,7 +856,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   role="combobox"
                   aria-label={searchPlaceholder}
                   aria-expanded={open}
-                  aria-controls={listId}
+                  aria-controls={controlsIds}
                   aria-autocomplete="list"
                   aria-activedescendant={open && activeOption ? optionId(activeIndex) : undefined}
                   placeholder={searchPlaceholder}
@@ -779,12 +872,17 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 />
               </div>
             )}
+            {panelNotice && (
+              <div className="mx-3 mb-1 border-b border-stroke-subtle py-2 text-caption-md-semibold text-text-tertiary">
+                {panelNotice}
+              </div>
+            )}
             {loading && (
               <div role="status" className={cn('px-3 pb-3 text-caption-md-semibold text-text-tertiary', searchable ? 'pt-1' : 'pt-2')}>
                 {loadingText}
               </div>
             )}
-            {!loading && list.length === 0 && (
+            {!loading && shownRows.length === 0 && (
               /* Outside the listbox: a listbox may hold only options. */
               <div
                 className={cn(
@@ -796,12 +894,12 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               </div>
             )}
             <div
-              role="listbox"
-              id={listId}
-              aria-label={ariaLabel}
-              aria-labelledby={ariaLabelledBy}
-              aria-multiselectable={multiple || undefined}
-              hidden={loading || list.length === 0}
+              role={collapsibleGroups ? undefined : 'listbox'}
+              id={collapsibleGroups ? undefined : listId}
+              aria-label={collapsibleGroups ? undefined : ariaLabel}
+              aria-labelledby={collapsibleGroups ? undefined : ariaLabelledBy}
+              aria-multiselectable={!collapsibleGroups && multiple ? true : undefined}
+              hidden={loading || shownRows.length === 0}
               className="max-h-64 overflow-y-auto"
               /* Reachable by keyboard when it scrolls, though focus never needs it. */
               tabIndex={-1}
@@ -809,18 +907,45 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               {ordered.map((g, gi) => (
                 <div
                   key={g.name ?? '__none'}
-                  role={g.name ? 'group' : 'presentation'}
-                  aria-labelledby={g.name ? `${listId}-grp-${gi}` : undefined}
+                  role={collapsibleGroups ? undefined : g.name ? 'group' : 'presentation'}
+                  aria-labelledby={!collapsibleGroups && g.name ? `${listId}-grp-${gi}` : undefined}
                 >
-                  {g.name && (
+                  {g.name && !collapsibleGroups && (
                     <div
                       id={`${listId}-grp-${gi}`}
                       className="mx-3 mt-1 border-b border-stroke-subtle py-1.5 text-caption-md-semibold text-text-tertiary"
                     >
-                      {g.name}
+                      {renderGroupHeading ? renderGroupHeading(g.name, { collapsed: false }) : g.name}
                     </div>
                   )}
-                  {g.rows.map(({ option, index }) => {
+                  {g.name && collapsibleGroups && (
+                    <div id={`${listId}-grp-${gi}`} className="mx-3 mt-1 border-b border-stroke-subtle">
+                      <button
+                        type="button"
+                        aria-expanded={!folded({ value: '', label: '', group: g.name })}
+                        onClick={() => toggleGroup(g.name!)}
+                        className="flex min-h-8 w-full items-center justify-between gap-2 rounded-sm py-1.5 text-left text-caption-md-semibold text-text-tertiary hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+                      >
+                        <span className="flex items-center gap-2">
+                          {renderGroupHeading
+                            ? renderGroupHeading(g.name, {
+                                collapsed: folded({ value: '', label: '', group: g.name }),
+                              })
+                            : g.name}
+                        </span>
+                        <Icon
+                          name="caret-up"
+                          size="sm"
+                          aria-hidden="true"
+                          className={cn(
+                            'shrink-0 transition-transform motion-reduce:transition-none',
+                            folded({ value: '', label: '', group: g.name }) && 'rotate-180',
+                          )}
+                        />
+                      </button>
+                    </div>
+                  )}
+                  {wrapRows(g, gi, g.rows.map(({ option, index }) => {
                     const isSelected = shown.includes(option.value);
                     const isActive = index === activeIndex && !option.disabled;
                     return (
@@ -861,7 +986,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                         )}
                       </div>
                     );
-                  })}
+                  }))}
                 </div>
               ))}
             </div>
@@ -883,6 +1008,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
           </div>
         </div>
 
+        {isWarning && (
+          <p id={errorId} className="mt-1.5 text-caption-md-medium text-accent-warning-outline-content-default">
+            {warning}
+          </p>
+        )}
         {error && (
           <p
             id={errorId}

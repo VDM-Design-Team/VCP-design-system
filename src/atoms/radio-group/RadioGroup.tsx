@@ -151,6 +151,9 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
             const isDisabled = Boolean(disabled || optionDisabled);
             const isChecked = selected === optionValue;
             const hintId = hint ? `${uid}-${index}-hint` : undefined;
+            /* The row's <label> wraps the hint too, so without this the hint is in the name *and* the
+               description, and heard twice. Named by its own words, it is said once, as a hint. */
+            const labelId = hint ? `${uid}-${index}-label` : undefined;
 
             return (
               <label key={optionValue} className={cn(optionRow({ disabled: isDisabled }))}>
@@ -163,6 +166,7 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
                     value={optionValue}
                     checked={isChecked}
                     disabled={isDisabled}
+                    aria-labelledby={labelId}
                     aria-describedby={hintId}
                     onChange={() => handleChange(optionValue)}
                     className={cn(
@@ -178,7 +182,9 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
                 </span>
 
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-body-sm-regular">{optionLabel}</span>
+                  <span id={labelId} className="text-body-sm-regular">
+                    {optionLabel}
+                  </span>
                   {hint ? (
                     <span
                       id={hintId}

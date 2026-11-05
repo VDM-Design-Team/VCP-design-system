@@ -47,6 +47,7 @@ Settled in October 2026. If you are tempted to change it, read the reasons first
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message (`Field`'s `error`, or this component's own `error`) |
 | `error` | `ReactNode` | — | A message under the select in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the select (`aria-describedby`, merged with any a `Field` set). **Inside a `Field`, use the `Field`'s `error`, not both** |
 | `size` | `sm \| md` | `md` | 32 / 40 — Input's scale. The export's `small`/`large` renamed to match the system |
+| `emphasis` | `medium \| regular` | `medium` | The weight of a chosen value. **A filter passes `regular`**, so a row of filters sits quietly; the default (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way |
 | `fullWidth` | `boolean` | — | — |
 | `className` | `string` | — | On the shell, not the `<select>` |
 | `ref` | `Ref<HTMLSelectElement>` | — | The real control |
@@ -70,8 +71,11 @@ pointer-transparent so clicks land on the control.
 | Option group label | `text.tertiary` | 7.58 / 9.85 |
 | Error message | `accent.critical.outline.content`, `caption-md-medium` | as `Field`'s |
 
-The placeholder grey is applied with `:has(option[value=""]:checked)` on the `<select>`, because a native
-select shows its placeholder as the selected option. No new tokens; the contrast table in docs/input.md
+The placeholder grey is applied with `:has(option[data-placeholder]:checked)` on the `<select>`, because a native
+select shows its placeholder as the selected option. It keys on the **placeholder option itself**, not on an empty
+`value`, so a real "All suppliers" option with `value=""` reads as a choice; and it applies only while enabled, so a
+disabled select with its placeholder showing is faded like any disabled field. With an `error`, the message has
+`role="alert"` (as `Field`'s does) and the wrapper hugs the select instead of stretching it. No new tokens; the contrast table in docs/input.md
 covers the shared shell.
 
 ## Accessibility

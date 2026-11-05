@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { Tag, type TagProps } from '../../atoms/tag';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * TypeTag — an Added Value's type, as a glyph and a word. The owner of VCP's
@@ -65,19 +66,47 @@ const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
 /* The glyph follows the tag's size, as the tag docs' table sets it: 20 in the 28 (the default), 16 in the 24, 24 in the 32. */
 const GLYPH_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
 
+/** What each type means — the one place this copy lives (Figma's tag tooltips and the column's ⓘ). */
+export const AV_TYPE_MEANING: Record<AVType, string> = {
+  'Type 1': 'Direct KPI impact with clear ROI',
+  'Type 2': 'Indirect impact, enablement/optimization',
+  'Type 3': 'Non-critical, no meaningful KPI impact',
+};
+
+/**
+ * The Type column's header tooltip: the three meanings, one a line, the type in bold. Pass it as a
+ * `ColumnHint`'s `text`.
+ */
+export const TYPE_COLUMN_HINT = (
+  <>
+    {AV_TYPES.map((t) => (
+      <span key={t} className="block">
+        <strong className="text-caption-md-semibold">{t}:</strong> {AV_TYPE_MEANING[t]}
+      </span>
+    ))}
+  </>
+);
+
 export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   type: AVType;
   /** `textual` (default), `tonal` (a pale fill), `faint` (a white fill with a light grey edge: Figma's "Faint Fill", as the Detail card draws it) or `outline` (a bordered pill in the type's hue). */
   variant?: TypeTagVariant;
   /** The ⓘ after the word, which the design draws on the filled and bordered looks. Decorative: it marks that the type has an explanation, which the page provides. */
   info?: boolean;
+  /**
+   * Say what the type means on hover ("Type 3: Non-critical, no meaningful KPI impact"), as the
+   * design's tag does. On by default. The tag is not focusable, so this is a pointer nicety: the same
+   * three meanings are on the Type column's header ⓘ (`TYPE_COLUMN_HINT`), which keyboards reach.
+   * Turn it off where the meaning is already on screen.
+   */
+  tooltip?: boolean;
 }
 
 export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
-  ({ className, type, variant = 'textual', info, size = 'md', ...props }, ref) => {
+  ({ className, type, variant = 'textual', info, size = 'md', tooltip = true, ...props }, ref) => {
     const glyphSize = GLYPH_SIZE[size ?? 'md'];
     const { icon, className: tone } = TYPE[type];
-    return (
+    const tag = (
       <Tag
         ref={ref}
         size={size}
@@ -98,6 +127,19 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
       >
         {type}
       </Tag>
+    );
+    return tooltip ? (
+      <Tooltip
+        content={
+          <>
+            <strong className="text-caption-md-semibold">{type}:</strong> {AV_TYPE_MEANING[type]}
+          </>
+        }
+      >
+        {tag}
+      </Tooltip>
+    ) : (
+      tag
     );
   },
 );

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 import { Button } from './Button';
 
 const meta = {
@@ -53,4 +54,71 @@ export const States: Story = {
       <Button {...args} disabled>Disabled</Button>
     </div>
   ),
+};
+
+const rgb = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 4).map(Number);
+const luminance = ([r, g, b]: number[]) => {
+  const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/**
+ * The filled variants in both themes. The label holds 4.5:1 at rest, hovered and pressed. The
+ * test reads the hover and pressed colours from the classes each button renders. (Dark primary
+ * used to darken its fill under dark text: 3.26:1 hovered, 2.23:1 pressed.)
+ */
+export const FilledTextContrast: Story = {
+  name: 'Filled text contrast, both themes',
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
+    /* The full height, so the dark half reaches the foot of the page like the light one. */
+    <div className="grid min-h-screen grid-cols-1 sm:grid-cols-2">
+      {[false, true].map((isDark) => (
+        <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
+          <div className="flex h-full flex-wrap items-center gap-2 bg-surface-canvas p-8">
+            {(['primary', 'danger'] as const).map((variant) => (
+              <Button key={variant} variant={variant} data-case={variant}>
+                {variant}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const under4_5to1: string[] = [];
+    for (const button of Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-case]'))) {
+      const theme = button.closest('[data-theme-case]')!.getAttribute('data-theme-case');
+      const style = getComputedStyle(button);
+      /* The colour a `hover:` or `active:` class on the button resolves to here, or undefined. */
+      const state = (prefix: string) => {
+        const token = button.className.split(/\s+/).find((c) => c.startsWith(prefix))?.slice(prefix.length);
+        if (!token) return undefined;
+        const probe = document.createElement('span');
+        probe.style.color = `var(--color-${token})`;
+        button.append(probe);
+        const value = rgb(getComputedStyle(probe).color);
+        probe.remove();
+        return value;
+      };
+      const ink = rgb(style.color);
+      const fill = rgb(style.backgroundColor);
+      for (const [name, fg, bg] of [
+        ['at rest', ink, fill],
+        /* A filled button always changes its fill; a missing class would test the rest fill twice. */
+        ['hovered', state('hover:text-') ?? ink, state('hover:bg-')],
+        ['pressed', state('active:text-') ?? ink, state('active:bg-')],
+      ] as const) {
+        if (!bg) under4_5to1.push(`${theme} ${button.dataset.case}, ${name}: no fill class`);
+        else if (contrast(fg, bg) < 4.5)
+          under4_5to1.push(`${theme} ${button.dataset.case}, ${name}: ${contrast(fg, bg).toFixed(2)}:1`);
+      }
+    }
+    await expect(under4_5to1).toEqual([]);
+  },
 };

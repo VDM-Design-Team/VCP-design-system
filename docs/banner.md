@@ -204,8 +204,8 @@ above the line. Any move of either token breaks Badge, Banner and Toast at once.
 The border is Figma's: `accent.<tone>.outline.border.default`, 1px (design review of
 the banners, October 2026: with the tonal fill carrying the banner, the outline is
 cosmetic). **It is not held to the 3:1 rule** the way the house controls are — against
-the canvas in light it measures 3.60:1 (`info`), 2.12:1 (`success`), **1.83:1**
-(`warning`) and 3.64:1 (`critical`), so two of the four tones have a faint edge. That is
+the canvas in light it measures 3.60:1 (`info`), **2.12:1** (`success`), 4.71:1
+(`warning`, a step darker since November 2026) and 3.64:1 (`critical`), so one of the four tones has a faint edge. That is
 a decision, not an oversight: the banner is legible by its tint, its glyph shape, and
 its text, none of which depend on the edge.
 
@@ -222,15 +222,15 @@ it (design review: the glyph is not what makes the message understood). **That i
 |---|---|---|
 | `info` | 3.08:1 | 1.98:1 |
 | `success` | 2.02:1 | 2.81:1 |
-| `warning` | **1.78:1** | 2.95:1 |
+| `warning` | 4.59:1 | 2.95:1 |
 | `critical` | 3.12:1 | 2.10:1 |
 
 Is that allowed? WCAG 1.4.11 asks 3:1 for a graphic *required to understand the content*.
 Here the glyph is reinforcement: the title and message say what is wrong in words, the
 tint carries the tone, and the glyph is named for assistive tech ("Warning, …"). The repo's
 own rule 5 is about text and UI borders, not decorative or redundant icons. So it is a
-recorded exception, not a violation — but `warning` in light (1.78:1) and `success` (2.02:1)
-are genuinely faint, which is why the title must always work without the colour (see
+recorded exception, not a violation — but `success` in light (2.02:1) is genuinely faint
+(`warning` was too, at 1.78:1, until its token moved to yellow-700 in November 2026), which is why the title must always work without the colour (see
 *Tone is never carried by colour alone*). Using `outline.content.default` for the glyph would
 clear 3:1 everywhere and is one token swap away.
 
@@ -256,7 +256,7 @@ This is why `action` is a prop pair (`actionLabel` + `onAction`) rather than a
 `ReactNode` slot as in the export: a caller passing their own `<Button>` gets
 `action.secondary` colours and a dark-theme AA failure, and has no way to know.
 The action's outline takes `tonal.content.default` rather than
-`outline.border.default`, which would sit at 1.78–3.12:1 on the pale fills.
+`outline.border.default`, which would sit at 2.02–4.59:1 on the pale fills.
 
 **Focus ring.** `stroke.focused` on the tonal fills: 5.07 / 5.63 / 5.75 / 5.07:1
 in light and 4.49 / 3.92 / 3.75 / 4.34:1 in dark. Floor 3.75:1, above the 3:1 a
@@ -289,8 +289,8 @@ Dark comes for free: every colour above is a semantic token that
   declares the pair for a button on top of a tonal message. Both controls reuse
   the triad's hover/pressed states, which holds (4.10:1 floor) but is this
   component's convention rather than a stated pair.
-- **`accent.<tone>.outline.border.default` is a weak container edge.** 1.83:1
-  (`warning`) and 2.12:1 (`success`) against the canvas in light. The Banner uses it
+- **`accent.<tone>.outline.border.default` is a weak container edge.** 2.12:1
+  (`success`) against the canvas in light (`warning` moved a step darker in November 2026: 4.71:1). The Banner uses it
   anyway, as Figma draws it (see *The border*); if an edge that carries weight is ever
   wanted, the token wants to move a step darker, or the family wants a `border.strong`.
 - **The title is `title-sm` (16/600)**, as Figma's `Title/sm-semibold` — the export's

@@ -6,7 +6,7 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Tag } from '../../atoms/tag';
-import { Chip } from '../../components/chip';
+import { Chip } from '../../atoms/chip';
 import { CycleTag } from '../../components/cycle-tag';
 import { DatePicker } from '../../components/date-picker';
 import { DueDateTag, dueDateTone } from '../../components/due-date-tag';
