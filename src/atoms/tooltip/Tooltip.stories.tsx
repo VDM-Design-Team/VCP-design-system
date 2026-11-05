@@ -404,3 +404,45 @@ export const InsideAScrollingList: Story = {
     await expect(bubble.getBoundingClientRect().right).toBeGreaterThan(list.getBoundingClientRect().right);
   },
 };
+
+/**
+ * **Flow:** a toolbar along the top of the screen, its last button flush right. With no room above, the
+ * bubble opens below the button; at the right edge it slides left, so none of it is cut off. (Both were
+ * drawn off the screen until November 2026.)
+ */
+export const StaysOnScreen: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => (
+    <div className="fixed inset-x-0 top-0 flex justify-between p-1">
+      <Tooltip {...args} content="Make the selected text bold">
+        <IconButton icon="text-b" label="Bold" variant="tertiary" size="sm" />
+      </Tooltip>
+      <Tooltip {...args} content="Download this Added Value as a PDF">
+        <IconButton icon="download-simple" label="Download" variant="tertiary" size="sm" />
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bold = canvas.getByRole('button', { name: 'Bold' });
+    const download = canvas.getByRole('button', { name: 'Download' });
+
+    /* No room above: it takes the bottom, under the button. */
+    await userEvent.tab();
+    await expect(bold).toHaveFocus();
+    await described(bold);
+    await waitFor(() => expect(isOpen(bold)).toBe(true));
+    await expect(bubbleOf(bold).parentElement).toHaveAttribute('data-side', 'bottom');
+    await expect(bubbleOf(bold).getBoundingClientRect().top).toBeGreaterThanOrEqual(bold.getBoundingClientRect().bottom);
+
+    /* At the right edge it slides left: all of it is on the screen. */
+    await userEvent.tab();
+    await expect(download).toHaveFocus();
+    await waitFor(() => expect(isOpen(download)).toBe(true));
+    const box = bubbleOf(download).getBoundingClientRect();
+    await expect(box.top).toBeGreaterThanOrEqual(0);
+    await expect(box.left).toBeGreaterThanOrEqual(0);
+    await expect(box.right).toBeLessThanOrEqual(window.innerWidth);
+  },
+};
