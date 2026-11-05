@@ -30,6 +30,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## The columns
 
+The **Domains** cell has 16 above and below its tags: one line is the row's usual 56, and when the tags wrap the row grows to fit rather than hugging them.
+
 | Column | What it is |
 |---|---|
 | **Name** | The avatar, the name and, under it, the email (`UserLabel`). Sortable |

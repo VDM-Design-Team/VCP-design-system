@@ -105,7 +105,8 @@ export function AccountsTable({
       label: 'Domains',
       width: '30%',
       render: (row) => (
-        <div className="flex flex-wrap gap-2">
+        /* 16 above and below, as the Planning title cell has it: one line of tags is the row's 56, and when they wrap (the column narrows) the lines keep their room. */
+        <div className="flex flex-wrap gap-2 py-4">
           {row.domains.map((domain) => (
             <Tag key={domain} size="sm">
               {domain}

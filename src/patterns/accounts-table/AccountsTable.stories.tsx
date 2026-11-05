@@ -327,5 +327,32 @@ export const OnThePage: Story = {
   },
 };
 
+/** Domains that wrap onto several lines (a narrow column, or many domains): the tags keep 16 above and below, and the row grows to fit rather than hugging them. */
+export const ManyDomains: Story = {
+  render: () => {
+    const rows = [
+      { ...ACCOUNTS[0], domains: ['Design', 'BESA Content', 'Development', 'Governance', 'Partners', 'QA'] },
+      { ...ACCOUNTS[1], domains: ['Design'] },
+    ] as AccountRow[];
+    return (
+      <div className="w-176">
+        <AccountsTable rows={rows} search="" onSearchChange={() => {}} page={1} pageCount={1} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const row = canvasElement.querySelector('tbody tr') as HTMLElement;
+    const cell = row.querySelectorAll('td')[1] as HTMLElement;
+    const tags = [...cell.querySelectorAll('span')].filter((el) => el.className.includes('rounded-sm'));
+    const first = tags[0].getBoundingClientRect();
+    const last = tags[tags.length - 1].getBoundingClientRect();
+    const box = cell.getBoundingClientRect();
+    /* The tags wrap (they are on more than one line) and keep their room above and below. */
+    await expect(last.top).toBeGreaterThan(first.bottom - 1);
+    await expect(first.top - box.top).toBeGreaterThanOrEqual(16);
+    await expect(box.bottom - last.bottom).toBeGreaterThanOrEqual(16);
+  },
+};
+
 /** Tokens only, so dark comes for free. */
 export const DarkTheme: Story = { globals: { theme: 'dark' } };
