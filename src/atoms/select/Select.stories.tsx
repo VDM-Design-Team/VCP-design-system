@@ -172,6 +172,27 @@ export const LightAndDark: Story = {
 };
 
 /**
+ * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
+ * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
+ */
+export const RegularForFilters: Story = {
+  render: (args) => (
+    <div className="flex w-72 flex-col gap-3">
+      <Select {...args} aria-label="Form field" defaultValue="Design" />
+      <Select {...args} aria-label="Filter" emphasis="regular" defaultValue="Design" />
+      <Select {...args} aria-label="Filter, empty" emphasis="regular" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: string) => Number(getComputedStyle(c.getByRole('combobox', { name })).fontWeight);
+    await expect(weight('Form field')).toBe(500);
+    await expect(weight('Filter')).toBe(400);
+    await expect(weight('Filter, empty')).toBe(400);
+  },
+};
+
+/**
  * Review fixes (hidden, tested): a disabled select with its placeholder showing is drawn in the disabled colour, not
  * the enabled placeholder grey; an `error` does not stretch a select sized to its content; and a real option with an
  * empty value reads as a chosen value, not as a placeholder.

@@ -29,6 +29,11 @@ moves it down a tier, per CLAUDE.md's composition rule.
 | `UrgencyTag` | An AV's *urgency*, which is a different scale with its own glyphs |
 | `Badge` | Generic classification with no VCP vocabulary |
 
+## Variants
+
+`variant` is `textual` (the default: the glyph and word alone), `tonal` (a pale fill in the glyph's hue family), `faint` (Figma's "Faint Fill": a white fill with a light grey edge, `stroke.default`, lighter than the neutral outline border because a tag is not a control; the Detail card uses it) or `outline` (a bordered pill, same hue): the Type_Tag set's four styles. The label stays neutral on a fill or a border; the glyph carries the colour. `size` takes `Tag`'s.
+`info` adds the ⓘ the design draws after the word on the filled and bordered looks; it is decorative, and the page provides the explanation.
+
 ## Props
 
 | Prop | Type | Default | Notes |
@@ -47,6 +52,8 @@ them in. `AV_TYPE_MEANING` holds what each type means — the one place that cop
 | Type 1 | `caret-triple-up` | `accent.critical.outline.content.default` |
 | Type 2 | `caret-double-up` | `accent.warning.outline.content.default` |
 | Type 3 | `caret-up` | `text.brand.medium` |
+
+The **glyph is 20 × 20** (`Icon` `md`) — the system's standard for the glyph in a `md` (28 tall) `Tag`; it was 24.
 
 The **label** is `neutral.outline.content.default` for all three, same reason
 as `UrgencyTag`: the glyph carries the scale so the column reads as a ranking.

@@ -5,13 +5,14 @@ up next. **Written in roles, not names** — who holds each seat is the
 "Current holders" table in [workflow.md](workflow.md), the one place a role
 maps to a person.
 
-Last updated **11 September 2026**.
+Last updated **3 November 2026**. The sections from 9–11 September below are
+kept as history; start with "What happened on 3 November".
 
 ---
 
 ## At a glance
 
-**These four rows link rather than state.** Every one of them changes on the
+**These rows link rather than state.** Every one of them changes on the
 next merge — including the merge that lands an edit to this file, which is how
 an earlier version managed to be wrong about itself ninety seconds after it
 landed. A link is still true tomorrow; a number is a claim with a shelf life.
@@ -26,14 +27,83 @@ dated facts belong.
 | Plugin released | [`version` in the manifest on `main`](https://github.com/VDM-Design-Team/VCP-design-system/blob/main/plugin/.claude-plugin/plugin.json) |
 | Published Storybook | [always the current `main`](https://main--6aba746352fe3d50eea0cdab.chromatic.com) |
 
-**Pieces, as of 11 September:** 20 atoms · 33 components · 10 patterns ·
-1 template. This one is a number because it is the shape of the system rather
-than its churn, and it only moves when something ships —
-[inventory.md](inventory.md) has the per-piece detail either way.
+| Published package | [`@vdm-design-team/vcp-design-system` on GitHub Packages](https://github.com/orgs/VDM-Design-Team/packages/npm/package/vcp-design-system) |
+| Shared prototype | [VCP-prototype repo](https://github.com/VDM-Design-Team/VCP-prototype) · [the site](https://vcp-prototype.pages.dev) (team login) |
 
-**`npm test` runs five checks now, not four.** Token lint, composition lint,
-plugin version consistency, typecheck, **and every story as a browser test**.
-That last one is new on 10 September and it changes how you work: see below.
+**Pieces:** [inventory.md](inventory.md) has the per-piece detail. The
+11 September count (20 · 33 · 10 · 1) is long out of date.
+
+**`npm test`** runs every check CI runs; the "Automated checks" table in
+[workflow.md](workflow.md) lists them, and the `npm test` row of
+[CLAUDE.md](../CLAUDE.md) names them in one line.
+
+---
+
+## What happened on 3 November
+
+**The design system is a package now, and 0.1.0 is published.**
+[#202](https://github.com/VDM-Design-Team/VCP-design-system/pull/202) made it
+publishable (tsup build, a `"use client"` bundle, a Tailwind-free
+`theme.css`). [#245](https://github.com/VDM-Design-Team/VCP-design-system/pull/245)
+exported the three pieces #202 missed (`InlineEdit`, `RejectionReason`,
+`StatusProgression`) and stopped stories and team-process docs shipping.
+[#246](https://github.com/VDM-Design-Team/VCP-design-system/pull/246) was the
+release: `npm run changelog` folded 86 entries into `CHANGELOG.md` as 0.1.0.
+It also fixed `scripts/changelog.mjs`, which sorted any entry first written
+during a merge to the top; each entry is now dated by the oldest commit that
+touches it. A fresh install, a server render, the Tailwind theme compile and a
+type check all passed on the published package.
+
+- **The package is private, on purpose.** It inherits access from this repo,
+  so installing it needs repo access plus a GitHub token with
+  `read:packages`. The README's "For engineering" section has the steps.
+  Making it public can't be undone.
+- **Publishing stays manual.** From a clean, freshly pulled `main`: a release
+  PR with `npm run changelog`, then `npm run build` and `npm publish`. Publishing
+  needs a token with `write:packages`; the engineering owner's `gh` login has it
+  (`npm publish --//npm.pkg.github.com/:_authToken="$(gh auth token)"`).
+- **The README's token names were wrong**, and an app following them got no
+  styling: `text-content-*`, `border-line-*` and `p-md` produce nothing. Fixed in
+  [#247](https://github.com/VDM-Design-Team/VCP-design-system/pull/247)
+  (`text-text-*`, `border-stroke-*`, Tailwind's numeric spacing).
+
+**`AppShell` has a Playground story** —
+[#251](https://github.com/VDM-Design-Team/VCP-design-system/pull/251): twenty
+controls that switch each piece of the shell (rail variant and state, top-bar
+parts, title band, theme). Documented in [app-shell.md](app-shell.md).
+
+**The dev-team contributor has read access** to this repo: they can comment,
+review and request changes, but not push. That is deliberate.
+
+**There is a shared clickable prototype: VCP Prototype.** Screens are designed
+in their own private repo,
+[VDM-Design-Team/VCP-prototype](https://github.com/VDM-Design-Team/VCP-prototype),
+not in Storybook. Storybook stays the catalogue of pieces; the prototype is
+where they become screens.
+
+- **What it is:** Next.js 16 (`output: "export"`, a static site) built only
+  from the published package, pinned at `0.1.0`. One route per rail row: the
+  Dashboard (`/`) and Drafts (its empty state) are built; My Values, Assigned and Task Log are
+  "Not designed yet" placeholders. Its `CLAUDE.md` holds the rules: build only
+  from the package, a missing piece is a PR here rather than a local component,
+  and real token names only.
+- **Hosting:** Cloudflare Pages (project `vcp-prototype`, free). CI lints,
+  builds and deploys on every push: `main` goes to
+  [vcp-prototype.pages.dev](https://vcp-prototype.pages.dev), and every other
+  branch gets its own preview link in the run's summary. CI reads the package
+  through the package's **Manage Actions access**, where VCP-prototype has
+  Read. It deploys with two repo secrets, `CLOUDFLARE_API_TOKEN` (the
+  "VCP Prototype" token, Pages Edit) and `CLOUDFLARE_ACCOUNT_ID`. Without the
+  token, CI just builds.
+- **Who can open it:** Cloudflare Access (Zero Trust, free up to 50 users)
+  guards both the production address and every preview. The policy
+  **"Team email domains"** allows any `@vdm.technology` or
+  `@creativextechlabsinc.com` email, which signs in with a one-time code.
+  To add one person: Zero Trust → Access controls → Applications →
+  *vcp-prototype – Cloudflare Pages* → Edit → Policies → that policy → add an
+  **Emails** rule → save the policy, then the app.
+- **Why not GitHub Pages:** on the org's free plan, Pages only serves public
+  repos, and only Enterprise Cloud can put a Pages site behind a login.
 
 ---
 
@@ -226,6 +296,60 @@ this is overdue rather than pending.
 designers who have not had them. The lead specifically wanted the design-system
 owner to hear about the owner seat directly, not via a tool. The plugin-update
 nudge above is still the natural moment to fold that in.
+
+**7. The Notion copy of workflow.md is one PR behind (added 3 November).**
+[#244](https://github.com/VDM-Design-Team/VCP-design-system/pull/244) rewrote
+the "Automated checks" table in `docs/workflow.md`; the
+[How We Work page](https://wholesale-piccolo-010.notion.site/VCP-Design-System-How-We-Work-e58fbfcc3ae082759885011915b9848a)
+still shows the old five rows and says axe *reports* rather than fails. It
+wasn't synced because nobody could edit it: the page lives in **"BESAdigital
+OÜ's Workspace"**, and the engineering owner's Notion login is not a member
+there, so neither the Notion connector nor the browser could reach it.
+Notion says that login may join the workspace itself, which could take a paid
+seat. The other ways in: share the page with that login as **Can edit**, or
+paste the change by hand. A connector would also need reconnecting to that
+workspace. What the sync needs, all copied from `workflow.md`:
+
+- Reword the 🎨 Token lint and 🧪 Story tests rows.
+- Add six rows between Token lint and Typecheck: 🧩 Composition lint,
+  🔢 Plugin version, 📚 Story lint, 📜 GDL contract, 🔲 Field contrast,
+  📝 Changelog entry.
+- In the 🧪 callout, swap the "currently reports… flips to failing" sentence
+  for the `npm test` sentence under the table.
+- Footer: last synced on the day it's done, PR #244.
+
+While you're in there, check two things. The page's 📖 Live Storybook link
+still points at the old Chromatic project (`main--685158a98c4fedbbec7ac708`),
+and nobody has decided yet whether to change it. And an older, retired copy
+is still published at `ivory-slope-836.notion.site`; unpublish it so nobody
+reads it by mistake.
+
+**8. Seventeen open design PRs, and two of them would bring back released
+entries (added 3 November).** The 0.1.0 release deleted every file in
+`changes/` once it was in `CHANGELOG.md`. Any PR branched before that still
+carries those files. Merging `main` in won't remove them, because the branch
+never changed them, and they would silently come back as unreleased entries.
+Check each PR's `changes/` list before merging:
+[#204](https://github.com/VDM-Design-Team/VCP-design-system/pull/204) carries
+nine released entries besides its own `feat-gantt-chart.md` (among them
+`feat-chart-legend-gauge.md`), and
+[#180](https://github.com/VDM-Design-Team/VCP-design-system/pull/180) carries
+`feat-notification-item-followup.md` besides its own. Both are also in conflict
+with `main`. The rest are queued for review:
+[waiting on your review](https://github.com/VDM-Design-Team/VCP-design-system/pulls?q=is%3Apr+is%3Aopen+review-requested%3A%40me).
+
+**9. The prototype's access list is the engineering owner's to settle.**
+On GitHub, VCP-prototype has the owner as admin and one reader; the designers
+who will build screens there need **Write**, and the dev-team contributor
+probably **Read**. Login access to the site is set by email domain (above).
+
+**10. The next release.** The prototype is pinned at `0.1.0`, so nothing
+merged here reaches it until a release is published and the prototype bumps
+to it in its own PR (`npm i @vdm-design-team/vcp-design-system@latest`, then
+click through every screen on that PR's preview link). Two small fixes are
+worth folding into that release: add `CHANGELOG.md` to the package's `files`,
+and run `npm pkg fix`, which normalises `repository.url` (npm warns about it on
+publish).
 
 ---
 

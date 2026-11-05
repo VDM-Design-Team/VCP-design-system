@@ -165,3 +165,7 @@ No new tokens.
   that wraps three lines wants a different layout.
 - **Don't use `selectable` without wiring `selected`** — a checkbox column
   that never changes state is furniture.
+
+## A cut name says the whole of it
+
+A first column that can truncate (`grow`) renders its text with **`TruncatedText`** (or, for a button that opens the row, `useIsTruncated` with its own `Tooltip`), so hovering or focusing a cut name shows it in full — never the browser's `title`. `AVTable` and `PlanningTable` do.
