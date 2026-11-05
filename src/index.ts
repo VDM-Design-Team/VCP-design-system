@@ -57,6 +57,7 @@ export * from './components/detail-card-menu';
 export * from './components/detail-row';
 export * from './components/domain-item';
 export * from './components/dropdown-stepper';
+export * from './components/domain-budget-summary';
 export * from './components/domain-access-table';
 export * from './components/domain-label';
 export * from './components/deliverable-link';
