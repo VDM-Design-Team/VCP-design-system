@@ -26,3 +26,4 @@ export * from './review-av-modal';
 export * from './sidebar';
 export * from './superadmin-metrics';
 export * from './top-bar';
+export * from './user-account-modal';
