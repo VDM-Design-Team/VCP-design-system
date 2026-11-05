@@ -302,6 +302,31 @@ export const DestructiveConfirmation: Story = {
 };
 
 /**
+ * `tone="critical"` + `actions`: the standard row without hand-building it. Cancel is the grey
+ * `neutral` button, the answer is red, and the dialog is an alertdialog with no ✕ and no
+ * backdrop dismissal by default.
+ */
+export const CriticalTone: Story = {
+  args: {
+    size: 'sm',
+    tone: 'critical',
+    title: 'Delete CLM-4471?',
+    description: 'The claim, its 12 attachments and its audit trail are removed permanently.',
+    actions: { confirm: { label: 'Delete claim' } },
+  },
+};
+
+/** The default tone's `actions`: `secondary` Cancel and a `primary` answer. */
+export const StandardActions: Story = {
+  args: {
+    size: 'sm',
+    title: 'Publish the changelog?',
+    children: 'Everyone in the workspace is notified.',
+    actions: { confirm: { label: 'Publish' } },
+  },
+};
+
+/**
  * Long content scrolls inside the body, not the page — the header and footer
  * stay put and the panel never grows past the viewport. This is also the `lg`
  * width. The body becomes a tab stop only because it overflows, so it can be

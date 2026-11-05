@@ -48,8 +48,9 @@ semibold), scaled with the ring — geometry, not the type ramp. **`segmented` i
 `heading-xl-bold` (32, Poppins) in `text.primary`, the same as a `StatCard` value, so the gauge reads with the
 figures beside it (it was the ring-scaled 40 semibold in Inter). Caption
 `label-sm` `text.tertiary`. No new tokens. Fill-vs-track contrast is measured
-per tone in docs/progress-bar.md (floor 3.84:1, dark critical) and applies
-unchanged.
+per tone in docs/progress-bar.md and applies unchanged: in dark, `critical`,
+`info` and `pending` sit under 3:1 against the track and keep 3.84:1 against
+the card around the ring.
 
 ## Accessibility
 
