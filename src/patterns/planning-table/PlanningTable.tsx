@@ -17,6 +17,7 @@ import {
 import { InlineDateEdit, InlineEdit } from '../../components/inline-edit';
 import { StatusTag, STATUS_COLUMN_HINT, type StatusTagProps } from '../../components/status-tag';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
+import { TruncatedText, useIsTruncated } from '../../components/truncated-text';
 import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
 
 /**
@@ -310,6 +311,24 @@ const liveCell = (dismiss: () => void) => ({
   onFocusCapture: dismiss,
 });
 
+/** The title as a button that opens the row; when it is cut, hovering or focusing it says the whole title. */
+function TitleButton({ row, onOpen }: { row: PlanningRow; onOpen: (row: PlanningRow) => void }) {
+  const ref = React.useRef<HTMLButtonElement>(null);
+  const truncated = useIsTruncated(ref, [row.title]);
+  return (
+    <Tooltip content={row.title} describe={false} disabled={!truncated} className="min-w-0 max-w-full">
+      <button
+        ref={ref}
+        type="button"
+        onClick={() => onOpen(row)}
+        className="block max-w-full truncate rounded-sm text-left text-label-sm-medium text-text-primary hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+      >
+        {row.title}
+      </button>
+    </Tooltip>
+  );
+}
+
 export function PlanningTable({
   className,
   sections,
@@ -410,18 +429,9 @@ export function PlanningTable({
         /* 16 above and below, Figma's own cell padding: with the domain tag that is the 81 row. */
         <div className="flex flex-col items-start gap-1 py-4">
           {onOpen ? (
-            <button
-              type="button"
-              onClick={() => onOpen(row)}
-              title={row.title}
-              className="block max-w-full truncate rounded-sm text-left text-label-sm-medium text-text-primary hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-            >
-              {row.title}
-            </button>
+            <TitleButton row={row} onOpen={onOpen} />
           ) : (
-            <span className="block max-w-full truncate text-label-sm-medium text-text-primary" title={row.title}>
-              {row.title}
-            </span>
+            <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>
           )}
           {row.domain && (
             <Tag tone="brand" size="sm">
