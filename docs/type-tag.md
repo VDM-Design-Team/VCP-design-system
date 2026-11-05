@@ -48,6 +48,8 @@ them in. `AV_TYPE_MEANING` holds what each type means — the one place that cop
 | Type 2 | `caret-double-up` | `accent.warning.outline.content.default` |
 | Type 3 | `caret-up` | `text.brand.medium` |
 
+The **glyph is 20 × 20** (`Icon` `md`) — the system's standard for the glyph in a `md` (28 tall) `Tag`; it was 24.
+
 The **label** is `neutral.outline.content.default` for all three, same reason
 as `UrgencyTag`: the glyph carries the scale so the column reads as a ranking.
 

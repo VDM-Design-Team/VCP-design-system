@@ -54,6 +54,7 @@ does not ship one yet — until it does, put the content on the page.
 | `openDelay` | `number` (ms) | `300` | Hover only. **Focus is always immediate** |
 | `defaultOpen` | `boolean` | `false` | Renders it already open. For Storybook, screenshots and visual regression — not a way to pin one open in product |
 | `tooltipId` | `string` | auto (`useId`) | Override the generated id of the bubble. Rarely needed |
+| `disabled` | `boolean` | `false` | Off for now: it does not open and does not describe its trigger. For a tooltip that applies only sometimes — the full text of a name, while the name is cut (`TruncatedText`) |
 | `describe` | `boolean` | `true` | Wires the trigger to the bubble with `aria-describedby`. Off when the trigger's own name already says the tooltip's words (an icon button labelled "Add reaction", a collapsed sidebar row, `AssigneeWithStatus`), so they are not heard twice. Off, the trigger gets `data-tooltip` instead, so it still knows it has one (`IconButton` drops its native `title` under either). The story tests fail a description that repeats its name (`vcp-description-repeats-name`, `src/lib/story-a11y.ts`) |
 | `className` | `string` | — | Merged onto the wrapper `<span>` via `cn()`. This replaces the source component's `style` prop |
 | `ref` | `Ref<HTMLSpanElement>` | — | Points at the wrapper `<span>`, not the trigger |

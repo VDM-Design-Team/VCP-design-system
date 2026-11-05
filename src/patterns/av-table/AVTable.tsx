@@ -11,6 +11,7 @@ import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../atoms/pagination';
 import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
+import { TruncatedText } from '../../components/truncated-text';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
 import { Button } from '../../atoms/button';
@@ -180,11 +181,8 @@ export function AVTable({
               <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
             )}
             <Divider orientation="vertical" className="h-4 shrink-0" />
-            {/* One line, ellipsed. The full title is the `title` attribute so a
-                truncated row is still readable on hover. */}
-            <span className="truncate text-label-sm-medium text-text-primary" title={row.title}>
-              {row.title}
-            </span>
+            {/* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */}
+            <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>
           </div>
 
           {(row.domain || row.attachments || row.comments) && (

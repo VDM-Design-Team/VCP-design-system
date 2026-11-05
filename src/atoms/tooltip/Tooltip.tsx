@@ -164,6 +164,11 @@ export interface TooltipProps
    * Busy)" whose tooltip shows that sentence), so a screen reader does not hear them twice.
    */
   describe?: boolean;
+  /**
+   * Switch the tooltip off for now: it does not open (hover or focus) and does not describe its trigger, and the trigger is otherwise untouched. For a tooltip that applies only sometimes — the
+   * full text of a name, which is worth showing only while the name is cut off (`TruncatedText`).
+   */
+  disabled?: boolean;
 }
 
 export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
@@ -177,6 +182,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       defaultOpen = false,
       tooltipId,
       describe = true,
+      disabled = false,
       className,
       onMouseEnter,
       onMouseLeave,
@@ -271,6 +277,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       };
     }, [open, place, host]);
 
+    React.useEffect(() => {
+      if (disabled) close();
+    }, [disabled, close]);
+
     /* Clear a pending open if the component goes away mid-delay. */
     React.useEffect(() => clearTimer, [clearTimer]);
 
@@ -302,6 +312,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const handleMouseEnter = (event: React.MouseEvent<HTMLSpanElement>) => {
       onMouseEnter?.(event);
       clearTimer();
+      if (disabled) return;
       if (openDelay <= 0) {
         setOpen(true);
         return;
@@ -325,6 +336,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const handleFocus = (event: React.FocusEvent<HTMLSpanElement>) => {
       onFocus?.(event);
       clearTimer();
+      if (disabled) return;
       let keyboardish = true;
       try {
         keyboardish = (event.target as Element).matches(':focus-visible');
@@ -343,10 +355,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       'aria-describedby'?: string;
       'data-tooltip'?: string;
     }>;
-    const describedBy = [child.props['aria-describedby'], describe && id].filter(Boolean).join(' ') || undefined;
+    const describedBy = [child.props['aria-describedby'], describe && !disabled && id].filter(Boolean).join(' ') || undefined;
     /* A trigger that is not described still has a tooltip, and some pieces need to know: `IconButton`
        drops its native `title` under one, or the browser would draw a second bubble over ours. */
-    const marker = describe ? {} : { 'data-tooltip': id };
+    const marker = describe || disabled ? {} : { 'data-tooltip': id };
 
     return (
       <span

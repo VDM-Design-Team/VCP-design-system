@@ -21,6 +21,7 @@
     "!docs/figma-audit.md",
     "!docs/handoff.md",
     "!docs/inventory.md",
+    "!docs/playbook.md",
     "!docs/workflow.md"
   ],
   "exports": {
