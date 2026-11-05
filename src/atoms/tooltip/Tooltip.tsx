@@ -31,8 +31,12 @@ import { cn } from '../../lib/cn';
  * popover's list scroll sideways.) The portal goes into the nearest `.dark`
  * ancestor when there is one, so a themed wrapper still themes it.
  *
- * Placement is still static: the four placements are fixed offsets off the trigger,
- * with no collision detection and no flipping. See `docs/tooltip.md`.
+ * **It stays on screen.** `placement` is the side you prefer. When that side has
+ * no room on screen for the bubble — a toolbar along the top of the page, a
+ * button at its right edge — it takes the opposite side if that has more room,
+ * and it slides along the edge so no part of it is cut off. (It was always drawn
+ * on the side asked for until November 2026, so at the top of the screen it was
+ * drawn off it.) See `docs/tooltip.md`.
  *
  * `followPointer` is for a trigger much wider than the bubble — a bar across a
  * chart. The bubble keeps its `top`/`bottom` side but takes its horizontal
@@ -61,22 +65,22 @@ import { cn } from '../../lib/cn';
 const positioner = cva(
   [
     /* Fixed, so it is positioned by the trigger's coordinates and by nothing
-       around it. The coordinates arrive as an inline style (they are measured, not
-       a design value); the transform pulls the bubble to the right side of that
-       point. */
+       around it. The coordinates of its top-left corner arrive as an inline style:
+       they are measured, from the trigger and the bubble's own size, not a design
+       value. */
     'fixed z-50 flex w-max',
     'transition-opacity duration-150 motion-reduce:transition-none',
   ],
   {
     variants: {
-      /* The point is the middle of the trigger's near edge. The `p*-2` is the gap
-         between trigger and bubble, on Tailwind's numeric spacing scale — and it
-         doubles as the pointer bridge described above. */
+      /* The side it is drawn on. The `p*-2` is the gap between trigger and bubble,
+         on Tailwind's numeric spacing scale — and it doubles as the pointer bridge
+         described above. */
       placement: {
-        top: '-translate-x-1/2 -translate-y-full pb-2',
-        bottom: '-translate-x-1/2 pt-2',
-        left: '-translate-x-full -translate-y-1/2 pr-2',
-        right: '-translate-y-1/2 pl-2',
+        top: 'pb-2',
+        bottom: 'pt-2',
+        left: 'pr-2',
+        right: 'pl-2',
       },
       open: {
         true: 'opacity-100',
@@ -121,6 +125,11 @@ const bubble = cva([
  */
 const DEFAULT_OPEN_DELAY = 300;
 
+/* Layout maths, not styling: how near the screen's edge the bubble may come. */
+const SCREEN_EDGE = 8;
+
+const OPPOSITE = { top: 'bottom', bottom: 'top', left: 'right', right: 'left' } as const;
+
 type Placement = NonNullable<VariantProps<typeof positioner>['placement']>;
 
 export interface TooltipProps
@@ -131,8 +140,9 @@ export interface TooltipProps
    */
   content: React.ReactNode;
   /**
-   * Which side of the trigger the bubble sits on. Static: there is no collision
-   * detection and no flipping, so pick the side with room.
+   * Which side of the trigger the bubble sits on: the side you prefer. It takes the opposite side
+   * when this one has no room on screen and that one has more, and slides along the edge to stay on
+   * screen.
    */
   placement?: Placement;
   /**
@@ -212,29 +222,50 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       setHost((wrapperRef.current?.closest('.dark') as HTMLElement | null) ?? document.body);
     }, []);
 
-    /* The point the bubble hangs from: the middle of the trigger's near edge — or, with
-       `followPointer` on a top or bottom bubble, the pointer's x, pulled back so the whole
-       bubble stays inside the viewport. */
-    const [anchor, setAnchor] = React.useState<{ top: number; left: number } | null>(null);
+    /* Where the bubble goes: the side it took, and its top-left corner on screen. Centred on the
+       trigger's near edge, unless that would cut it off. */
+    const [anchor, setAnchor] = React.useState<{ top: number; left: number; side: Placement } | null>(null);
     const place = React.useCallback(() => {
       const rect = wrapperRef.current?.getBoundingClientRect();
-      if (!rect) return;
-      let centreX = rect.left + rect.width / 2;
+      const box = positionerRef.current;
+      if (!rect || !box) return;
+      /* The bubble's size with its gap, which is the same on whichever side it takes. */
+      const w = box.offsetWidth;
+      const h = box.offsetHeight;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const room = {
+        top: rect.top - SCREEN_EDGE,
+        bottom: vh - rect.bottom - SCREEN_EDGE,
+        left: rect.left - SCREEN_EDGE,
+        right: vw - rect.right - SCREEN_EDGE,
+      };
+      const need = placement === 'top' || placement === 'bottom' ? h : w;
+      const other = OPPOSITE[placement];
+      const side: Placement = room[placement] >= need || room[placement] >= room[other] ? placement : other;
+      /* Slide along the edge, but never past the far one: a bubble wider than the screen keeps its start. */
+      const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+      /* `followPointer`: a top or bottom bubble centres on where the pointer entered, not on the
+         trigger's middle; the clamp below still keeps the whole bubble on screen. */
+      const centreX =
+        followPointer && pointerX.current !== null && (side === 'top' || side === 'bottom')
+          ? pointerX.current
+          : rect.left + rect.width / 2;
       const centreY = rect.top + rect.height / 2;
-      if (followPointer && pointerX.current !== null && (placement === 'top' || placement === 'bottom')) {
-        const margin = 8;
-        const half = (positionerRef.current?.offsetWidth ?? 0) / 2;
-        const max = Math.max(margin + half, window.innerWidth - margin - half);
-        centreX = Math.min(Math.max(pointerX.current, margin + half), max);
-      }
-      setAnchor(
-        placement === 'bottom'
-          ? { top: rect.bottom, left: centreX }
-          : placement === 'left'
-            ? { top: centreY, left: rect.left }
-            : placement === 'right'
-              ? { top: centreY, left: rect.right }
-              : { top: rect.top, left: centreX },
+      const next =
+        side === 'top' || side === 'bottom'
+          ? {
+              side,
+              top: side === 'top' ? rect.top - h : rect.bottom,
+              left: clamp(centreX - w / 2, SCREEN_EDGE, vw - SCREEN_EDGE - w),
+            }
+          : {
+              side,
+              top: clamp(centreY - h / 2, SCREEN_EDGE, vh - SCREEN_EDGE - h),
+              left: side === 'left' ? rect.left - w : rect.right,
+            };
+      setAnchor((prev) =>
+        prev && prev.side === next.side && prev.top === next.top && prev.left === next.left ? prev : next,
       );
     }, [placement, followPointer]);
 
@@ -253,9 +284,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     }, [clearTimer]);
 
     /* Measure before the bubble shows, and keep it on the trigger while it is open:
-       the page can scroll or resize under a fixed element. */
+       the page can scroll or resize under a fixed element. Again once the portal
+       exists, so a tooltip that starts open is measured too. */
     React.useLayoutEffect(() => {
-      if (!open) return;
+      if (!open || !host) return;
       place();
       window.addEventListener('scroll', place, true);
       window.addEventListener('resize', place);
@@ -263,7 +295,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         window.removeEventListener('scroll', place, true);
         window.removeEventListener('resize', place);
       };
-    }, [open, place]);
+    }, [open, place, host]);
 
     React.useEffect(() => {
       if (disabled) close();
@@ -388,7 +420,9 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
           createPortal(
             <span
               ref={positionerRef}
-              className={positioner({ placement, open, wide })}
+              /* The side it really took, for tests and for styling a pointer one day. */
+              data-side={anchor?.side ?? placement}
+              className={positioner({ placement: anchor?.side ?? placement, open, wide })}
               style={anchor ? { top: anchor.top, left: anchor.left } : undefined}
             >
               {/* The described element: `role="tooltip"` *and* the id that

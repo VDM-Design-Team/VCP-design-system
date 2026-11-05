@@ -233,7 +233,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 - **The scrollbar is the browser's.** `Menu_Dropdown` in Figma draws a slim custom scrollbar; this panel scrolls with the platform's.
 - **The tags menu's blue highlighted row** (a single-pick look) is replaced by the checkbox,
   because the field now allows several tags.
-- **The panel is not repositioned.** It opens under the field, growing to the right if its content is wider than the field, and clips inside an `overflow: hidden` ancestor or the viewport edge. No flipping, same as `Popover`.
+- **The panel floats and flips.** It is placed from the field's position on screen (`position: fixed`), so a dialog or a panel that scrolls cannot cut it off. It opens under the field, or above it when the screen has no room below and more above; the side is chosen as it opens and kept while it is open, so filtering does not make it jump. When neither side has room for all of it, it takes the roomier one and the list gets shorter and scrolls, so the search box stays on screen. It grows to the right if its content is wider than the field, and moves left rather than run off the screen. (Until November 2026 it always opened under the field and was clipped by an `overflow: hidden` ancestor or the screen's edge; the `OpensAboveNearTheBottom` story is the regression test.)
 
 ## Don't
 

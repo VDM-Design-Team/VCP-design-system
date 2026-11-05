@@ -49,8 +49,8 @@ does not ship one yet — until it does, put the content on the page.
 |---|---|---|---|
 | `content` | `ReactNode` | — | **Required.** The description. Text, or light markup for emphasis and line breaks. **Never interactive** |
 | `children` | `ReactElement` | — | **Required.** Exactly one element, and it must be focusable. It is cloned to receive `aria-describedby` |
-| `placement` | `top \| bottom \| left \| right` | `top` | Static offsets. No collision detection, no flipping — see below |
-| `followPointer` | `boolean` | `false` | Opens under the pointer (horizontally) instead of at the trigger's middle, kept inside the viewport and still on the `top` or `bottom` side. For a trigger much wider than the bubble — a chart bar. It holds still once open so the pointer can reach it; keyboard focus still opens it at the trigger's middle |
+| `placement` | `top \| bottom \| left \| right` | `top` | The side you prefer. It takes the opposite side when this one has no room on screen, and slides along the edge to stay on screen — see below |
+| `followPointer` | `boolean` | `false` | Opens under the pointer (horizontally) instead of at the trigger's middle, kept inside the viewport, on the `top` or `bottom` side (flipping to the other one when there is no room). For a trigger much wider than the bubble — a chart bar. It holds still once open so the pointer can reach it; keyboard focus still opens it at the trigger's middle |
 | `wide` | `boolean` | `false` | The bubble runs to 384 instead of 256 — for a tooltip that is a short list (each line a row), like the Type column's. Longer text still wraps |
 | `openDelay` | `number` (ms) | `300` | Hover only. **Focus is always immediate** |
 | `defaultOpen` | `boolean` | `false` | Renders it already open. For Storybook, screenshots and visual regression — not a way to pin one open in product |
@@ -69,12 +69,18 @@ would only ever be used to make a tooltip look like something it is not.
 
 ## Positioning — read this before choosing a placement
 
-**There is no positioning library here, and the limitation is real:**
+**There is no positioning library here, but the bubble stays on screen:**
 
-- **No collision detection and no flipping.** Each placement is a fixed CSS
-  offset off the trigger. A `top` tooltip near the top of the viewport, or a
-  `left` one on a control at the left edge, will overflow — it will not flip to
-  the opposite side. Pick the side with room, and pick it per usage.
+- **It flips when its side has no room.** `placement` is the side you prefer. When
+  the bubble does not fit there on screen (a `top` tooltip on a toolbar along the
+  top of the page, a `left` one at the left edge) and the opposite side has more
+  room, it opens on the opposite side. The side it took is on the positioner as
+  `data-side`.
+- **It slides along the edge.** Centred on the trigger by default, it moves sideways
+  (or up and down, for `left` and `right`) so that none of it is cut off by the
+  screen's edge: the long tooltip on a button at the right of a toolbar moves left.
+  (Until November 2026 it did neither, so at the top of the screen it was drawn off
+  it; the `StaysOnScreen` story is the regression test.)
 - **The bubble is in a portal, so no container clips it or scrolls with it.** It is
   drawn `position: fixed` from the trigger's coordinates, in the nearest `.dark`
   ancestor or else at the end of the page. A tooltip in a scrolling list, a table
@@ -84,11 +90,9 @@ would only ever be used to make a tooltip look like something it is not.
   resize.
 - **No arrow.** The gap and the proximity carry the association; a CSS triangle
   would need a background colour set twice and would not survive a theme flip.
-- **It is positioned from the trigger's box, not flipped.** Placement is still one
-  of four fixed sides; near a viewport edge the bubble can run off the screen.
-
-If a screen genuinely needs flipping and collision handling, that is a real
-positioning engine and a system-level decision, not a local fix.
+- **It avoids the screen's edges, not other floating things.** Two open bubbles,
+  or a bubble and a menu, can overlap. Only one tooltip is open at a time in
+  practice, so this rarely shows.
 
 ## Tokens
 
@@ -294,7 +298,7 @@ in a way that helps nobody.
   body copy belongs on the page.
 - Don't set a long `openDelay` to "reduce noise". If tooltips are noisy there are
   too many of them.
-- Don't assume a placement will flip near a viewport edge. It will not; choose the
-  side with room.
+- Don't rely on the flip to choose the side for you. It is a safety net for the
+  screen's edges; still pick the side with room for each use.
 - Don't put status or error information in one. Those need a live region and a
   visible, persistent home.
