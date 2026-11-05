@@ -66,11 +66,12 @@ this on 5 November 2026, over the rule above. It holds only on these terms:
 - **`tone="critical"`, with a close control.** Pass `onDismiss`, as the design
   draws an ✕. Normal timing is fine: when a toast goes, nothing is lost,
   because the field error is still there.
-- **Known gap: a screen reader hears each problem twice.** `Field` announces its
-  error with `role="alert"`, and a `critical` toast goes to the assertive
-  region as well, which breaks *Say it once* (`CLAUDE.md`, rule 5). Toast has
-  no way yet to show a message without announcing it. Until it does, the
-  repeat is a known cost of this exception.
+- **`announce: false`, so it is said once.** `Field` already announces its
+  error with `role="alert"`. A `critical` toast would go to the assertive
+  region and say it a second time, which breaks *Say it once* (`CLAUDE.md`,
+  rule 5). Raised with `announce: false`, the toast shows but is not read out
+  (see *Shown, not announced* below). The story **Blocked submit is said once**
+  tests it.
 
 ## Parts
 
@@ -112,9 +113,11 @@ test can assert on the timer without reaching into React.
 | `politeLabel` / `assertiveLabel` | `string` | `Notifications` / `Errors` | Names on the two regions |
 
 `toast(options)` takes `tone`, `title`, `description`, `toneLabel`,
-`actionLabel`, `onAction`, `dismissLabel`, `duration`, and returns an id.
-`duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to `null` as
-it does on a bare `<Toast>`.
+`actionLabel`, `onAction`, `dismissLabel`, `duration`, `announce`, and returns
+an id. `duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to
+`null` as it does on a bare `<Toast>`. `announce` defaults to `true`; `false`
+shows the toast without reading it out, and is only for a toast that repeats
+a message announced somewhere else (see *Shown, not announced*).
 
 ## The timer bar
 
@@ -190,6 +193,20 @@ The cost of splitting: a mixed batch of toasts is not in strict arrival order on
 screen, because errors are in a different container. That is the right trade —
 correct assertiveness is worth more than the ordering of a batch that rarely
 happens.
+
+### Shown, not announced: `announce: false`
+
+A toast raised with `announce: false` goes into **neither** region. It lands in a
+third stack after them, with no role and no `aria-live`. It looks like any other
+toast, a screen reader still reaches it when reading the page, and its close
+control works the same. It is just not read out when it arrives.
+
+It exists for one reason: **Say it once**. When a toast repeats a message that
+is already announced somewhere else, announcing the toast too makes a screen
+reader user hear the same problem twice. The case in VCP is the blocked Submit
+above, where each `Field` error announces itself. The stack is only rendered
+while it holds a toast; it has no announcement to set up in advance, so unlike
+the regions it does not need to be in the page first.
 
 ### Auto-dismiss and WCAG 2.2.1
 
@@ -366,6 +383,9 @@ Dark comes for free: every colour above is a semantic token that
 - **Don't auto-dismiss a toast that carries an action.** The component will
   refuse, and the reason is worth knowing: a control on a timer is not a control.
 - **Don't move focus to a toast**, and don't make the toast itself focusable.
+- **Don't use `announce: false` on a toast that is the only place its message
+  lives.** A screen reader user would never hear it. It is for a toast that
+  repeats something already announced, like a field error.
 - Don't put anything in a Toast that the user must not miss. It is transient by
   definition — use a `Banner`, or a `Modal` if they must answer. A blocked
   Submit's toasts are allowed only because each one repeats a field error that
