@@ -1,5 +1,266 @@
 # Changelog
 
+## 0.2.0 — 2026-11-05
+
+### `Dropzone` checks the files it takes (November 2026)
+
+`Dropzone` now checks **every** file against `accept` and a new `maxSize`, dropped ones too (before, `accept` only filtered the browse dialog and a dropped file of any type or size went straight to `onFiles`). `accept` defaults to PNG, JPG, GIF, DOCX, CSV and PDF and `maxSize` to 10MB, as the default hint already said (`*` takes anything). A file that fails is turned away: the zone says why in its error state ("photo.heic is not a file type we take", "huge.png is 11 MB; the limit is 10 MB") until the next selection, and the new `onReject` gets the same list. Only the files that pass reach `onFiles`. A caller's own `error` still wins.
+
+Behaviour change to know about: a caller that relied on dropped files of any type reaching `onFiles` must now pass `accept="*"`. The accepted types and the limit are as the team understands them and are to be confirmed with design.
+
+### A `Field` error turns the control's edge red too (November 2026)
+
+`Input`, `Select`, `Textarea`, `SearchSelect` and `DateField` now draw the critical border when they are `aria-invalid`, which is what a `Field` with an `error` puts on its control. Before, only passing `invalid` to the control did, so a `Field` with just an `error` showed the red message and left the edge alone. The red message and the red edge now always arrive together. Passing `invalid` still works on its own.
+
+### A cut name says the whole of it: `TruncatedText` (November 2026)
+
+New **`TruncatedText`** (and `useIsTruncated`): one line cut with "…" that shows the system `Tooltip` with the full text on hover and focus when — and only when — it has been cut, and is a tab stop only then. `AVTable` and `PlanningTable` use it for the title in their first column, replacing the browser's `title` attribute (slow, unstyled, shown even for text that fits, and no use from the keyboard). `Tooltip` gains `disabled`. Any table with a name that can truncate should do the same (docs/data-table.md).
+
+### `TypeTag`'s glyph is 20 × 20 (November 2026)
+
+The caret in a `TypeTag` (the Type column of the AV and Planning tables) is now 20 × 20 (`Icon` `md`), the system's standard for the glyph in a `md` `Tag`. It was 24 × 24, which sat a size too big in the tag.
+
+### `Popover`, `Menu`, `Tooltip`, `SearchSelect` — nothing is cut off at an edge any more (November 2026)
+
+Fix, found by putting each one next to shadcn's in the same tight spot: four floating pieces could be cut off by the container around them or by the screen.
+
+- **`Popover`** floats above the page by default: `strategy` now defaults to `fixed`, so a panel that scrolls, a table or a dialog no longer clips it. While the page scrolls it moves with its trigger and keeps the side it opened on. `strategy="absolute"` keeps the old placement, for the one case `fixed` gets wrong: an ancestor with a CSS `transform` (none of the system's containers has one). This covers everything built on it: `Menu`, `DateField`, `InlineDateEdit`, `EmojiReactionPicker` and `NotificationPopover`.
+- **`Menu`** no longer has its last row's list cut off by `DataTable`, and takes Popover's `strategy` as a new prop.
+- **`Tooltip`** stays on screen. When its `placement` has no room (a toolbar along the top of the page) it opens on the opposite side, and it slides along the edge so a long tooltip at the right of the screen is not cut off. The side it took is on the positioner as `data-side`.
+- **`SearchSelect`**'s list floats above the page and opens above the field when there is no room below, so a field at the foot of the screen or of a dialog shows its whole list. The side is chosen as it opens and kept while you filter; when neither side has room for all of it, the list gets shorter and scrolls.
+
+No visual change where there was room already. Each fix has a story that fails without it: `FloatsOutOfAScrollingPanel`, `FloatsOutOfATable`, `StaysOnScreen`, `OpensAboveNearTheBottom`.
+
+### `Modal` — the caption is medium weight and has room beneath it (November 2026)
+
+The `description` caption under the title is now `caption-md-medium` (weight 500, was regular), and **the header has 16 of padding below it when a caption is shown** (8 under a title alone, as before), so the content no longer sits close against the caption.
+
+### `PasswordStrength` — Fair is brown, as Figma draws it (November 2026)
+
+Fix: Fair was the bright `caution` yellow (`accent.yellow.medium`), on the reading that Figma painted a bright yellow, at 1.28:1 against the light track. Figma's `_Password_Item_Strength` draws Fair brown, so it is now the `warning` tone (`accent.warning.filled.surface`): 4.00:1 light, 5.42:1 dark, above the 3:1 a meaningful graphic should reach. The other four levels are unchanged. No API change.
+
+### `DateField` — no Clear button that did nothing (November 2026)
+
+Fix: a date field's calendar showed `DatePicker`'s footer **Clear** button, but nothing was wired to it, so pressing it left the date as it was and the calendar open. It showed in every `DateField`: the Add Required Details dialog's dates, and since #258 the super admin dashboard's month filter, where Figma's month selector draws no Clear. The field now turns it off (`clearable={false}`), in day and month mode. A form whose date is optional offers its own way to clear it, as the docs already said. No API change.
+
+### `surface.track` — the dark track shows on a card: slate-700 (November 2026)
+
+Fix: in dark, the grey track behind `ProgressBar` and `DonutChart` was slate-800, the same colour as a card (`surface.elevated`), so on a card it disappeared. A partly filled bar or ring lost its remainder and read as a loose stripe or arc. An empty gauge, such as the Cycle Summary's before it has a rate, drew nothing but "-%". It is now slate-700, one step up: **1.41:1** on a dark card and 1.72:1 on the canvas, a little more than the light track's 1.23:1 on white. Light is unchanged.
+
+The cost: against the lighter track, three dark fills drop under 3:1, critical (2.72:1), info (2.75:1) and pending (2.91:1). Each still clears 3.84:1 against the card around the meter, and every meter announces its value, so the colour is never the only signal. The others stay above 3:1: brand 4.48, success 3.22, warning and caution 5.42. `docs/progress-bar.md`, `docs/donut-chart.md` and `docs/password-strength.md` carry the new figures. Figma's dark `surface/track` variable wants the same value.
+
+No API change.
+
+### `ChangePasswordForm` — the Password tab of Settings (November 2026)
+
+New pattern, built to Figma's `Settings_Password`: Old, New and Confirm Password (each a `PasswordField` with a show/hide eye), a `PasswordStrength` meter under the new one (the page scores it with `getStrength`; the field is described by the meter), and Set Password. Each field is required, in Figma's own words ("Old password is required"…); a confirmation that does not match is an addition. Set Password says what is wrong, moves focus and does not go through; `errors` carries server messages; `saving` locks the fields. It changes nothing itself.
+
+The strength score is VCP's own, `scorePassword` in `src/lib/password-strength.ts` (length, character kinds, common passwords; 0–4), and the form uses it by default, debounced 300ms; `getStrength={null}` removes the meter. A new password under 8 characters is refused ("Password must be at least 8 characters"), and New Password says so beforehand, under the field ("At least 8 characters"); strength is never required. A field with an error turns its edge critical. `scorePassword` and `MIN_PASSWORD_LENGTH` are exported, so a page uses the same rule. `PasswordField`'s eye is grey (`neutral.outline` content) rather than brand blue.
+
+### `PasswordField` — a password input with a show/hide eye (November 2026)
+
+New, built to Figma's `_Password_Show_Hide_Icon`: an `Input` with an eye at its end (`Input`'s new `trailingAction`) that shows what was typed. The eye is a real button named "Show password" with `aria-pressed`, with a 40 press area; the field is `type="password"` until it is pressed. `visible` / `onVisibleChange` control it from outside.
+
+### `Input` — `trailingAction` (November 2026)
+
+A slot for a **control** at the field's end — a show/hide toggle, a clear button — where `trailingIcon` is only decoration. It takes a real, focusable `IconButton` the caller names and is not hidden from assistive tech. Nothing changes for an `Input` that does not use it.
+
+### `accent.pending` tokens; `PasswordStrength` component; `ProgressBar` tones and props (November 2026)
+
+**New tokens: `accent.pending.*`** — an orange status family with the same shape as
+`accent.warning` (`filled` / `outline` / `tonal` × `surface` / `content` / `border` ×
+`default` / `hover` / `pressed` / `disabled`), light and dark, built from GDL's core
+orange scale. The name is the one GDL's contract reserves for CAF's "pending", so
+`npm run check:contract` recognises it.
+
+**New component: `PasswordStrength`** — a labelled five-step meter (`very-weak` →
+`strong`) for the password being typed, ported from the Settings "New Password"
+item and built on `ProgressBar`. The caller scores the password and may pass a
+one-line `message`.
+
+**`ProgressBar`** grows additive pieces so it can carry this: `tone="info"`,
+`tone="pending"` and `tone="caution"` (the bright `accent.pending.outline.border`
+and `accent.yellow.medium` — **2.27:1 and 1.28:1 on the light track**,
+documented as only for use beside a written value), a `valueLabel` that paints and announces words in
+place of the percentage, `role="meter"`, and a `labelSize` (`sm` 12px default, `md` 14px). Existing bars are unchanged.
+
+### `UserAccountModal` — add or edit a user (November 2026)
+
+New pattern, built to Figma's `Accounts_Page_User_Modal`: one dialog in two modes. `new` ("User", empty, no Capacity Points) and `edit` (the user's name as the title, filled, with Capacity Points and its own Save). Both have a photo with Upload (opens the file picker, no crop or remove), Status, Name, Email and Proficiency (the lists are passed in), the Domain Access & Admin Rights table (`DomainAccessTable`) and Submit. It keeps its own draft, reset each time it opens; Name and Email are required and Submit says what is wrong and moves focus; `errors` carries what only the server knows. It saves nothing itself.
+
+### `DomainAccessTable` — per-domain access and admin rights (November 2026)
+
+New, built to Figma's `_Accounts_User_Modal_Domain_Access_Table`: a row per domain with an Access checkbox, an Admin checkbox and the Role they add up to (`domainRole`: Admin if ticked, else User if Access, else No Access), shown as a `Tag`. Both boxes are always available, and **Admin implies Access**: ticking Admin also ticks Access, and un-ticking Access also un-ticks Admin, so a row never reads Admin for a domain the person cannot get into. Controlled; one click can report both boxes, so callers update their rows functionally. Admin's tag is blue (`brand`), User's green, No Access grey.
+
+### `emphasis` on the value fields — filters read regular (November 2026)
+
+`Input`, `Select`, `SearchSelect` and `DateField` take `emphasis: 'regular' | 'medium'`: the weight of a *chosen* value (the placeholder is regular either way). Each keeps the weight it had by default — `Input` regular, `Select` and `SearchSelect` medium — so nothing changes unless it is set. **A filter passes `emphasis="regular"`**, so a row of filters sits quietly while a chosen value in a form stays medium. `DateField`'s chosen date is now medium by default (it was regular, via `Input`) so it reads like the selects beside it in a form; its existing day-mode fields, such as the Add Required Details dialog's, change look. `PlanningFilters`' status and priority use `regular`.
+
+### `DateField` — `mode="month"` (November 2026)
+
+`DateField` takes `mode: 'day' | 'month'` (`DatePicker`'s own prop; `day` by default, so every existing field is unchanged). In month mode the field reads "September 2026", the calendar opens on the month grid, and `onChange` reports the first of the chosen month; `estimated` is ignored. For a month with no day — a reporting period — where Figma draws a month selector. New helper `formatMonth`.
+
+### `SuperAdminMetrics` — the super admin dashboard's numbers (November 2026)
+
+New pattern, built to Figma's `SuperAdmin_Dashboard_Metrics`: a domain `Select` and a month `DateField` (both regular weight, as filters are), four single `StatCard`s (Values Created, Values Completed, Overdue Value Rate, Active / Total Users) and two `StatCardGroup`s (Avg. Time, Review), each figure with its tooltip. It owns no arithmetic: counts read `0`, a rate or average that cannot be worked out is `null` and reads `--`, as Figma's empty state does. `loading` shows a placeholder per figure. The users card is a fixed narrow one (the least important figure). It reflows by its own width.
+
+### `Stepper` — commit after a pause, and only numbers (November 2026)
+
+New opt-in `commitDelay` (ms): what is typed commits after that long without a keystroke, without leaving the field, so anything derived from the value follows while it is typed. Off by default; a stepper still commits on blur or Enter unless it is set. Also, only a number can now be typed: digits, a leading minus when `min` is below zero, a point when the steps are fractional; anything else is dropped as it is typed.
+
+### `Stepper` — an empty state (November 2026)
+
+`value` can now be `null`: a number not chosen yet, shown as `placeholder` ("Set Budget") in italic `text.tertiary`. Nudging up gives an empty field its minimum; the down caret is disabled. New `onClear` is called when a field is committed empty, so a caller can take a value back to `null`. Without `onClear` an empty commit restores the number as before, so existing steppers are unchanged.
+
+### `Stepper` — hold a button to keep stepping (November 2026)
+
+Pressing and holding a nudge button (the minus and plus, or the up and down carets) now keeps stepping: once as the press lands, then repeatedly after a short pause, until it is released or the value reaches the end. A single click is still one step, and keyboard use is unchanged. No API change.
+
+### `BudgetTable` — edit every domain's quarterly budget (November 2026)
+
+New pattern, built to Figma's `Domain Budget Edit` page: one row per domain with an allocation field (`Stepper` `up-down`, with its empty "Set Budget" state), the points consumed against it as a bar, Remaining (derived, red when negative) and an optional note that grows when focused. Remaining and the bar follow the allocation: at once for a nudge, after a brief pause (`commitDelay`, 600 ms) for typing. The bar's status is `DomainBudgetSummary`'s `budgetStatus`, so the two never disagree. It is controlled and saves nothing: Save Changes, its loading state and the "Changes Saved" toast are the page's. A `loading` state keeps the headers and shows placeholder rows. The stories show the page around it: quarter and year (a 40-high segmented control and select), Save Changes, the success toast, an error toast for a save that fails (the table keeps what was typed), and the browser's leave-page prompt for unsaved changes.
+
+### `DomainBudgetSummary` — a domain's budget for one quarter (November 2026)
+
+New, built to Figma's `Domain_Budget_Admin_View`: Allocated, Consumed and Remaining points (each with an info tooltip; Remaining is derived and turns red when negative), the quarter's tag and dates (current, past or upcoming), quarter and year pickers with a "Go to Current Quarter" button when another quarter is being viewed, and a usage bar. The bar's status is owned by the card (`budgetStatus`): under 75% brand blue, 75–99% warning, 100% and over critical. It reflows by its own width with a container query. Controlled: the caller supplies the quarter, year, dates and days left.
+
+**`ProgressBar` — `labelPlacement`.** New `labelPlacement` (`above` by default, or `below`) puts the label row under the bar, as Figma draws Domain Budget's. Nothing changes for existing bars.
+
+Below 560 wide the card stops reflowing and scrolls sideways as a whole, rather than squeezing its figures.
+
+### `AppShell` — a Playground story with controls for every piece (November 2026)
+
+Storybook's Templates → AppShell → Playground lets you assemble a shell from the Controls panel instead of picking a fixed story: the rail's user type, width, open groups and domain switcher; the top bar's left side, bell, mode switch and account chip; `PageTitle` (size, subtitle, back, actions) or `AVHeader` (type, role, status or domain step, status buttons) or no title band; the page's content; the footer; and light or dark. Every control sets a prop or preset its piece already has, so no component API changed. The existing AppShell stories are unchanged.
+
+### `DonutChart` — the segmented gauge's numeral is the dashboard figure (November 2026)
+
+The centre numeral of a `segmented` gauge (the Cycle Summary's) is now `heading-xl-bold` in Poppins, the same 32 bold as a `StatCard` value, instead of the ring-scaled 40 semibold in Inter. It sits on the type ramp so the gauge reads with the figures beside it. Round-capped rings are unchanged.
+
+### `StatCard` — narrower, and a yellow for Pending (November 2026)
+
+The default card's minimum width was 16.5rem (264), widened from Figma's own 175 "so the card stays readable", and a row of cards wrapped early because of it. It is now 11rem (176): Figma's six-across dashboard row fits at 1187 before any card drops onto the next row. A wrapping flex container still lets cards fall to the next row when they run out of room.
+
+**`StatCard` — a yellow for Pending.** New accent `yellow` (`accent.yellow.medium`, an existing token) for a figure that is more cosmetic than urgent; it is brighter than `warning`'s brown and close to Figma's Pending stripe. The dashboard's Pending uses it.
+
+This follows the November change that moved `accent.warning.outline.border.default` from yellow-500 to yellow-700 for contrast. Figma's Pending stripe is still drawn with the old yellow, so `warning` would now render brown. A stripe is purely decorative, and the card's label carries the meaning, so a brighter yellow here costs nothing in contrast terms. A dedicated decorative stripe token is a possible follow-up.
+
+### `InCaseYouMissedIt` and `InCaseYouMissedItCard` — the dashboard's "waiting" strip (November 2026)
+
+New, built to Figma's `InCaseYouMissedIt` and `_ICYM_Card`.
+
+- **`InCaseYouMissedItCard`** (component) — one waiting Added Value: who and when, its title, and a tag and message for Overdue, Due Soon, Awaiting Review or Pending (the type vocabulary lives here; pass `days` and the sentence is written for you). The face opens it; a tonal red ✕ in the corner dismisses it (shown on hover and focus, always on touch).
+- **`InCaseYouMissedIt`** (pattern) — a titled card over a row of those cards that scrolls sideways, with an arrow at each edge on hover. It owns no state: the caller removes and remembers a dismissed card. Empty renders nothing.
+- **Icon:** `clock-user` (and its fill).
+
+### `DomainItem`, `DomainCard`, `TagManagementModal` — Tag Management (November 2026)
+
+New, built to Figma's Tag Management page.
+
+- **`DomainItem`** (component) — a row with edit and delete; a locked built-in with a "Default" `Tag`; a draggable row with a grip that also moves with ↑ / ↓.
+- **`DomainCard`** (pattern) — a titled card with "Add New" and a column of rows. Draggable rows reorder by pointer or keyboard, among themselves only, with a live-region announcement.
+- **`TagManagementModal`** (pattern) — add a tag, add a domain, confirm deleting a domain.
+
+**`Modal`** — new `actions` prop (the standard Cancel + answer row; `secondary` + `primary`) and `tone="critical"` (swaps to a grey `neutral` Cancel and a red `danger` answer, and defaults to `alertdialog`, no ✕, no backdrop dismissal). `footer` is unchanged and wins when set.
+
+**`TagManagementModal`** — `mode="edit"` + `initialName` rename a tag or domain (not drawn in Figma; the add dialog, reused).
+
+**`IconButton`** — new `critical` variant: textual like `tertiary` but red — only the glyph colour changes on hover and press (`accent.critical.outline.content`). The quiet destructive control, for a row's bin; `danger` stays the loud filled one.
+
+### `NotificationItem` — reactions and the reply flow under a comment (October 2026)
+
+Under a comment preview, as Figma's `Notification_Popover_Comment_Reply` draws it: "Reply" (or "Show Reply" / "Hide Reply" once there is a reply) with the emoji reactions beside it, a composer with @-mentions for a new reply (`MentionInput`), and one reply card with Edit and Delete. The reply and the reactions are the caller's data, passed in (`reply`, `reactions`, `members`, `currentUser`) with callbacks (`onReply`, `onEditReply`, `onDeleteReply`, `onToggleReaction`, `onSelectEmoji`). A click on the comment does not open the item; the reply controls respond as controls of their own. `previewActions` stays, below the reply row.
+
+### `DetailCardMenu` — the ⋮ menu at the head of an Added Value page (October 2026)
+
+New component, to Figma's `Detail_Card_Menu` and `AV_Options_Dropdown`: a 32 outlined ⋮ button that opens a `Menu` of Edit and Delete, with the moves between Draft, Pending and Backlog that the role (`user` or `admin`) and the status allow. The component owns which actions appear (a table in `docs/detail-card-menu.md`), so no page decides it again; it only reports each action.
+
+### `DetailCard` — the facts about one Added Value (October 2026)
+
+New pattern, to Figma's `Detail_Card` and `_Detail_Card_Item_*` rows. `type` picks which of the four cards it is (`viewing`, `duplicate` for an AV initiated to another domain, `editing`, `new`), each a fixed list of fields; `domain` trims it (Design has no Cycle, Development has every field). Values go in as `value` and out through `onChange`; the dropdowns' choices come as `options`; `errors` marks a field invalid. Reading uses `Chip`, `Tag`, `StatusTag`, `UrgencyTag`, `TypeTag`, `DueDateTag` (its due-soon colour computed from the date) and `CycleTag`; editing uses `SearchSelect`, `Input` and a `DatePicker` in a `Popover`. The viewers pill is a placeholder until Edit Viewers is built. UI Changes and Estimated Duration are not built.
+
+`UrgencyTag` and `TypeTag` gain `variant` (`textual`, `tonal`, `outline`) and `size`, and `TypeTag` gains `info` (the ⓘ); `CycleTag` gains `size`; a `Menu` item can set `icon: false` to drop the warning glyph a `danger` item gets. `DetailCardMenu` is a square outlined button and its list has no icons. `DetailCard` draws every tag large, capacity points as a `Badge`, urgency tonal and type outlined with the ⓘ, and adds, edits and removes people in the card (a form under the chips, a pencil and ✕ on each chip).
+
+### `DescriptionCard`, `DescriptionSection`, `StatusHistory`, `DuplicateToOtherDomain` — the cards from the AV page (October 2026)
+
+**`DescriptionCard`** (component): one numbered entry in an AV's description, a coloured number
+block and the paragraph beside it. Four types: `problem`, `solution`, `deliverable`,
+`desired-outcome`. Reading, or `editing`: the paragraph becomes a text field that grows with what is
+typed, with an `error` (the critical border and a message under the card) and an optional remove button inside the card's right edge, which appears on hover and while the card has focus (always on a touch screen).
+
+**`DescriptionSection`** (component): the frame around a block of the description, with four fixed types (`problem`, `solution`, `deliverable`, `desired-outcome`) that fix the title, the cards' colour and which controls exist (desired outcome has no add and no files). It numbers its cards and gives each its type and a remove name. A round add button, the cards as an ordered list, and the attached files with a paperclip to attach more. The cards are its children and the files its `attachments`; pass `onAdd` and `onAttach` for an editor and neither for a view. Every section folds: a caret button at the right of the header hides the cards and files (hidden, not unmounted), with a short slide.
+
+**`StatusHistory`** (component): the collapsible bar that holds the status log, a clock,
+"Status History (n)" and a caret. A disclosure wired as one (heading, button with
+`aria-expanded` / `aria-controls`, labelled region); controlled or uncontrolled. Open, it shows `entries`: who
+changed the status, from which to which (a neutral `Tag`, then a `StatusTag`), and when.
+
+**`DuplicateToOtherDomain`** (component): the "Duplicate to other Domains" card, a `fieldset`
+with one `Checkbox` per domain, "Initiate to {name} assignment". The domains are passed in and
+never include the current one; controlled or uncontrolled. `onChange` reports which option just
+changed as well as the whole set, because ticking one usually opens a section.
+
+**`RemoveButton`** (atom): the small critical ✕ that takes an item out of a list. `tonal` is the glyph on a filled disc, used by `DescriptionCard` and `FileAttachment` (whose remove button now uses it) so the two match; `plain` is the bare glyph. Icon only, with a required name and a 40 target.
+
+No new tokens. `DescriptionCard`'s `deliverable` type uses `accent.info` and `desired-outcome` uses
+`surface.neutral.stronger` as stand-ins: the design's cyan is on no ramp and the darkest slate has no
+surface token.
+
+### `GanttChart` — new pattern; `GanttTooltip` — new component; `Tooltip` `followPointer`; `SearchSelect` `inline`; `Icon` `link-simple-horizontal` (October 2026)
+
+**`GanttChart`** is the Gantt pattern: each Added Value a bar from start to due date,
+against people down the side and time across the top, in three views (one cycle by the
+day, a month by the day, a year by the cycle). It takes flat `tasks`, `users` (with their
+WIP, planned and availability figures), `projects` and `cycles`, and lays them out as the
+page design does: one row per user or, with projects selected, a header per project with
+the people who have tasks in it. It has a Today column, a legend built from `LegendItem`,
+a `GanttTooltip` on every bar, open and closed rows (a closed row draws a summary bar, an
+open one packs tasks onto shared lines), and the view, period and filters as controlled
+props. The filters are the new `SearchSelect` (`multiple`, avatars for users) and Reset
+Filters is the filter bar's own button. Status colours are the accessible `filled` tones,
+with `accent.blue.medium` standing in for Pre-Delivered until a cyan token exists.
+
+Beyond the design, for approval: the period bar's middle is a quick pick (the filter bar's
+cycle field in Cycle view, a list of years in Year view, a month calendar in Month view);
+a Today button returns to today and scrolls its column into view; the month/cycle and day
+headings stay at the top of the screen as the page scrolls; a person's figures slide open
+and shut (not under reduced motion). No phone layout: VCP has no mobile version yet. A blue line under the headings marks where the
+Added Values are. A `loading` state keeps the header, Today column and legend and swaps the
+rows for `Skeleton` placeholders, announced as busy.
+
+**`GanttTooltip`** is the card a Gantt bar shows on hover or focus: the work item's title
+with a link glyph, then label/value lines (Status, Initiator, Est. Due Date). It is `Tooltip`
+with the content filled in, so hover and focus, `aria-describedby` and Escape come from
+`Tooltip`; the title truncates so every card is one width and the lines are a description list.
+
+**`Tooltip`** gains `followPointer`: the bubble opens under the pointer, kept inside the
+viewport, for a trigger far wider than the bubble. `GanttTooltip` uses it. Off by default;
+nothing changes for existing tooltips.
+
+**`SearchSelect`** gains `inline`: the button drawn as plain text in a bar, without the
+bordered field (the panel is unchanged), for a picker inside another control's toolbar. Off
+by default; nothing changes for existing fields.
+
+**`Icon`** gains the Phosphor `link-simple-horizontal` glyph (regular and fill), which the
+card's title row uses.
+
+No new tokens.
+
+### `FilterBar` — user fields (October 2026)
+
+`FilterBar` takes `users`: one `SearchSelect` per entry (Assignee, Initiator…) after tags, with avatars and a search box in the panel, like Figma's user menu. An entry can be `multiple` (checkbox rows; the field shows a name or a count), and its options can carry a photo (`src`) or the "Unassigned" glyph (`unassigned`).
+
+### `FilterBar` — the filter row above a list (October 2026)
+
+New pattern, to Figma's `_Filter_Bar`: a search field, then period (a range calendar in a popover), status (`SearchSelect` with Clear all / Apply), priority (`Select`) and tags (`SearchSelect` with search, and removable tags), then Reset and a Filters button that shows or hides the fields. Every filter is controlled by the page. It is three columns from `md` up, with the buttons pinned top right and the fields wrapping between, and stacks as Figma's Mobile below. `children` adds more fields to the row.
+
+`DatePickerPreset` and `DatePickerMode` are now exported from `DatePicker`.
+
+The search box and every field are fluid between a minimum and a maximum width instead of fixed, so they stretch with the page; the minimums are measured so nothing is cut off, and a page with period, status, priority and tags fits one row at 1440 with the expanded sidebar. A page chooses which filters show by which props it passes (a draft page leaves `status` out), and the bar closes up around the rest.
+
+`FilterBar` also takes `cycle`: a one-pick searchable field whose rows read **C33** (May 25, 2026 - Jun 08, 2026), as in the AV details card, while the field says just the code so it stays narrow. It is built on `SearchSelect`'s new `shortLabel`.
+
+When the filters are folded away, the search box widens (up to 32rem) to use the room the fields leave.
+
 ## 0.1.0 — 2026-11-03
 
 ### Package — three more components importable, no stories in the tarball (November 2026)
