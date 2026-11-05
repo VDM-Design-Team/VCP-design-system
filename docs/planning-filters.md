@@ -46,7 +46,7 @@ with the calendar glyph) on the right. The row wraps on a narrow screen rather t
 ## Accessibility
 
 - A `role="search"` region named "Filter the planning list"; the search is a real `type="search"` field named by its placeholder text.
-- The two selects are `SearchSelect`s (keyboard, listbox, announcements — see docs/search-select.md), named "Status" and "Priority".
+- The two selects are `SearchSelect`s (keyboard, listbox, announcements — see docs/search-select.md), named "Status" and "Priority". They read **regular** weight (`emphasis="regular"`), as every filter does: a chosen value in a form is medium, but a row of filters sits quietly.
 - The priority placeholder reads "Select priority", the system's wording for a picker. Figma's frame says "Search priority", though
   the dropdown is a short pick list with no search box — a copy slip, not a design choice.
 

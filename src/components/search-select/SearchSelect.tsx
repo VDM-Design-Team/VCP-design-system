@@ -124,6 +124,11 @@ interface SearchSelectBase
   disabled?: boolean;
   /** `sm` 32 tall, `md` 40 (default), as `Select`. */
   size?: 'sm' | 'md';
+  /**
+   * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
+   * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
   fullWidth?: boolean;
   /**
@@ -269,11 +274,13 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       renderOption,
       disabled,
       size = 'md',
+      emphasis = 'medium',
       fullWidth = false,
       loading,
       onSearch,
       loadingText = 'Loading…',
       invalid,
+      'aria-invalid': ariaInvalid,
       error,
       warning,
       collapsibleGroups,
@@ -333,7 +340,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const committed: readonly string[] =
       value === undefined ? inner : multiple ? (value as readonly string[]) : value ? [value as string] : [];
     const shown = multiple && confirm && open ? draft : committed;
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || ariaInvalid === true || ariaInvalid === 'true';
     const isWarning = !isInvalid && !!warning;
     const [collapsedGroups, setCollapsedGroups] = React.useState<readonly string[]>(
       defaultCollapsedGroups ?? [],
@@ -799,7 +807,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 size === 'sm' ? 'h-6' : 'h-8',
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
-                  ? 'text-body-sm-medium text-text-primary'
+                  ? cn('text-text-primary', emphasis === 'medium' ? 'text-body-sm-medium' : 'text-body-sm-regular')
                   : 'text-body-sm-regular text-text-subtle',
                 size === 'sm' && 'text-caption-md-regular',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',

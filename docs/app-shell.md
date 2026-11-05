@@ -51,6 +51,36 @@ the export ended up with a role badge the bar does not draw and a footer CTA
 the rail does not have. Here each piece keeps its own API and the shell owns
 only the geometry.
 
+## Trying it in Storybook
+
+**Templates → AppShell → Playground** builds the shell from the Controls
+panel, so you can try any combination of its pieces instead of picking a fixed
+story. Every control sets a prop or preset its piece already has; the shell
+itself forwards nothing, so the story builds each slot and hands it over, as a
+page would.
+
+| Group | Control | Sets |
+|---|---|---|
+| Sidebar | User type | `Sidebar`'s `userType`: User, Admin, Admin Dev, Super Admin |
+| | Collapsed | `collapsed`, the 76-wide rail. The rail's own toggle flips it too |
+| | Groups open | `defaultOpen` with Archive and Planning (hidden for Super Admin, which has neither) |
+| | Domain switcher | `showDomainSelector`, with Design and Development |
+| Top bar | Left side | `primaryAction` (the "Create Added Value" `Button`), the logo with or without `homeHref`, or `showLeftSide={false}` |
+| | Bell | `notifications`: 3 unread, 0, or left out (no bell) |
+| | Mode switch | `theme`. Flipping it changes the story's theme |
+| | Account | `onUserMenuSelect` (the built-in account menu), `onUserMenu` (a button for the app's own menu), a `user` alone, or no user |
+| Page header | Title band | The `header` slot: `PageTitle`, `AVHeader`, or nothing |
+| | Size, Subtitle, Back link, Actions | `PageTitle`'s `size`, `subtitle`, `backHref`, `actions` (shown when the band is `PageTitle`) |
+| | AV type, Role, Status, Status buttons | `AVHeader`'s `type`, `role`, `status` (or a `step` on the Development chain), `showStatusActions` (shown when the band is `AVHeader`) |
+| Page | Content | `children`: the dashboard, a page long enough to scroll, or an empty page |
+| | Footer | The `footer` slot: the default, a `Footer` with a pinned year, or `null` |
+| Theme | Theme | Light or dark. Follows the toolbar until you pick one here; then this story's control wins |
+
+The Playground is left off the Docs page (setting the theme there would
+re-theme every story on it) and out of Chromatic (as it opens, it is
+`Default`). Axe passed for every combination of each group's controls in both
+themes when it was added.
+
 ## When to use
 
 | Use | For |

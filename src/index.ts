@@ -53,14 +53,18 @@ export * from './components/date-picker';
 export * from './components/detail-row';
 export * from './components/dropdown-stepper';
 export * from './components/domain-budget-summary';
+export * from './components/domain-access-table';
 export * from './components/domain-label';
 export * from './components/deliverable-link';
 export * from './components/deliverable-link-form';
+export * from './components/password-field';
+export * from './components/password-strength';
 export * from './components/due-date-tag';
 export * from './components/emoji-reaction-picker';
 export * from './components/empty-state';
 export * from './components/field';
 export * from './components/file-attachment';
+export * from './components/in-case-you-missed-it-card';
 export * from './components/inline-edit';
 export * from './components/menu';
 export * from './components/modal';
@@ -82,6 +86,7 @@ export * from './components/timeline';
 export * from './components/toast';
 export * from './components/user-menu';
 export * from './components/type-tag';
+export * from './components/truncated-text';
 export * from './components/urgency-tag';
 export * from './components/user-label';
 
@@ -90,3 +95,5 @@ export * from './patterns';
 export * from './templates';
 
 export { cn } from './lib/cn';
+/* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
+export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';

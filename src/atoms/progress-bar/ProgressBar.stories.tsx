@@ -22,6 +22,7 @@ const meta = {
     max: { control: 'number' },
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     size: { control: 'radio', options: ['sm', 'md'] },
+    labelSize: { control: 'radio', options: ['sm', 'md'] },
     label: { control: 'text' },
     showValue: { control: 'boolean' },
   },
@@ -58,6 +59,16 @@ export const Sizes: Story = {
     <div className="flex w-96 flex-col gap-6">
       <ProgressBar {...args} size="md" label="md — the default" />
       <ProgressBar {...args} size="sm" label="sm — table rows" />
+    </div>
+  ),
+};
+
+/** `labelSize="md"` — the 14px label row, for when the words are the main signal. */
+export const LabelSizes: Story = {
+  render: (args) => (
+    <div className="flex w-96 flex-col gap-6">
+      <ProgressBar {...args} label="sm — 12px, the default" showValue />
+      <ProgressBar {...args} labelSize="md" label="md — 14px" valueLabel="Strong" tone="success" />
     </div>
   ),
 };
