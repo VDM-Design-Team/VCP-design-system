@@ -31,12 +31,20 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `disabled` | `boolean` | — | Locks every box — while a save is in flight |
 | `caption` | `string` | `Domain access and admin rights` | The table's accessible name |
 
-It is **controlled and saves nothing**: the rows are the caller's, and a tick is only reported.
+It is **controlled and saves nothing**: the rows are the caller's, and a tick is only reported. One click can report both boxes
+(see below), so update the rows functionally — `setRows((rs) => rs.map(…))` — and the two reports combine.
 
-## The two boxes are independent
+## Admin implies Access
 
-**Both are always available, in any combination.** This table applies no rule between them: an admin without access is the
-caller's to allow or refuse. (Whether the system should allow it is a design question — raise it with design.)
+**Both boxes are always available, and Admin brings Access with it** (design, 4 Nov 2026), so a row never reads Admin for a domain
+the person cannot get into:
+
+| Click | Reports |
+|---|---|
+| Tick Admin on a row without Access | `onAdminChange(id, true)` **and** `onAccessChange(id, true)` |
+| Un-tick Access on an admin's row | `onAccessChange(id, false)` **and** `onAdminChange(id, false)` |
+| Un-tick Admin | `onAdminChange(id, false)` only: an admin who stops being one is still a user |
+| Tick Access | `onAccessChange(id, true)` only |
 
 ## Role is derived, once
 
@@ -45,19 +53,17 @@ caller's to allow or refuse. (Whether the system should allow it is a design que
 | Access | Admin | Role | Tag |
 |---|---|---|---|
 | | | **No Access** | neutral |
-| ✓ | | **User** | green |
-| any | ✓ | **Admin** | green (a placeholder, see below) |
+| ✓ | | **User** | green (`success`) |
+| any | ✓ | **Admin** | blue (`brand`) |
 
-Admin wins over User. The role is a `Tag`, so it is words as well as a colour.
-
-**Admin's colour is a placeholder.** Figma draws only User (green) and No Access (grey); Admin is green too until design says
-otherwise.
+Admin wins over User. The role is a `Tag`, so it is words as well as a colour. Figma draws only User and No Access; Admin is
+blue so it reads apart from User at a glance (design, 4 Nov 2026).
 
 ## Tokens
 
 The table is `Checkbox`es and `Tag`s on the page's surface: header cells `body-sm-semibold`, domain names `body-sm-regular`, both
-`text.primary` (20.17:1 light / 14.63:1 dark); rows divided by `stroke.default`. The role `Tag` is `sm` (24 high, 12 type), `success` or
-`neutral` tonal. No new tokens.
+`text.primary` (20.17:1 light / 14.63:1 dark); rows divided by `stroke.default`. The role `Tag` is `sm` (24 high, 12 type), `brand`,
+`success` or `neutral` tonal. No new tokens.
 
 ## Accessibility
 
@@ -69,4 +75,6 @@ The table is `Checkbox`es and `Tag`s on the page's surface: header cells `body-s
 ## Don't
 
 - **Don't derive the role at the call site.** `domainRole` is the rule.
-- **Don't encode access rules in it** (admin needs access, and so on): it applies none. The page decides.
+- **Don't add access rules beyond "Admin implies Access"** (who may be an admin, how many, and so on). Those are the page's.
+- **Don't update the rows from a stale copy** (`setRows(rows.map(…))`): one click can report two changes, and the second would
+  overwrite the first. Update functionally.

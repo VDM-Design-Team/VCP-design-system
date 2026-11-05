@@ -36,10 +36,43 @@ import { Icon } from '../icon';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
+/** The types the default hint names — PNG, JPG, GIF, DOCX, CSV and PDF — as an `accept` string. */
+export const DEFAULT_ACCEPT = '.png,.jpg,.jpeg,.gif,.docx,.csv,.pdf';
+/** The size the default hint names: 10MB, in bytes. */
+export const DEFAULT_MAX_SIZE = 10 * 1024 * 1024;
+
+/** Why a file was turned away. */
+export interface DropzoneRejection {
+  file: File;
+  reason: 'type' | 'size';
+  /** In words, as the zone shows it. */
+  message: string;
+}
+
+/** Does `file` match an `accept` string (`.png`, `application/pdf`, an `image` family; `*` takes anything)? */
+export const acceptsFile = (file: File, accept: string): boolean => {
+  const tokens = accept
+    .split(',')
+    .map((token) => token.trim().toLowerCase())
+    .filter(Boolean);
+  if (tokens.length === 0 || tokens.includes('*') || tokens.includes('*/*')) return true;
+  const name = file.name.toLowerCase();
+  const type = file.type.toLowerCase();
+  return tokens.some((token) =>
+    token.startsWith('.') ? name.endsWith(token) : token.endsWith('/*') ? type.startsWith(token.slice(0, -1)) : type === token,
+  );
+};
+
+const megabytes = (bytes: number) => `${Math.round((bytes / (1024 * 1024)) * 10) / 10} MB`;
+
 export interface DropzoneProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'type' | 'size'> {
-  /** The selection, from browse or drop. Dropped files are not filtered by `accept`. */
+  /** The files that were taken, from browse or drop. **Both are checked** against `accept` and `maxSize`; the ones that fail go to `onReject` instead. */
   onFiles?: (files: File[]) => void;
+  /** The files that were turned away, each with its reason. The zone also says so itself (its error state) until the next selection. */
+  onReject?: (rejections: DropzoneRejection[]) => void;
+  /** The largest file, in bytes. Defaults to 10MB, as the default `hint` says. */
+  maxSize?: number;
   /** The linked verb in "Upload a file or drag and drop". */
   label?: string;
   /** Accepted-types line under the label. */
@@ -51,7 +84,7 @@ export interface DropzoneProps
    * can immediately try another file.
    */
   error?: React.ReactNode;
-  /** Forwarded to the input; also the browse dialog's filter. */
+  /** The types taken: the browse dialog's filter **and the check on every file**, dropped ones too. Defaults to PNG, JPG, GIF, DOCX, CSV and PDF; `*` takes anything. */
   accept?: string;
   multiple?: boolean;
   /** Merged onto the zone, not the hidden input. */
@@ -63,6 +96,9 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
     {
       className,
       onFiles,
+      onReject,
+      accept = DEFAULT_ACCEPT,
+      maxSize = DEFAULT_MAX_SIZE,
       label = 'Upload a file',
       hint = 'PNG, JPG, GIF, DOCX, CSV and PDF file up to 10MB',
       error,
@@ -104,10 +140,28 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
       };
     }, [disabled]);
 
+    /* What the zone itself says about the last selection's refusals; the caller's `error` wins. */
+    const [refused, setRefused] = React.useState<string | null>(null);
+
     const take = (list: FileList | null) => {
       const files = Array.from(list ?? []);
-      if (files.length) onFiles?.(files);
+      if (!files.length) return;
+      const taken: File[] = [];
+      const rejections: DropzoneRejection[] = [];
+      for (const file of files) {
+        if (!acceptsFile(file, accept)) {
+          rejections.push({ file, reason: 'type', message: `${file.name} is not a file type we take (${hint}).` });
+        } else if (file.size > maxSize) {
+          rejections.push({ file, reason: 'size', message: `${file.name} is ${megabytes(file.size)}; the limit is ${megabytes(maxSize)}.` });
+        } else taken.push(file);
+      }
+      setRefused(
+        rejections.length === 0 ? null : rejections.length === 1 ? rejections[0].message : `${rejections.length} files were not added. ${rejections[0].message}`,
+      );
+      if (rejections.length) onReject?.(rejections);
+      if (taken.length) onFiles?.(taken);
     };
+    const shownError = error ?? refused;
 
     return (
       <label
@@ -150,7 +204,7 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
               ? 'text-stroke-subtle'
               : over
                 ? 'text-stroke-focused'
-                : error
+                : shownError
                   ? 'text-accent-critical-outline-border-default'
                   : 'text-stroke-strong group-hover/zone:text-stroke-focused',
           )}
@@ -171,13 +225,14 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           type="file"
           className="sr-only"
           multiple={multiple}
+          accept={accept}
           disabled={disabled}
-          aria-invalid={error ? true : undefined}
+          aria-invalid={shownError ? true : undefined}
           /* The zone's <label> wraps the hint or error too, so without this they are in the name *and*
              the description, and heard twice. Named by its call to action, the hint is said once. A
              caller's own aria-label or aria-labelledby still wins. */
           aria-labelledby={props['aria-label'] ? undefined : labelId}
-          aria-describedby={error || hint ? messageId : undefined}
+          aria-describedby={shownError || hint ? messageId : undefined}
           onChange={(e) => {
             take(e.target.files);
             /* Same file twice in a row still fires. */
@@ -222,19 +277,19 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
           </span>{' '}
           or drag and drop
         </span>
-        {(error || hint) && (
+        {(shownError || hint) && (
           <span
             id={messageId}
             className={cn(
               'font-sans text-caption-md-regular',
-              error
+              shownError
                 ? 'text-accent-critical-outline-content-default'
                 : disabled
                   ? 'text-text-disabled'
                   : 'text-text-tertiary',
             )}
           >
-            {error ?? hint}
+            {shownError ?? hint}
           </span>
         )}
       </label>

@@ -30,6 +30,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## The columns
 
+The **Domains** cell has 16 above and below its tags: one line is the row's usual 56, and when the tags wrap the row grows to fit rather than hugging them.
+
 | Column | What it is |
 |---|---|
 | **Name** | The avatar, the name and, under it, the email (`UserLabel`). Sortable |
@@ -43,7 +45,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `rows` | `AccountRow[]` | required | `id`, `name`, `email`, `avatarSrc?`, `domains`, `dateAdded` |
 | `search` / `onSearchChange` | `string` / `(s) => void` | required | The box's text. **Filtering by it is the caller's job** |
-| `searchPlaceholder` | `string` | `Search by name, email, or role...` | |
+| `searchPlaceholder` | `string` | `Search by name, email, or domain...` | |
 | `sort` / `onSortChange` | `DataTableSort` / `(sort) => void` | — | Sorting is the caller's job, as in `DataTable` |
 | `onEdit` / `onDelete` | `(row) => void` | — | The button was pressed. They **ask**: see below |
 | `page` / `pageCount` / `onPageChange` | | required | `Pagination`'s |
@@ -63,9 +65,23 @@ follows, and the `OnThePage` story shows the whole of it:
 | **Delete** | Opens `ConfirmDeleteModal` first — **nothing is deleted until it is confirmed** — then removes the row and shows a toast ("User deleted") |
 | **Add Account** (a page-header action, not the table's) | Opens `UserAccountModal` in `new` mode |
 
+### Focus after a delete — the page's job
+
+The table only reports the delete, and when the row goes its **Delete button goes with it**: the dialog tries to hand focus back to a button that no longer exists, so focus falls to the page and a keyboard or
+screen-reader user is sent back to the top. CLAUDE.md's "Never drop focus" names this case. After the row is removed, move focus on purpose:
+
+| What is left | Focus goes to |
+|---|---|
+| A row after the deleted one | That row's **Delete** button |
+| It was the last row on the page | The **previous** row's Delete button |
+| The table is empty | The **search box** |
+
+Do it after the dialog has closed (it restores focus first, to the button that has gone). Cancel needs nothing: the row stays and the dialog returns focus to its Delete button. The `OnThePage` story does this and
+asserts `document.activeElement` after confirming, for the next-row and the empty-table cases.
+
 ## Empty
 
-With no rows it says so in an `EmptyState` (the system's empty look): "No accounts yet." — or, while a search is typed, **No accounts match “…”.** with the words searched and a hint. Pass `empty` to say
+With no rows it says so in an `EmptyState` (the system's empty look): "No accounts yet." — or, while a search is typed, **No accounts match “…”.** with the words searched and a hint ("Try a different name, email or domain."). Pass `empty` to say
 something else.
 
 ## Tokens

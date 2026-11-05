@@ -3,7 +3,10 @@ import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
+import { EmojiReactionPicker, type EmojiReaction } from '../emoji-reaction-picker';
+import type { MentionMember, MentionSegment } from '../../atoms/mention-input';
 import { Tooltip } from '../../atoms/tooltip';
+import { ReplyCard, ReplyComposer, ReplyControl } from './NotificationReply';
 
 /**
  * NotificationItem — one line in a list of notifications: who did what to which
@@ -23,6 +26,15 @@ import { Tooltip } from '../../atoms/tooltip';
  * mark-read button is focused, when it makes way for the design's mark-read /
  * mark-unread button; with no button (no `onToggleRead`) it stays. The comment
  * preview is the design's: three lines, then "Show more".
+ *
+ * **Reacting and replying** live under the preview, as the design's
+ * `Notification_Popover_Comment_Reply` draws them. The row under the card holds
+ * "Reply" (or, once there is a reply, "Show Reply" / "Hide Reply") on the left and the
+ * reactions on the right, exactly as `EmojiReactionPicker` draws them. "Reply" swaps the
+ * row for a composer; a posted reply is one card, hidden until shown, with Edit
+ * and Delete under it; Edit puts the composer back, filled. There is **one reply** per
+ * comment. The reply and the reactions are the caller's data and come in as props; the
+ * component owns only which of those views is showing.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -101,7 +113,7 @@ type NotificationEvent =
       status: string | undefined;
     };
 
-interface NotificationItemBaseProps
+export interface NotificationItemBaseProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'onSelect'> {
   /** Who did it. */
   actor: NotificationActor;
@@ -122,8 +134,37 @@ interface NotificationItemBaseProps
   onSelect?: () => void;
   /** The comment, when the event is about one. Drawn as the design's preview card. */
   preview?: string;
-  /** Below the preview — the reply and reaction controls, which the caller owns. */
+  /** Below the preview and its reply row: any other controls the caller owns. */
   previewActions?: React.ReactNode;
+  /** Reactions under the preview, as `EmojiReactionPicker` takes them. */
+  reactions?: readonly EmojiReaction[];
+  /** A reaction pill or the thumbs-up button was pressed. */
+  onToggleReaction?: (emoji: string) => void;
+  /** An emoji was chosen from the palette. */
+  onSelectEmoji?: (emoji: string) => void;
+  /** The one reply to the comment, when there is one. */
+  reply?: NotificationReply;
+  /**
+   * Turns replying on: renders "Reply" under the preview, and the composer it opens.
+   * Fires with the words and the ids of everyone mentioned.
+   */
+  onReply?: (value: MentionSegment[], mentionedIds: string[]) => void;
+  /** Renders "Edit" on the reply, and fires when the edit is saved. */
+  onEditReply?: (value: MentionSegment[], mentionedIds: string[]) => void;
+  /** Renders "Delete" on the reply, and fires when it is pressed. */
+  onDeleteReply?: () => void;
+  /** Who can be mentioned in a reply. */
+  members?: readonly MentionMember[];
+  /** Who is replying: the composer's avatar. */
+  currentUser?: NotificationActor;
+  /** Show the reply from the start. It is hidden by default, as the design draws it. */
+  defaultReplyShown?: boolean;
+}
+
+/** The one reply to a comment. */
+export interface NotificationReply {
+  author: NotificationActor;
+  value: readonly MentionSegment[];
 }
 
 export type NotificationItemProps = NotificationItemBaseProps & NotificationEvent;
@@ -143,14 +184,32 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       onSelect,
       preview,
       previewActions,
+      reactions,
+      onToggleReaction,
+      onSelectEmoji,
+      reply,
+      onReply,
+      onEditReply,
+      onDeleteReply,
+      members = [],
+      currentUser,
+      defaultReplyShown = false,
       ...props
     },
     ref,
   ) {
+    /* Which view of the reply flow is showing. The data is the caller's; this is only
+       the screen: the row, the composer for a new reply, or the composer for an edit. */
+    const [mode, setMode] = React.useState<'idle' | 'replying' | 'editing'>('idle');
+    const [replyShown, setReplyShown] = React.useState(defaultReplyShown);
+    const replyId = React.useId();
+    const hasReactions = Boolean(reactions || onToggleReaction || onSelectEmoji);
+    const composerUser = currentUser ?? actor;
+
     const phrase = NOTIFICATION_PHRASES[kind];
     const trail = phrase.trail?.(status);
-    const interactive = Boolean(href || onSelect);
     const markLabel = `${unread ? 'Mark as read' : 'Mark as unread'}: ${subject}`;
+    const interactive = Boolean(href || onSelect);
 
     /* The spaces are text nodes of their own: a space at the start of an inline
        `<span>` is dropped when the accessible name is computed, which ran the
@@ -217,18 +276,19 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
             <p className="min-w-0 flex-1 text-body-sm-regular text-text-primary">{message}</p>
           )}
 
-          {/* The trailing slot: one 40 box, so the click area is a comfortable target,
-              pulled back by 8 on every side (`-m-2`) so the text and the icon sit where a
-              24 box would put them. The dot and the check share its centre, so they swap
-              in place. Unread: the dot
-              at rest, which dissolves into an outlined check-circle (mark as read)
-              when the row is hovered or that button is focused. Read: empty at
-              rest; on hover and focus a filled check-circle (mark as unread)
-              dissolves in. Every change is a dissolve, not a jump. */}
+          {/* The trailing slot: one 40 box, so the click area is a comfortable
+              target, pulled back by 8 on every side (`-m-2`) so the text and the
+              icon sit where a 24 box would put them. The dot and the check share
+              the box's centre, so they swap in place. Unread: the dot at rest,
+              which dissolves into an outlined check-circle (mark as read) when the
+              row is hovered or the button focused. Read: empty at rest; a filled
+              check-circle (mark as unread) dissolves in. Every change is a
+              dissolve, not a jump. With no `onToggleRead` the dot just stays. */}
           <span className="relative -m-2 flex size-10 shrink-0 items-center justify-center">
             {unread && (
               <span
                 aria-hidden="true"
+                data-unread-dot
                 className={cn(
                   'size-2 rounded-full bg-surface-brand-strong',
                   'transition-opacity duration-200 ease-out motion-reduce:transition-none',
@@ -279,9 +339,96 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         {preview && (
           /* Lifted above the row's stretched target (`z-10`), so a click on the comment does
              not open the item: the comment can be read and its text selected, and only "Show
-             more" and the caller's `previewActions` respond. */
-          <div className="relative z-10 flex flex-col gap-1 pr-6 pl-13">
-            <CommentPreview text={preview} />
+             more", the reply controls and the caller's `previewActions` respond. */
+          <div className="relative z-10 flex flex-col gap-3 pr-6 pl-13">
+            <div className="flex flex-col gap-1">
+              <CommentPreview text={preview} />
+
+              {/* The row under the card. Gone while a composer is open, as the
+                  design draws the Replying and Editing states. */}
+              {mode === 'idle' && (onReply || reply || hasReactions) && (
+                <div className="flex items-center justify-between gap-4">
+                  {reply ? (
+                    <ReplyControl
+                      kind={replyShown ? 'hide' : 'show'}
+                      label={replyShown ? 'Hide Reply' : 'Show Reply'}
+                      aria-expanded={replyShown}
+                      aria-controls={replyId}
+                      onClick={() => setReplyShown((shown) => !shown)}
+                    />
+                  ) : onReply ? (
+                    <ReplyControl kind="reply" label="Reply" onClick={() => setMode('replying')} />
+                  ) : (
+                    <span />
+                  )}
+                  {hasReactions && (
+                    <EmojiReactionPicker
+                      className="shrink-0"
+                      reactions={reactions}
+                      onToggle={onToggleReaction}
+                      onSelect={onSelectEmoji}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            {mode === 'replying' && onReply && (
+              <ReplyComposer
+                autoFocus
+                user={composerUser}
+                members={members}
+                submitLabel="Reply"
+                onSubmit={(value, ids) => {
+                  onReply(value, ids);
+                  /* A new reply starts hidden, as the design draws it. */
+                  setReplyShown(false);
+                  setMode('idle');
+                }}
+                onCancel={() => setMode('idle')}
+              />
+            )}
+
+            {reply && mode === 'editing' && (
+              <ReplyComposer
+                autoFocus
+                user={reply.author}
+                members={members}
+                submitLabel="Save"
+                defaultValue={reply.value}
+                onSubmit={(value, ids) => {
+                  onEditReply?.(value, ids);
+                  setMode('idle');
+                }}
+                onCancel={() => setMode('idle')}
+              />
+            )}
+
+            {reply && replyShown && mode !== 'editing' && (
+              <ReplyCard
+                id={replyId}
+                author={reply.author}
+                value={reply.value}
+                actions={
+                  <>
+                    {onEditReply && (
+                      <ReplyControl kind="edit" label="Edit" onClick={() => setMode('editing')} />
+                    )}
+                    {onDeleteReply && (
+                      <ReplyControl
+                        kind="delete"
+                        label="Delete"
+                        onClick={() => {
+                          onDeleteReply();
+                          setReplyShown(false);
+                        }}
+                      />
+                    )}
+                  </>
+                }
+              />
+            )}
+
             {previewActions}
           </div>
         )}
