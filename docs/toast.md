@@ -42,10 +42,35 @@ their own time, it is a Banner. Toast supports an action for the narrow case
 where the action is a *convenience* ("Retry", "Undo") — and a Toast with an
 action never auto-dismisses.
 
-**Never use a Toast for an error the user must fix.** Errors that block a task
-belong next to the thing that is broken — a `Field` error, or a `Banner` at the
-top of the form. `tone="critical"` on a Toast is for something that failed
-*behind* the user, like a background save.
+**Never use a Toast *instead of* an error the user must fix.** Errors that block
+a task belong next to the thing that is broken — a `Field` error, or a `Banner`
+at the top of the form. `tone="critical"` on a Toast is for something that
+failed *behind* the user, like a background save. A Toast may *also* report a
+blocking error in one place only: a blocked Submit, below.
+
+### The one exception: a blocked Submit
+
+When Submit on an Added Value is blocked, VCP shows a toast for each problem
+**as well as** the error under its field. Figma draws it in *AV Page Missing
+Information Error Handling* (a "Missing Input" toast per missing field) and
+*Assignee Busy Warning* (the "Unavailable Assignee" toast). The product chose
+this on 5 November 2026, over the rule above. It holds only on these terms:
+
+- **The field error is the message; the toast points at it.** Every problem is
+  still a `Field` (or `DetailCard`) error under its own field, and stays until
+  it is fixed. A toast with no field error behind it is still the bug the rule
+  above describes.
+- **One toast per problem.** This is the one place where "Say the one thing that
+  happened" (the *Don't* list) gives way: the design shows a toast for every
+  missing field.
+- **`tone="critical"`, with a close control.** Pass `onDismiss`, as the design
+  draws an ✕. Normal timing is fine: when a toast goes, nothing is lost,
+  because the field error is still there.
+- **Known gap: a screen reader hears each problem twice.** `Field` announces its
+  error with `role="alert"`, and a `critical` toast goes to the assertive
+  region as well, which breaks *Say it once* (`CLAUDE.md`, rule 5). Toast has
+  no way yet to show a message without announcing it. Until it does, the
+  repeat is a known cost of this exception.
 
 ## Parts
 
@@ -342,8 +367,11 @@ Dark comes for free: every colour above is a semantic token that
   refuse, and the reason is worth knowing: a control on a timer is not a control.
 - **Don't move focus to a toast**, and don't make the toast itself focusable.
 - Don't put anything in a Toast that the user must not miss. It is transient by
-  definition — use a `Banner`, or a `Modal` if they must answer.
-- Don't queue five toasts for one action. Say the one thing that happened.
+  definition — use a `Banner`, or a `Modal` if they must answer. A blocked
+  Submit's toasts are allowed only because each one repeats a field error that
+  stays (see *The one exception: a blocked Submit*).
+- Don't queue five toasts for one action. Say the one thing that happened. The
+  one exception is a blocked Submit, which shows a toast per problem.
 - Don't set the type with `font-medium text-sm` or similar. Size and weight come
   as a unit from the ramp.
 - Don't reach for `duration` under about four seconds. Nobody finishes reading.
