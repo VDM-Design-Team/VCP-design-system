@@ -157,7 +157,7 @@ export const Empty: Story = {
   },
 };
 
-/** More width than the panel has: the container scrolls, the page does not. */
+/** More width than the panel has: the container scrolls, the page does not. This one has links in it, so tabbing through them brings the rest into view and the scroller adds no stop of its own. */
 export const HorizontalScroll: Story = {
   render: (args) => (
     <div className="w-112">
@@ -167,6 +167,36 @@ export const HorizontalScroll: Story = {
       />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const scroller = canvasElement.querySelector('.overflow-x-auto') as HTMLElement;
+    await expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+    await expect(scroller).not.toHaveAttribute('tabindex');
+  },
+};
+
+/**
+ * The same, with only text in it (no link, no button): nothing to tab to, so the scroller itself is the keyboard's way to the rest — a tab stop, named by the caption, while it scrolls. That is what the
+ * accessibility check for a scrollable region asks. A table that fits, or has a control in it, adds no stop.
+ */
+export const HorizontalScrollTextOnly: Story = {
+  render: (args) => (
+    <div className="w-112">
+      <DataTable
+        {...args}
+        caption="Suppliers"
+        /* No link in the id column and no sortable headers (a sort button is a control too). */
+        columns={COLUMNS.map(({ render, sortable, ...c }) => ({ ...c, width: c.width ?? '220px', ...(c.key === 'id' ? {} : { render }) })) as DataTableColumn<unknown>[]}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const scroller = canvasElement.querySelector('.overflow-x-auto') as HTMLElement;
+    await expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+    await waitFor(() => expect(scroller).toHaveAttribute('tabindex', '0'));
+    await expect(scroller).toHaveAccessibleName('Suppliers');
+    await userEvent.tab();
+    await expect(scroller).toHaveFocus();
+  },
 };
 
 /** Every surface and stroke is a token, so dark is free. */
