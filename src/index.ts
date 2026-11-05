@@ -55,6 +55,7 @@ export * from './components/date-field';
 export * from './components/date-picker';
 export * from './components/detail-card-menu';
 export * from './components/detail-row';
+export * from './components/domain-item';
 export * from './components/dropdown-stepper';
 export * from './components/domain-access-table';
 export * from './components/domain-label';
