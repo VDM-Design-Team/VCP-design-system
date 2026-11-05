@@ -645,7 +645,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           /* Only a tab stop while it actually scrolls — see `scrollable`. */
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
+            /* `relative`: a hidden input (a checkbox, a radio, a switch — all `sr-only`, so `position: absolute`)
+               takes this as its containing block and scrolls with the body. Without it the dialog panel is the
+               containing block, the input stays where it first sat while the body scrolls, and focusing it
+               scrolls the *panel* — the footer rides up the dialog and the form is cut off. */
+            'relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
             /* The gap under the header is split: the header's own share (8, or 16 under
                a caption) stays put while the body scrolls, and this 4 scrolls away and
                doubles as room for a focus ring at the very top. Content scrolls out
