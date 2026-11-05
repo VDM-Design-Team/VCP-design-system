@@ -30,6 +30,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## The completion band
 
+**The rate is rounded first**, the way the gauge shows it, so the colour never disagrees with the number: 89.5 reads "90%" and is green, 69.5 reads "70%" and is amber.
+
 The gauge's colour is the band the rate falls in. **This card owns the bands, once** (`completionBand`):
 
 | Rate | Band | Ring and percentage |
@@ -61,7 +63,7 @@ the 32 (`heading-xl`) the system's other headline figures use. The gauge is `Don
 
 ## Accessibility
 
-- A `<section>` named by its title. The gauge is a `progressbar` named "Completion 90%" (or "Completion: no rate yet").
+- A `<section>` named by its title. The gauge is a `progressbar` named "Completion" (its caption) whose value is its number, so a screen reader hears "Completion, 90" once — not "Completion 90%… 90". With no rate it has `aria-valuetext="No rate yet"`, so the 0 is not announced.
 - Colour is never the only signal: the percentage is written out, and the dots sit beside their titles.
 
 ## Don't

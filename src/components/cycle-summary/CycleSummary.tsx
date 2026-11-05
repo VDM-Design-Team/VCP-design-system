@@ -26,13 +26,15 @@ export type CompletionBand = 'complete' | 'high' | 'medium' | 'low' | 'none';
 
 /**
  * Which band a completion rate falls in: 100 `complete`, 90–99 `high`, 70–89 `medium`, under 70 `low`, and `none` when
- * there is no rate. The thresholds live here and nowhere else.
+ * there is no rate. The thresholds live here and nowhere else. **The rate is rounded first**, as the gauge shows it: 89.5
+ * reads "90%" and is `high` (green), 69.5 reads "70%" and is `medium` (amber) — the colour never disagrees with the number.
  */
 export const completionBand = (rate: number | null | undefined): CompletionBand => {
   if (rate === null || rate === undefined || Number.isNaN(rate)) return 'none';
-  if (rate >= 100) return 'complete';
-  if (rate >= 90) return 'high';
-  if (rate >= 70) return 'medium';
+  const shown = Math.round(rate);
+  if (shown >= 100) return 'complete';
+  if (shown >= 90) return 'high';
+  if (shown >= 70) return 'medium';
   return 'low';
 };
 
@@ -131,7 +133,8 @@ export const CycleSummary = React.forwardRef<HTMLElement, CycleSummaryProps>(
               thickness={8}
               value={rate}
               tone={style.tone}
-              aria-label={has ? `${completionLabel} ${rate}%` : `${completionLabel}: no rate yet`}
+              /* Named by its caption ("Completion") and valued by its own number, so a screen reader hears "Completion, 90" once. With no rate the 0 is not announced: it says so instead. */
+              aria-valuetext={has ? undefined : 'No rate yet'}
               label={
                 <span className={style.text}>{has ? `${rate}%` : '-%'}</span>
               }

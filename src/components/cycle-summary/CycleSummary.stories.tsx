@@ -36,7 +36,14 @@ export const Medium: Story = { args: { completion: 70 } };
 /** Under 70% is red. */
 export const Low: Story = { args: { completion: 60 } };
 /** No rate yet: an empty ring over "-%". */
-export const Empty: Story = { args: { committed: 0, completed: 0, carriedOver: 0, completion: null } };
+export const Empty: Story = {
+  args: { committed: 0, completed: 0, carriedOver: 0, completion: null },
+  play: async ({ canvasElement }) => {
+    /* Named "Completion"; with no rate it says so, rather than announcing a 0. */
+    const gauge = within(canvasElement).getByRole('progressbar', { name: 'Completion' });
+    await expect(gauge).toHaveAttribute('aria-valuetext', 'No rate yet');
+  },
+};
 
 /** All five, as Figma's `_Cycle_Summary_Half_Donut_Chart` frame draws them. */
 export const AllBands: Story = {
@@ -75,6 +82,11 @@ export const Bands: Story = {
     await expect([100, 95, 90, 89, 70, 69, 0, null, undefined].map(completionBand)).toEqual([
       'complete', 'high', 'high', 'medium', 'medium', 'low', 'low', 'none', 'none',
     ]);
-    await expect(within(canvasElement).getByRole('progressbar', { name: 'Completion 90%' })).toBeInTheDocument();
+    /* The band follows the rate as shown: 89.5 reads "90%" (green), 69.5 reads "70%" (amber), 99.6 reads "100%". */
+    await expect([89.5, 69.5, 99.6, 89.4, 69.4].map(completionBand)).toEqual(['high', 'medium', 'complete', 'medium', 'low']);
+    /* Named once by its caption, valued by its number: "Completion", 90 — not "Completion 90%… 90". */
+    const gauge = within(canvasElement).getByRole('progressbar', { name: 'Completion' });
+    await expect(gauge).toHaveAttribute('aria-valuenow', '90');
+    await expect(gauge).not.toHaveAttribute('aria-valuetext');
   },
 };
