@@ -43,7 +43,7 @@ A segment's `tone` is one of `neutral`, `yellow`, `blue`, `brand`, `critical`.
 
 ## It owns one mapping
 
-**A tone → its colour,** once (`neutral.outline.border.default`, `accent.yellow.medium`, `accent.blue.medium`, `surface.brand.strong`,
+**A tone → its colour,** once (`stroke.strong`, `accent.yellow.medium`, `accent.blue.medium`, `surface.brand.strong`,
 `accent.critical.outline.border.default`). Everything else is the page's: which statuses there are, what they are called, which tone
 each wears, and every number. The breakdown is **not** the `AVStatus` vocabulary — Figma's has *Active* (a grouping) and *Overdue* (a
 derived state) — so the segments arrive as data and `StatusTag` keeps owning the statuses themselves.
@@ -52,7 +52,7 @@ derived state) — so the segments arrive as data and `StatusTag` keeps owning t
 
 **It wraps first, then scrolls.** With room, the profile, the two figures and the breakdown share one row. When the breakdown no
 longer fits beside them it **drops to its own line, full width**. The segments share it **in proportion to their counts**, each at
-least 100, so the breakdown alone has a narrowest width (100 a segment). Once it is that narrow and cannot wrap any further,
+least 100 (when every count is 0 they share the strip equally, so the outlines span the width), so the breakdown alone has a narrowest width (100 a segment). Once it is that narrow and cannot wrap any further,
 **the whole strip scrolls sideways** (`overflow-x: auto`).
 
 ## Tokens
@@ -63,12 +63,17 @@ Contrast on the card: `text.primary` **20.17:1** light / **14.63:1** dark; `text
 
 **Differences from Figma, on purpose.**
 
+- **Draft's grey is `stroke.strong`**, a border token worn as a fill. Figma's is slate-500; `stroke.strong` is slate-500 in light and slate-400 in dark, a quiet mid grey in both. The fill token that matches in light,
+  `surface.neutral.strong`, is slate-300 in dark, so Draft (usually the widest segment) would read almost white and outweigh Active and Accepted; `neutral.outline.border` is slate-400 in light, lighter than Figma.
+
 - **Active is `brand` blue** (`surface.brand.strong`), the blue the dashboards' In Progress card uses. Figma draws it `#818cf8` — an
   indigo that is bound to no variable, and the system has no indigo.
 - **The avatar is 36** (`lg`, the system's largest); Figma's profile image is 40.
 - **"Total AVs"** is the default label; Figma's text reads "Total Avs".
 - **24 medium has no step** on the type ramp (`heading-lg` ships bold, semibold and regular), so it is the one marked exception,
   the same as `StatCard`'s and `DomainBudgetSummary`'s. A `heading-lg-medium` in GDL would remove it from all three.
+
+**Each segment has a light 2 line down its left** (`stroke.subtle`, 8 from the words), under the bar and beside the count and name, as Figma's status item draws it.
 
 ## Accessibility
 

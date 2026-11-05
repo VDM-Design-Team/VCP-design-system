@@ -64,12 +64,20 @@ export const Default: Story = {
   },
 };
 
-/** Nothing in any status yet: every segment an empty outline, at its floor width. */
+/** Nothing in any status yet: every segment an empty outline, in equal shares that span the whole strip (not bunched up at their floor width on the left). */
 export const NothingYet: Story = {
   args: {
     total: 0,
     completed: 0,
     segments: SEGMENTS.map((s) => ({ ...s, count: 0 })),
+  },
+  play: async ({ canvasElement }) => {
+    const list = canvasElement.querySelector('ul') as HTMLElement;
+    const items = [...list.querySelectorAll('li')] as HTMLElement[];
+    const widths = items.map((li) => Math.round(li.getBoundingClientRect().width));
+    /* Equal, and together they fill the list to its right edge. */
+    await expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(1);
+    await expect(Math.round(list.getBoundingClientRect().right - items[items.length - 1].getBoundingClientRect().right)).toBeLessThanOrEqual(1);
   },
 };
 

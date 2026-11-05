@@ -53,14 +53,16 @@ export interface MyValuesStatsProps extends Omit<React.HTMLAttributes<HTMLElemen
 
 /* The one place a tone becomes a colour: filled for a segment with a count, an outline for one with none. */
 const FILL: Record<StatsSegmentTone, string> = {
-  neutral: 'bg-neutral-outline-border-default',
+  /* Figma's slate-500 in light, a quiet mid grey in dark: `stroke.strong` is slate-500 / slate-400. It is a *border* token worn as a fill, a deliberate exception: the fill token that matches in light,
+     `surface.neutral.strong`, is slate-300 in dark, so Draft (usually the widest segment) would turn nearly white and outweigh Active and Accepted; `neutral.outline.border` is slate-400 in light, lighter than Figma. */
+  neutral: 'bg-stroke-strong',
   yellow: 'bg-accent-yellow-medium',
   blue: 'bg-accent-blue-medium',
   brand: 'bg-surface-brand-strong',
   critical: 'bg-accent-critical-outline-border-default',
 };
 const OUTLINE: Record<StatsSegmentTone, string> = {
-  neutral: 'border-neutral-outline-border-default',
+  neutral: 'border-stroke-strong',
   yellow: 'border-accent-yellow-medium',
   blue: 'border-accent-blue-medium',
   brand: 'border-surface-brand-strong',
@@ -115,6 +117,9 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
       else if (ref) ref.current = node;
     };
 
+    /* Nothing yet: every count is 0, so every segment would sit at its 100 floor and bunch up on the left. Equal shares let the outlines span the strip. */
+    const nothingYet = segments.every((segment) => segment.count <= 0);
+
     return (
       <section
         ref={setRef}
@@ -149,15 +154,16 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
             return (
               <li
                 key={segment.id}
-                /* As wide as its count, never narrower than 100. The width is data, so it is the one inline style. */
-                style={{ flexGrow: Math.max(segment.count, 0) }}
+                /* As wide as its count, never narrower than 100 (all equal while every count is 0). The width is data, so it is the one inline style. */
+                style={{ flexGrow: nothingYet ? 1 : Math.max(segment.count, 0) }}
                 className="flex min-w-25 basis-0 flex-col gap-2"
               >
                 <span
                   aria-hidden="true"
                   className={cn('block h-2 rounded-pill', filled ? FILL[segment.tone] : cn('border', OUTLINE[segment.tone]))}
                 />
-                <div className="flex flex-col">
+                {/* A light 2 line down the left, 8 from the words, as Figma's status item draws it. */}
+                <div className="flex flex-col border-l-2 border-stroke-subtle pl-2">
                   <span className="text-body-lg-medium text-text-primary">{segment.count}</span>
                   <span className="text-body-sm-medium text-text-tertiary">{segment.label}</span>
                 </div>
