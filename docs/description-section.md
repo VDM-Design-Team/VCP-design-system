@@ -71,6 +71,19 @@ new tokens.
   distinct buttons. The paperclip is "Attach files".
 - The add button is 24 to look at and 40 to press (its target reaches 8 past the circle).
 
+### Focus after a remove — the page's job
+
+Removing a card only **reports** it (`DescriptionCard`'s `onRemove`): the card goes, and its remove button with it, so the section cannot know where focus should land and the page owns it. Left alone, focus falls to the
+page and a keyboard or screen-reader user is sent back to the top (CLAUDE.md: "Never drop focus"). After the card is gone:
+
+| What is left | Focus goes to |
+|---|---|
+| A card in its place (the one that followed it) | That card's **field** |
+| It was the last card | The section's **Add** button ("Add problem", "Add solution"…) |
+
+Do it once the removed card has left the DOM (an effect on the cards). The cards are renumbered as one goes, and their remove buttons' names follow ("Remove problem 2"), so find the next one by its place, not its old name. The `RemovingACard` story shows it and asserts
+`document.activeElement`.
+
 ## Don't
 
 - **Don't put the cards' logic here.** Whether a card is editing, its text and its remove are the
