@@ -1055,3 +1055,34 @@ export const Warning: Story = {
   },
   decorators: [(Story) => <div className="h-40 w-72"><Story /></div>],
 };
+
+/**
+ * **Flow:** a field at the foot of the screen. With no room below, the list opens above the field, and
+ * all of it shows. (It always opened below, off the screen, until November 2026.)
+ */
+export const OpensAboveNearTheBottom: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: { options: PEOPLE.slice(0, 4), searchable: false },
+  render: (args) => (
+    <div className="fixed inset-x-0 bottom-0 p-2">
+      <Controlled {...args} aria-label="Reviewer" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('combobox', { name: 'Reviewer' });
+    await userEvent.click(trigger);
+    const list = await canvas.findByRole('listbox');
+    const panel = list.closest('[data-side]') as HTMLElement;
+    await expect(panel).toHaveAttribute('data-side', 'top');
+    const box = panel.getBoundingClientRect();
+    await expect(box.top).toBeGreaterThanOrEqual(0);
+    await expect(box.bottom).toBeLessThanOrEqual(trigger.getBoundingClientRect().top);
+    /* Each row is what the pointer finds at its own centre. */
+    for (const option of within(list).getAllByRole('option')) {
+      const r = option.getBoundingClientRect();
+      await expect(option.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2))).toBe(true);
+    }
+  },
+};
