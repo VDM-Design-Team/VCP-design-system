@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
-import { Tag } from '../../atoms/tag';
+import { Tag, type TagProps } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
 
 /**
@@ -53,6 +53,19 @@ const TYPE: Record<AVType, { icon: IconName; className: string }> = {
   'Type 3': { icon: 'caret-up', className: 'text-text-brand-medium' },
 };
 
+/** How the tag is drawn: the glyph and word alone (the default), on a pale fill, on a white fill with a light edge, or in a bordered pill in the type's hue. The Figma Type_Tag set's four styles. */
+export type TypeTagVariant = 'textual' | 'tonal' | 'faint' | 'outline';
+
+/* The hue each type wears when the tag has a fill or a border, the glyph's own family. */
+const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
+  'Type 1': 'critical',
+  'Type 2': 'warning',
+  'Type 3': 'info',
+};
+
+/* The glyph follows the tag's size, as the tag docs' table sets it: 20 in the 28 (the default), 16 in the 24, 24 in the 32. */
+const GLYPH_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
+
 /** What each type means — the one place this copy lives (Figma's tag tooltips and the column's ⓘ). */
 export const AV_TYPE_MEANING: Record<AVType, string> = {
   'Type 1': 'Direct KPI impact with clear ROI',
@@ -74,8 +87,12 @@ export const TYPE_COLUMN_HINT = (
   </>
 );
 
-export interface TypeTagProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   type: AVType;
+  /** `textual` (default), `tonal` (a pale fill), `faint` (a white fill with a light grey edge: Figma's "Faint Fill", as the Detail card draws it) or `outline` (a bordered pill in the type's hue). */
+  variant?: TypeTagVariant;
+  /** The ⓘ after the word, which the design draws on the filled and bordered looks. Decorative: it marks that the type has an explanation, which the page provides. */
+  info?: boolean;
   /**
    * Say what the type means on hover ("Type 3: Non-critical, no meaningful KPI impact"), as the
    * design's tag does. On by default. The tag is not focusable, so this is a pointer nicety: the same
@@ -86,16 +103,26 @@ export interface TypeTagProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
-  ({ className, type, tooltip = true, ...props }, ref) => {
+  ({ className, type, variant = 'textual', info, size = 'md', tooltip = true, ...props }, ref) => {
+    const glyphSize = GLYPH_SIZE[size ?? 'md'];
     const { icon, className: tone } = TYPE[type];
     const tag = (
       <Tag
         ref={ref}
-        variant="textual"
-        tone="neutral"
+        size={size}
+        variant={variant === 'faint' ? 'outline' : variant}
+        tone={variant === 'textual' || variant === 'faint' ? 'neutral' : TYPE_TONE[type]}
         /* Decorative: the word beside it already says which type this is. */
-        icon={<Icon name={icon} size="md" className={cn('shrink-0', tone)} />}
-        className={className}
+        icon={<Icon name={icon} size={glyphSize} className={cn('shrink-0', tone)} />}
+        trailingIcon={info ? <Icon name="info" size="md" className="shrink-0 text-text-tertiary" /> : undefined}
+        /* The label stays neutral on a fill or a border; the glyph carries the colour. */
+        className={cn(
+          variant !== 'textual' && 'text-text-secondary',
+          /* A tag is not a control, so its edge need not hold 3:1: the lighter `stroke.default`,
+             as `CycleTag` uses, rather than the neutral outline border (too dark for a label). */
+          variant === 'faint' && 'border-stroke-default bg-surface-elevated',
+          className,
+        )}
         {...props}
       >
         {type}

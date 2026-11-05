@@ -75,9 +75,10 @@ export interface MenuActionItem {
   /**
    * A glyph name from the Icon library — typed, so a name the system does not
    * ship is a compile error rather than an empty square at runtime. Rendered
-   * decorative; the label carries the meaning.
+   * decorative; the label carries the meaning. A `danger` item gets a warning glyph when
+   * it has none; `false` opts out of it (the tone and the screen-reader qualifier stay).
    */
-  icon?: IconName;
+  icon?: IconName | false;
   /** Shown right-aligned. Display only — Menu binds no shortcuts itself. */
   shortcut?: string;
   tone?: 'default' | 'danger';
@@ -317,8 +318,10 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
 
         const danger = item.tone === 'danger';
         /* Danger is never colour alone: a critical item always carries a glyph,
-           and falls back to `warning` when the caller gave none. */
-        const glyph: IconName | undefined = item.icon ?? (danger ? 'warning' : undefined);
+           and falls back to `warning` when the caller gave none. `icon: false` opts out:
+           the accessible name still says "destructive action", and the colour stays. */
+        const glyph: IconName | undefined =
+          item.icon === false ? undefined : (item.icon ?? (danger ? 'warning' : undefined));
         const isChoice = item.selected !== undefined;
 
         return (
