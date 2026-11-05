@@ -1,7 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { Input } from './Input';
+import { IconButton } from '../icon-button';
 
 const meta = {
   title: 'Atoms/Input',
@@ -90,6 +91,34 @@ export const WithLeadingIcon: Story = {
 
 export const WithTrailingIcon: Story = {
   args: { defaultValue: '02-03-2026', trailingIcon: <CalendarIcon /> },
+};
+
+/**
+ * `trailingAction` is a control at the field's end — here a clear button — where `trailingIcon` is only decoration. It is a real, focusable button the
+ * caller names, and it sits inside the field's border and ring.
+ */
+export const WithTrailingAction: Story = {
+  render: (args) => {
+    const [value, setValue] = React.useState('Search term');
+    return (
+      <Input
+        {...args}
+        aria-label="Search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        trailingAction={<IconButton size="xs" icon="x" label="Clear search" onClick={() => setValue('')} />}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByRole('textbox', { name: 'Search' })).toHaveValue('Search term');
+    /* A real button, named, not hidden from assistive tech. */
+    const clear = c.getByRole('button', { name: 'Clear search' });
+    await expect(clear).toBeVisible();
+    await userEvent.click(clear);
+    await expect(c.getByRole('textbox', { name: 'Search' })).toHaveValue('');
+  },
 };
 
 export const Invalid: Story = {
