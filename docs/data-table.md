@@ -9,7 +9,7 @@ empty slot. A real `<table>`, not a div grid.
 |---|---|
 | `Checkbox` | atom |
 | `Icon` | atom |
-| `Tooltip` | component |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -31,7 +31,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, sortable?, hint?, render? }` |
+| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, fit?, grow?, sortable?, hint?, render? }` |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
@@ -41,6 +41,8 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `empty` | `ReactNode` | `'Nothing here yet.'` | An `<EmptyState>` fits; its copy rules apply |
 | `dense` | `boolean` | — | 44 rows instead of 56 |
 | `caption` | `string` | — | Visually hidden `<caption>` naming the table. Strongly encouraged |
+| `cellProps` (on a column) | `(row) => HTMLAttributes<td>` | — | Extra attributes for that column's `<td>` in a row — a class that lets something fill the whole cell, a pointer handler on the cell. `className` is merged |
+| `rowProps` | `(row) => HTMLAttributes<tr>` | — | Extra attributes for a row — a drag source, a data attribute. `className` is merged; the row stays a plain row |
 | `className` | `string` | — | On the scrolling container |
 
 `DataTableColumn.hint` renders after the label and **before the sort arrows** — a
@@ -63,6 +65,21 @@ batch 5.
 A trap worth naming: **the repo's type ramp and Figma's share names but not
 values.** Figma's `label-sm` is 14px; this repo's is 11px. Read a spec off the
 canvas by *value*, not by token name — 14px medium here is `label-lg`.
+
+### How a column is sized: a floor, then a share
+
+The responsive pattern for every VCP table: **no column is ever narrower than its content, and above that
+the spare room is shared out** — so a wide table fills out, and only a squeezed one scrolls.
+
+| Column option | What it does | Use it for |
+|---|---|---|
+| `fit` | Its floor is its widest cell or header — never wrapped, never cut with "…". Above the floor it takes a share of the spare room by its `width` weight (its content's length without one) | Tags, dates, avatars, counts: anything whose length *is* the information |
+| `grow` | The column that gives way: its content truncates with "…" as the table narrows, down to 16rem, below which the table scrolls sideways. Give it a `width` weight for its share of spare room; with none it takes what the others leave | The one long text column — an Added Value's title. Use it once |
+| neither | The browser sizes it (or `width` does) | Anything else — the generic default |
+
+So narrowing the window squeezes the title first; when it cannot give any more the table scrolls horizontally (the
+container, never the page). `width` percentages are *weights*, not promises — a floor always wins. `AVTable` and
+`PlanningTable` use it. A tag in a cell needs `max-w-none`: a `Tag` is `max-w-full`, which would clip it.
 
 `DataTableColumn.width` takes CSS widths (`'120px'`, `'30%'`) applied to
 `<col>` — **not** the export's grid tracks; `'1fr'` has no meaning in a table.
@@ -148,3 +165,7 @@ No new tokens.
   that wraps three lines wants a different layout.
 - **Don't use `selectable` without wiring `selected`** — a checkbox column
   that never changes state is furniture.
+
+## A cut name says the whole of it
+
+A first column that can truncate (`grow`) renders its text with **`TruncatedText`** (or, for a button that opens the row, `useIsTruncated` with its own `Tooltip`), so hovering or focusing a cut name shows it in full — never the browser's `title`. `AVTable` and `PlanningTable` do.

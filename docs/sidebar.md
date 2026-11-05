@@ -12,7 +12,7 @@ Read off the Figma `SideBar` section (`2349:935`, audit batch 3, 8 Sep 2026).
 | Piece | Tier | Role here |
 |---|---|---|
 | `SidebarItem` | component | Every row, including the pinned footer row |
-| `Tooltip` | component | The label of a collapsed row, which has no visible one |
+| `Tooltip` | atom | The label of a collapsed row, which has no visible one |
 | `Menu` | component | The domain switcher's dropdown, when shown |
 | `Logo` | atom | The wordmark, or the diamond alone when collapsed |
 | `Icon` | atom | The collapse toggle's double chevron |

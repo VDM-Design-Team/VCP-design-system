@@ -62,10 +62,8 @@ const ROWS: AVTableRow[] = [
   },
 ];
 
+/* Urgency, Type and Status default to their pieces' own copy; Members has none in Figma. */
 const HINTS = {
-  urgency: 'How soon this needs attention, set by the initiator.',
-  type: 'The effort band this Added Value was sized into.',
-  status: 'Where this sits in its domain’s flow.',
   members: 'Everyone assigned to this Added Value.',
 };
 

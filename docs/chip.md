@@ -1,4 +1,4 @@
-# Chip
+# Chip *(atom)*
 
 An interactive pill: a selected filter, a removable tag, a toggleable option —
 optionally carrying an avatar or a count.

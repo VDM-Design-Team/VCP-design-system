@@ -1,5 +1,7 @@
-/* Storybook entry: the compiled VCP theme + Tailwind scanning of the stories. */
+/* Storybook entry: Tailwind, then the compiled VCP theme — the same two
+   imports an app makes — plus Tailwind scanning of the stories. */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import 'tailwindcss';
 @import '../dist/theme.css';
 @source '../src';
 

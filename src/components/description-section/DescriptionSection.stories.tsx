@@ -23,11 +23,15 @@ const meta = {
   },
   args: { type: 'problem' },
   decorators: [
-    (Story) => (
-      <div className="w-176 max-w-full bg-surface-canvas p-4">
+    (Story, context) =>
+      /* The side-by-side story frames its own sections. */
+      context.parameters.layout === 'fullscreen' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        <div className="w-176 max-w-full bg-surface-canvas p-4">
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<typeof DescriptionSection>;
 
@@ -200,7 +204,6 @@ export const AddInTheHeader: Story = {
 export const LightAndDark: Story = {
   /* Two identical sections side by side, one per theme: the landmark-uniqueness rules stand down. */
   parameters: { layout: 'fullscreen', controls: { disable: true }, ...SIDE_BY_SIDE },
-  decorators: [],
   render: () => (
     <div className="grid grid-cols-2">
       {[false, true].map((isDark) => (

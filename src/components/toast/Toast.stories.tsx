@@ -305,7 +305,7 @@ export const TitleOnlyIsCentred: Story = {
     for (const toast of Array.from(canvasElement.querySelectorAll<HTMLElement>('[data-tone]'))) {
       const glyph = toast.querySelector('svg') as SVGElement;
       const text = toast.querySelector('p') as HTMLElement;
-      const close = toast.querySelector('button[aria-label^="Dismiss"]') as HTMLElement;
+      const close = within(toast).getByRole('button', { name: /^Dismiss/ });
       await expect(Math.abs(mid(glyph) - mid(text))).toBeLessThan(1);
       await expect(Math.abs(mid(close) - mid(text))).toBeLessThan(1);
     }

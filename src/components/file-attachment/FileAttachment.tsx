@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { RemoveButton } from '../../atoms/remove-button';
+import { DOMAINS, DomainLabel, type DomainKey } from '../domain-label';
 
 /**
  * FileAttachment — one attached file as a small card: kind glyph and name,
@@ -54,25 +55,7 @@ import { RemoveButton } from '../../atoms/remove-button';
 export type FileAttachmentKind = 'image' | 'pdf' | 'doc' | 'csv' | 'video';
 
 /** The domain an AV was handed over from — the corner badge. */
-export type FileAttachmentDomain =
-  | 'design'
-  | 'development'
-  | 'governance'
-  | 'content'
-  | 'partners'
-  | 'qa';
-
-/* THE mapping — domain → glyph and code, off Figma's `_Domain_Label` set. The
-   badge colour is the same for every domain (`neutral.tonal`, fixed); only the
-   glyph and the two letters tell them apart. */
-const DOMAIN: Record<FileAttachmentDomain, { icon: IconName; code: string; name: string }> = {
-  design: { icon: 'pen-nib', code: 'DS', name: 'Design' },
-  development: { icon: 'code', code: 'DV', name: 'Development' },
-  governance: { icon: 'bank', code: 'GV', name: 'Governance' },
-  content: { icon: 'image', code: 'CN', name: 'Content' },
-  partners: { icon: 'handshake', code: 'PT', name: 'Partners' },
-  qa: { icon: 'file-magnifying-glass', code: 'QA', name: 'QA' },
-};
+export type FileAttachmentDomain = DomainKey;
 
 const KIND_ICON: Record<FileAttachmentKind, IconName> = {
   image: 'image',
@@ -125,7 +108,7 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
   ) => {
     const [stem, ext] = splitName(name);
     const badge = domain
-      ? DOMAIN[domain]
+      ? DOMAINS[domain]
       : domainLabel
         ? { icon: domainIcon, code: domainLabel, name: domainLabel }
         : undefined;
@@ -185,16 +168,12 @@ export const FileAttachment = React.forwardRef<HTMLDivElement, FileAttachmentPro
         )}
         {badge && (
           <>
-            <span
-              aria-hidden="true"
-              className={cn(
-                'pointer-events-none absolute left-1 top-1 inline-flex items-center gap-1 rounded-pill px-2 py-0.5',
-                'border border-stroke-inverse bg-neutral-tonal-surface-default text-neutral-tonal-content-default',
-              )}
-            >
-              <Icon name={badge.icon} className="size-3" />
-              <span className="text-caption-sm-medium">{badge.code}</span>
-            </span>
+            <DomainLabel
+              decorative
+              code={badge.code}
+              icon={badge.icon}
+              className="pointer-events-none absolute left-1 top-1"
+            />
             {/* The badge is decorative; the domain still reaches a screen reader. */}
             <span className="sr-only">{badge.name} domain.</span>
           </>
