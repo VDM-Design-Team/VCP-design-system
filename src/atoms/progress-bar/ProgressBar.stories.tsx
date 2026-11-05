@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { ProgressBar } from './ProgressBar';
 
 const meta = {
@@ -21,6 +22,7 @@ const meta = {
     max: { control: 'number' },
     tone: { control: 'radio', options: ['brand', 'success', 'warning', 'critical'] },
     size: { control: 'radio', options: ['sm', 'md'] },
+    labelSize: { control: 'radio', options: ['sm', 'md'] },
     label: { control: 'text' },
     showValue: { control: 'boolean' },
   },
@@ -61,6 +63,16 @@ export const Sizes: Story = {
   ),
 };
 
+/** `labelSize="md"` — the 14px label row, for when the words are the main signal. */
+export const LabelSizes: Story = {
+  render: (args) => (
+    <div className="flex w-96 flex-col gap-6">
+      <ProgressBar {...args} label="sm — 12px, the default" showValue />
+      <ProgressBar {...args} labelSize="md" label="md — 14px" valueLabel="Strong" tone="success" />
+    </div>
+  ),
+};
+
 /**
  * `max` other than 100: the announced value is the real one (34 of 40); only
  * the painted percentage is derived.
@@ -78,6 +90,22 @@ export const RealUnits: Story = {
  * No visible label — the name must come from somewhere, so pass `aria-label`.
  * A bare unnamed meter announces as a percentage of nothing.
  */
+/** The label row can sit under the bar instead — Domain Budget's. The meter is still named by its label. */
+export const LabelBelow: Story = {
+  args: { value: 50, label: 'Budget Usage', showValue: true, labelPlacement: 'below' },
+  render: (args) => (
+    <div className="w-96">
+      <ProgressBar {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bar = canvas.getByRole('progressbar', { name: 'Budget Usage' });
+    const label = canvas.getByText('Budget Usage');
+    await expect(bar.getBoundingClientRect().bottom).toBeLessThanOrEqual(label.getBoundingClientRect().top);
+  },
+};
+
 export const Unlabelled: Story = {
   args: { 'aria-label': 'Upload progress' } as never,
   render: (args) => (
