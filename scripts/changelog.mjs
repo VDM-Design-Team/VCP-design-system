@@ -32,7 +32,11 @@ if (!fragments.length) {
 /* Newest first, by when each fragment was first committed (its file time if never committed). */
 const addedAt = (path) => {
   try {
-    const t = execSync(`git log --diff-filter=A --format=%ct -1 -- "${path}"`, { encoding: 'utf8' }).trim();
+    /* The oldest commit that touches it. Not `--diff-filter=A`: git log shows
+       no diff for a merge commit, so a fragment first written while resolving
+       a merge has no "added" commit, fell back to its checkout time and
+       sorted above everything. */
+    const t = execSync(`git log --format=%ct --reverse -- "${path}"`, { encoding: 'utf8' }).trim().split('\n')[0];
     if (t) return Number(t);
   } catch {}
   return statSync(path).mtimeMs / 1000;

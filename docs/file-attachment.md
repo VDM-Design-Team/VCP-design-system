@@ -9,6 +9,7 @@ file size: Figma's card doesn't show one.
 | Piece | Tier |
 |---|---|
 | `Icon` | atom |
+| `DomainLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

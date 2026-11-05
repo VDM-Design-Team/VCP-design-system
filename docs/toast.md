@@ -239,7 +239,7 @@ The tone lives in two places, both the accent's own bright colour,
 |---|---|---|
 | `info` | 3.76:1 | 2.79:1 |
 | `success` | **2.22:1** | 4.54:1 |
-| `warning` | **1.91:1** | 4.98:1 |
+| `warning` | 4.93:1 | 4.98:1 |
 | `critical` | 3.81:1 | 3.07:1 |
 
 **Several of these are below 3:1, and that is a deliberate exception, signed off by

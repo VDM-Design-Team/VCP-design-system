@@ -1,6 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, within } from 'storybook/test';
 import { Input } from './Input';
+import { IconButton } from '../icon-button';
 
 const meta = {
   title: 'Atoms/Input',
@@ -52,6 +54,28 @@ export const Placeholder: Story = {
   args: { placeholder: 'Search by title or ID' },
 };
 
+/**
+ * `emphasis="medium"` sets a *chosen* value in medium — what `Select`, `SearchSelect` and `DateField` do — while the
+ * placeholder stays regular. The default is regular.
+ */
+export const MediumValue: Story = {
+  render: () => (
+    <div className="flex w-72 flex-col gap-3">
+      <Input aria-label="Regular" defaultValue="Development" />
+      <Input aria-label="Medium" emphasis="medium" defaultValue="Development" />
+      <Input aria-label="Medium, empty" emphasis="medium" placeholder="Choose a domain" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: string) => Number(getComputedStyle(c.getByRole('textbox', { name })).fontWeight);
+    await expect(weight('Regular')).toBe(400);
+    await expect(weight('Medium')).toBe(500);
+    /* Nothing chosen yet: the placeholder is regular whatever the emphasis. */
+    await expect(weight('Medium, empty')).toBe(400);
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-3">
@@ -67,6 +91,34 @@ export const WithLeadingIcon: Story = {
 
 export const WithTrailingIcon: Story = {
   args: { defaultValue: '02-03-2026', trailingIcon: <CalendarIcon /> },
+};
+
+/**
+ * `trailingAction` is a control at the field's end — here a clear button — where `trailingIcon` is only decoration. It is a real, focusable button the
+ * caller names, and it sits inside the field's border and ring.
+ */
+export const WithTrailingAction: Story = {
+  render: (args) => {
+    const [value, setValue] = React.useState('Search term');
+    return (
+      <Input
+        {...args}
+        aria-label="Search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        trailingAction={<IconButton size="xs" icon="x" label="Clear search" onClick={() => setValue('')} />}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByRole('textbox', { name: 'Search' })).toHaveValue('Search term');
+    /* A real button, named, not hidden from assistive tech. */
+    const clear = c.getByRole('button', { name: 'Clear search' });
+    await expect(clear).toBeVisible();
+    await userEvent.click(clear);
+    await expect(c.getByRole('textbox', { name: 'Search' })).toHaveValue('');
+  },
 };
 
 export const Invalid: Story = {

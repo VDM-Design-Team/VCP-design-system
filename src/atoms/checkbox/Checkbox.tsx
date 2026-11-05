@@ -165,7 +165,10 @@ export interface CheckboxMarkProps {
  * would be invalid). Decorative: `aria-hidden`, no focus, no hover or pressed
  * states of its own — the row owns those.
  *
- * Same box, tokens and tick as `Checkbox`, so the two never drift.
+ * Same box, tokens and tick as `Checkbox`. The classes are Checkbox's own, written
+ * without the `peer-` states an input drives (Tailwind needs them spelled out), so
+ * they are kept in step by the `Mark` story's test, which compares the two in every
+ * state and both themes. Change one, change the other.
  */
 export function CheckboxMark({ checked, disabled, size = 'sm', className }: CheckboxMarkProps) {
   return (
