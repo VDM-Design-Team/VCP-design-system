@@ -63,7 +63,7 @@ table only reports the delete, so after the row is removed the page moves focus 
 | It was the last row on the page | The **previous** row's Delete button (the first on the page that takes its place when the page empties) |
 | The table is empty | The empty message ("No messages yet."), made focusable for the purpose |
 
-Do it after the dialog has closed. Cancel needs nothing: the row stays and focus returns to its Delete button. The `OnThePage` story does this and asserts `document.activeElement`, down to the empty table. The same rule
+Do it after the dialog has closed. Cancel needs nothing: the row stays and focus returns to its Delete button. The `OnThePage` story does this and asserts `document.activeElement` for the next row; `DeletingTheLastMessage` asserts the empty table. The same rule
 is in `docs/accounts-table.md` and `docs/confirm-delete-modal.md`.
 
 ## A long message is shown whole

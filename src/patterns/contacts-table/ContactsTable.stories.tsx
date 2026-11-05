@@ -136,8 +136,8 @@ export const Loading: Story = {
 
 /* ---- The page: what the table asks for, and what the page does about it. ---- */
 
-function ContactsPage() {
-  const [all, setAll] = React.useState<readonly ContactRow[]>(ALL);
+function ContactsPage({ initial = ALL }: { initial?: readonly ContactRow[] }) {
+  const [all, setAll] = React.useState<readonly ContactRow[]>(initial);
   const [page, setPage] = React.useState(1);
   const [deleting, setDeleting] = React.useState<ContactRow | null>(null);
   const { toast } = useToast();
@@ -224,13 +224,21 @@ export const OnThePage: Story = {
     /* Focus did not fall to the page: it is on the next message's Delete button (the one after Michael's). */
     const buttons = () => c.getAllByRole('button', { name: /^Delete message from/ });
     await waitFor(() => expect(buttons()[1]).toHaveFocus());
+  },
+};
 
-    /* Delete them all: each time focus stays in the table, and with none left it goes to the empty message. */
-    for (let left = ALL.length - 1; left > 0; left--) {
-      await userEvent.click(buttons()[0]);
-      await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
-      await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
-    }
+/** The last message: nothing follows or precedes it, so once it is deleted focus goes to the empty message ("No messages yet.") rather than falling to the page. */
+export const DeletingTheLastMessage: Story = {
+  render: () => (
+    <ToastProvider position="top-right">
+      <ContactsPage initial={ALL.slice(0, 1)} />
+      <ToastViewport />
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.click(c.getByRole('button', { name: /^Delete message from/ }));
+    await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(c.getByRole('heading', { name: 'No messages yet.' })).toHaveFocus());
   },
 };

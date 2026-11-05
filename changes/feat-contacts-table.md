@@ -7,4 +7,4 @@ New pattern, built to Figma's `Contact_List`: Email, Subject and Message columns
 
 Its empty table is an `EmptyState` (“No messages yet.”).
 
-Focus after a delete is the page's job and is documented (docs/contacts-table.md): the `OnThePage` story moves it to the next message's Delete button, the previous one's for the last row, or the empty message when none is left, and asserts it.
+Focus after a delete is the page's job and is documented (docs/contacts-table.md): the `OnThePage` story moves it to the next message's Delete button, the previous one's for the last row, or the empty message when none is left (`DeletingTheLastMessage`), and asserts it.
