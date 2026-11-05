@@ -23,7 +23,8 @@ const ACCOUNTS = PEOPLE.map((name, i) => ({
   id: name.toLowerCase(),
   name,
   email: `${name.toLowerCase()}@vdm.technology`,
-  domains: i % 3 === 2 ? ['Design', 'BESA Content'] : ['Design'],
+  /* Sarah is in six, which wrap onto several lines: the tags keep their room above and below. */
+  domains: name === 'Sarah' ? ['Design', 'BESA Content', 'Development', 'Governance', 'Partners', 'QA'] : i % 3 === 2 ? ['Design', 'BESA Content'] : ['Design'],
   dateAdded: ago(DAYS[i]),
   days: DAYS[i],
 }));
@@ -117,6 +118,13 @@ export const Default: Story = {
     await expect(c.getByText('john@vdm.technology')).toBeVisible();
     await expect(c.getByText('7 days ago')).toBeVisible();
     await expect(c.getAllByText('BESA Content').length).toBeGreaterThan(0);
+    /* Sarah's six domains wrap onto several lines, and keep 16 above and below (the row grows to fit rather than the tags touching its edges). */
+    const cell = c.getByText('sarah@vdm.technology').closest('tr')!.querySelectorAll('td')[1] as HTMLElement;
+    const tags = [...cell.querySelectorAll('span')].filter((el) => el.className.includes('rounded-sm'));
+    const box = cell.getBoundingClientRect();
+    await expect(tags[tags.length - 1].getBoundingClientRect().top).toBeGreaterThan(tags[0].getBoundingClientRect().bottom - 1);
+    await expect(tags[0].getBoundingClientRect().top - box.top).toBeGreaterThanOrEqual(16);
+    await expect(box.bottom - tags[tags.length - 1].getBoundingClientRect().bottom).toBeGreaterThanOrEqual(16);
     /* Each button is named for its row. */
     await userEvent.click(c.getByRole('button', { name: 'Edit John' }));
     await expect(args.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 'john' }));
@@ -324,33 +332,6 @@ export const OnThePage: Story = {
     /* Add Account: a new, empty dialog. */
     await userEvent.click(c.getByRole('button', { name: 'Add Account' }));
     await expect(await screen.findByRole('dialog', { name: 'User' })).toBeVisible();
-  },
-};
-
-/** Domains that wrap onto several lines (a narrow column, or many domains): the tags keep 16 above and below, and the row grows to fit rather than hugging them. */
-export const ManyDomains: Story = {
-  render: () => {
-    const rows = [
-      { ...ACCOUNTS[0], domains: ['Design', 'BESA Content', 'Development', 'Governance', 'Partners', 'QA'] },
-      { ...ACCOUNTS[1], domains: ['Design'] },
-    ] as AccountRow[];
-    return (
-      <div className="w-176">
-        <AccountsTable rows={rows} search="" onSearchChange={() => {}} page={1} pageCount={1} />
-      </div>
-    );
-  },
-  play: async ({ canvasElement }) => {
-    const row = canvasElement.querySelector('tbody tr') as HTMLElement;
-    const cell = row.querySelectorAll('td')[1] as HTMLElement;
-    const tags = [...cell.querySelectorAll('span')].filter((el) => el.className.includes('rounded-sm'));
-    const first = tags[0].getBoundingClientRect();
-    const last = tags[tags.length - 1].getBoundingClientRect();
-    const box = cell.getBoundingClientRect();
-    /* The tags wrap (they are on more than one line) and keep their room above and below. */
-    await expect(last.top).toBeGreaterThan(first.bottom - 1);
-    await expect(first.top - box.top).toBeGreaterThanOrEqual(16);
-    await expect(box.bottom - last.bottom).toBeGreaterThanOrEqual(16);
   },
 };
 

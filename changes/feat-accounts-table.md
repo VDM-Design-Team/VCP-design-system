@@ -7,4 +7,4 @@ New pattern, built to Figma's `Accounts_Page_Content`: a search box, a sortable 
 
 Focus after a delete is the page's job and is documented (docs/accounts-table.md, docs/confirm-delete-modal.md): the `OnThePage` story moves it to the next row's Delete button, the previous one's for the last row, or the search box when the table is empty, and asserts it. The search placeholder and the empty hint say "domain" (the column the table has), and the story shows the Items select.
 
-The Domains cell keeps 16 above and below its tags, so when they wrap onto several lines (a narrow column, many domains) the row grows to fit instead of the tags touching the row's edges; the `ManyDomains` story holds it.
+The Domains cell keeps 16 above and below its tags, so when they wrap onto several lines (a narrow column, many domains) the row grows to fit instead of the tags touching the row's edges; the `Default` story holds it (Sarah is in six domains).
