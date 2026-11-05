@@ -1,6 +1,6 @@
 # VCP Design System — Build & Maintain Playbook
 
-Last updated 4 November 2026. This file is the canonical copy; a shareable Claude Doc mirrors it, and if the two differ, this file wins.
+Last updated 5 November 2026. This file is the canonical copy; a shareable Claude Doc mirrors it, and if the two differ, this file wins.
 
 ## How to use this playbook
 
@@ -77,7 +77,7 @@ VCP-design-system/
 │  ├─ lib/                    cn.ts, shared logic, story-* helpers (helpers not shipped)
 │  └─ index.ts                the package's single export barrel
 ├─ docs/
-│  ├─ <name>.md               one usage page per piece (108 today: every piece has one)
+│  ├─ <name>.md               one usage page per piece (109 today: every piece has one)
 │  └─ color-tokens.md, type-tokens.md, workflow.md, handoff.md, inventory.md, playbook.md
 ├─ changes/<branch>.md        one changelog fragment per PR
 ├─ CHANGELOG.md               written only by `npm run changelog`
@@ -102,8 +102,8 @@ Tokens are DTCG JSON in two layers, built by Style Dictionary into a Tailwind v4
 | Layer | File | Holds | Example | Rule |
 | --- | --- | --- | --- | --- |
 | Core, shared | GDL package | Colour families (`slate`, `blue`, `red`…), spacing, fonts, elevation, the type ramp `type.*` | `color.red.600` | Change it in GDL, then bump the exact pin |
-| Core, VCP's own | `tokens/core/*.json` | Only what is VCP's: the `vcp-blue` ramp, the navy logo mark, the UI face | `color.vcp-blue.500` = `#1a56db` | The only place a hex may appear |
-| Semantic | `tokens/semantic/color.json`, `shape.json`, `border.json` | Intent | `action.primary.surface.hover` → `{color.vcp-blue.600}` | References core tokens only, never a raw value |
+| Core, VCP's own | `tokens/core/*.json` | Only what is VCP's: the `vcp-blue` ramp, the navy logo mark, the UI face | `color.vcp-blue.500` = `#1a56db` | The only place a colour hex may appear |
+| Semantic | `tokens/semantic/color.json`, `shape.json`, `border.json` | Intent | `action.primary.surface.hover` → `{color.vcp-blue.600}` | Colours reference core tokens only. `shape.json` and `border.json` still hold their raw radii, widths and shadow values, a known gap with `CLAUDE.md` rule 2 |
 | Dark | `tokens/semantic/color.dark.json` | The same names, pointing at other core values | built to `dist/tokens.dark.css` as `.dark` overrides | Components never branch on theme |
 
 ### Naming
@@ -143,15 +143,15 @@ Which token to reach for is a separate question, answered in `docs/color-tokens.
 - Radius and shadow: `rounded-sm`, `rounded-md`, `shadow-card`, `shadow-menu`.
 - `src/lib/cn.ts` declares the type ramp to tailwind-merge. Without it, tailwind-merge files `text-label-sm-medium` as a colour and silently drops it next to `text-text-primary`. `lint:tokens` fails if that list drifts from GDL's ramp.
 
-The first token set was seeded from Figma's variables export by `scripts/import-figma-tokens.mjs` (re-runnable, overwrites `tokens/`). After that, the repo leads and Figma variables are updated to match within the same week.
+The first token set was seeded from Figma's variables export by `scripts/import-figma-tokens.mjs` (it overwrites `tokens/core` and `tokens/semantic`, so re-running it now would undo the move of the shared scales to GDL: don't). After that, the repo leads and Figma variables are updated to match within the same week.
 
 ## The four tiers
 
-The system is atomic-design shaped, and a piece's tier is decided by **what it composes, not by its vocabulary**: domain words such as statuses or roles may appear at any tier. Today: 30 atoms, 56 components, 21 patterns, 1 template.
+The system is atomic-design shaped, and a piece's tier is decided by **what it composes, not by its vocabulary**: domain words such as statuses or roles may appear at any tier. Today: 30 atoms, 57 components, 21 patterns, 1 template.
 
 | Tier | Folder | Test | VCP examples | May import |
 | --- | --- | --- | --- | --- |
-| Atom | `src/atoms/` | One self-contained element a designer names as one thing. May use `Icon` as decoration, nothing else from the system | `Button`, `Input`, `Badge`, `Avatar`, `Toggle`, `Tooltip`, `Logo` | `lib/` only |
+| Atom | `src/atoms/` | One self-contained element a designer names as one thing. May use `Icon` as decoration, nothing else from the system | `Button`, `Input`, `Badge`, `Avatar`, `Toggle`, `Tooltip`, `Logo` | `lib/` and `Icon` |
 | Component | `src/components/` | One control or display unit assembled from atoms (and other components), however rich inside | `Field`, `SearchSelect`, `Menu`, `Modal`, `DataTable`, `DatePicker`, `StatusTag` | Atoms, components |
 | Pattern | `src/patterns/` | Two or more pieces composed into a distinct page section (an organism) | `TopBar`, `Sidebar`, `PlanningTable`, `CommentSection`, `ChangePasswordForm`, the AV modals | Atoms, components, patterns |
 | Template | `src/templates/` | A page-level layout that arranges patterns into a whole screen | `AppShell` | Everything below |
@@ -184,7 +184,7 @@ Every piece, at every tier, is three files that ship together: the component, it
 - A prop exists only when a real call site needs it. Storybook-only switches live in the story's args, not the component.
 - Behaviour contracts are explicit. For example, an editable control times nothing and reverts nothing: the parent owns saving (`src/lib/saving.ts`).
 - Motion that starts by itself stops within 5 s and respects `motion-reduce`.
-- Export it from the folder's `index.ts` and add `export * from './<tier>/<name>'` to `src/index.ts`.
+- Export it from the folder's `index.ts`. An atom or component then gets `export * from './<tier>/<name>'` in `src/index.ts`; a pattern or template goes in `src/patterns/index.ts` or `src/templates/index.ts`, which `src/index.ts` already re-exports.
 
 ```tsx
 const button = cva(
@@ -223,7 +223,7 @@ Button.displayName = 'Button';
 
 - The meta sets `title` (by tier), `component`, `parameters.docs.description.component` (one paragraph on when to use each variant), default `args`, and `argTypes` controls: `select` for `variant`, `radio` for `size`; booleans get a toggle automatically. Write it as `const meta = {…} satisfies Meta<typeof Button>`.
 - One story per variant, then `Sizes` and `States` (default, hover where testable, focus, disabled, loading, error, empty).
-- Behaviour stories are named as claims and carry a `play` function that asserts with `expect` from `storybook/test`: `FilledTextContrast`, `FloatsOutOfAScrollingPanel`, `StaysOnScreen`, `EmptyPartsRenderNothing`. A fix lands with a story that fails without it.
+- Behaviour stories are named as claims and carry a `play` function that asserts with `expect` from `storybook/test`: `FilledTextContrast`, `EmptyPartsRenderNothing`. A fix lands with a story that fails without it.
 - A JSDoc comment above a story becomes its description on the Docs page.
 - **Playground pattern** for story-only switches: a `PlaygroundArgs` type adds booleans such as `withAction`, hidden from the props table with `table: { disable: true }` and translated into real props inside `render`.
 - Stateful demos write back with `useArgs` from `storybook/preview-api`; save flows use `useFakeSave` from `src/lib/story-saving.ts`.
@@ -313,7 +313,7 @@ Every rule an agent could forget is a script that fails the build. `npm test` ru
 
 | Command | Script | Fails when |
 | --- | --- | --- |
-| `lint:tokens` | `scripts/lint-hardcoded-values.mjs` | A hex, raw `px` or arbitrary Tailwind class in a component, or the type ramp in `cn.ts` drifts from GDL. Comments are blanked first, so `#212` in a comment passes; `ds-lint-ignore` marks a deliberate exception |
+| `lint:tokens` | `scripts/lint-hardcoded-values.mjs` | A hex, raw `px` or arbitrary Tailwind class in a component, or the type ramp in `cn.ts` drifts from GDL. Rules run on the raw line; only a digits-only `#212` (an issue number) passes inside a comment, so `24px` in a doc comment still fails. `ds-lint-ignore` marks a deliberate exception |
 | `lint:composition` | `scripts/lint-composition.mjs` | “Composed of” doesn't match the real imports, an import points up a tier, or a pattern composes fewer than two pieces |
 | `lint:stories` | `scripts/lint-stories.mjs` | A story uses `decorators: []` |
 | `lint:changes` | `scripts/lint-changes.mjs` | `src/` or `tokens/` changed without a `changes/` file, `CHANGELOG.md` edited directly, or a fragment is malformed |
@@ -357,7 +357,7 @@ What changed, in product terms, and why. Name the stories that prove it:
 
 ### Releasing
 
-1. On a release branch: `npm run changelog -- --dry-run`, then `npm run changelog`. It writes the fragments into `CHANGELOG.md` newest first, deletes them, picks the next version from the highest `bump` and sets it in `package.json`. Merge that as the release PR (0.1.0 was #246, 3 Nov 2026).
+1. On a release branch: `npm run changelog -- --dry-run`, then `npm run changelog`. It writes the fragments into `CHANGELOG.md` newest first, deletes them, picks the next version from the highest `bump` and sets it in `package.json` (unless the top section is already `## <version> — unreleased`: then the entries go there and the version stays). Merge that as the release PR (0.1.0 was #246, 3 Nov 2026).
 2. From a clean, freshly pulled `main`: `npm run build` (tokens → `tsup` → `tsc -p tsconfig.build.json` for types).
 3. `npm publish` with a token that has `write:packages`. A read-only token fails with E403. Publishing is a person's decision and is done by hand; there is no publish workflow yet.
 
@@ -371,7 +371,7 @@ What changed, in product terms, and why. Name the stories that prove it:
 | `./tokens` | `dist/tokens.js` | Token values for server code, no client directive |
 | `./tokens.json` | `dist/tokens.flat.json` | Flat token map |
 
-`files` ships `dist`, `src`, `tokens` and `docs`, and leaves out stories, `src/lib/story-*.ts` and the team-process docs (`workflow`, `handoff`, `inventory`, Figma audits). React 18+ and Tailwind 4+ are peer dependencies; `class-variance-authority`, `clsx` and `tailwind-merge` are the only runtime dependencies. GDL is a dev dependency, pinned exactly.
+`files` ships `dist`, `src`, `tokens` and `docs`, and leaves out stories, `src/lib/story-*.ts` and the team-process docs (`workflow`, `handoff`, `inventory`, `playbook`, Figma audits). React and React DOM 18+ and Tailwind 4+ are peer dependencies; `class-variance-authority`, `clsx` and `tailwind-merge` are the only runtime dependencies. GDL is a dev dependency, pinned exactly.
 
 **Installing.** The package is private on GitHub Packages. A consumer needs repo access, a `.npmrc` line `@vdm-design-team:registry=https://npm.pkg.github.com`, and a one-time `npm login --scope=@vdm-design-team --auth-type=legacy --registry=https://npm.pkg.github.com` with a classic token that has `read:packages`. In CI, `GITHUB_TOKEN` with `packages: read` works once the package grants that repo Actions access (package settings → Manage Actions access).
 
@@ -381,14 +381,14 @@ Every change, from anyone in any role, travels the same road: short-lived branch
 
 ### The road, as an agent runs it
 
-1. Start from a freshly pulled `origin/main` (`/latest` or `npm run latest` does it and refuses over uncommitted work).
+1. Start from a freshly pulled `origin/main`: `git switch main && git pull --ff-only && npm install && npm run tokens`, then branch. (`npm run latest` does the same for a person but also switches to `main` and starts Storybook, which never exits: an agent runs it only in the background, and never from a branch with work on it.)
 2. Branch for the change, never the person: `feat/avatar-status`, `fix/select-disabled-state`, `tokens/spacing-scale`, `docs/tooltip-usage`. Live 2–3 working days at most.
 3. Touch only the files the task needs. No drive-by renames, reformatting or moves without approval.
 4. Push early and open a **draft PR** as soon as the structure exists, so overlapping work is found while it is cheap. Token or foundation work opens its draft first and builds second.
 5. Before each commit, list the changed files and check they match the task.
 6. When done: `npm test` green, stories and docs complete, `changes/` entry added, then fill the PR template and mark it ready.
 7. Bring `main` in with **merge, never rebase**. Never force-push. On a conflict, explain both sides before choosing. In `src/index.ts`, the usual hotspot, keep both.
-8. Approved PRs merge the same day with a merge commit; the branch is deleted.
+8. Approved PRs merge the same day; the branch is deleted. `main` accepts a merge commit or a squash (a branch that brought `main` in by merge is usually squashed).
 9. Report: files changed and why, checks run and their results, possible breaking changes, and the PR description.
 
 ### The PR template
@@ -493,7 +493,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm, registry-url: https://npm.pkg.github.com, scope: "@vdm-design-team" }
       - run: npm ci
-        env: { NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run lint
       - run: npm run build            # writes out/
       - id: deploy
@@ -535,7 +536,7 @@ Each recipe starts the same way, from a freshly pulled `main` on a new branch na
 2. Is the raw value shared across brands? Then it is a GDL PR first, and VCP takes an exact-pinned bump. Is it VCP-only? Add it to `tokens/core/`.
 3. Add the semantic name to `tokens/semantic/color.json` **and** `color.dark.json`, referencing core tokens only. Follow the Figma variable name exactly.
 4. `npm run tokens`, then `npm run check:contract` and `npm run check:field-contrast`.
-5. Check it in `Foundations/Tokens` and the static gallery (`npm run gallery`) in both themes.
+5. Check it in `Foundations/Tokens` in both themes. (`npm run gallery` rewrites the tracked `gallery/index.html`; commit that only when the task is the gallery.)
 6. `bump: minor` (or `major` with `Migration:` for a rename or removal). The lead approves token PRs. Update the Figma variables the same week.
 
 ### Add a piece (atom, component, pattern or template)
@@ -545,7 +546,7 @@ Each recipe starts the same way, from a freshly pulled `main` on a new branch na
 3. Build it with `cva` and token utilities only, the standard prop names, `forwardRef`, native props spread. Any missing value goes back to the token recipe first.
 4. Stories: meta with tier title, description and controls; one story per variant; `Sizes`; `States`; a `play` story for each behaviour, keyboard path and focus move.
 5. `docs/<kebab-name>.md` with Composed of (above atoms), When to use, Props, Tokens, Accessibility, Don't.
-6. Export it from the folder `index.ts` and `src/index.ts`; add it to `docs/inventory.md`.
+6. Export it from the folder `index.ts`, then from `src/index.ts` (atom, component) or `src/patterns/index.ts` / `src/templates/index.ts`; add it to `docs/inventory.md`.
 7. Run `npm run dev` and check it in light, dark and at mobile width; then `npm test`.
 8. `bump: minor`. A new component or pattern is a big change, so the lead approves.
 
@@ -583,7 +584,7 @@ Each of these cost the team real time once. Most now have a check or a helper; t
 | Dialogs on the Docs page | All stories share one document, so several open dialogs stack and trap focus against each other | `OVERLAY_DOCS_STORY` gives each its own iframe |
 | Theme class on a wrapper | Portalled overlays (Modal, Toast) escape the wrapper and stay light | `.dark` goes on `<html>`, in Storybook and in apps |
 | Reusing a token for a new job | The banner's warning outline (yellow-500, 1.91:1) was too faint as a field edge | `check:field-contrast`; choose tokens by role |
-| Floating panels in scroll or overflow containers | Menu clipped inside `DataTable`, Tooltip off-screen at the top edge | Popover defaults to `strategy="fixed"`, Tooltip flips and slides, SearchSelect flips (PR #278) |
+| Floating panels in scroll or overflow containers | Menu clipped inside `DataTable`, Tooltip off-screen at the top edge | Panels float with `position: fixed` and flip to the side with room: pass Popover's `strategy="fixed"`, which PR #278 makes the default, with Tooltip and SearchSelect flipping too |
 | Props that mirror HTML attributes | `UserLabel`'s `role` shadowed ARIA `role` | Never reuse an attribute name: it became `description` |
 | Storybook-only props | A prop added only to toggle a demo pollutes the API | `PlaygroundArgs` in the story |
 | Long-lived branches | One sat 28 commits ahead of `main` with no PR; untangling cost more than the work | 2–3 days, draft PR early, one concern per PR |
