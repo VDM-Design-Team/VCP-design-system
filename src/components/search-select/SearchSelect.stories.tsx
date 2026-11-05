@@ -481,7 +481,7 @@ export const ShortLabelInField: Story = {
   render: (args) => <Controlled {...args} aria-label="Cycle" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const field = canvas.getByRole('button', { name: 'Cycle' });
+    const field = canvas.getByRole('button', { name: /^Cycle/ });
     await userEvent.click(field);
     /* The row says everything, and search matches the dates, not just the code. */
     fireEvent.change(canvas.getByRole('combobox', { name: 'Search cycles' }), { target: { value: 'Jun 09' } });
@@ -579,6 +579,40 @@ export const StatusWithApply: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Apply' }));
     await expect(args.onChange).toHaveBeenLastCalledWith([]);
     await expect(field).toHaveTextContent('Select status');
+  },
+};
+
+/**
+ * `inline`: the button is plain text with a caret, for a picker that lives inside another
+ * control's bar (the Gantt chart's period bar). Only the button changes; the panel is the same.
+ */
+export const Inline: Story = {
+  render: () => {
+    const [value, setValue] = React.useState('c44');
+    return (
+      <div className="flex w-96 items-center justify-center rounded-sm border border-stroke-brand-medium bg-surface-brand-faint">
+        <SearchSelect
+          inline
+          aria-label="Cycle"
+          searchPlaceholder="Search cycles"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: 'c43', label: 'Cycle 43 (Oct 13, 2026 - Oct 26, 2026)', shortLabel: 'Cycle 43' },
+            { value: 'c44', label: 'Cycle 44 (Oct 27, 2026 - Nov 09, 2026)', shortLabel: 'Cycle 44' },
+            { value: 'c45', label: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)', shortLabel: 'Cycle 45' },
+          ]}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: /^Cycle/ });
+    await expect(button).toHaveTextContent('Cycle 44');
+    await userEvent.click(button);
+    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)' }));
+    await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Cycle 45');
   },
 };
 
@@ -1054,4 +1088,35 @@ export const Warning: Story = {
     warning: 'This person is busy during the selected dates, but can still be assigned.',
   },
   decorators: [(Story) => <div className="h-40 w-72"><Story /></div>],
+};
+
+/**
+ * **Flow:** a field at the foot of the screen. With no room below, the list opens above the field, and
+ * all of it shows. (It always opened below, off the screen, until November 2026.)
+ */
+export const OpensAboveNearTheBottom: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  args: { options: PEOPLE.slice(0, 4), searchable: false },
+  render: (args) => (
+    <div className="fixed inset-x-0 bottom-0 p-2">
+      <Controlled {...args} aria-label="Reviewer" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('combobox', { name: 'Reviewer' });
+    await userEvent.click(trigger);
+    const list = await canvas.findByRole('listbox');
+    const panel = list.closest('[data-side]') as HTMLElement;
+    await expect(panel).toHaveAttribute('data-side', 'top');
+    const box = panel.getBoundingClientRect();
+    await expect(box.top).toBeGreaterThanOrEqual(0);
+    await expect(box.bottom).toBeLessThanOrEqual(trigger.getBoundingClientRect().top);
+    /* Each row is what the pointer finds at its own centre. */
+    for (const option of within(list).getAllByRole('option')) {
+      const r = option.getBoundingClientRect();
+      await expect(option.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2))).toBe(true);
+    }
+  },
 };

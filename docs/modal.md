@@ -12,9 +12,23 @@ keyboard until it is dismissed. Reach for it last, not first.
 
 | Piece | Tier |
 |---|---|
+| `Button` | atom |
 | `IconButton` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
+
+## The critical tone
+
+A dialog whose answer destroys something takes `tone="critical"`. Its buttons are the system's
+critical pair — a **neutral** (grey outline) Cancel and a **danger** (red) answer — rather than
+the default `secondary` (blue outline) + `primary`. Two reasons for neutral: an outlined *brand*
+button beside a red one is two competing colours and reads as a second call to action, and
+Cancel is the way out, so it should be the quietest button. (Design note, Nov 2026: Figma's
+delete-domain modal draws a plain dark-text Cancel; we use the system's neutral outline.)
+
+`critical` also defaults the dialog to `role="alertdialog"`, with no ✕ and no backdrop click,
+so a stray click cannot answer it. Existing destructive dialogs that hand-build a `footer`
+(`ConfirmDeleteAVModal`, the reject dialogs) can move to `actions` when next touched.
 
 ## When to use
 
@@ -50,9 +64,11 @@ Rules of thumb:
 | `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. One of the three naming props |
 | `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
 | `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
-| `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby`. Left out, `false` or blank, nothing renders for it |
+| `description` | `ReactNode` | — | Caption under the title (`caption-md-medium`, 500), wired to `aria-describedby`. **With a caption the header has 16 below it** (8 without), so content never sits close against it. Left out, `false` or blank, nothing renders for it |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s. Left out, `false` or blank, no footer renders |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
+| `actions` | `{ cancelLabel?, confirm: { label, onClick?, type?, form?, loading?, disabled? } }` | — | The standard action row: Cancel (calls `onClose`) and the one answer. `secondary` + `primary`, or `neutral` + `danger` in the critical tone. Ignored when `footer` is set |
+| `tone` | `default \| critical` | `default` | `critical`: the answer destroys something. Swaps `actions` to grey Cancel + red answer, and defaults `role="alertdialog"`, `showClose={false}`, `dismissible={false}` (each overridable) |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |
 | `showClose` | `boolean` | `true` | The icon-only close button in the header |
@@ -419,7 +435,7 @@ stories are where the behaviour lives.
 | `borderRadius: 12` | `rounded-md` (8) | The radius scale stops at `md`. Reported, not invented |
 | `zIndex: 100` | `z-50` | There is no z-index token; `z-50` is Tailwind's top default layer |
 | `font: '600 18px/1.3'` on the title | `text-title-md-semibold` | Type ramp only. 18 is not a step; `title-md-semibold` is 20/28 semibold |
-| `font: '400 13px/1.5'` on the description | `text-caption-md-regular` | Same. `caption-md-regular` is 12/16 regular |
+| `font: '400 13px/1.5'` on the description | `text-caption-md-medium` | Same. The caption is `caption-md-medium` (12/16, weight 500) |
 | `borderTop: 1px solid stroke.subtle` on the footer | Dropped entirely | The dialog is one sheet; whitespace separates the actions (11 Sep 2026) |
 | `gap: 10` in the footer | `gap-3` (12) | 10 is not on the scale |
 | Hand-rolled 32px close `<button>` | The real `IconButton`, `md` | 40 is the system's minimum target, and `IconButton` makes the name mandatory |

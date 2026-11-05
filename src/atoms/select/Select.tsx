@@ -158,7 +158,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     ref,
   ) => {
     const errorId = React.useId();
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || props['aria-invalid'] === true || props['aria-invalid'] === 'true';
     /* Keep a describedby a `Field` already set, and add the error's. */
     const describedBy =
       [props['aria-describedby'], error ? errorId : undefined].filter(Boolean).join(' ') || undefined;

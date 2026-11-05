@@ -63,6 +63,8 @@ export interface DateFieldProps {
   id?: string;
   'aria-describedby'?: string;
   invalid?: boolean;
+  /** From a `Field` with an error: the field is invalid, as `invalid` says. */
+  'aria-invalid'?: boolean | 'true' | 'false';
   disabled?: boolean;
   /** `min`, `max`, `today` and the rest go to the `DatePicker`. */
   picker?: Omit<DatePickerProps, 'value' | 'onChange' | 'mode' | 'clearable' | 'onClear' | 'clearLabel'>;
@@ -79,7 +81,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       estimated,
       placeholder = '-',
       id,
-      invalid,
+      invalid: invalidProp,
+      'aria-invalid': ariaInvalid,
       disabled,
       picker,
       className,
@@ -89,6 +92,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    const invalid = invalidProp || ariaInvalid === true || ariaInvalid === 'true';
     return (
       <Popover
         open={open}
@@ -124,6 +128,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             mode={mode}
             /* An empty string is no date, as `undefined` is: the calendar opens on today's month either way. */
             value={value || undefined}
+            /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
+            clearable={false}
             onChange={(iso) => {
               onChange?.(iso);
               setOpen(false);

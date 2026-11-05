@@ -97,6 +97,14 @@ const iconButton = cva(
           'active:bg-neutral-tonal-surface-pressed active:text-neutral-tonal-content-pressed',
           'disabled:bg-neutral-tonal-surface-disabled disabled:text-neutral-tonal-content-disabled',
         ],
+        /* accent.critical.outline — textual, like `tertiary` but red: only the
+           glyph colour changes, never a fill. The quiet destructive control (a
+           row's bin). `danger` is the loud filled one. */
+        critical: [
+          'bg-transparent text-accent-critical-outline-content-default',
+          'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
+          'disabled:text-accent-critical-outline-content-disabled',
+        ],
         /* accent.critical.filled — destructive */
         danger: [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
