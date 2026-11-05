@@ -51,7 +51,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Accessibility
 
 - The dialog is named by the heading in its body (`aria-labelledby`) and described by the consequence, so the announced name is the visible question.
-- Focus moves in on open and returns to what opened it; Escape closes.
+- Focus moves in on open and returns to what opened it; Escape closes. **If the item is deleted, what opened it is gone**, so focus falls to the page: the caller moves it on purpose after the delete — to the next item's delete control (or the previous one's when it was the last), or to the list's search or heading when nothing is left. See "Focus after a delete" in `docs/accounts-table.md`; every caller that removes the item has this job.
 - The name field is a real, labelled, read-only input: it is read out and can be copied.
 
 ## Don't

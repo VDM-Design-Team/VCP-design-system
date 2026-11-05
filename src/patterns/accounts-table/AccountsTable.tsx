@@ -75,7 +75,7 @@ export function AccountsTable({
   rows,
   search,
   onSearchChange,
-  searchPlaceholder = 'Search by name, email, or role...',
+  searchPlaceholder = 'Search by name, email, or domain...',
   sort,
   onSortChange,
   onEdit,
@@ -196,7 +196,7 @@ export function AccountsTable({
             <EmptyState
               icon={<Icon name="magnifying-glass" size="lg" />}
               title={`No accounts match “${search.trim()}”.`}
-              description="Try a different name, email or role."
+              description="Try a different name, email or domain."
             />
           ) : (
             <EmptyState icon={<Icon name="users" size="lg" />} title="No accounts yet." />
