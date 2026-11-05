@@ -22,7 +22,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `RemoveButton`, `tonal` | Removing a card or a file: `DescriptionCard` and `FileAttachment` |
-| `RemoveButton`, `plain` | A bare ✕ on a plain surface, where the disc is too much |
+| `RemoveButton`, `plain` | A bare ✕ on a plain surface (`surface.base`, `elevated`, `canvas`), where the disc is too much |
 | `IconButton` `danger` | A destructive action that is not "take this item out of the list": delete a record, discard a draft |
 | `Tag`'s `onRemove` | A value picked into a field, inside the tag |
 
@@ -65,8 +65,13 @@ attachment's is a ✕ on a filled disc, which is the system's other ✕ controls
 a proposal for design to review rather than two conflicting styles. If design keeps the ring, only
 `DescriptionCard` changes; `plain` stays for a bare ✕ on a plain surface.
 
+## On a filled brand surface: `tonal` only
+
+The red ✕ is about **1.3:1** against the brand blue, far under the 3:1 WCAG 1.4.11 asks of a graphic, so **`plain` is not offered on a filled brand surface** (`surface.brand.strong` and the like). Use `tonal` there: the ✕ sits on its own disc and holds 3:1 against it (3.91 light, 3.47 dark). `ContrastHolds` measures that surface in both themes: the tonal ✕ passes and the bare one is asserted not to, so the rule cannot be forgotten.
+
 ## Don't
 
 - **Don't use it for a destructive action on a record.** That is `IconButton` `danger`, or a `Button`.
 - **Don't put your own reveal logic in the atom.** The item decides when it shows.
+- **Don't use `plain` on a filled brand surface.** Red on brand blue is about 1.3:1; use `tonal`.
 - **Don't draw a red ✕ yourself.** Use this, so every remove looks and behaves the same.
