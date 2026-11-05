@@ -50,6 +50,7 @@ does not ship one yet — until it does, put the content on the page.
 | `content` | `ReactNode` | — | **Required.** The description. Text, or light markup for emphasis and line breaks. **Never interactive** |
 | `children` | `ReactElement` | — | **Required.** Exactly one element, and it must be focusable. It is cloned to receive `aria-describedby` |
 | `placement` | `top \| bottom \| left \| right` | `top` | The side you prefer. It takes the opposite side when this one has no room on screen, and slides along the edge to stay on screen — see below |
+| `followPointer` | `boolean` | `false` | Opens under the pointer (horizontally) instead of at the trigger's middle, kept inside the viewport, on the `top` or `bottom` side (flipping to the other one when there is no room). For a trigger much wider than the bubble — a chart bar. It holds still once open so the pointer can reach it; keyboard focus still opens it at the trigger's middle |
 | `wide` | `boolean` | `false` | The bubble runs to 384 instead of 256 — for a tooltip that is a short list (each line a row), like the Type column's. Longer text still wraps |
 | `openDelay` | `number` (ms) | `300` | Hover only. **Focus is always immediate** |
 | `defaultOpen` | `boolean` | `false` | Renders it already open. For Storybook, screenshots and visual regression — not a way to pin one open in product |

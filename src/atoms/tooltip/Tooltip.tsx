@@ -38,6 +38,12 @@ import { cn } from '../../lib/cn';
  * on the side asked for until November 2026, so at the top of the screen it was
  * drawn off it.) See `docs/tooltip.md`.
  *
+ * `followPointer` is for a trigger much wider than the bubble — a bar across a
+ * chart. The bubble keeps its `top`/`bottom` side but takes its horizontal
+ * position from where the pointer entered, clamped to the viewport, so it opens
+ * under the cursor and never off the screen. It stays put once it is open, so the
+ * pointer can still travel onto it.
+ *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -145,6 +151,12 @@ export interface TooltipProps
    */
   children: React.ReactElement;
   /**
+   * Open under the pointer (horizontally) instead of at the middle of the trigger,
+   * kept inside the viewport. For a trigger far wider than the bubble. Only for
+   * `top` and `bottom`; keyboard focus still opens it at the trigger's middle.
+   */
+  followPointer?: boolean;
+  /**
    * Let the bubble run to 384 instead of 256 — for a tooltip that is a short list (each line on its own
    * row) rather than a sentence. Text is still wrapped past that.
    */
@@ -181,10 +193,12 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       openDelay = DEFAULT_OPEN_DELAY,
       defaultOpen = false,
       tooltipId,
+      followPointer = false,
       describe = true,
       disabled = false,
       className,
       onMouseEnter,
+      onMouseMove,
       onMouseLeave,
       onFocus,
       onBlur,
@@ -197,6 +211,9 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const id = tooltipId ?? `tooltip-${generatedId}`;
 
     const wrapperRef = React.useRef<HTMLSpanElement | null>(null);
+    const positionerRef = React.useRef<HTMLSpanElement | null>(null);
+    /* With `followPointer`: where the pointer entered, in viewport coordinates. */
+    const pointerX = React.useRef<number | null>(null);
 
     /* Where the bubble is drawn: the nearest `.dark` ancestor, else the page. Nothing
        is drawn on the server, which has no `document`. */
@@ -204,8 +221,6 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     React.useLayoutEffect(() => {
       setHost((wrapperRef.current?.closest('.dark') as HTMLElement | null) ?? document.body);
     }, []);
-
-    const positionerRef = React.useRef<HTMLSpanElement | null>(null);
 
     /* Where the bubble goes: the side it took, and its top-left corner on screen. Centred on the
        trigger's near edge, unless that would cut it off. */
@@ -230,7 +245,12 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       const side: Placement = room[placement] >= need || room[placement] >= room[other] ? placement : other;
       /* Slide along the edge, but never past the far one: a bubble wider than the screen keeps its start. */
       const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
-      const centreX = rect.left + rect.width / 2;
+      /* `followPointer`: a top or bottom bubble centres on where the pointer entered, not on the
+         trigger's middle; the clamp below still keeps the whole bubble on screen. */
+      const centreX =
+        followPointer && pointerX.current !== null && (side === 'top' || side === 'bottom')
+          ? pointerX.current
+          : rect.left + rect.width / 2;
       const centreY = rect.top + rect.height / 2;
       const next =
         side === 'top' || side === 'bottom'
@@ -247,7 +267,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       setAnchor((prev) =>
         prev && prev.side === next.side && prev.top === next.top && prev.left === next.left ? prev : next,
       );
-    }, [placement]);
+    }, [placement, followPointer]);
 
     const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -309,8 +329,18 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       return () => document.removeEventListener('keydown', onKeyDown, true);
     }, [open, close]);
 
+    /* Note where the pointer is while the bubble is closed; once open it holds still, so
+       the pointer can reach it. (The bubble is in a portal, but React still passes its
+       mouse events up to this wrapper, hence the check.) */
+    const track = (event: React.MouseEvent<HTMLSpanElement>) => {
+      if (!followPointer || open) return;
+      if (positionerRef.current?.contains(event.target as Node)) return;
+      pointerX.current = event.clientX;
+    };
+
     const handleMouseEnter = (event: React.MouseEvent<HTMLSpanElement>) => {
       onMouseEnter?.(event);
+      track(event);
       clearTimer();
       if (disabled) return;
       if (openDelay <= 0) {
@@ -318,6 +348,11 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         return;
       }
       timer.current = setTimeout(() => setOpen(true), openDelay);
+    };
+
+    const handleMouseMove = (event: React.MouseEvent<HTMLSpanElement>) => {
+      onMouseMove?.(event);
+      track(event);
     };
 
     const handleMouseLeave = (event: React.MouseEvent<HTMLSpanElement>) => {
@@ -343,7 +378,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       } catch {
         keyboardish = true;
       }
-      if (keyboardish) setOpen(true);
+      if (keyboardish) {
+        pointerX.current = null;
+        setOpen(true);
+      }
     };
 
     const handleBlur = (event: React.FocusEvent<HTMLSpanElement>) => {
@@ -369,6 +407,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         }}
         className={cn('relative inline-flex', className)}
         onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         /* React's onFocus/onBlur are focusin/focusout — they bubble from the
            trigger, so the handlers can live on the wrapper. */

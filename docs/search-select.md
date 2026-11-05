@@ -150,6 +150,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |
 | `onSearch` | `(query: string) => void` | — | Search is on your server: called with the text on every change (and `''` when the panel opens), and the component stops filtering `options` itself, so you pass what matches. Debounce on your side and pair it with `loading` while the request runs. A pick keeps its name after it drops out of `options`: the field remembers every option it has been given. For a value set before any search (a saved form), include its option in the first `options` |
 | `loadingText` | `string` | `Loading…` | What the panel says while `loading` |
+| `inline` | `boolean` | — | Draws the button as plain text in a bar instead of a bordered field: no border or fill, the value semibold with a brand caret, a tint on hover. The panel is unchanged. For a picker inside another control's toolbar (the Gantt chart's period bar); the field hugs its value and centres in the width you give the control, and the panel opens from that width's left edge |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
 
