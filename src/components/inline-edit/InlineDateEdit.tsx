@@ -70,6 +70,7 @@ export const InlineDateEdit = React.forwardRef<HTMLDivElement, InlineDateEditPro
             open={open}
             onOpenChange={setOpen}
             width="auto"
+            strategy="fixed"
             align={align}
             panelClassName="p-0"
             autoFocus={byKeyboard}

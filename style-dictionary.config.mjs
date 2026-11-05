@@ -23,8 +23,31 @@ import { registerGdlFormats, gdlPlatforms, gdlIncludes } from '@vdm-design-team/
 
 registerGdlFormats(StyleDictionary);
 
+/* theme.css is the stylesheet an app imports, and the app already runs its
+ * own Tailwind v4 (`@import "tailwindcss"` first, then this file). GDL's
+ * format writes `@import "tailwindcss"` at the top, which would load
+ * Tailwind a second time, so VCP's theme swaps that line for an `@source`
+ * on the component bundle beside it: the app's Tailwind then generates the
+ * components' classes without an @source of its own. Storybook and the
+ * preview import Tailwind themselves, the same way an app does. */
+const gdlTheme = StyleDictionary.hooks.formats['gdl/tailwind-theme'];
+StyleDictionary.registerFormat({
+  name: 'vcp/tailwind-theme',
+  format: async (args) => {
+    const css = await gdlTheme(args);
+    const themed = css.replace('@import "tailwindcss";\n', '@source "./index.js";\n');
+    if (themed === css) throw new Error('vcp/tailwind-theme: GDL\'s theme no longer starts with @import "tailwindcss" — update this wrapper.');
+    return themed;
+  },
+});
+
+const platforms = gdlPlatforms();
+platforms.tailwind.files = platforms.tailwind.files.map((f) =>
+  f.destination === 'theme.css' ? { ...f, format: 'vcp/tailwind-theme' } : f,
+);
+
 export default {
   include: gdlIncludes(),        // GDL tokens; VCP's win on a collision (font.family.sans)
   source: ['tokens/**/*.json'],
-  platforms: gdlPlatforms(),
+  platforms,
 };

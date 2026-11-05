@@ -44,10 +44,13 @@ a pattern to write.
 The ProgressBar set, stroke-flavoured: track `surface.track`, fills
 `surface.brand.strong` and the `accent.{success,warning,critical}.filled`
 surfaces. Centre numeral in the numeric face (`font.family.numeric`,
-semibold), scaled with the ring — geometry, not the type ramp; caption
+semibold), scaled with the ring — geometry, not the type ramp. **`segmented` is the exception**: its numeral is
+`heading-xl-bold` (32, Poppins) in `text.primary`, the same as a `StatCard` value, so the gauge reads with the
+figures beside it (it was the ring-scaled 40 semibold in Inter). Caption
 `label-sm` `text.tertiary`. No new tokens. Fill-vs-track contrast is measured
-per tone in docs/progress-bar.md (floor 3.84:1, dark critical) and applies
-unchanged.
+per tone in docs/progress-bar.md and applies unchanged: in dark, `critical`,
+`info` and `pending` sit under 3:1 against the track and keep 3.84:1 against
+the card around the ring.
 
 ## Accessibility
 

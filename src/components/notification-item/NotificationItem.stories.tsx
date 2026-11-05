@@ -27,11 +27,16 @@ const LONG_COMMENT =
 /* Typed, so Storybook does not read the story args off the decorator: the props are
    a union (`moved` needs `status`), and an untyped decorator collapses every story's
    args to `never`. */
-const column: Decorator = (Story) => (
-  <div className="w-96">
+/* A story's own `decorators` add to this one rather than replace it, so a full-screen story
+   (Light and dark, the contrast check) opts out here instead. */
+const column: Decorator = (Story, { parameters }) =>
+  parameters.layout === 'fullscreen' ? (
     <Story />
-  </div>
-);
+  ) : (
+    <div className="w-96">
+      <Story />
+    </div>
+  );
 
 const meta = {
   title: 'Components/Feedback/NotificationItem',
@@ -92,17 +97,24 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/* The tooltip a trigger is described by, and whether it is open, as in
-   `Tooltip.stories`. The bubble is in a portal on `document.body`, and closed is
-   `opacity-0`, not `hidden`, so it is in the DOM either way: finding it proves
-   nothing, its positioner's open class does. */
+/* The mark-read tooltip, and whether it is open. It shows the button's name and does not
+   describe the button (the name already says it), so it is found by its words, not through
+   `aria-describedby`. The bubble is in a portal on `document.body`, and closed is `opacity-0`,
+   not `hidden`, so it is in the DOM either way: finding it proves nothing, its positioner's open
+   class does. */
 const bubbleOf = (trigger: HTMLElement) => {
-  const ids = (trigger.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
-  const bubble = document.getElementById(ids[ids.length - 1] ?? '');
-  if (!bubble) throw new Error('The trigger is not described by a tooltip');
+  const words = (trigger.getAttribute('aria-label') ?? '').split(':')[0];
+  const bubble = [...document.querySelectorAll<HTMLElement>('[role="tooltip"]')].find(
+    (t) => t.textContent?.trim() === words,
+  );
+  if (!bubble) throw new Error(`No tooltip reads "${words}"`);
   return bubble;
 };
-const described = (trigger: HTMLElement) => waitFor(() => bubbleOf(trigger));
+/* The tooltip is there, and the button is not described by it: its name is heard once. */
+const described = async (trigger: HTMLElement) => {
+  await waitFor(() => bubbleOf(trigger));
+  await expect(trigger).not.toHaveAttribute('aria-describedby');
+};
 const isOpen = (trigger: HTMLElement) => bubbleOf(trigger).parentElement?.classList.contains('opacity-100');
 
 /* The unread dot (the avatar is `rounded-pill`, so this is the only round span). */
@@ -225,7 +237,6 @@ export const Read: Story = {
 
 /** Every kind of event, with the sentence the design draws for it. */
 export const Kinds: Story = {
-  decorators: [],
   render: (args) => {
     const rows: { kind: NotificationKind; status?: string; time: string; expect: RegExp }[] = [
       { kind: 'commented', time: 'a few seconds ago', expect: /commented on/ },
@@ -325,6 +336,20 @@ export const WithCommentPreview: Story = {
     await expect(less).toHaveAttribute('aria-expanded', 'true');
     await userEvent.click(less);
     await expect(await canvas.findByRole('button', { name: 'Show more' })).toBeVisible();
+    /* Its focus ring shows whole: the card clips anything outside it, so the ring must sit
+       inside the card on every side (it used to show only its left and right). */
+    const shown = canvas.getByRole('button', { name: 'Show more' });
+    shown.focus();
+    const style = getComputedStyle(shown);
+    const reach = parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth);
+    const ring = shown.getBoundingClientRect();
+    let clip = shown.parentElement!;
+    while (getComputedStyle(clip).overflow !== 'hidden') clip = clip.parentElement!;
+    const card = clip.getBoundingClientRect();
+    await expect(ring.top - reach).toBeGreaterThanOrEqual(card.top);
+    await expect(ring.bottom + reach).toBeLessThanOrEqual(card.bottom);
+    await expect(ring.left - reach).toBeGreaterThanOrEqual(card.left);
+    await expect(ring.right + reach).toBeLessThanOrEqual(card.right);
   },
 };
 
@@ -647,7 +672,6 @@ const contrast = (a: number[], b: number[]) => {
  */
 export const MarkersClear3to1: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
     <div>
       {[false, true].map((isDark) => (
@@ -689,13 +713,13 @@ export const MarkersClear3to1: Story = {
 /** Both themes. Every colour is a semantic token, so dark comes for free. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
   render: (args) => (
-    <div className="grid grid-cols-2">
+    /* Side by side once each half has room for its 384 column, stacked below that. */
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex w-full flex-col items-center bg-surface-canvas p-8">
-            <div className="w-96">
+          <div className="flex h-full w-full flex-col items-center bg-surface-canvas p-8">
+            <div className="w-full max-w-96">
             <NotificationItem {...args} />
             <NotificationItem {...args} unread={false} kind="moved" status="Confirmed prod" />
             <NotificationItem {...args} preview={LONG_COMMENT} />
@@ -705,4 +729,16 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/** A subject that ends in its own punctuation gets no second full stop ("Is this ready?", not "ready?."). */
+export const SubjectEndsInPunctuation: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { subject: 'Is this ready?' },
+  play: async ({ canvasElement }) => {
+    const text = canvasElement.textContent ?? '';
+    await expect(text).toContain('Is this ready?');
+    await expect(text).not.toContain('ready?.');
+  },
 };

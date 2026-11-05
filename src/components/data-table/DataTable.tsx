@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
+import { Icon, type IconName } from '../../atoms/icon';
 import { Checkbox } from '../../atoms/checkbox';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * DataTable — the generic table: columns, rows, sortable headers, optional
@@ -49,6 +49,21 @@ export interface DataTableColumn<Row> {
   label: string;
   /** CSS width for the `<col>` — '120px', '30%'. Unsized columns share the rest. ds-lint-ignore */
   width?: string;
+  /**
+   * **Never narrower than its content.** Cells and header stay on one line — not wrapped, not cut with
+   * "…" — so the column's floor is its widest cell. Above that floor it shares the table's spare room
+   * like any column (by its `width` weight, or its content's length without one); the table scrolls
+   * sideways only when even the floors do not fit. Use it for tags, dates, avatars, counts: anything
+   * whose length is the information.
+   */
+  fit?: boolean;
+  /**
+   * **The column that gives way.** Its content truncates with "…" as the table narrows, down to a floor
+   * (16rem) — below which the table scrolls sideways instead. Use it once, for the long text (an Added
+   * Value's title) that is almost always longer than its header. Give it a `width` weight to say how
+   * much of the spare room it takes; with none it takes what the others leave.
+   */
+  grow?: boolean;
   sortable?: boolean;
   /**
    * Rendered after the label and **before** the sort arrows — a tooltip
@@ -60,6 +75,12 @@ export interface DataTableColumn<Row> {
   hint?: React.ReactNode;
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
+  /**
+   * Extra attributes for this column's `<td>` in a row — a class that lets something fill the whole cell
+   * (an animated highlight), a pointer handler on the cell rather than its content. `className` is merged
+   * with the cell's own; the handlers are yours.
+   */
+  cellProps?: (row: Row) => React.HTMLAttributes<HTMLTableCellElement> | undefined;
 }
 
 export interface DataTableSort {
@@ -92,6 +113,11 @@ export interface DataTableProps<Row extends { id?: string | number }>
   dense?: boolean;
   /** Names the table for assistive tech. Strongly encouraged. */
   caption?: string;
+  /**
+   * Extra attributes for a row's `<tr>` — a drag source, a data attribute. `className` is merged with
+   * the row's own; the handlers are yours. The row stays a plain row: nothing here makes it a control.
+   */
+  rowProps?: (row: Row) => React.HTMLAttributes<HTMLTableRowElement>;
 }
 
 const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-4 last:pr-4';
@@ -100,26 +126,58 @@ const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-
 const headerInner = 'flex items-center gap-1.5';
 
 /**
- * The info glyph that explains a column — Figma's header `ⓘ`. Pass it as a
+ * The glyph that explains a column — Figma's header `ⓘ` (or, with `icon="function"`, the ƒ in a ring that marks a formula column). Pass it as a
  * column's `hint`: it sits beside the label, outside the sort button, and opens
  * `text` in a tooltip on hover **and** on keyboard focus. There is no default
  * copy; the product says what the column is for. With no `text` it renders
  * nothing, so a conditional hint needs no conditional.
  */
-export function ColumnHint({ text, column }: { text?: string; column: string }) {
+export function ColumnHint({
+  text,
+  column,
+  icon = 'info',
+}: {
+  text?: React.ReactNode;
+  column: string;
+  /** The glyph. `info` (ⓘ) by default; the Planning table marks its editable, formula-linked columns with `function`. */
+  icon?: IconName;
+}) {
   if (!text) return null;
   return (
-    <Tooltip content={text} placement="bottom">
+    <Tooltip
+      content={
+        typeof text === 'string' && text.includes('\n')
+          ? text.split('\n').map((line, i) => (
+              <span key={i} className="block">
+                {line}
+              </span>
+            ))
+          : text
+      }
+      placement="bottom"
+      wide={typeof text !== 'string' || text.includes('\n')}
+    >
       <button
         type="button"
         aria-label={`About ${column}`}
         className={cn(
-          'grid size-4 shrink-0 place-items-center rounded-sm text-text-tertiary',
-          'hover:text-text-secondary',
+          'grid size-4 shrink-0 place-items-center rounded-sm',
+          /* `function` is the formula columns' mark (Figma's `_function_tooltip_icon`): a ƒ in a ring, in
+             brand blue, where the info glyph is a quiet grey. */
+          icon === 'function'
+            ? 'text-text-brand-medium hover:text-text-brand-strong'
+            : 'text-text-tertiary hover:text-text-secondary',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
         )}
       >
-        <Icon name="info" size="sm" />
+        {icon === 'function' ? (
+          /* The ring is drawn as wide as the ⓘ's own circle (12 inside its 16), so the two marks match. */
+          <span className="grid size-3 place-items-center rounded-pill border border-current">
+            <Icon name="function" size={10} />
+          </span>
+        ) : (
+          <Icon name={icon} size="sm" />
+        )}
       </button>
     </Tooltip>
   );
@@ -138,6 +196,7 @@ export function DataTable<Row extends { id?: string | number }>({
   empty,
   dense,
   caption,
+  rowProps,
   ...props
 }: DataTableProps<Row>) {
   const rowId = (row: Row, index: number) => row.id ?? index;
@@ -195,7 +254,7 @@ export function DataTable<Row extends { id?: string | number }>({
                   aria-sort={
                     sorted ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined
                   }
-                  className={headerCell}
+                  className={cn(headerCell, columnSizing(c))}
                 >
                   {/* Label, then the hint, then the sort arrows — in that order, as
                       Figma draws a header that has both. The sort button is the
@@ -257,13 +316,16 @@ export function DataTable<Row extends { id?: string | number }>({
           ) : (
             rows.map((row, i) => {
               const id = rowId(row, i);
+              const extra = rowProps?.(row);
               return (
                 <tr
                   key={id}
+                  {...extra}
                   className={cn(
                     'border-b border-stroke-subtle transition-colors last:border-b-0',
                     'hover:bg-surface-brand-base',
                     selected.includes(id) && 'bg-surface-brand-base',
+                    extra?.className,
                   )}
                 >
                   {selectable && (
@@ -276,7 +338,11 @@ export function DataTable<Row extends { id?: string | number }>({
                     </td>
                   )}
                   {columns.map((c) => (
-                    <td key={c.key} className={cn(cell(dense), 'text-left')}>
+                    <td
+                      key={c.key}
+                      {...c.cellProps?.(row)}
+                      className={cn(cell(dense), 'text-left', columnSizing(c), c.cellProps?.(row)?.className)}
+                    >
                       {c.render
                         ? c.render(row)
                         : ((row as Record<string, unknown>)[c.key] as React.ReactNode)}
@@ -294,6 +360,12 @@ export function DataTable<Row extends { id?: string | number }>({
 
 /* 56 rows by default, 44 dense — the export's two densities, as min-heights so
    a tall cell can grow. */
+/* `fit`: no wrapping, so the column's floor is its content. `grow`: `max-w-0` so its own content truncates
+   instead of widening the column, with a floor of its own — and the rest of the row unless it was given a
+   `width` weight. */
+const columnSizing = (c: { fit?: boolean; grow?: boolean; width?: string }) =>
+  c.grow ? cn('min-w-64 max-w-0', !c.width && 'w-full') : c.fit ? 'whitespace-nowrap' : undefined;
+
 const cell = (dense?: boolean) =>
   cn(
     'px-2 align-middle text-body-sm-regular text-text-secondary first:pl-4 last:pr-4',

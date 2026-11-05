@@ -14,7 +14,7 @@ hover button.
 |---|---|---|
 | `Avatar` | atom | The actor, 36 (`lg`), initials or a photo, with the avatar's white outline (`ring`) as Figma's `Profile_Initials` draws it |
 | `Button` | atom | "Show more" / "Show less" on a long comment preview (`tertiary`, `sm`), and Reply / Save / Cancel in the composer |
-| `Tooltip` | component | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
+| `Tooltip` | atom | Names the mark-read button after a half-second rest: "Mark as read" or "Mark as unread" |
 | `EmojiReactionPicker` | component | The reactions row: thumbs-up, the palette and the pills |
 | `MentionInput` | atom | The field a reply is written in, with @-mentions, and the `MentionTag` a posted reply draws |
 | `Icon` | atom | The check-circle in the mark-read button |
@@ -152,7 +152,9 @@ close; with no button the text keeps its 8.
   touch screen there is no hover, so the button is invisible until focused but still tappable;
   the unread dot is what shows there.
 - **The preview's** "Show more" is a real button with `aria-expanded` and
-  `aria-controls`. It appears only when the comment really overflows three lines.
+  `aria-controls`. It appears only when the comment really overflows three lines. Its focus
+  ring is drawn inside it, because the preview card clips its overflow and the button sits on
+  the card's bottom edge.
 - Put items in a `<ul>` / `<li>`; the root is a `<div>` so it works in either.
 
 ## Reacting and replying

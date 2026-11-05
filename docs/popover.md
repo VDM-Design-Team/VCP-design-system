@@ -42,6 +42,7 @@ Modal.
 | `placement` | `top \| bottom` | `bottom` | The whole placement contract. See the positioning limits below |
 | `align` | `left \| right` | `left` | Which edge of the panel lines up with the same edge of the trigger |
 | `width` | `auto \| sm \| md \| lg` | `md` | 224 / 288 / 384 wide, or content-sized. A variant, not a number — see the deviations |
+| `strategy` | `absolute \| fixed` | `absolute` | `fixed` places the panel from the trigger's position on screen, so an ancestor with `overflow: auto \| hidden` — a table that scrolls sideways — cannot clip it. It follows the trigger on scroll and resize and still lives in the wrapper (focus, Escape and click-outside are unchanged). An ancestor with a CSS `transform` would re-anchor it; none of the system's containers has one. `InlineDateEdit` uses it |
 | `autoFocus` | `boolean` | `false` | Move focus to the first focusable element in the panel on open. See the accessibility notes before turning it on |
 | `label` | `string` | — | Accessible name for the panel. Only meaningful with `panelRole`; without it the panel is named by the trigger |
 | `panelRole` | `dialog \| menu \| listbox \| grid \| tree` | — | Role for the panel, which also decides the trigger's `aria-haspopup`. Leave unset for the plain disclosure case |

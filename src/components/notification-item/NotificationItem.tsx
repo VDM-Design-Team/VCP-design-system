@@ -5,7 +5,7 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { EmojiReactionPicker, type EmojiReaction } from '../emoji-reaction-picker';
 import type { MentionMember, MentionSegment } from '../../atoms/mention-input';
-import { Tooltip } from '../tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 import { ReplyCard, ReplyComposer, ReplyControl } from './NotificationReply';
 
 /**
@@ -61,6 +61,10 @@ export type NotificationKind =
  * backlog"). Every sentence ends in a full stop, added here. The strings are the design's; localise by passing your own through a
  * wrapper, not by editing call sites.
  */
+/* A sentence ends in one full stop: none is added after a subject or a status that already
+   ends in its own (a title "Is this ready?" reads "… Is this ready? A few seconds ago"). */
+const endSentence = (text: string) => (/[.!?…]$/.test(text) ? text : `${text}.`);
+
 const NOTIFICATION_PHRASES: Record<
   NotificationKind,
   { verb: string; trail?: (status?: string) => string | undefined }
@@ -214,11 +218,11 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
       <>
         {unread && <span className="sr-only">Unread: </span>}
         <span className="text-body-sm-bold">{`${actor.name} ${phrase.verb}`}</span>{' '}
-        <span className="text-body-sm-regular">{trail ? subject : `${subject}.`}</span>
+        <span className="text-body-sm-regular">{trail ? subject : endSentence(subject)}</span>
         {trail && (
           <>
             {!trail.startsWith('.') && ' '}
-            <span className="text-body-sm-bold">{`${trail}.`}</span>
+            <span className="text-body-sm-bold">{endSentence(trail)}</span>
           </>
         )}{' '}
         {/* Capitalised for display: it follows the sentence's full stop, so it starts a
@@ -306,6 +310,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                  not the row or the header above. */
               <Tooltip
                 content={unread ? 'Mark as read' : 'Mark as unread'}
+                /* The button's name ("Mark as read: …") already says it. */
+                describe={false}
                 openDelay={500}
                 placement="left"
                 className="absolute inset-0 z-10 flex"
@@ -483,6 +489,9 @@ function CommentPreview({ text }: { text: string }) {
           <Button
             variant="tertiary"
             size="sm"
+            /* The focus ring is drawn inside the button: the card clips its overflow and the
+               button sits on its bottom edge, so a ring outside showed only its two sides. */
+            className="focus-visible:-outline-offset-2"
             aria-expanded={expanded}
             aria-controls={id}
             onClick={() => setExpanded((open) => !open)}

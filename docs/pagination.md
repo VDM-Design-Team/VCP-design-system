@@ -1,4 +1,4 @@
-# Pagination
+# Pagination *(atom)*
 
 Page numbers for a data set with pages worth naming — tables, search results,
 anywhere "page 3 of 12" is something a user might say. Built to Figma's

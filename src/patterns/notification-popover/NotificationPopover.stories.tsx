@@ -68,12 +68,17 @@ const meta = {
     onUnreadOnlyChange: { control: false },
   },
   decorators: [
-    (Story) => (
-      /* Right-aligned and with room below, as it sits in the top bar. */
-      <div className="flex min-h-[28rem] items-start justify-end bg-surface-canvas p-8">
+    /* Every story here is fullscreen, so one with its own layout says `frame: 'none'`: a
+       story's own `decorators: []` doesn't remove this one. */
+    (Story, { parameters }) =>
+      parameters.frame === 'none' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        /* Right-aligned and with room below, as it sits in the top bar. */
+        <div className="flex min-h-[28rem] items-start justify-end bg-surface-canvas p-8">
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<typeof NotificationPopover>;
 
@@ -205,17 +210,16 @@ export const OpensAndCloses: Story = {
 
 /** Both themes. Every colour is a semantic token, so dark comes for free. */
 export const LightAndDark: Story = {
-  parameters: { layout: 'fullscreen', controls: { disable: true } },
-  decorators: [],
+  parameters: { layout: 'fullscreen', frame: 'none', controls: { disable: true } },
   render: (args) => (
-    /* One theme above the other, each tall enough for its open panel (40 bell, 8 gap,
-       448 panel, the padding): side by side, two 528-wide panels overlap at most
-       canvas widths. Full width, because the meta's decorator (a right-aligned row)
-       still wraps it and would otherwise shrink it to the bell. */
-    <div className="grid w-full grid-cols-1">
+    /* Side by side, so both bells sit at the top and both panels open downward. Stacked,
+       the lower bell has no room below it on most screens, and its panel opens upward
+       over the upper one. Each half holds a 528 panel and its padding (40 bell, 8 gap,
+       448 panel in height); a canvas narrower than both scrolls sideways. */
+    <div className="flex min-h-screen">
       {[false, true].map((isDark) => (
-        <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
-          <div className="flex min-h-140 items-start justify-end bg-surface-canvas p-8">
+        <div key={String(isDark)} className={`min-w-148 flex-1${isDark ? ' dark' : ''}`}>
+          <div className="flex h-full min-h-140 items-start justify-end bg-surface-canvas p-8">
             <NotificationPopover {...args} defaultOpen>
               <Items unreadOnly={false} filter="all" />
             </NotificationPopover>
