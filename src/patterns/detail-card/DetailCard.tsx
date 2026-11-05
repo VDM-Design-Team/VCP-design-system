@@ -15,6 +15,7 @@ import { SearchSelect, type SearchSelectOption } from '../../components/search-s
 import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
 import { AV_TYPES, TypeTag, type AVType } from '../../components/type-tag';
 import { AV_URGENCIES, UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * DetailCard — the facts about one Added Value, down the right of its page: who started it and
@@ -144,11 +145,6 @@ const parts = (iso: string) => iso.split('-').map(Number) as [number, number, nu
 const longDate = (iso: string) => {
   const [y, m, d] = parts(iso);
   return MONTHS[m - 1] ? `${MONTHS[m - 1]} ${d}, ${y}` : iso;
-};
-/** "10-01-2025", as the editing field shows it. */
-const fieldDate = (iso: string) => {
-  const [y, m, d] = parts(iso);
-  return `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}-${y}`;
 };
 const toDate = (iso: string) => {
   const [y, m, d] = parts(iso);
@@ -531,6 +527,8 @@ function DateField({
 }) {
   const [open, setOpen] = React.useState(false);
   const errorId = React.useId();
+  /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
+  const dates = useDateFormat();
   return (
     <div className="w-full">
       <Popover
@@ -551,8 +549,8 @@ function DateField({
             invalid={!!error}
             aria-describedby={error ? errorId : undefined}
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
-            placeholder="MM-DD-YYYY"
-            value={value ? fieldDate(value) : ''}
+            placeholder={dates.placeholder}
+            value={value ? dates.format(value) : ''}
             onClick={() => setOpen(true)}
           />
         }
