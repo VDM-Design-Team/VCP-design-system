@@ -50,60 +50,63 @@ const control = cva(
   ],
   {
     variants: {
-      size: {
-        sm: 'text-caption-md-regular',
-        md: 'text-body-sm-regular',
-      },
+      size: { sm: '', md: '' },
+      /* `medium` is a chosen value, as `Select` and `SearchSelect` set it; the placeholder is regular either way. */
+      emphasis: { regular: '', medium: '' },
     },
-    defaultVariants: { size: 'md' },
+    compoundVariants: [
+      { size: 'sm', emphasis: 'regular', className: 'text-caption-md-regular' },
+      { size: 'md', emphasis: 'regular', className: 'text-body-sm-regular' },
+      { size: 'sm', emphasis: 'medium', className: 'text-caption-md-medium placeholder-shown:text-caption-md-regular' },
+      { size: 'md', emphasis: 'medium', className: 'text-body-sm-medium placeholder-shown:text-body-sm-regular' },
+    ],
+    defaultVariants: { size: 'md', emphasis: 'regular' },
   },
 );
 
 export interface InputProps
   /* Native `size` is a character count — ours is the control's height, so it's replaced. */
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof field> {
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>, VariantProps<typeof field> {
   /** Decorative adornment before the value — 16 icons only. ds-lint-ignore */
   leadingIcon?: React.ReactNode;
   /** Decorative adornment after the value — 16 icons only. ds-lint-ignore */
   trailingIcon?: React.ReactNode;
+  /**
+   * A **control** at the field's end — a show/hide toggle, a clear button — where `trailingIcon` is only decoration. It is a real, focusable
+   * element the caller names (an `IconButton` with a label), not hidden from assistive tech, and it keeps its own colours.
+   */
+  trailingAction?: React.ReactNode;
   /** Critical border + `aria-invalid`. Always pair with a visible error message. */
   invalid?: boolean;
+  /**
+   * The weight of the value: `regular` (the default) or `medium` — what a *chosen* value reads as in `Select`,
+   * `SearchSelect` and `DateField`. The placeholder stays regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
   /** Merged onto the field wrapper, not the inner `<input>`. */
   className?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  (
-    { className, size, invalid, fullWidth, leadingIcon, trailingIcon, disabled, type = 'text', ...props },
-    ref,
-  ) => (
-    <div className={cn(field({ size, invalid, fullWidth }), className)}>
-      {leadingIcon && <Adornment disabled={disabled}>{leadingIcon}</Adornment>}
-      <input
-        ref={ref}
-        type={type}
-        disabled={disabled}
-        aria-invalid={invalid || undefined}
-        className={control({ size })}
-        {...props}
-      />
-      {trailingIcon && <Adornment disabled={disabled}>{trailingIcon}</Adornment>}
-    </div>
-  ),
+  ({ className, size, invalid: invalidProp, emphasis, fullWidth, leadingIcon, trailingIcon, trailingAction, disabled, type = 'text', ...props }, ref) => {
+    /* Invalid by the prop, or by the `aria-invalid` a `Field` with an `error` puts on its control: the error's red edge comes with the message. */
+    const invalid = invalidProp || props['aria-invalid'] === true || props['aria-invalid'] === 'true';
+    return (
+      <div className={cn(field({ size, invalid, fullWidth }), className)}>
+        {leadingIcon && <Adornment disabled={disabled}>{leadingIcon}</Adornment>}
+        <input ref={ref} type={type} disabled={disabled} aria-invalid={invalid || undefined} className={control({ size, emphasis })} {...props} />
+        {trailingIcon && <Adornment disabled={disabled}>{trailingIcon}</Adornment>}
+        {trailingAction && <span className="-mr-1 flex shrink-0 items-center">{trailingAction}</span>}
+      </div>
+    );
+  },
 );
 Input.displayName = 'Input';
 
 /** Icons are decoration — the label and the value carry the meaning. */
 function Adornment({ disabled, children }: { disabled?: boolean; children: React.ReactNode }) {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'grid shrink-0 place-items-center',
-        disabled ? 'text-text-disabled' : 'text-text-subtle',
-      )}
-    >
+    <span aria-hidden="true" className={cn('grid shrink-0 place-items-center', disabled ? 'text-text-disabled' : 'text-text-subtle')}>
       {children}
     </span>
   );

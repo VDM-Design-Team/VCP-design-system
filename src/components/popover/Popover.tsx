@@ -40,11 +40,13 @@ interface Fit {
   align: 'left' | 'right';
   /** Set only when neither side has room for the whole panel: it scrolls inside this. */
   maxHeight?: number;
+  /** `fixed` only: the panel's offsets from the screen's edges, from the trigger's rect. */
+  anchor?: { top?: number; bottom?: number; left?: number; right?: number };
 }
 
 const popoverPanel = cva(
   [
-    'absolute z-50',
+    'z-50',
     /* The floating surface: elevated fill, a defined edge, and the shadow the
        token set reserves for exactly this — `shadow.menu`. */
     'rounded-md border border-stroke-default bg-surface-elevated shadow-menu',
@@ -53,15 +55,24 @@ const popoverPanel = cva(
   ],
   {
     variants: {
-      /* The whole placement contract: above, or below. Nothing smarter. */
+      /* `absolute` sits inside the wrapper; `fixed` is placed from the trigger's screen rect, so no
+         `overflow` ancestor can clip it (see `strategy`). */
+      strategy: {
+        absolute: 'absolute',
+        fixed: 'fixed',
+      },
+      /* The whole placement contract: above, or below. Nothing smarter. `none` is `fixed`: it takes its
+         offsets from the inline style instead. */
       placement: {
         bottom: 'top-full mt-2',
         top: 'bottom-full mb-2',
+        none: '',
       },
       /* Which edge of the panel lines up with the same edge of the trigger. */
       align: {
         left: 'left-0',
         right: 'right-0',
+        none: '',
       },
       /* A fixed-width panel keeps line length readable; `auto` lets the content
          size it, which is what a Menu wants. */
@@ -72,7 +83,7 @@ const popoverPanel = cva(
         lg: 'w-96',
       },
     },
-    defaultVariants: { placement: 'bottom', align: 'left', width: 'md' },
+    defaultVariants: { strategy: 'absolute', placement: 'bottom', align: 'left', width: 'md' },
   },
 );
 
@@ -131,6 +142,15 @@ export interface PopoverProps
    */
   width?: PopoverWidth;
   /**
+   * How the panel is placed. `absolute` (default) sits inside the wrapper, so an ancestor with
+   * `overflow: hidden | auto` clips it. `fixed` places it from the trigger's position on screen, so
+   * it floats over such an ancestor — a date picker opening out of a table cell that scrolls
+   * sideways. It follows the trigger on scroll and resize. It still does not portal: the panel stays
+   * in the wrapper, so focus, Escape and click-outside work as before. (An ancestor with a CSS
+   * `transform` would re-anchor it; none of the system's containers has one.)
+   */
+  strategy?: 'absolute' | 'fixed';
+  /**
    * Move focus into the panel when it opens (the first focusable child, or the
    * panel itself if it has none). **Off by default**, and that default is the
    * point: see the accessibility notes in docs/popover.md. Turn it on when the
@@ -179,6 +199,7 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     placement = 'bottom',
     align = 'left',
     width = 'md',
+    strategy = 'absolute',
     autoFocus = false,
     label,
     panelRole,
@@ -245,12 +266,26 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     const fitsRight = trigger.right - wide >= SCREEN_EDGE;
     const edge = align === 'left' ? (fitsLeft || !fitsRight ? 'left' : 'right') : fitsRight || !fitsLeft ? 'right' : 'left';
 
+    const anchor =
+      strategy === 'fixed'
+        ? {
+            ...(side === 'bottom'
+              ? { top: trigger.bottom + PANEL_GAP }
+              : { bottom: window.innerHeight - trigger.top + PANEL_GAP }),
+            ...(edge === 'left' ? { left: trigger.left } : { right: window.innerWidth - trigger.right }),
+          }
+        : undefined;
+
     setFit((prev) =>
-      prev && prev.placement === side && prev.align === edge && prev.maxHeight === maxHeight
+      prev &&
+      prev.placement === side &&
+      prev.align === edge &&
+      prev.maxHeight === maxHeight &&
+      JSON.stringify(prev.anchor) === JSON.stringify(anchor)
         ? prev
-        : { placement: side, align: edge, maxHeight },
+        : { placement: side, align: edge, maxHeight, anchor },
     );
-  }, [placement, align]);
+  }, [placement, align, strategy]);
 
   /* Measured before the first paint of the open panel, and again if the window or the panel changes size. */
   React.useLayoutEffect(() => {
@@ -264,11 +299,14 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     const observer = panel && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
     if (panel) observer?.observe(panel);
     window.addEventListener('resize', measure);
+    /* A fixed panel follows its trigger when anything scrolls (capture: scroll does not bubble). */
+    if (strategy === 'fixed') window.addEventListener('scroll', measure, true);
     return () => {
       observer?.disconnect();
       window.removeEventListener('resize', measure);
+      if (strategy === 'fixed') window.removeEventListener('scroll', measure, true);
     };
-  }, [isOpen, measure]);
+  }, [isOpen, measure, strategy]);
 
   /* Was focus inside the popover at the moment it closed? That is the only
      thing that decides whether closing restores focus to the trigger. Closing
@@ -369,9 +407,17 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
              focusable inside could not otherwise be scrolled from the keyboard. */
           tabIndex={panelProps?.tabIndex ?? (fit?.maxHeight !== undefined ? 0 : -1)}
           /* Only when neither side has room, so a tall panel scrolls instead of leaving the screen. */
-          style={fit?.maxHeight !== undefined ? { maxHeight: fit.maxHeight, overflowY: 'auto' } : undefined}
+          style={{
+            ...(strategy === 'fixed' ? fit?.anchor : undefined),
+            ...(fit?.maxHeight !== undefined ? { maxHeight: fit.maxHeight, overflowY: 'auto' } : undefined),
+          }}
           className={cn(
-            popoverPanel({ placement: fit?.placement ?? placement, align: fit?.align ?? align, width }),
+            popoverPanel({
+              strategy,
+              placement: strategy === 'fixed' ? 'none' : (fit?.placement ?? placement),
+              align: strategy === 'fixed' ? 'none' : (fit?.align ?? align),
+              width,
+            }),
             /* A scrolling panel is a Tab stop, so it shows the focus ring like any other.
                Otherwise it is focusable only so a click on dead space inside it does not
                drop focus to the body, and draws no outline. */

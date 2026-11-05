@@ -188,7 +188,7 @@ export const LightAndDark: Story = {
 /* ---- Recipes: how a column becomes something other than text ---- */
 
 const ROW_ACTIONS: MenuItem[] = [
-  { key: 'edit', label: 'Edit', icon: 'pencil-simple' },
+  { key: 'edit', label: 'Edit', icon: 'note-pencil' },
   { key: 'duplicate', label: 'Duplicate' },
   { divider: true },
   { key: 'delete', label: 'Delete', icon: 'trash', tone: 'danger' },

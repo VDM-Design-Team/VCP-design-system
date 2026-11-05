@@ -71,7 +71,7 @@ export const DetailRow = React.forwardRef<HTMLDivElement, DetailRowProps>(
           variant="tertiary"
           size="sm"
           shape="square"
-          icon={editing ? 'check' : 'pencil-simple'}
+          icon={editing ? 'check' : 'note-pencil'}
           label={`${editing ? 'Confirm' : 'Edit'} ${label}`}
           onClick={onEdit}
           className={cn('shrink-0', align === 'top' && '-mt-1')}

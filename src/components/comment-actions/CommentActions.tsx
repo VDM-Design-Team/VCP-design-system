@@ -163,19 +163,21 @@ export const CommentActions = React.forwardRef<HTMLDivElement, CommentActionsPro
             {`${repliesOpen ? 'Hide' : 'Show'} ${replyCount} ${replyCount === 1 ? 'Reply' : 'Replies'}`}
           </Action>
         )}
+        {/* `data-action` lets the comment hand focus back to the button that opened a box. */}
         {onEdit && (
-          <Action icon="pencil-simple" aria-label={named('Edit {}')} onClick={onEdit}>
+          <Action icon="note-pencil" aria-label={named('Edit {}')} onClick={onEdit} data-action="edit">
             Edit
           </Action>
         )}
         {onDelete && (
-          <Action icon="trash" aria-label={named('Delete {}')} onClick={onDelete}>
+          <Action icon="trash" aria-label={named('Delete {}')} onClick={onDelete} data-action="delete">
             Delete
           </Action>
         )}
         {showReply && (
           <Action
             icon="arrow-u-up-left"
+            data-action="reply"
             aria-label={named(replying ? 'Cancel Reply to {}' : 'Reply to {}')}
             onClick={replying ? onCancelReply : onReply}
           >

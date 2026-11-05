@@ -28,13 +28,22 @@ import { IconButton } from '../../atoms/icon-button';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-const backdrop = cva([
-  /* Covers the viewport from the portal, above every page-level surface. */
-  'fixed inset-0 z-50',
-  'grid place-items-center',
-  /* surface.overlay — the system's own scrim. It flips in dark for free. */
-  'bg-surface-overlay p-6',
-]);
+const backdrop = cva(
+  [
+    /* Covers the viewport from the portal, above every page-level surface. */
+    'fixed inset-0 z-50',
+    'grid place-items-center',
+    /* surface.overlay — the system's own scrim. It flips in dark for free. */
+    'bg-surface-overlay',
+  ],
+  {
+    variants: {
+      /* A `full` panel takes the whole viewport, so there is no margin to the edge. */
+      full: { true: '', false: 'p-6' },
+    },
+    defaultVariants: { full: false },
+  },
+);
 
 const panel = cva(
   [
@@ -57,23 +66,29 @@ const panel = cva(
         md: 'max-w-128',
         lg: 'max-w-160',
         xl: 'max-w-200',
+        /* The whole viewport: a viewer that is the page while it is open. No corners, no shadow. */
+        full: 'h-full max-w-none rounded-none shadow-none',
       },
     },
     defaultVariants: { size: 'md' },
   },
 );
 
-/* The gap to the body is 12, one fixed value, split so it survives scrolling: 8
-   here (pb-2) and 4 as the body's own top padding. Padding inside a scrolling box
-   scrolls away, and long content then slid up to the header's edge and ran hard
-   against the caption; the header's share stays put. */
-const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5 pb-2', {
+/* The gap to the body is one fixed value, split so it survives scrolling: the
+   header's share (below) and 4 as the body's own top padding. Padding inside a
+   scrolling box scrolls away, and long content then slid up to the header's edge
+   and ran hard against the caption; the header's share stays put.
+   The header's share is 8 under a title alone (12 in all) and **16 when there is a
+   caption** (20 in all): a caption is a line of its own, and 8 left it close
+   against whatever came next. */
+const header = cva('flex shrink-0 items-start gap-3 px-6 pt-5', {
   variants: {
     /* With no heading text the close button is the only child, so it hugs the
        right edge rather than sitting alone on the left. */
     hasText: { true: '', false: 'justify-end' },
+    hasCaption: { true: 'pb-4', false: 'pb-2' },
   },
-  defaultVariants: { hasText: true },
+  defaultVariants: { hasText: true, hasCaption: false },
 });
 
 /** Whether a node would draw anything: not absent, not `false`, not a blank string. */
@@ -552,7 +567,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   return createPortal(
     <div
       ref={portalRef}
-      className={backdrop()}
+      className={backdrop({ full: size === 'full' })}
       onPointerDown={(event) => {
         pointerDownOnBackdrop.current = event.target === event.currentTarget;
       }}
@@ -586,7 +601,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
         className={cn(panel({ size }), className)}
       >
         {(hasHeaderText || showClose) && (
-          <header className={header({ hasText: hasHeaderText })}>
+          <header className={header({ hasText: hasHeaderText, hasCaption: hasDescription })}>
             {hasHeaderText && (
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 {hasTitle && (
@@ -595,7 +610,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                   </h2>
                 )}
                 {hasDescription && (
-                  <p id={descriptionId} className="text-caption-md-regular text-text-tertiary">
+                  <p id={descriptionId} className="text-caption-md-medium text-text-tertiary">
                     {description}
                   </p>
                 )}
@@ -631,11 +646,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
             'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
-            /* The 12 under the header is split: the header's own 8 stays put
-               while the body scrolls, and this 4 scrolls away and doubles as
-               room for a focus ring at the very top. Content scrolls out 8
-               below the header's text instead of against it. 20 when there is
-               no header at all. */
+            /* The gap under the header is split: the header's own share (8, or 16 under
+               a caption) stays put while the body scrolls, and this 4 scrolls away and
+               doubles as room for a focus ring at the very top. Content scrolls out
+               below the header's text instead of against it. 20 when there is no
+               header at all. */
             hasHeaderText || showClose ? 'pt-1' : 'pt-5',
             /* The footer owns the gap above the actions, but the body keeps 4 of
                its own: a focus ring is a 2-wide outline offset by 2, so it reaches 4

@@ -224,6 +224,33 @@ export const Single: Story = {
   },
 };
 
+/**
+ * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
+ * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
+ */
+export const RegularForFilters: Story = {
+  render: () => {
+    const options = [
+      { value: 'open', label: 'Open' },
+      { value: 'closed', label: 'Closed' },
+    ];
+    return (
+      <div className="flex w-56 flex-col gap-3">
+        <SearchSelect aria-label="Form field" searchable={false} options={options} value="open" />
+        <SearchSelect aria-label="Filter" searchable={false} emphasis="regular" options={options} value="open" />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* The trigger's name is its label and the chosen value: "Form field Open". */
+    const weight = (name: string) =>
+      Number(getComputedStyle(canvas.getByRole('combobox', { name: new RegExp(`^${name}`) })).fontWeight);
+    await expect(weight('Form field')).toBe(500);
+    await expect(weight('Filter')).toBe(400);
+  },
+};
+
 /** The search box is the combobox: arrows move, Enter picks, Escape closes and returns focus. */
 export const Keyboard: Story = {
   tags: ['!dev', '!autodocs'],
@@ -851,6 +878,27 @@ export const TabReachesApply: Story = {
   },
 };
 
+/** **Flow:** Escape on Apply closes the panel, puts focus back on the field and discards the draft. */
+export const EscapeFromApply: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { options: STATUSES, multiple: true, searchable: false, confirm: true, placeholder: 'Select status' },
+  render: (args) => <Controlled {...args} aria-label="Status" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('combobox', { name: 'Status' });
+    await userEvent.click(field);
+    await userEvent.click(canvas.getByRole('option', { name: 'Accepted' }));
+    canvas.getByRole('button', { name: 'Apply' }).focus();
+    await userEvent.keyboard('{Escape}');
+    await expect(field).toHaveAttribute('aria-expanded', 'false');
+    await expect(field).toHaveFocus();
+    await expect(args.onChange).not.toHaveBeenCalled();
+    await userEvent.click(field);
+    await expect(canvas.getByRole('option', { name: 'Accepted' })).toHaveAttribute('aria-selected', 'false');
+  },
+};
+
 /** A quote in a label does not crash the field: removing a tag still hands focus to the next ✕. */
 export const QuoteInALabel: Story = {
   tags: ['!dev', '!autodocs'],
@@ -980,4 +1028,30 @@ export const ServerSearch: Story = {
     await waitFor(() => expect(canvas.queryByRole('option', { name: 'Carl Baker' })).toBeNull());
     await expect(trigger).toHaveTextContent('Carl Baker');
   },
+};
+
+/** `collapsibleGroups`: each heading is a button with a caret; folded groups leave the list and the keys. */
+export const CollapsibleGroups: Story = {
+  args: {
+    'aria-label': 'Person',
+    collapsibleGroups: true,
+    defaultCollapsedGroups: ['Away'],
+    options: [
+      { value: 'a', label: 'Amy Lee', group: 'Here' },
+      { value: 'b', label: 'Bo Tran', group: 'Here' },
+      { value: 'c', label: 'Cy Park', group: 'Away' },
+    ],
+  },
+  decorators: [(Story) => <div className="h-72 w-72"><Story /></div>],
+};
+
+/** `warning`: the pick is allowed but worth a second look — an amber border and message. */
+export const Warning: Story = {
+  args: {
+    'aria-label': 'Person',
+    value: 'a',
+    options: ['a', 'b'].map((value) => ({ value, label: `Person ${value}` })),
+    warning: 'This person is busy during the selected dates, but can still be assigned.',
+  },
+  decorators: [(Story) => <div className="h-40 w-72"><Story /></div>],
 };

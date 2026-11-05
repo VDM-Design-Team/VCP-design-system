@@ -3,6 +3,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Tooltip } from './Tooltip';
 import { Button } from '../button';
 import { IconButton } from '../icon-button';
+import { A11Y_CONFIG } from '../../lib/story-a11y';
 
 const meta = {
   title: 'Atoms/Tooltip',
@@ -102,6 +103,16 @@ export const OnAButton: Story = {
  */
 export const OnAnIconButton: Story = {
   name: 'On an IconButton',
+  /* The third button is the "Don't" on purpose: it repeats its own name, which the house rule
+     (vcp-description-repeats-name) would fail. Off for this story only, to show the mistake. */
+  parameters: {
+    a11y: {
+      config: {
+        checks: A11Y_CONFIG.checks,
+        rules: A11Y_CONFIG.rules.map((rule) => ({ ...rule, enabled: false })),
+      },
+    },
+  },
   render: (args) => (
     <div className="flex items-center gap-4 p-12">
       <Tooltip {...args} content="Delete — this cannot be undone">
@@ -111,7 +122,7 @@ export const OnAnIconButton: Story = {
         <IconButton icon="funnel-simple" label="Filter results" variant="secondary" />
       </Tooltip>
       <Tooltip {...args} content="Edit deliverable">
-        <IconButton icon="pencil-simple" label="Edit deliverable" variant="secondary" />
+        <IconButton icon="note-pencil" label="Edit deliverable" variant="secondary" />
       </Tooltip>
       <span className="text-caption-md-regular text-text-subtle">
         ← the third one duplicates its own accessible name. Don’t.

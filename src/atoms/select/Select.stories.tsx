@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, within } from 'storybook/test';
 import { Select } from './Select';
 import { Field } from '../../components/field';
 
@@ -14,7 +15,9 @@ const meta = {
         component:
           'A choice from a fixed list, on the native `<select>` — the popup, keyboard model ' +
           'and mobile pickers come from the platform. The shell is `Input`’s, class for ' +
-          'class, so a form mixes the two seamlessly. Needs search? That’s `SearchSelect`.',
+          'class, so a form mixes the two seamlessly. The field reads like `SearchSelect`’s (a grey ' +
+          'placeholder, a medium-weight value), but the open list is the browser’s: for the styled ' +
+          'panel, or search, use `SearchSelect`.',
       },
     },
   },
@@ -31,13 +34,28 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Uncontrolled with a placeholder: starts on it, and it can't be re-picked. */
+/**
+ * Uncontrolled with a placeholder: starts on it, and it can't be re-picked. The placeholder is
+ * `text.subtle` in regular weight, and a chosen value is `text.primary` in medium — the same pairing
+ * as `SearchSelect`'s field.
+ */
 export const Default: Story = {
   render: (args) => (
     <div className="w-72">
       <Select {...args} aria-label="Domain" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const select = within(canvasElement).getByRole('combobox', { name: 'Domain' });
+    const placeholder = getComputedStyle(select);
+    const [subtleColor, regularWeight] = [placeholder.color, placeholder.fontWeight];
+
+    await userEvent.selectOptions(select, 'Design');
+    const chosen = getComputedStyle(select);
+    /* Choosing a value darkens the text and sets it in a heavier weight. */
+    await expect(chosen.color).not.toBe(subtleColor);
+    await expect(Number(chosen.fontWeight)).toBeGreaterThan(Number(regularWeight));
+  },
 };
 
 /** Controlled — `onChange` hands you the value, nothing else. */
@@ -62,6 +80,21 @@ export const InAField: Story = {
       </Field>
     </div>
   ),
+};
+
+/** `error` puts a message under the select in the critical colour, as `SearchSelect` does. */
+export const WithError: Story = {
+  render: (args) => (
+    <div className="w-72">
+      <Select {...args} aria-label="Domain" error="Choose a domain before submitting." fullWidth />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const select = within(canvasElement).getByRole('combobox', { name: 'Domain' });
+    await expect(within(canvasElement).getByText('Choose a domain before submitting.')).toBeVisible();
+    await expect(select).toHaveAttribute('aria-invalid', 'true');
+    await expect(select).toHaveAccessibleDescription('Choose a domain before submitting.');
+  },
 };
 
 /** Same treatment as Input: critical border, `aria-invalid`, message from Field. */
@@ -136,4 +169,56 @@ export const LightAndDark: Story = {
       ))}
     </div>
   ),
+};
+
+/**
+ * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
+ * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
+ */
+export const RegularForFilters: Story = {
+  render: (args) => (
+    <div className="flex w-72 flex-col gap-3">
+      <Select {...args} aria-label="Form field" defaultValue="Design" />
+      <Select {...args} aria-label="Filter" emphasis="regular" defaultValue="Design" />
+      <Select {...args} aria-label="Filter, empty" emphasis="regular" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const weight = (name: string) => Number(getComputedStyle(c.getByRole('combobox', { name })).fontWeight);
+    await expect(weight('Form field')).toBe(500);
+    await expect(weight('Filter')).toBe(400);
+    await expect(weight('Filter, empty')).toBe(400);
+  },
+};
+
+/**
+ * Review fixes (hidden, tested): a disabled select with its placeholder showing is drawn in the disabled colour, not
+ * the enabled placeholder grey; an `error` does not stretch a select sized to its content; and a real option with an
+ * empty value reads as a chosen value, not as a placeholder.
+ */
+export const ReviewFixes: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div className="flex w-128 flex-col items-start gap-4">
+      <Select {...args} aria-label="Enabled" />
+      <Select {...args} aria-label="Disabled" disabled />
+      <Select {...args} aria-label="Plain" />
+      <Select {...args} aria-label="With error" error="Pick a domain." />
+      <Select aria-label="All suppliers" defaultValue="" options={[{ value: '', label: 'All suppliers' }, 'Acme', 'Globex']} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const color = (name: string) => getComputedStyle(canvas.getByRole('combobox', { name })).color;
+    await expect(color('Disabled')).not.toBe(color('Enabled'));
+    await expect(color('All suppliers')).not.toBe(color('Enabled'));
+
+    const plain = canvas.getByRole('combobox', { name: 'Plain' }).parentElement as HTMLElement;
+    const withError = canvas.getByRole('combobox', { name: 'With error' }).parentElement as HTMLElement;
+    await expect(withError.offsetWidth).toBe(plain.offsetWidth);
+
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Pick a domain.');
+  },
 };

@@ -138,7 +138,13 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `emptyText` | `string` | `No matches` | What the panel says when there are no rows |
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
 | `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
+| `warning` | `ReactNode` | — | A caution under the field in the warning colour (`accent.warning.outline.content`), with an amber border: the pick is allowed but worth a second look. `error` wins if both are set. Announced with the field |
+| `collapsibleGroups` | `boolean` | — | Group headings become buttons (`aria-expanded`, a caret). A folded group's rows leave the list — and the arrow keys. A search query unfolds every group that has a match |
+| `defaultCollapsedGroups` | `string[]` | — | Group names that start folded |
+| `renderGroupHeading` | `(name, { collapsed }) => ReactNode` | — | Draws a heading's content (a status dot beside the name). The button, caret and ARIA stay the component's |
+| `panelNotice` | `ReactNode` | — | A line above the rows inside the panel, with a divider under it |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
+| `emphasis` | `'medium' \| 'regular'` | `medium` | The weight of a chosen value in the field. **A filter passes `regular`**, so a row of filters sits quietly; the default is what a chosen value in a form reads as. The placeholder is regular either way |
 | `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
 | `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
 | `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |
@@ -149,6 +155,17 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 
 There is no built-in "clear" for a single pick. For "no one in particular" add an option that
 says so ("Anyone", "Unassigned") — it is then a choice the user can see.
+
+## Collapsible groups
+
+`collapsibleGroups` is for a long list whose groups matter more than the rows — assignees by
+availability, where the people who can take the work should lead and the rest can fold away.
+Each heading is a real `<button>` with `aria-expanded`, so folding works with a pointer or the
+keyboard: **Tab** from the search box walks the headings (the panel stays open while focus is in
+it), **Enter** or **Space** folds one, **Escape** closes the panel from anywhere in it. The arrow
+keys only ever visit rows that are on screen, so a folded group is never a hidden stop. While
+the user is searching, groups with matches show whether folded or not — a search must not hide
+its own results.
 
 ## The panel
 
@@ -185,7 +202,9 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   and keeps focus. A picked row has `aria-selected`.
 - Keyboard: Enter, Space or ArrowDown on the trigger opens; arrows move (skipping disabled rows);
   Home and End jump (when the trigger has focus); Enter or Space picks the active row; Escape closes and
-  puts focus back on the trigger; Tab closes (with `confirm`, Tab instead walks on into Clear all and Apply, and the panel closes when focus leaves the control); a click away closes. Arrow order is the drawn order: ungrouped rows first, then each group. With `confirm`, Escape and a
+  puts focus back on the trigger, from the trigger, the search box or anything inside the panel (Clear all,
+  Apply, a group heading); Tab closes (with `confirm` or `collapsibleGroups`, Tab instead walks on into the
+  panel, and the panel closes when focus leaves the control); a click away closes. Arrow order is the drawn order: ungrouped rows first, then each group. With `confirm`, Escape and a
   click away discard the draft.
 - **The trigger is named by its label and its value** ("Assignee Amy Lee"): the label through `aria-label`, `aria-labelledby` or a `Field`'s `<label for>`, then the picked text. The active row scrolls into view as the arrows move it.
 - Every click opens the panel, whatever is behind it (a mouse, a screen reader, voice control, `element.click()`); Enter and Space are handled on key down.

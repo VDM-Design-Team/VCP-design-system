@@ -58,7 +58,7 @@ const positioner = cva(
        around it. The coordinates arrive as an inline style (they are measured, not
        a design value); the transform pulls the bubble to the right side of that
        point. */
-    'fixed z-50 flex w-max max-w-64',
+    'fixed z-50 flex w-max',
     'transition-opacity duration-150 motion-reduce:transition-none',
   ],
   {
@@ -76,8 +76,13 @@ const positioner = cva(
         true: 'opacity-100',
         false: 'pointer-events-none opacity-0',
       },
+      /* 256 by default; `wide` is 384, for a tooltip that is a short list rather than a sentence. */
+      wide: {
+        true: 'max-w-96',
+        false: 'max-w-64',
+      },
     },
-    defaultVariants: { placement: 'top', open: false },
+    defaultVariants: { placement: 'top', open: false, wide: false },
   },
 );
 
@@ -129,6 +134,11 @@ export interface TooltipProps
    * link, an input. It is cloned to receive `aria-describedby`.
    */
   children: React.ReactElement;
+  /**
+   * Let the bubble run to 384 instead of 256 — for a tooltip that is a short list (each line on its own
+   * row) rather than a sentence. Text is still wrapped past that.
+   */
+  wide?: boolean;
   /** Hover open delay in ms. Focus is always immediate. */
   openDelay?: number;
   /**
@@ -138,6 +148,17 @@ export interface TooltipProps
   defaultOpen?: boolean;
   /** Override the generated id of the bubble. Rarely needed. */
   tooltipId?: string;
+  /**
+   * Wire the trigger to the bubble with `aria-describedby`. Default `true`. Turn it off only when
+   * the trigger's own name already is the tooltip's words (an avatar named "John Doe (Assignee,
+   * Busy)" whose tooltip shows that sentence), so a screen reader does not hear them twice.
+   */
+  describe?: boolean;
+  /**
+   * Switch the tooltip off for now: it does not open (hover or focus) and does not describe its trigger, and the trigger is otherwise untouched. For a tooltip that applies only sometimes — the
+   * full text of a name, which is worth showing only while the name is cut off (`TruncatedText`).
+   */
+  disabled?: boolean;
 }
 
 export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
@@ -145,10 +166,13 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     {
       content,
       placement = 'top',
+      wide = false,
       children,
       openDelay = DEFAULT_OPEN_DELAY,
       defaultOpen = false,
       tooltipId,
+      describe = true,
+      disabled = false,
       className,
       onMouseEnter,
       onMouseLeave,
@@ -216,6 +240,10 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
       };
     }, [open, place]);
 
+    React.useEffect(() => {
+      if (disabled) close();
+    }, [disabled, close]);
+
     /* Clear a pending open if the component goes away mid-delay. */
     React.useEffect(() => clearTimer, [clearTimer]);
 
@@ -247,6 +275,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const handleMouseEnter = (event: React.MouseEvent<HTMLSpanElement>) => {
       onMouseEnter?.(event);
       clearTimer();
+      if (disabled) return;
       if (openDelay <= 0) {
         setOpen(true);
         return;
@@ -270,6 +299,7 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
     const handleFocus = (event: React.FocusEvent<HTMLSpanElement>) => {
       onFocus?.(event);
       clearTimer();
+      if (disabled) return;
       let keyboardish = true;
       try {
         keyboardish = (event.target as Element).matches(':focus-visible');
@@ -286,8 +316,12 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
 
     const child = React.Children.only(children) as React.ReactElement<{
       'aria-describedby'?: string;
+      'data-tooltip'?: string;
     }>;
-    const describedBy = [child.props['aria-describedby'], id].filter(Boolean).join(' ');
+    const describedBy = [child.props['aria-describedby'], describe && !disabled && id].filter(Boolean).join(' ') || undefined;
+    /* A trigger that is not described still has a tooltip, and some pieces need to know: `IconButton`
+       drops its native `title` under one, or the browser would draw a second bubble over ours. */
+    const marker = describe || disabled ? {} : { 'data-tooltip': id };
 
     return (
       <span
@@ -305,11 +339,11 @@ export const Tooltip = React.forwardRef<HTMLSpanElement, TooltipProps>(
         onBlur={handleBlur}
         {...props}
       >
-        {React.cloneElement(child, { 'aria-describedby': describedBy })}
+        {React.cloneElement(child, { 'aria-describedby': describedBy, ...marker })}
         {host &&
           createPortal(
             <span
-              className={positioner({ placement, open })}
+              className={positioner({ placement, open, wide })}
               style={anchor ? { top: anchor.top, left: anchor.left } : undefined}
             >
               {/* The described element: `role="tooltip"` *and* the id that

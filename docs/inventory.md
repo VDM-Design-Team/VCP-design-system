@@ -40,7 +40,7 @@ record of when each piece landed.
 | component | `DataTable` | PR #43 |
 | atom | `Select` | PR #46 |
 | atom | `Stepper` | PR #46 (moved from components) |
-| component | `Dropzone` | PR #46 |
+| atom | `Dropzone` | PR #46 (moved from components) |
 | atom | `DonutChart` | PR #47 |
 | component | `Timeline`, `StatCard` | PR #47 |
 | component | `FileAttachment`, `AttachmentPreview`, `EmojiReactionPicker` | PR #48 |
@@ -83,7 +83,7 @@ Organisms: 2+ components forming a page section.
 | Page structure | `SettingsSection` |
 | Status & domain | `DomainCard`, `DomainSelector`, `DomainAccessTable`, `MultipartEditor`, `ReviewPanel`, `WatchersList` |
 | Tables and planning | `PlanningTable`, `BudgetTable`, `HolidayTable`, `HolidayForm`, `GanttChart`, `AvailabilityGrid`, `PeriodSelector`, `FilterBar` |
-| Collaboration | `CommentItem`, `CommentComposer`, `NotificationItem`, `UserMenu` |
+| Collaboration | `NotificationItem`, `UserMenu` (comments shipped: `CommentSection`, `CommentReply`, `CommentComposer`) |
 | Marketing | `MarketingHero` |
 
 ## Templates — to port
