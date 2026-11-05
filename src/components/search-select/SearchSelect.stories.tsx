@@ -83,12 +83,18 @@ const meta = {
     disabled: { control: 'boolean' },
     invalid: { control: 'boolean' },
   },
+  /* Room under the field for the panel, at the width a field usually gets. A story that needs
+     more says so with `parameters.frame`: `wide` for a wider column, `none` for its own layout
+     (a story's own `decorators` add to this one, they cannot replace it). */
   decorators: [
-    (Story) => (
-      <div className="h-96 w-60">
+    (Story, { parameters }) =>
+      parameters.frame === 'none' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        <div className={parameters.frame === 'wide' ? 'h-96 w-96' : 'h-96 w-60'}>
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<StoryProps>;
 
@@ -183,7 +189,7 @@ export const CustomRows: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('combobox', { name: 'Owner' }));
     await userEvent.click(canvas.getByRole('option', { name: /Eve Kestrel/ }));
-    await expect(canvas.getByRole('combobox', { name: 'Owner' })).toHaveTextContent('Eve Kestrel');
+    await expect(canvas.getByRole('combobox', { name: 'Owner Eve Kestrel' })).toHaveTextContent('Eve Kestrel');
   },
 };
 
@@ -215,6 +221,33 @@ export const Single: Story = {
     await expect(trigger).toHaveTextContent('Liam Carter');
     await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     await expect(trigger).toHaveFocus();
+  },
+};
+
+/**
+ * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
+ * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
+ */
+export const RegularForFilters: Story = {
+  render: () => {
+    const options = [
+      { value: 'open', label: 'Open' },
+      { value: 'closed', label: 'Closed' },
+    ];
+    return (
+      <div className="flex w-56 flex-col gap-3">
+        <SearchSelect aria-label="Form field" searchable={false} options={options} value="open" />
+        <SearchSelect aria-label="Filter" searchable={false} emphasis="regular" options={options} value="open" />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* The trigger's name is its label and the chosen value: "Form field Open". */
+    const weight = (name: string) =>
+      Number(getComputedStyle(canvas.getByRole('combobox', { name: new RegExp(`^${name}`) })).fontWeight);
+    await expect(weight('Form field')).toBe(500);
+    await expect(weight('Filter')).toBe(400);
   },
 };
 
@@ -254,8 +287,8 @@ export const Unassigned: Story = {
   render: (args) => <Controlled {...args} aria-label="Assignee" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('button', { name: 'Assignee' })).toHaveTextContent('Unassigned');
-    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await expect(canvas.getByRole('button', { name: 'Assignee Unassigned' })).toHaveTextContent('Unassigned');
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee Unassigned' }));
     await expect(canvas.getByRole('option', { name: 'Unassigned' })).toHaveAttribute('aria-selected', 'true');
   },
 };
@@ -448,7 +481,7 @@ export const ShortLabelInField: Story = {
   render: (args) => <Controlled {...args} aria-label="Cycle" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const field = canvas.getByRole('button', { name: 'Cycle' });
+    const field = canvas.getByRole('button', { name: /^Cycle/ });
     await userEvent.click(field);
     /* The row says everything, and search matches the dates, not just the code. */
     fireEvent.change(canvas.getByRole('combobox', { name: 'Search cycles' }), { target: { value: 'Jun 09' } });
@@ -575,11 +608,11 @@ export const Inline: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Cycle' });
+    const button = canvas.getByRole('button', { name: /^Cycle/ });
     await expect(button).toHaveTextContent('Cycle 44');
     await userEvent.click(button);
     await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)' }));
-    await expect(canvas.getByRole('button', { name: 'Cycle' })).toHaveTextContent('Cycle 45');
+    await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Cycle 45');
   },
 };
 
@@ -656,7 +689,13 @@ export const InAField: Story = {
     </Field>
   ),
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('button', { name: /Assignee/ })).toBeVisible();
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: /Assignee/ });
+    await expect(trigger).toBeVisible();
+    /* The label focuses the field, as it does a native Select, and does not open the panel. */
+    await userEvent.click(canvas.getByText('Assignee'));
+    await expect(trigger).toHaveFocus();
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   },
 };
 
@@ -717,6 +756,8 @@ export const States: Story = {
  * Everything but the row's content (checkbox, states, keyboard, ARIA) is the same in all of them.
  */
 export const Rows: Story = {
+  /* Wide enough for the five-way switcher to read in full. */
+  parameters: { frame: 'wide' },
   render: function Render() {
     const [kind, setKind] = React.useState('avatar');
     const config: Record<string, StoryProps> = {
@@ -765,15 +806,286 @@ export const Rows: Story = {
 /** Light and dark: the search box, avatars, checkboxes and tags hold in both. */
 export const LightAndDark: Story = {
   args: { multiple: true, rows: 'avatar', value: ['amy', 'liam'] },
-  decorators: [],
+  parameters: { layout: 'fullscreen', frame: 'none' },
   render: (args) => (
-    <div className="flex flex-col gap-6">
-      <div className="h-96 w-60 p-4">
+    <div className="grid min-h-screen grid-cols-1 sm:grid-cols-2">
+      <div className="bg-surface-canvas p-8">
         <Controlled {...args} aria-label="Watchers (light)" />
       </div>
-      <div className="dark h-96 w-60 bg-surface-base p-4">
+      <div className="dark bg-surface-canvas p-8">
         <Controlled {...args} aria-label="Watchers (dark)" />
       </div>
     </div>
   ),
+};
+
+/**
+ * `size` (`sm` is 32 tall, `md` the default 40), `fullWidth` (fills its container; off, the field
+ * hugs its content) and `loading` (a spinner for the caret; the panel says "Loading…").
+ */
+export const SizesWidthAndLoading: Story = {
+  name: 'Sizes, full width and loading',
+  parameters: { frame: 'wide' },
+  args: { rows: 'avatar' },
+  render: (args) => (
+    <div className="flex flex-col gap-4">
+      {(
+        [
+          ['Small', { size: 'sm' }],
+          ['Medium (default)', {}],
+          ['Full width', { fullWidth: true }],
+          ['Loading', { loading: true }],
+        ] as const
+      ).map(([name, props]) => (
+        /* `items-start`: a column would otherwise stretch every field to its width. */
+        <div key={name} className="flex flex-col items-start gap-1">
+          <span className="text-caption-md-medium text-text-tertiary">{name}</span>
+          <Controlled {...args} {...props} aria-label={name} />
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const field = (name: string) => canvas.getByRole('button', { name }).parentElement!;
+    await expect(field('Small').getBoundingClientRect().height).toBeLessThan(
+      field('Medium (default)').getBoundingClientRect().height,
+    );
+    await expect(field('Full width').getBoundingClientRect().width).toBeGreaterThan(
+      field('Medium (default)').getBoundingClientRect().width,
+    );
+    await expect(canvasElement.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+  },
+};
+
+/* ---- Review fixes: each of these was a bug found by the reviewer. ---- */
+
+/** The picked value is part of the trigger's name, so a screen reader hears it: "Assignee Amy Lee". */
+export const ValueIsAnnounced: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <Field label="Assignee" htmlFor="assignee-named">
+      <Controlled {...args} id="assignee-named" />
+    </Field>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
+    await expect(canvas.getByRole('button', { name: 'Assignee Amy Lee' })).toBeVisible();
+  },
+};
+
+/** A click with no mouse behind it (`detail` 0: a screen reader, voice control, `element.click()`) opens and closes. */
+export const ClickWithoutAMouse: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => <Controlled {...args} aria-label="Assignee" />,
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Assignee' });
+    trigger.click();
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'));
+    trigger.click();
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+  },
+};
+
+/** With Clear all / Apply, Tab walks into them and the panel stays open, with the draft. */
+export const TabReachesApply: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { options: STATUSES, multiple: true, searchable: false, confirm: true, placeholder: 'Select status' },
+  render: (args) => <Controlled {...args} aria-label="Status" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('combobox', { name: 'Status' });
+    await userEvent.click(field);
+    await userEvent.click(canvas.getByRole('option', { name: 'Accepted' }));
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Clear all' })).toHaveFocus();
+    await expect(field).toHaveAttribute('aria-expanded', 'true');
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'Apply' })).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onChange).toHaveBeenLastCalledWith(['Accepted']);
+  },
+};
+
+/** **Flow:** Escape on Apply closes the panel, puts focus back on the field and discards the draft. */
+export const EscapeFromApply: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { options: STATUSES, multiple: true, searchable: false, confirm: true, placeholder: 'Select status' },
+  render: (args) => <Controlled {...args} aria-label="Status" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const field = canvas.getByRole('combobox', { name: 'Status' });
+    await userEvent.click(field);
+    await userEvent.click(canvas.getByRole('option', { name: 'Accepted' }));
+    canvas.getByRole('button', { name: 'Apply' }).focus();
+    await userEvent.keyboard('{Escape}');
+    await expect(field).toHaveAttribute('aria-expanded', 'false');
+    await expect(field).toHaveFocus();
+    await expect(args.onChange).not.toHaveBeenCalled();
+    await userEvent.click(field);
+    await expect(canvas.getByRole('option', { name: 'Accepted' })).toHaveAttribute('aria-selected', 'false');
+  },
+};
+
+/** A quote in a label does not crash the field: removing a tag still hands focus to the next ✕. */
+export const QuoteInALabel: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    options: [
+      { value: 'a', label: 'Plain' },
+      { value: 'b', label: '12" screen' },
+      { value: 'c', label: 'Say "hi"' },
+    ],
+    multiple: true,
+    display: 'tags',
+    value: ['a', 'b', 'c'],
+  },
+  render: (args) => <Controlled {...args} aria-label="Items" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove Plain' }));
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Remove 12" screen' })).toHaveFocus());
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove 12" screen' }));
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Remove Say "hi"' })).toHaveFocus());
+  },
+};
+
+/** Groups interleaved in `options` are drawn regrouped; the arrows follow what is drawn. */
+export const ArrowsFollowTheGroups: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    options: [
+      { value: 'a1', label: 'A1', group: 'A' },
+      { value: 'b1', label: 'B1', group: 'B' },
+      { value: 'a2', label: 'A2', group: 'A' },
+      { value: 'none', label: 'None' },
+    ],
+  },
+  render: (args) => <Controlled {...args} aria-label="Group" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Group' }));
+    const search = canvas.getByRole('combobox', { name: 'Search by name' });
+    const active = () => document.getElementById(search.getAttribute('aria-activedescendant') ?? '')?.textContent;
+    await expect(active()).toBe('None');
+    const seen: Array<string | null | undefined> = [];
+    for (let i = 0; i < 3; i++) {
+      await userEvent.keyboard('{ArrowDown}');
+      seen.push(active());
+    }
+    /* Drawn: None, A1, A2, B1. */
+    await expect(seen).toEqual(['A1', 'A2', 'B1']);
+  },
+};
+
+/** Past the sixth row the active row is scrolled into view; so is a far-down pick when the panel opens. */
+export const ActiveRowScrollsIntoView: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    options: Array.from({ length: 30 }, (_, i) => ({ value: `o${i}`, label: `Option ${i + 1}` })),
+    value: 'o24',
+  },
+  render: (args) => <Controlled {...args} aria-label="Many" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const inView = (row: HTMLElement) => {
+      const list = row.closest('[role="listbox"]')!.getBoundingClientRect();
+      const box = row.getBoundingClientRect();
+      return box.top >= list.top - 1 && box.bottom <= list.bottom + 1;
+    };
+    await userEvent.click(canvas.getByRole('button', { name: /^Many/ }));
+    await waitFor(() => expect(inView(canvas.getByRole('option', { name: 'Option 25' }))).toBe(true));
+    for (let i = 0; i < 8; i++) await userEvent.keyboard('{ArrowDown}');
+    const search = canvas.getByRole('combobox', { name: 'Search by name' });
+    const active = document.getElementById(search.getAttribute('aria-activedescendant') ?? '')!;
+    await expect(inView(active)).toBe(true);
+  },
+};
+
+/** `loading`: busy, a spinner for the caret, and the panel says so instead of showing rows. */
+export const Loading: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { loading: true, size: 'sm', fullWidth: true },
+  render: (args) => <Controlled {...args} aria-label="Assignee" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await expect(canvas.getByText('Loading…')).toBeVisible();
+    await expect(canvas.queryByRole('option')).toBeNull();
+    await expect(canvasElement.querySelector('[aria-busy="true"]')).not.toBeNull();
+  },
+};
+
+/** `onSearch`: the page gets the text and passes what matches; the component does not filter. */
+export const ServerSearch: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => {
+    const [shown, setShown] = React.useState<SearchSelectOption[]>(PEOPLE.slice(0, 2));
+    return (
+      <Controlled
+        {...args}
+        aria-label="Assignee"
+        options={shown}
+        onSearch={(query) => {
+          args.onSearch?.(query);
+          setShown(query ? PEOPLE.filter((o) => o.value.startsWith('c')) : PEOPLE.slice(0, 2));
+        }}
+      />
+    );
+  },
+  args: { onSearch: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Assignee' }));
+    await expect(args.onSearch).toHaveBeenLastCalledWith('');
+    await expect(canvas.getAllByRole('option')).toHaveLength(2);
+    /* "zz" matches nothing by label, but the page decides what matches: the component shows its answer. */
+    fireEvent.change(canvas.getByRole('combobox', { name: 'Search by name' }), { target: { value: 'zz' } });
+    await waitFor(() => expect(args.onSearch).toHaveBeenLastCalledWith('zz'));
+    await waitFor(() => expect(canvas.getByRole('option', { name: 'Carl Baker' })).toBeVisible());
+    /* Picked, then the search resets to two others: the field still says who, not "carl". */
+    await userEvent.click(canvas.getByRole('option', { name: 'Carl Baker' }));
+    const trigger = canvas.getByRole('button', { name: /Assignee/ });
+    await expect(trigger).toHaveTextContent('Carl Baker');
+    await userEvent.click(trigger);
+    await waitFor(() => expect(canvas.queryByRole('option', { name: 'Carl Baker' })).toBeNull());
+    await expect(trigger).toHaveTextContent('Carl Baker');
+  },
+};
+
+/** `collapsibleGroups`: each heading is a button with a caret; folded groups leave the list and the keys. */
+export const CollapsibleGroups: Story = {
+  args: {
+    'aria-label': 'Person',
+    collapsibleGroups: true,
+    defaultCollapsedGroups: ['Away'],
+    options: [
+      { value: 'a', label: 'Amy Lee', group: 'Here' },
+      { value: 'b', label: 'Bo Tran', group: 'Here' },
+      { value: 'c', label: 'Cy Park', group: 'Away' },
+    ],
+  },
+  decorators: [(Story) => <div className="h-72 w-72"><Story /></div>],
+};
+
+/** `warning`: the pick is allowed but worth a second look — an amber border and message. */
+export const Warning: Story = {
+  args: {
+    'aria-label': 'Person',
+    value: 'a',
+    options: ['a', 'b'].map((value) => ({ value, label: `Person ${value}` })),
+    warning: 'This person is busy during the selected dates, but can still be assigned.',
+  },
+  decorators: [(Story) => <div className="h-40 w-72"><Story /></div>],
 };

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Icon } from '../../atoms/icon';
-import { Tooltip, type TooltipProps } from '../tooltip';
+import { Tooltip, type TooltipProps } from '../../atoms/tooltip';
 
 /**
  * GanttTooltip — the card a Gantt bar shows on hover or focus: the work item's

@@ -12,7 +12,7 @@ import { Menu, type MenuItem } from '../../components/menu';
 import { Popover } from '../../components/popover';
 import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
-import { Tooltip } from '../../components/tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 import {
   buildPeriod,
   columnIndex,

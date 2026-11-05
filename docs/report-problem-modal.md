@@ -12,7 +12,7 @@ Read off the Figma `Report_A_Problem_Modal` (`7218:77431`, audit batch 4,
 |---|---|---|
 | `Modal` | component | The dialog itself — header, close button, focus trap |
 | `Field` | component | Labels each of the three inputs |
-| `Dropzone` | component | The attachments area |
+| `Dropzone` | atom | The attachments area |
 | `Input` | atom | The problem and its description |
 | `Button` | atom | Cancel and Submit |
 

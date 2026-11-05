@@ -4,6 +4,7 @@ import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { CheckboxMark } from '../../atoms/checkbox';
 import { Icon, type IconName } from '../../atoms/icon';
+import { Spinner } from '../../atoms/spinner';
 import { Input } from '../../atoms/input';
 import { Tag, type TagTone } from '../../atoms/tag';
 
@@ -121,6 +122,30 @@ interface SearchSelectBase
    */
   renderOption?: (option: SearchSelectOption, state: SearchSelectRowState) => React.ReactNode;
   disabled?: boolean;
+  /** `sm` 32 tall, `md` 40 (default), as `Select`. */
+  size?: 'sm' | 'md';
+  /**
+   * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
+   * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
+   */
+  emphasis?: 'regular' | 'medium';
+  /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
+  fullWidth?: boolean;
+  /**
+   * The rows are on their way: the field is `aria-busy`, a spinner stands in for the caret, and
+   * the panel says "Loading…" in place of the rows.
+   */
+  loading?: boolean;
+  /**
+   * Search happens on your server: called with the text on every change in the search box (and
+   * with `''` when the panel opens), and the component then stops filtering `options` itself, so
+   * you pass what matches. Debounce it on your side; pair it with `loading` while the request runs.
+   * A pick keeps its name after it drops out of `options` (the field remembers every option it has
+   * been given); for a value set before any search, include its option in the first `options`.
+   */
+  onSearch?: (query: string) => void;
+  /** What the panel says while `loading`. */
+  loadingText?: string;
   /**
    * Draws the field as plain text inside a bar rather than as a bordered input: no
    * border or fill, the value semibold with a brand caret, a tint on hover. For a
@@ -135,6 +160,30 @@ interface SearchSelectBase
    * announced with the field (`aria-describedby`).
    */
   error?: React.ReactNode;
+  /**
+   * A caution under the field, in the warning colour: the pick is allowed but worth a second
+   * look ("This assignee is busy during the selected dates, but can still be assigned"). The
+   * border turns warning; `error` wins if both are set.
+   */
+  warning?: React.ReactNode;
+  /**
+   * Groups fold: each heading becomes a button (`aria-expanded`) with a caret, and a folded
+   * group's rows leave the list — and the arrow keys. While there is a search query every group
+   * with a match shows, folded or not, so a search never hides its own results.
+   */
+  collapsibleGroups?: boolean;
+  /** Group names that start folded, with `collapsibleGroups`. */
+  defaultCollapsedGroups?: readonly string[];
+  /**
+   * Draws a group heading's content yourself (a status dot beside the name), replacing the
+   * plain name. The button, caret and ARIA stay the component's.
+   */
+  renderGroupHeading?: (name: string, state: { collapsed: boolean }) => React.ReactNode;
+  /**
+   * A line above the rows, inside the panel, with a divider under it — "Availability is unknown.
+   * Pick a start date first." Rows still follow it.
+   */
+  panelNotice?: React.ReactNode;
   /** Id of the trigger button, for a `Field` label's `htmlFor`. */
   id?: string;
   'aria-label'?: string;
@@ -232,8 +281,20 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       renderOption,
       disabled,
       inline,
+      size = 'md',
+      emphasis = 'medium',
+      fullWidth = false,
+      loading,
+      onSearch,
+      loadingText = 'Loading…',
       invalid,
+      'aria-invalid': ariaInvalid,
       error,
+      warning,
+      collapsibleGroups,
+      defaultCollapsedGroups,
+      renderGroupHeading,
+      panelNotice,
       id,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
@@ -246,6 +307,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const listId = React.useId();
     const tagsId = React.useId();
     const errorId = React.useId();
+    const valueId = React.useId();
+    const generatedTriggerId = React.useId();
+    const triggerId = id ?? generatedTriggerId;
     const wrapperRef = React.useRef<HTMLDivElement>(null);
     const fieldRef = React.useRef<HTMLDivElement>(null);
     const rowRef = React.useRef<HTMLDivElement>(null);
@@ -270,24 +334,57 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const [announce, setAnnounce] = React.useState('');
 
     const all = options.map(normalize);
+    /* Every option this field has been given, by value. With `onSearch` the page swaps `options`
+       for each search, so a pick can drop out of the current list; its name and tone still come
+       from here, not the raw value. */
+    const seen = React.useRef(new Map<string, SearchSelectOption>());
+    all.forEach((o) => seen.current.set(o.value, o));
+    const optionOf = (v: string) => all.find((x) => x.value === v) ?? seen.current.get(v);
     /* What the field, the tags and the announcements say: the short label when there is one. */
     const labelOf = (v: string) => {
-      const o = all.find((x) => x.value === v);
+      const o = optionOf(v);
       return o ? (o.shortLabel ?? o.label) : v;
     };
     const committed: readonly string[] =
       value === undefined ? inner : multiple ? (value as readonly string[]) : value ? [value as string] : [];
     const shown = multiple && confirm && open ? draft : committed;
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || ariaInvalid === true || ariaInvalid === 'true';
+    const isWarning = !isInvalid && !!warning;
+    const [collapsedGroups, setCollapsedGroups] = React.useState<readonly string[]>(
+      defaultCollapsedGroups ?? [],
+    );
 
-    const list = searchable && query
-      ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
-      : all;
+    /* Rows in the order they are drawn: ungrouped first, then each group in the order first seen.
+       Arrow keys, Home / End and the active row all index this list, so they match the screen. */
+    const arrange = (rows: SearchSelectOption[]) => {
+      /* Not `sort`: it sends `undefined` (the ungrouped rows' name) to the end without asking. */
+      const names: string[] = [];
+      rows.forEach((o) => {
+        if (o.group && !names.includes(o.group)) names.push(o.group);
+      });
+      return [...rows.filter((o) => !o.group), ...names.flatMap((name) => rows.filter((o) => o.group === name))];
+    };
+    const arranged = arrange(all);
+    /* Everything the search lets through, folded or not: the headings are drawn from this. */
+    const shownRows = arrange(
+      searchable && query && !onSearch
+        ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+        : all,
+    );
+    /* A folded group's rows are not on screen, so they are not in the list the keys walk. A search
+       unfolds everything it matched. */
+    const folded = (o: SearchSelectOption) =>
+      !!collapsibleGroups && !!o.group && !query && collapsedGroups.includes(o.group);
+    const list = shownRows.filter((o) => !folded(o));
     const firstEnabled = (rows: SearchSelectOption[]) => Math.max(0, rows.findIndex((o) => !o.disabled));
     const activeIndex = Math.min(active, list.length - 1);
     const activeOption = list[activeIndex];
     /* Index-based ids: values are arbitrary strings. */
     const optionId = (i: number) => `${listId}-opt-${i}`;
+    /* With foldable groups the heading is a button, and a listbox may hold only options, so each
+       group is its own listbox with its heading beside it and the field controls all of them. */
+    const groupListId = (gi: number) => `${listId}-g${gi}`;
 
     const commit = (next: string[]) => {
       if (value === undefined) setInner(next);
@@ -298,9 +395,10 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const openPanel = () => {
       if (disabled) return;
       setQuery('');
+      onSearch?.('');
       setDraft(committed);
-      const at = all.findIndex((o) => committed.includes(o.value));
-      setActive(at >= 0 ? at : firstEnabled(all));
+      const at = arranged.findIndex((o) => committed.includes(o.value));
+      setActive(at >= 0 ? at : firstEnabled(arranged));
       setOpen(true);
     };
     const closePanel = (restoreFocus = false) => {
@@ -388,10 +486,20 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
           }
           break;
         case 'Tab':
-          closePanel();
+          /* With Clear all / Apply the panel is a stop on the way: Tab walks on into it, and
+             the panel closes when focus leaves the whole control. Without them Tab just leaves. */
+          if (!(multiple && confirm) && !collapsibleGroups) closePanel();
           break;
       }
     };
+
+    /* The active row stays in view as the arrows move it, and when the panel opens on a far-down pick. */
+    React.useEffect(() => {
+      if (open && activeOption) {
+        document.getElementById(optionId(activeIndex))?.scrollIntoView({ block: 'nearest' });
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, activeIndex]);
 
     /* With search, focus moves into it the moment the panel opens. */
     React.useEffect(() => {
@@ -400,15 +508,34 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
 
     /* Groups from the rows that survive the search; ungrouped lead. */
     const groups: Array<{ name?: string; rows: Array<{ option: SearchSelectOption; index: number }> }> = [];
-    list.forEach((option, index) => {
+    shownRows.forEach((option) => {
       let g = groups.find((x) => x.name === option.group);
       if (!g) {
         g = { name: option.group, rows: [] };
         groups.push(g);
       }
-      g.rows.push({ option, index });
+      if (!folded(option)) g.rows.push({ option, index: list.indexOf(option) });
     });
-    const ordered = [...groups].sort((a, b) => Number(!!a.name) - Number(!!b.name));
+    const controlsIds = collapsibleGroups ? groups.map((_, gi) => groupListId(gi)).join(' ') : listId;
+    /* A foldable group's rows are their own listbox, named by its heading (see `groupListId`). */
+    const wrapRows = (g: { name?: string; rows: unknown[] }, gi: number, nodes: React.ReactNode) =>
+      !collapsibleGroups ? (
+        nodes
+      ) : (
+        <div
+          role="listbox"
+          id={groupListId(gi)}
+          aria-labelledby={g.name ? `${listId}-grp-${gi}` : undefined}
+          aria-label={g.name ? undefined : ariaLabel}
+          aria-multiselectable={multiple || undefined}
+          hidden={g.rows.length === 0}
+        >
+          {nodes}
+        </div>
+      );
+    const toggleGroup = (name: string) =>
+      setCollapsedGroups((now) => (now.includes(name) ? now.filter((n) => n !== name) : [...now, name]));
+    const ordered = groups;
 
     const summary =
       committed.length === 0
@@ -416,6 +543,32 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         : committed.length === 1
           ? labelOf(committed[0]!)
           : `${committed.length} selected`;
+    /* The trigger is named by its label and then its value ("Assignee Amy Lee"), so a screen reader
+       hears what was picked. An `aria-label` is named by the trigger itself; a `<label for>` (a Field)
+       is found through the button's `labels`, and given an id if it has none. */
+    const [labelIds, setLabelIds] = React.useState<string[]>([]);
+    React.useLayoutEffect(() => {
+      if (ariaLabel || ariaLabelledBy) return;
+      const ids = Array.from(triggerRef.current?.labels ?? []).map((label, i) => {
+        if (!label.id) label.id = `${listId}-label-${i}`;
+        return label.id;
+      });
+      setLabelIds((prev) => (prev.join(' ') === ids.join(' ') ? prev : ids));
+    });
+    /* A click on the field's `<label>` focuses it, as it does a native `Select`, and does not open
+       the panel: a label passes its click on to the button it names, which would. */
+    React.useEffect(() => {
+      const labels = Array.from(triggerRef.current?.labels ?? []);
+      const onLabelClick = (e: MouseEvent) => {
+        e.preventDefault();
+        triggerRef.current?.focus();
+      };
+      labels.forEach((label) => label.addEventListener('click', onLabelClick));
+      return () => labels.forEach((label) => label.removeEventListener('click', onLabelClick));
+    }, [triggerId]);
+    const hasValue = committed.length > 0;
+    const nameParts = ariaLabelledBy ? [ariaLabelledBy] : ariaLabel ? [triggerId] : labelIds;
+    const triggerName = hasValue && nameParts.length > 0 ? [...nameParts, valueId].join(' ') : ariaLabelledBy;
     const showTags = !!multiple && display === 'tags' && committed.length > 0;
     const tagsKey = committed.join('\u0000');
     /* Without a search box the trigger is the combobox. */
@@ -490,8 +643,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         return;
       }
       pendingFocus.current = null;
+      /* Found by the tag's own value, never through a selector: a label can hold any character. */
       const target = pending.tag
-        ? rowRef.current?.querySelector<HTMLElement>(`button[aria-label="Remove ${labelOf(pending.tag)}"]`)
+        ? tagEls()
+            .find((el) => el.dataset.selectTag === pending.tag)
+            ?.querySelector<HTMLElement>('button')
         : null;
       (target && target.offsetParent !== null ? target : triggerRef.current)?.focus();
     });
@@ -520,7 +676,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     return (
       <div
         ref={setWrapperRef}
-        className={cn('font-sans', className)}
+        aria-busy={loading || undefined}
+        className={cn('font-sans', fullWidth ? 'w-full' : 'inline-block min-w-48 max-w-full', className)}
         onBlur={(e) => {
           onBlur?.(e);
           /* Focus left the whole control, not just moved into the panel — or a
@@ -534,6 +691,10 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
         onKeyDown={(e) => {
           onWrapperKeyDown?.(e);
           /* Escape folds an opened-out field back (an open panel takes Escape first). */
+          if (e.key === 'Escape' && open && e.target !== triggerRef.current && e.target !== searchRef.current) {
+            e.preventDefault();
+            closePanel(true);
+          }
           if (e.key === 'Escape' && expanded && !open) {
             e.preventDefault();
             setOpenedOut(false);
@@ -555,12 +716,17 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             className={cn(
               inline
                 ? 'mx-auto flex h-7 w-max max-w-full items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
-                : 'flex min-h-10 items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
+                : cn(
+                    'flex items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
+                    size === 'sm' ? 'min-h-8' : 'min-h-10',
+                  ),
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
               !inline &&
                 (isInvalid
                   ? 'border-accent-critical-outline-border-default'
-                  : 'border-stroke-strong focus-within:border-stroke-focused'),
+                  : isWarning
+                    ? 'border-accent-warning-outline-border-default'
+                    : 'border-stroke-strong focus-within:border-stroke-focused'),
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
               disabled && (inline ? 'cursor-not-allowed' : 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'),
             )}
@@ -577,9 +743,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 {committed.map((v, i) => (
                   <Tag
                     key={v}
-                    data-select-tag=""
+                    data-select-tag={v}
                     size="sm"
-                    tone={rows === 'tag' ? (all.find((o) => o.value === v)?.tone ?? 'neutral') : 'neutral'}
+                    tone={rows === 'tag' ? (optionOf(v)?.tone ?? 'neutral') : 'neutral'}
                     onRemove={disabled ? undefined : () => removeTag(v)}
                     className={cn('shrink-0', disabledTag, i >= visible && 'hidden')}
                   >
@@ -626,54 +792,64 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
             )}
             <button
               ref={triggerRef}
-              id={id}
+              id={triggerId}
               type="button"
               role={triggerIsCombobox ? 'combobox' : undefined}
               aria-haspopup="listbox"
               aria-expanded={open}
-              aria-controls={listId}
+              aria-controls={controlsIds}
               aria-activedescendant={
                 triggerIsCombobox && open && activeOption ? optionId(activeIndex) : undefined
               }
               aria-label={ariaLabel}
-              aria-labelledby={ariaLabelledBy}
+              aria-labelledby={triggerName}
               aria-invalid={isInvalid || undefined}
-              aria-describedby={error ? errorId : undefined}
+              aria-describedby={error || isWarning ? errorId : undefined}
               disabled={disabled}
               onKeyDown={(e) => onKeyDown(e, false)}
-              onClick={(e) => {
-                /* Keyboard activation is handled in onKeyDown (detail 0). */
-                if (e.detail === 0) return;
-                open ? closePanel() : openPanel();
+              /* Enter and Space are handled on keydown, which also stops the click the browser
+                 would send (Enter on keydown, Space on keyup, so keyup is stopped too). Every
+                 click that does arrive is a real one: a mouse, a screen reader's browse mode,
+                 voice control, a switch, `element.click()`. */
+              onKeyUp={(e) => {
+                if (e.key === ' ') e.preventDefault();
               }}
+              onClick={() => (open ? closePanel() : openPanel())}
               className={cn(
                 'flex items-center justify-between rounded-sm text-left outline-none',
-                inline ? 'h-7 gap-1' : 'h-8 gap-2',
+                inline ? 'h-7 gap-1' : cn('gap-2', size === 'sm' ? 'h-6' : 'h-8'),
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
                   ? inline
                     ? 'text-body-sm-semibold text-text-primary'
-                    : 'text-body-sm-medium text-text-primary'
+                    : cn('text-text-primary', emphasis === 'medium' ? 'text-body-sm-medium' : 'text-body-sm-regular')
                   : 'text-body-sm-regular text-text-subtle',
+                size === 'sm' && 'text-caption-md-regular',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',
               )}
             >
               {showTags ? (
                 /* The tags carry the value; the button still needs a name. */
-                <span className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
+                <span id={valueId} className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
               ) : (
-                <span className="min-w-0 truncate">{summary ?? placeholder}</span>
+                <span id={valueId} className="min-w-0 truncate">
+                  {summary ?? placeholder}
+                </span>
               )}
-              <Icon
-                name="caret-down"
-                size="sm"
-                aria-hidden="true"
-                className={cn(
-                  'shrink-0 transition-transform motion-reduce:transition-none',
-                  inline ? 'text-text-brand-medium' : 'text-text-tertiary',
-                  open && 'rotate-180',
-                )}
-              />
+              {loading ? (
+                <Spinner size="sm" decorative className="shrink-0 text-text-tertiary" />
+              ) : (
+                <Icon
+                  name="caret-down"
+                  size="sm"
+                  aria-hidden="true"
+                  className={cn(
+                    'shrink-0 transition-transform motion-reduce:transition-none',
+                    inline ? 'text-text-brand-medium' : 'text-text-tertiary',
+                    open && 'rotate-180',
+                  )}
+                />
+              )}
             </button>
           </div>
 
@@ -696,7 +872,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   role="combobox"
                   aria-label={searchPlaceholder}
                   aria-expanded={open}
-                  aria-controls={listId}
+                  aria-controls={controlsIds}
                   aria-autocomplete="list"
                   aria-activedescendant={open && activeOption ? optionId(activeIndex) : undefined}
                   placeholder={searchPlaceholder}
@@ -706,12 +882,23 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   onChange={(e) => {
                     setQuery(e.target.value);
                     setActive(0);
+                    onSearch?.(e.target.value);
                   }}
                   onKeyDown={(e) => onKeyDown(e, true)}
                 />
               </div>
             )}
-            {list.length === 0 && (
+            {panelNotice && (
+              <div className="mx-3 mb-1 border-b border-stroke-subtle py-2 text-caption-md-semibold text-text-tertiary">
+                {panelNotice}
+              </div>
+            )}
+            {loading && (
+              <div role="status" className={cn('px-3 pb-3 text-caption-md-semibold text-text-tertiary', searchable ? 'pt-1' : 'pt-2')}>
+                {loadingText}
+              </div>
+            )}
+            {!loading && shownRows.length === 0 && (
               /* Outside the listbox: a listbox may hold only options. */
               <div
                 className={cn(
@@ -723,12 +910,12 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               </div>
             )}
             <div
-              role="listbox"
-              id={listId}
-              aria-label={ariaLabel}
-              aria-labelledby={ariaLabelledBy}
-              aria-multiselectable={multiple || undefined}
-              hidden={list.length === 0}
+              role={collapsibleGroups ? undefined : 'listbox'}
+              id={collapsibleGroups ? undefined : listId}
+              aria-label={collapsibleGroups ? undefined : ariaLabel}
+              aria-labelledby={collapsibleGroups ? undefined : ariaLabelledBy}
+              aria-multiselectable={!collapsibleGroups && multiple ? true : undefined}
+              hidden={loading || shownRows.length === 0}
               className="max-h-64 overflow-y-auto"
               /* Reachable by keyboard when it scrolls, though focus never needs it. */
               tabIndex={-1}
@@ -736,18 +923,45 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               {ordered.map((g, gi) => (
                 <div
                   key={g.name ?? '__none'}
-                  role={g.name ? 'group' : 'presentation'}
-                  aria-labelledby={g.name ? `${listId}-grp-${gi}` : undefined}
+                  role={collapsibleGroups ? undefined : g.name ? 'group' : 'presentation'}
+                  aria-labelledby={!collapsibleGroups && g.name ? `${listId}-grp-${gi}` : undefined}
                 >
-                  {g.name && (
+                  {g.name && !collapsibleGroups && (
                     <div
                       id={`${listId}-grp-${gi}`}
                       className="mx-3 mt-1 border-b border-stroke-subtle py-1.5 text-caption-md-semibold text-text-tertiary"
                     >
-                      {g.name}
+                      {renderGroupHeading ? renderGroupHeading(g.name, { collapsed: false }) : g.name}
                     </div>
                   )}
-                  {g.rows.map(({ option, index }) => {
+                  {g.name && collapsibleGroups && (
+                    <div id={`${listId}-grp-${gi}`} className="mx-3 mt-1 border-b border-stroke-subtle">
+                      <button
+                        type="button"
+                        aria-expanded={!folded({ value: '', label: '', group: g.name })}
+                        onClick={() => toggleGroup(g.name!)}
+                        className="flex min-h-8 w-full items-center justify-between gap-2 rounded-sm py-1.5 text-left text-caption-md-semibold text-text-tertiary hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+                      >
+                        <span className="flex items-center gap-2">
+                          {renderGroupHeading
+                            ? renderGroupHeading(g.name, {
+                                collapsed: folded({ value: '', label: '', group: g.name }),
+                              })
+                            : g.name}
+                        </span>
+                        <Icon
+                          name="caret-up"
+                          size="sm"
+                          aria-hidden="true"
+                          className={cn(
+                            'shrink-0 transition-transform motion-reduce:transition-none',
+                            folded({ value: '', label: '', group: g.name }) && 'rotate-180',
+                          )}
+                        />
+                      </button>
+                    </div>
+                  )}
+                  {wrapRows(g, gi, g.rows.map(({ option, index }) => {
                     const isSelected = shown.includes(option.value);
                     const isActive = index === activeIndex && !option.disabled;
                     return (
@@ -788,7 +1002,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                         )}
                       </div>
                     );
-                  })}
+                  }))}
                 </div>
               ))}
             </div>
@@ -810,6 +1024,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
           </div>
         </div>
 
+        {isWarning && (
+          <p id={errorId} className="mt-1.5 text-caption-md-medium text-accent-warning-outline-content-default">
+            {warning}
+          </p>
+        )}
         {error && (
           <p
             id={errorId}

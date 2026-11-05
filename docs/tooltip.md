@@ -1,4 +1,4 @@
-# Tooltip
+# Tooltip *(atom)*
 
 A small floating label describing the element it is attached to.
 
@@ -51,9 +51,12 @@ does not ship one yet — until it does, put the content on the page.
 | `children` | `ReactElement` | — | **Required.** Exactly one element, and it must be focusable. It is cloned to receive `aria-describedby` |
 | `placement` | `top \| bottom \| left \| right` | `top` | Static offsets. No collision detection, no flipping — see below |
 | `followPointer` | `boolean` | `false` | Opens under the pointer (horizontally) instead of at the trigger's middle, kept inside the viewport and still on the `top` or `bottom` side. For a trigger much wider than the bubble — a chart bar. It holds still once open so the pointer can reach it; keyboard focus still opens it at the trigger's middle |
+| `wide` | `boolean` | `false` | The bubble runs to 384 instead of 256 — for a tooltip that is a short list (each line a row), like the Type column's. Longer text still wraps |
 | `openDelay` | `number` (ms) | `300` | Hover only. **Focus is always immediate** |
 | `defaultOpen` | `boolean` | `false` | Renders it already open. For Storybook, screenshots and visual regression — not a way to pin one open in product |
 | `tooltipId` | `string` | auto (`useId`) | Override the generated id of the bubble. Rarely needed |
+| `disabled` | `boolean` | `false` | Off for now: it does not open and does not describe its trigger. For a tooltip that applies only sometimes — the full text of a name, while the name is cut (`TruncatedText`) |
+| `describe` | `boolean` | `true` | Wires the trigger to the bubble with `aria-describedby`. Off when the trigger's own name already says the tooltip's words (an icon button labelled "Add reaction", a collapsed sidebar row, `AssigneeWithStatus`), so they are not heard twice. Off, the trigger gets `data-tooltip` instead, so it still knows it has one (`IconButton` drops its native `title` under either). The story tests fail a description that repeats its name (`vcp-description-repeats-name`, `src/lib/story-a11y.ts`) |
 | `className` | `string` | — | Merged onto the wrapper `<span>` via `cn()`. This replaces the source component's `style` prop |
 | `ref` | `Ref<HTMLSpanElement>` | — | Points at the wrapper `<span>`, not the trigger |
 
@@ -162,7 +165,9 @@ in a way that helps nobody.
   reason to read the element. The component clones the single child and sets
   `aria-describedby` to the bubble's id, merging with any value the child already
   had. Both halves are present — `role="tooltip"` **and** the association — and
-  neither is useful without the other.
+  neither is useful without the other. The one exception is `describe={false}`, for a
+  trigger whose own name already says exactly what the bubble shows: there the
+  association would only repeat it.
 
 - **The bubble is never removed from the accessibility tree.** The closed state is
   `opacity-0`, not `hidden`, `display: none` or `visibility: hidden`, all three of
@@ -277,7 +282,8 @@ in a way that helps nobody.
 - Don't put a tooltip on a `disabled` control — neither hover nor focus reaches
   it. See the workarounds above.
 - Don't repeat an `IconButton`'s `label` as the tooltip content; it announces
-  twice.
+  twice. (Where a sighted user does need the trigger's name shown, as on an avatar,
+  pass `describe={false}`.)
 - Don't wrap a non-focusable element. A tooltip only a mouse can open is a tooltip
   most people never see.
 - Don't hardcode colours or spacing. `className="bg-[#0e0a49]"` is a bug — add a
