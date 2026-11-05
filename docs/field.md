@@ -78,6 +78,8 @@ Never show both. `error` wins whenever it is set.
 
 ## Accessibility
 
+- **A custom control** (a `contenteditable` field, which `<label for>` cannot name) receives the label's id as `aria-labelledby`, unless it already has `aria-labelledby` or `aria-label`; the function form gets it in its props. Clicking the label focuses such a control.
+
 - The label is a real `<label htmlFor>`. Clicking it focuses the control.
 - `error` renders with `role="alert"`, so it is announced the moment it appears.
   Both `helper` and `error` are referenced by the control's `aria-describedby`.
@@ -98,6 +100,10 @@ Never show both. `error` wins whenever it is set.
   `surface.elevated` and 4.56:1 on `surface.canvas` in light, 5.06:1 / 6.18:1 in
   dark. It clears 4.5:1 on those two, but **not** on `surface.neutral.subtle`
   (4.35:1) — don't put a field's error message on that surface.
+
+## The error edge
+
+An `error` turns the control's **edge critical as well as the message red**. `Field` puts `aria-invalid` on the control, and `Input`, `Select`, `Textarea`, `SearchSelect` and `DateField` read it, so a `Field` with an error needs nothing else (their own `invalid` prop still works on its own). The edge stays through focus.
 
 ## Don't
 

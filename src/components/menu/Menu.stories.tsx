@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Menu, type MenuItem } from './Menu';
 import { Button } from '../../atoms/button';
+import { DataTable } from '../data-table';
 
 const basic: MenuItem[] = [
   { key: 'edit', label: 'Edit deliverable' },
@@ -52,7 +53,7 @@ export const WithIcons: Story = {
   name: 'With icons',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { key: 'share', label: 'Share with team', icon: 'users' },
       { key: 'export', label: 'Export as file', icon: 'file' },
@@ -65,7 +66,7 @@ export const WithShortcuts: Story = {
   name: 'With shortcuts',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple', shortcut: '⌘E' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil', shortcut: '⌘E' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle', shortcut: '⌘D' },
       { key: 'share', label: 'Share with team', icon: 'users', shortcut: '⇧⌘S' },
     ],
@@ -77,7 +78,7 @@ export const WithDivider: Story = {
   name: 'With a divider',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { divider: true },
       { key: 'archive', label: 'Archive', icon: 'trash-simple' },
@@ -93,7 +94,7 @@ export const WithDangerItem: Story = {
   name: 'With a danger item',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { divider: true },
       { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'danger' },
@@ -134,7 +135,7 @@ export const WithDisabledItem: Story = {
   name: 'With a disabled item',
   args: {
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
       { key: 'share', label: 'Share with team', icon: 'users' },
     ],
@@ -187,7 +188,7 @@ export const LightAndDark: Story = {
           defaultOpen
           align="left"
           items={[
-            { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple', shortcut: '⌘E' },
+            { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil', shortcut: '⌘E' },
             { key: 'share', label: 'Share with team', icon: 'users' },
             { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
             { divider: true },
@@ -206,7 +207,7 @@ export const LightAndDark: Story = {
 };
 
 const actions: MenuItem[] = [
-  { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+  { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
   { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
   { key: 'share', label: 'Share with team', icon: 'users' },
   { key: 'export', label: 'Export as file', icon: 'file' },
@@ -275,7 +276,7 @@ export const SkipsDisabledAndDividers: Story = {
   args: {
     trigger: <Button variant="secondary">Deliverable actions</Button>,
     items: [
-      { key: 'edit', label: 'Edit deliverable', icon: 'pencil-simple' },
+      { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { divider: true },
       { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
       { key: 'share', label: 'Share with team', icon: 'users' },
@@ -330,5 +331,41 @@ export const SelectCloses: Story = {
     await expect(args.onSelect).toHaveBeenLastCalledWith('share');
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
     await expect(trigger).toHaveFocus();
+  },
+};
+
+/**
+ * **Flow:** the menu on a table's last row. `DataTable` scrolls sideways, so it clips whatever runs past
+ * its edges; the menu floats above the page instead, and every item shows and can be clicked. (The table
+ * cut it off until November 2026.)
+ */
+export const FloatsOutOfATable: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => (
+    <div className="w-112">
+      <DataTable
+        caption="Added Values"
+        columns={[
+          { key: 'id', label: 'ID' },
+          { key: 'title', label: 'Title' },
+          { key: 'actions', label: 'Actions', render: () => <Menu {...args} /> },
+        ]}
+        rows={[
+          { id: 'AV-2041', title: 'Supplier onboarding portal' },
+          { id: 'AV-2037', title: 'Freight cost renegotiation' },
+        ]}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const triggers = within(canvasElement).getAllByRole('button', { name: 'More actions' });
+    await userEvent.click(triggers[triggers.length - 1]!);
+    const menu = await screen.findByRole('menu');
+    /* Each item is what the pointer finds at its own centre: the table does not cut it off. */
+    for (const item of within(menu).getAllByRole('menuitem')) {
+      const r = item.getBoundingClientRect();
+      await expect(item.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2))).toBe(true);
+    }
   },
 };

@@ -42,6 +42,7 @@ Modal.
 | `placement` | `top \| bottom` | `bottom` | The whole placement contract. See the positioning limits below |
 | `align` | `left \| right` | `left` | Which edge of the panel lines up with the same edge of the trigger |
 | `width` | `auto \| sm \| md \| lg` | `md` | 224 / 288 / 384 wide, or content-sized. A variant, not a number — see the deviations |
+| `strategy` | `absolute \| fixed` | `fixed` | `fixed` places the panel from the trigger's position on screen, so an ancestor with `overflow: auto \| hidden` (a table that scrolls sideways, a side panel that scrolls) cannot clip it. It follows the trigger on scroll and resize and still lives in the wrapper, so focus, Escape and click-outside are unchanged. `absolute` puts the panel inside the wrapper, where such an ancestor clips it: use it only under an ancestor with a CSS `transform` or `filter`, which would re-anchor a fixed panel. None of the system's containers has one. The default was `absolute` until November 2026 |
 | `autoFocus` | `boolean` | `false` | Move focus to the first focusable element in the panel on open. See the accessibility notes before turning it on |
 | `label` | `string` | — | Accessible name for the panel. Only meaningful with `panelRole`; without it the panel is named by the trigger |
 | `panelRole` | `dialog \| menu \| listbox \| grid \| tree` | — | Role for the panel, which also decides the trigger's `aria-haspopup`. Leave unset for the plain disclosure case |
@@ -150,8 +151,11 @@ because a list of actions with no keyboard entry point is a mouse feature.
 
 ### Positioning — what it does and does not do
 
-The panel is absolutely positioned inside a relatively positioned wrapper:
-`top` or `bottom`, flush to the trigger's `left` or `right` edge. `placement` and
+The panel is placed from the trigger's position on screen (`position: fixed`):
+`top` or `bottom`, flush to the trigger's `left` or `right` edge. So it floats above
+the page, and no table, dialog or panel that scrolls can cut it off. (Until November
+2026 it sat inside the wrapper, where any `overflow` ancestor clipped it; the
+`FloatsOutOfAScrollingPanel` story is the regression test.) `placement` and
 `align` are what you *prefer*. When the panel is opened it is measured, and:
 
 - **It flips vertically** when the preferred side is cut off and the other side has
@@ -167,18 +171,21 @@ The panel is absolutely positioned inside a relatively positioned wrapper:
   While shortened it also remembers the height it had before, so content that
   shrinks to fit instead of scrolling (a column whose header and footer stay while
   its list gives way, as `NotificationPopover`'s does) settles too.
-- It is measured again when the window or the panel is resized. It does **not**
-  re-measure while the page scrolls, so an open panel never jumps to the other side
-  under the reader's hands.
+- It is measured again when the window or the panel is resized. While the page
+  scrolls it **moves with its trigger but keeps the side and edge it opened on**,
+  so an open panel never jumps to the other side under the reader's hands.
 
 **What it still does not do:**
 
 - **No shifting.** A panel wider than the space on both sides overflows rather than
   sliding to fit. Keep panels to the width variants.
-- **No portal.** The panel is a child of the trigger's wrapper, so any ancestor
-  with `overflow: hidden`, `overflow: auto` or a transform will clip or move it. It
-  measures against the *screen*, not that ancestor: a Popover inside a scrolling table
-  cell is the usual way this bites.
+- **No portal.** The panel is still a child of the trigger's wrapper (which is
+  what keeps focus, Escape and click-outside simple). Being `fixed`, it escapes any
+  `overflow` ancestor, but an ancestor with a CSS `transform` or `filter` would
+  re-anchor it to itself. None of the system's containers has one; under one, pass
+  `strategy="absolute"`.
+- **It does not hide when its trigger scrolls out of a container.** It stays on
+  the trigger's position, over whatever is there, until it is closed.
 - **No collision with other floating things**, only with the screen's edges.
 
 There is no positioning library in this system and this component does not
@@ -202,5 +209,5 @@ to sit beside anything.
 - Don't put a `role="dialog"` on the panel and then expect Modal behaviour. This
   component does not trap focus, does not render inert background, and does not
   lock scroll.
-- Don't place one inside a clipping container (`overflow: hidden`) and expect the
-  panel to escape it. It flips for the screen's edges, not the container's.
+- Don't put one under a CSS `transform` or `filter` with the default `strategy`:
+  that ancestor re-anchors a fixed panel. Pass `strategy="absolute"` there.

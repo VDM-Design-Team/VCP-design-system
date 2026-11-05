@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Logo } from '../../atoms/logo';
 import { Icon } from '../../atoms/icon';
 import { Menu } from '../../components/menu';
-import { Tooltip } from '../../components/tooltip';
+import { Tooltip } from '../../atoms/tooltip';
 import { SidebarItem, type SidebarSubItem } from '../../components/sidebar-item';
 import type { IconName } from '../../atoms/icon';
 
@@ -153,7 +153,8 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
          sighted user learns what the glyph means. Expanded rows show their
          label already, and a tooltip on each would be noise. */
       return collapsed ? (
-        <Tooltip key={item.key} content={item.label} placement="right">
+        /* The row is named by the same label: shown, not described again. */
+        <Tooltip key={item.key} content={item.label} placement="right" describe={false}>
           {row}
         </Tooltip>
       ) : (

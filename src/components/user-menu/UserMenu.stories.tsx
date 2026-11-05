@@ -36,11 +36,15 @@ const meta = {
   },
   args: { user: { name: 'Francis M.' }, onSelect: fn() },
   decorators: [
-    (Story) => (
-      <div className="flex h-64 w-72 justify-end">
+    /* A story's own `decorators: []` doesn't remove this one, so a fullscreen story is skipped here. */
+    (Story, { parameters }) =>
+      parameters.layout === 'fullscreen' ? (
         <Story />
-      </div>
-    ),
+      ) : (
+        <div className="flex h-64 w-72 justify-end">
+          <Story />
+        </div>
+      ),
   ],
 } satisfies Meta<typeof UserMenu>;
 
@@ -154,7 +158,6 @@ export const WithDividerAndDanger: Story = {
 /** Light and dark, closed and open. */
 export const LightAndDark: Story = {
   parameters: { layout: 'fullscreen' },
-  decorators: [],
   render: (args) => (
     <div className="flex flex-col">
       {[false, true].map((isDark) => (

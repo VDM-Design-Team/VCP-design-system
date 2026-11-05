@@ -29,7 +29,24 @@ Claude Design project — those mirror this repo, not the other way round.
    and fails a pattern that composes fewer than two pieces.
 5. **Accessibility is not optional.** 4.5:1 contrast on text, 3:1 on UI borders,
    visible focus ring, 40px minimum target for touch, `aria-label` on icon-only
-   controls.
+   controls. What review keeps finding, because a screenshot can't show it:
+   - **Say it once.** A tooltip describes its trigger, so one that repeats the
+     trigger's name is heard twice: pass `describe={false}`. The same goes for a
+     hint that is inside a label *and* in its `aria-describedby`: name the control
+     by its own words (`aria-labelledby`), and for a `title` beside an `aria-label`
+     that repeats it: let the `title` be the name. The story tests fail it
+     (`vcp-description-repeats-name`, in `src/lib/story-a11y.ts`).
+   - **Never drop focus.** When the element that has focus goes away (a box
+     closes, a row is deleted), move focus on purpose: back to the control that
+     opened it, or to what took its place. Test it with the keyboard.
+   - **No `aria-label` on a plain `span` or `div`.** It isn't allowed and most
+     screen readers skip it. Use visually hidden text (`sr-only`) or a real role.
+   - **A field's edge clears 3:1 in both themes** at rest, in error, with a
+     warning and focused (`npm run check:field-contrast`). A token chosen for a
+     banner's outline can be too faint for a field.
+   - **`decorators: []` on a story removes nothing**: a story's decorators add
+     to the meta's. Make the meta's decorator skip the story instead
+     (`npm run lint:stories`).
 6. **Changes are versioned.** Adding a token or variant is a minor bump. Renaming
    or removing one is a major bump and needs a migration note. Every PR that
    touches `src/` or `tokens/` adds its changelog entry as **its own file in
@@ -54,14 +71,14 @@ internally as decoration (icons are sub-atomic); it never composes another
 piece of the system.
 
 **`src/components/` — components.** One unit assembled *from* atoms (and
-other components): `IconButton`'s wrapping cousins like `Field`, `Chip`,
+other components): `IconButton`'s wrapping cousins like `Field`, `SearchSelect`,
 `Menu`, `DataTable`, `StatusTag` (a `Badge` plus the status mapping). However
 rich inside, if it presents as one control or one display unit, it is a
 component — `DataTable` and `DatePicker` are components, not patterns.
 
 **`src/patterns/` — patterns.** Organisms: **two or more components composed
 into a distinct page section.** `TopBar` (Logo + Menu + Avatar + bell),
-`FilterBar`, `CommentItem`, the planning tables built on `DataTable`.
+`FilterBar`, `CommentSection`, the planning tables built on `DataTable`.
 
 **`src/templates/` — templates.** Page-level layouts that arrange patterns
 into whole screens: `AppShell`, `EmailLayout`.
@@ -116,7 +133,7 @@ Rules that follow from the split:
 |---|---|
 | `npm run tokens` | Rebuild `dist/` from `tokens/` |
 | `npm run dev` | Storybook at :6006 |
-| `npm test` | Token lint + composition lint + changelog-entry lint + GDL contract + typecheck (what CI runs) |
+| `npm test` | Token lint + composition lint + story lint + changelog-entry lint + GDL contract + field-edge contrast + typecheck + story tests (what CI runs) |
 | `npm run changelog` | At release: fold `changes/` into `CHANGELOG.md` and set the version |
 
 ## How design proposes a change

@@ -136,11 +136,14 @@ component should paper over locally.
   wait exceeds ~1s, announce the outcome from a live region on the surrounding
   region rather than by mutating this button's name mid-flight.
 
-- **The `title` attribute is a bonus, not the name.** It is set from `label` so
-  pointer users get a native tooltip, but `aria-label` is what assistive tech
-  reads and `title` is never announced when `aria-label` is present. A tooltip
-  alone is not an accessible name: it is unreachable by keyboard on many browsers
-  and invisible on touch.
+- **One attribute carries both the name and the hover hint, never two.** Alone, the
+  button is named by its `title`, which pointer users also see as the browser's
+  tooltip. Under a `Tooltip` it is named by `aria-label` and has no `title`, so only
+  our bubble shows. Both at once is a bug: a `title` the name didn't come from is
+  read again as the description ("Add deliverable, button, Add deliverable"), and
+  the story tests fail it (`vcp-description-repeats-name`). The native hint never
+  shows on keyboard focus or touch, which is why `label` must name the action
+  plainly (above).
 
 - **Toggle buttons need state, not just a name.** If the button toggles
   something, pass `aria-pressed` (or `aria-expanded` for a disclosure) yourself.

@@ -37,6 +37,9 @@ import { Tag } from '../../atoms/tag';
 export type AVUrgency = 'Low' | 'Normal' | 'High' | 'Urgent';
 
 /** Every urgency, least to most. For pickers, filters, legends and tests. */
+/** The Urgency column's header tooltip (Figma's copy). Pass it as a `ColumnHint`'s `text`. */
+export const URGENCY_COLUMN_HINT = 'Indicates how urgent or important a task is compared to others';
+
 export const AV_URGENCIES: readonly AVUrgency[] = ['Low', 'Normal', 'High', 'Urgent'];
 
 /* THE mapping — every row measured off the Figma `Urgency_Tag` set, Textual

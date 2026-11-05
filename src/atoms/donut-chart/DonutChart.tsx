@@ -19,6 +19,8 @@ import { cn } from '../../lib/cn';
  * caps instead of round ones, and a small gap between the filled arc and the
  * remainder, so a 90% ring reads as two pieces rather than one bar with a
  * darker end. The gap scales with `thickness`. Round-capped rings stay the default.
+ * Its centre numeral is the dashboard's figure — `heading-xl-bold`, Poppins, the same as a
+ * `StatCard` value — not the ring-scaled numeric face.
  *
  * Colour is a `tone` first. For one a tone does not cover, `fillClassName` takes a
 semantic `stroke-*` token class — a token class, never a hex.
@@ -186,9 +188,13 @@ export const DonutChart = React.forwardRef<HTMLDivElement, DonutChartProps>(
           >
             {hasNumeral && (
               <span
-                className="font-numeric font-semibold text-text-primary"
-                /* Scales with the ring — geometry, not the type ramp. */
-                style={{ fontSize: Math.round(size * 0.2), lineHeight: 1 }}
+                className={cn(
+                  'text-text-primary',
+                  segmented ? 'font-sans text-heading-xl-bold' : 'font-numeric font-semibold',
+                )}
+                /* Scales with the ring — geometry, not the type ramp — except on the segmented gauge,
+                   which sits on the ramp so it matches the figures beside it. */
+                style={segmented ? undefined : { fontSize: Math.round(size * 0.2), lineHeight: 1 }}
               >
                 {numeral}
               </span>

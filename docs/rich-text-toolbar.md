@@ -20,12 +20,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `RichTextToolbar` | Over a rich-text selection — the comment composer, a description editor |
+| `RichTextToolbar` | Over a rich-text selection — a description editor. (The comment box, `CommentComposer`, is plain text and mentions, so it does not use this.) |
 | `SegmentedControl` | A choice of views, not text formatting |
 | Nothing | Plain text fields — a toolbar over a `Textarea` that ignores it is furniture |
 
 The editor itself (contenteditable wiring, document model) is deliberately not here —
-`CommentComposer` (pattern) will marry this to one.
+a rich-text field, such as a description editor, will marry this to one.
 
 ## The three groups
 
@@ -144,9 +144,10 @@ cannot take focus, so the arrows **skip** them — the tab stop never sits on a 
 keyboard can't reach.
 
 Only the stateful commands (`bold`, `italic`, `underline`, `strike`, `ol`, `ul`, `quote`,
-`code`) carry `aria-pressed`; link, unlink and history are plain buttons. The design's
-markup names its buttons with `title` alone; here each has an `aria-label`, and the glyphs
-are `aria-hidden`.
+`code`) carry `aria-pressed`; link, unlink and history are plain buttons. Each button is
+named by its `title`, which is also its hover hint, and the glyphs are `aria-hidden`. An
+`aria-label` as well would turn the `title` into a description, so the name would be heard
+twice.
 
 ## Tokens
 
@@ -176,7 +177,7 @@ each with its fill).
 ## Differences from the design's markup, on purpose
 
 - Raw Tailwind greys and a `dark:` variant → semantic tokens, so dark is free.
-- `title`-only names, no roles, a tab stop per button → a real toolbar (above).
+- No roles and a tab stop per button → a real toolbar (above). The `title` names stay.
 - `opacity-50` for disabled → `text.disabled` (opacity is not a token).
 - No on state drawn → `aria-pressed` and a tint, never colour alone.
 - Buttons are **32**, under the 40 touch minimum. This is a pointer toolbar over a text
@@ -185,7 +186,8 @@ each with its fill).
 
 ## Accessibility
 
-- Every button is named ("Bold", "Block quote") and `title`-hinted; glyphs are `aria-hidden`.
+- Every button is named by its `title` ("Bold", "Block quote"), which is also its hover hint,
+  so the name is heard once; glyphs are `aria-hidden`.
 - State is `aria-pressed` + the tint — never colour alone, and never on commands that
   have no state.
 - Dividers are `role="separator"` (vertical) inside the toolbar.

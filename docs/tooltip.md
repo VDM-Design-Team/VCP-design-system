@@ -1,4 +1,4 @@
-# Tooltip
+# Tooltip *(atom)*
 
 A small floating label describing the element it is attached to.
 
@@ -49,10 +49,13 @@ does not ship one yet — until it does, put the content on the page.
 |---|---|---|---|
 | `content` | `ReactNode` | — | **Required.** The description. Text, or light markup for emphasis and line breaks. **Never interactive** |
 | `children` | `ReactElement` | — | **Required.** Exactly one element, and it must be focusable. It is cloned to receive `aria-describedby` |
-| `placement` | `top \| bottom \| left \| right` | `top` | Static offsets. No collision detection, no flipping — see below |
+| `placement` | `top \| bottom \| left \| right` | `top` | The side you prefer. It takes the opposite side when this one has no room on screen, and slides along the edge to stay on screen — see below |
+| `wide` | `boolean` | `false` | The bubble runs to 384 instead of 256 — for a tooltip that is a short list (each line a row), like the Type column's. Longer text still wraps |
 | `openDelay` | `number` (ms) | `300` | Hover only. **Focus is always immediate** |
 | `defaultOpen` | `boolean` | `false` | Renders it already open. For Storybook, screenshots and visual regression — not a way to pin one open in product |
 | `tooltipId` | `string` | auto (`useId`) | Override the generated id of the bubble. Rarely needed |
+| `disabled` | `boolean` | `false` | Off for now: it does not open and does not describe its trigger. For a tooltip that applies only sometimes — the full text of a name, while the name is cut (`TruncatedText`) |
+| `describe` | `boolean` | `true` | Wires the trigger to the bubble with `aria-describedby`. Off when the trigger's own name already says the tooltip's words (an icon button labelled "Add reaction", a collapsed sidebar row, `AssigneeWithStatus`), so they are not heard twice. Off, the trigger gets `data-tooltip` instead, so it still knows it has one (`IconButton` drops its native `title` under either). The story tests fail a description that repeats its name (`vcp-description-repeats-name`, `src/lib/story-a11y.ts`) |
 | `className` | `string` | — | Merged onto the wrapper `<span>` via `cn()`. This replaces the source component's `style` prop |
 | `ref` | `Ref<HTMLSpanElement>` | — | Points at the wrapper `<span>`, not the trigger |
 
@@ -65,12 +68,18 @@ would only ever be used to make a tooltip look like something it is not.
 
 ## Positioning — read this before choosing a placement
 
-**There is no positioning library here, and the limitation is real:**
+**There is no positioning library here, but the bubble stays on screen:**
 
-- **No collision detection and no flipping.** Each placement is a fixed CSS
-  offset off the trigger. A `top` tooltip near the top of the viewport, or a
-  `left` one on a control at the left edge, will overflow — it will not flip to
-  the opposite side. Pick the side with room, and pick it per usage.
+- **It flips when its side has no room.** `placement` is the side you prefer. When
+  the bubble does not fit there on screen (a `top` tooltip on a toolbar along the
+  top of the page, a `left` one at the left edge) and the opposite side has more
+  room, it opens on the opposite side. The side it took is on the positioner as
+  `data-side`.
+- **It slides along the edge.** Centred on the trigger by default, it moves sideways
+  (or up and down, for `left` and `right`) so that none of it is cut off by the
+  screen's edge: the long tooltip on a button at the right of a toolbar moves left.
+  (Until November 2026 it did neither, so at the top of the screen it was drawn off
+  it; the `StaysOnScreen` story is the regression test.)
 - **The bubble is in a portal, so no container clips it or scrolls with it.** It is
   drawn `position: fixed` from the trigger's coordinates, in the nearest `.dark`
   ancestor or else at the end of the page. A tooltip in a scrolling list, a table
@@ -80,11 +89,9 @@ would only ever be used to make a tooltip look like something it is not.
   resize.
 - **No arrow.** The gap and the proximity carry the association; a CSS triangle
   would need a background colour set twice and would not survive a theme flip.
-- **It is positioned from the trigger's box, not flipped.** Placement is still one
-  of four fixed sides; near a viewport edge the bubble can run off the screen.
-
-If a screen genuinely needs flipping and collision handling, that is a real
-positioning engine and a system-level decision, not a local fix.
+- **It avoids the screen's edges, not other floating things.** Two open bubbles,
+  or a bubble and a menu, can overlap. Only one tooltip is open at a time in
+  practice, so this rarely shows.
 
 ## Tokens
 
@@ -161,7 +168,9 @@ in a way that helps nobody.
   reason to read the element. The component clones the single child and sets
   `aria-describedby` to the bubble's id, merging with any value the child already
   had. Both halves are present — `role="tooltip"` **and** the association — and
-  neither is useful without the other.
+  neither is useful without the other. The one exception is `describe={false}`, for a
+  trigger whose own name already says exactly what the bubble shows: there the
+  association would only repeat it.
 
 - **The bubble is never removed from the accessibility tree.** The closed state is
   `opacity-0`, not `hidden`, `display: none` or `visibility: hidden`, all three of
@@ -276,7 +285,8 @@ in a way that helps nobody.
 - Don't put a tooltip on a `disabled` control — neither hover nor focus reaches
   it. See the workarounds above.
 - Don't repeat an `IconButton`'s `label` as the tooltip content; it announces
-  twice.
+  twice. (Where a sighted user does need the trigger's name shown, as on an avatar,
+  pass `describe={false}`.)
 - Don't wrap a non-focusable element. A tooltip only a mouse can open is a tooltip
   most people never see.
 - Don't hardcode colours or spacing. `className="bg-[#0e0a49]"` is a bug — add a
@@ -287,7 +297,7 @@ in a way that helps nobody.
   body copy belongs on the page.
 - Don't set a long `openDelay` to "reduce noise". If tooltips are noisy there are
   too many of them.
-- Don't assume a placement will flip near a viewport edge. It will not; choose the
-  side with room.
+- Don't rely on the flip to choose the side for you. It is a safety net for the
+  screen's edges; still pick the side with room for each use.
 - Don't put status or error information in one. Those need a live region and a
   visible, persistent home.
