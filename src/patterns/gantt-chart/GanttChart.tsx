@@ -113,23 +113,6 @@ const LEGEND_ORDER: GanttStatus[] = ['planned', 'in-progress', 'pre-delivered', 
 /** A column is this wide, and the name column beside them is `LABEL` wide. Chart geometry, not tokens. */
 const CELL = 90;
 const LABEL = 164;
-/** Room kept above the period bar when it is held at the top of a phone's screen, plus the device's own safe area (a notch, a camera). */
-const TOP_GAP = 8;
-const ROW = 36;
-
-/** Under 30rem — a phone held upright, and only that: the name column becomes a header above each row. Everything wider keeps the regular layout. */
-function useNarrow() {
-  const [narrow, setNarrow] = React.useState(false);
-  React.useEffect(() => {
-    if (typeof window.matchMedia !== 'function') return;
-    const query = window.matchMedia('(max-width: 29.99rem)');
-    const sync = () => setNarrow(query.matches);
-    sync();
-    query.addEventListener('change', sync);
-    return () => query.removeEventListener('change', sync);
-  }, []);
-  return narrow;
-}
 
 export interface GanttUser {
   id: string;
@@ -508,20 +491,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     /* Whenever the view, the period or a filter changes, start again from the left edge. */
     const scroller = React.useRef<HTMLDivElement | null>(null);
     const headerTrack = React.useRef<HTMLDivElement | null>(null);
-    /* On a phone each person's name and figures sit above their bars, as wide as the screen and held at the left edge while the bars scroll sideways. */
-    const narrow = useNarrow();
-    const gutter = narrow ? 0 : LABEL;
-    const [viewWidth, setViewWidth] = React.useState(0);
-    React.useEffect(() => {
-      const el = scroller.current;
-      if (!el || typeof ResizeObserver === 'undefined') return;
-      const sync = () => setViewWidth(el.clientWidth);
-      sync();
-      const observer = new ResizeObserver(sync);
-      observer.observe(el);
-      return () => observer.disconnect();
-    }, []);
-    const nameStyle: React.CSSProperties = narrow ? { width: viewWidth || undefined, maxWidth: '100vw' } : { width: LABEL };
+    const gutter = LABEL;
+    const nameStyle: React.CSSProperties = { width: LABEL };
     const scrollKey = [view, date, projectIds.join(), userIds.join()].join('|');
     /* Today asked for from another period: wait for that period to render, then bring the column into view. */
     const wantToday = React.useRef(false);
@@ -610,8 +581,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             );
           }}
           inline
-          /* On a phone the field spans the whole bar, so its panel opens from the bar's left edge and stays on screen; on a wide screen it hugs the value and the panel opens under it. */
-          className="absolute inset-0 grid content-center min-[30rem]:static min-[30rem]:block min-[30rem]:w-max"
+          /* It hugs the value, and its panel opens under it. */
+          className="block w-max"
         />
       ) : view === 'month' ? (
         <Popover
@@ -669,7 +640,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       onUserIdsChange([]);
     };
 
-    /* The grid lines and the Today column. On a phone they run behind the whole row, name block included, so the lines stay unbroken; on a wide screen they sit in the track beside the name column. */
+    /* The grid lines and the Today column, in the track beside the name column. */
     const columnsLayer = (className?: string) => (
       <div aria-hidden="true" className={cn('absolute inset-0 flex', className)}>
         {columns.map((c, i) => (
@@ -690,10 +661,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       if (row.kind === 'project') {
         const closed = folded.includes(row.id);
         return (
-          <div key={row.id} className="relative flex flex-col border-b border-stroke-default bg-surface-neutral-subtle min-[30rem]:flex-row">
-            {columnsLayer('min-[30rem]:hidden')}
+          <div key={row.id} className="relative flex flex-row border-b border-stroke-default bg-surface-neutral-subtle">
             {/* No edge on the right, and the name and count share one line: a long one runs on over the grid rather than wrapping. */}
-            <div style={nameStyle} className="sticky left-0 z-10 shrink-0 min-[30rem]:bg-surface-neutral-subtle">
+            <div style={nameStyle} className="sticky left-0 z-10 shrink-0 bg-surface-neutral-subtle">
               <button
                 type="button"
                 aria-expanded={!closed}
@@ -707,8 +677,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 </span>
               </button>
             </div>
-            <div className="relative hidden min-[30rem]:block" style={{ width: trackWidth }}>
-              {columnsLayer('hidden min-[30rem]:flex')}
+            <div className="relative" style={{ width: trackWidth }}>
+              {columnsLayer()}
             </div>
           </div>
         );
@@ -737,15 +707,12 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       const placement = firstUser ? 'bottom' : 'top';
       firstUser = false;
       return (
-        <div key={row.id} className="relative flex flex-col border-b border-stroke-default pb-3 min-[30rem]:flex-row min-[30rem]:pb-0">
-          {columnsLayer('min-[30rem]:hidden')}
+        <div key={row.id} className="relative flex flex-row border-b border-stroke-default">
           <div
             style={nameStyle}
             className={cn(
-              'sticky left-0 z-10 shrink-0 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated',
-              /* On a phone an open person's block is half-opaque, so the figures read cleanly while the grid lines still show faintly; a closed one lets them through fully. */
-              expanded && 'bg-surface-elevated/50',
-              expanded && 'mb-3 border-l-4 border-l-stroke-default min-[30rem]:mb-0',
+              'sticky left-0 z-10 shrink-0 border-r border-stroke-default bg-surface-elevated',
+              expanded && 'border-l-4 border-l-stroke-default',
             )}
           >
             <button
@@ -762,7 +729,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               <Slide open={expanded}>
                 <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
                   {stats.map((s) => (
-                    <div key={s.label} className="flex items-center gap-2 min-[30rem]:justify-between">
+                    <div key={s.label} className="flex items-center justify-between gap-2">
                       <dt className="font-sans text-caption-md-regular text-text-tertiary">{s.label}</dt>
                       <dd className={cn('m-0', statTone({ tone: s.tone }))}>{s.value}</dd>
                     </div>
@@ -772,7 +739,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           </div>
           <div className="relative" style={{ width: trackWidth }}>
-            {columnsLayer('hidden min-[30rem]:flex')}
+            {columnsLayer()}
             {/* The summary bar and the full set of bars trade places: one folds away as the other opens. */}
             <Show open={!expanded}>
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
@@ -890,12 +857,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
         </div>
 
-        {/* The period's own header — year, month, and the arrows that move it. Over the dates (past the 164 name column) on a wide screen; the full width on a phone, where the dates are too narrow to hold it, and held at the top of the screen there as the page scrolls. */}
-        <div
-          className="sticky top-0 z-40 flex flex-col bg-surface-elevated min-[30rem]:static min-[30rem]:pl-41"
-          /* The padding is cancelled by the negative margin, so nothing moves at rest; it is the gap that shows once the bar is held. */
-          style={narrow ? { paddingTop: `calc(env(safe-area-inset-top) + ${TOP_GAP}px)`, marginTop: -TOP_GAP } : undefined}
-        >
+        {/* The period's own header — year, month, and the arrows that move it — over the dates, past the 164 name column. */}
+        <div className="flex flex-col bg-surface-elevated pl-41">
           {period.heading.map((text, i) => (
             <div
               key={i}
@@ -921,13 +884,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
 
         {/* The timeline's own headings — months or cycles over the days — held at the top of the screen as the page scrolls, so a row far down is never lost. They are outside the sideways scroller (a scroller cannot stick to the page), and slid along with it. -mt-3 takes back the card's gap, so the column lines start at the period bar instead of floating below it. */}
         <div
-          className="sticky z-30 -mt-3 flex bg-surface-elevated"
-          /* On a phone the period bar above is held at the top too, so these sit just under it: one row each for the year, the month and the arrows, and the gap kept above them. */
-          style={{
-            top: narrow
-              ? `calc(env(safe-area-inset-top) + ${TOP_GAP + (period.heading.length + 1) * ROW}px)`
-              : 0,
-          }}
+          className="sticky top-0 z-30 -mt-3 flex bg-surface-elevated"
         >
           {gutter > 0 && <Corner width={gutter} />}
           <div className="min-w-0 flex-1 overflow-hidden">
@@ -997,16 +954,15 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           <div className="flex flex-col" style={{ width: gutter + trackWidth }}>
             {loading &&
               SKELETON_ROWS.map((bars, i) => (
-                <div key={i} className="relative flex flex-col border-b border-stroke-default min-[30rem]:flex-row">
-                  {columnsLayer('min-[30rem]:hidden')}
+                <div key={i} className="relative flex flex-row border-b border-stroke-default">
                   <div
                     style={nameStyle}
-                    className="sticky left-0 z-10 flex shrink-0 items-center py-4 pl-8 pr-4 min-[30rem]:border-r min-[30rem]:border-stroke-default min-[30rem]:bg-surface-elevated"
+                    className="sticky left-0 z-10 flex shrink-0 items-center border-r border-stroke-default bg-surface-elevated py-4 pl-8 pr-4"
                   >
                     <Skeleton width={i % 2 === 0 ? 96 : 72} textStyle="body-sm" />
                   </div>
                   <div className="relative" style={{ width: trackWidth }}>
-                    {columnsLayer('hidden min-[30rem]:flex')}
+                    {columnsLayer()}
                     <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                       {bars.map(([start, span], j) => {
                         const from = start % Math.max(columns.length, 1);

@@ -19,8 +19,7 @@ Beyond the design, for approval: the period bar's middle is a quick pick (the fi
 cycle field in Cycle view, a list of years in Year view, a month calendar in Month view);
 a Today button returns to today and scrolls its column into view; the month/cycle and day
 headings stay at the top of the screen as the page scrolls; a person's figures slide open
-and shut (not under reduced motion); and on a phone held upright (under 30rem) the name
-column becomes a header above each row. A blue line under the headings marks where the
+and shut (not under reduced motion). No phone layout: VCP has no mobile version yet. A blue line under the headings marks where the
 Added Values are. A `loading` state keeps the header, Today column and legend and swaps the
 rows for `Skeleton` placeholders, announced as busy.
 

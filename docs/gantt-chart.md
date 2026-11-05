@@ -120,19 +120,14 @@ legend entry:
   column into view; inside that period it just scrolls to it.
 - **The blue line** under the headings marks where the Added Values are: it starts at the
   first column any bar starts in and ends at the last column any bar ends in, across every
-  row on show, in every view and on a phone too. With no bars in the period there is no line,
+  row on show, in every view. With no bars in the period there is no line,
   and a bar-free day at either end is left out; the usual grey rule runs the whole width
   under the headings so they are always separated from the rows. An open person's cell has a grey left edge.
 - **The headings stay put.** The cycles or months over the days, and the days
   themselves, are held at the top of the screen as the page scrolls, and slide with the
   bars when they scroll sideways, so a row far down is never lost.
-- **On a phone held upright** (under 30rem, and only then: everything wider keeps the
-  regular layout, name column and all) the name column becomes a header above each
-  person's bars: the name and, when open, their figures stacked, as wide as the screen and
-  held at the left edge while the bars scroll sideways, with a little space under an open one
-  before the bars; project headers stack the same way. The grid lines and the Today column run unbroken behind the name blocks (an open person's block is half-opaque, so the figures stay readable). The dates
-  start at the left edge, the period bar (year, month, arrows and the quick pick) spans the
-  full width, and the cycle list opens from the bar's left edge so it stays on screen. On a phone the period bar and its labels above (year, month, arrows) are held at the top of the screen too, with the headings just under them and a little gap above (plus the device's safe area), so a notch or camera never covers them.
+- **No phone layout yet.** VCP has no mobile version for now (decided 5 Nov 2026), so the
+  chart keeps its name column at every width; a narrow screen scrolls sideways.
 - **Today** is a hatched column through the header and every row, labelled.
 - **The chart starts at its left edge** — scrolled back to the beginning — whenever
   the view, the period or a filter changes.
