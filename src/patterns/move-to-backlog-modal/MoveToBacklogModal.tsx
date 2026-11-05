@@ -11,7 +11,7 @@ import { Modal } from '../../components/modal';
  * - **Feedback is optional**: the design draws no required marker and no error, so Move to Backlog is always available. What is typed goes to `onMove`; blank is `''`.
  * - **It owns the draft** and reports it once; moving, and closing afterwards, is the page's. Everything resets each time it opens, so feedback abandoned half-typed is not there on the next one.
  * - **Title.** Figma writes "Move to backlog Added Value"; this reads "Move Added Value to Backlog", the order the bulk action's popup uses ("Move 2 Added Values to Backlog") and with Backlog capitalised as
- *   everywhere else. *For design to confirm.*
+ *   everywhere else (decided with design).
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.

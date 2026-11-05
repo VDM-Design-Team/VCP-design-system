@@ -33,7 +33,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 - **Feedback is optional**: the design draws no required marker and no error, so Move to Backlog is always available. Enter in the field submits.
 - It resets each time it opens, and does nothing itself.
-- **Title:** Figma writes "Move to backlog Added Value"; this reads "Move Added Value to Backlog" (the bulk popup's order, Backlog capitalised). *For design to confirm.*
+- **Title:** "Move Added Value to Backlog" — the bulk popup's order with Backlog capitalised. Figma's text reads "Move to backlog Added Value"; the wording here was decided with design.
 
 ## Tokens
 
