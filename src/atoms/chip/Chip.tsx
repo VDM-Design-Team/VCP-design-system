@@ -240,7 +240,8 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
     const control = cn(
       'grid size-5 shrink-0 place-items-center rounded-full transition-colors',
       focusRing,
-      'focus-visible:outline-offset-0',
+      /* Drawn *inside* the button: with `actions="hover"` the buttons sit in a box that clips its overflow (`overflow-hidden`, to be zero-wide), and a ring outside them was cut off on every side but the corners. */
+      'focus-visible:-outline-offset-2',
       size === 'md' && 'size-6',
     );
     const glyph = size === 'md' ? 'size-4' : 'size-3.5';
