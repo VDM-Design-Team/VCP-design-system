@@ -53,6 +53,7 @@ export * from './components/data-table';
 export * from './components/description-card';
 export * from './components/description-section';
 export * from './components/date-field';
+export * from './components/bar-chart';
 export * from './components/capacity-bar';
 export * from './components/cycle-summary';
 export * from './components/date-picker';
