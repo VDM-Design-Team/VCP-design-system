@@ -27,12 +27,23 @@ import { Skeleton } from '../../atoms/skeleton';
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
+export interface LineChartTooltipRow {
+  label: string;
+  value: string | number;
+  /** The row that names the point (usually the first): its label is bold. */
+  strong?: boolean;
+}
+
 export interface LineChartDatum {
   key: string | number;
   /** The point's name on the axis: "June 20". */
   label: string;
-  /** The heading of the tooltip, when it should say more than the axis does ("Fri 20 June 2025"). Defaults to `label`. */
-  title?: string;
+  /**
+   * What the tooltip says about this point, row by row: `Date: 06.20.2025`, `Pts Remaining: 145`. These are yours, and need not be the
+   * series (Figma's card says Date, Pts Completed, Pts Remaining, Off-track pts). Without it the tooltip is the point's `label` over
+   * each series' value.
+   */
+  tooltip?: readonly LineChartTooltipRow[];
   /** Series → value. A series left out (or `null`) has no point here, and its line breaks. */
   values: Partial<Record<ChartSeries, number | null>>;
 }
@@ -114,10 +125,16 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
     };
 
     const describe = (d: (typeof data)[number]) =>
-      `${d.title ?? d.label}: ${series
-        .filter((s) => has(d.values[s]))
-        .map((s) => `${label(s, seriesLabels)} ${d.values[s]} ${unit}`)
-        .join(', ')}`;
+      d.tooltip
+        ? d.tooltip.map((r) => `${r.label} ${r.value}`).join(', ')
+        : `${d.label}: ${series
+            .filter((s) => has(d.values[s]))
+            .map((s) => `${label(s, seriesLabels)} ${d.values[s]} ${unit}`)
+            .join(', ')}`;
+
+    /* Anything a tooltip says that is not the point's name is data too: it gets a column in the hidden table. */
+    const extraColumns = [...new Set(data.flatMap((d) => d.tooltip?.filter((r) => !r.strong).map((r) => r.label) ?? []))];
+    const extra = (d: (typeof data)[number], column: string) => d.tooltip?.find((r) => r.label === column)?.value;
 
     const nearest = (clientX: number, el: Element) => {
       /* `el` is the hit area, which starts at the plot's left edge. */
@@ -228,15 +245,28 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                     className="pointer-events-none absolute z-10 w-max max-w-60 -translate-x-1/2 rounded-md border border-stroke-subtle bg-surface-elevated px-3 py-2 shadow-md"
                     style={{ left: Math.min(Math.max(tipLeft, 80), Math.max(80, width - 80)), top: MARGIN.top }}
                   >
-                    <p className="m-0 text-caption-md-semibold text-text-primary">{shown.title ?? shown.label}</p>
-                    <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
-                      {series.map((s) => (
-                        <li key={s} className="flex items-center justify-between gap-3 text-caption-md-medium text-text-secondary">
-                          <LegendItem size="sm" label={label(s, seriesLabels)} swatchClassName={CHART_SERIES[s].fill} />
-                          <span className="text-text-primary">{has(shown.values[s]) ? `${shown.values[s]} ${unit}` : 'no data'}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {shown.tooltip ? (
+                      <ul className="m-0 flex list-none flex-col gap-1 p-0 text-caption-md-regular text-text-primary">
+                        {shown.tooltip.map((r) => (
+                          <li key={r.label}>
+                            <span className={r.strong ? 'text-caption-md-semibold' : 'text-caption-md-medium'}>{r.label}: </span>
+                            {r.value}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <>
+                        <p className="m-0 text-caption-md-semibold text-text-primary">{shown.label}</p>
+                        <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
+                          {series.map((s) => (
+                            <li key={s} className="flex items-center justify-between gap-3 text-caption-md-medium text-text-secondary">
+                              <LegendItem size="sm" label={label(s, seriesLabels)} swatchClassName={CHART_SERIES[s].fill} />
+                              <span className="text-text-primary">{has(shown.values[s]) ? `${shown.values[s]} ${unit}` : 'no data'}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
                   </div>
                 )}
               </>
@@ -260,14 +290,22 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                           {label(s, seriesLabels)}
                         </th>
                       ))}
+                      {extraColumns.map((c) => (
+                        <th key={c} scope="col">
+                          {c}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {data.map((d) => (
                       <tr key={d.key}>
-                        <th scope="row">{d.title ?? d.label}</th>
+                        <th scope="row">{d.label}</th>
                         {series.map((s) => (
                           <td key={s}>{has(d.values[s]) ? `${d.values[s]} ${unit}` : 'no data'}</td>
+                        ))}
+                        {extraColumns.map((c) => (
+                          <td key={c}>{extra(d, c) ?? 'no data'}</td>
                         ))}
                       </tr>
                     ))}

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { CycleBurndown, type CycleBurndownStat } from './CycleBurndown';
 import type { LineChartDatum } from '../../components/line-chart';
 
@@ -8,26 +8,33 @@ import type { LineChartDatum } from '../../components/line-chart';
 const API_RESPONSE = {
   cycle: 'C37',
   days: [
-    { date: '2025-06-16', completed_pts: 175, committed_pts: 180, overdue_pts: 12, available_pts: 150 },
-    { date: '2025-06-17', completed_pts: 150, committed_pts: 160, overdue_pts: 14, available_pts: 135 },
-    { date: '2025-06-18', completed_pts: 162, committed_pts: 140, overdue_pts: 18, available_pts: 120 },
-    { date: '2025-06-19', completed_pts: 158, committed_pts: 120, overdue_pts: 25, available_pts: 105 },
-    { date: '2025-06-20', completed_pts: 100, committed_pts: 100, overdue_pts: 20, available_pts: 90 },
-    { date: '2025-06-23', completed_pts: 70, committed_pts: 80, overdue_pts: 16, available_pts: 75 },
-    { date: '2025-06-24', completed_pts: 45, committed_pts: 60, overdue_pts: 10, available_pts: 60 },
-    { date: '2025-06-25', completed_pts: 30, committed_pts: 40, overdue_pts: 6, available_pts: 45 },
-    { date: '2025-06-26', completed_pts: 20, committed_pts: 20, overdue_pts: 2, available_pts: 30 },
+    { date: '2025-06-16', completed_pts: 175, committed_pts: 180, overdue_pts: 12, available_pts: 150, pts_completed: 5, pts_remaining: 175, off_track_pts: 12 },
+    { date: '2025-06-17', completed_pts: 150, committed_pts: 160, overdue_pts: 14, available_pts: 135, pts_completed: 30, pts_remaining: 150, off_track_pts: 14 },
+    { date: '2025-06-18', completed_pts: 162, committed_pts: 140, overdue_pts: 18, available_pts: 120, pts_completed: 18, pts_remaining: 162, off_track_pts: 18 },
+    { date: '2025-06-19', completed_pts: 158, committed_pts: 120, overdue_pts: 25, available_pts: 105, pts_completed: 22, pts_remaining: 158, off_track_pts: 25 },
+    { date: '2025-06-20', completed_pts: 100, committed_pts: 100, overdue_pts: 20, available_pts: 90, pts_completed: 80, pts_remaining: 100, off_track_pts: 20 },
+    { date: '2025-06-23', completed_pts: 70, committed_pts: 80, overdue_pts: 16, available_pts: 75, pts_completed: 110, pts_remaining: 70, off_track_pts: 16 },
+    { date: '2025-06-24', completed_pts: 45, committed_pts: 60, overdue_pts: 10, available_pts: 60, pts_completed: 135, pts_remaining: 45, off_track_pts: 10 },
+    { date: '2025-06-25', completed_pts: 30, committed_pts: 40, overdue_pts: 6, available_pts: 45, pts_completed: 150, pts_remaining: 30, off_track_pts: 6 },
+    { date: '2025-06-26', completed_pts: 20, committed_pts: 20, overdue_pts: 2, available_pts: 30, pts_completed: 160, pts_remaining: 20, off_track_pts: 2 },
   ],
   totals: { completed: 168, remaining: 0, off_track: 0 },
 };
 
-/* The whole of "plugging it in": map each day to `{ key, label, values }`, and the totals to `stats`. Dates are formatted here, by the caller. */
+/* The whole of "plugging it in": map each day to `{ key, label, values, tooltip }`, and the totals to `stats`. Dates are formatted here, by the caller. `values` is what the four lines draw; `tooltip` is what the card says on hover. */
+const tooltipDate = (iso: string) => iso.slice(5).replace('-', '.') + '.' + iso.slice(0, 4);
 const dayLabel = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
 const toData = (r: typeof API_RESPONSE): LineChartDatum[] =>
   r.days.map((d) => ({
     key: d.date,
     label: dayLabel(d.date),
     values: { completed: d.completed_pts, committed: d.committed_pts, overdue: d.overdue_pts, available: d.available_pts },
+    tooltip: [
+      { label: 'Date', value: tooltipDate(d.date), strong: true },
+      { label: 'Pts Completed', value: d.pts_completed },
+      { label: 'Pts Remaining', value: d.pts_remaining },
+      { label: 'Off-track pts', value: d.off_track_pts },
+    ],
   }));
 const toStats = (r: typeof API_RESPONSE): CycleBurndownStat[] => [
   { key: 'completed', label: 'Completed', value: r.totals.completed, tone: 'success' },
@@ -64,7 +71,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Nine working days, four lines, the totals under the chart, the legend at the bottom. */
+/** Nine working days, four lines, the totals under the chart, the legend at the bottom. Hover for the day's card (Date, Pts Completed, Pts Remaining, Off-track pts). */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
@@ -74,6 +81,11 @@ export const Default: Story = {
     await expect(c.getByText('168', { selector: 'dd' })).toBeVisible();
     await expect(within(c.getByRole('list', { name: 'Legend' })).getAllByRole('listitem')).toHaveLength(4);
     await expect(canvasElement.querySelectorAll('svg circle')).toHaveLength(36);
+    const target = canvasElement.querySelector('svg rect[fill="transparent"]') as SVGRectElement;
+    const r = target.getBoundingClientRect();
+    await userEvent.pointer({ target, coords: { clientX: r.left + r.width / 2, clientY: r.top + 40 } });
+    await expect(await c.findByText('Pts Remaining:')).toBeVisible();
+    await expect(c.getByText('Off-track pts:')).toBeVisible();
   },
 };
 
