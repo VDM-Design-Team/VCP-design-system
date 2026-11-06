@@ -50,7 +50,9 @@ Which quarter is the current one, its dates and its days left are the caller's: 
 |---|---|---|
 | under 75% | `fine` | brand blue |
 | 75–99% | `warning` | warning |
-| 100% and over | `over` | critical, capped at 100% |
+| 100% and over | `over` | critical; **the bar stops at full, the number does not** |
+
+**Over budget the label says the real figure.** 170 of 120 reads **142%**, not 100%: the bar can stop at full, but the number is not capped (`budgetUsagePercent`; the bar's `valueLabel` carries it, so a screen reader hears 142% too). With no allocation there is no percentage to give, so the bar's own capped value shows.
 
 With no allocation there is nothing to measure against: nothing consumed reads 0% and fine, anything consumed reads over.
 Remaining is green until it goes negative, then red. Figma draws it green at every level but over.
@@ -99,7 +101,7 @@ moved to yellow-700 for contrast in November and Figma still shows the old one.
   reachable by keyboard, not only on hover. The glyph is 20, with a 40 press area.
 - "Go to Current Quarter" goes away once the current quarter shows, so focus moves to the quarter picker instead of dropping to the page.
 - The bar is a `role="progressbar"` named "Budget Usage", with its value in percent, so what is announced is what is shown.
-  The status is also in the numbers beside it (a negative Remaining, "100%"): colour is never the only signal.
+  The status is also in the numbers beside it (a negative Remaining, "142%"): colour is never the only signal.
 - The pickers are native selects named "Quarter" and "Year".
 - "Days left" reads "48 of 90": the slash is hidden from assistive tech and "of" read instead.
 
