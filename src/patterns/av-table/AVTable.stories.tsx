@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { AVTable, type AVTableRow } from './AVTable';
 import { IconButton } from '../../atoms/icon-button';
+import { FilterBar } from '../filter-bar';
 import type { DataTableSort } from '../../components/data-table';
 
 const ROWS: AVTableRow[] = [
@@ -97,6 +98,26 @@ export const Default: Story = {
       <AVTable {...args} onOpen={() => {}} />
     </div>
   ),
+};
+
+/**
+ * With `filters` the table is drawn **in a card with its filters above it** and its pagination at its foot — one card, the rule for every table. The page passes a `FilterBar` (or a search box); the table keeps no
+ * border of its own then. Without `filters` it is as it always was.
+ */
+export const WithFilters: Story = {
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} filters={<FilterBar search="" onSearchChange={() => {}} onReset={() => {}} />} page={1} pageCount={4} onPageChange={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* The filters, the table and the pagination are in one card: they share the same parent. */
+    const table = canvas.getByRole('table', { name: 'Added Values' });
+    const card = table.closest('.rounded-md') as HTMLElement;
+    await expect(card.contains(canvas.getByRole('searchbox'))).toBe(true);
+    await expect(card.contains(canvas.getByRole('navigation', { name: /pagination/i }))).toBe(true);
+  },
 };
 
 /**
