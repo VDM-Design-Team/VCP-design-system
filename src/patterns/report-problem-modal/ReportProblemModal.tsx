@@ -64,11 +64,12 @@ export function ReportProblemModal({
     <Modal
       open={open}
       onClose={onClose}
+      busy={loading}
       title="Report a Problem"
       size="md"
       footer={
         <>
-          <Button variant="tertiary" type="button" onClick={onClose}>
+          <Button variant="tertiary" type="button" disabled={loading} onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" form={formId} loading={loading}>
