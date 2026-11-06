@@ -203,6 +203,20 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
     const [mode, setMode] = React.useState<'idle' | 'replying' | 'editing'>('idle');
     const [replyShown, setReplyShown] = React.useState(defaultReplyShown);
     const replyId = React.useId();
+    /* Focus must never fall to the page when the control that had it goes (CLAUDE.md: "Never drop focus"). Each step of the reply flow says which control focus belongs on next; the effect below
+       puts it there as soon as that control is on screen (the reply's data comes from the caller, so it may arrive a render later). */
+    const replyButton = React.useRef<HTMLButtonElement>(null);
+    const showButton = React.useRef<HTMLButtonElement>(null);
+    const editButton = React.useRef<HTMLButtonElement>(null);
+    const focusNext = React.useRef<'reply' | 'show' | 'edit' | null>(null);
+    React.useEffect(() => {
+      const target = focusNext.current;
+      if (!target) return;
+      const el = { reply: replyButton, show: showButton, edit: editButton }[target].current;
+      if (!el) return;
+      focusNext.current = null;
+      el.focus();
+    }, [mode, reply, replyShown]);
     const hasReactions = Boolean(reactions || onToggleReaction || onSelectEmoji);
     const composerUser = currentUser ?? actor;
 
@@ -350,6 +364,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 <div className="flex items-center justify-between gap-4">
                   {reply ? (
                     <ReplyControl
+                      ref={showButton}
                       kind={replyShown ? 'hide' : 'show'}
                       label={replyShown ? 'Hide Reply' : 'Show Reply'}
                       aria-expanded={replyShown}
@@ -357,7 +372,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                       onClick={() => setReplyShown((shown) => !shown)}
                     />
                   ) : onReply ? (
-                    <ReplyControl kind="reply" label="Reply" onClick={() => setMode('replying')} />
+                    <ReplyControl ref={replyButton} kind="reply" label="Reply" onClick={() => setMode('replying')} />
                   ) : (
                     <span />
                   )}
@@ -381,11 +396,15 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 submitLabel="Reply"
                 onSubmit={(value, ids) => {
                   onReply(value, ids);
-                  /* A new reply starts hidden, as the design draws it. */
+                  /* A new reply starts hidden, as the design draws it; focus goes to "Show Reply". */
+                  focusNext.current = 'show';
                   setReplyShown(false);
                   setMode('idle');
                 }}
-                onCancel={() => setMode('idle')}
+                onCancel={() => {
+                  focusNext.current = 'reply';
+                  setMode('idle');
+                }}
               />
             )}
 
@@ -398,9 +417,13 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 defaultValue={reply.value}
                 onSubmit={(value, ids) => {
                   onEditReply?.(value, ids);
+                  focusNext.current = 'edit';
                   setMode('idle');
                 }}
-                onCancel={() => setMode('idle')}
+                onCancel={() => {
+                  focusNext.current = 'edit';
+                  setMode('idle');
+                }}
               />
             )}
 
@@ -412,7 +435,7 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                 actions={
                   <>
                     {onEditReply && (
-                      <ReplyControl kind="edit" label="Edit" onClick={() => setMode('editing')} />
+                      <ReplyControl ref={editButton} kind="edit" label="Edit" onClick={() => setMode('editing')} />
                     )}
                     {onDeleteReply && (
                       <ReplyControl
@@ -420,6 +443,8 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
                         label="Delete"
                         onClick={() => {
                           onDeleteReply();
+                          /* The reply, its card and this button go; "Reply" is what is left to land on. */
+                          focusNext.current = 'reply';
                           setReplyShown(false);
                         }}
                       />

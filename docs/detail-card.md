@@ -99,6 +99,19 @@ As the design's flow draws it, inside the card:
 The chips are `Chip`'s people recipes (`tone="brand"`; `variant="outline"` with `actions="hover"` while editing). The
 changes come out through `onChange` as the whole `value`; the form's users come from `options.people`.
 
+### Focus never falls to the page
+
+Opening the form disables the **+** that had focus, closing it removes the form, and removing a chip removes its buttons — in each case the control that had focus goes. So each step moves it on purpose:
+
+| After | Focus goes to |
+|---|---|
+| The **+** opens the add form (or a pencil opens the edit form) | The form's **"Select user"** field |
+| **Cancel** or **Add** on the add form | The **+** |
+| **Cancel** or **Save** on an edit | That chip's **pencil** (an initiator has none: its ✕) |
+| A chip's **✕** removes it | The **next chip's** pencil (or ✕), or the **+** when it was the last |
+
+The chips' buttons are named for the person ("Edit Jane Doe", "Remove Jane Doe"), so a row of chips is not a row of identical buttons. The `EditingPeople` story asserts `document.activeElement` at each step.
+
 ## Tag sizes
 
 Every tag in the card is **large** (28 tall: GDL's Large, our `md`, the default): the date and cycle tags, status, urgency, type, projects, category

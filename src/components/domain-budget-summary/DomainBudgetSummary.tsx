@@ -45,6 +45,12 @@ export const budgetUsage = (consumed: number, allocated: number): number => {
   return Math.max(0, Math.min(100, (consumed / allocated) * 100));
 };
 
+/**
+ * The share used as it really is, **not capped**: 170 of 120 is 142. The bar stops at full (`budgetUsage`), but the number beside it does not say 100 when it is over. `null` when there is no allocation to measure
+ * against (a percentage of nothing).
+ */
+export const budgetUsagePercent = (consumed: number, allocated: number): number | null => (allocated <= 0 ? null : Math.max(0, Math.round((consumed / allocated) * 100)));
+
 /** Which status the budget is in: under 75% used is `fine`, 75–99% `warning`, 100% and over `over`. */
 export const budgetStatus = (consumed: number, allocated: number): BudgetStatus => {
   const usage = budgetUsage(consumed, allocated);
@@ -174,6 +180,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
     const quarterRef = React.useRef<HTMLSelectElement>(null);
     const remaining = allocated - consumed;
     const status = budgetStatus(consumed, allocated);
+    const percent = budgetUsagePercent(consumed, allocated);
 
     return (
       <section
@@ -281,7 +288,15 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
               </div>
             </div>
 
-            <ProgressBar label="Budget Usage" showValue labelPlacement="below" tone={TONE[status]} value={budgetUsage(consumed, allocated)} />
+            <ProgressBar
+              label="Budget Usage"
+              showValue={percent === null}
+              /* The bar stops at full; the number is the real one (142%, not 100%), and so is what a screen reader hears. */
+              valueLabel={percent === null ? undefined : `${percent}%`}
+              labelPlacement="below"
+              tone={TONE[status]}
+              value={budgetUsage(consumed, allocated)}
+            />
           </div>
         </div>
       </section>

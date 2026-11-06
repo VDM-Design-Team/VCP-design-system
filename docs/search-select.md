@@ -145,6 +145,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `panelNotice` | `ReactNode` | — | A line above the rows inside the panel, with a divider under it |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
 | `emphasis` | `'medium' \| 'regular'` | `medium` | The weight of a chosen value in the field. **A filter passes `regular`**, so a row of filters sits quietly; the default is what a chosen value in a form reads as. The placeholder is regular either way |
+| `valuePrefix` | `string` | — | Words before what is picked, once something is: "Assignee" makes the field read "Assignee: Amy Lee" (or "Assignee: 2 selected"), so a filled field still says what it filters. The placeholder is unchanged. Drawn only: the trigger is already named by its label and then its value, so a screen reader is not told twice |
 | `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
 | `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
 | `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |

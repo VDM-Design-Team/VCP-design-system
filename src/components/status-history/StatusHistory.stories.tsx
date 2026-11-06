@@ -63,9 +63,10 @@ const ENTRIES = [
   { actor: 'Eve', from: 'Initial Creation', to: 'Draft', when: '2 months ago' },
 ];
 
-/** The log, as the live app draws it: who, from which status to which, and how long ago. The count follows the entries. */
+/** The log, as the live app draws it: who, from which status to which, and how long ago. The count follows the entries — and `count` is ignored when `entries` is given, so the two cannot disagree. */
 export const WithEntries: Story = {
-  args: { count: undefined, defaultOpen: true, entries: ENTRIES },
+  /* A wrong `count` on purpose: with entries it is ignored, so the title says what is listed. */
+  args: { count: 99, defaultOpen: true, entries: ENTRIES },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('button', { name: 'Status History (6)' })).toBeVisible();
@@ -107,10 +108,8 @@ export const LightAndDark: Story = {
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="flex flex-col gap-4 bg-surface-canvas p-8">
             <StatusHistory {...args} />
-            {/* A different count per column, so the two open panels have different names. */}
-            <StatusHistory {...args} count={isDark ? 2 : 1} defaultOpen>
-              {LOG}
-            </StatusHistory>
+            {/* A different number of entries per column, so the two open panels have different names — and the count is the entries', so it cannot disagree with them. */}
+            <StatusHistory {...args} count={undefined} entries={ENTRIES.slice(0, isDark ? 2 : 1)} defaultOpen />
           </div>
         </div>
       ))}

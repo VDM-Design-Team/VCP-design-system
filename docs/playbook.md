@@ -1,6 +1,6 @@
 # VCP Design System — Build & Maintain Playbook
 
-Last updated 5 November 2026. This file is the canonical copy; a shareable Claude Doc mirrors it, and if the two differ, this file wins.
+Last updated 6 November 2026. This file is the canonical copy; a shareable Claude Doc mirrors it, and if the two differ, this file wins.
 
 ## How to use this playbook
 
@@ -354,6 +354,21 @@ bump: minor
 What changed, in product terms, and why. Name the stories that prove it:
 `FloatsOutOfAScrollingPanel`, `StaysOnScreen`.
 ```
+
+### When to release
+
+Release by time and need, with a cap on size, not by size alone (decided 6 Nov 2026):
+
+| Trigger | Release |
+| --- | --- |
+| **Weekly** | Every Thursday, if anything is waiting in `changes/` |
+| **Someone is blocked** | Straight away when a consumer (the prototype, later the app) needs something that is merged but not published |
+| **About 15 entries** | Cut one mid-week rather than let it grow. Fifteen is what a person can read in the changelog and check in the prototype in one sitting; 0.2.0 had 34, and two changed defaults (`Dropzone`, `Popover`) were easy to miss among them |
+| **A `major` entry** | Goes out **alone**, in a release of its own with its `Migration:` note, so upgrading past it is one step with one note to follow. Before 1.0 the first `major` takes the package to `1.0.0` (the changelog script bumps the first number): decide that on purpose |
+
+**Say what people will notice.** The release PR's description opens with a short **"You'll notice"** list: changed defaults and anything that looks or reads different (0.3.0: every numeric date reads dd/mm/yyyy). It goes in the PR description and the announcement, not in `CHANGELOG.md`, which only the script writes.
+
+**The same gate every time.** `npm test` green on `main` → publish → the prototype takes the new version in its own PR the same day and every screen is clicked through, in both themes (see "Take a new DS version into the prototype"). The prototype is the first user of every release; what it finds is fixed in a patch release.
 
 ### Releasing
 

@@ -104,5 +104,6 @@ export * from './patterns';
 export * from './templates';
 
 export { cn } from './lib/cn';
+export { DateFormatProvider, useDateFormat, formatDate, formatDayMonthYear, datePlaceholder } from './lib/format-date';
 /* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
 export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';
