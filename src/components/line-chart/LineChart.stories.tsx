@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { LineChart, type LineChartDatum } from './LineChart';
 
 /* Nine working days: the chart spaces the points evenly in the order given, so the weekend between June 20 and 23 leaves no gap. */
@@ -99,6 +99,79 @@ export const KeyboardReading: Story = {
     await expect(c.getByRole('status')).toHaveTextContent('June 16');
     await userEvent.keyboard('{Escape}');
     await expect(c.getByRole('status')).toHaveTextContent('');
+  },
+};
+
+/** `formatValue` says how a number reads in the tooltip, the table and the announcement; `formatTick` says how the value axis reads. */
+export const FormattedNumbers: Story = {
+  args: {
+    data: [
+      { key: 1, label: 'Mon', values: { completed: 1200, committed: 1500 } },
+      { key: 2, label: 'Tue', values: { completed: 1800, committed: 1700 } },
+    ],
+    series: ['completed', 'committed'],
+    formatValue: (v) => `$${(v / 1000).toFixed(1)}k`,
+    formatTick: (t) => `${t / 1000}k`,
+  },
+  play: async ({ canvasElement }) => {
+    await expect(canvasElement.querySelector('svg')!.textContent).toMatch(/\dk|\d\.\dk/);
+    await expect(within(canvasElement).getByRole('row', { name: /Tue/ })).toHaveTextContent('$1.8k');
+    await userEvent.tab();
+    await userEvent.keyboard('{Home}');
+    await expect(within(canvasElement).getByRole('status')).toHaveTextContent('Mon: Completed $1.2k, Committed $1.5k');
+  },
+};
+
+/** `onSelectDatum` hears a click (the nearest point) and Enter on the keyboard. */
+export const SelectingAPoint: Story = {
+  args: { onSelectDatum: fn() },
+  play: async ({ canvasElement, args }) => {
+    const target = canvasElement.querySelector('svg rect[fill="transparent"]') as SVGRectElement;
+    const r = target.getBoundingClientRect();
+    await userEvent.pointer({ keys: '[MouseLeft]', target, coords: { clientX: r.left + r.width / 2, clientY: r.top + 40 } });
+    await expect(args.onSelectDatum).toHaveBeenLastCalledWith(expect.objectContaining({ key: '06-20' }));
+    within(canvasElement).getByRole('group').focus();
+    await userEvent.keyboard('{Home}{ArrowRight}{Enter}');
+    await expect(args.onSelectDatum).toHaveBeenLastCalledWith(expect.objectContaining({ key: '06-17' }));
+    await expect(within(canvasElement).getByRole('group', { name: /Enter to choose one/ })).toBeInTheDocument();
+  },
+};
+
+/** `renderTooltip` replaces what the tooltip says (the card and its position stay). */
+export const CustomTooltip: Story = {
+  args: {
+    renderTooltip: ({ datum }) => (
+      <p className="m-0 text-caption-md-medium text-text-primary">
+        {datum.label}: {datum.values.committed! - datum.values.completed!} pts behind plan
+      </p>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const target = canvasElement.querySelector('svg rect[fill="transparent"]') as SVGRectElement;
+    const r = target.getBoundingClientRect();
+    await userEvent.pointer({ target, coords: { clientX: r.left + 4, clientY: r.top + 40 } });
+    await expect(await within(canvasElement).findByText('June 16: 5 pts behind plan')).toBeVisible();
+  },
+};
+
+/** `toggleSeries` makes each legend entry a button: the chart redraws without that line and its axis follows. The last visible line cannot be hidden. */
+export const TogglingSeries: Story = {
+  args: { toggleSeries: true },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const lines = () => canvasElement.querySelectorAll('svg path[stroke-width="2"]').length;
+    await expect(lines()).toBe(4);
+    const overdue = c.getByRole('button', { name: 'Overdue' });
+    await userEvent.click(overdue);
+    await expect(overdue).toHaveAttribute('aria-pressed', 'false');
+    await expect(lines()).toBe(3);
+    await expect(canvasElement.querySelectorAll('svg circle')).toHaveLength(27);
+    await userEvent.click(c.getByRole('button', { name: 'Completed' }));
+    await userEvent.click(c.getByRole('button', { name: 'Committed' }));
+    /* One left: it stays. */
+    await userEvent.click(c.getByRole('button', { name: 'Available' }));
+    await expect(lines()).toBe(1);
+    await expect(c.getByRole('button', { name: 'Available' })).toHaveAttribute('aria-pressed', 'true');
   },
 };
 

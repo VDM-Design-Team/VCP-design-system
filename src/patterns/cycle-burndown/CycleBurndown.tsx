@@ -4,7 +4,7 @@ import type { ChartSeries } from '../../lib/chart-series';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
 import { Tooltip } from '../../atoms/tooltip';
-import { LineChart, type LineChartDatum } from '../../components/line-chart';
+import { LineChart, type LineChartDatum, type LineChartProps } from '../../components/line-chart';
 
 /**
  * CycleBurndown — how a cycle's points burned down over its days: a line for each of Completed, Committed, Overdue and Available
@@ -33,7 +33,9 @@ export interface CycleBurndownStat {
   tone?: CycleBurndownStatTone;
 }
 
-export interface CycleBurndownProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
+export interface CycleBurndownProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'title'>,
+    Pick<LineChartProps, 'formatValue' | 'formatTick' | 'onSelectDatum' | 'renderTooltip' | 'toggleSeries' | 'defaultHiddenSeries' | 'onToggleSeries'> {
   /** One entry per day, in order. */
   data: readonly LineChartDatum[];
   title?: string;
@@ -64,7 +66,7 @@ const STAT_TONE: Record<CycleBurndownStatTone, string> = {
 const SERIES: readonly ChartSeries[] = ['completed', 'committed', 'overdue', 'available'];
 
 export const CycleBurndown = React.forwardRef<HTMLElement, CycleBurndownProps>(
-  ({ className, data, title = 'Cycle Burndown', hint, stats, series = SERIES, seriesLabels, pointLabel = 'Date', yLabel = 'Development Points', unit = 'pts', height, loading, empty, ...props }, ref) => {
+  ({ className, data, title = 'Cycle Burndown', hint, stats, series = SERIES, seriesLabels, pointLabel = 'Date', yLabel = 'Development Points', unit = 'pts', height, loading, empty, formatValue, formatTick, onSelectDatum, renderTooltip, toggleSeries, defaultHiddenSeries, onToggleSeries, ...props }, ref) => {
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} aria-busy={loading || undefined} className={cn('@container flex flex-col gap-6 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
@@ -85,7 +87,7 @@ export const CycleBurndown = React.forwardRef<HTMLElement, CycleBurndownProps>(
           )}
         </header>
 
-        <LineChart data={data} series={series} seriesLabels={seriesLabels} pointLabel={pointLabel} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} />
+        <LineChart data={data} series={series} seriesLabels={seriesLabels} pointLabel={pointLabel} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} formatValue={formatValue} formatTick={formatTick} onSelectDatum={onSelectDatum} renderTooltip={renderTooltip} toggleSeries={toggleSeries} defaultHiddenSeries={defaultHiddenSeries} onToggleSeries={onToggleSeries} />
 
         {stats && stats.length > 0 && !loading && (
           <div className="flex flex-col gap-4">

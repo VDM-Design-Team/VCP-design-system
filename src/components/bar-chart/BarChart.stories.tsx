@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { BarChart, type BarChartDatum } from './BarChart';
 
 const CYCLES: BarChartDatum[] = [
@@ -124,6 +124,124 @@ export const ManyCategories: Story = {
 /** A value too small to hold its number keeps its bar and drops the number (it is still in the tooltip and the table). */
 export const SmallValues: Story = {
   args: { data: [{ key: 1, label: 'Jan C23', values: { available: 200, completed: 3, overdue: 1 } }] },
+};
+
+/** The plot is one tab stop: the left and right arrows move from group to group, the group is announced, Home and End jump and Escape clears. */
+export const KeyboardReading: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.tab();
+    await expect(c.getByRole('group', { name: /Cycle Performance/ })).toHaveFocus();
+    await userEvent.keyboard('{ArrowRight}');
+    await expect(c.getByRole('status')).toHaveTextContent('Jan C23: Available 130 pts, Overdue 30 pts, Completed 140 pts');
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}');
+    await expect(c.getByRole('status')).toHaveTextContent('Feb C25: Available 157 pts');
+    await userEvent.keyboard('{End}');
+    await expect(c.getByRole('status')).toHaveTextContent('Mar C29');
+    await userEvent.keyboard('{Home}');
+    await expect(c.getByRole('status')).toHaveTextContent('Jan C23');
+    await userEvent.keyboard('{Escape}');
+    await expect(c.getByRole('status')).toHaveTextContent('');
+  },
+};
+
+/** `formatValue` says how a number reads on a bar, in the tooltip, the table and the announcement; `formatTick` says how the value axis reads. Here, thousands as "1.2k" and money with a symbol. */
+export const FormattedNumbers: Story = {
+  args: {
+    data: [
+      { key: 1, label: 'Q1', values: { available: 1200, completed: 900 } },
+      { key: 2, label: 'Q2', values: { available: 1500, completed: 1350 } },
+    ],
+    series: ['available', 'completed'],
+    unit: 'USD',
+    yLabel: 'Revenue',
+    formatValue: (v) => (v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v}`),
+    formatTick: (t) => (t >= 1000 ? `${t / 1000}k` : String(t)),
+  },
+  play: async ({ canvasElement }) => {
+    const svg = canvasElement.querySelector('svg')!;
+    await expect(svg.textContent).toContain('$1.2k');
+    await expect(svg.textContent).toMatch(/1\.5k|2k/);
+    await expect(within(canvasElement).getByRole('row', { name: /Q2/ })).toHaveTextContent('$1.5k');
+    await userEvent.tab();
+    await userEvent.keyboard('{Home}');
+    await expect(within(canvasElement).getByRole('status')).toHaveTextContent('Q1: Available $1.2k, Completed $0.9k'.replace('$0.9k', '$900'));
+  },
+};
+
+/** `onSelectDatum` hears a click on a group (with the series of the bar when the click lands on one) and Enter on the keyboard. */
+export const SelectingAGroup: Story = {
+  args: { onSelectDatum: fn() },
+  play: async ({ canvasElement, args }) => {
+    const rects = canvasElement.querySelectorAll('svg rect[fill="transparent"]');
+    /* The middle of the group is the middle bar: Overdue. */
+    const mid = (rects[2] as Element).getBoundingClientRect();
+    await userEvent.pointer({ keys: '[MouseLeft]', target: rects[2] as Element, coords: { clientX: mid.left + mid.width / 2, clientY: mid.top + 40 } });
+    await expect(args.onSelectDatum).toHaveBeenLastCalledWith(expect.objectContaining({ key: 3 }), 'overdue');
+    /* The left edge of the group is between groups: no bar. */
+    const r = (rects[0] as Element).getBoundingClientRect();
+    await userEvent.pointer({ keys: '[MouseLeft]', target: rects[0] as Element, coords: { clientX: r.left + 2, clientY: r.top + 20 } });
+    await expect(args.onSelectDatum).toHaveBeenLastCalledWith(expect.objectContaining({ key: 1 }), undefined);
+    /* And from the keyboard: Enter on the group the arrows are on. */
+    within(canvasElement).getByRole('group').focus();
+    await userEvent.keyboard('{Home}{ArrowRight}{Enter}');
+    await expect(args.onSelectDatum).toHaveBeenLastCalledWith(expect.objectContaining({ key: 2 }));
+    await expect(within(canvasElement).getByRole('group', { name: /Enter to choose one/ })).toBeInTheDocument();
+  },
+};
+
+/** `renderTooltip` replaces what the tooltip says (the card and its position stay). */
+export const CustomTooltip: Story = {
+  args: {
+    renderTooltip: ({ datum, series }) => (
+      <p className="m-0 text-caption-md-medium text-text-primary">
+        {datum.label}: {series.reduce((sum, s) => sum + (datum.values[s] ?? 0), 0)} pts in all
+      </p>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const target = canvasElement.querySelectorAll('svg rect[fill="transparent"]')[2] as Element;
+    await userEvent.hover(target);
+    await expect(await within(canvasElement).findByText('Feb C25: 323 pts in all')).toBeVisible();
+  },
+};
+
+/** `toggleSeries` makes each legend entry a button: the chart redraws without that series and its axis follows. The last visible series cannot be hidden. */
+export const TogglingSeries: Story = {
+  args: { toggleSeries: true },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const bars = () => canvasElement.querySelectorAll('svg path').length;
+    const before = bars();
+    const overdue = c.getByRole('button', { name: 'Overdue' });
+    await expect(overdue).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(overdue);
+    await expect(overdue).toHaveAttribute('aria-pressed', 'false');
+    await expect(bars()).toBeLessThan(before);
+    /* The data is still all in the table. */
+    await expect(within(c.getByRole('table')).getAllByRole('columnheader')).toHaveLength(4);
+    await userEvent.click(c.getByRole('button', { name: 'Available' }));
+    await userEvent.click(c.getByRole('button', { name: 'Completed' }));
+    /* One left: it stays. */
+    await expect(c.getByRole('button', { name: 'Completed' })).toHaveAttribute('aria-pressed', 'true');
+    await userEvent.click(overdue);
+    await expect(overdue).toHaveAttribute('aria-pressed', 'true');
+  },
+};
+
+/** The axis follows what is drawn: hide the tallest series and the top comes down. */
+export const AxisFollowsTheVisibleSeries: Story = {
+  args: {
+    toggleSeries: true,
+    series: ['available', 'completed'],
+    data: [{ key: 1, label: 'A', values: { available: 400, completed: 90 } }],
+  },
+  play: async ({ canvasElement }) => {
+    const svg = canvasElement.querySelector('svg')!;
+    await expect(svg.textContent).toContain('400');
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Available' }));
+    await expect(svg.textContent).not.toContain('400');
+  },
 };
 
 /** With nothing to draw, it says so. */
