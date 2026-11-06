@@ -56,7 +56,6 @@ export const SprintMetrics = React.forwardRef<HTMLElement, SprintMetricsProps>(
           yTickCount={4}
           valueLabels="above"
           grid="dashed"
-          legend="top"
           maxBarWidth={64}
           loading={loading}
           empty={empty}

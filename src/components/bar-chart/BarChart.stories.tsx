@@ -69,7 +69,7 @@ export const Tooltip: Story = {
   },
 };
 
-/** Sprint Metrics' look: the numbers over the bars, dashed gridlines, the legend on top, and a few ticks. */
+/** Sprint Metrics' look: the numbers over the bars, dashed gridlines and a few ticks. */
 export const NumbersAboveDashedGrid: Story = {
   args: {
     caption: 'Sprint Metrics',
@@ -83,7 +83,6 @@ export const NumbersAboveDashedGrid: Story = {
     ],
     valueLabels: 'above',
     grid: 'dashed',
-    legend: 'top',
     yTickCount: 4,
     maxBarWidth: 48,
   },
@@ -140,3 +139,54 @@ export const Loading: Story = {
 
 /** Tokens only, so dark comes for free. */
 export const DarkTheme: Story = { globals: { theme: 'dark' } };
+
+/* WCAG 1.4.3 (text) and 1.4.11 (the bars are graphics that carry meaning). axe cannot see into an `aria-hidden` SVG, so this measures it. */
+const channels = (css: string) => css.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+const luminance = ([r, g, b]: number[]) => {
+  const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/** In both themes: the axis text and the numbers over bars hold 4.5:1 on the card, each bar holds 3:1 against the card, and a number written on a bar holds 4.5:1 on that bar. */
+export const ContrastHolds: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', controls: { disable: true }, chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div>
+      {[false, true].map((isDark) => (
+        <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
+          <div className="w-160 bg-surface-elevated p-6" data-card>
+            <BarChart data={CYCLES.slice(0, 3)} series={['available', 'committed', 'overdue', 'completed', 'leave']} caption="Contrast" yLabel="Points" legend="none" />
+            <BarChart data={CYCLES.slice(0, 3)} series={['available', 'completed']} caption="Over" valueLabels="above" legend="none" />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const theme of ['light', 'dark']) {
+      const scope = canvasElement.querySelector(`[data-theme-case="${theme}"]`) as HTMLElement;
+      /* The chart measures its own width: wait for it. */
+      await new Promise((r) => setTimeout(r, 300));
+      const card = channels(getComputedStyle(scope.querySelector('[data-card]') as HTMLElement).backgroundColor);
+      const fills = (el: Element) => channels(getComputedStyle(el).fill);
+      const checks: [string, number, number][] = [];
+      for (const text of scope.querySelectorAll('svg text.fill-text-secondary, svg text.fill-text-primary')) {
+        checks.push([`text "${text.textContent}"`, contrast(fills(text), card), 4.5]);
+      }
+      for (const g of scope.querySelectorAll('svg g > g')) {
+        const path = g.querySelector(':scope > path');
+        if (!path) continue;
+        checks.push([`bar ${path.getAttribute('class')}`, contrast(fills(path), card), 3]);
+        const number = g.querySelector(':scope > text');
+        if (number && !number.getAttribute('class')?.includes('fill-text-primary')) checks.push([`number on ${path.getAttribute('class')}`, contrast(fills(number), fills(path)), 4.5]);
+      }
+      await expect(checks.length).toBeGreaterThan(20);
+      for (const [name, ratio, need] of checks) await expect({ theme, name, ok: ratio >= need }).toEqual({ theme, name, ok: true });
+    }
+  },
+};

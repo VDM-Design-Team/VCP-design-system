@@ -34,9 +34,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## What it is
 
-A `BarChart` with Sprint Metrics' look: the numbers over the bars, dashed gridlines, four ticks, the legend on top and bars up to 64 wide. **Capacity** is the system's `available` series and **Commitment** its `committed` one, relabelled here, so the blues read as they do on every other chart.
+A `BarChart` with Sprint Metrics' look: the numbers over the bars, dashed gridlines, four ticks and bars up to 64 wide, with the legend under the chart. **Capacity** is the system's `available` series and **Commitment** its `committed` one, relabelled here, so the blues read as they do on every other chart.
 
-**Differences from Figma, on purpose.** Overdue is the system's red (Figma draws it orange here and red elsewhere); the two blues are the series' tokens (Figma's pale periwinkle and blue are not variables); Capacity is the primary blue and Commitment the deeper step, as Available and Committed are on every chart.
+**Differences from Figma, on purpose.** The legend is under the chart (Figma draws it above; the system keeps every legend at the bottom). Overdue is the system's red (Figma draws it orange here and red elsewhere); the two blues are the series' tokens (Figma's pale periwinkle and blue are not variables); Capacity is the primary blue and Commitment the deeper step, as Available and Committed are on every chart.
 
 ## Layout and responsiveness
 
