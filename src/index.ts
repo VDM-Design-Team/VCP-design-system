@@ -6,6 +6,7 @@ export * from './atoms/button';
 export * from './atoms/checkbox';
 export * from './atoms/chip';
 export * from './atoms/copy-text';
+export * from './atoms/description-card-title';
 export * from './atoms/divider';
 export * from './atoms/dropzone';
 export * from './atoms/donut-chart';
@@ -103,5 +104,6 @@ export * from './patterns';
 export * from './templates';
 
 export { cn } from './lib/cn';
+export { DateFormatProvider, useDateFormat, formatDate, formatDayMonthYear, datePlaceholder } from './lib/format-date';
 /* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
 export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';

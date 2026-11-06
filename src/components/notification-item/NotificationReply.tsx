@@ -61,7 +61,7 @@ export const ReplyControl = React.forwardRef<HTMLButtonElement, ReplyControlProp
         ref={ref}
         type={type}
         className={cn(
-          'inline-flex h-9 items-center gap-2 rounded-md font-sans text-body-sm-regular',
+          'inline-flex h-9 items-center gap-2 whitespace-nowrap rounded-md font-sans text-body-sm-regular',
           'text-neutral-textual-content-default transition-colors',
           'hover:text-text-link-default',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',

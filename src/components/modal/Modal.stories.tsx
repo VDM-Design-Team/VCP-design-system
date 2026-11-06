@@ -5,6 +5,7 @@ import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Modal } from './Modal';
 import { Button } from '../../atoms/button';
 import { Field } from '../field';
+import { Checkbox } from '../../atoms/checkbox';
 import { Input } from '../../atoms/input';
 import { Popover } from '../popover';
 
@@ -362,6 +363,31 @@ export const LongContent: Story = {
       </div>
     </Modal>
   ),
+};
+
+/**
+ * A tall body with checkboxes down it. Tabbing to one that has scrolled into view must scroll the **body**, never the dialog's own panel: a checkbox's real input is hidden with `sr-only`
+ * (absolutely positioned), and unless the body is the containing block it stays put while the body scrolls, so focusing it drags the panel — the footer ends up at the top of the dialog.
+ */
+export const TallBodyWithCheckboxes: Story = {
+  args: { title: 'Access', size: 'md' },
+  render: (args) => (
+    <Modal {...args} footer={<Button onClick={args.onClose}>Submit</Button>}>
+      <div className="flex flex-col gap-6 pb-4">
+        {Array.from({ length: 24 }, (_, i) => (
+          <Checkbox key={i} label={`Domain ${i + 1}`} />
+        ))}
+      </div>
+    </Modal>
+  ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog', { name: 'Access' });
+    const last = within(dialog).getByRole('checkbox', { name: 'Domain 24' });
+    last.focus();
+    /* The body scrolled to it; the panel itself did not. */
+    await expect(dialog.scrollTop).toBe(0);
+    await expect(within(dialog).getByRole('button', { name: 'Submit' }).getBoundingClientRect().bottom).toBeLessThanOrEqual(dialog.getBoundingClientRect().bottom);
+  },
 };
 
 /**

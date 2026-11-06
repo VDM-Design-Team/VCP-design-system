@@ -476,3 +476,8 @@ Reported, not invented — nothing new was added to `tokens/` for this component
    "behind the dialog" is carried mostly by the panel's shadow. It is the token the
    system has and it flips correctly in dark, so it was used as-is, but the light
    value is worth a second look.
+
+## Long forms scroll the body, not the panel
+
+Only the **body** scrolls; the header and footer stay put. A checkbox, radio or switch hides its real input with `sr-only` (`position: absolute`), so the body is its containing block (`relative`) and the input
+scrolls with it. Were the panel the containing block instead, tabbing to a control that had scrolled out of view would scroll the *panel* and carry the footer up the dialog. The `TallBodyWithCheckboxes` story holds this.

@@ -456,8 +456,9 @@ export const ReplyFlow: Story = {
     await typeText(field, 'will review');
     await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
 
-    /* Posted, and hidden by default. */
+    /* Posted, and hidden by default — and focus went to "Show Reply", not the page. */
     const show = await canvas.findByRole('button', { name: 'Show Reply' });
+    await waitFor(() => expect(show).toHaveFocus());
     await expect(show).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.queryByText(/will review/)).toBeNull();
     await userEvent.click(show);
@@ -471,10 +472,13 @@ export const ReplyFlow: Story = {
     await typeText(editor, ' soon');
     await userEvent.click(canvas.getByRole('button', { name: 'Save' }));
     await expect(await canvas.findByText(/will review soon/)).toBeVisible();
+    /* Saved: focus is on "Edit", where it was. */
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Edit' })).toHaveFocus());
 
-    /* Delete: the reply goes and "Reply" comes back. */
+    /* Delete: the reply goes and "Reply" comes back — with focus on it. */
     await userEvent.click(canvas.getByRole('button', { name: 'Delete' }));
     await expect(await canvas.findByRole('button', { name: 'Reply' })).toBeVisible();
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Reply' })).toHaveFocus());
     await expect(canvas.queryByRole('button', { name: /Show Reply|Hide Reply/ })).toBeNull();
   },
 };
@@ -527,6 +531,8 @@ export const CancelReply: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Reply' }));
     await userEvent.click(canvas.getByRole('button', { name: 'Cancel' }));
     await expect(await canvas.findByRole('button', { name: 'Reply' })).toBeVisible();
+    /* Focus is back on "Reply", the control that opened the composer. */
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Reply' })).toHaveFocus());
     await expect(canvas.getByRole('button', { name: /thumbs up/ })).toBeVisible();
   },
 };

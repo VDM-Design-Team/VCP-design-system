@@ -15,6 +15,7 @@ import { SearchSelect, type SearchSelectOption } from '../../components/search-s
 import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
 import { AV_TYPES, TypeTag, type AVType } from '../../components/type-tag';
 import { AV_URGENCIES, UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * DetailCard — the facts about one Added Value, down the right of its page: who started it and
@@ -144,11 +145,6 @@ const parts = (iso: string) => iso.split('-').map(Number) as [number, number, nu
 const longDate = (iso: string) => {
   const [y, m, d] = parts(iso);
   return MONTHS[m - 1] ? `${MONTHS[m - 1]} ${d}, ${y}` : iso;
-};
-/** "10-01-2025", as the editing field shows it. */
-const fieldDate = (iso: string) => {
-  const [y, m, d] = parts(iso);
-  return `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}-${y}`;
 };
 const toDate = (iso: string) => {
   const [y, m, d] = parts(iso);
@@ -448,11 +444,14 @@ function Item({
   label,
   onAdd,
   addDisabled,
+  addRef,
   aside,
   children,
 }: {
   label: string;
   onAdd?: () => void;
+  /** The + button, for a field that puts focus back on it. */
+  addRef?: React.Ref<HTMLButtonElement>;
   /** The + is dimmed and does nothing while a form is open. */
   addDisabled?: boolean;
   aside?: React.ReactNode;
@@ -467,6 +466,7 @@ function Item({
         </span>
         {onAdd && (
           <button
+            ref={addRef}
             type="button"
             aria-label={`Add ${label.toLowerCase()}`}
             onClick={onAdd}
@@ -531,6 +531,8 @@ function DateField({
 }) {
   const [open, setOpen] = React.useState(false);
   const errorId = React.useId();
+  /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
+  const dates = useDateFormat();
   return (
     <div className="w-full">
       <Popover
@@ -551,8 +553,8 @@ function DateField({
             invalid={!!error}
             aria-describedby={error ? errorId : undefined}
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
-            placeholder="MM-DD-YYYY"
-            value={value ? fieldDate(value) : ''}
+            placeholder={dates.placeholder}
+            value={value ? dates.format(value) : ''}
             onClick={() => setOpen(true)}
           />
         }
@@ -600,7 +602,27 @@ function PeopleField({
   aside?: React.ReactNode;
 }) {
   const [mode, setMode] = React.useState<{ type: 'add' } | { type: 'edit'; index: number } | null>(null);
+  /* Focus never falls to the page when the control that had it goes: opening the form disables the + (and replaces a chip), closing it removes the form, and removing a chip removes its buttons. Each step
+     says where focus belongs next; the effect below puts it there once that control is on screen. */
+  const addButton = React.useRef<HTMLButtonElement>(null);
+  const row = React.useRef<HTMLDivElement>(null);
+  const focusNext = React.useRef<{ to: 'add' } | { to: 'chip'; index: number } | null>(null);
   const done = () => setMode(null);
+  /* The first action on a chip: Edit (an assignee) or Remove (an initiator has no pencil). */
+  const chipAction = (person: DetailCardPerson | undefined) =>
+    person
+      ? (row.current?.querySelector<HTMLElement>(`button[aria-label="Edit ${person.name}"], button[aria-label="Remove ${person.name}"]`) ?? null)
+      : null;
+  React.useEffect(() => {
+    const target = focusNext.current;
+    if (!target || mode !== null) return;
+    const el = target.to === 'add' ? addButton.current : chipAction(people[target.index]);
+    /* Nothing to land on in the row (the last chip went): the + is what is left. */
+    const landing = el ?? addButton.current;
+    if (!landing || landing.hasAttribute('disabled')) return;
+    focusNext.current = null;
+    landing.focus();
+  }, [mode, people]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const form = (initial: DetailCardPerson | undefined, submitLabel: string, commit: (p: DetailCardPerson) => void) => (
     <PersonForm
@@ -609,9 +631,13 @@ function PeopleField({
       directory={directory}
       roles={roles}
       submitLabel={submitLabel}
-      onCancel={done}
+      onCancel={() => {
+        focusNext.current = mode?.type === 'edit' ? { to: 'chip', index: mode.index } : { to: 'add' };
+        done();
+      }}
       onSubmit={(person) => {
         commit(person);
+        focusNext.current = mode?.type === 'edit' ? { to: 'chip', index: mode.index } : { to: 'add' };
         done();
       }}
     />
@@ -622,11 +648,12 @@ function PeopleField({
       label={label}
       onAdd={() => setMode({ type: 'add' })}
       addDisabled={mode !== null}
+      addRef={addButton}
       aside={aside}
     >
       {/* One wrapping row. A chip being edited is replaced, in its own place among the others, by the form,
           which takes a whole row (`w-full`) so the chips before it stay above and the ones after it below. */}
-      <div className="flex w-full flex-wrap gap-2">
+      <div ref={row} className="flex w-full flex-wrap gap-2">
         {people.map((p, index) =>
           mode?.type === 'edit' && mode.index === index ? (
             <React.Fragment key={p.name}>
@@ -645,8 +672,15 @@ function PeopleField({
               label={p.name}
               description={kind === 'assignee' ? (p.description ?? 'Assignee') : undefined}
               count={p.points}
+              /* Named for the person, so a row of chips is not a row of identical "Edit" and "Remove". */
+              editLabel={`Edit ${p.name}`}
+              removeLabel={`Remove ${p.name}`}
               onEdit={kind === 'assignee' ? () => setMode({ type: 'edit', index }) : undefined}
-              onRemove={() => onChange(people.filter((_, i) => i !== index))}
+              onRemove={() => {
+                /* The next chip's action (the one now at this place), or the + when it was the last. */
+                focusNext.current = { to: 'chip', index };
+                onChange(people.filter((_, i) => i !== index));
+              }}
             />
           ),
         )}
@@ -679,9 +713,15 @@ function PersonForm({
   const [role, setRole] = React.useState(initial?.description ?? (roles.includes('Assignee') ? 'Assignee' : roles[0]) ?? 'Assignee');
   const [points, setPoints] = React.useState(initial?.points !== undefined ? String(initial.points) : '');
   const known = directory.find((p) => p.name === name);
+  /* Opening the form disables the + that had focus, so focus goes into the form: the "Select user" field. */
+  const formRef = React.useRef<HTMLFormElement>(null);
+  React.useEffect(() => {
+    formRef.current?.querySelector<HTMLElement>('button[aria-haspopup="listbox"]')?.focus();
+  }, []);
 
   return (
     <form
+      ref={formRef}
       className="flex w-full flex-col gap-2"
       onSubmit={(e) => {
         e.preventDefault();

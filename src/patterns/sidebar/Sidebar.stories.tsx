@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 /* Storybook's own hooks, not React's: a story function can't mix the two,
    and `useArgs` is a Storybook hook. */
 import { useArgs, useEffect, useState, useStoryContext } from 'storybook/preview-api';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { Sidebar, NAV_BY_USER_TYPE, type SidebarUserType } from './Sidebar';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
@@ -161,6 +162,50 @@ export const FullyExpanded: Story = {
         />
       </Stage>
     );
+  },
+};
+
+/**
+ * The sub-rows are destinations too. Each built-in sub-row has a key
+ * (`planning/gantt-chart`, `archive/completed`, …): pressing it calls
+ * `onNavigate` with that key, and passing it as `active` marks the row current
+ * and opens its group. Here the rail starts on Gantt Chart, and pressing
+ * Archive → Completed moves the current page there.
+ */
+/* Keeps the current page in React state, as an app's router would. */
+const RoutedRail = (props: React.ComponentProps<typeof Sidebar>) => {
+  const [active, setActive] = React.useState(props.active);
+  const [collapsed, setCollapsed] = React.useState(!!props.collapsed);
+  return (
+    <Sidebar
+      {...props}
+      active={active}
+      onNavigate={setActive}
+      collapsed={collapsed}
+      onToggleCollapse={() => setCollapsed((c) => !c)}
+    />
+  );
+};
+
+export const SubRowNavigation: Story = {
+  args: { userType: 'admin-dev', active: 'planning/gantt-chart' },
+  argTypes: { showDomainSelector: { control: false } },
+  render: (args) => (
+    <Stage>
+      {/* Keyed so a change in the controls starts the rail afresh. */}
+      <RoutedRail key={`${args.userType}-${args.active}-${args.collapsed}`} {...args} />
+    </Stage>
+  ),
+  play: async ({ canvasElement }) => {
+    const rail = within(canvasElement);
+    /* The current page's group starts open, with its row marked current. */
+    await expect(rail.getByRole('button', { name: 'Planning' })).toHaveAttribute('aria-expanded', 'true');
+    await expect(rail.getByRole('button', { name: 'Gantt Chart' })).toHaveAttribute('aria-current', 'page');
+    /* A sub-row is reported and becomes the current page. */
+    await userEvent.click(rail.getByRole('button', { name: 'Archive' }));
+    await userEvent.click(rail.getByRole('button', { name: 'Completed' }));
+    await expect(rail.getByRole('button', { name: 'Completed' })).toHaveAttribute('aria-current', 'page');
+    await expect(rail.getByRole('button', { name: 'Gantt Chart' })).not.toHaveAttribute('aria-current');
   },
 };
 
