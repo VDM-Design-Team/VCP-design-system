@@ -1,5 +1,105 @@
 # Changelog
 
+## 0.3.0 — 2026-11-06
+
+### `GanttChart`: a cut name can be read, and "1 pt" (November 2026)
+
+A user's name in the row's expand button was cut with "…" ("John Mason S…") with no way to read the rest. When it is cut, it now says the whole name on hover and focus (the system tooltip, off while the name fits). Points also read "1 pt" instead of "1 pts" in the bars, the row summary and a bar's accessible name.
+
+### `StatusHistory`: the count can no longer disagree with the entries (November 2026)
+
+The "(3)" after the title was a separate `count` prop, so it could say a different number from the log under it (the dark story read "(2)" over one entry). With `entries` given the count is now the entries' — `count` is ignored — and `count` stays for a log whose entries are in `children`. The stories pass a wrong `count` on purpose to show it.
+
+### `FilterBar`: a filled user field says which person it filters (November 2026)
+
+Once filled ("Amy Lee", "2 selected") a user field gave no hint whether it was the Assignee or the Initiator. It now reads **"Assignee: Amy Lee"** (or "Assignee: 2 selected"). New `SearchSelect` prop `valuePrefix` does it (drawn only; the trigger's accessible name is still its label and then its value, so it is not read twice); `FilterBar` passes each user entry's `label`. The placeholder is unchanged.
+
+### `DomainBudgetSummary`: over budget the label says the real percentage (November 2026)
+
+At 170 of 120 the bar's label said "100%". The bar still stops at full, but the number beside it is now the real figure: **142%** (new `budgetUsagePercent`, not capped; with no allocation there is no percentage). It is passed as the bar's `valueLabel`, so a screen reader hears 142% as well. The `OverBudget` story asserts it.
+
+### `RemoveButton`: `plain` is not offered on a filled brand surface (November 2026)
+
+The bare red ✕ on the brand blue is about 1.3:1, well under the 3:1 a graphic needs (WCAG 1.4.11). `plain` is for plain surfaces only; on a filled brand surface use `tonal` (the ✕ on its own disc, 3.91 light / 3.47 dark). The `Surfaces` story no longer draws `plain` on brand, `ContrastHolds` now measures that surface in both themes (tonal passes; the bare ✕ is asserted not to), and the docs say so.
+
+### One date format everywhere: dd/mm/yyyy, or the person's locale (November 2026)
+
+Dates read two or three ways: `DateField`, `InlineDateEdit` and the Planning table showed the raw ISO string ("2026-03-04"), the detail card's fields month-first ("10-01-2025"), and the filter bar dd/mm/yyyy. They all read **dd/mm/yyyy** now, from one place (`src/lib/format-date.ts`), by splitting the string so no time zone can move the day. Wrap the app in `<DateFormatProvider locale="en-US">` to read in the person's locale instead (order, separators and the detail card's placeholder follow it); `useDateFormat()` gives a component the same formatter. `formatDate`, `formatDayMonthYear` and `datePlaceholder` are exported. `InlineDateEdit`'s `format` still overrides.
+
+Visible change: any story or page that showed an ISO date now shows dd/mm/yyyy.
+
+### `DescriptionSection`: where focus goes after a card is removed (November 2026)
+
+Removing a card only reports it, so the page owns focus afterwards; left alone it fell to the page. `docs/description-section.md` now says where it goes — the next card's field, or the section's Add button when it was the last — and a new `RemovingACard` story shows it and asserts `document.activeElement`. No change to the component.
+
+### `Chip`: the focus ring on the edit and ✕ buttons is no longer clipped (November 2026)
+
+With `actions="hover"` the edit and ✕ buttons sit in a box that clips its overflow (so it can be zero-wide until the chip is hovered or focused), and their focus ring was drawn outside the button, so it showed only at the corners. The ring is now drawn inside the button. The `ActionsOnHover` story asserts it.
+
+### `DetailCard`: focus no longer drops when adding, editing or removing a person (November 2026)
+
+Opening the add form disabled the + that had focus, so focus fell to the page. Now focus goes into the form's "Select user" field; Cancel or Add puts it back on the +; Cancel or Save on an edit puts it on that chip's pencil; removing a chip moves it to the next chip's pencil, or to the + when it was the last. The chips' pencil and ✕ are named for the person ("Edit Jane Doe", "Remove Jane Doe"). `EditingPeople` asserts it.
+
+### `NotificationItem`: focus no longer drops in the reply flow (November 2026)
+
+In the reply flow the control that had focus went with its view and focus fell to the page. Now: after **Reply** (sent) focus goes to "Show Reply"; after **Cancel** a new reply, to "Reply"; after **Save** or **Cancel** an edit, to "Edit"; after **Delete**, to "Reply". The stories assert it. "Show Reply" / "Hide Reply" also no longer wrap onto two lines.
+
+### `DataTable`: a text-only table that scrolls sideways is reachable by keyboard (November 2026)
+
+A table wider than its container scrolls sideways; when it had no control in it (no link, button or sortable header) there was nothing to tab to and the hidden columns could not be reached from the keyboard — the accessibility check for a scrollable region failed it. The scroller now takes a tab stop, named by the `caption`, but only while it actually scrolls and has no control inside, so tables with controls or that fit add no stop. `HorizontalScrollTextOnly` holds it.
+
+### `DescriptionCardTitle` — the card that names an Added Value (November 2026)
+
+New atom, built to Figma's `Description_Card_Title`: the card at the top of an AV page's left column with the AV's reference ("VCP-1234") over its title. It is the page's second header: `AVHeader` above it is the ID row and holds the `<h1>`, and this card's title is the `<h2>` beneath it (`headingLevel` 3 for a deeper spot). A long title wraps and is never cut. Found building the AV pages of the clickable prototype, where the title had no component.
+
+### `Toast` — `announce: false`, and toasts on a blocked Submit (November 2026)
+
+`toast()` takes a new option, `announce: false`. It shows a toast without
+reading it out: the toast goes into a plain stack after the two live regions,
+with no role and no `aria-live`. It is for a toast that repeats a message
+already announced somewhere else, so a screen reader user hears it once.
+`announce` defaults to `true`, so every existing toast behaves as before.
+
+The one case in VCP is a blocked Submit on an Added Value. The product chose
+the Figma behaviour (5 November 2026): a "Missing Input" toast for each missing
+field, and the "Unavailable Assignee" toast, on top of the error under each
+field. `docs/toast.md` now allows those toasts and says on what terms. The
+field error stays the message and the one announcement, and the toasts are
+raised with `announce: false`. The story **Blocked submit is said once** tests
+it.
+
+### `Modal`: tabbing through a long form no longer scrolls the dialog itself (November 2026)
+
+In a dialog whose body scrolls and holds checkboxes, radios or switches (their real inputs are hidden with `sr-only`, i.e. absolutely positioned), tabbing down to one that had scrolled out of view scrolled the **dialog panel** instead of the body: the footer (Submit) rode up to the top of the dialog and the form was cut off. The body is now the containing block for those inputs (`relative`), so they scroll with it and focus scrolls the body. A `TallBodyWithCheckboxes` story fails without the fix.
+
+### `Sidebar` — the Archive and Planning sub-rows go somewhere (November 2026)
+
+The built-in rails' sub-rows (Archive → Completed / Rejected / Backlogs, Planning → Planning List / Gantt Chart / Holiday Registry) had no key and no destination, so pressing one did nothing and no page could mark one as current; an app had to rebuild the whole rail with `items` to route them. Each now has a key — `archive/completed`, `planning/gantt-chart`, … — that `onNavigate` reports and `active` matches, like a top-level row's. The current page's group starts open in the expanded rail (not as a flyout in the collapsed one). New type `SidebarNavSubItem`: an `items` override's sub-row may carry a `key` the same way; a sub-row's own `href`, `onNavigate` or `selected` still wins. Found building the Gantt Chart screen of the clickable prototype. New story: `SubRowNavigation`.
+
+### `ContactsTable` — the Contact List page (November 2026)
+
+New pattern, built to Figma's `Contact_List`: Email, Subject and Message columns (a long message wraps and is shown whole), a delete button on every row (the plain glyph-only `IconButton`, named for the row) and `Pagination` beneath. Controlled: the caller pages, and `onDelete` only asks — the page confirms (`ConfirmDeleteModal`) and toasts. `loading` shows placeholder rows; an empty table says so.
+
+Its empty table is an `EmptyState` (“No messages yet.”).
+
+Focus after a delete is the page's job and is documented (docs/contacts-table.md): the `OnThePage` story moves it to the next message's Delete button, the previous one's for the last row, or the empty message when none is left (`DeletingTheLastMessage`), and asserts it.
+
+### `UserLabel` — the description sits 2 below the name at `md` (November 2026)
+
+At the default size the description (the email under a name) is 2 below the name, where it was pulled up 6 so the two lines touched. `sm` is unchanged. Only the Accounts table uses it.
+
+### `AccountsTable` — the Accounts page's list of users (November 2026)
+
+New pattern, built to Figma's `Accounts_Page_Content`: a search box, a sortable Name column (avatar, name, email), the domains as neutral tags, a sortable Date Added (already formatted), an edit and a delete button on every row (the plain glyph-only `IconButton`; named for the person), and `Pagination` beneath. Controlled: the caller filters, sorts and pages, and `onEdit` / `onDelete` only ask — the page opens the user dialog, confirms the delete (`ConfirmDeleteModal`) and toasts. `loading` shows placeholder rows; an empty table says so in an `EmptyState`, with the words searched.
+
+Focus after a delete is the page's job and is documented (docs/accounts-table.md, docs/confirm-delete-modal.md): the `OnThePage` story moves it to the next row's Delete button, the previous one's for the last row, or the search box when the table is empty, and asserts it. The search placeholder and the empty hint say "domain" (the column the table has), and the story shows the Items select.
+
+The Domains cell keeps 16 above and below its tags, so when they wrap onto several lines (a narrow column, many domains) the row grows to fit instead of the tags touching the row's edges; the `Default` story holds it (Sarah is in six domains).
+
+### `ConfirmDeleteModal` — confirm deleting anything (November 2026)
+
+New pattern: the same alert layout as `ConfirmDeleteAVModal` (a warning glyph, the question, the consequence, the item's name in a read-only field; not dismissible by the backdrop; `alertdialog`), with the word for the thing configurable (`itemLabel`, `itemName`) so a user, a contact or a domain can use it. It asks and reports; it deletes nothing. `ConfirmDeleteAVModal` is unchanged.
+
 ## 0.2.0 — 2026-11-05
 
 ### `Dropzone` checks the files it takes (November 2026)
