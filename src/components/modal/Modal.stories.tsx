@@ -52,10 +52,10 @@ type Story = StoryObj<typeof meta>;
 /** The two actions the plain dialog ends with. */
 const ConfirmFooter = ({ onClose }: { onClose: () => void }) => (
   <>
-    <Button variant="secondary" onClick={onClose}>
+    <Button size="sm" variant="secondary" onClick={onClose}>
       Cancel
     </Button>
-    <Button onClick={onClose}>Publish</Button>
+    <Button size="sm" onClick={onClose}>Publish</Button>
   </>
 );
 
@@ -229,10 +229,10 @@ export const WithForm: Story = {
           initialFocusRef={nameRef}
           footer={
             <>
-              <Button variant="secondary" type="button" onClick={args.onClose}>
+              <Button size="sm" variant="secondary" type="button" onClick={args.onClose}>
                 Cancel
               </Button>
-              <Button type="submit" form="modal-invite-form">
+              <Button size="sm" type="submit" form="modal-invite-form">
                 Send invite
               </Button>
             </>
@@ -290,10 +290,10 @@ export const DestructiveConfirmation: Story = {
       {...args}
       footer={
         <>
-          <Button variant="secondary" onClick={args.onClose}>
+          <Button size="sm" variant="neutral" onClick={args.onClose}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={args.onClose}>
+          <Button size="sm" variant="danger" onClick={args.onClose}>
             Delete claim
           </Button>
         </>
@@ -314,6 +314,11 @@ export const CriticalTone: Story = {
     title: 'Delete CLM-4471?',
     description: 'The claim, its 12 attachments and its audit trail are removed permanently.',
     actions: { confirm: { label: 'Delete claim' } },
+  },
+  play: async () => {
+    /* Every footer button in a dialog is the `sm` size (36 high), the critical pair included. */
+    const footer = within(await screen.findByRole('alertdialog', { name: 'Delete CLM-4471?' })).getByRole('button', { name: 'Cancel' }).closest('footer') as HTMLElement;
+    for (const button of footer.querySelectorAll('button')) await expect(Math.round(button.getBoundingClientRect().height)).toBe(36);
   },
 };
 
@@ -341,10 +346,10 @@ export const LongContent: Story = {
       description="Version 4.2 — effective 1 September"
       footer={
         <>
-          <Button variant="secondary" onClick={args.onClose}>
+          <Button size="sm" variant="secondary" onClick={args.onClose}>
             Decline
           </Button>
-          <Button onClick={args.onClose}>Accept</Button>
+          <Button size="sm" onClick={args.onClose}>Accept</Button>
         </>
       }
     >
@@ -372,7 +377,7 @@ export const LongContent: Story = {
 export const TallBodyWithCheckboxes: Story = {
   args: { title: 'Access', size: 'md' },
   render: (args) => (
-    <Modal {...args} footer={<Button onClick={args.onClose}>Submit</Button>}>
+    <Modal {...args} footer={<Button size="sm" onClick={args.onClose}>Submit</Button>}>
       <div className="flex flex-col gap-6 pb-4">
         {Array.from({ length: 24 }, (_, i) => (
           <Checkbox key={i} label={`Domain ${i + 1}`} />
@@ -399,7 +404,7 @@ export const TallBodyWithCheckboxes: Story = {
 export const ExtraWide: Story = {
   args: { size: 'xl', title: 'Reconciliation for September' },
   render: (args) => (
-    <Modal {...args} footer={<Button onClick={args.onClose}>Close</Button>}>
+    <Modal {...args} footer={<Button size="sm" onClick={args.onClose}>Close</Button>}>
       A dialog this wide is for content that needs the room — a table, a diff, a preview — not for
       a sentence like this one.
     </Modal>
@@ -609,10 +614,10 @@ export const NotDismissible: Story = {
             description="The claim, its 12 attachments and its audit trail are removed permanently."
             footer={
               <>
-                <Button variant="secondary" onClick={onClose}>
+                <Button size="sm" variant="neutral" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button variant="danger" onClick={onClose}>
+                <Button size="sm" variant="danger" onClick={onClose}>
                   Delete claim
                 </Button>
               </>
@@ -681,7 +686,7 @@ export const NestedDialog: Story = {
               <Button variant="danger" onClick={() => setInner(true)}>
                 Reject
               </Button>
-              <Button onClick={() => setOuter(false)}>Accept</Button>
+              <Button size="sm" onClick={() => setOuter(false)}>Accept</Button>
             </>
           }
         >
@@ -693,7 +698,7 @@ export const NestedDialog: Story = {
           title="Rejection reason"
           size="sm"
           footer={
-            <Button variant="secondary" onClick={() => setInner(false)}>
+            <Button size="sm" variant="secondary" onClick={() => setInner(false)}>
               Cancel
             </Button>
           }

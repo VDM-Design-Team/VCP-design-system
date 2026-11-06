@@ -17,6 +17,10 @@ keyboard until it is dismissed. Reach for it last, not first.
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
+## Footer buttons are all `sm` (36 high)
+
+Every button in a dialog's footer is `Button` `size="sm"` (36 high, 12 either side), the critical pair included: `actions` draws them at that size, and a hand-built `footer` says `size="sm"` on each. A footer at the default 40 beside the others reads as a different dialog. And **a grey Cancel (`neutral`) goes beside a red answer** (`danger`) — a blue-outlined Cancel next to a red button is two competing colours — so a hand-built destructive footer uses `variant="neutral"` for Cancel, as `tone="critical"` does.
+
 ## The critical tone
 
 A dialog whose answer destroys something takes `tone="critical"`. Its buttons are the system's
