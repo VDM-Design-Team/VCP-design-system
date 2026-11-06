@@ -166,7 +166,8 @@ export const Default: Story = {
     /* Users: a searchable list that then says who. */
     await userEvent.click(canvas.getByRole('button', { name: /^Assignee/ }));
     await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
-    await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveTextContent('Amy Lee');
+    /* Filled, the field still says which person it is. */
+    await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveTextContent('Assignee: Amy Lee');
 
     /* Reset clears every value the page holds. */
     await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
@@ -240,7 +241,9 @@ export const MultipleUsers: Story = {
     await userEvent.click(field);
     await userEvent.click(canvas.getByRole('option', { name: 'Adam' }));
     await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
-    await expect(field).toHaveTextContent('2 selected');
+    await expect(field).toHaveTextContent('Watchers: 2 selected');
+    /* Said once to a screen reader: its name is its label and its value, the prefix is only drawn. */
+    await expect(field).toHaveAccessibleName('Watchers 2 selected');
   },
 };
 

@@ -147,6 +147,11 @@ interface SearchSelectBase
    * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
    */
   emphasis?: 'regular' | 'medium';
+  /**
+   * Words before what is picked, once something is: "Assignee" makes the field read "Assignee: Amy Lee" (or "Assignee: 2 selected"), so a filled field still says what it filters. The placeholder stays as it is.
+   * Visual only: the trigger is already named by its label and then its value, so a screen reader is not told twice. Summary display only (tags have no summary).
+   */
+  valuePrefix?: string;
   /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
   fullWidth?: boolean;
   /**
@@ -301,6 +306,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       inline,
       size = 'md',
       emphasis = 'medium',
+      valuePrefix,
       fullWidth = false,
       loading,
       onSearch,
@@ -911,6 +917,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 <span id={valueId} className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
               ) : (
                 <span id={valueId} className="min-w-0 truncate">
+                  {summary && valuePrefix && <span aria-hidden="true">{valuePrefix}: </span>}
                   {summary ?? placeholder}
                 </span>
               )}
