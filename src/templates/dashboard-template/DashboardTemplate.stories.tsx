@@ -11,7 +11,7 @@ import { TeamCapacity } from '../../patterns/team-capacity';
 import { UserCapacity } from '../../patterns/user-capacity';
 import { CyclePerformance } from '../../patterns/cycle-performance';
 import { CycleBurndown } from '../../patterns/cycle-burndown';
-import { SuperAdminMetrics, type SuperAdminMetricsData } from '../../patterns/superadmin-metrics';
+import { SuperAdminFilters, SuperAdminMetrics, type SuperAdminMetricsData } from '../../patterns/superadmin-metrics';
 import { CycleSummary } from '../../components/cycle-summary';
 import { SprintMetrics } from '../../components/sprint-metrics';
 import { DomainBudgetSummary } from '../../components/domain-budget-summary';
@@ -114,7 +114,13 @@ const globalFilters = (withTeam: boolean): DashboardFilter[] => [
   { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {} },
   ...(withTeam ? [{ key: 'team', label: 'Team', value: 'All Teams', options: ['All Teams', 'Platform', 'Growth'], onChange: () => {} }] : []),
 ];
-const Filters = ({ withTeam = true }: { withTeam?: boolean }) => <DashboardFilters filters={globalFilters(withTeam)} onReset={() => {}} exportLabel="Export Cycle Report" exportOptions={[{ key: 'pdf', label: 'PDF' }, { key: 'csv', label: 'CSV' }]} onExport={() => {}} />;
+const Filters = ({ withTeam = true, withExport = true }: { withTeam?: boolean; withExport?: boolean }) => (
+  <DashboardFilters
+    filters={globalFilters(withTeam)}
+    onReset={() => {}}
+    {...(withExport ? { exportLabel: 'Export Cycle Report', exportOptions: [{ key: 'pdf', label: 'PDF' }, { key: 'csv', label: 'CSV' }], onExport: () => {} } : {})}
+  />
+);
 
 /* ---- The sections each role sees, as the Figma pages draw them -------------------------------------------------------------- */
 
@@ -156,7 +162,15 @@ const DevUserCycle = () => (
 const DevUserQuarter = () => (
   <>
     <ValueCards items={VALUE_ITEMS} />
-    <CyclePerformance title="My Cycle Performance" data={CYCLES} />
+    {/* The Quarter view has no global bar, so the chart keeps its own quarter and year; no "whose": it is already theirs. */}
+    <CyclePerformance
+      title="My Cycle Performance"
+      data={CYCLES}
+      filters={[
+        { key: 'quarter', label: 'Quarter', value: 'Q1', options: ['Q1', 'Q2', 'Q3', 'Q4'], onChange: () => {}, className: 'w-24' },
+        { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {}, className: 'w-28' },
+      ]}
+    />
   </>
 );
 
@@ -222,6 +236,9 @@ export const DevelopmentAdmin: Story = {
     await expect(c.getByRole('region', { name: 'Domain Budget' })).toBeInTheDocument();
     await expect(c.queryByRole('region', { name: 'Team Capacity' })).toBeNull();
     await expect(c.queryByRole('group', { name: 'Dashboard filters' })).toBeNull();
+    /* And back, so the story opens on (and rests at) the Cycle view. */
+    await userEvent.click(within(views).getByRole('radio', { name: 'Cycle' }));
+    await expect(await c.findByRole('region', { name: 'Team Capacity' })).toBeInTheDocument();
   },
 };
 
@@ -234,18 +251,37 @@ export const DevelopmentAdminQuarter: Story = {
   ),
 };
 
-/** **Super admin.** One view and its own filters (domain and month) inside the metrics, so no switch and no global bar: just the title and the numbers. */
+/** **Super admin.** One view, so no switch and no global bar. Its two filters (the domain and the month) sit **in the title row, aligned to the right**, 36 high, level with the development admin's, and the metrics draw only the cards. */
 export const SuperAdmin: Story = {
-  render: () => (
-    <DashboardTemplate sidebar={<Rail userType="super-admin" />} topBar={<Bar name="Super Admin" />}>
-      <SuperAdminMetrics metrics={METRICS} domains={['Development Domain', 'Design Domain']} domain="Development Domain" month="2026-09-01" onDomainChange={() => {}} onMonthChange={() => {}} />
-    </DashboardTemplate>
-  ),
+  render: () => {
+    const [domain, setDomain] = React.useState('Development Domain');
+    const [month, setMonth] = React.useState('2026-09-01');
+    const domains = ['Development Domain', 'Design Domain'];
+    return (
+      <DashboardTemplate
+        sidebar={<Rail userType="super-admin" />}
+        topBar={<Bar name="Super Admin" />}
+        filters={<SuperAdminFilters size="compact" domains={domains} domain={domain} onDomainChange={setDomain} month={month} onMonthChange={setMonth} />}
+      >
+        <SuperAdminMetrics filters={false} metrics={METRICS} domains={domains} domain={domain} month={month} />
+      </DashboardTemplate>
+    );
+  },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await expect(c.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument();
+    const title = c.getByRole('heading', { level: 1, name: 'Dashboard' });
     await expect(c.queryByRole('radiogroup', { name: 'Dashboard view' })).toBeNull();
-    await expect(c.queryByRole('group', { name: 'Dashboard filters' })).toBeNull();
+    /* The filters are in the title band, level with the title, once, and aligned to the right (the band's inner edge is 32 in). */
+    const filters = c.getByRole('group', { name: 'Dashboard filters' });
+    const band = title.closest('header') as HTMLElement;
+    await expect(band).toContainElement(filters);
+    await expect(Math.abs(filters.getBoundingClientRect().top - title.getBoundingClientRect().top)).toBeLessThan(24);
+    await expect(Math.abs(band.getBoundingClientRect().right - 32 - filters.getBoundingClientRect().right)).toBeLessThan(4);
+    /* 36 high, the same as the development admin's. */
+    const heights = [...filters.children].map((el) => Math.round(el.getBoundingClientRect().height));
+    await expect(new Set(heights)).toEqual(new Set([36]));
+    /* The metrics drew no second copy. */
+    await expect(c.getAllByRole('group', { name: 'Dashboard filters' })).toHaveLength(1);
   },
 };
 
@@ -254,7 +290,7 @@ export const DevelopmentUser: Story = {
   render: () => {
     const [view, setView] = React.useState('cycle');
     return (
-      <DashboardTemplate sidebar={<Rail userType="user" />} topBar={<Bar />} views={VIEWS} view={view} onViewChange={setView} filters={view === 'cycle' ? <Filters withTeam={false} /> : undefined}>
+      <DashboardTemplate sidebar={<Rail userType="user" />} topBar={<Bar />} views={VIEWS} view={view} onViewChange={setView} filters={view === 'cycle' ? <Filters withTeam={false} withExport={false} /> : undefined}>
         {view === 'cycle' ? <DevUserCycle /> : <DevUserQuarter />}
       </DashboardTemplate>
     );
@@ -262,10 +298,16 @@ export const DevelopmentUser: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('region', { name: 'My Capacity' })).toBeInTheDocument();
+    /* The global filters stay on the Cycle view, without the export a development admin has. */
+    await expect(c.getByRole('group', { name: 'Dashboard filters' })).toBeInTheDocument();
+    await expect(c.queryByRole('button', { name: /Export/ })).toBeNull();
     await expect(c.getByRole('region', { name: 'My Cycle Burndown' })).toBeInTheDocument();
     await expect(c.queryByRole('region', { name: 'User Capacity' })).toBeNull();
     await userEvent.click(c.getByRole('radio', { name: 'Quarter' }));
     await expect(await c.findByRole('region', { name: 'My Cycle Performance' })).toBeInTheDocument();
+    /* The chart keeps its own quarter and year (no global bar here), and no "whose". */
+    await expect(c.getByRole('combobox', { name: 'Quarter' })).toBeInTheDocument();
+    await expect(c.queryByRole('combobox', { name: 'Show' })).toBeNull();
   },
 };
 
@@ -282,24 +324,6 @@ export const DesignUserView: Story = {
     await expect(c.getByRole('region', { name: 'Value Cards' })).toBeInTheDocument();
     await expect(c.getByRole('region', { name: 'In Case You Missed it' })).toBeInTheDocument();
     await expect(c.queryByRole('radiogroup')).toBeNull();
-  },
-};
-
-/** At 1440 wide (the rail 256, the page inset 32 each side) the title, the switch and the whole filter bar fit on one line: the selects hug their longest option, so none carries empty space. */
-export const At1440Wide: Story = {
-  render: () => (
-    <div className="w-360">
-      <Switching cycle={<DevAdminCycle />} quarter={<DevAdminQuarter />} filters />
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const c = within(canvasElement);
-    const filters = c.getByRole('group', { name: 'Dashboard filters' });
-    const title = c.getByRole('heading', { level: 1, name: 'Dashboard' });
-    /* Same row: the filters start level with the title (not wrapped beneath it). */
-    await expect(Math.abs(filters.getBoundingClientRect().top - title.getBoundingClientRect().top)).toBeLessThan(24);
-    /* And no column gap between the switch and the filters: that room goes to the filters. */
-    await expect(getComputedStyle(title.closest('header') as HTMLElement).columnGap).toBe('0px');
   },
 };
 

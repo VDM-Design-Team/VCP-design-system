@@ -85,17 +85,49 @@ export interface SuperAdminMetricsProps
   month: string;
   /** The first of the chosen month, ISO. */
   onMonthChange?: (month: string) => void;
+  /**
+   * Draw the domain and month filters above the cards (the default). Turn it off when the page puts them elsewhere, in the title
+   * band beside the page's title, as `SuperAdminFilters`: the metrics then draw only the cards.
+   */
+  filters?: boolean;
   /** The figures are on their way: placeholders instead of numbers. */
   loading?: boolean;
   hints?: Partial<SuperAdminMetricsHints>;
 }
+
+export interface SuperAdminFiltersProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'> {
+  /** The domains the filter offers, named as they should read ("Development Domain"). */
+  domains: readonly string[];
+  domain: string;
+  onDomainChange?: (domain: string) => void;
+  /** The month shown, as any ISO date inside it. */
+  month: string;
+  onMonthChange?: (month: string) => void;
+  /** `md` (40, the default: above the cards) or `compact` (36: in the title band, level with a dashboard's other filters). */
+  size?: 'compact' | 'md';
+}
+
+/**
+ * The super admin dashboard's two filters: a domain `Select` and a month `DateField`, in **regular** weight so they sit quietly. By default
+ * `SuperAdminMetrics` draws them above its cards (40 high, 14rem wide); `size="compact"` draws them 36 high, hugging their content, for
+ * the title band beside the page's title (turn the metrics' own off with `filters={false}`).
+ */
+export const SuperAdminFilters = React.forwardRef<HTMLDivElement, SuperAdminFiltersProps>(
+  ({ className, domains, domain, onDomainChange, month, onMonthChange, size = 'md', ...props }, ref) => (
+    <div ref={ref} role="group" aria-label="Dashboard filters" className={cn('flex flex-wrap items-center gap-3 font-sans', className)} {...props}>
+      <Select size={size} emphasis="regular" aria-label="Domain" className={size === 'md' ? 'w-56' : undefined} value={domain} options={domains} onChange={onDomainChange} />
+      <DateField mode="month" size={size} emphasis="regular" aria-label="Month" className={size === 'md' ? 'w-56' : 'w-48'} value={month} onChange={onMonthChange} />
+    </div>
+  ),
+);
+SuperAdminFilters.displayName = 'SuperAdminFilters';
 
 /* A figure, or the "--" of one that cannot be worked out yet. */
 const figure = (n: number | null) => (n === null ? '--' : String(n));
 
 export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetricsProps>(
   (
-    { className, metrics, domains, domain, onDomainChange, month, onMonthChange, loading, hints, ...props },
+    { className, metrics, domains, domain, onDomainChange, month, onMonthChange, filters = true, loading, hints, ...props },
     ref,
   ) => {
     const tip = { ...SUPERADMIN_METRIC_HINTS, ...hints };
@@ -111,18 +143,16 @@ export const SuperAdminMetrics = React.forwardRef<HTMLElement, SuperAdminMetrics
         className={cn('@container flex flex-col gap-4 font-sans', className)}
         {...props}
       >
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <Select
-            size="md"
-            emphasis="regular"
-            aria-label="Domain"
-            className="w-56"
-            value={domain}
-            options={domains}
-            onChange={onDomainChange}
+        {filters && (
+          <SuperAdminFilters
+            className="justify-end"
+            domains={domains}
+            domain={domain}
+            onDomainChange={onDomainChange}
+            month={month}
+            onMonthChange={onMonthChange}
           />
-          <DateField mode="month" emphasis="regular" aria-label="Month" className="w-56" value={month} onChange={onMonthChange} />
-        </div>
+        )}
 
         <div className="flex flex-wrap gap-4">
           <StatCard

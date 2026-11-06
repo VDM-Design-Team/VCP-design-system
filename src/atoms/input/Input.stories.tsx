@@ -79,10 +79,16 @@ export const MediumValue: Story = {
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-3">
-      <Input {...args} size="sm" placeholder="Small — 32 tall, dense contexts" />
-      <Input {...args} size="md" placeholder="Medium — 40 tall, the default" />
+      <Input {...args} size="sm" aria-label="Small" placeholder="Small — 32 tall, dense contexts" />
+      <Input {...args} size="compact" aria-label="Compact" placeholder="Compact — 36 tall, beside a small Button" />
+      <Input {...args} size="md" aria-label="Medium" placeholder="Medium — 40 tall, the default" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (name: string) => Math.round((c.getByRole('textbox', { name }).parentElement as HTMLElement).getBoundingClientRect().height);
+    await expect([height('Small'), height('Compact'), height('Medium')]).toEqual([32, 36, 40]);
+  },
 };
 
 export const WithLeadingIcon: Story = {

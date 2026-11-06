@@ -29,6 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `mode` | `'day' \| 'month'` | `'day'` | What it picks: a day, or a month with no day (see below). `DatePicker`'s own prop |
 | `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder. It **reads dd/mm/yyyy** (see below) |
 | `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
+| `size` | `sm \| compact \| md` | `md` | The field's height, as `Input`'s: 32 / 36 / 40. `compact` (36) is a toolbar's field beside a small Button |
 | `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
 | `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
 | `placeholder` | `string` | `-` | While there is no date |

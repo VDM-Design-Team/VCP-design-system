@@ -26,6 +26,8 @@ const field = cva(
       size: {
         /* 32 tall — dense tables and toolbars only. ds-lint-ignore */
         sm: 'h-8 px-3',
+        /* 36 tall — a toolbar's field beside a small Button (36): the dashboard's header row. ds-lint-ignore */
+        compact: 'h-9 px-3',
         /* 40 tall — the default, meets the minimum target size. ds-lint-ignore */
         md: 'h-10 px-3',
       },
@@ -50,14 +52,16 @@ const control = cva(
   ],
   {
     variants: {
-      size: { sm: '', md: '' },
+      size: { sm: '', compact: '', md: '' },
       /* `medium` is a chosen value, as `Select` and `SearchSelect` set it; the placeholder is regular either way. */
       emphasis: { regular: '', medium: '' },
     },
     compoundVariants: [
       { size: 'sm', emphasis: 'regular', className: 'text-caption-md-regular' },
+      { size: 'compact', emphasis: 'regular', className: 'text-body-sm-regular' },
       { size: 'md', emphasis: 'regular', className: 'text-body-sm-regular' },
       { size: 'sm', emphasis: 'medium', className: 'text-caption-md-medium placeholder-shown:text-caption-md-regular' },
+      { size: 'compact', emphasis: 'medium', className: 'text-body-sm-medium placeholder-shown:text-body-sm-regular' },
       { size: 'md', emphasis: 'medium', className: 'text-body-sm-medium placeholder-shown:text-body-sm-regular' },
     ],
     defaultVariants: { size: 'md', emphasis: 'regular' },

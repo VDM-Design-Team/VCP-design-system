@@ -8,6 +8,7 @@ A single-line text field, with optional decorative icons and an error state.
 |---|---|---|---|
 | `md` | 40 | Everything by default — forms, filters, modals | The only size that meets the 40 minimum target |
 | `sm` | 32 | Dense tables, toolbars, inline filters | Pointer-only contexts. Never on a touch-first screen |
+| `compact` | 36 | A toolbar's field beside a small `Button` (36), as the dashboard's header row has it | Pointer-only contexts, like `sm`. The same 36 as `Select` and `SearchSelect`'s `compact` |
 
 For anything that isn't one line of free text, reach for the right control instead:
 a `Textarea` for long answers, a `Select` for a closed set, a date picker for dates.
@@ -16,7 +17,7 @@ a `Textarea` for long answers, a `Select` for a closed set, a date picker for da
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `size` | `sm \| md` | `md` | Replaces the native `size` attribute (character count), which is not forwarded |
+| `size` | `sm \| compact \| md` | `md` | Replaces the native `size` attribute (character count), which is not forwarded |
 | `invalid` | `boolean` | `false` | Critical border + `aria-invalid`. Must be paired with a visible message |
 | `emphasis` | `regular \| medium` | `regular` | The weight of the value. `medium` is what a *chosen* value reads as in `Select`, `SearchSelect` and `DateField`; the placeholder stays regular either way |
 | `fullWidth` | `boolean` | `false` | Spans the container. Use in forms, modal bodies, and on mobile |

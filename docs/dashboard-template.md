@@ -26,12 +26,12 @@ What differs between a development admin, a development user, a design user and 
 | Role | Rail (`userType`) | View switch | Global filters | Cycle view | Quarter view |
 |---|---|---|---|---|---|
 | **Development admin** | `admin-dev` | Cycle / Quarter | Cycle, year, team, reset, export (Cycle view only) | `CycleSummary`, `ValueCards`, `InCaseYouMissedIt`, `TeamCapacity`, `UserCapacity`, `SprintMetrics`, `CycleBurndown` | `DomainBudgetSummary`, `ValueCards`, `CyclePerformance` (with its own filters) |
-| **Development user** | `user` | Cycle / Quarter | Cycle, year (no team) | `ValueCards`, `TeamCapacity` titled "My Capacity", `CycleBurndown` titled "My Cycle Burndown" | `ValueCards`, `CyclePerformance` titled "My Cycle Performance" |
+| **Development user** | `user` | Cycle / Quarter | Cycle, year (no team), reset; **no export** (Cycle view only) | `ValueCards`, `TeamCapacity` titled "My Capacity", `CycleBurndown` titled "My Cycle Burndown" | `ValueCards`, `CyclePerformance` titled "My Cycle Performance" **with its own quarter and year filters** (no global bar on this view, and no "whose": it is already theirs) |
 | **Design user** | `user` | none | none | `ValueCards`, `InCaseYouMissedIt` | |
-| **Super admin** | `super-admin` | none | none (its own domain and month filters are inside the metrics) | `SuperAdminMetrics` | |
+| **Super admin** | `super-admin` | none | its own domain and month (`SuperAdminFilters`, 36 high) **in the title row, aligned to the right**, passed as `filters`; the metrics draw only the cards (`filters={false}`) | `SuperAdminMetrics` | |
 | **Design admin** | `admin` | not yet designed | | | |
 
-The development user and design user rows come from the product's description, not from a Figma frame; the development admin and super admin rows are read off Figma.
+The development user and design user rows come from the product's description, not from a Figma frame (the development user's no-export Cycle filters and its chart's own quarter and year are suggestions); the development admin and super admin rows are read off Figma, except that the super admin's filters now sit in the title row (Figma draws them above the cards).
 
 ## Props
 
