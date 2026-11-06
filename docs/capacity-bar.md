@@ -44,16 +44,19 @@ The colour of each series is owned by `src/lib/chart-series.ts` (`CHART_SERIES`)
 | Series | Fill | Number | Light | Dark |
 |---|---|---|---|---|
 | Completed | `accent.success.filled.surface` | `accent.success.filled.content` | **4.95:1** | **6.27:1** |
-| Committed | `surface.brand.subtle` | `text.primary` | **13.69:1** | **9.04:1** |
+| Committed | `surface.brand.strong` | `action.primary.content` | **6.18:1** | **8.73:1** |
 | Overdue | `accent.critical.filled.surface` | `accent.critical.filled.content` | **4.77:1** | **5.30:1** |
-| Available | `surface.brand.strong` | `action.primary.content` | **6.18:1** | **8.73:1** |
-| Leave | `surface.neutral.medium` | `text.primary` | **13.59:1** | **4.76:1** |
+| Available | `surface.brand.stronger` | `action.primary.content` | **13.23:1** | **13.69:1** |
+| Leave | `accent.warning.filled.surface` | `accent.warning.filled.content` | **4.93:1** | **10.56:1** |
+
+**Every number is one colour per theme**: white in light, near-black in dark. Every fill follows the system's filled-surface rule, so no series needs the opposite text colour from the others.
 
 The segments sit 1 apart on the `surface.track`, so each is a shape of its own and not only a colour change.
 
 **Differences from Figma, on purpose.**
 - **The fills are tokens.** Figma draws Completed in `#63c270`, Committed in `#5280e5` and Overdue in `#ff5656`, none of them a variable, and the legend swatches in other greens and reds again (`accent.success.outline.border`, a *border* token). White numbers on those are under 4.5:1. Here they are the filled-surface tokens and their content colours.
-- **Committed is `surface.brand.subtle`**, with a dark number. The only blue that stays distinct from Available (`surface.brand.strong`, `#1a56db`) and still has contrast for a number is the pale one: `accent.info.filled` is `#155dfc`, which is Available's twin. In dark, Committed is the deeper blue and Available the lighter, and both hold.
+- **Committed and Available are two steps of the brand blue**: Available the deepest (`surface.brand.stronger`), Committed the one lighter (`surface.brand.strong`), both with the same number colour. They are 2.14:1 apart in light and 1.57:1 in dark (the ramp flips there, so Available is the lighter of the two), with a 1 gap between segments. The nearer blue, `accent.info.filled`, is the same colour as Committed's, which is why it isn't used.
+- **Leave is amber**, which Figma draws as a grey. A grey Leave read as Available in dark.
 - **Overdue is red everywhere.** Figma's Sprint Metrics drew it orange.
 
 ## Accessibility
