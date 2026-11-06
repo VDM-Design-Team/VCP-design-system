@@ -16,6 +16,7 @@ import { CycleSummary } from '../../components/cycle-summary';
 import { SprintMetrics } from '../../components/sprint-metrics';
 import { DomainBudgetSummary } from '../../components/domain-budget-summary';
 import { Button } from '../../atoms/button';
+import { useToolbarTheme } from '../../lib/story-theme';
 
 /* ---- The shell: a rail and a bar per role -------------------------------------------------------------------------------------- */
 
@@ -25,9 +26,11 @@ const Rail = ({ userType }: { userType: SidebarUserType }) => {
   return <Sidebar userType={userType} active={active} onNavigate={setActive} collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} />;
 };
 
-const Bar = ({ name = 'Francis Magallen' }: { name?: string }) => (
-  <TopBar primaryAction={<Button>Create Added Value</Button>} notifications={3} user={{ name }} onUserMenu={() => {}} />
-);
+/* The bar's light/dark switch is linked to Storybook's own theme control, both ways. */
+const Bar = ({ name = 'Francis Magallen' }: { name?: string }) => {
+  const theme = useToolbarTheme();
+  return <TopBar primaryAction={<Button>Create Added Value</Button>} notifications={3} user={{ name }} onUserMenu={() => {}} {...theme} />;
+};
 
 /* ---- Sample data: what a page would fetch ------------------------------------------------------------------------------------- */
 
