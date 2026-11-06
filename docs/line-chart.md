@@ -25,14 +25,13 @@ Generated from the real imports — `npm test` fails if this list drifts.
 data: {
   key: string | number;                         // stable per point
   label: string;                                // the axis text: "June 20" (yours to format)
-  tooltip?: { label: string; value: string | number; strong?: boolean }[];   // what the hover card says about this point
+  title?: string;                               // the tooltip heading, if it should say more: "Fri 20 June 2025"
   values: { completed?: number | null; committed?: number | null; overdue?: number | null; available?: number | null; leave?: number | null };
 }[]
 series: ChartSeries[]                           // which lines to draw, in order
 ```
 
 - **One entry per point, in order.** Points are **evenly spaced in the order given**: leave weekends out of a working-days axis and the line does not stretch over them. The chart does not sort, fill gaps or work out dates.
-- **The hover card is yours to word.** Give a point `tooltip` rows and the card says exactly those: `Date: 06.20.2025` (`strong` makes that row's label bold), `Pts Completed: 0`, `Pts Remaining: 145`. They need not be the series; Figma's card says Date, Pts Completed, Pts Remaining and Off-track pts. With no `tooltip` the card is the point's `label` over each series' value. The rows are data too: they are columns in the hidden table and what the keyboard announces.
 - **A series with no value at a point** (`undefined` or `null`) **breaks its line** there, and has no dot: a series that starts late or ends early is just shorter. `0` is a real point on the axis.
 - **What each series measures is the product's.** The chart draws the numbers it is given; the colours and names are the system's (`CHART_SERIES`), shared with every other chart. Use `seriesLabels` to rename one ("Pts Completed").
 
@@ -68,14 +67,14 @@ It measures its own width and draws in real pixels, so type never scales; the ax
 | Gridlines | 1 | `stroke.subtle` |
 | Lines | 2, round caps and joins | the series' fill (`stroke-*`) |
 | Dots | radius 3 (5 on the hovered point) | the series' fill |
-| Tooltip | `caption-md` (label medium, the strong label semibold, value regular) | `text.primary` on `surface.elevated`, `stroke.subtle`, `shadow-md` |
+| Tooltip | `caption-md` | `surface.elevated`, `stroke.subtle`, `shadow-md` |
 
 **Differences from Figma, on purpose.** The line colours are the series tokens (Figma's blues and greens are not variables); Committed is dashed and Available dotted (Figma draws all lines solid, which leaves two blues distinguishable by colour alone); the plot spaces points evenly and does not draw the weekend.
 
 ## Accessibility
 
-- **One keyboard stop, arrow keys inside.** The plot is a focusable group named "Cycle Burndown. Use the left and right arrow keys to read each point." Left and right move from point to point, Home and End jump to the first and last, Escape clears. The tooltip follows, and a polite status announces the point: "June 20: Completed 0 pts, Committed 145 pts …" (or the point's own `tooltip` rows, "Date 06.20.2025, Pts Completed 0 …").
-- **The picture is `aria-hidden`; the data is a table.** A visually hidden `<table>` (captioned by `caption`) has a row per point, a column per series and a column for each row the tooltips add; a missing value reads "no data".
+- **One keyboard stop, arrow keys inside.** The plot is a focusable group named "Cycle Burndown. Use the left and right arrow keys to read each point." Left and right move from point to point, Home and End jump to the first and last, Escape clears. The tooltip follows, and a polite status announces the point: "June 20: Completed 0 pts, Committed 145 pts …".
+- **The picture is `aria-hidden`; the data is a table.** A visually hidden `<table>` (captioned by `caption`) has a row per point and a column per series; a missing value reads "no data".
 - **Contrast, measured in both themes** (the `ContrastHolds` story): every line holds 3:1 against the card (1.4.11) and the axis text 4.5:1.
 - Colour is never the only signal: dash patterns, the legend, the tooltip and the table.
 - Loading: one `status` ("Loading Cycle Burndown"), the placeholder hidden from assistive tech.

@@ -24,7 +24,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Supplying the data
 
-**One entry per day, in order**, each with the label for the axis, a number for each line, and the rows for the hover card:
+**One entry per day, in order**, each with the label for the axis and a number for each line:
 
 ```tsx
 const { data: cycle, isLoading } = useBurndown({ cycleId, team });   // the page's fetch, following its global filters
@@ -35,13 +35,7 @@ const { data: cycle, isLoading } = useBurndown({ cycleId, team });   // the page
   data={(cycle?.days ?? []).map((d) => ({
     key: d.date,
     label: formatDay(d.date),                       // "June 20": yours to format
-    values: { completed: d.completed_pts, committed: d.committed_pts, overdue: d.overdue_pts, available: d.available_pts },   // what the four lines draw
-    tooltip: [                                      // what the hover card says (Figma's: Date, Pts Completed, Pts Remaining, Off-track pts)
-      { label: 'Date', value: formatFull(d.date), strong: true },
-      { label: 'Pts Completed', value: d.pts_completed },
-      { label: 'Pts Remaining', value: d.pts_remaining },
-      { label: 'Off-track pts', value: d.off_track_pts },
-    ],
+    values: { completed: d.completed_pts, committed: d.committed_pts, overdue: d.overdue_pts, available: d.available_pts },
   }))}
   stats={[
     { key: 'completed', label: 'Completed', value: cycle.totals.completed, tone: 'success' },
@@ -62,7 +56,7 @@ The `FromAnApiResponse` story is this mapping, from a raw response, with a butto
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `data` | `{ key, label, values, tooltip? }[]` | required | One entry per day, see `LineChart` |
+| `data` | `{ key, label, title?, values }[]` | required | One entry per day, see `LineChart` |
 | `title` | `string` | `Cycle Burndown` | The heading, and the region's name |
 | `hint` | `string` | — | Explains the card, behind an info glyph (a real button, "About Cycle Burndown"). Omit it and there is no glyph |
 | `stats` | `{ key, label, value, tone? }[]` | — | The totals under the chart. `tone` is `neutral` (default), `success`, `brand` or `critical` |

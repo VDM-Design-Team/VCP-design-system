@@ -8,7 +8,7 @@ const DAYS: LineChartDatum[] = [
   { key: '06-17', label: 'June 17', values: { completed: 150, committed: 160, overdue: 14, available: 135 } },
   { key: '06-18', label: 'June 18', values: { completed: 162, committed: 140, overdue: 18, available: 120 } },
   { key: '06-19', label: 'June 19', values: { completed: 158, committed: 120, overdue: 25, available: 105 } },
-  { key: '06-20', label: 'June 20', values: { completed: 100, committed: 100, overdue: 20, available: 90 } },
+  { key: '06-20', label: 'June 20', title: 'Fri 20 June 2025', values: { completed: 100, committed: 100, overdue: 20, available: 90 } },
   { key: '06-23', label: 'June 23', values: { completed: 70, committed: 80, overdue: 16, available: 75 } },
   { key: '06-24', label: 'June 24', values: { completed: 45, committed: 60, overdue: 10, available: 60 } },
   { key: '06-25', label: 'June 25', values: { completed: 30, committed: 40, overdue: 6, available: 45 } },
@@ -50,11 +50,11 @@ export const Default: Story = {
     await expect(within(c.getByRole('list', { name: 'Legend' })).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Completed', 'Committed', 'Overdue', 'Available']);
     const table = c.getByRole('table', { name: 'Cycle Burndown' });
     await expect(within(table).getAllByRole('row')).toHaveLength(10);
-    await expect(within(table).getByRole('row', { name: /June 20/ })).toHaveTextContent('100 pts');
+    await expect(within(table).getByRole('row', { name: /Fri 20 June 2025/ })).toHaveTextContent('100 pts');
   },
 };
 
-/** Hover for every series at the nearest point. With no `tooltip` rows of its own, the point's label sits over each series and its value. */
+/** Hover for every series at the nearest point; the heading is the point's `title` when it has one. */
 export const Tooltip: Story = {
   play: async ({ canvasElement }) => {
     const target = canvasElement.querySelector('svg rect[fill="transparent"]') as SVGRectElement;
@@ -62,39 +62,8 @@ export const Tooltip: Story = {
     /* Halfway along: the fifth of nine points. */
     await userEvent.pointer({ target, coords: { clientX: r.left + r.width / 2, clientY: r.top + 40 } });
     const c = within(canvasElement);
-    await expect(await c.findByText('June 20', { selector: 'p' })).toBeVisible();
+    await expect(await c.findByText('Fri 20 June 2025', { selector: 'p' })).toBeVisible();
     await expect(c.getAllByText('100 pts').length).toBeGreaterThan(0);
-  },
-};
-
-/** Figma's card: the caller gives each point its own rows (`label`, `value`, `strong` for the one that names the point). They need not be the series: here it says the date, what was completed, what remains and what is off track. They are in the hidden table too, and in what the keyboard announces. */
-export const CustomTooltipRows: Story = {
-  args: {
-    data: DAYS.map((d, i) => ({
-      ...d,
-      tooltip: [
-        { label: 'Date', value: `06.${String(16 + i + (i > 4 ? 2 : 0)).padStart(2, '0')}.2025`, strong: true },
-        { label: 'Pts Completed', value: 180 - (d.values.completed ?? 0) },
-        { label: 'Pts Remaining', value: d.values.completed ?? 0 },
-        { label: 'Off-track pts', value: d.values.overdue ?? 0 },
-      ],
-    })),
-  },
-  play: async ({ canvasElement }) => {
-    const target = canvasElement.querySelector('svg rect[fill="transparent"]') as SVGRectElement;
-    const r = target.getBoundingClientRect();
-    await userEvent.pointer({ target, coords: { clientX: r.left + r.width / 2, clientY: r.top + 40 } });
-    const c = within(canvasElement);
-    const tip = (await c.findByText('Date:')).closest('ul') as HTMLElement;
-    await expect(within(tip).getByText('Pts Remaining:')).toBeVisible();
-    await expect(within(tip).getAllByRole('listitem')).toHaveLength(4);
-    /* The rows that are not the point's name are data too: columns in the hidden table. */
-    const table = c.getByRole('table', { name: 'Cycle Burndown' });
-    await expect(within(table).getAllByRole('columnheader').map((h) => h.textContent)).toContain('Pts Remaining');
-    /* And the keyboard says them. */
-    await userEvent.tab();
-    await userEvent.keyboard('{Home}');
-    await expect(c.getByRole('status')).toHaveTextContent('Date 06.16.2025, Pts Completed 5, Pts Remaining 175, Off-track pts 12');
   },
 };
 
