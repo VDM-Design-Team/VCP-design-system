@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { Field } from '../../components/field';
-import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 
@@ -73,10 +72,17 @@ export function ConfirmDeleteAVModal({
          the announced name *is* the visible question. */
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
-      role="alertdialog"
+      /* The critical tone *is* this dialog: an alertdialog, no ✕, no backdrop dismissal, and a grey Cancel beside a red answer. */
+      tone="critical"
       size="md"
-      dismissible={false}
-      showClose={false}
+      footer={
+        <>
+          <ModalCancel>{cancelLabel}</ModalCancel>
+          <ModalConfirm loading={loading} onClick={onConfirm}>
+            {confirmLabel}
+          </ModalConfirm>
+        </>
+      }
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 text-center">
@@ -99,15 +105,6 @@ export function ConfirmDeleteAVModal({
         <Field label="Added Value">
           <Input readOnly fullWidth value={avTitle} />
         </Field>
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-center justify-end gap-4">
-        <Button variant="neutral" onClick={onClose}>
-          {cancelLabel}
-        </Button>
-        <Button variant="danger" loading={loading} onClick={onConfirm}>
-          {confirmLabel}
-        </Button>
       </div>
     </Modal>
   );
