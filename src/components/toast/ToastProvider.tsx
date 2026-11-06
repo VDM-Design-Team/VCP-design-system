@@ -19,6 +19,14 @@ export interface ToastOptions {
   dismissLabel?: string;
   /** `null` keeps it up until dismissed. Defaults to `DEFAULT_TOAST_DURATION`. */
   duration?: number | null;
+  /**
+   * `false` shows the toast without reading it out: it goes into a plain stack
+   * beside the live regions instead of into one. Only for a toast that repeats
+   * a message already announced somewhere else — a blocked Submit, whose field
+   * errors announce themselves — so it is said once. Never for a toast that is
+   * the only place its message lives. Defaults to `true`.
+   */
+  announce?: boolean;
 }
 
 /** A queued toast: the options plus the id the queue uses to find it again. */
@@ -86,6 +94,12 @@ export function useToast(): ToastContextValue {
  *
  * Rendering `<ToastViewport />` with no toasts is not a no-op — it is the whole
  * point. It puts the empty regions in the page.
+ *
+ * A toast raised with `announce: false` goes in neither region. It lands in a
+ * third stack after them, with no role and no `aria-live`: on screen like any
+ * other toast, reachable when the user reads the page, never read out on
+ * arrival. That stack is only rendered while it holds something, since it has
+ * no announcement to set up in advance.
  */
 const viewport = cva(
   [
@@ -132,8 +146,10 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
     },
     ref,
   ) {
-    const polite = toasts.filter((t) => (t.tone ?? 'info') !== 'critical');
-    const assertive = toasts.filter((t) => t.tone === 'critical');
+    const announced = toasts.filter((t) => t.announce !== false);
+    const polite = announced.filter((t) => (t.tone ?? 'info') !== 'critical');
+    const assertive = announced.filter((t) => t.tone === 'critical');
+    const quiet = toasts.filter((t) => t.announce === false);
 
     /* A toast hugs its content, so a short one is narrower than the 384 column
        it stacks in. Pack the stack against the edge it is anchored to — the right
@@ -158,10 +174,35 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
           toasts={assertive}
           onDismiss={onDismiss}
         />
+        {quiet.length > 0 && (
+          /* Shown, not announced: no role, no aria-live, and so no name either —
+             a plain div may not carry an aria-label. */
+          <div className={cn('flex flex-col gap-2', align)}>
+            {quiet.map((item) => renderToast(item, onDismiss))}
+          </div>
+        )}
       </div>
     );
   },
 );
+
+function renderToast(item: ToastRecord, onDismiss?: (id: string) => void) {
+  return (
+    <Toast
+      key={item.id}
+      tone={item.tone}
+      title={item.title}
+      toneLabel={item.toneLabel}
+      actionLabel={item.actionLabel}
+      onAction={item.onAction}
+      dismissLabel={item.dismissLabel}
+      duration={item.duration === undefined ? DEFAULT_TOAST_DURATION : item.duration}
+      onDismiss={() => onDismiss?.(item.id)}
+    >
+      {item.description}
+    </Toast>
+  );
+}
 
 function ToastRegion({
   role,
@@ -193,21 +234,7 @@ function ToastRegion({
          prevent. An empty flex column is zero pixels tall anyway. */
       className={cn('flex flex-col gap-2', align)}
     >
-      {toasts.map((item) => (
-        <Toast
-          key={item.id}
-          tone={item.tone}
-          title={item.title}
-          toneLabel={item.toneLabel}
-          actionLabel={item.actionLabel}
-          onAction={item.onAction}
-          dismissLabel={item.dismissLabel}
-          duration={item.duration === undefined ? DEFAULT_TOAST_DURATION : item.duration}
-          onDismiss={() => onDismiss?.(item.id)}
-        >
-          {item.description}
-        </Toast>
-      ))}
+      {toasts.map((item) => renderToast(item, onDismiss))}
     </div>
   );
 }
