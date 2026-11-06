@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Modal } from '../../components/modal';
+import { ConfirmDeleteModal } from '../confirm-delete-modal';
 import { Field } from '../../components/field';
 import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
@@ -11,17 +12,15 @@ import { Input } from '../../atoms/input';
  * - **`tag`** — "Add a new Tag": one "Tag Name" field and Submit.
  * - **`domain`** — "Add a new Domain": the same, for a domain.
  * - **`delete-domain`** — "Are you sure you want to delete this domain?", with
- *   Cancel and a red Confirm.
+ *   the domain's name, Cancel and a red Delete. It is `ConfirmDeleteModal`, the
+ *   system's one delete confirmation.
  *
  * The first two are one form with a different noun, so `type` picks the copy
  * and nothing else (`mode="edit"` reuses it to rename — see `mode`). The third
- * is a different dialog — a question, not a form — so it is `Modal`'s
- * `tone="critical"`: an alertdialog with a grey Cancel and a red Confirm, no
- * close ✕, and no backdrop dismissal, so a stray click cannot delete a domain.
- *
- * There is no general "confirm delete" modal in the system:
- * `ConfirmDeleteAVModal` is an alert layout built around an Added Value's
- * title. This one is the plain dialog Figma draws, on `Modal` directly.
+ * is a different dialog — a question, not a form — so it hands over to
+ * `ConfirmDeleteModal`: an alertdialog with the domain's name, a grey Cancel and
+ * a red Delete, no close ✕, and no backdrop dismissal, so a stray click cannot
+ * delete a domain.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -46,7 +45,7 @@ export interface TagManagementModalProps {
    * pencil's dialog isn't drawn — so it is the add dialog, reused.
    */
   mode?: 'add' | 'edit';
-  /** The current name, for `mode="edit"`. */
+  /** The current name: what `mode="edit"` starts the field as, and what `delete-domain` shows so nobody deletes the wrong one. */
   initialName?: string;
 }
 
@@ -72,13 +71,15 @@ export function TagManagementModal({
 
   if (type === 'delete-domain') {
     return (
-      <Modal
+      <ConfirmDeleteModal
         open={open}
         onClose={onClose}
+        onConfirm={() => onConfirm?.()}
+        itemLabel="Domain"
+        itemName={initialName}
         title="Are you sure you want to delete this domain?"
-        tone="critical"
-        size="md"
-        actions={{ confirm: { label: 'Confirm', onClick: onConfirm, loading } }}
+        description="This action cannot be undone. The domain will be permanently removed."
+        loading={loading}
       />
     );
   }
