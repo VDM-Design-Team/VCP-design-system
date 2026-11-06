@@ -88,7 +88,7 @@ export function TagManagementModal({
   const editing = mode === 'edit';
 
   return (
-    <Modal open={open} onClose={onClose} title={editing ? `Rename ${noun}` : `Add a new ${noun}`} size="md">
+    <Modal open={open} onClose={onClose} busy={loading} title={editing ? `Rename ${noun}` : `Add a new ${noun}`} size="md">
       <form
         id={formId}
         className="flex flex-col gap-6"

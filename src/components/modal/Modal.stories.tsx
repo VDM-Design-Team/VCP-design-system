@@ -581,6 +581,76 @@ export const BackdropClickCloses: Story = {
   },
 };
 
+/** The dialog's answer saves for a moment, then is done: the shape of every real save. */
+function SavingDialog({ open, onClose, ...args }: React.ComponentProps<typeof Modal>) {
+  const [saving, setSaving] = React.useState(false);
+  React.useEffect(() => {
+    if (open) setSaving(false);
+  }, [open]);
+  return (
+    <Modal
+      {...args}
+      open={open}
+      onClose={onClose}
+      footer={
+        <>
+          <ModalCancel />
+          <ModalConfirm
+            loading={saving}
+            onClick={() => {
+              setSaving(true);
+              window.setTimeout(() => setSaving(false), 1500);
+            }}
+          >
+            Publish
+          </ModalConfirm>
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * **Nothing closes a dialog while it saves.** Once Publish is loading, the dialog is `busy`: Escape, ✕ and a backdrop click
+ * do nothing, Cancel is disabled, and focus stays on Publish (a loading button keeps focus). When the save finishes, all of
+ * them work again. `ModalConfirm`'s `loading` turns this on by itself; a dialog whose saving button is a plain `Button`
+ * passes `busy`.
+ */
+export const Saving: Story = {
+  args: { open: false },
+  render: (args) => (
+    <Background>
+      <Trigger label="Publish claim">{({ open, onClose }) => <SavingDialog {...args} open={open} onClose={onClose} />}</Trigger>
+    </Background>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Publish claim' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Publish this claim?' });
+    const publish = within(dialog).getByRole('button', { name: 'Publish' });
+    await userEvent.click(publish);
+
+    /* Saving: Publish keeps focus, and is busy rather than disabled. */
+    await expect(publish).toHaveAttribute('aria-busy', 'true');
+    await expect(publish).toHaveAttribute('aria-disabled', 'true');
+    await expect(publish).toHaveFocus();
+    await expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    await expect(within(dialog).getByRole('button', { name: 'Close' })).toBeDisabled();
+
+    /* Escape and a backdrop click leave it open, and focus where it was. */
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(dialog.parentElement as HTMLElement);
+    await expect(screen.getByRole('dialog', { name: 'Publish this claim?' })).toBeInTheDocument();
+    await expect(publish).toHaveFocus();
+
+    /* Saved: everything works again (Cancel is back), and Escape closes it. */
+    await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeEnabled(), { timeout: 3000 });
+    await expect(publish).not.toHaveAttribute('aria-busy');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  },
+};
+
 /**
  * `dismissible={false}` guards against the accidental gesture — a stray click on
  * the backdrop — and nothing else. Escape still closes it, because taking that
