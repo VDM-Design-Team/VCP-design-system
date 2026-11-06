@@ -43,6 +43,8 @@ export interface CycleBurndownProps extends Omit<React.HTMLAttributes<HTMLElemen
   stats?: readonly CycleBurndownStat[];
   /** The lines to draw, in order. */
   series?: readonly ChartSeries[];
+  /** What a day is called in the hover card's heading: "Date" gives "Date: 06.20.2025". */
+  pointLabel?: string;
   /** A different word for a series ("Pts Completed"). */
   seriesLabels?: Partial<Record<ChartSeries, string>>;
   yLabel?: string;
@@ -62,7 +64,7 @@ const STAT_TONE: Record<CycleBurndownStatTone, string> = {
 const SERIES: readonly ChartSeries[] = ['completed', 'committed', 'overdue', 'available'];
 
 export const CycleBurndown = React.forwardRef<HTMLElement, CycleBurndownProps>(
-  ({ className, data, title = 'Cycle Burndown', hint, stats, series = SERIES, seriesLabels, yLabel = 'Development Points', unit = 'pts', height, loading, empty, ...props }, ref) => {
+  ({ className, data, title = 'Cycle Burndown', hint, stats, series = SERIES, seriesLabels, pointLabel = 'Date', yLabel = 'Development Points', unit = 'pts', height, loading, empty, ...props }, ref) => {
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} aria-busy={loading || undefined} className={cn('@container flex flex-col gap-6 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
@@ -83,7 +85,7 @@ export const CycleBurndown = React.forwardRef<HTMLElement, CycleBurndownProps>(
           )}
         </header>
 
-        <LineChart data={data} series={series} seriesLabels={seriesLabels} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} />
+        <LineChart data={data} series={series} seriesLabels={seriesLabels} pointLabel={pointLabel} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} />
 
         {stats && stats.length > 0 && !loading && (
           <div className="flex flex-col gap-4">

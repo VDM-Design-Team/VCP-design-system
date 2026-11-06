@@ -45,6 +45,8 @@ export interface LineChartProps extends Omit<React.HTMLAttributes<HTMLDivElement
   seriesLabels?: Partial<Record<ChartSeries, string>>;
   /** The chart's name: the table's caption for assistive tech ("Cycle Burndown"). */
   caption: string;
+  /** What a point is called in the tooltip's heading: "Date" gives "Date: 06.20.2025". Without it the heading is just the point's title. */
+  pointLabel?: string;
   /** The value axis' title, turned on its side. */
   yLabel?: string;
   /** After a number in the tooltip, the table and the announcement. */
@@ -72,7 +74,7 @@ const has = (v: number | null | undefined): v is number => v !== null && v !== u
 
 export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
   (
-    { className, data, series, seriesLabels, caption, yLabel, unit = 'pts', height = 244, yTickCount = 7, yMax, legend = 'bottom', loading, empty = 'Nothing to show for this period.', ...props },
+    { className, data, series, seriesLabels, caption, pointLabel, yLabel, unit = 'pts', height = 244, yTickCount = 7, yMax, legend = 'bottom', loading, empty = 'Nothing to show for this period.', ...props },
     ref,
   ) => {
     const [plotRef, width] = useElementWidth<HTMLDivElement>();
@@ -114,7 +116,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
     };
 
     const describe = (d: (typeof data)[number]) =>
-      `${d.title ?? d.label}: ${series
+      `${pointLabel ? `${pointLabel} ` : ''}${d.title ?? d.label}: ${series
         .filter((s) => has(d.values[s]))
         .map((s) => `${label(s, seriesLabels)} ${d.values[s]} ${unit}`)
         .join(', ')}`;
@@ -228,7 +230,10 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                     className="pointer-events-none absolute z-10 w-max max-w-60 -translate-x-1/2 rounded-md border border-stroke-subtle bg-surface-elevated px-3 py-2 shadow-md"
                     style={{ left: Math.min(Math.max(tipLeft, 80), Math.max(80, width - 80)), top: MARGIN.top }}
                   >
-                    <p className="m-0 text-caption-md-semibold text-text-primary">{shown.title ?? shown.label}</p>
+                    <p className="m-0 text-caption-md-regular text-text-primary">
+                      {pointLabel && <span className="text-caption-md-semibold">{pointLabel}: </span>}
+                      <span className={pointLabel ? undefined : 'text-caption-md-semibold'}>{shown.title ?? shown.label}</span>
+                    </p>
                     <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
                       {series.map((s) => (
                         <li key={s} className="flex items-center justify-between gap-3 text-caption-md-medium text-text-secondary">

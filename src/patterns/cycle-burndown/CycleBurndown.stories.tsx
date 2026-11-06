@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { CycleBurndown, type CycleBurndownStat } from './CycleBurndown';
 import type { LineChartDatum } from '../../components/line-chart';
 
@@ -21,12 +21,14 @@ const API_RESPONSE = {
   totals: { completed: 168, remaining: 0, off_track: 0 },
 };
 
-/* The whole of "plugging it in": map each day to `{ key, label, values }`, and the totals to `stats`. Dates are formatted here, by the caller. */
+/* The whole of "plugging it in": map each day to `{ key, label, title, values }`, and the totals to `stats`. Dates are formatted here, by the caller. */
+const fullDate = (iso: string) => `${iso.slice(5, 7)}.${iso.slice(8)}.${iso.slice(0, 4)}`;
 const dayLabel = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
 const toData = (r: typeof API_RESPONSE): LineChartDatum[] =>
   r.days.map((d) => ({
     key: d.date,
     label: dayLabel(d.date),
+    title: fullDate(d.date),                    // the hover card's heading, under `pointLabel` ("Date: 06.20.2025")
     values: { completed: d.completed_pts, committed: d.committed_pts, overdue: d.overdue_pts, available: d.available_pts },
   }));
 const toStats = (r: typeof API_RESPONSE): CycleBurndownStat[] => [
@@ -64,7 +66,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Nine working days, four lines, the totals under the chart, the legend at the bottom. */
+/** Nine working days, four lines, the totals under the chart, the legend at the bottom. Hover for the day's card: "Date: 06.20.2025" over each line's value. */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
@@ -74,6 +76,10 @@ export const Default: Story = {
     await expect(c.getByText('168', { selector: 'dd' })).toBeVisible();
     await expect(within(c.getByRole('list', { name: 'Legend' })).getAllByRole('listitem')).toHaveLength(4);
     await expect(canvasElement.querySelectorAll('svg circle')).toHaveLength(36);
+    const target = canvasElement.querySelector('svg rect[fill="transparent"]') as SVGRectElement;
+    const r = target.getBoundingClientRect();
+    await userEvent.pointer({ target, coords: { clientX: r.left + r.width / 2, clientY: r.top + 40 } });
+    await expect((await c.findByText('Date:')).parentElement).toHaveTextContent('Date: 06.20.2025');
   },
 };
 

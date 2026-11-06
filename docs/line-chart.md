@@ -25,7 +25,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 data: {
   key: string | number;                         // stable per point
   label: string;                                // the axis text: "June 20" (yours to format)
-  title?: string;                               // the tooltip heading, if it should say more: "Fri 20 June 2025"
+  title?: string;                               // the tooltip heading, when it should say more than the axis does: "06.20.2025"
   values: { completed?: number | null; committed?: number | null; overdue?: number | null; available?: number | null; leave?: number | null };
 }[]
 series: ChartSeries[]                           // which lines to draw, in order
@@ -42,6 +42,7 @@ series: ChartSeries[]                           // which lines to draw, in order
 | `data` | see above | required | |
 | `series` | `ChartSeries[]` | required | `completed`, `committed`, `overdue`, `available`, `leave` |
 | `seriesLabels` | `Partial<Record<ChartSeries, string>>` | — | A different word in this chart |
+| `pointLabel` | `string` | — | What a point is called in the tooltip's heading: `Date` gives "Date: 06.20.2025" (label bold). Without it the heading is just the title |
 | `caption` | `string` | required | The chart's name: the table's caption and the plot's accessible name |
 | `yLabel` | `string` | — | The value axis' title, turned on its side |
 | `unit` | `string` | `pts` | After a number in the tooltip, the table and the announcement |

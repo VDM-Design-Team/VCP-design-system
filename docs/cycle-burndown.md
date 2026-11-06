@@ -35,6 +35,7 @@ const { data: cycle, isLoading } = useBurndown({ cycleId, team });   // the page
   data={(cycle?.days ?? []).map((d) => ({
     key: d.date,
     label: formatDay(d.date),                       // "June 20": yours to format
+    title: formatFull(d.date),                      // the hover card's heading: "Date: 06.20.2025"
     values: { completed: d.completed_pts, committed: d.committed_pts, overdue: d.overdue_pts, available: d.available_pts },
   }))}
   stats={[
@@ -60,6 +61,7 @@ The `FromAnApiResponse` story is this mapping, from a raw response, with a butto
 | `title` | `string` | `Cycle Burndown` | The heading, and the region's name |
 | `hint` | `string` | — | Explains the card, behind an info glyph (a real button, "About Cycle Burndown"). Omit it and there is no glyph |
 | `stats` | `{ key, label, value, tone? }[]` | — | The totals under the chart. `tone` is `neutral` (default), `success`, `brand` or `critical` |
+| `pointLabel` | `string` | `Date` | What a day is called in the hover card's heading: "Date: 06.20.2025" |
 | `series` | `ChartSeries[]` | `completed`, `committed`, `overdue`, `available` | The lines to draw, in order |
 | `seriesLabels` | `Partial<Record<ChartSeries, string>>` | — | A different word for a series |
 | `yLabel` | `string` | `Development Points` | |
