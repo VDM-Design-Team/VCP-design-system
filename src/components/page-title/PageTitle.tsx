@@ -66,7 +66,9 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
     <header
       ref={ref}
       className={cn(
-        'flex flex-wrap items-start justify-between gap-4 px-8 pb-4 pt-8 font-sans',
+        'flex flex-wrap items-start justify-between px-8 pb-4 pt-8 font-sans',
+        /* No column gap beside a view switch: the actions (a row of padded buttons and selects) already stand clear, and the room goes to the filters. */
+        beside ? 'gap-x-0 gap-y-4' : 'gap-4',
         className,
       )}
       {...props}

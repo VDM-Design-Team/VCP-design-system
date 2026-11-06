@@ -290,6 +290,8 @@ export const At1440Wide: Story = {
     const title = c.getByRole('heading', { level: 1, name: 'Dashboard' });
     /* Same row: the filters start level with the title (not wrapped beneath it). */
     await expect(Math.abs(filters.getBoundingClientRect().top - title.getBoundingClientRect().top)).toBeLessThan(24);
+    /* And no column gap between the switch and the filters: that room goes to the filters. */
+    await expect(getComputedStyle(title.closest('header') as HTMLElement).columnGap).toBe('0px');
   },
 };
 

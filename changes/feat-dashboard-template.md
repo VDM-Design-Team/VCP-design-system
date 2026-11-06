@@ -16,3 +16,5 @@ One height across the header row, 36 as Figma draws it: the filters' selects are
 `Select` gains `size="compact"` (36): a toolbar's select beside a small Button and a medium SegmentedControl. Small (32) and medium (40) are unchanged.
 
 The filter bar's selects hug their longest option (capped at 20rem) instead of a fixed width, so the title, the switch and the whole bar fit on one line at 1440 wide, with no empty space inside the selects.
+
+With `beside` set, `PageTitle` has no column gap between the title group and the actions (16 before), so the filters get that room: at 1440 wide the header now has about 27 to spare.
