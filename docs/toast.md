@@ -42,10 +42,36 @@ their own time, it is a Banner. Toast supports an action for the narrow case
 where the action is a *convenience* ("Retry", "Undo") — and a Toast with an
 action never auto-dismisses.
 
-**Never use a Toast for an error the user must fix.** Errors that block a task
-belong next to the thing that is broken — a `Field` error, or a `Banner` at the
-top of the form. `tone="critical"` on a Toast is for something that failed
-*behind* the user, like a background save.
+**Never use a Toast *instead of* an error the user must fix.** Errors that block
+a task belong next to the thing that is broken — a `Field` error, or a `Banner`
+at the top of the form. `tone="critical"` on a Toast is for something that
+failed *behind* the user, like a background save. A Toast may *also* report a
+blocking error in one place only: a blocked Submit, below.
+
+### The one exception: a blocked Submit
+
+When Submit on an Added Value is blocked, VCP shows a toast for each problem
+**as well as** the error under its field. Figma draws it in *AV Page Missing
+Information Error Handling* (a "Missing Input" toast per missing field) and
+*Assignee Busy Warning* (the "Unavailable Assignee" toast). The product chose
+this on 5 November 2026, over the rule above. It holds only on these terms:
+
+- **The field error is the message; the toast points at it.** Every problem is
+  still a `Field` (or `DetailCard`) error under its own field, and stays until
+  it is fixed. A toast with no field error behind it is still the bug the rule
+  above describes.
+- **One toast per problem.** This is the one place where "Say the one thing that
+  happened" (the *Don't* list) gives way: the design shows a toast for every
+  missing field.
+- **`tone="critical"`, with a close control.** Pass `onDismiss`, as the design
+  draws an ✕. Normal timing is fine: when a toast goes, nothing is lost,
+  because the field error is still there.
+- **`announce: false`, so it is said once.** `Field` already announces its
+  error with `role="alert"`. A `critical` toast would go to the assertive
+  region and say it a second time, which breaks *Say it once* (`CLAUDE.md`,
+  rule 5). Raised with `announce: false`, the toast shows but is not read out
+  (see *Shown, not announced* below). The story **Blocked submit is said once**
+  tests it.
 
 ## Parts
 
@@ -87,9 +113,11 @@ test can assert on the timer without reaching into React.
 | `politeLabel` / `assertiveLabel` | `string` | `Notifications` / `Errors` | Names on the two regions |
 
 `toast(options)` takes `tone`, `title`, `description`, `toneLabel`,
-`actionLabel`, `onAction`, `dismissLabel`, `duration`, and returns an id.
-`duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to `null` as
-it does on a bare `<Toast>`.
+`actionLabel`, `onAction`, `dismissLabel`, `duration`, `announce`, and returns
+an id. `duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to
+`null` as it does on a bare `<Toast>`. `announce` defaults to `true`; `false`
+shows the toast without reading it out, and is only for a toast that repeats
+a message announced somewhere else (see *Shown, not announced*).
 
 ## The timer bar
 
@@ -165,6 +193,20 @@ The cost of splitting: a mixed batch of toasts is not in strict arrival order on
 screen, because errors are in a different container. That is the right trade —
 correct assertiveness is worth more than the ordering of a batch that rarely
 happens.
+
+### Shown, not announced: `announce: false`
+
+A toast raised with `announce: false` goes into **neither** region. It lands in a
+third stack after them, with no role and no `aria-live`. It looks like any other
+toast, a screen reader still reaches it when reading the page, and its close
+control works the same. It is just not read out when it arrives.
+
+It exists for one reason: **Say it once**. When a toast repeats a message that
+is already announced somewhere else, announcing the toast too makes a screen
+reader user hear the same problem twice. The case in VCP is the blocked Submit
+above, where each `Field` error announces itself. The stack is only rendered
+while it holds a toast; it has no announcement to set up in advance, so unlike
+the regions it does not need to be in the page first.
 
 ### Auto-dismiss and WCAG 2.2.1
 
@@ -341,9 +383,15 @@ Dark comes for free: every colour above is a semantic token that
 - **Don't auto-dismiss a toast that carries an action.** The component will
   refuse, and the reason is worth knowing: a control on a timer is not a control.
 - **Don't move focus to a toast**, and don't make the toast itself focusable.
+- **Don't use `announce: false` on a toast that is the only place its message
+  lives.** A screen reader user would never hear it. It is for a toast that
+  repeats something already announced, like a field error.
 - Don't put anything in a Toast that the user must not miss. It is transient by
-  definition — use a `Banner`, or a `Modal` if they must answer.
-- Don't queue five toasts for one action. Say the one thing that happened.
+  definition — use a `Banner`, or a `Modal` if they must answer. A blocked
+  Submit's toasts are allowed only because each one repeats a field error that
+  stays (see *The one exception: a blocked Submit*).
+- Don't queue five toasts for one action. Say the one thing that happened. The
+  one exception is a blocked Submit, which shows a toast per problem.
 - Don't set the type with `font-medium text-sm` or similar. Size and weight come
   as a unit from the ramp.
 - Don't reach for `duration` under about four seconds. Nobody finishes reading.

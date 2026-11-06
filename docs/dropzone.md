@@ -31,7 +31,9 @@ moment it hands them over.
 | `label` | `string` | `'Upload a file'` | The linked verb in "… or drag and drop" |
 | `hint` | `string` | `'PNG, JPG, GIF, DOCX, CSV and PDF file up to 10MB'` | The contract line under the label |
 | `error` | `ReactNode` | — | The rejection, in words. The design's Error state: critical border, message replacing `hint`. Sets `aria-invalid` and is wired with `aria-describedby` |
-| `accept` | `string` | — | Filters the **browse dialog only** — dropped files arrive unfiltered; validate them |
+| `accept` | `string` | PNG, JPG, GIF, DOCX, CSV, PDF | The browse dialog's filter **and the check on every file, dropped ones too**. `*` takes anything |
+| `maxSize` | `number` | 10MB | Bytes. A larger file is turned away |
+| `onReject` | `(rejections: { file, reason: 'type' \| 'size', message }[]) => void` | — | The files turned away. The zone also says so in its error state until the next selection; a caller's `error` wins |
 | `multiple` | `boolean` | `true` | — |
 | `disabled` | `boolean` | — | Also inert to drops |
 | `className` | `string` | — | On the zone |
@@ -108,8 +110,7 @@ and the hover (`stroke.focused`) are the design's. Decided in review of this PR,
   clicking anywhere opens the dialog. Its **name is the call to action** ("Upload a file or drag and
   drop", by `aria-labelledby`) and the hint or error is its **description**, so each is heard once.
   (The label wraps them all; named by the label alone, the hint was read twice.)
-- `accept` is a convenience, not a gate — announce actual constraints in
-  `hint` and validate what arrives, because drops bypass the filter.
+- `accept` and `maxSize` are checked on every file as it arrives, dropped ones too; the refusal is announced like any `error`. Still say the constraints in `hint`, so they are known before the attempt.
 - Disabled is visibly quiet *and* inert to drops — not just a greyed label
   over a live target.
 - `error` is announced, not just painted: the input gets `aria-invalid` and
@@ -122,7 +123,7 @@ and the hover (`stroke.focused`) are the design's. Decided in review of this PR,
 
 ## Don't
 
-- **Don't trust `accept`.** Dropped files ignore it; validate in `onFiles`.
+- **Don't re-validate in `onFiles`** for type or size: only files that passed arrive there. Rules beyond those (dimensions, virus scan) are yours.
 - **Don't build upload progress into the zone** — it hands off and forgets;
   progress belongs to the list you render below.
 - **Don't hide the hint when there are real constraints** — discovering the
