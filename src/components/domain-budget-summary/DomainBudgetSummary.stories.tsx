@@ -5,6 +5,7 @@ import {
   DomainBudgetSummary,
   budgetStatus,
   budgetUsage,
+  budgetUsagePercent,
   type DomainBudgetSummaryProps,
   type Quarter,
 } from './DomainBudgetSummary';
@@ -74,7 +75,9 @@ export const OverBudget: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('-50')).toBeVisible();
-    await expect(canvas.getByText('100%')).toBeVisible();
+    /* The bar stops at full; the number is the real one. */
+    await expect(canvas.getByText('142%')).toBeVisible();
+    await expect(canvas.queryByText('100%')).toBeNull();
   },
 };
 
@@ -234,5 +237,9 @@ export const StatusBoundaries: Story = {
     await expect(budgetStatus(5, 0)).toBe('over');
     await expect(budgetUsage(170, 120)).toBe(100);
     await expect(budgetUsage(0, 120)).toBe(0);
+    /* The share as it really is: not capped, and nothing against no allocation. */
+    await expect(budgetUsagePercent(170, 120)).toBe(142);
+    await expect(budgetUsagePercent(60, 120)).toBe(50);
+    await expect(budgetUsagePercent(5, 0)).toBeNull();
   },
 };
