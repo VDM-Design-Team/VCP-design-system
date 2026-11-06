@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DetailCard, type DetailCardValue } from './DetailCard';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
@@ -121,13 +121,22 @@ export const EditingPeople: Story = {
     /* Add: the + opens the form and is dimmed meanwhile. */
     await userEvent.click(assignees.getByRole('button', { name: 'Add assignee' }));
     await expect(assignees.getByRole('button', { name: 'Add assignee' })).toBeDisabled();
+    /* The + went dim, so focus went into the form: the "User" field. */
+    await waitFor(() => expect(assignees.getByRole('button', { name: /^User/ })).toHaveFocus());
     await userEvent.click(assignees.getByRole('button', { name: /^User/ }));
     await userEvent.click(within(canvasElement).getByRole('option', { name: 'Amy Lee' }));
     await userEvent.click(assignees.getByRole('button', { name: 'Add' }));
     await expect(assignees.getByText('Amy Lee')).toBeVisible();
-    /* Remove: the ✕ takes a chip out. */
+    /* Added: the form is gone and the + is back, with focus on it. */
+    await waitFor(() => expect(assignees.getByRole('button', { name: 'Add assignee' })).toHaveFocus());
+    /* Remove: the ✕ takes a chip out — the last one, so focus goes to the +. */
     await userEvent.click(assignees.getByRole('button', { name: 'Remove Amy Lee' }));
     await expect(assignees.queryByText('Amy Lee')).toBeNull();
+    await waitFor(() => expect(assignees.getByRole('button', { name: 'Add assignee' })).toHaveFocus());
+    /* Cancel on the add form: back to the +. */
+    await userEvent.click(assignees.getByRole('button', { name: 'Add assignee' }));
+    await userEvent.click(assignees.getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(assignees.getByRole('button', { name: 'Add assignee' })).toHaveFocus());
     /* Edit: the pencil turns a chip into the form, with Save. */
     await userEvent.click(assignees.getByRole('button', { name: 'Edit John Kestrel' }));
     await expect(assignees.getByRole('button', { name: 'Save' })).toBeVisible();
@@ -137,6 +146,11 @@ export const EditingPeople: Story = {
     await expect(form.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     await userEvent.click(assignees.getByRole('button', { name: 'Cancel' }));
     await expect(assignees.getByText('John Kestrel')).toBeVisible();
+    /* Cancel on an edit: focus is on that chip's pencil. */
+    await waitFor(() => expect(assignees.getByRole('button', { name: 'Edit John Kestrel' })).toHaveFocus());
+    /* Remove a chip that has another after it: focus goes to the next chip's pencil. */
+    await userEvent.click(assignees.getByRole('button', { name: 'Remove John Kestrel' }));
+    await waitFor(() => expect(assignees.getByRole('button', { name: 'Edit Jane Doe' })).toHaveFocus());
     /* Several initiators; none has a pencil. */
     const initiator = within(canvas.getByRole('group', { name: 'Initiator' }));
     await expect(initiator.queryByRole('button', { name: /^Edit/ })).toBeNull();

@@ -244,6 +244,15 @@ export const Cycle: Story = {
     await expect(canvas.getByText('TODAY')).toBeVisible();
     /* Every person has their availability figures when open. */
     await waitFor(() => expect(canvas.getAllByText('EAD TD')[0]).toBeVisible());
+    /* One point reads "1 pt", never "1 pts". */
+    await expect(canvas.queryByText(/\b1 pts\b/)).toBeNull();
+    /* A name that does not fit is cut with "…", and says the whole of it when the row's button is focused. */
+    const toggle = canvas.getByRole('button', { name: /^John Mason Smith/ });
+    const name = toggle.querySelector('span.truncate') as HTMLElement;
+    if (name.scrollWidth > name.clientWidth) {
+      toggle.focus();
+      await waitFor(() => expect(within(document.body).getAllByRole('tooltip').some((tip) => tip.textContent === 'John Mason Smith')).toBe(true));
+    }
   },
 };
 
