@@ -25,6 +25,7 @@ page design dictates — the layout below — and never fetches, pages or sorts.
 | `Popover` | component |
 | `SearchSelect` | component |
 | `Tooltip` | component |
+| `TruncatedText` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -158,6 +159,8 @@ text `text.primary`, `text.secondary`, `text.tertiary`, `text.brand.medium` (the
 and carets) and `text.brand.strong` (the Planned figure and the Today heading, which need
 the stronger tone to keep 4.5:1 on the dark theme's cards). Column and name-column
 widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
+
+**A long name says the whole of it.** A user's name in the row's expand button is cut with "…" when it does not fit ("John Mason S…") and, when it has been cut, says the whole name on hover and focus (the system tooltip, via `TruncatedText`'s `useIsTruncated`). **Points read "1 pt", "5 pts"** — never "1 pts".
 
 ## Accessibility
 
