@@ -6,3 +6,4 @@
  * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
 export * from './app-shell';
+export * from './dashboard-template';
