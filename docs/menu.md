@@ -50,6 +50,7 @@ navigation pattern, not behind an ellipsis.
 | `heading` | `string` | — | A heading over the items ("Move to Status", "Urgency"), in the library's **category** style without its caret: 40 high, small bold type in `text.tertiary`, a rule beneath. It names the menu (`aria-label`) and is not an item: arrows and type-ahead step over it |
 | `searchable` | `boolean` | `false` | A search box at the top (Figma's `_Menu_Item_Search`): typing narrows the items by label, it has focus on open, ArrowDown enters the list, ArrowUp from the first item comes back, Enter chooses the first match. `searchPlaceholder` ("Search...") and `emptyText` ("No results") |
 | `placement` | `top \| bottom` | `bottom` | Which side the menu prefers. It still flips when there is no room — set `top` for a trigger at the bottom of the window (the bulk action bar) |
+| `strategy` | `absolute \| fixed` | `fixed` | `Popover`'s: `fixed` floats the list above any `overflow` ancestor (a `DataTable`). `absolute` only under a CSS `transform`; see `docs/popover.md` |
 | `className` | `string` | — | Merged onto the wrapper via `cn()` |
 | `panelClassName` | `string` | — | Merged onto the `role="menu"` panel via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | Points at the positioning wrapper |
@@ -213,14 +214,17 @@ Items are `min-h-10` — the 40px minimum touch target from `CLAUDE.md`, with th
 label free to wrap taller. The panel is `min-w-48` so short labels do not produce
 a sliver of a menu.
 
-### Positioning — the same honest limits as Popover
+### Positioning — Popover's
 
-Below the trigger, flush left or right. **No collision detection, no flipping, no
-shifting, no portal, no repositioning on scroll.** A menu on a trigger near the
-bottom of the viewport opens off-screen; a menu inside a container with
-`overflow: hidden` is clipped. `align` is how you compensate: `right` (the
-default) for a trigger near the right edge, `left` for one near the left. The
-full explanation is in `docs/popover.md`.
+The list floats above the page (`position: fixed`, from the trigger's place on
+screen), so a container that clips, such as `DataTable` (which scrolls sideways),
+cannot cut off the menu on its last row. It opens below the trigger, or above it
+when the screen has no room below and more above, and flush to the other edge when
+`align`'s edge would run off the screen. While the page scrolls it moves with the
+trigger and keeps its side. It does not slide along an edge and does not portal.
+(Until November 2026 it sat inside the wrapper, and a table cut it off; the
+`FloatsOutOfATable` story is the regression test.) The full explanation is in
+`docs/popover.md`.
 
 ### How this was verified
 

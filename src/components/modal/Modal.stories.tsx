@@ -2,9 +2,10 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
-import { Modal } from './Modal';
+import { Modal, ModalCancel, ModalConfirm } from './Modal';
 import { Button } from '../../atoms/button';
 import { Field } from '../field';
+import { Checkbox } from '../../atoms/checkbox';
 import { Input } from '../../atoms/input';
 import { Popover } from '../popover';
 
@@ -51,10 +52,8 @@ type Story = StoryObj<typeof meta>;
 /** The two actions the plain dialog ends with. */
 const ConfirmFooter = ({ onClose }: { onClose: () => void }) => (
   <>
-    <Button variant="secondary" onClick={onClose}>
-      Cancel
-    </Button>
-    <Button onClick={onClose}>Publish</Button>
+    <ModalCancel onClick={onClose} />
+    <ModalConfirm onClick={onClose}>Publish</ModalConfirm>
   </>
 );
 
@@ -228,12 +227,10 @@ export const WithForm: Story = {
           initialFocusRef={nameRef}
           footer={
             <>
-              <Button variant="secondary" type="button" onClick={args.onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" form="modal-invite-form">
+              <ModalCancel onClick={args.onClose} />
+              <ModalConfirm type="submit" form="modal-invite-form">
                 Send invite
-              </Button>
+              </ModalConfirm>
             </>
           }
         >
@@ -276,7 +273,8 @@ export const WithForm: Story = {
 export const DestructiveConfirmation: Story = {
   args: {
     size: 'sm',
-    role: 'alertdialog',
+    /* The tone sets the alertdialog role and the grey Cancel + red answer; the footer is hand-built only to show the buttons. Backdrop and ✕ are off by default in this tone too; they are set here to say so. */
+    tone: 'critical',
     dismissible: false,
     showClose: false,
     title: 'Delete CLM-4471?',
@@ -289,16 +287,42 @@ export const DestructiveConfirmation: Story = {
       {...args}
       footer={
         <>
-          <Button variant="secondary" onClick={args.onClose}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={args.onClose}>
-            Delete claim
-          </Button>
+          <ModalCancel onClick={args.onClose} />
+          <ModalConfirm onClick={args.onClose}>Delete claim</ModalConfirm>
         </>
       }
     />
   ),
+};
+
+/**
+ * `tone="critical"` + `actions`: the standard row without hand-building it. Cancel is the grey
+ * `neutral` button, the answer is red, and the dialog is an alertdialog with no ✕ and no
+ * backdrop dismissal by default.
+ */
+export const CriticalTone: Story = {
+  args: {
+    size: 'sm',
+    tone: 'critical',
+    title: 'Delete CLM-4471?',
+    description: 'The claim, its 12 attachments and its audit trail are removed permanently.',
+    actions: { confirm: { label: 'Delete claim' } },
+  },
+  play: async () => {
+    /* Every footer button in a dialog is the same size (`md`, 40 high), the critical pair included. */
+    const footer = within(await screen.findByRole('alertdialog', { name: 'Delete CLM-4471?' })).getByRole('button', { name: 'Cancel' }).closest('footer') as HTMLElement;
+    for (const button of footer.querySelectorAll('button')) await expect(Math.round(button.getBoundingClientRect().height)).toBe(40);
+  },
+};
+
+/** The default tone's `actions`: `secondary` Cancel and a `primary` answer. */
+export const StandardActions: Story = {
+  args: {
+    size: 'sm',
+    title: 'Publish the changelog?',
+    children: 'Everyone in the workspace is notified.',
+    actions: { confirm: { label: 'Publish' } },
+  },
 };
 
 /**
@@ -315,10 +339,8 @@ export const LongContent: Story = {
       description="Version 4.2 — effective 1 September"
       footer={
         <>
-          <Button variant="secondary" onClick={args.onClose}>
-            Decline
-          </Button>
-          <Button onClick={args.onClose}>Accept</Button>
+          <ModalCancel onClick={args.onClose}>Decline</ModalCancel>
+          <ModalConfirm onClick={args.onClose}>Accept</ModalConfirm>
         </>
       }
     >
@@ -340,6 +362,31 @@ export const LongContent: Story = {
 };
 
 /**
+ * A tall body with checkboxes down it. Tabbing to one that has scrolled into view must scroll the **body**, never the dialog's own panel: a checkbox's real input is hidden with `sr-only`
+ * (absolutely positioned), and unless the body is the containing block it stays put while the body scrolls, so focusing it drags the panel — the footer ends up at the top of the dialog.
+ */
+export const TallBodyWithCheckboxes: Story = {
+  args: { title: 'Access', size: 'md' },
+  render: (args) => (
+    <Modal {...args} footer={<ModalConfirm onClick={args.onClose}>Submit</ModalConfirm>}>
+      <div className="flex flex-col gap-6 pb-4">
+        {Array.from({ length: 24 }, (_, i) => (
+          <Checkbox key={i} label={`Domain ${i + 1}`} />
+        ))}
+      </div>
+    </Modal>
+  ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog', { name: 'Access' });
+    const last = within(dialog).getByRole('checkbox', { name: 'Domain 24' });
+    last.focus();
+    /* The body scrolled to it; the panel itself did not. */
+    await expect(dialog.scrollTop).toBe(0);
+    await expect(within(dialog).getByRole('button', { name: 'Submit' }).getBoundingClientRect().bottom).toBeLessThanOrEqual(dialog.getBoundingClientRect().bottom);
+  },
+};
+
+/**
  * The widest of the four: 800. The others appear across the stories above —
  * `sm` (384) on the destructive confirmation, `md` (512) on Default, `lg` (640)
  * on Long Content. Widths ride Tailwind's numeric spacing scale, so a dialog is
@@ -348,7 +395,7 @@ export const LongContent: Story = {
 export const ExtraWide: Story = {
   args: { size: 'xl', title: 'Reconciliation for September' },
   render: (args) => (
-    <Modal {...args} footer={<Button onClick={args.onClose}>Close</Button>}>
+    <Modal {...args} footer={<ModalConfirm onClick={args.onClose}>Close</ModalConfirm>}>
       A dialog this wide is for content that needs the room — a table, a diff, a preview — not for
       a sentence like this one.
     </Modal>
@@ -551,19 +598,15 @@ export const NotDismissible: Story = {
             open={open}
             onClose={onClose}
             size="sm"
-            role="alertdialog"
+            tone="critical"
             dismissible={false}
             showClose={false}
             title="Delete CLM-4471?"
             description="The claim, its 12 attachments and its audit trail are removed permanently."
             footer={
               <>
-                <Button variant="secondary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button variant="danger" onClick={onClose}>
-                  Delete claim
-                </Button>
+                <ModalCancel />
+                <ModalConfirm onClick={onClose}>Delete claim</ModalConfirm>
               </>
             }
           >
@@ -630,7 +673,7 @@ export const NestedDialog: Story = {
               <Button variant="danger" onClick={() => setInner(true)}>
                 Reject
               </Button>
-              <Button onClick={() => setOuter(false)}>Accept</Button>
+              <ModalConfirm onClick={() => setOuter(false)}>Accept</ModalConfirm>
             </>
           }
         >
@@ -642,9 +685,7 @@ export const NestedDialog: Story = {
           title="Rejection reason"
           size="sm"
           footer={
-            <Button variant="secondary" onClick={() => setInner(false)}>
-              Cancel
-            </Button>
+            <ModalCancel onClick={() => setInner(false)} />
           }
         >
           Why is it being rejected?

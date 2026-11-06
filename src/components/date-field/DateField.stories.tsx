@@ -1,6 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
+import { DateFormatProvider } from '../../lib/format-date';
 import { DateField, formatMonth } from './DateField';
 
 const meta = {
@@ -68,10 +69,10 @@ export const PickingADay: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const field = canvas.getByRole('combobox', { name: 'Due date' });
-    await expect(field).toHaveValue('2026-03-12 (est.)');
+    await expect(field).toHaveValue('12/03/2026 (est.)');
     await userEvent.click(field);
     await userEvent.click(await canvas.findByRole('button', { name: /^15\b/ }));
-    await expect(field).toHaveValue('2026-03-15');
+    await expect(field).toHaveValue('15/03/2026');
   },
 };
 
@@ -161,5 +162,17 @@ export const ValueWeight: Story = {
     await expect(weight('Empty')).toBe(400);
     /* A filter passes `emphasis="regular"`. */
     await expect(weight('Filter')).toBe(400);
+  },
+};
+
+/** Every date reads dd/mm/yyyy; give the app the person's locale (`DateFormatProvider`) and the field follows it. */
+export const InThePersonsLocale: Story = {
+  render: () => (
+    <DateFormatProvider locale="en-US">
+      <Controlled value="2026-03-12" aria-label="Due date" />
+    </DateFormatProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('combobox', { name: 'Due date' })).toHaveValue('03/12/2026');
   },
 };

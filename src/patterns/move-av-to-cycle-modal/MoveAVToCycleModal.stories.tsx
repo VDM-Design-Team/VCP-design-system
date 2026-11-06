@@ -82,7 +82,7 @@ export const FillingItIn: Story = {
     const ui = within(dialog);
     await userEvent.click(ui.getByRole('combobox', { name: /Assignee 1/ }));
     await userEvent.click(await ui.findByRole('option', { name: /Amy Lee/ }));
-    await waitFor(() => expect(ui.getByRole('combobox', { name: 'Due Date' })).toHaveValue('2026-03-12 (est.)'));
+    await waitFor(() => expect(ui.getByRole('combobox', { name: 'Due Date' })).toHaveValue('12/03/2026 (est.)'));
     await userEvent.selectOptions(ui.getByRole('combobox', { name: 'Capacity Points' }), '3');
     await userEvent.click(ui.getByRole('button', { name: 'Confirm' }));
     await expect(args.onConfirm).toHaveBeenCalledTimes(1);
@@ -107,7 +107,7 @@ export const UnavailableAssigneeBlocksConfirm: Story = {
     await userEvent.click(ui.getByRole('combobox', { name: /Assignee 1/ }));
     await userEvent.click(await ui.findByRole('option', { name: /Ed Ruiz/ }));
     await userEvent.selectOptions(ui.getByRole('combobox', { name: 'Capacity Points' }), '2');
-    await waitFor(() => expect(ui.getByRole('combobox', { name: 'Due Date' })).toHaveValue('2026-03-12 (est.)'));
+    await waitFor(() => expect(ui.getByRole('combobox', { name: 'Due Date' })).toHaveValue('12/03/2026 (est.)'));
     await userEvent.click(ui.getByRole('button', { name: 'Confirm' }));
     await expect(args.onInvalid).toHaveBeenCalledWith('unavailable-assignee');
     await expect(args.onConfirm).not.toHaveBeenCalled();

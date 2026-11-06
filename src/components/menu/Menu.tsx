@@ -5,7 +5,7 @@ import { Icon, type IconName } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Input } from '../../atoms/input';
 import { Divider } from '../../atoms/divider';
-import { Popover, type PopoverAlign } from '../popover';
+import { Popover, type PopoverAlign, type PopoverProps } from '../popover';
 
 /**
  * Menu — a dropdown list of actions hanging off a trigger.
@@ -20,8 +20,10 @@ import { Popover, type PopoverAlign } from '../popover';
  * stop, arrows move within it, and disabled items are stepped over rather than
  * landed on.
  *
- * Positioning is `Popover`'s, with all of `Popover`'s limits — below the trigger,
- * flush left or right, no flipping, no collision detection. See docs/menu.md.
+ * Positioning is `Popover`'s: the list floats above the page, so a `DataTable`
+ * (which scrolls sideways) cannot cut off the menu in its last row, and it opens
+ * above the trigger or flush to the other edge when the screen has no room below
+ * or to the side. See docs/menu.md.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -74,9 +76,10 @@ export interface MenuActionItem {
   /**
    * A glyph name from the Icon library — typed, so a name the system does not
    * ship is a compile error rather than an empty square at runtime. Rendered
-   * decorative; the label carries the meaning.
+   * decorative; the label carries the meaning. A `danger` item gets a warning glyph when
+   * it has none; `false` opts out of it (the tone and the screen-reader qualifier stay).
    */
-  icon?: IconName;
+  icon?: IconName | false;
   /** Shown right-aligned. Display only — Menu binds no shortcuts itself. */
   shortcut?: string;
   tone?: 'default' | 'danger';
@@ -139,13 +142,10 @@ export interface MenuProps
   emptyText?: string;
   /** Which side of the trigger the menu prefers: `bottom` (the default) or `top`. It still flips when there is no room. */
   placement?: 'top' | 'bottom';
-  /**
-   * `fixed` places the menu from the trigger's screen rect, so **no scrolling or clipping ancestor can cut it off** — for a trigger inside a box that scrolls (the bulk action bar on a narrow
-   * screen). `absolute` (the default) places it inside the wrapper.
-   */
-  strategy?: 'absolute' | 'fixed';
   /** Which edge of the menu lines up with the trigger's. */
   align?: PopoverAlign;
+  /** `Popover`'s `strategy`: `fixed` (default) floats over any `overflow` ancestor; `absolute` only inside a CSS `transform`. */
+  strategy?: PopoverProps['strategy'];
   /** Merged onto the wrapper via `cn()`. `panelClassName` styles the list. */
   className?: string;
   /** Merged onto the `role="menu"` panel via `cn()`. */
@@ -242,8 +242,8 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
     searchPlaceholder = 'Search...',
     emptyText = 'No results',
     placement,
-    strategy,
     align = 'right',
+    strategy,
     className,
     panelClassName,
     ...props
@@ -493,8 +493,10 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
 
         const danger = item.tone === 'danger';
         /* Danger is never colour alone: a critical item always carries a glyph,
-           and falls back to `warning` when the caller gave none. */
-        const glyph: IconName | undefined = item.icon ?? (danger ? 'warning' : undefined);
+           and falls back to `warning` when the caller gave none. `icon: false` opts out:
+           the accessible name still says "destructive action", and the colour stays. */
+        const glyph: IconName | undefined =
+          item.icon === false ? undefined : (item.icon ?? (danger ? 'warning' : undefined));
         const isChoice = item.selected !== undefined;
         const submenu = item.items?.length ? item.items : null;
 

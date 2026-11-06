@@ -2,6 +2,7 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { Button } from '../../atoms/button';
 import { IconButton } from '../../atoms/icon-button';
 
 /**
@@ -270,6 +271,33 @@ function getFocusable(root: HTMLElement): HTMLElement[] {
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
+/* What a footer button needs from the dialog around it: its tone (to pick its colour) and how to close it. */
+const ModalFooterContext = React.createContext<{ tone: 'default' | 'critical'; onClose: () => void } | null>(null);
+
+type ModalButtonProps = Omit<React.ComponentProps<typeof Button>, 'variant' | 'size'>;
+
+/**
+ * **Cancel** in a dialog's footer. It picks its own look from the dialog's `tone`: `secondary` in the default tone, the grey `neutral` in the `critical` one (a blue-outlined Cancel beside a red answer is two
+ * competing colours), always at the footer's size (`md`, 40 high). It calls the dialog's `onClose` unless given its own `onClick`. Use it in a hand-built `footer`, so nobody has to remember the colour or the size.
+ */
+export const ModalCancel = React.forwardRef<HTMLButtonElement, ModalButtonProps>(function ModalCancel({ children = 'Cancel', type = 'button', onClick, ...props }, ref) {
+  const dialog = React.useContext(ModalFooterContext);
+  return (
+    <Button ref={ref} variant={dialog?.tone === 'critical' ? 'neutral' : 'secondary'} size="md" type={type} onClick={onClick ?? dialog?.onClose} {...props}>
+      {children}
+    </Button>
+  );
+});
+
+/**
+ * The **answer** in a dialog's footer: `primary` in the default tone, the red `danger` in the `critical` one, always at the footer's size (`md`). Takes a button's own props (`type`, `form`, `loading`, `disabled`,
+ * `onClick`). Use it in a hand-built `footer`, so the colour follows the dialog's `tone` and nobody has to remember it.
+ */
+export const ModalConfirm = React.forwardRef<HTMLButtonElement, ModalButtonProps>(function ModalConfirm({ type = 'button', ...props }, ref) {
+  const dialog = React.useContext(ModalFooterContext);
+  return <Button ref={ref} variant={dialog?.tone === 'critical' ? 'danger' : 'primary'} size="md" type={type} {...props} />;
+});
+
 interface ModalBaseProps
   extends Omit<
       React.HTMLAttributes<HTMLDivElement>,
@@ -299,6 +327,21 @@ interface ModalBaseProps
    * bottom padding.
    */
   footer?: React.ReactNode;
+  /**
+   * The standard action row, so a dialog doesn't hand-build it: Cancel (calls
+   * `onClose`) and the one answer. In the default tone they are `secondary` +
+   * `primary`; in the `critical` tone they swap to `neutral` + `danger`.
+   * Ignored when `footer` is set — that is the slot for anything else.
+   */
+  actions?: ModalActions;
+  /**
+   * `critical` is for a dialog whose answer destroys something. It swaps the
+   * `actions` buttons to their critical pair (grey Cancel, red answer) and
+   * defaults the dialog to `role="alertdialog"`, no ✕ and no backdrop dismissal,
+   * so a stray click cannot confirm or cancel by accident. Each default can
+   * still be overridden. Escape always closes.
+   */
+  tone?: 'default' | 'critical';
   /**
    * `alertdialog` for a destructive confirmation the user must answer. It makes
    * screen readers announce the description immediately, so give one.
@@ -332,6 +375,21 @@ interface ModalBaseProps
  * 3. **`aria-label`** — last resort, for a dialog with no visible heading at
  *    all, like an image preview.
  */
+export interface ModalActions {
+  /** Cancel's label. */
+  cancelLabel?: string;
+  /** The answer: the primary (or, in the critical tone, red) button. */
+  confirm: {
+    label: string;
+    onClick?: () => void;
+    type?: 'button' | 'submit';
+    /** The `id` of a `<form>` to submit, when the form is in the body. */
+    form?: string;
+    loading?: boolean;
+    disabled?: boolean;
+  };
+}
+
 type ModalNameProps =
   | { title: React.ReactNode; 'aria-label'?: string; 'aria-labelledby'?: string }
   | { title?: undefined; 'aria-label': string; 'aria-labelledby'?: string }
@@ -348,10 +406,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     title,
     description,
     footer,
+    actions,
+    tone = 'default',
     size,
-    role = 'dialog',
-    dismissible = true,
-    showClose = true,
+    role = tone === 'critical' ? 'alertdialog' : 'dialog',
+    dismissible = tone !== 'critical',
+    showClose = tone !== 'critical',
     closeLabel = 'Close',
     initialFocusRef,
     returnFocusRef,
@@ -363,6 +423,18 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   },
   ref,
 ) {
+  /* The standard action row, unless the caller brought their own footer. It is the same two buttons a hand-built footer uses (`ModalCancel`, `ModalConfirm`), so the colours and size are decided in one place. */
+  const footerContent =
+    footer ??
+    (actions && (
+      <>
+        <ModalCancel>{actions.cancelLabel ?? 'Cancel'}</ModalCancel>
+        <ModalConfirm type={actions.confirm.type} form={actions.confirm.form} loading={actions.confirm.loading} disabled={actions.confirm.disabled} onClick={actions.confirm.onClick}>
+          {actions.confirm.label}
+        </ModalConfirm>
+      </>
+    ));
+
   /* SSR-safe: `document` is never read during render, only after mount. */
   const [mounted, setMounted] = React.useState(false);
   React.useEffect(() => setMounted(true), []);
@@ -585,7 +657,11 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
           /* Only a tab stop while it actually scrolls — see `scrollable`. */
           tabIndex={scrollable ? 0 : undefined}
           className={cn(
-            'min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
+            /* `relative`: a hidden input (a checkbox, a radio, a switch — all `sr-only`, so `position: absolute`)
+               takes this as its containing block and scrolls with the body. Without it the dialog panel is the
+               containing block, the input stays where it first sat while the body scrolls, and focusing it
+               scrolls the *panel* — the footer rides up the dialog and the form is cut off. */
+            'relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-6',
             /* The gap under the header is split: the header's own share (8, or 16 under
                a caption) stays put while the body scrolls, and this 4 scrolls away and
                doubles as room for a focus ring at the very top. Content scrolls out
@@ -597,7 +673,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                outside the last control, and the scroll box would clip it at the
                padding edge. The footer's top padding is 4 shorter to compensate,
                so the visible gap stays 20. */
-            hasContent(footer) ? 'pb-1' : 'pb-5',
+            hasContent(footerContent) ? 'pb-1' : 'pb-5',
             'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
             bodyClassName,
           )}
@@ -610,9 +686,9 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             the same way the header is separated from the body. The padding is
             symmetric, and it is the footer's own, so the gap above the buttons
             is the same 20 whether the body scrolls or not. */}
-        {hasContent(footer) && (
+        {hasContent(footerContent) && (
           <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
-            {footer}
+            <ModalFooterContext.Provider value={{ tone, onClose }}>{footerContent}</ModalFooterContext.Provider>
           </footer>
         )}
       </div>

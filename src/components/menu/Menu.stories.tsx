@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Menu, type MenuItem } from './Menu';
 import { Button } from '../../atoms/button';
+import { DataTable } from '../data-table';
 
 const basic: MenuItem[] = [
   { key: 'edit', label: 'Edit deliverable' },
@@ -419,5 +420,41 @@ export const Searchable: Story = {
     await userEvent.type(search, '38');
     await userEvent.keyboard('{Enter}');
     await expect(args.onSelect).toHaveBeenCalledWith('C38');
+  },
+};
+
+/**
+ * **Flow:** the menu on a table's last row. `DataTable` scrolls sideways, so it clips whatever runs past
+ * its edges; the menu floats above the page instead, and every item shows and can be clicked. (The table
+ * cut it off until November 2026.)
+ */
+export const FloatsOutOfATable: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => (
+    <div className="w-112">
+      <DataTable
+        caption="Added Values"
+        columns={[
+          { key: 'id', label: 'ID' },
+          { key: 'title', label: 'Title' },
+          { key: 'actions', label: 'Actions', render: () => <Menu {...args} /> },
+        ]}
+        rows={[
+          { id: 'AV-2041', title: 'Supplier onboarding portal' },
+          { id: 'AV-2037', title: 'Freight cost renegotiation' },
+        ]}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const triggers = within(canvasElement).getAllByRole('button', { name: 'More actions' });
+    await userEvent.click(triggers[triggers.length - 1]!);
+    const menu = await screen.findByRole('menu');
+    /* Each item is what the pointer finds at its own centre: the table does not cut it off. */
+    for (const item of within(menu).getAllByRole('menuitem')) {
+      const r = item.getBoundingClientRect();
+      await expect(item.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2))).toBe(true);
+    }
   },
 };

@@ -86,6 +86,8 @@ export interface ProgressBarProps
   labelSize?: 'sm' | 'md';
   /** Paints the rounded percentage after the label row, in the numeric face. */
   showValue?: boolean;
+  /** Which side of the bar the label row sits on. Above by default; Domain Budget draws it below. */
+  labelPlacement?: 'above' | 'below';
   /**
    * Words for the value instead of a percentage — "Strong", "34 of 40 used".
    * Painted at the end of the label row in place of `showValue`, and announced
@@ -110,6 +112,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
       label,
       labelSize = 'sm',
       showValue,
+      labelPlacement = 'above',
       valueLabel,
       role = 'progressbar',
       'aria-label': ariaLabel,
@@ -122,34 +125,31 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     const clamped = Math.max(0, Math.min(max, value));
     const pct = max > 0 ? (clamped / max) * 100 : 0;
 
+    const row = (label || showValue || valueLabel) && (
+      <div
+        className={cn(
+          'flex items-baseline justify-between gap-2 font-sans text-text-tertiary',
+          labelSize === 'md' ? 'text-label-sm-regular' : 'text-caption-md-regular',
+        )}
+      >
+        {/* The span renders (empty) even without a label so a lone
+            percentage still right-aligns. */}
+        <span id={label ? labelId : undefined}>{label}</span>
+        {valueLabel ? (
+          <span aria-hidden="true">{valueLabel}</span>
+        ) : (
+          showValue && (
+            <span className={cn('font-numeric', labelSize === 'md' ? 'text-label-sm-medium' : 'text-caption-md-medium')}>
+              {Math.round(pct)}%
+            </span>
+          )
+        )}
+      </div>
+    );
+
     return (
       <div ref={ref} className={cn('flex w-full flex-col gap-1.5', className)} {...props}>
-        {(label || showValue || valueLabel) && (
-          <div
-            className={cn(
-              'flex items-baseline justify-between gap-2 font-sans text-text-tertiary',
-              labelSize === 'md' ? 'text-label-sm-regular' : 'text-caption-md-regular',
-            )}
-          >
-            {/* The span renders (empty) even without a label so a lone
-                percentage still right-aligns. */}
-            <span id={label ? labelId : undefined}>{label}</span>
-            {valueLabel ? (
-              <span aria-hidden="true">{valueLabel}</span>
-            ) : (
-              showValue && (
-                <span
-                  className={cn(
-                    'font-numeric',
-                    labelSize === 'md' ? 'text-label-sm-medium' : 'text-caption-md-medium',
-                  )}
-                >
-                  {Math.round(pct)}%
-                </span>
-              )
-            )}
-          </div>
-        )}
+        {labelPlacement === 'above' && row}
         <div
           role={role}
           aria-valuemin={0}
@@ -164,6 +164,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
         >
           <div className={fill({ tone })} style={{ width: `${pct}%` }} />
         </div>
+        {labelPlacement === 'below' && row}
       </div>
     );
   },

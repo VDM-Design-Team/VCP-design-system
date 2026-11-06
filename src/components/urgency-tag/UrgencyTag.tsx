@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
-import { Tag } from '../../atoms/tag';
+import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
  * UrgencyTag — how urgent an Added Value is, as a glyph and a word. The owner
@@ -62,23 +62,43 @@ const URGENCY: Record<AVUrgency, { icon: IconName; className: string }> = {
   Urgent: { icon: 'fire-solid', className: 'text-accent-critical-outline-content-default' },
 };
 
-export interface UrgencyTagProps extends React.HTMLAttributes<HTMLSpanElement> {
+/** How the tag is drawn: the glyph and word alone (the default), on a pale fill, or in a bordered pill. */
+export type UrgencyTagVariant = 'textual' | 'tonal' | 'outline';
+
+/* The hue each urgency wears when the tag has a fill or a border. The label stays neutral; the fill
+   or border is the glyph's own colour family, so the scale still reads as one. */
+const URGENCY_TONE: Record<AVUrgency, NonNullable<TagProps['tone']>> = {
+  Low: 'success',
+  Normal: 'neutral',
+  High: 'warning',
+  Urgent: 'critical',
+};
+
+/* The glyph follows the tag's size, as the tag docs' table sets it: 20 in the 28 (the default), 16 in the 24, 24 in the 32. */
+const GLYPH_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
+
+export interface UrgencyTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon' | 'trailingIcon' | 'children'> {
   urgency: AVUrgency;
+  /** `textual` (default), `tonal` (a pale fill) or `outline` (a bordered pill), as the design's Urgency_Tag set draws them. */
+  variant?: UrgencyTagVariant;
 }
 
 export const UrgencyTag = React.forwardRef<HTMLSpanElement, UrgencyTagProps>(
-  ({ className, urgency, ...props }, ref) => {
+  ({ className, urgency, variant = 'textual', size = 'md', ...props }, ref) => {
+    const glyphSize = GLYPH_SIZE[size ?? 'md'];
     const { icon, className: tone } = URGENCY[urgency];
     return (
       <Tag
         ref={ref}
-        variant="textual"
-        tone="neutral"
+        size={size}
+        variant={variant}
+        tone={variant === 'textual' ? 'neutral' : URGENCY_TONE[urgency]}
         /* Decorative: the word beside it already says which urgency this is,
            so naming the glyph too would make every cell announce twice. */
         /* md = Figma's 20 glyph in the 28 tag (was lg, 24). */
-        icon={<Icon name={icon} size="md" className={cn('shrink-0', tone)} />}
-        className={className}
+        icon={<Icon name={icon} size={glyphSize} className={cn('shrink-0', tone)} />}
+        /* The label stays neutral on a fill or a border; the glyph carries the colour. */
+        className={cn(variant !== 'textual' && 'text-text-secondary', className)}
         {...props}
       >
         {urgency}
