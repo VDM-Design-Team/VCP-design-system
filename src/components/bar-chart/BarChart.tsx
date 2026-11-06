@@ -86,7 +86,7 @@ export const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
       yLabel,
       unit = 'pts',
       height = 320,
-      yTickCount = 6,
+      yTickCount = 7,
       yMax,
       valueLabels = 'inside',
       grid = 'solid',
@@ -117,7 +117,7 @@ export const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
     const barW = Math.max(MIN_BAR, Math.min(maxBarWidth, Math.floor((groupW * 0.8 - (k - 1) * GAP) / k)));
     const innerW = k * barW + (k - 1) * GAP;
 
-    /* Thin the category labels out when they would run into each other (10px type is about 5.5 across a character). */
+    /* Thin the category labels out when they would run into each other (the axis type is about 5.5 across a character). */
     const longest = Math.max(0, ...data.map((d) => d.label.length));
     const labelStep = groupW > 0 ? Math.max(1, Math.ceil((longest * 5.5 + 8) / groupW)) : 1;
 

@@ -88,6 +88,7 @@ export * from './components/rejection-reason';
 export * from './components/rich-text-toolbar';
 export * from './components/search-select';
 export * from './components/source-tag';
+export * from './components/sprint-metrics';
 export * from './components/stat-card';
 export * from './components/sidebar-item';
 export * from './components/status-history';

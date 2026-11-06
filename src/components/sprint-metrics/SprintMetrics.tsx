@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import type { ChartSeries } from '../../lib/chart-series';
-import { BarChart, type BarChartDatum } from '../../components/bar-chart';
+import { BarChart, type BarChartDatum } from '../bar-chart';
 
 /**
  * SprintMetrics — how each sprint's capacity was used, as grouped bars: for every sprint, its Capacity, Commitment, Completed and
