@@ -6,6 +6,7 @@
  * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
 export * from './accept-pending-av-modal';
+export * from './accounts-table';
 export * from './move-av-to-cycle-modal';
 export * from './av-header';
 export * from './detail-card';
@@ -13,6 +14,7 @@ export * from './av-table';
 export * from './changelog-modal';
 export * from './change-password-form';
 export * from './confirm-delete-av-modal';
+export * from './confirm-delete-modal';
 export * from './domain-card';
 export * from './filter-bar';
 export * from './gantt-chart';
