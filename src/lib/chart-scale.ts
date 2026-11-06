@@ -16,12 +16,20 @@ const niceStep = (raw: number): number => {
 /**
  * Gridline values for a value axis from 0: `[0, 25, 50, … 175]` for a maximum of 157 and `tickCount` 7. The last tick is at or
  * above the largest value, so nothing is drawn past the top. `tickCount` is a *target*: the steps round to readable numbers.
+ * `pinned` makes `max` the top gridline itself (a chart pinned to 200 gets 0, 25 … 200, not a tick past it).
  * No data (or all zeros) gives `[0, 1]` so there is still an axis to draw.
  */
-export const niceTicks = (max: number, tickCount = 7): number[] => {
+export const niceTicks = (max: number, tickCount = 7, pinned = false): number[] => {
   if (!Number.isFinite(max) || max <= 0) return [0, 1];
-  const step = niceStep(max / Math.max(1, tickCount));
-  const top = Math.ceil(max / step) * step;
+  let step = niceStep(max / Math.max(1, tickCount));
+  if (pinned) {
+    /* A pinned top must itself be a gridline: take the readable step, of those that divide it evenly, nearest the target count. */
+    const target = max / Math.max(1, tickCount);
+    const exp = Math.floor(Math.log10(target));
+    const divides = [-1, 0, 1].flatMap((d) => [1, 2, 2.5, 3, 5, 10].map((m) => m * 10 ** (exp + d))).filter((c) => Math.abs(max / c - Math.round(max / c)) < 1e-9);
+    if (divides.length) step = divides.sort((a, b) => Math.abs(max / a - tickCount) - Math.abs(max / b - tickCount))[0]!;
+  }
+  const top = pinned ? max : Math.ceil(max / step) * step;
   const ticks: number[] = [];
   for (let v = 0; v <= top + step / 1000; v += step) ticks.push(Math.round(v * 1e6) / 1e6);
   return ticks;
