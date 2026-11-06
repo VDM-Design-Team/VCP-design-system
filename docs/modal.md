@@ -17,10 +17,19 @@ keyboard until it is dismissed. Reach for it last, not first.
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
-## Footer buttons are all `sm` (36 high)
+## Footer buttons: `ModalCancel` and `ModalConfirm`
 
-Every button in a dialog's footer is `Button` `size="sm"` (36 high, 12 either side), the critical pair included: `actions` draws them at that size, and a hand-built `footer` says `size="sm"` on each. A footer at the default 40 beside the others reads as a different dialog. And **a grey Cancel (`neutral`) goes beside a red answer** (`danger`) — a blue-outlined Cancel next to a red button is two competing colours — so a hand-built destructive footer uses `variant="neutral"` for Cancel, as `tone="critical"` does.
+A dialog's footer buttons are **`md` (40 high)**, and they take their colour from the dialog's `tone`, so nobody has to remember either:
 
+| Button | Default tone | `critical` tone |
+|---|---|---|
+| **`ModalCancel`** (calls `onClose` unless given an `onClick`; `children` default "Cancel") | `secondary` | the grey `neutral` |
+| **`ModalConfirm`** (the answer; takes `type`, `form`, `loading`, `disabled`, `onClick`) | `primary` | the red `danger` |
+
+The `actions` row is these two buttons. A hand-built `footer` uses them too: `<ModalCancel /><ModalConfirm onClick={…}>Delete claim</ModalConfirm>`. **A grey Cancel goes beside a red answer** — a blue-outlined Cancel next to a red button is two competing colours. Extra buttons (a third action, a tertiary Cancel the design draws) can stay plain `Button`s at the
+default size. Buttons inside the *body* of a dialog (not the footer) are not affected.
+
+## The critical tone
 ## The critical tone
 
 A dialog whose answer destroys something takes `tone="critical"`. Its buttons are the system's

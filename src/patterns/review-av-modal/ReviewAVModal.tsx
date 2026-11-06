@@ -116,10 +116,10 @@ export function ReviewAVModal({
         showClose={false}
         footer={
           <>
-            <Button variant="danger" size="sm" onClick={() => setRejecting(true)}>
+            <Button variant="danger" onClick={() => setRejecting(true)}>
               Reject
             </Button>
-            <Button size="sm" loading={loading} onClick={() => onAccept({ domainOption })}>
+            <Button loading={loading} onClick={() => onAccept({ domainOption })}>
               Accept
             </Button>
           </>
@@ -199,12 +199,12 @@ export function ReviewAVModal({
         showClose={false}
         footer={
           <>
-            <Button variant="secondary" size="sm" onClick={() => setRejecting(false)}>
+            {/* A grey Cancel beside the red Reject: a blue-outlined one would be two competing colours. */}
+            <Button variant="neutral" onClick={() => setRejecting(false)}>
               Cancel
             </Button>
             <Button
               variant="danger"
-              size="sm"
               /* The design fades it until a reason is chosen. */
               disabled={!reason}
               loading={loading}

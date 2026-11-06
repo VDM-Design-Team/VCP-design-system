@@ -271,6 +271,33 @@ function getFocusable(root: HTMLElement): HTMLElement[] {
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
+/* What a footer button needs from the dialog around it: its tone (to pick its colour) and how to close it. */
+const ModalFooterContext = React.createContext<{ tone: 'default' | 'critical'; onClose: () => void } | null>(null);
+
+type ModalButtonProps = Omit<React.ComponentProps<typeof Button>, 'variant' | 'size'>;
+
+/**
+ * **Cancel** in a dialog's footer. It picks its own look from the dialog's `tone`: `secondary` in the default tone, the grey `neutral` in the `critical` one (a blue-outlined Cancel beside a red answer is two
+ * competing colours), always at the footer's size (`md`, 40 high). It calls the dialog's `onClose` unless given its own `onClick`. Use it in a hand-built `footer`, so nobody has to remember the colour or the size.
+ */
+export const ModalCancel = React.forwardRef<HTMLButtonElement, ModalButtonProps>(function ModalCancel({ children = 'Cancel', type = 'button', onClick, ...props }, ref) {
+  const dialog = React.useContext(ModalFooterContext);
+  return (
+    <Button ref={ref} variant={dialog?.tone === 'critical' ? 'neutral' : 'secondary'} size="md" type={type} onClick={onClick ?? dialog?.onClose} {...props}>
+      {children}
+    </Button>
+  );
+});
+
+/**
+ * The **answer** in a dialog's footer: `primary` in the default tone, the red `danger` in the `critical` one, always at the footer's size (`md`). Takes a button's own props (`type`, `form`, `loading`, `disabled`,
+ * `onClick`). Use it in a hand-built `footer`, so the colour follows the dialog's `tone` and nobody has to remember it.
+ */
+export const ModalConfirm = React.forwardRef<HTMLButtonElement, ModalButtonProps>(function ModalConfirm({ type = 'button', ...props }, ref) {
+  const dialog = React.useContext(ModalFooterContext);
+  return <Button ref={ref} variant={dialog?.tone === 'critical' ? 'danger' : 'primary'} size="md" type={type} {...props} />;
+});
+
 interface ModalBaseProps
   extends Omit<
       React.HTMLAttributes<HTMLDivElement>,
@@ -396,30 +423,15 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   },
   ref,
 ) {
-  /* The standard action row, unless the caller brought their own footer. */
+  /* The standard action row, unless the caller brought their own footer. It is the same two buttons a hand-built footer uses (`ModalCancel`, `ModalConfirm`), so the colours and size are decided in one place. */
   const footerContent =
     footer ??
     (actions && (
       <>
-        <Button
-          variant={tone === 'critical' ? 'neutral' : 'secondary'}
-          size="sm"
-          type="button"
-          onClick={onClose}
-        >
-          {actions.cancelLabel ?? 'Cancel'}
-        </Button>
-        <Button
-          variant={tone === 'critical' ? 'danger' : 'primary'}
-          size="sm"
-          type={actions.confirm.type ?? 'button'}
-          form={actions.confirm.form}
-          loading={actions.confirm.loading}
-          disabled={actions.confirm.disabled}
-          onClick={actions.confirm.onClick}
-        >
+        <ModalCancel>{actions.cancelLabel ?? 'Cancel'}</ModalCancel>
+        <ModalConfirm type={actions.confirm.type} form={actions.confirm.form} loading={actions.confirm.loading} disabled={actions.confirm.disabled} onClick={actions.confirm.onClick}>
           {actions.confirm.label}
-        </Button>
+        </ModalConfirm>
       </>
     ));
 
@@ -676,7 +688,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             is the same 20 whether the body scrolls or not. */}
         {hasContent(footerContent) && (
           <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
-            {footerContent}
+            <ModalFooterContext.Provider value={{ tone, onClose }}>{footerContent}</ModalFooterContext.Provider>
           </footer>
         )}
       </div>
