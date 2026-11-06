@@ -6,6 +6,7 @@ export * from './atoms/button';
 export * from './atoms/checkbox';
 export * from './atoms/chip';
 export * from './atoms/copy-text';
+export * from './atoms/description-card-title';
 export * from './atoms/divider';
 export * from './atoms/dropzone';
 export * from './atoms/donut-chart';
