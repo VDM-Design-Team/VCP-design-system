@@ -25,7 +25,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `filters` | `{ key, label, value, options, onChange, className? }[]` | required | Each a quiet `Select`. `label` names it for assistive tech ("Cycle", "Year", "Team") |
+| `filters` | `{ key, label, value, options, onChange, className? }[]` | required | Each a quiet `Select` that hugs its longest option (`className` pins a width). `label` names it for assistive tech ("Cycle", "Year", "Team") |
 | `onReset` | `() => void` | — | Shows the reset button (tertiary) |
 | `resetLabel` | `string` | `Reset Filters` | |
 | `exportLabel` | `string` | — | Shows the export button (secondary, with a caret): "Export Cycle Report" |
@@ -39,7 +39,7 @@ It reports each choice (`onChange` per filter, `onReset`, `onExport`); the page 
 
 ## Layout
 
-A row, right-aligned, `space.8` apart, that wraps when the page is narrow instead of overflowing. **Every control is 36 high**, as Figma draws the row: the selects are `compact` (36), the buttons `sm` (36) and `DashboardTemplate`'s view switch beside the title `md` (36). A plain small select is 32, which is why the selects take the `compact` size. The selects are quiet (`emphasis="regular"`); a wide one (the cycle's name and dates) takes a wider `className`.
+A row, right-aligned, `space.8` apart, that wraps when the page is narrow instead of overflowing. **Every control is 36 high**, as Figma draws the row: the selects are `compact` (36), the buttons `sm` (36) and `DashboardTemplate`'s view switch beside the title `md` (36). A plain small select is 32, which is why the selects take the `compact` size. The selects are quiet (`emphasis="regular"`); **the selects hug their longest option** (capped at 20rem), so none carries empty space and the row stays short: at 1440 wide it fits beside the title and the view switch on one line. Pass a `className` width only to pin one.
 
 ## Accessibility
 

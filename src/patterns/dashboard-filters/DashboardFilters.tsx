@@ -16,6 +16,7 @@ import { Menu } from '../../components/menu';
  *   (secondary, with a caret). Give it `exportOptions` and the button opens a menu of them (the formats, or which report), reported
  *   to `onExport(key)`; without options it is one button, and `onExport()` hears the press.
  * - **It does no filtering.** It reports each choice, and the page changes what the charts and cards are given.
+ * - **The selects hug their longest option**, so none carries empty space and the whole row stays short (at 1440 wide it fits beside the title on one line).
  * - **Every control is 36 high**: the selects are `compact`, the buttons `sm` and the view switch beside the title `md`, the three sizes that are 36 (a plain
  *   small select is 32), as Figma draws the row.
  * - **It wraps**, right-aligned: in a narrow page the row breaks onto a second line instead of overflowing.
@@ -30,7 +31,7 @@ export interface DashboardFilter {
   value: string;
   options: ReadonlyArray<string | { value: string; label: string }>;
   onChange: (value: string) => void;
-  /** The select's width, as a Tailwind width class. */
+  /** The select's width, as a Tailwind width class. By default it hugs its longest option (capped at 20rem), so none carries empty space. */
   className?: string;
 }
 
@@ -68,7 +69,7 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
           </Button>
         )}
         {filters.map((f) => (
-          <Select key={f.key} size="compact" emphasis="regular" aria-label={f.label} className={f.className ?? 'w-36'} value={f.value} options={f.options} onChange={f.onChange} />
+          <Select key={f.key} size="compact" emphasis="regular" aria-label={f.label} className={f.className ?? 'max-w-80'} value={f.value} options={f.options} onChange={f.onChange} />
         ))}
         {exportButton && exportOptions ? (
           <Menu trigger={exportButton} items={exportOptions.map((o) => ({ key: o.key, label: o.label }))} onSelect={(key) => onExport?.(key)} />

@@ -102,8 +102,8 @@ const METRICS: SuperAdminMetricsData = {
 };
 
 const globalFilters = (withTeam: boolean): DashboardFilter[] => [
-  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {}, className: 'w-80' },
-  { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {}, className: 'w-28' },
+  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {} },
+  { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {} },
   ...(withTeam ? [{ key: 'team', label: 'Team', value: 'All Teams', options: ['All Teams', 'Platform', 'Growth'], onChange: () => {} }] : []),
 ];
 const Filters = ({ withTeam = true }: { withTeam?: boolean }) => <DashboardFilters filters={globalFilters(withTeam)} onReset={() => {}} exportLabel="Export Cycle Report" exportOptions={[{ key: 'pdf', label: 'PDF' }, { key: 'csv', label: 'CSV' }]} onExport={() => {}} />;
@@ -131,7 +131,7 @@ const DevAdminQuarter = () => (
       filters={[
         { key: 'who', label: 'Show', value: 'All', options: ['All', 'Mine', 'Earl', 'Winston Fale'], onChange: () => {} },
         { key: 'quarter', label: 'Quarter', value: 'Q1', options: ['Q1', 'Q2', 'Q3', 'Q4'], onChange: () => {}, className: 'w-24' },
-        { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {}, className: 'w-28' },
+        { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {} },
       ]}
     />
   </>
@@ -274,6 +274,22 @@ export const DesignUserView: Story = {
     await expect(c.getByRole('region', { name: 'Value Cards' })).toBeInTheDocument();
     await expect(c.getByRole('region', { name: 'In Case You Missed it' })).toBeInTheDocument();
     await expect(c.queryByRole('radiogroup')).toBeNull();
+  },
+};
+
+/** At 1440 wide (the rail 256, the page inset 32 each side) the title, the switch and the whole filter bar fit on one line: the selects hug their longest option, so none carries empty space. */
+export const At1440Wide: Story = {
+  render: () => (
+    <div className="w-360">
+      <Switching cycle={<DevAdminCycle />} quarter={<DevAdminQuarter />} filters />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const filters = c.getByRole('group', { name: 'Dashboard filters' });
+    const title = c.getByRole('heading', { level: 1, name: 'Dashboard' });
+    /* Same row: the filters start level with the title (not wrapped beneath it). */
+    await expect(Math.abs(filters.getBoundingClientRect().top - title.getBoundingClientRect().top)).toBeLessThan(24);
   },
 };
 

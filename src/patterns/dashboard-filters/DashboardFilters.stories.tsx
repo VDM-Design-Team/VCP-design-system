@@ -4,8 +4,8 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { DashboardFilters, type DashboardFilter } from './DashboardFilters';
 
 const FILTERS: DashboardFilter[] = [
-  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {}, className: 'w-80' },
-  { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {}, className: 'w-28' },
+  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {} },
+  { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {} },
   { key: 'team', label: 'Team', value: 'All Teams', options: ['All Teams', 'Platform', 'Growth'], onChange: () => {} },
 ];
 

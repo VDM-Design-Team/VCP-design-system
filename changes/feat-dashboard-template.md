@@ -14,3 +14,5 @@ New template and two patterns, read off the Figma dashboards (development admin,
 One height across the header row, 36 as Figma draws it: the filters' selects are the new `Select` size `compact` (36, between small 32 and medium 40), the buttons are `sm` (36) and the view switch is `md` (36; the control's own default is 48).
 
 `Select` gains `size="compact"` (36): a toolbar's select beside a small Button and a medium SegmentedControl. Small (32) and medium (40) are unchanged.
+
+The filter bar's selects hug their longest option (capped at 20rem) instead of a fixed width, so the title, the switch and the whole bar fit on one line at 1440 wide, with no empty space inside the selects.
