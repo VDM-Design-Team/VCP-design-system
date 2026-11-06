@@ -35,7 +35,7 @@ export const Plain: Story = {
 /** Tonal: on a filled disc, for an item over a picture. */
 export const Tonal: Story = { args: { tone: 'tonal' } };
 
-/** Both, on a plain surface and over a picture. */
+/** On a plain surface both are fine; on a filled brand surface only `tonal` is offered — the bare red ✕ on brand blue is about 1.3:1 (see `ContrastHolds`), so there it is not drawn. */
 export const Surfaces: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
@@ -45,7 +45,6 @@ export const Surfaces: Story = {
         <RemoveButton tone="tonal" label="Remove file" />
       </div>
       <div className="flex items-center gap-4 rounded-md bg-surface-brand-strong p-6">
-        <RemoveButton label="Remove problem" />
         <RemoveButton tone="tonal" label="Remove file" />
       </div>
     </div>
@@ -75,6 +74,11 @@ export const ContrastHolds: Story = {
             <RemoveButton label="Remove plain" />
             <RemoveButton tone="tonal" label="Remove tonal" />
           </div>
+          {/* A filled brand surface: only the tonal ✕ is offered there. */}
+          <div className="flex items-center gap-4 bg-surface-brand-strong p-6" data-surface="brand">
+            <RemoveButton label="Remove plain on brand" />
+            <RemoveButton tone="tonal" label="Remove tonal on brand" />
+          </div>
         </div>
       ))}
     </div>
@@ -92,6 +96,12 @@ export const ContrastHolds: Story = {
       for (const [name, fg, bg] of rows) {
         await expect({ theme, name, ok: contrast(fg, bg) >= 3 }).toEqual({ theme, name, ok: true });
       }
+      /* The brand surface: the tonal ✕ holds 3:1 against its own disc; the bare red ✕ does not hold against the blue, which is why `plain` is not offered there. */
+      const brand = channels(getComputedStyle(scope.querySelector('[data-surface="brand"]') as HTMLElement).backgroundColor);
+      const tonalOnBrand = scope.querySelector('button[aria-label="Remove tonal on brand"]') as HTMLElement;
+      const plainOnBrand = scope.querySelector('button[aria-label="Remove plain on brand"]') as HTMLElement;
+      await expect({ theme, name: 'tonal on its disc, on brand', ok: contrast(channels(getComputedStyle(tonalOnBrand).color), channels(getComputedStyle(tonalOnBrand).backgroundColor)) >= 3 }).toEqual({ theme, name: 'tonal on its disc, on brand', ok: true });
+      await expect({ theme, name: 'plain on brand', ok: contrast(channels(getComputedStyle(plainOnBrand).color), brand) >= 3 }).toEqual({ theme, name: 'plain on brand', ok: false });
     }
   },
 };
