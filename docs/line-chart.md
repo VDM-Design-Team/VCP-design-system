@@ -63,14 +63,14 @@ It measures its own width and draws in real pixels, so type never scales; the ax
 
 | Part | Style | Colour |
 |---|---|---|
-| Axis numbers and labels | `caption-sm-regular` (10) | `text.secondary` |
+| Axis numbers and labels | `caption-md-regular` (12) | `text.secondary` |
 | Axis title | `caption-md-semibold` | `text.secondary` |
 | Gridlines | 1 | `stroke.subtle` |
 | Lines | 2, round caps and joins | the series' fill (`stroke-*`) |
 | Dots | radius 3 (5 on the hovered point) | the series' fill |
 | Tooltip | `caption-md` | `surface.elevated`, `stroke.subtle`, `shadow-md` |
 
-**Differences from Figma, on purpose.** The line colours are the series tokens (Figma's blues and greens are not variables); Committed is dashed and Available dotted (Figma draws all lines solid, which leaves two blues distinguishable by colour alone); the plot spaces points evenly and does not draw the weekend.
+**Differences from Figma, on purpose.** The text in the plot is 12 (Figma sets the axis at 10, too small to read comfortably; one size across a chart, with the hover card and legend). The line colours are the series tokens (Figma's blues and greens are not variables); Committed is dashed and Available dotted (Figma draws all lines solid, which leaves two blues distinguishable by colour alone); the plot spaces points evenly and does not draw the weekend.
 
 ## Accessibility
 

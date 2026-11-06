@@ -10,3 +10,5 @@ Lines differ by more than colour (Committed is dashed, Available dotted). The pl
 `CycleBurndown` is the card: title with an optional hint, the chart with all four lines (Completed, Committed, Overdue, Available), a row of totals (`stats`: label, value, tone) and the legend at the bottom. No filters of its own: the page's global filters decide the `data`. The `FromAnApiResponse` story and `docs/cycle-burndown.md` show the whole mapping from a raw API response.
 
 Differences from Figma, on purpose: line colours are the series tokens, lines are not all solid, the legend is at the bottom as on every chart, and the totals use token colours.
+
+The axis text is 12, not Figma's 10: one readable size across a chart, with the hover card and legend.

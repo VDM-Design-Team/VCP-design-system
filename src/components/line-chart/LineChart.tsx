@@ -62,7 +62,7 @@ export interface LineChartProps extends Omit<React.HTMLAttributes<HTMLDivElement
 }
 
 const MARGIN = { top: 16, right: 12, bottom: 28 } as const;
-const AXIS_LABEL_WIDTH = 28;
+const AXIS_LABEL_WIDTH = 32;
 const Y_TITLE_WIDTH = 24;
 const EDGE = 12;
 
@@ -97,7 +97,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
     const step = n > 1 ? (plotW - 2 * EDGE) / (n - 1) : plotW;
 
     const longest = Math.max(0, ...data.map((d) => d.label.length));
-    const labelStep = step > 0 ? Math.max(1, Math.ceil((longest * 5.5 + 8) / step)) : 1;
+    const labelStep = step > 0 ? Math.max(1, Math.ceil((longest * 6.6 + 8) / step)) : 1;
 
     /* A series' path, broken wherever a point has no value. */
     const pathFor = (s: ChartSeries) => {
@@ -182,7 +182,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                   {ticks.map((t) => (
                     <g key={t}>
                       <line x1={left} x2={left + plotW} y1={y(t)} y2={y(t)} className="stroke-stroke-subtle" strokeWidth={1} />
-                      <text x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" className="fill-text-secondary text-caption-sm-regular">
+                      <text x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" className="fill-text-secondary text-caption-md-regular">
                         {t}
                       </text>
                     </g>
@@ -194,7 +194,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                   )}
                   {data.map((d, i) =>
                     i % labelStep === 0 ? (
-                      <text key={d.key} x={x(i)} y={base + 18} textAnchor="middle" className="fill-text-secondary text-caption-sm-regular">
+                      <text key={d.key} x={x(i)} y={base + 18} textAnchor="middle" className="fill-text-secondary text-caption-md-regular">
                         {d.label}
                       </text>
                     ) : null,
