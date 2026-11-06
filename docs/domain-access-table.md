@@ -1,0 +1,80 @@
+# DomainAccessTable
+
+Which domains a user can get into, and whether they are an admin there: a row per domain, a checkbox for **Access** and one for
+**Admin**, and the **Role** the two add up to. Built to Figma's `_Accounts_User_Modal_Domain_Access_Table` (the "Domain Access &
+Admin Rights" section of the Accounts page's user modal).
+
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Checkbox` | atom |
+| `Tag` | atom |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
+## When to use
+
+| Use | For |
+|---|---|
+| `DomainAccessTable` | Setting a user's per-domain access and admin rights |
+| `DataTable` | A table of records to read, sort and page |
+| `Checkbox` | A single yes/no |
+
+## Props
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `rows` | `DomainAccessRow[]` | required | `id`, `domain`, `access`, `admin` |
+| `onAccessChange` | `(id, access: boolean) => void` | — | A tick of the Access box |
+| `onAdminChange` | `(id, admin: boolean) => void` | — | A tick of the Admin box |
+| `disabled` | `boolean` | — | Locks every box — while a save is in flight |
+| `caption` | `string` | `Domain access and admin rights` | The table's accessible name |
+
+It is **controlled and saves nothing**: the rows are the caller's, and a tick is only reported. One click can report both boxes
+(see below), so update the rows functionally — `setRows((rs) => rs.map(…))` — and the two reports combine.
+
+## Admin implies Access
+
+**Both boxes are always available, and Admin brings Access with it** (design, 4 Nov 2026), so a row never reads Admin for a domain
+the person cannot get into:
+
+| Click | Reports |
+|---|---|
+| Tick Admin on a row without Access | `onAdminChange(id, true)` **and** `onAccessChange(id, true)` |
+| Un-tick Access on an admin's row | `onAccessChange(id, false)` **and** `onAdminChange(id, false)` |
+| Un-tick Admin | `onAdminChange(id, false)` only: an admin who stops being one is still a user |
+| Tick Access | `onAccessChange(id, true)` only |
+
+## Role is derived, once
+
+`domainRole` is the one place two ticks become a role:
+
+| Access | Admin | Role | Tag |
+|---|---|---|---|
+| | | **No Access** | neutral |
+| ✓ | | **User** | green (`success`) |
+| any | ✓ | **Admin** | blue (`brand`) |
+
+Admin wins over User. The role is a `Tag`, so it is words as well as a colour. Figma draws only User and No Access; Admin is
+blue so it reads apart from User at a glance (design, 4 Nov 2026).
+
+## Tokens
+
+The table is `Checkbox`es and `Tag`s on the page's surface: header cells `body-sm-semibold`, domain names `body-sm-regular`, both
+`text.primary` (20.17:1 light / 14.63:1 dark); rows divided by `stroke.default`. The role `Tag` is `sm` (24 high, 12 type), `brand`,
+`success` or `neutral` tonal. No new tokens.
+
+## Accessibility
+
+- A real `<table>`, named by `caption`, with column headers (`scope="col"`) and each domain a row header (`scope="row"`).
+- Each box is named for its row and column — "Design access", "Design admin" — so six identical "Access" boxes never meet a screen
+  reader. Each `Checkbox` keeps its own 40 target.
+- Role is text ("User", "Admin", "No Access"), never colour alone.
+
+## Don't
+
+- **Don't derive the role at the call site.** `domainRole` is the rule.
+- **Don't add access rules beyond "Admin implies Access"** (who may be an admin, how many, and so on). Those are the page's.
+- **Don't update the rows from a stale copy** (`setRows(rows.map(…))`): one click can report two changes, and the second would
+  overwrite the first. Update functionally.

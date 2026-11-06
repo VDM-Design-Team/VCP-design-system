@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { Button } from '../../atoms/button';
 import { Checkbox } from '../../atoms/checkbox';
 
@@ -75,12 +75,10 @@ export function AcceptPendingAVModal({
       showClose={false}
       footer={
         <>
-          <Button variant="secondary" size="sm" onClick={onClose}>
-            {cancelLabel}
-          </Button>
-          <Button size="sm" loading={loading} onClick={() => onConfirm({ multipart })}>
+          <ModalCancel>{cancelLabel}</ModalCancel>
+          <ModalConfirm loading={loading} onClick={() => onConfirm({ multipart })}>
             {confirmLabel}
-          </Button>
+          </ModalConfirm>
         </>
       }
     >
