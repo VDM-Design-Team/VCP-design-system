@@ -16,8 +16,8 @@ import { Menu } from '../../components/menu';
  *   (secondary, with a caret). Give it `exportOptions` and the button opens a menu of them (the formats, or which report), reported
  *   to `onExport(key)`; without options it is one button, and `onExport()` hears the press.
  * - **It does no filtering.** It reports each choice, and the page changes what the charts and cards are given.
- * - **Every control is 40 high**: the selects and the buttons are all `md`, the one size they share (a small select is 32 and a small button 36), and the
- *   view switch beside the title is the same 40.
+ * - **Every control is 36 high**: the selects are `compact`, the buttons `sm` and the view switch beside the title `md`, the three sizes that are 36 (a plain
+ *   small select is 32), as Figma draws the row.
  * - **It wraps**, right-aligned: in a narrow page the row breaks onto a second line instead of overflowing.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
@@ -52,6 +52,7 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
     const exportButton = exportLabel ? (
       <Button
         variant="secondary"
+        size="sm"
         iconLeft={<Icon name="caret-down" size="sm" aria-hidden="true" />}
         onClick={exportOptions ? undefined : () => onExport?.()}
       >
@@ -62,12 +63,12 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
     return (
       <div ref={ref} role="group" aria-label="Dashboard filters" className={cn('flex flex-wrap items-center justify-end gap-2 font-sans', className)} {...props}>
         {onReset && (
-          <Button variant="tertiary" onClick={onReset}>
+          <Button variant="tertiary" size="sm" onClick={onReset}>
             {resetLabel}
           </Button>
         )}
         {filters.map((f) => (
-          <Select key={f.key} emphasis="regular" aria-label={f.label} className={f.className ?? 'w-36'} value={f.value} options={f.options} onChange={f.onChange} />
+          <Select key={f.key} size="compact" emphasis="regular" aria-label={f.label} className={f.className ?? 'w-36'} value={f.value} options={f.options} onChange={f.onChange} />
         ))}
         {exportButton && exportOptions ? (
           <Menu trigger={exportButton} items={exportOptions.map((o) => ({ key: o.key, label: o.label }))} onSelect={(key) => onExport?.(key)} />

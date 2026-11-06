@@ -11,4 +11,6 @@ New template and two patterns, read off the Figma dashboards (development admin,
 
 `PageTitle` gains `beside` (a slot beside the title, for a view switch). Its `actions` slot now wraps and is capped to the band's width, so a row of filters no longer overflows a narrow page; with `beside` set the left group wraps, so the switch drops under the title instead of squeezing it.
 
-One height across the header row: the filters' selects and buttons are `md` (40, the one size a select and a button share) and the view switch is `lg` (40; the control's own default is 48). Figma draws this row at 36, which the system's selects do not have.
+One height across the header row, 36 as Figma draws it: the filters' selects are the new `Select` size `compact` (36, between small 32 and medium 40), the buttons are `sm` (36) and the view switch is `md` (36; the control's own default is 48).
+
+`Select` gains `size="compact"` (36): a toolbar's select beside a small Button and a medium SegmentedControl. Small (32) and medium (40) are unchanged.

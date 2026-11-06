@@ -49,7 +49,7 @@ The development user and design user rows come from the product's description, n
 
 ## The view switch is yours to wire
 
-The switch is a `SegmentedControl` (a radio group), not tabs, at `lg` (40 high, the same as the filters' selects and buttons; its own default is 48): it swaps which sections the page shows, and the page does the swapping. The page also decides whether the filters belong to a view (the development admin's global filters are on the Cycle view and not the Quarter one).
+The switch is a `SegmentedControl` (a radio group), not tabs, at `md` (36 high, the same as the filters' selects and buttons; its own default is 48): it swaps which sections the page shows, and the page does the swapping. The page also decides whether the filters belong to a view (the development admin's global filters are on the Cycle view and not the Quarter one).
 
 ## Layout
 

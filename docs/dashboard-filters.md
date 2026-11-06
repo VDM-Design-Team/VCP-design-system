@@ -39,7 +39,7 @@ It reports each choice (`onChange` per filter, `onReset`, `onExport`); the page 
 
 ## Layout
 
-A row, right-aligned, `space.8` apart, that wraps when the page is narrow instead of overflowing. **Every control is 40 high:** the selects and the buttons are all `md`, the one size they share (a small select is 32 and a small button 36), and `DashboardTemplate`'s view switch beside the title is the same 40. Figma draws this row at 36, a height the system's selects do not have. The selects are quiet (`emphasis="regular"`); a wide one (the cycle's name and dates) takes a wider `className`.
+A row, right-aligned, `space.8` apart, that wraps when the page is narrow instead of overflowing. **Every control is 36 high**, as Figma draws the row: the selects are `compact` (36), the buttons `sm` (36) and `DashboardTemplate`'s view switch beside the title `md` (36). A plain small select is 32, which is why the selects take the `compact` size. The selects are quiet (`emphasis="regular"`); a wide one (the cycle's name and dates) takes a wider `className`.
 
 ## Accessibility
 

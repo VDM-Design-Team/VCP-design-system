@@ -51,7 +51,7 @@ export const DashboardTemplate = React.forwardRef<HTMLDivElement, DashboardTempl
       header={
         <PageTitle
           title={title}
-          beside={views && views.length > 0 ? <SegmentedControl size="lg" aria-label={viewsLabel} options={views.map((v) => ({ value: v.value, label: v.label }))} value={view} onChange={onViewChange} /> : undefined}
+          beside={views && views.length > 0 ? <SegmentedControl size="md" aria-label={viewsLabel} options={views.map((v) => ({ value: v.value, label: v.label }))} value={view} onChange={onViewChange} /> : undefined}
           actions={filters}
         />
       }

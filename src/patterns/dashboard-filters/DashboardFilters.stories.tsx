@@ -40,12 +40,12 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByRole('group', { name: 'Dashboard filters' })).toBeInTheDocument();
     await expect(c.getByRole('combobox', { name: 'Cycle' })).toHaveValue('C37');
-    /* One height across the row: the selects and the buttons are all 40. */
+    /* One height across the row: the selects and the buttons are all 36. */
     const heights = [
       ...c.getAllByRole('combobox').map((el) => (el.parentElement as HTMLElement).getBoundingClientRect().height),
       ...c.getAllByRole('button').map((el) => el.getBoundingClientRect().height),
     ];
-    await expect(new Set(heights.map(Math.round))).toEqual(new Set([40]));
+    await expect(new Set(heights.map(Math.round))).toEqual(new Set([36]));
     await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await userEvent.click(c.getByRole('button', { name: 'Export Cycle Report' }));

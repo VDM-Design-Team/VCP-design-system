@@ -48,6 +48,8 @@ const shell = cva(
       size: {
         /* 32 tall — dense tables and toolbars only. ds-lint-ignore */
         sm: 'h-8',
+        /* 36 tall — a toolbar's controls beside a small Button (36) and a medium SegmentedControl (36): the dashboard's header row. ds-lint-ignore */
+        compact: 'h-9',
         /* 40 tall — the default, meets the minimum target size. ds-lint-ignore */
         md: 'h-10',
       },
@@ -78,7 +80,7 @@ const control = cva(
   ],
   {
     variants: {
-      size: { sm: '', md: '' },
+      size: { sm: '', compact: '', md: '' },
       /* A value is medium and the placeholder regular (SearchSelect's pairing) — or, for a filter, regular throughout. */
       emphasis: { medium: '', regular: '' },
     },
@@ -93,7 +95,13 @@ const control = cva(
         emphasis: 'medium',
         className: 'text-body-sm-medium has-[option[data-placeholder]:checked]:text-body-sm-regular',
       },
+      {
+        size: 'compact',
+        emphasis: 'medium',
+        className: 'text-body-sm-medium has-[option[data-placeholder]:checked]:text-body-sm-regular',
+      },
       { size: 'sm', emphasis: 'regular', className: 'text-caption-md-regular' },
+      { size: 'compact', emphasis: 'regular', className: 'text-body-sm-regular' },
       { size: 'md', emphasis: 'regular', className: 'text-body-sm-regular' },
     ],
     defaultVariants: { size: 'md', emphasis: 'medium' },

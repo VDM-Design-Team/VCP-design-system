@@ -46,7 +46,7 @@ Settled in October 2026. If you are tempted to change it, read the reasons first
 | `placeholder` | `string` | — | A disabled, hidden `value=""` option — cannot be re-picked. A real "none" choice should be a real option |
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message (`Field`'s `error`, or this component's own `error`) |
 | `error` | `ReactNode` | — | A message under the select in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the select (`aria-describedby`, merged with any a `Field` set). **Inside a `Field`, use the `Field`'s `error`, not both** |
-| `size` | `sm \| md` | `md` | 32 / 40 — Input's scale. The export's `small`/`large` renamed to match the system |
+| `size` | `sm \| compact \| md` | `md` | 32 / 36 / 40. `sm` and `md` are Input's scale (the export's `small`/`large` renamed to match the system); `compact` (36) is a toolbar's select beside a small Button (36) and a medium SegmentedControl (36), as the dashboard's header row has them |
 | `emphasis` | `medium \| regular` | `medium` | The weight of a chosen value. **A filter passes `regular`**, so a row of filters sits quietly; the default (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way |
 | `fullWidth` | `boolean` | — | — |
 | `className` | `string` | — | On the shell, not the `<select>` |
