@@ -102,7 +102,7 @@ const METRICS: SuperAdminMetricsData = {
 };
 
 const globalFilters = (withTeam: boolean): DashboardFilter[] => [
-  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {}, className: 'w-72' },
+  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {}, className: 'w-80' },
   { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {}, className: 'w-28' },
   ...(withTeam ? [{ key: 'team', label: 'Team', value: 'All Teams', options: ['All Teams', 'Platform', 'Growth'], onChange: () => {} }] : []),
 ];
@@ -201,6 +201,9 @@ export const DevelopmentAdmin: Story = {
     await expect(c.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeInTheDocument();
     const views = c.getByRole('radiogroup', { name: 'Dashboard view' });
     await expect(within(views).getByRole('radio', { name: 'Cycle' })).toBeChecked();
+    /* The switch is 40 high, the same as the filters' selects and buttons. */
+    await expect(Math.round(views.getBoundingClientRect().height)).toBe(40);
+    await expect(Math.round((c.getByRole('combobox', { name: 'Team' }).parentElement as HTMLElement).getBoundingClientRect().height)).toBe(40);
     await expect(c.getByRole('group', { name: 'Dashboard filters' })).toBeInTheDocument();
     for (const name of ['Cycle Summary', 'Value Cards', 'Team Capacity', 'User Capacity', 'Sprint Metrics', 'Cycle Burndown']) {
       await expect(c.getByRole('region', { name })).toBeInTheDocument();

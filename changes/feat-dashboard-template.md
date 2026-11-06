@@ -10,3 +10,5 @@ New template and two patterns, read off the Figma dashboards (development admin,
 `DashboardFilters`: Reset Filters, the filters (data-driven: cycle, year, team) and an Export button (one button, or a menu with `exportOptions`). `ValueCards`: the status counts (Overdue, In Progress, Pending, Draft) as a titled card of `StatCard`s with an optional "whose" filter, four across, two by two or one column by its own width.
 
 `PageTitle` gains `beside` (a slot beside the title, for a view switch). Its `actions` slot now wraps and is capped to the band's width, so a row of filters no longer overflows a narrow page; with `beside` set the left group wraps, so the switch drops under the title instead of squeezing it.
+
+One height across the header row: the filters' selects and buttons are `md` (40, the one size a select and a button share) and the view switch is `lg` (40; the control's own default is 48). Figma draws this row at 36, which the system's selects do not have.

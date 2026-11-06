@@ -4,7 +4,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { DashboardFilters, type DashboardFilter } from './DashboardFilters';
 
 const FILTERS: DashboardFilter[] = [
-  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {}, className: 'w-72' },
+  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {}, className: 'w-80' },
   { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {}, className: 'w-28' },
   { key: 'team', label: 'Team', value: 'All Teams', options: ['All Teams', 'Platform', 'Growth'], onChange: () => {} },
 ];
@@ -40,6 +40,12 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByRole('group', { name: 'Dashboard filters' })).toBeInTheDocument();
     await expect(c.getByRole('combobox', { name: 'Cycle' })).toHaveValue('C37');
+    /* One height across the row: the selects and the buttons are all 40. */
+    const heights = [
+      ...c.getAllByRole('combobox').map((el) => (el.parentElement as HTMLElement).getBoundingClientRect().height),
+      ...c.getAllByRole('button').map((el) => el.getBoundingClientRect().height),
+    ];
+    await expect(new Set(heights.map(Math.round))).toEqual(new Set([40]));
     await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await userEvent.click(c.getByRole('button', { name: 'Export Cycle Report' }));
