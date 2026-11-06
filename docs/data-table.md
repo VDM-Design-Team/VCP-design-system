@@ -166,6 +166,14 @@ No new tokens.
 - **Don't use `selectable` without wiring `selected`** — a checkbox column
   that never changes state is furniture.
 
+## Filters go above the table, in a card
+
+`DataTable` never owns its filters or search. They sit above it, in the same card as the table, drawn by `TableCard` (see `docs/table-card.md`); the table inside is `bare` (no border or fill of its own). `AVTable` does this when given `filters`.
+
 ## A cut name says the whole of it
 
 A first column that can truncate (`grow`) renders its text with **`TruncatedText`** (or, for a button that opens the row, `useIsTruncated` with its own `Tooltip`), so hovering or focusing a cut name shows it in full — never the browser's `title`. `AVTable` and `PlanningTable` do.
+
+## A table that scrolls sideways is reachable by keyboard
+
+When a table is wider than its container it scrolls sideways. A table with a control in it (a link, a button, a sortable header) needs nothing: tabbing through the controls brings the rest into view. A table of **only text** has nothing to tab to, so the scroller itself becomes a tab stop — and a named `region`, from the `caption` — **only while it scrolls**, so the arrow keys can reach the rest. A table that fits adds no stop. This is what the accessibility rule for a scrollable region asks (`scrollable-region-focusable`); the `HorizontalScrollTextOnly` story holds it.
