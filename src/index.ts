@@ -53,6 +53,7 @@ export * from './components/data-table';
 export * from './components/description-card';
 export * from './components/description-section';
 export * from './components/date-field';
+export * from './components/capacity-bar';
 export * from './components/cycle-summary';
 export * from './components/date-picker';
 export * from './components/detail-card-menu';
@@ -106,6 +107,8 @@ export * from './patterns';
 export * from './templates';
 
 export { cn } from './lib/cn';
+export { CHART_SERIES, CHART_SERIES_ORDER, seriesIn } from './lib/chart-series';
+export type { ChartSeries, ChartSeriesStyle } from './lib/chart-series';
 export { DateFormatProvider, useDateFormat, formatDate, formatDayMonthYear, datePlaceholder } from './lib/format-date';
 /* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
 export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';
