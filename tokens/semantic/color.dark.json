@@ -946,8 +946,8 @@
         "$value": "#1e293bbf"
       },
       "track": {
-        "$value": "{color.slate.800}",
-        "$description": "Meter/progress track, dark: every accent filled surface clears 3.8:1 on it; the fill, not the track, carries the boundary"
+        "$value": "{color.slate.700}",
+        "$description": "Meter/progress track, dark: one step above surface.elevated so it shows on a card (1.41:1, and 1.72:1 on the canvas). Brand, success, warning and caution fills clear 3.2:1 on it; critical (2.72), info (2.75) and pending (2.91) do not, but keep 3.84:1 against the card around the meter"
       }
     },
     "text": {

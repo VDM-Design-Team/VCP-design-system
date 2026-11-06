@@ -142,7 +142,7 @@ Disabled text (`text.disabled`) is exempt from the contrast minimum, as every di
 ## Accessibility
 
 - Every clickable region is a real `<button>` — focusable, Enter/Space, visible
-  `stroke.focused` ring. Nothing is a div with an onClick.
+  `stroke.focused` ring. Nothing is a div with an onClick. **The edit and ✕ buttons' ring is drawn inside them** (`outline-offset: -2`): with `actions="hover"` they sit in a box that clips its overflow to stay zero-wide, and a ring outside them was cut off on every side but the corners.
 - A toggleable chip announces its state via `aria-pressed`; the fill change is
   the visual echo, not the only signal.
 - The ✕ is named `Remove ${label}` (or `removeLabel`). It stops nothing —
