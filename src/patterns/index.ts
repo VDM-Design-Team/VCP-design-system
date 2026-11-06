@@ -15,6 +15,7 @@ export * from './changelog-modal';
 export * from './change-password-form';
 export * from './confirm-delete-av-modal';
 export * from './confirm-delete-modal';
+export * from './contacts-table';
 export * from './domain-card';
 export * from './filter-bar';
 export * from './gantt-chart';
