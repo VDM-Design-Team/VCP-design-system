@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { Dropzone } from './Dropzone';
 import { Field } from '../../components/field';
 
@@ -109,6 +109,40 @@ export const WithError: Story = {
       <Dropzone {...args} />
     </div>
   ),
+};
+
+/**
+ * Files are checked when they arrive — dropped ones too, which the browse dialog's filter never covered. A type we do not take, or a file over the size limit, is turned away and
+ * the zone says why in its error state (`onReject` gets the same); the files that pass still go to `onFiles`. The next selection clears the message.
+ */
+export const RejectsWhatItDoesNotTake: Story = {
+  args: { onFiles: fn(), onReject: fn() },
+  render: (args) => (
+    <div className="w-96">
+      <Dropzone {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const big = new File([new Uint8Array(11 * 1024 * 1024)], 'huge.png', { type: 'image/png' });
+    const good = new File(['x'], 'notes.pdf', { type: 'application/pdf' });
+    const bad = new File(['x'], 'photo.heic', { type: 'image/heic' });
+    /* Dropped and browsed files take the same road; the upload here skips the browser's own `accept` filter, as the "All files" option of a file dialog does. */
+    const user = userEvent.setup({ applyAccept: false });
+    const input = canvasElement.querySelector('input[type="file"]') as HTMLInputElement;
+    await user.upload(input, [good, bad, big]);
+    await waitFor(() => expect(args.onFiles).toHaveBeenCalled());
+    /* The browser hands the zone copies of the files, so they are told apart by name. */
+    const names = (files: Array<{ name: string }>) => files.map((file) => file.name);
+    await expect(names((args.onFiles as ReturnType<typeof fn>).mock.calls[0][0])).toEqual(['notes.pdf']);
+    const rejections = (args.onReject as ReturnType<typeof fn>).mock.calls[0][0] as Array<{ file: File; reason: string }>;
+    await expect(rejections.map((r) => [r.file.name, r.reason])).toEqual([
+      ['photo.heic', 'type'],
+      ['huge.png', 'size'],
+    ]);
+    await expect(within(canvasElement).getByText(/2 files were not added/)).toBeVisible();
+    await user.upload(input, good);
+    await waitFor(() => expect(within(canvasElement).queryByText(/were not added/)).toBeNull());
+  },
 };
 
 export const Disabled: Story = {

@@ -204,6 +204,26 @@ export function DataTable<Row extends { id?: string | number }>({
   rowProps,
   ...props
 }: DataTableProps<Row>) {
+  /* A table that scrolls sideways has to be reachable by keyboard, or someone who cannot use a mouse cannot see the rest. When it has a control in it, tabbing through the controls scrolls it into view; when it has
+     none (a table of text), the scroller itself takes a tab stop — and only while it actually scrolls, so a table that fits adds nothing. */
+  const scroller = React.useRef<HTMLDivElement>(null);
+  const [needsStop, setNeedsStop] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el) return undefined;
+    const measure = () => {
+      const scrolls = el.scrollWidth > el.clientWidth;
+      const hasControl = !!el.querySelector('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      setNeedsStop(scrolls && !hasControl);
+    };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    if (el.firstElementChild) observer.observe(el.firstElementChild);
+    return () => observer.disconnect();
+  }, [rows, columns]);
+
   const rowId = (row: Row, index: number) => row.id ?? index;
   const allOn = rows.length > 0 && selected.length === rows.length;
   const someOn = selected.length > 0 && !allOn;
@@ -223,8 +243,14 @@ export function DataTable<Row extends { id?: string | number }>({
 
   return (
     <div
+      ref={scroller}
+      /* A scrolling region with no control in it is a tab stop (and a named region, from the caption), so the arrow keys can scroll it. */
+      tabIndex={needsStop ? 0 : undefined}
+      role={needsStop && caption ? 'region' : undefined}
+      aria-label={needsStop && caption ? caption : undefined}
       className={cn(
         'overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated font-sans',
+        needsStop && 'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
         className,
       )}
       {...props}

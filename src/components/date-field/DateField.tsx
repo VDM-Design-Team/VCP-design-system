@@ -3,6 +3,7 @@ import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { DatePicker, type DatePickerProps } from '../date-picker';
 import { Popover } from '../popover';
+import { useDateFormat } from '../../lib/format-date';
 
 /** "2026-09-14" → "September 2026". Read in UTC, so no time zone can move the month. */
 export const formatMonth = (iso: string): string => {
@@ -117,7 +118,9 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     React.useEffect(() => {
       if (open) setDraft({ start: value || undefined, end: rangeEnd || undefined });
     }, [open]); // eslint-disable-line
-    const show = (iso: string) => (formatDate ? formatDate(iso) : iso);
+    /* dd/mm/yyyy, or the person's locale when the product sets one (`DateFormatProvider`). */
+    const dates = useDateFormat();
+    const show = (iso: string) => (formatDate ? formatDate(iso) : dates.format(iso));
     const invalid = invalidProp || ariaInvalid === true || ariaInvalid === 'true';
     return (
       <Popover

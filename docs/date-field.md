@@ -1,7 +1,7 @@
 # DateField
 
 A date in a form: a read-only field that shows it, and a calendar that picks it. Built to Figma's date fields
-(a calendar glyph, then `2026-03-02`) in the Add Required Details dialog and the detail card.
+(a calendar glyph, then the date) in the Add Required Details dialog and the detail card.
 
 ## Composed of
 
@@ -29,8 +29,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `mode` | `'day' \| 'range' \| 'month'` | `'day'` | What it picks: a day, a period, or a month with no day (see below). `DatePicker`'s own prop |
 | `rangeEnd` / `onRangeChange` | `string` / `(start, end?) => void` | — | Range mode: `value` is the start, `rangeEnd` the end. `onRangeChange` fires on **Apply** (one day picked is a period of one) and with `('', undefined)` on **Clear** |
 | `onClear` | `() => void` | — | Day and month mode: shows the picker's own **Clear**, which empties the field and closes. A **filter** passes it; a required form field does not |
-| `formatDate` | `(iso) => string` | ISO as is | How a date reads in the field (the Holiday Registry draws `dd/mm/yyyy`) |
-| `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder |
+| `formatDate` | `(iso) => string` | dd/mm/yyyy | Overrides how a date reads in the field; by default it follows the system format (see below) |
+| `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder. It **reads dd/mm/yyyy** (see below) |
 | `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
 | `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
 | `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
@@ -44,6 +44,13 @@ Generated from the real imports — `npm test` fails if this list drifts.
 The chosen date is **medium** weight and the placeholder regular (`Input`'s `emphasis="medium"`) — the rule `Select` and `SearchSelect`
 follow, so a date field reads the same as the selects beside it. (It was regular until November 2026.) **A filter passes
 `emphasis="regular"`**, as its `Select`s and `SearchSelect`s do, so a row of filters sits quietly.
+
+## How dates read: one format everywhere
+
+Dates travel as ISO `yyyy-mm-dd` and **read dd/mm/yyyy** ("12/03/2026") in every field and cell in the system — `DateField`, `InlineDateEdit`, the Planning table, the detail card, the filter bar — from one place (`src/lib/format-date.ts`), so a date never reads two ways on one screen. The string is split, never passed
+through a `Date`, so no time zone can move the day.
+
+**Optionally, the person's locale.** Wrap the app in `<DateFormatProvider locale="en-US">` and every date reads in that locale's own order and separators ("03/12/2026", or "12.03.2026" for `de-DE`); the placeholder follows ("MM/DD/YYYY"). With no provider, or no `locale`, it is dd/mm/yyyy. `useDateFormat()` gives a component the same `format` and `placeholder`; `InlineDateEdit` can still override with its own `format`.
 
 ## Range mode
 

@@ -12,9 +12,23 @@ keyboard until it is dismissed. Reach for it last, not first.
 
 | Piece | Tier |
 |---|---|
+| `Button` | atom |
 | `IconButton` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
+
+## The critical tone
+
+A dialog whose answer destroys something takes `tone="critical"`. Its buttons are the system's
+critical pair — a **neutral** (grey outline) Cancel and a **danger** (red) answer — rather than
+the default `secondary` (blue outline) + `primary`. Two reasons for neutral: an outlined *brand*
+button beside a red one is two competing colours and reads as a second call to action, and
+Cancel is the way out, so it should be the quietest button. (Design note, Nov 2026: Figma's
+delete-domain modal draws a plain dark-text Cancel; we use the system's neutral outline.)
+
+`critical` also defaults the dialog to `role="alertdialog"`, with no ✕ and no backdrop click,
+so a stray click cannot answer it. Existing destructive dialogs that hand-build a `footer`
+(`ConfirmDeleteAVModal`, the reject dialogs) can move to `actions` when next touched.
 
 ## When to use
 
@@ -53,6 +67,8 @@ Rules of thumb:
 | `description` | `ReactNode` | — | Caption under the title (`caption-md-medium`, 500), wired to `aria-describedby`. **With a caption the header has 16 below it** (8 without), so content never sits close against it. Left out, `false` or blank, nothing renders for it |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s. Left out, `false` or blank, no footer renders |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
+| `actions` | `{ cancelLabel?, confirm: { label, onClick?, type?, form?, loading?, disabled? } }` | — | The standard action row: Cancel (calls `onClose`) and the one answer. `secondary` + `primary`, or `neutral` + `danger` in the critical tone. Ignored when `footer` is set |
+| `tone` | `default \| critical` | `default` | `critical`: the answer destroys something. Swaps `actions` to grey Cancel + red answer, and defaults `role="alertdialog"`, `showClose={false}`, `dismissible={false}` (each overridable) |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |
 | `showClose` | `boolean` | `true` | The icon-only close button in the header |
@@ -460,3 +476,8 @@ Reported, not invented — nothing new was added to `tokens/` for this component
    "behind the dialog" is carried mostly by the panel's shadow. It is the token the
    system has and it flips correctly in dark, so it was used as-is, but the light
    value is worth a second look.
+
+## Long forms scroll the body, not the panel
+
+Only the **body** scrolls; the header and footer stay put. A checkbox, radio or switch hides its real input with `sr-only` (`position: absolute`), so the body is its containing block (`relative`) and the input
+scrolls with it. Were the panel the containing block instead, tabbing to a control that had scrolled out of view would scroll the *panel* and carry the footer up the dialog. The `TallBodyWithCheckboxes` story holds this.
