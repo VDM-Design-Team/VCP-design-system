@@ -13,6 +13,7 @@ import {
   type SearchSelectRows,
 } from '../../components/search-select';
 import { Popover } from '../../components/popover';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
@@ -145,11 +146,6 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
-/* ISO yyyy-mm-dd → dd/mm/yyyy, as a string split: no Date, no time zone. */
-const display = (iso: string) => {
-  const [y, m, d] = iso.split('-');
-  return `${pad(Number(d))}/${pad(Number(m))}/${y}`;
-};
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /* ISO yyyy-mm-dd → "Mar 02, 2026", by string split, like the period field: no Date, no time zone. */
@@ -200,6 +196,8 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const [openState, setOpenState] = React.useState(true);
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
+  /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
+  const { format: display } = useDateFormat();
 
   const hasFields = !!(period || cycle || status || priority || tags || users?.length || children);
   /* With no fields showing (folded away, or none passed) the search takes the room they leave. */
