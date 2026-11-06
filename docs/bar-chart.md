@@ -45,7 +45,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 Pass `data` and `series`; the axis (from 0 to the next readable number above the largest value), the bars, the tooltip and the legend all follow. It measures its own width and draws in real pixels, so type never scales:
 
-- **Bars sit 2 apart** within a group, and **narrow**, to a minimum of 4, and **give up their number** when it will not fit (under 20 wide, or under 20 tall).
+- **Bars sit 2 apart** within a group, and **narrow**, to a minimum of 4, and **give up their number** when it will not fit (under 24 wide, or under 22 tall).
 - **Category labels thin out** — every other, every third … — when they would run into each other, so none overlap.
 - Nothing overflows its box.
 
@@ -82,15 +82,15 @@ const { data: cycles, isLoading } = useCycles({ timeframe });   // the page's fe
 
 | Part | Style | Colour |
 |---|---|---|
-| Axis numbers and category labels | `caption-sm-regular` (10) | `text.secondary` |
+| Axis numbers and category labels | `caption-md-regular` (12) | `text.secondary` |
 | Axis title | `caption-md-semibold` | `text.secondary` |
-| Number on a bar | `caption-sm-semibold` | the series' content colour (white in light, near-black in dark) |
-| Number over a bar | `caption-sm-regular` | `text.primary` |
+| Number on a bar | `caption-md-semibold` (12) | the series' content colour (white in light, near-black in dark) |
+| Number over a bar | `caption-md-regular` (12) | `text.primary` |
 | Gridlines | 1 | `stroke.subtle` |
 | Bar | top corners `radius.xs`-ish (4) | the series' fill |
 | Tooltip | `caption-md` | `surface.elevated`, `stroke.subtle`, `shadow-md` |
 
-**Differences from Figma, on purpose.** The bar fills are the series tokens (Figma's are `#63c270` and `#ff5656`, not variables, with white numbers under 4.5:1); the number on a bar is `caption-sm-semibold` (the ramp has no bold at 10); the axis' top is a readable number above the data, so 157 gives 175 as Figma draws it.
+**Differences from Figma, on purpose.** The bar fills are the series tokens (Figma's are `#63c270` and `#ff5656`, not variables, with white numbers under 4.5:1); all the text in the plot is 12 (`caption-md`), where Figma sets the axis and the numbers at 10, which is too small to read comfortably, so a chart's type is one size; the number on a bar is `caption-md-semibold`; the axis' top is a readable number above the data, so 157 gives 175 as Figma draws it.
 
 ## Accessibility
 

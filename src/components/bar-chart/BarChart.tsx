@@ -65,7 +65,7 @@ export interface BarChartProps extends Omit<React.HTMLAttributes<HTMLDivElement>
 }
 
 const MARGIN = { top: 16, right: 8, bottom: 28 } as const;
-const AXIS_LABEL_WIDTH = 28;
+const AXIS_LABEL_WIDTH = 32;
 const Y_TITLE_WIDTH = 24;
 const MIN_BAR = 4;
 const GAP = 2;
@@ -119,9 +119,9 @@ export const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
     const barW = Math.max(MIN_BAR, Math.min(maxBarWidth, Math.floor((groupW * 0.8 - (k - 1) * GAP) / k)));
     const innerW = k * barW + (k - 1) * GAP;
 
-    /* Thin the category labels out when they would run into each other (the axis type is about 5.5 across a character). */
+    /* Thin the category labels out when they would run into each other (12px type is about 6.6 across a character). */
     const longest = Math.max(0, ...data.map((d) => d.label.length));
-    const labelStep = groupW > 0 ? Math.max(1, Math.ceil((longest * 5.5 + 8) / groupW)) : 1;
+    const labelStep = groupW > 0 ? Math.max(1, Math.ceil((longest * 6.6 + 8) / groupW)) : 1;
 
     const legendEl = legend !== 'none' && series.length > 0 && (
       <ul aria-label="Legend" className="m-0 flex list-none flex-wrap items-center justify-center gap-x-4 gap-y-1 p-0">
@@ -164,7 +164,7 @@ export const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
                         strokeWidth={1}
                         strokeDasharray={grid === 'dashed' ? '4 4' : undefined}
                       />
-                      <text x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" className="fill-text-secondary text-caption-sm-regular">
+                      <text x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" className="fill-text-secondary text-caption-md-regular">
                         {t}
                       </text>
                     </g>
@@ -195,13 +195,13 @@ export const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
                           return (
                             <g key={s}>
                               <path d={roundedTop(bx, by, barW, bh, 4)} className={style.svgFill} />
-                              {valueLabels === 'inside' && bh >= 20 && barW >= 20 && (
-                                <text x={bx + barW / 2} y={by + 12} textAnchor="middle" dominantBaseline="central" className={cn(style.svgContent, 'text-caption-sm-semibold')}>
+                              {valueLabels === 'inside' && bh >= 22 && barW >= 24 && (
+                                <text x={bx + barW / 2} y={by + 14} textAnchor="middle" dominantBaseline="central" className={cn(style.svgContent, 'text-caption-md-semibold')}>
                                   {v}
                                 </text>
                               )}
-                              {valueLabels === 'above' && barW + GAP >= 18 && (
-                                <text x={bx + barW / 2} y={by - 6} textAnchor="middle" className="fill-text-primary text-caption-sm-regular">
+                              {valueLabels === 'above' && barW + GAP >= 22 && (
+                                <text x={bx + barW / 2} y={by - 6} textAnchor="middle" className="fill-text-primary text-caption-md-regular">
                                   {v}
                                 </text>
                               )}
@@ -209,7 +209,7 @@ export const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
                           );
                         })}
                         {i % labelStep === 0 && (
-                          <text x={gx + groupW / 2} y={base + 18} textAnchor="middle" className="fill-text-secondary text-caption-sm-regular">
+                          <text x={gx + groupW / 2} y={base + 18} textAnchor="middle" className="fill-text-secondary text-caption-md-regular">
                             {d.label}
                           </text>
                         )}
