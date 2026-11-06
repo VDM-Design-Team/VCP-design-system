@@ -56,7 +56,7 @@ export interface StatusHistoryProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'title'> {
   /** The bar's title. Defaults to "Status History". */
   title?: React.ReactNode;
-  /** How many entries are in the log; shown as "(3)" after the title. Defaults to `entries.length`. */
+  /** How many entries are in the log, shown as "(3)" after the title, for a log whose entries are in `children` (or not all passed). **Ignored when `entries` is given: the count is then the entries', so it can never disagree with them.** */
   count?: number;
   /** Controlled open state. Pair with `onOpenChange`. */
   open?: boolean;
@@ -92,7 +92,7 @@ export const StatusHistory = React.forwardRef<HTMLDivElement, StatusHistoryProps
     const controlled = open !== undefined;
     const isOpen = controlled ? open : inner;
     const Heading = `h${headingLevel}` as const;
-    const shown = count ?? entries?.length;
+    const shown = entries ? entries.length : count;
     const headerId = `${idBase}-h`;
     const panelId = `${idBase}-p`;
 

@@ -47,7 +47,7 @@ import { useDateFormat } from '../../lib/format-date';
  * - **tags** — `SearchSelect` with search, whose picks are removable tags in the field;
  *   give options a `group` for the Global / Domain-Specific headings.
  * - **users** — one `SearchSelect` per entry (Assignee, Initiator…): a searchable
- *   list of people with avatars. Each is named by its `label`.
+ *   list of people with avatars. Each is named by its `label`, and once filled it reads "Assignee: Amy Lee" (or "Assignee: 2 selected"), so the field still says which person it filters.
  * - **children** — more fields in the same row (an assignee picker, say),
  *   shown and hidden with the others.
  *
@@ -361,6 +361,8 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               key={label}
               {...({
                 'aria-label': label,
+                /* Filled, the field still says which person it is ("Assignee: Amy Lee"). */
+                valuePrefix: label,
                 placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
                 searchPlaceholder: 'Search by name',
                 rows: 'avatar',
