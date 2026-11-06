@@ -12,3 +12,5 @@ New, built to Figma's `Cycle_Performance` and `Sprint_Metrics`, and drawn in SVG
 Differences from Figma, on purpose: fills are the series tokens (Figma's are not variables, with white numbers under 4.5:1) and Sprint Metrics' orange Overdue is the system's red.
 
 Bars sit 2 apart within a group so each reads as its own. The legend is always under the chart (Sprint Metrics' Figma draws it above; the system keeps every legend at the bottom), so `BarChart`'s `legend` is `bottom` or `none`.
+
+The text in the plot (axis numbers, category labels, the numbers on and over bars) is 12, not Figma's 10: one readable size across a chart, with the hover card and legend. A bar now needs about 24 to hold its number.
