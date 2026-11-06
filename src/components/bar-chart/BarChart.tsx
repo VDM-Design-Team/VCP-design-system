@@ -68,7 +68,7 @@ const MARGIN = { top: 16, right: 8, bottom: 28 } as const;
 const AXIS_LABEL_WIDTH = 28;
 const Y_TITLE_WIDTH = 24;
 const MIN_BAR = 4;
-const GAP = 4;
+const GAP = 2;
 
 const roundedTop = (x: number, y: number, w: number, h: number, r: number) => {
   const rr = Math.max(0, Math.min(r, w / 2, h));

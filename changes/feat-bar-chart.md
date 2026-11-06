@@ -11,4 +11,4 @@ New, built to Figma's `Cycle_Performance` and `Sprint_Metrics`, and drawn in SVG
 
 Differences from Figma, on purpose: fills are the series tokens (Figma's are not variables, with white numbers under 4.5:1) and Sprint Metrics' orange Overdue is the system's red.
 
-Bars sit 4 apart within a group so each reads as its own. The legend is always under the chart (Sprint Metrics' Figma draws it above; the system keeps every legend at the bottom), so `BarChart`'s `legend` is `bottom` or `none`.
+Bars sit 2 apart within a group so each reads as its own. The legend is always under the chart (Sprint Metrics' Figma draws it above; the system keeps every legend at the bottom), so `BarChart`'s `legend` is `bottom` or `none`.

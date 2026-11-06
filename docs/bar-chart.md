@@ -45,7 +45,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 Pass `data` and `series`; the axis (from 0 to the next readable number above the largest value), the bars, the tooltip and the legend all follow. It measures its own width and draws in real pixels, so type never scales:
 
-- **Bars sit 4 apart** within a group, and **narrow**, to a minimum of 4, and **give up their number** when it will not fit (under 20 wide, or under 20 tall).
+- **Bars sit 2 apart** within a group, and **narrow**, to a minimum of 4, and **give up their number** when it will not fit (under 20 wide, or under 20 tall).
 - **Category labels thin out** — every other, every third … — when they would run into each other, so none overlap.
 - Nothing overflows its box.
 
