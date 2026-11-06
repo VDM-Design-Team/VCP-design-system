@@ -18,3 +18,5 @@ One height across the header row, 36 as Figma draws it: the filters' selects are
 The filter bar's selects hug their longest option (capped at 20rem) instead of a fixed width, so the title, the switch and the whole bar fit on one line at 1440 wide, with no empty space inside the selects.
 
 With `beside` set, `PageTitle` has no column gap between the title group and the actions (16 before), so the filters get that room: at 1440 wide the header now has about 27 to spare.
+
+The cycle filter is searchable, as Figma's annotations ask: a filter can be `searchable` and then draws a `SearchSelect` (a search box in its list). `SearchSelect` gains `size="compact"` (36, as `Select`'s) and its search now matches **every word typed, in any order** ("Aug 2026" finds "C37 (Jul 20, 2026 - Aug 03, 2026)"); a one-word search is unchanged. The annotations' other rules (Reset returns to the current cycle, the current year and All Teams; the year narrows the cycles; Export offers PDF and CSV) are in `docs/dashboard-filters.md`.

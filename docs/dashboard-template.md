@@ -63,12 +63,12 @@ The shell is `AppShell`'s (the rail and bar stay put, the page scrolls). The tit
 
 ## Gaps (what the Figma pages do not settle)
 
-1. **Design admin's dashboard:** not drawn, so not composed. The rail has an `admin` type for it.
+1. **Design admin's dashboard:** the Figma page exists ("Design Admin Only → Dashboard") but holds only an empty section, so it is not composed. The rail has an `admin` type for it.
 2. **Development user and design user dashboards:** composed from the product's description, with no Figma frame; the user's filters (which, if any) are assumed.
 3. **Other domains** (Quality, and so on): no dashboards seen; each would be one more composition.
 4. **A narrow window:** Figma draws a 658 wide dashboard without the rail. `AppShell` has no behaviour for hiding the rail at that width; the sections reflow, the shell does not.
 5. **Value cards are not interactive** in Figma (no click-through to a filtered list), so `ValueCards` does not link.
-6. **The global filters:** the cycle's text, the year's and the team's options, the export's formats (one button or a menu), and whether Reset also resets the cycle, are the product's.
+6. **The global filters:** settled by Figma's annotations (see `docs/dashboard-filters.md`): the cycle is searchable, the year narrows the cycles, Reset returns to the current cycle, the current year and All Teams, Export offers PDF and CSV. Still the product's: which teams exist, and what each export contains.
 7. **Empty, loading and error states** exist per section (each pattern has `loading` and `empty`); the page-level states (a failed fetch, a cycle with no data at all) are not drawn.
 8. **What each burndown line measures**, and what "My Capacity" counts, are the product's to define.
 

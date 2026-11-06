@@ -102,7 +102,15 @@ const METRICS: SuperAdminMetricsData = {
 };
 
 const globalFilters = (withTeam: boolean): DashboardFilter[] => [
-  { key: 'cycle', label: 'Cycle', value: 'C37', options: [{ value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' }, { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' }], onChange: () => {} },
+  { key: 'cycle', label: 'Cycle', value: 'C37', searchable: true, options: [
+    { value: 'C33', label: 'C33 (May 25, 2026 - Jun 08, 2026)' },
+    { value: 'C34', label: 'C34 (Jun 08, 2026 - Jun 22, 2026)' },
+    { value: 'C35', label: 'C35 (Jun 22, 2026 - Jul 06, 2026)' },
+    { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' },
+    { value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' },
+    { value: 'C38', label: 'C38 (Aug 03, 2026 - Aug 17, 2026)' },
+    { value: 'C39', label: 'C39 (Aug 17, 2026 - Aug 31, 2026)' },
+  ], onChange: () => {} },
   { key: 'year', label: 'Year', value: '2026', options: ['2026', '2025'], onChange: () => {} },
   ...(withTeam ? [{ key: 'team', label: 'Team', value: 'All Teams', options: ['All Teams', 'Platform', 'Growth'], onChange: () => {} }] : []),
 ];

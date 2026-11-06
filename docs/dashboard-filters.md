@@ -10,6 +10,7 @@ The global filter bar at the top of a dashboard: a **Reset Filters** link, the f
 | `Icon` | sub-atomic |
 | `Select` | atom |
 | `Menu` | component |
+| `SearchSelect` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -25,13 +26,24 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `filters` | `{ key, label, value, options, onChange, className? }[]` | required | Each a quiet `Select` that hugs its longest option (`className` pins a width). `label` names it for assistive tech ("Cycle", "Year", "Team") |
+| `filters` | `{ key, label, value, options, onChange, searchable?, searchPlaceholder?, className? }[]` | required | Each a quiet `Select` that hugs its longest option (`className` pins a width). With `searchable` it is a `SearchSelect` instead (a search box in its list, 19.5rem wide): the cycle's list is long. `label` names it for assistive tech ("Cycle", "Year", "Team") |
 | `onReset` | `() => void` | — | Shows the reset button (tertiary) |
 | `resetLabel` | `string` | `Reset Filters` | |
 | `exportLabel` | `string` | — | Shows the export button (secondary, with a caret): "Export Cycle Report" |
 | `exportOptions` | `{ key, label }[]` | — | The button opens a menu of these |
 | `onExport` | `(key?) => void` | — | The export was chosen: with the option's `key` when there are options, with nothing for a single button |
 | `className`, `ref` | | | On the group |
+
+## What the Figma annotations say
+
+Read off the annotated frame (`Main Views: Cycle & Quarter`), so the page knows what to wire:
+
+- **The cycle is searchable.** "Searching by text like C39 or Aug 2026 should be possible": `searchable` on that filter, and the search matches every word you type in any order ("Aug 2026" finds the August 2026 cycles).
+- **The year narrows the cycles.** The cycle's list shows the chosen year's cycles; a cycle that spans two years appears in both years' lists. This is the page's to do: pass the narrowed `options`.
+- **Defaults:** the current cycle, the current year, All Teams. **Reset Filters** returns to those three: `onReset` sets the cycle to the current cycle, the year to the current year and the team to All Teams.
+- **The filters affect every visible card on the page**, so the page passes what they choose to all of them.
+- **Export** opens a list of file types (PDF, CSV); choosing one proceeds with the export in that type: `exportOptions` and `onExport(key)`.
+- The filters are on the **Cycle view only**; the Quarter view has none (see `DashboardTemplate`).
 
 ## It does no filtering
 

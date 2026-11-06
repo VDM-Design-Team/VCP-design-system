@@ -4,13 +4,14 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Select } from '../../atoms/select';
 import { Menu } from '../../components/menu';
+import { SearchSelect } from '../../components/search-select';
 
 /**
  * DashboardFilters — the global filter bar at the top of a dashboard: a **Reset Filters** link, the filters (the cycle, the year, the
  * team) and an **Export** button, in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export`
  * (`7577:107312`).
  *
- * - **It is data, not a layout.** Pass `filters` (each a `{ key, label, value, options, onChange }`, drawn as a quiet `Select`)
+ * - **It is data, not a layout.** Pass `filters` (each a `{ key, label, value, options, onChange }`, drawn as a quiet `Select`, or as a searchable `SearchSelect` when `searchable`: the cycle's list is long)
  *   and the bar lays them out. A dashboard with two filters passes two; the superadmin's has its own, so it has none of these.
  * - **Reset and Export are optional.** `onReset` shows the Reset Filters button (tertiary); `exportLabel` shows the export button
  *   (secondary, with a caret). Give it `exportOptions` and the button opens a menu of them (the formats, or which report), reported
@@ -31,7 +32,11 @@ export interface DashboardFilter {
   value: string;
   options: ReadonlyArray<string | { value: string; label: string }>;
   onChange: (value: string) => void;
-  /** The select's width, as a Tailwind width class. By default it hugs its longest option (capped at 20rem), so none carries empty space. */
+  /** A search box in the list: "C39" or "Aug 2026" finds a cycle. For a long list (the cycles); a short one (years, teams) stays a plain select. */
+  searchable?: boolean;
+  /** The search box's placeholder and name. */
+  searchPlaceholder?: string;
+  /** The filter's width, as a Tailwind width class. A plain select hugs its longest option (capped at 20rem); a searchable one is 19.5rem (the longest cycle label and its caret). */
   className?: string;
 }
 
@@ -68,9 +73,23 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
             {resetLabel}
           </Button>
         )}
-        {filters.map((f) => (
-          <Select key={f.key} size="compact" emphasis="regular" aria-label={f.label} className={f.className ?? 'max-w-80'} value={f.value} options={f.options} onChange={f.onChange} />
-        ))}
+        {filters.map((f) =>
+          f.searchable ? (
+            <SearchSelect
+              key={f.key}
+              size="compact"
+              emphasis="regular"
+              aria-label={f.label}
+              searchPlaceholder={f.searchPlaceholder ?? 'Search...'}
+              className={f.className ?? 'w-78'}
+              value={f.value}
+              options={f.options}
+              onChange={f.onChange}
+            />
+          ) : (
+            <Select key={f.key} size="compact" emphasis="regular" aria-label={f.label} className={f.className ?? 'max-w-80'} value={f.value} options={f.options} onChange={f.onChange} />
+          ),
+        )}
         {exportButton && exportOptions ? (
           <Menu trigger={exportButton} items={exportOptions.map((o) => ({ key: o.key, label: o.label }))} onSelect={(key) => onExport?.(key)} />
         ) : (
