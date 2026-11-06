@@ -209,6 +209,39 @@ export const Hoverable: Story = {
 };
 
 /**
+ * `followPointer`: for a trigger far wider than the bubble (a chart bar). The bubble opens
+ * under the pointer, not at the middle of the trigger, and is pulled back so it stays
+ * inside the viewport. It holds still once open, so the pointer can still reach it.
+ */
+export const FollowPointer: Story = {
+  render: (args) => (
+    <div className="p-16">
+      <Tooltip {...args} followPointer placement="bottom" openDelay={0} content="Opens where the pointer entered">
+        <Button variant="secondary" fullWidth>
+          A trigger much wider than its tooltip: hover anywhere along it
+        </Button>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button');
+    const box = trigger.getBoundingClientRect();
+    const x = Math.round(box.left + box.width * 0.75);
+    await userEvent.pointer({ target: trigger, coords: { clientX: x, clientY: box.top + box.height / 2 } });
+    const tip = await waitFor(() => {
+      const t = document.getElementById(trigger.getAttribute('aria-describedby')!.split(' ').pop()!) as HTMLElement;
+      expect(t.parentElement).toHaveClass('opacity-100');
+      return t;
+    });
+    const r = tip.getBoundingClientRect();
+    /* Centred on the pointer (give or take a pixel), not on the middle of the trigger. */
+    await expect(Math.abs((r.left + r.right) / 2 - x)).toBeLessThan(2);
+    await expect(r.left).toBeGreaterThanOrEqual(0);
+    await expect(r.right).toBeLessThanOrEqual(window.innerWidth);
+  },
+};
+
+/**
  * The hover delay, side by side. `openDelay={0}` fires on contact and turns a
  * sweep across a toolbar into a strobe; the 300ms default waits for a pause that
  * reads as intent. Neither applies to focus.
@@ -402,5 +435,47 @@ export const InsideAScrollingList: Story = {
     await expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
     /* ...and the bubble is not clipped: it extends past the list's right edge. */
     await expect(bubble.getBoundingClientRect().right).toBeGreaterThan(list.getBoundingClientRect().right);
+  },
+};
+
+/**
+ * **Flow:** a toolbar along the top of the screen, its last button flush right. With no room above, the
+ * bubble opens below the button; at the right edge it slides left, so none of it is cut off. (Both were
+ * drawn off the screen until November 2026.)
+ */
+export const StaysOnScreen: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: (args) => (
+    <div className="fixed inset-x-0 top-0 flex justify-between p-1">
+      <Tooltip {...args} content="Make the selected text bold">
+        <IconButton icon="text-b" label="Bold" variant="tertiary" size="sm" />
+      </Tooltip>
+      <Tooltip {...args} content="Download this Added Value as a PDF">
+        <IconButton icon="download-simple" label="Download" variant="tertiary" size="sm" />
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bold = canvas.getByRole('button', { name: 'Bold' });
+    const download = canvas.getByRole('button', { name: 'Download' });
+
+    /* No room above: it takes the bottom, under the button. */
+    await userEvent.tab();
+    await expect(bold).toHaveFocus();
+    await described(bold);
+    await waitFor(() => expect(isOpen(bold)).toBe(true));
+    await expect(bubbleOf(bold).parentElement).toHaveAttribute('data-side', 'bottom');
+    await expect(bubbleOf(bold).getBoundingClientRect().top).toBeGreaterThanOrEqual(bold.getBoundingClientRect().bottom);
+
+    /* At the right edge it slides left: all of it is on the screen. */
+    await userEvent.tab();
+    await expect(download).toHaveFocus();
+    await waitFor(() => expect(isOpen(download)).toBe(true));
+    const box = bubbleOf(download).getBoundingClientRect();
+    await expect(box.top).toBeGreaterThanOrEqual(0);
+    await expect(box.left).toBeGreaterThanOrEqual(0);
+    await expect(box.right).toBeLessThanOrEqual(window.innerWidth);
   },
 };

@@ -35,9 +35,9 @@ this list drifts, and fails a pattern composing fewer than two pieces.
 |---|---|---|---|
 | `userType` | `SidebarUserType` | `'user'` | Which rail the design draws. Ignored when `items` is given |
 | `items` | `SidebarNavItem[]` | — | Override the nav set, for a rail the design hasn't drawn |
-| `active` | `string` | — | The `key` of the current row |
+| `active` | `string` | — | The `key` of the current row — top-level (`'drafts'`) or a sub-row (`'planning/gantt-chart'`). A sub-row's group starts open in the expanded rail |
 | `defaultOpen` | `string[]` | — | Keys of rows with sub-items that start open — `'archive'`, `'planning'` |
-| `onNavigate` | `(key: string) => void` | — | A row press, for rows without an `href` |
+| `onNavigate` | `(key: string) => void` | — | A row press, for rows without an `href`: a top-level row's key, or a sub-row's (`'archive/completed'`) |
 | `collapsed` | `boolean` | `false` | The 76-wide rail |
 | `onToggleCollapse` | `() => void` | — | Omit to hide the floating toggle entirely |
 | `showDomainSelector` | `boolean` | `false` | **Off by default** — see below |
@@ -71,6 +71,22 @@ starts being used routinely, the vocabulary has moved and this should follow.
 
 ▾ = has sub-items. `Archive` opens Completed / Rejected / Backlogs;
 `Planning` opens Planning List / Gantt Chart / Holiday Registry.
+
+## Sub-rows are destinations
+
+Every built-in sub-row has a key, the parent's key and its own joined by a
+slash, so it routes like a top-level row:
+
+| Group | Sub-row keys |
+|---|---|
+| `archive` | `archive/completed`, `archive/rejected`, `archive/backlogs` |
+| `planning` | `planning/planning-list`, `planning/gantt-chart`, `planning/holiday-registry` |
+
+Pressing one calls `onNavigate` with its key; passing it as `active` marks it
+the current page (`aria-current="page"`) and opens its group in the expanded
+rail. Collapsed, the group is a flyout, so it stays shut until it is pressed.
+In an `items` override a sub-row (`SidebarNavSubItem`) may carry a `key` the
+same way; one with its own `href`, `onNavigate` or `selected` keeps them.
 
 **`admin-dev` is not in the Claude Design export.** The export had three
 roles; the design has four, and `Admin Dev` is the only rail with `Planning`.

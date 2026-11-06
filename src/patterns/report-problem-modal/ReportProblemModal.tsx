@@ -68,10 +68,10 @@ export function ReportProblemModal({
       size="md"
       footer={
         <>
-          <Button variant="tertiary" size="sm" type="button" onClick={onClose}>
+          <Button variant="tertiary" type="button" onClick={onClose}>
             Cancel
           </Button>
-          <Button size="sm" type="submit" form={formId} loading={loading}>
+          <Button type="submit" form={formId} loading={loading}>
             Submit
           </Button>
         </>
