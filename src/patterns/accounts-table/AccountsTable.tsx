@@ -75,7 +75,7 @@ export function AccountsTable({
   rows,
   search,
   onSearchChange,
-  searchPlaceholder = 'Search by name, email, or role...',
+  searchPlaceholder = 'Search by name, email, or domain...',
   sort,
   onSortChange,
   onEdit,
@@ -105,7 +105,8 @@ export function AccountsTable({
       label: 'Domains',
       width: '30%',
       render: (row) => (
-        <div className="flex flex-wrap gap-2">
+        /* 16 above and below, as the Planning title cell has it: one line of tags is the row's 56, and when they wrap (the column narrows) the lines keep their room. */
+        <div className="flex flex-wrap gap-2 py-4">
           {row.domains.map((domain) => (
             <Tag key={domain} size="sm">
               {domain}
@@ -196,7 +197,7 @@ export function AccountsTable({
             <EmptyState
               icon={<Icon name="magnifying-glass" size="lg" />}
               title={`No accounts match “${search.trim()}”.`}
-              description="Try a different name, email or role."
+              description="Try a different name, email or domain."
             />
           ) : (
             <EmptyState icon={<Icon name="users" size="lg" />} title="No accounts yet." />

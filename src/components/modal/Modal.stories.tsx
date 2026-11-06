@@ -5,6 +5,7 @@ import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Modal } from './Modal';
 import { Button } from '../../atoms/button';
 import { Field } from '../field';
+import { Checkbox } from '../../atoms/checkbox';
 import { Input } from '../../atoms/input';
 import { Popover } from '../popover';
 
@@ -302,6 +303,31 @@ export const DestructiveConfirmation: Story = {
 };
 
 /**
+ * `tone="critical"` + `actions`: the standard row without hand-building it. Cancel is the grey
+ * `neutral` button, the answer is red, and the dialog is an alertdialog with no ✕ and no
+ * backdrop dismissal by default.
+ */
+export const CriticalTone: Story = {
+  args: {
+    size: 'sm',
+    tone: 'critical',
+    title: 'Delete CLM-4471?',
+    description: 'The claim, its 12 attachments and its audit trail are removed permanently.',
+    actions: { confirm: { label: 'Delete claim' } },
+  },
+};
+
+/** The default tone's `actions`: `secondary` Cancel and a `primary` answer. */
+export const StandardActions: Story = {
+  args: {
+    size: 'sm',
+    title: 'Publish the changelog?',
+    children: 'Everyone in the workspace is notified.',
+    actions: { confirm: { label: 'Publish' } },
+  },
+};
+
+/**
  * Long content scrolls inside the body, not the page — the header and footer
  * stay put and the panel never grows past the viewport. This is also the `lg`
  * width. The body becomes a tab stop only because it overflows, so it can be
@@ -337,6 +363,31 @@ export const LongContent: Story = {
       </div>
     </Modal>
   ),
+};
+
+/**
+ * A tall body with checkboxes down it. Tabbing to one that has scrolled into view must scroll the **body**, never the dialog's own panel: a checkbox's real input is hidden with `sr-only`
+ * (absolutely positioned), and unless the body is the containing block it stays put while the body scrolls, so focusing it drags the panel — the footer ends up at the top of the dialog.
+ */
+export const TallBodyWithCheckboxes: Story = {
+  args: { title: 'Access', size: 'md' },
+  render: (args) => (
+    <Modal {...args} footer={<Button onClick={args.onClose}>Submit</Button>}>
+      <div className="flex flex-col gap-6 pb-4">
+        {Array.from({ length: 24 }, (_, i) => (
+          <Checkbox key={i} label={`Domain ${i + 1}`} />
+        ))}
+      </div>
+    </Modal>
+  ),
+  play: async () => {
+    const dialog = await screen.findByRole('dialog', { name: 'Access' });
+    const last = within(dialog).getByRole('checkbox', { name: 'Domain 24' });
+    last.focus();
+    /* The body scrolled to it; the panel itself did not. */
+    await expect(dialog.scrollTop).toBe(0);
+    await expect(within(dialog).getByRole('button', { name: 'Submit' }).getBoundingClientRect().bottom).toBeLessThanOrEqual(dialog.getBoundingClientRect().bottom);
+  },
 };
 
 /**

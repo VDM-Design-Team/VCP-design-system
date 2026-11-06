@@ -136,16 +136,36 @@ export const Loading: Story = {
 
 /* ---- The page: what the table asks for, and what the page does about it. ---- */
 
-function ContactsPage() {
-  const [all, setAll] = React.useState<readonly ContactRow[]>(ALL);
+function ContactsPage({ initial = ALL }: { initial?: readonly ContactRow[] }) {
+  const [all, setAll] = React.useState<readonly ContactRow[]>(initial);
   const [page, setPage] = React.useState(1);
   const [deleting, setDeleting] = React.useState<ContactRow | null>(null);
   const { toast } = useToast();
+  const root = React.useRef<HTMLDivElement>(null);
+  /* Whose Delete button takes focus once the row is gone (`null`: the empty message). The table only reports the delete, so the page owns this. */
+  const focusAfter = React.useRef<{ email: string | null } | null>(null);
+  React.useEffect(() => {
+    const pending = focusAfter.current;
+    if (!pending || (deleting && all.some((a) => a.id === deleting.id))) return;
+    focusAfter.current = null;
+    /* After the dialog has handed focus back to a button that no longer exists. */
+    const timer = setTimeout(() => {
+      const label = `Delete message from ${pending.email}`;
+      const next = pending.email ? root.current?.querySelector<HTMLElement>(`button[aria-label="${label}"], button[title="${label}"]`) : null;
+      /* Nothing left: the empty message says why the page is empty, so focus goes there. */
+      /* Or, when the page emptied but others remain (the last row of the last page), the first Delete on the page that took its place. */
+      const first = root.current?.querySelector<HTMLElement>('button[aria-label^="Delete message from"], button[title^="Delete message from"]');
+      const empty = root.current?.querySelector<HTMLElement>('h3');
+      if (!next && !first && empty) empty.tabIndex = -1;
+      (next ?? first ?? empty)?.focus();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [all, deleting]);
   const pageCount = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
   const current = Math.min(page, pageCount);
 
   return (
-    <>
+    <div ref={root}>
       <ContactsTable
         rows={all.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)}
         page={current}
@@ -162,12 +182,17 @@ function ContactsPage() {
         itemName={deleting?.email ?? ''}
         onConfirm={() => {
           if (!deleting) return;
+          /* Focus goes to the next row's Delete, or the previous one's when it was the last, or the empty message when nothing is left. */
+          const visible = all.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+          const at = visible.findIndex((row) => row.id === deleting.id);
+          const neighbour = visible[at + 1] ?? visible[at - 1];
+          focusAfter.current = { email: neighbour?.email ?? null };
           setAll((a) => a.filter((x) => x.id !== deleting.id));
           toast({ tone: 'success', title: 'Message deleted', description: `The message from ${deleting.email} was deleted.` });
           setDeleting(null);
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -196,6 +221,25 @@ export const OnThePage: Story = {
     await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(c.queryByText('michael@vdm.technology')).toBeNull());
     await expect(await screen.findByText('Message deleted')).toBeVisible();
+    /* Focus did not fall to the page: it is on the next message's Delete button (the one after Michael's). */
+    const buttons = () => c.getAllByRole('button', { name: /^Delete message from/ });
+    await waitFor(() => expect(buttons()[1]).toHaveFocus());
+  },
+};
+
+/** The last message: nothing follows or precedes it, so once it is deleted focus goes to the empty message ("No messages yet.") rather than falling to the page. */
+export const DeletingTheLastMessage: Story = {
+  render: () => (
+    <ToastProvider position="top-right">
+      <ContactsPage initial={ALL.slice(0, 1)} />
+      <ToastViewport />
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.click(c.getByRole('button', { name: /^Delete message from/ }));
+    await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(c.getByRole('heading', { name: 'No messages yet.' })).toHaveFocus());
   },
 };
 

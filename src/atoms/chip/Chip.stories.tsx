@@ -225,6 +225,8 @@ export const ActionsOnHover: Story = {
     await userEvent.tab();
     await expect(edit).toHaveFocus();
     await waitFor(() => expect(getComputedStyle(actions).opacity).toBe('1'));
+    /* The ring is drawn inside the button: the box the buttons sit in clips its overflow, so a ring outside them was cut off on every side but the corners. */
+    await expect(getComputedStyle(edit).outlineOffset).toBe('-2px');
 
     await userEvent.keyboard('{Enter}');
     await expect(args.onEdit).toHaveBeenCalledTimes(1);

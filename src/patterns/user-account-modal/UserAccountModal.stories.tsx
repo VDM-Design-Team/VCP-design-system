@@ -110,7 +110,7 @@ export const Validation: Story = {
   },
 };
 
-/** Valid, it hands the whole draft over: the fields, trimmed, and every domain's access. */
+/** Valid, it hands the whole draft over: the fields, trimmed, and every domain's access (making someone an admin gives them Access too). */
 export const Submits: Story = {
   args: { mode: 'new' },
   play: async ({ args }) => {
@@ -127,7 +127,7 @@ export const Submits: Story = {
     const draft = (args.onSubmit as ReturnType<typeof fn>).mock.calls[0][0];
     await expect(draft).toMatchObject({ name: 'Ada Lovelace', email: 'ada@vdm.technology', status: 'Pending', proficiency: 'Senior' });
     await expect(draft.access.find((r: DomainAccessRow) => r.id === 'design')).toMatchObject({ access: true, admin: false });
-    await expect(draft.access.find((r: DomainAccessRow) => r.id === 'test')).toMatchObject({ access: false, admin: true });
+    await expect(draft.access.find((r: DomainAccessRow) => r.id === 'test')).toMatchObject({ access: true, admin: true });
   },
 };
 
