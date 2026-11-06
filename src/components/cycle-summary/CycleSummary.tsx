@@ -72,7 +72,7 @@ function Figure({
   value: number;
 }) {
   return (
-    <div className="flex flex-col justify-center px-6 py-4">
+    <div className="flex flex-col justify-center gap-1 px-6 py-4">
       <span className="flex items-center gap-1 text-label-sm-medium text-text-secondary">
         {label}
         <span aria-hidden="true" className={cn('size-3 shrink-0 rounded-pill', dotClassName)} />
@@ -116,16 +116,16 @@ export const CycleSummary = React.forwardRef<HTMLElement, CycleSummaryProps>(
           {title}
         </h2>
         <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @4xl:grid-cols-4">
-          <div className="h-25 min-w-50">
-            <Figure label="Points Committed" dotClassName="bg-action-primary-surface-default" value={committed} />
+          <div className="min-w-50 @md:h-25">
+            <Figure label="Points Committed" dotClassName="bg-surface-brand-strong" value={committed} />
           </div>
-          <div className={cn('h-25 min-w-50 @md:border-l', divide)}>
-            <Figure label="Points Completed" dotClassName="bg-accent-success-outline-border-default" value={completed} />
+          <div className={cn('min-w-50 @md:h-25 @md:border-l', divide)}>
+            <Figure label="Points Completed" dotClassName="bg-accent-success-filled-surface-default" value={completed} />
           </div>
-          <div className={cn('h-25 min-w-50 @4xl:border-l', divide)}>
-            <Figure label="Carried Over" dotClassName="bg-accent-warning-outline-content-default" value={carriedOver} />
+          <div className={cn('min-w-50 @md:h-25 @4xl:border-l', divide)}>
+            <Figure label="Carried Over" dotClassName="bg-accent-warning-filled-surface-default" value={carriedOver} />
           </div>
-          <div className={cn('flex h-25 min-w-50 items-center justify-center px-6 @md:border-l', divide)}>
+          <div className={cn('flex min-w-50 items-center px-6 @md:h-25 @md:border-l', divide)}>
             <DonutChart
               half
               segmented

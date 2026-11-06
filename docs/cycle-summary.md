@@ -57,9 +57,9 @@ A container query, so the card reflows by **its own** width, not the screen's â€
 
 ## Tokens
 
-Figures: a 12 dot (`action.primary.surface` blue, `accent.success.outline.border` green, `accent.warning.outline.content` brown), the
+Figures: a 12 dot in the chart tones `DonutChart` and `LegendItem` use (`surface.brand.strong` blue, `accent.success.filled.surface` green, `accent.warning.filled.surface` amber), so the key moves with the chart and not with a button, a border or a text colour; the
 title `label-sm-medium` in `text.secondary`, the value `heading-xl-bold`. Figma's value is 28 bold; the ramp has no 28, so this uses
-the 32 (`heading-xl`) the system's other headline figures use. The gauge is `DonutChart` (half, segmented, 200, thickness 8).
+the 32 (`heading-xl`) the system's other headline figures use. The gauge is `DonutChart` (half, segmented, 200, thickness 8), set 24 in from its divider. A figure's title and value are 4 apart. Each cell is 100 high when side by side; stacked it follows its content, so there is no empty space between one value and the next title.
 
 ## Accessibility
 
