@@ -142,6 +142,8 @@ interface SearchSelectBase
   disabled?: boolean;
   /** `sm` 32 tall, `md` 40 (default), as `Select`. */
   size?: 'sm' | 'md';
+  /** The resting edge, as `Input` and `Select`: `strong` (default) or `neutral` (lighter; a deliberate exception for a row of filters). An error, a warning and focus still win. */
+  edge?: 'strong' | 'neutral';
   /**
    * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
    * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
@@ -305,6 +307,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       disabled,
       inline,
       size = 'md',
+      edge = 'strong',
       emphasis = 'medium',
       valuePrefix,
       fullWidth = false,
@@ -810,7 +813,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   ? 'border-accent-critical-outline-border-default'
                   : isWarning
                     ? 'border-accent-warning-outline-border-default'
-                    : 'border-stroke-strong focus-within:border-stroke-focused'),
+                    : cn('focus-within:border-stroke-focused', edge === 'neutral' ? 'border-neutral-outline-border-default' : 'border-stroke-strong')),
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
               disabled && (inline ? 'cursor-not-allowed' : 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'),
             )}

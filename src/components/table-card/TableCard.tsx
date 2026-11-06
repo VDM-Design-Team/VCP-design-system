@@ -23,7 +23,7 @@ export interface TableCardProps extends Omit<React.HTMLAttributes<HTMLDivElement
 }
 
 export const TableCard = React.forwardRef<HTMLDivElement, TableCardProps>(({ className, filters, footer, children, ...props }, ref) => (
-  <div ref={ref} className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
+  <div ref={ref} className={cn('flex flex-col gap-6 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
     {filters}
     {children}
     {footer && <div className="flex justify-end">{footer}</div>}
