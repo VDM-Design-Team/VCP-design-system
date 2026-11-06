@@ -1,6 +1,6 @@
 # TableCard
 
-The card a table sits in: **filters above the table, the table, then its pagination, all in one card.** It is the one place that says where a table's filters go. It draws the surface (`surface.elevated`, `radius.md`, `space.24` all round, `space.16` between its parts) and owns no state.
+The card a table sits in: **filters above the table, the table, then its pagination, all in one card.** It is the one place that says where a table's filters go. It draws the surface (`surface.elevated`, `radius.md`, `space.24` all round, `space.24` between its parts) and owns no state.
 
 ## Composed of
 
