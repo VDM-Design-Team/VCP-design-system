@@ -15,6 +15,7 @@ the Actions header, and the pages beneath. Built to Figma's `Settings_Users`.
 | `Tag` | atom |
 | `DataTable` | component |
 | `EmptyState` | component |
+| `TableCard` | component |
 | `UserLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
