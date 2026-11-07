@@ -114,7 +114,7 @@ export const WithFilters: Story = {
     const canvas = within(canvasElement);
     /* The filters, the table and the pagination are in one card: they share the same parent. */
     const table = canvas.getByRole('table', { name: 'Added Values' });
-    const card = table.closest('.rounded-md') as HTMLElement;
+    const card = table.closest('.bg-surface-elevated') as HTMLElement;
     await expect(card.contains(canvas.getByRole('searchbox'))).toBe(true);
     await expect(card.contains(canvas.getByRole('navigation', { name: /pagination/i }))).toBe(true);
   },

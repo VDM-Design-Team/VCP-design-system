@@ -58,7 +58,7 @@ export const Default: Story = {
   ),
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    const card = c.getByRole('table', { name: 'People' }).closest('.rounded-md') as HTMLElement;
+    const card = c.getByRole('table', { name: 'People' }).closest('.bg-surface-elevated') as HTMLElement;
     await expect(card.contains(c.getByRole('searchbox'))).toBe(true);
     await expect(card.contains(c.getByRole('navigation'))).toBe(true);
   },
