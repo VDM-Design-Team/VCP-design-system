@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
 import { expect, screen, userEvent, waitFor, within } from 'storybook/test';
-import { Modal } from './Modal';
+import { Modal, ModalCancel, ModalConfirm } from './Modal';
 import { Button } from '../../atoms/button';
 import { Field } from '../field';
 import { Checkbox } from '../../atoms/checkbox';
@@ -52,10 +52,8 @@ type Story = StoryObj<typeof meta>;
 /** The two actions the plain dialog ends with. */
 const ConfirmFooter = ({ onClose }: { onClose: () => void }) => (
   <>
-    <Button variant="secondary" onClick={onClose}>
-      Cancel
-    </Button>
-    <Button onClick={onClose}>Publish</Button>
+    <ModalCancel onClick={onClose} />
+    <ModalConfirm onClick={onClose}>Publish</ModalConfirm>
   </>
 );
 
@@ -229,12 +227,10 @@ export const WithForm: Story = {
           initialFocusRef={nameRef}
           footer={
             <>
-              <Button variant="secondary" type="button" onClick={args.onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" form="modal-invite-form">
+              <ModalCancel onClick={args.onClose} />
+              <ModalConfirm type="submit" form="modal-invite-form">
                 Send invite
-              </Button>
+              </ModalConfirm>
             </>
           }
         >
@@ -277,7 +273,8 @@ export const WithForm: Story = {
 export const DestructiveConfirmation: Story = {
   args: {
     size: 'sm',
-    role: 'alertdialog',
+    /* The tone sets the alertdialog role and the grey Cancel + red answer; the footer is hand-built only to show the buttons. Backdrop and ✕ are off by default in this tone too; they are set here to say so. */
+    tone: 'critical',
     dismissible: false,
     showClose: false,
     title: 'Delete CLM-4471?',
@@ -290,12 +287,8 @@ export const DestructiveConfirmation: Story = {
       {...args}
       footer={
         <>
-          <Button variant="secondary" onClick={args.onClose}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={args.onClose}>
-            Delete claim
-          </Button>
+          <ModalCancel onClick={args.onClose} />
+          <ModalConfirm onClick={args.onClose}>Delete claim</ModalConfirm>
         </>
       }
     />
@@ -314,6 +307,11 @@ export const CriticalTone: Story = {
     title: 'Delete CLM-4471?',
     description: 'The claim, its 12 attachments and its audit trail are removed permanently.',
     actions: { confirm: { label: 'Delete claim' } },
+  },
+  play: async () => {
+    /* Every footer button in a dialog is the same size (`md`, 40 high), the critical pair included. */
+    const footer = within(await screen.findByRole('alertdialog', { name: 'Delete CLM-4471?' })).getByRole('button', { name: 'Cancel' }).closest('footer') as HTMLElement;
+    for (const button of footer.querySelectorAll('button')) await expect(Math.round(button.getBoundingClientRect().height)).toBe(40);
   },
 };
 
@@ -341,10 +339,8 @@ export const LongContent: Story = {
       description="Version 4.2 — effective 1 September"
       footer={
         <>
-          <Button variant="secondary" onClick={args.onClose}>
-            Decline
-          </Button>
-          <Button onClick={args.onClose}>Accept</Button>
+          <ModalCancel onClick={args.onClose}>Decline</ModalCancel>
+          <ModalConfirm onClick={args.onClose}>Accept</ModalConfirm>
         </>
       }
     >
@@ -372,7 +368,7 @@ export const LongContent: Story = {
 export const TallBodyWithCheckboxes: Story = {
   args: { title: 'Access', size: 'md' },
   render: (args) => (
-    <Modal {...args} footer={<Button onClick={args.onClose}>Submit</Button>}>
+    <Modal {...args} footer={<ModalConfirm onClick={args.onClose}>Submit</ModalConfirm>}>
       <div className="flex flex-col gap-6 pb-4">
         {Array.from({ length: 24 }, (_, i) => (
           <Checkbox key={i} label={`Domain ${i + 1}`} />
@@ -399,7 +395,7 @@ export const TallBodyWithCheckboxes: Story = {
 export const ExtraWide: Story = {
   args: { size: 'xl', title: 'Reconciliation for September' },
   render: (args) => (
-    <Modal {...args} footer={<Button onClick={args.onClose}>Close</Button>}>
+    <Modal {...args} footer={<ModalConfirm onClick={args.onClose}>Close</ModalConfirm>}>
       A dialog this wide is for content that needs the room — a table, a diff, a preview — not for
       a sentence like this one.
     </Modal>
@@ -585,6 +581,76 @@ export const BackdropClickCloses: Story = {
   },
 };
 
+/** The dialog's answer saves for a moment, then is done: the shape of every real save. */
+function SavingDialog({ open, onClose, ...args }: React.ComponentProps<typeof Modal>) {
+  const [saving, setSaving] = React.useState(false);
+  React.useEffect(() => {
+    if (open) setSaving(false);
+  }, [open]);
+  return (
+    <Modal
+      {...args}
+      open={open}
+      onClose={onClose}
+      footer={
+        <>
+          <ModalCancel />
+          <ModalConfirm
+            loading={saving}
+            onClick={() => {
+              setSaving(true);
+              window.setTimeout(() => setSaving(false), 1500);
+            }}
+          >
+            Publish
+          </ModalConfirm>
+        </>
+      }
+    />
+  );
+}
+
+/**
+ * **Nothing closes a dialog while it saves.** Once Publish is loading, the dialog is `busy`: Escape, ✕ and a backdrop click
+ * do nothing, Cancel is disabled, and focus stays on Publish (a loading button keeps focus). When the save finishes, all of
+ * them work again. `ModalConfirm`'s `loading` turns this on by itself; a dialog whose saving button is a plain `Button`
+ * passes `busy`.
+ */
+export const Saving: Story = {
+  args: { open: false },
+  render: (args) => (
+    <Background>
+      <Trigger label="Publish claim">{({ open, onClose }) => <SavingDialog {...args} open={open} onClose={onClose} />}</Trigger>
+    </Background>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Publish claim' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Publish this claim?' });
+    const publish = within(dialog).getByRole('button', { name: 'Publish' });
+    await userEvent.click(publish);
+
+    /* Saving: Publish keeps focus, and is busy rather than disabled. */
+    await expect(publish).toHaveAttribute('aria-busy', 'true');
+    await expect(publish).toHaveAttribute('aria-disabled', 'true');
+    await expect(publish).toHaveFocus();
+    await expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeDisabled();
+    await expect(within(dialog).getByRole('button', { name: 'Close' })).toBeDisabled();
+
+    /* Escape and a backdrop click leave it open, and focus where it was. */
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(dialog.parentElement as HTMLElement);
+    await expect(screen.getByRole('dialog', { name: 'Publish this claim?' })).toBeInTheDocument();
+    await expect(publish).toHaveFocus();
+
+    /* Saved: everything works again (Cancel is back), and Escape closes it. */
+    await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeEnabled(), { timeout: 3000 });
+    await expect(publish).not.toHaveAttribute('aria-busy');
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  },
+};
+
 /**
  * `dismissible={false}` guards against the accidental gesture — a stray click on
  * the backdrop — and nothing else. Escape still closes it, because taking that
@@ -602,19 +668,15 @@ export const NotDismissible: Story = {
             open={open}
             onClose={onClose}
             size="sm"
-            role="alertdialog"
+            tone="critical"
             dismissible={false}
             showClose={false}
             title="Delete CLM-4471?"
             description="The claim, its 12 attachments and its audit trail are removed permanently."
             footer={
               <>
-                <Button variant="secondary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button variant="danger" onClick={onClose}>
-                  Delete claim
-                </Button>
+                <ModalCancel />
+                <ModalConfirm onClick={onClose}>Delete claim</ModalConfirm>
               </>
             }
           >
@@ -681,7 +743,7 @@ export const NestedDialog: Story = {
               <Button variant="danger" onClick={() => setInner(true)}>
                 Reject
               </Button>
-              <Button onClick={() => setOuter(false)}>Accept</Button>
+              <ModalConfirm onClick={() => setOuter(false)}>Accept</ModalConfirm>
             </>
           }
         >
@@ -693,9 +755,7 @@ export const NestedDialog: Story = {
           title="Rejection reason"
           size="sm"
           footer={
-            <Button variant="secondary" onClick={() => setInner(false)}>
-              Cancel
-            </Button>
+            <ModalCancel onClick={() => setInner(false)} />
           }
         >
           Why is it being rejected?

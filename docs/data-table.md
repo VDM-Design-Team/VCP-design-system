@@ -168,7 +168,7 @@ No new tokens.
 
 ## Filters go above the table, in a card
 
-`DataTable` never owns its filters or search. They sit above it, in the same card as the table, drawn by `TableCard` (see `docs/table-card.md`); the table inside is `bare` (no border or fill of its own). `AVTable` does this when given `filters`.
+`DataTable` never owns its filters or search. They sit above it, in the same card as the table, drawn by `TableCard` (see `docs/table-card.md`); the table inside is `bare` (no border or fill of its own, corners still `radius.md`). `AVTable` does this when given `filters`.
 
 ## A cut name says the whole of it
 

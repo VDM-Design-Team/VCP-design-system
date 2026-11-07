@@ -45,7 +45,7 @@ it needs a visible label, not a better icon.
 | `variant` | `primary \| secondary \| neutral \| tertiary \| tonal \| danger` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls |
 | `size` | `xs \| sm \| md \| lg` | `md` | 24 / 36 / 40 / 48. `xs` and `sm` only in dense contexts. `xs` carries a 16 glyph |
 | `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
-| `loading` | `boolean` | `false` | Swaps the glyph for a spinner, disables the button, sets `aria-busy` |
+| `loading` | `boolean` | `false` | Swaps the glyph for a spinner, ignores presses and sets `aria-busy`, but **keeps focus** (`aria-disabled`, not `disabled`), like `Button` |
 | `disabled` | `boolean` | `false` | Same as Button |
 | `className` | `string` | — | Merged onto the `<button>` via `cn()` |
 | `ref` | `Ref<HTMLButtonElement>` | — | Points at the real `<button>` |
@@ -133,7 +133,7 @@ component should paper over locally.
   a shape change, not colour alone. Never remove it — an icon-only button with no
   focus ring is invisible to a keyboard user, since there is no text to follow.
 
-- **`loading` sets `aria-busy` and disables the control**, and the accessible name
+- **`loading` sets `aria-busy` and ignores presses but keeps focus** (`aria-disabled`, not `disabled`, as in `Button`), and the accessible name
   does **not** change while it is busy. The spinner replaces the glyph only. If a
   wait exceeds ~1s, announce the outcome from a live region on the surrounding
   region rather than by mutating this button's name mid-flight.
