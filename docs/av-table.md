@@ -26,6 +26,7 @@ page, audit batch 5, 11 September 2026.
 | `DueDateTag` | component |
 | `Pagination` | atom |
 | `StatusTag` | component |
+| `TableCard` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -72,6 +73,7 @@ rather than a `variant` prop.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `rows` | `AVTableRow[]` | required | Rendered **in the order given** |
+| `filters` | `ReactNode` | — | A `FilterBar` or search box. Given, the table is drawn in a `TableCard` with the filters above it and the pagination at its foot (the table itself goes borderless). Without it, nothing changes |
 | `sort` / `onSortChange` | `DataTableSort` / `(sort) => void` | — | Keys: `title`, `due`, `lastUpdated` |
 | `selectable` | `boolean` | — | Adds the leading checkbox column |
 | `selected` / `onSelectedChange` | `string[]` / `(ids) => void` | `[]` | Ids are `row.id` |

@@ -174,13 +174,14 @@ export function HandoffAVModal({
     <Modal
       open={open}
       onClose={onClose}
+      busy={loading}
       title="Handoff Added Value"
       size="md"
       showClose={false}
       footer={
         domain === 'development' ? (
           <>
-            <Button variant="tertiary" type="button" onClick={onClose}>
+            <Button variant="tertiary" type="button" disabled={loading} onClick={onClose}>
               Cancel
             </Button>
             {handoffButton}
@@ -197,7 +198,7 @@ export function HandoffAVModal({
           </>
         ) : (
           <>
-            <Button variant="secondary" type="button" onClick={onClose}>
+            <Button variant="secondary" type="button" disabled={loading} onClick={onClose}>
               Cancel
             </Button>
             {handoffButton}

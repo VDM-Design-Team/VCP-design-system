@@ -223,6 +223,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     >
       <Input
         type="search"
+        edge="neutral"
         aria-label={searchPlaceholder}
         placeholder={searchPlaceholder}
         value={search ?? ''}
@@ -258,7 +259,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                   type="button"
                   aria-label={periodText ? `Period, ${periodText}` : 'Period'}
                   className={cn(
-                    'flex h-10 w-full items-center gap-2 rounded-md border border-stroke-strong bg-surface-elevated px-3 text-left transition-colors',
+                    'flex h-10 w-full items-center gap-2 rounded-md border border-neutral-outline-border-default bg-surface-elevated px-3 text-left transition-colors',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                   )}
                 >
@@ -298,6 +299,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {cycle && (
             <SearchSelect
+              edge="neutral"
               aria-label="Cycle"
               placeholder={cycle.placeholder ?? 'Select cycle'}
               searchPlaceholder="Search cycles"
@@ -327,6 +329,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {status && (
             <SearchSelect
+              edge="neutral"
               multiple
               display="summary"
               confirm
@@ -339,6 +342,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {priority && (
             <Select
+              edge="neutral"
               aria-label="Priority"
               placeholder="Select priority"
               {...priority}
@@ -347,6 +351,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {tags && (
             <SearchSelect
+              edge="neutral"
               multiple
               display="tags"
               searchPlaceholder="Search tags"
@@ -358,6 +363,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {users?.map(({ label, placeholder, ...rest }) => (
             <SearchSelect
+              edge="neutral"
               key={label}
               {...({
                 'aria-label': label,
