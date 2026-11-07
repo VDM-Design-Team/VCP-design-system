@@ -129,7 +129,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
         content={
           <DatePicker
             mode={mode}
-            value={value}
+            /* An empty string is no date, as `undefined` is: the calendar opens on today's month either way. */
+            value={value || undefined}
             /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
             clearable={false}
             onChange={(iso) => {

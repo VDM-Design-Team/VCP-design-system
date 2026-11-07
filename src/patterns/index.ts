@@ -37,4 +37,5 @@ export * from './superadmin-metrics';
 export * from './team-capacity';
 export * from './user-capacity';
 export * from './top-bar';
+export * from './task-log-trail';
 export * from './user-account-modal';
