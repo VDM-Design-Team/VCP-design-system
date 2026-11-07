@@ -23,20 +23,22 @@ const ACCOUNTS = PEOPLE.map((name, i) => ({
   id: name.toLowerCase(),
   name,
   email: `${name.toLowerCase()}@vdm.technology`,
-  domains: i % 3 === 2 ? ['Design', 'BESA Content'] : ['Design'],
+  /* Sarah is in six, which wrap onto several lines: the tags keep their room above and below. */
+  domains: name === 'Sarah' ? ['Design', 'BESA Content', 'Development', 'Governance', 'Partners', 'QA'] : i % 3 === 2 ? ['Design', 'BESA Content'] : ['Design'],
   dateAdded: ago(DAYS[i]),
   days: DAYS[i],
 }));
 
 type Account = (typeof ACCOUNTS)[number];
 
-const PAGE_SIZE = 8;
+const PAGE_SIZES = [8, 16, 50] as const;
 
 /* What the page does with the table's state: filter by the search, sort, take a page. The table does none of it. */
 function useAccounts(all: readonly Account[]) {
   const [search, setSearch] = React.useState('');
   const [sort, setSort] = React.useState<DataTableSort | undefined>(undefined);
   const [page, setPage] = React.useState(1);
+  const [pageSize, setPageSize] = React.useState<number>(PAGE_SIZES[0]);
   const q = search.trim().toLowerCase();
   const filtered = all.filter((a) => !q || `${a.name} ${a.email} ${a.domains.join(' ')}`.toLowerCase().includes(q));
   const sorted = sort
@@ -45,16 +47,22 @@ function useAccounts(all: readonly Account[]) {
         return sort.direction === 'asc' ? d : -d;
       })
     : filtered;
-  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
   const current = Math.min(page, pageCount);
   return {
-    rows: sorted.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE) as AccountRow[],
+    rows: sorted.slice((current - 1) * pageSize, current * pageSize) as AccountRow[],
     search,
     sort,
     page: current,
     pageCount,
     itemCount: sorted.length,
-    pageSize: PAGE_SIZE,
+    pageSize,
+    pageSizeOptions: PAGE_SIZES,
+    /* A new size starts again at page 1: the old page may no longer exist. */
+    onPageSizeChange: (size: number) => {
+      setPageSize(size);
+      setPage(1);
+    },
     onSearchChange: (s: string) => {
       setSearch(s);
       setPage(1);
@@ -110,6 +118,13 @@ export const Default: Story = {
     await expect(c.getByText('john@vdm.technology')).toBeVisible();
     await expect(c.getByText('7 days ago')).toBeVisible();
     await expect(c.getAllByText('BESA Content').length).toBeGreaterThan(0);
+    /* Sarah's six domains wrap onto several lines, and keep 16 above and below (the row grows to fit rather than the tags touching its edges). */
+    const cell = c.getByText('sarah@vdm.technology').closest('tr')!.querySelectorAll('td')[1] as HTMLElement;
+    const tags = [...cell.querySelectorAll('span')].filter((el) => el.className.includes('rounded-sm'));
+    const box = cell.getBoundingClientRect();
+    await expect(tags[tags.length - 1].getBoundingClientRect().top).toBeGreaterThan(tags[0].getBoundingClientRect().bottom - 1);
+    await expect(tags[0].getBoundingClientRect().top - box.top).toBeGreaterThanOrEqual(16);
+    await expect(box.bottom - tags[tags.length - 1].getBoundingClientRect().bottom).toBeGreaterThanOrEqual(16);
     /* Each button is named for its row. */
     await userEvent.click(c.getByRole('button', { name: 'Edit John' }));
     await expect(args.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 'john' }));
@@ -192,6 +207,20 @@ function AccountsPage() {
   const { toast } = useToast();
   const [editing, setEditing] = React.useState<Account | 'new' | null>(null);
   const [deleting, setDeleting] = React.useState<Account | null>(null);
+  const root = React.useRef<HTMLDivElement>(null);
+  /* Whose Delete button takes focus once the row is gone (`null`: the search box, when nothing is left). The table only reports the delete, so the page owns this. */
+  const focusAfter = React.useRef<{ name: string | null } | null>(null);
+  React.useEffect(() => {
+    const pending = focusAfter.current;
+    if (!pending || (deleting && all.some((a) => a.id === deleting.id))) return;
+    focusAfter.current = null;
+    /* After the dialog has handed focus back to a button that no longer exists. */
+    const timer = setTimeout(() => {
+      const next = pending.name ? root.current?.querySelector<HTMLElement>(`button[aria-label="Delete ${pending.name}"], button[title="Delete ${pending.name}"]`) : null;
+      (next ?? root.current?.querySelector<HTMLElement>('input[type="search"]'))?.focus();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [all, deleting]);
 
   const submit = (draft: UserAccountDraft) => {
     if (editing === 'new') {
@@ -210,7 +239,7 @@ function AccountsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={root} className="flex flex-col gap-4">
       <div className="flex justify-end">
         <Button onClick={() => setEditing('new')}>Add Account</Button>
       </div>
@@ -242,6 +271,10 @@ function AccountsPage() {
         itemName={deleting?.name ?? ''}
         onConfirm={() => {
           if (!deleting) return;
+          /* Focus goes to the next row's Delete, or the previous one's when it was the last, or the search box when the table is empty. */
+          const at = state.rows.findIndex((row) => row.id === deleting.id);
+          const neighbour = state.rows[at + 1] ?? state.rows[at - 1];
+          focusAfter.current = { name: neighbour?.name ?? null };
           setAll((a) => a.filter((x) => x.id !== deleting.id));
           toast({ tone: 'success', title: 'User deleted', description: `${deleting.name} was deleted.` });
           setDeleting(null);
@@ -285,6 +318,16 @@ export const OnThePage: Story = {
     await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(c.queryByText('michael@vdm.technology')).toBeNull());
     await expect(await screen.findByText('User deleted')).toBeVisible();
+    /* Focus did not fall to the page: it is on the next row's Delete button (Sarah followed Michael). */
+    await waitFor(() => expect(c.getByRole('button', { name: 'Delete Sarah' })).toHaveFocus());
+
+    /* The only row left in a search: nothing follows or precedes it, so focus goes to the search box. */
+    await userEvent.type(c.getByRole('searchbox'), 'Zara');
+    await waitFor(() => expect(c.queryByText('sarah@vdm.technology')).toBeNull());
+    await userEvent.click(c.getByRole('button', { name: 'Delete Zara' }));
+    await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
+    await waitFor(() => expect(c.getByRole('searchbox')).toHaveFocus());
+    await userEvent.clear(c.getByRole('searchbox'));
 
     /* Add Account: a new, empty dialog. */
     await userEvent.click(c.getByRole('button', { name: 'Add Account' }));

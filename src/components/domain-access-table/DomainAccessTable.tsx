@@ -8,13 +8,15 @@ import { Tag, type TagTone } from '../../atoms/tag';
  * for Access and one for Admin, and the Role those two add up to. Built to Figma's `_Accounts_User_Modal_Domain_Access_Table`
  * (the "Domain Access & Admin Rights" section of the Accounts page's user modal).
  *
- * - **The two checkboxes are independent.** Both are always available; this table applies no rule between them (an admin
- *   without access is the caller's to allow or refuse).
+ * - **Admin implies Access.** Both boxes are always available, but ticking Admin also ticks Access, and un-ticking Access
+ *   also un-ticks Admin, so a row never says Admin for a domain the person cannot get into.
  * - **Role is derived, and this component owns it, once** (`domainRole`): Admin if the Admin box is ticked, else User if Access
- *   is, else No Access. It is a `Tag`, so the role is words as well as a colour.
+ *   is, else No Access. It is a `Tag`, so the role is words as well as a colour: Admin `brand`, User `success`, No Access
+ *   `neutral`.
  *
- * It is controlled and saves nothing: rows come in, `onAccessChange` / `onAdminChange` report a tick. A real `<table>`, named
- * by `caption`, with column headers.
+ * It is controlled and saves nothing: rows come in, `onAccessChange` / `onAdminChange` report a tick. One click can report
+ * both (that is the rule above), so update the rows functionally (`setRows((rs) => …)`) for the two to combine. A real
+ * `<table>`, named by `caption`, with column headers.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -35,9 +37,9 @@ export type DomainRole = 'admin' | 'user' | 'none';
 export const domainRole = (row: Pick<DomainAccessRow, 'access' | 'admin'>): DomainRole =>
   row.admin ? 'admin' : row.access ? 'user' : 'none';
 
-/* The role → its words and tone, once. Admin is green for now, as User is — a placeholder until design settles it. */
+/* The role → its words and tone, once. Admin is blue so it reads apart from User at a glance (design, 4 Nov 2026). */
 const ROLE: Record<DomainRole, { label: string; tone: TagTone }> = {
-  admin: { label: 'Admin', tone: 'success' },
+  admin: { label: 'Admin', tone: 'brand' },
   user: { label: 'User', tone: 'success' },
   none: { label: 'No Access', tone: 'neutral' },
 };
@@ -92,7 +94,11 @@ export const DomainAccessTable = React.forwardRef<HTMLTableElement, DomainAccess
                   aria-label={`${row.domain} access`}
                   checked={row.access}
                   disabled={disabled}
-                  onChange={(checked) => onAccessChange?.(row.id, checked)}
+                  onChange={(checked) => {
+                    onAccessChange?.(row.id, checked);
+                    /* Admin implies Access: taking Access away takes Admin with it. */
+                    if (!checked && row.admin) onAdminChange?.(row.id, false);
+                  }}
                 />
               </td>
               <td className={cell}>
@@ -100,7 +106,11 @@ export const DomainAccessTable = React.forwardRef<HTMLTableElement, DomainAccess
                   aria-label={`${row.domain} admin`}
                   checked={row.admin}
                   disabled={disabled}
-                  onChange={(checked) => onAdminChange?.(row.id, checked)}
+                  onChange={(checked) => {
+                    onAdminChange?.(row.id, checked);
+                    /* …and making someone an admin gives them Access. */
+                    if (checked && !row.access) onAccessChange?.(row.id, true);
+                  }}
                 />
               </td>
               <td className={cell}>

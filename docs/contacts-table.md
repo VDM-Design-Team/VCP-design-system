@@ -52,6 +52,20 @@ The caller **pages** by `page`; `onDelete` only *asks*. The page owns what follo
 `ConfirmDeleteModal` first (`itemLabel="Contact"`) — **nothing is deleted until it is confirmed**, and Cancel keeps the message — then removes the
 row and shows a toast ("Message deleted").
 
+### Focus after a delete — the page's job
+
+When the row goes its **Delete button goes with it**, so the dialog's focus return lands on nothing and focus falls to the page: a keyboard or screen-reader user is sent back to the top (CLAUDE.md: "Never drop focus"). The
+table only reports the delete, so after the row is removed the page moves focus on purpose:
+
+| What is left | Focus goes to |
+|---|---|
+| A message after the deleted one | That row's **Delete** button |
+| It was the last row on the page | The **previous** row's Delete button (the first on the page that takes its place when the page empties) |
+| The table is empty | The empty message ("No messages yet."), made focusable for the purpose |
+
+Do it after the dialog has closed. Cancel needs nothing: the row stays and focus returns to its Delete button. The `OnThePage` story does this and asserts `document.activeElement` for the next row; `DeletingTheLastMessage` asserts the empty table. The same rule
+is in `docs/accounts-table.md` and `docs/confirm-delete-modal.md`.
+
 ## A long message is shown whole
 
 Nothing here can open a message, and an admin has to be able to read what was sent, so a long message **wraps** and the row grows, rather than

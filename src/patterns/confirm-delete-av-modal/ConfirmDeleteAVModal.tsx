@@ -69,6 +69,7 @@ export function ConfirmDeleteAVModal({
     <Modal
       open={open}
       onClose={onClose}
+      busy={loading}
       /* The dialog is named by the heading it renders in its own body, so
          the announced name *is* the visible question. */
       aria-labelledby={titleId}
@@ -102,7 +103,7 @@ export function ConfirmDeleteAVModal({
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-end gap-4">
-        <Button variant="neutral" onClick={onClose}>
+        <Button variant="neutral" disabled={loading} onClick={onClose}>
           {cancelLabel}
         </Button>
         <Button variant="danger" loading={loading} onClick={onConfirm}>

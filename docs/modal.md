@@ -12,9 +12,46 @@ keyboard until it is dismissed. Reach for it last, not first.
 
 | Piece | Tier |
 |---|---|
+| `Button` | atom |
 | `IconButton` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
+
+## Footer buttons: `ModalCancel` and `ModalConfirm`
+
+A dialog's footer buttons are **`md` (40 high)**, and they take their colour from the dialog's `tone`, so nobody has to remember either:
+
+| Button | Default tone | `critical` tone |
+|---|---|---|
+| **`ModalCancel`** (calls `onClose` unless given an `onClick`; `children` default "Cancel") | `secondary` | the grey `neutral` |
+| **`ModalConfirm`** (the answer; takes `type`, `form`, `loading`, `disabled`, `onClick`) | `primary` | the red `danger` |
+
+The `actions` row is these two buttons. A hand-built `footer` uses them too: `<ModalCancel /><ModalConfirm onClick={…}>Delete claim</ModalConfirm>`. **A grey Cancel goes beside a red answer** — a blue-outlined Cancel next to a red button is two competing colours. Extra buttons (a third action, a tertiary Cancel the design draws) can stay plain `Button`s at the
+default size. Buttons inside the *body* of a dialog (not the footer) are not affected.
+
+## While it saves: `busy`
+
+**Nothing closes a dialog while it saves.** While `busy`, Escape, the ✕ and a backdrop click do nothing, `ModalCancel` is disabled, and the ✕ is disabled. A save can't be abandoned halfway with its result landing on a closed dialog. Focus stays where it was: on the saving button, which keeps focus while it loads (see `Button`'s `loading`). A backdrop click doesn't blur it either.
+
+- **It turns on by itself** while the footer's `ModalConfirm` (or `actions.confirm`) is `loading`. Most dialogs need nothing more.
+- **When the saving button is a plain `Button`** (a tertiary Cancel and two answers, or buttons in the body), pass `busy={loading}` yourself, and give any hand-built Cancel `disabled={loading}`.
+- `busy={false}` opts out. Leave it for a dialog that really can be walked away from mid-request.
+
+The `Saving` story is the test: once Publish is loading, Escape and a backdrop click leave the dialog open with focus on Publish, Cancel and ✕ are disabled, and when the save finishes Escape closes it again.
+
+## The critical tone
+## The critical tone
+
+A dialog whose answer destroys something takes `tone="critical"`. Its buttons are the system's
+critical pair — a **neutral** (grey outline) Cancel and a **danger** (red) answer — rather than
+the default `secondary` (blue outline) + `primary`. Two reasons for neutral: an outlined *brand*
+button beside a red one is two competing colours and reads as a second call to action, and
+Cancel is the way out, so it should be the quietest button. (Design note, Nov 2026: Figma's
+delete-domain modal draws a plain dark-text Cancel; we use the system's neutral outline.)
+
+`critical` also defaults the dialog to `role="alertdialog"`, with no ✕ and no backdrop click,
+so a stray click cannot answer it. Existing destructive dialogs that hand-build a `footer`
+(`ConfirmDeleteAVModal`, the reject dialogs) can move to `actions` when next touched.
 
 ## When to use
 
@@ -50,12 +87,15 @@ Rules of thumb:
 | `title` | `ReactNode` | — | Rendered as a real `<h2>` and wired to `aria-labelledby`. One of the three naming props |
 | `aria-labelledby` | `string` | — | Name it by a heading **you** render in the body — the alert layout. One of the three |
 | `aria-label` | `string` | — | The accessible name when there is no visible heading at all. One of the three |
-| `description` | `ReactNode` | — | Sub-heading under the title, wired to `aria-describedby`. Left out, `false` or blank, nothing renders for it |
+| `description` | `ReactNode` | — | Caption under the title (`caption-md-medium`, 500), wired to `aria-describedby`. **With a caption the header has 16 below it** (8 without), so content never sits close against it. Left out, `false` or blank, nothing renders for it |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s. Left out, `false` or blank, no footer renders |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
+| `actions` | `{ cancelLabel?, confirm: { label, onClick?, type?, form?, loading?, disabled? } }` | — | The standard action row: Cancel (calls `onClose`) and the one answer. `secondary` + `primary`, or `neutral` + `danger` in the critical tone. Ignored when `footer` is set |
+| `tone` | `default \| critical` | `default` | `critical`: the answer destroys something. Swaps `actions` to grey Cancel + red answer, and defaults `role="alertdialog"`, `showClose={false}`, `dismissible={false}` (each overridable) |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |
 | `showClose` | `boolean` | `true` | The icon-only close button in the header |
+| `busy` | `boolean` | while `ModalConfirm` is `loading` | Saving: nothing closes the dialog (Escape, ✕, backdrop, `ModalCancel`). See "While it saves" |
 | `closeLabel` | `string` | `'Close'` | Accessible name for that button |
 | `initialFocusRef` | `RefObject<HTMLElement \| null>` | — | Where focus goes on open. Defaults to the panel |
 | `returnFocusRef` | `RefObject<HTMLElement \| null>` | — | Where focus goes on close. Defaults to whatever had it when it opened |
@@ -232,11 +272,14 @@ everyone. Fixed 11 September 2026, with the `NestedDialog` story as the
 regression test. The review flow is the design that needs it: a review dialog
 that opens a rejection dialog on top of itself.
 
-**Escape always closes it — including when `dismissible={false}`.**
+**Escape always closes it — including when `dismissible={false}` — except while it saves (`busy`).**
 `dismissible` guards against a *stray click* on the backdrop, which is the
 accidental gesture. Escape is deliberate, it is what WAI-ARIA requires of every
 dialog, and taking it away is how keyboard users get sealed in. If a decision is
 so important that Escape must not dismiss it, it is not a dialog — it is a page.
+The one pause is `busy`: while a save is in flight Escape is used up and the
+dialog stays, so the result never lands on a closed dialog. It works again the
+moment the save finishes.
 A popup open inside the dialog takes the first Escape, but the second one still
 closes it — see the next section.
 
@@ -343,6 +386,7 @@ clauses above rather than describing them:
 | `BackgroundIsInert` | The page carries `inert` while open and loses it on close; the dialog's own portal never gets it |
 | `BackdropClickCloses` | A click on the backdrop closes it, and a press that starts on the panel and ends on the backdrop does not |
 | `NotDismissible` | `dismissible={false}` survives a backdrop click and puts focus back on the panel, Escape still closes, there is no close button, and the first Tab is Cancel rather than Delete |
+| `Saving` | While the answer loads, Escape and a backdrop click leave the dialog open with focus on the loading button, Cancel and ✕ are disabled, and once it finishes Escape closes it |
 | `NestedDialog` | With a dialog open over a dialog, the outer one is inert, Tab cycles in the inner one, and Escape closes the inner one first, then the outer |
 | `EscapeClosesPopupFirst` | With a `Popover` open inside the dialog, the first Escape closes the popover, returns focus to its trigger and leaves the dialog open; the second closes the dialog and returns focus to the dialog's trigger |
 
@@ -419,7 +463,7 @@ stories are where the behaviour lives.
 | `borderRadius: 12` | `rounded-md` (8) | The radius scale stops at `md`. Reported, not invented |
 | `zIndex: 100` | `z-50` | There is no z-index token; `z-50` is Tailwind's top default layer |
 | `font: '600 18px/1.3'` on the title | `text-title-md-semibold` | Type ramp only. 18 is not a step; `title-md-semibold` is 20/28 semibold |
-| `font: '400 13px/1.5'` on the description | `text-caption-md-regular` | Same. `caption-md-regular` is 12/16 regular |
+| `font: '400 13px/1.5'` on the description | `text-caption-md-medium` | Same. The caption is `caption-md-medium` (12/16, weight 500) |
 | `borderTop: 1px solid stroke.subtle` on the footer | Dropped entirely | The dialog is one sheet; whitespace separates the actions (11 Sep 2026) |
 | `gap: 10` in the footer | `gap-3` (12) | 10 is not on the scale |
 | Hand-rolled 32px close `<button>` | The real `IconButton`, `md` | 40 is the system's minimum target, and `IconButton` makes the name mandatory |
@@ -460,3 +504,8 @@ Reported, not invented — nothing new was added to `tokens/` for this component
    "behind the dialog" is carried mostly by the panel's shadow. It is the token the
    system has and it flips correctly in dark, so it was used as-is, but the light
    value is worth a second look.
+
+## Long forms scroll the body, not the panel
+
+Only the **body** scrolls; the header and footer stay put. A checkbox, radio or switch hides its real input with `sr-only` (`position: absolute`), so the body is its containing block (`relative`) and the input
+scrolls with it. Were the panel the containing block instead, tabbing to a control that had scrolled out of view would scroll the *panel* and carry the footer up the dialog. The `TallBodyWithCheckboxes` story holds this.

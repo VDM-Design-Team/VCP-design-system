@@ -65,22 +65,41 @@ export const Default: Story = {
     /* Admin wins over User. ("Admin" is also the column header, so the role tag makes two.) */
     await userEvent.click(c.getByRole('checkbox', { name: 'BESA Content admin' }));
     await expect(c.getAllByText('Admin')).toHaveLength(2);
-    /* Un-ticking Access does not touch Admin: the two are independent. */
+    /* Admin implies Access: un-ticking Access takes Admin with it. */
     await userEvent.click(c.getByRole('checkbox', { name: 'BESA Content access' }));
-    await expect(c.getByRole('checkbox', { name: 'BESA Content admin' })).toBeChecked();
+    await expect(c.getByRole('checkbox', { name: 'BESA Content admin' })).not.toBeChecked();
+    await expect(c.getAllByText('Admin')).toHaveLength(1);
+    await expect(c.getAllByText('No Access')).toHaveLength(3);
+    /* …and ticking Admin on a row with no access gives it Access too. */
+    await userEvent.click(c.getByRole('checkbox', { name: 'BESA Partner admin' }));
+    await expect(c.getByRole('checkbox', { name: 'BESA Partner access' })).toBeChecked();
     await expect(c.getAllByText('Admin')).toHaveLength(2);
   },
 };
 
-/** Both boxes are always available, in any combination — an admin with no access is the caller's to allow or refuse. */
-export const Independent: Story = {
-  args: { rows: [{ id: 'a', domain: 'Design', access: false, admin: true }] },
-  play: async ({ canvasElement }) => {
+/**
+ * Admin implies Access: ticking Admin also reports Access ticked, and un-ticking Access also reports Admin un-ticked. A
+ * caller that updates its rows functionally gets both.
+ */
+export const AdminImpliesAccess: Story = {
+  args: {
+    rows: [
+      { id: 'design', domain: 'Design', access: false, admin: false },
+      { id: 'test', domain: 'BESA Test', access: true, admin: true },
+    ],
+  },
+  play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
-    await expect(c.getByRole('checkbox', { name: 'Design access' })).toBeEnabled();
-    await expect(c.getByRole('checkbox', { name: 'Design admin' })).toBeEnabled();
-    /* Admin without Access still reads Admin: the column header and the role tag. */
-    await expect(c.getAllByText('Admin')).toHaveLength(2);
+    await userEvent.click(c.getByRole('checkbox', { name: 'Design admin' }));
+    await expect(args.onAdminChange).toHaveBeenCalledWith('design', true);
+    await expect(args.onAccessChange).toHaveBeenCalledWith('design', true);
+    await userEvent.click(c.getByRole('checkbox', { name: 'BESA Test access' }));
+    await expect(args.onAccessChange).toHaveBeenCalledWith('test', false);
+    await expect(args.onAdminChange).toHaveBeenCalledWith('test', false);
+    /* Un-ticking Admin alone leaves Access as it was: an admin who stops being one is still a user. */
+    await userEvent.click(c.getByRole('checkbox', { name: 'BESA Test admin' }));
+    await expect(args.onAdminChange).toHaveBeenLastCalledWith('test', false);
+    await expect(args.onAccessChange).toHaveBeenCalledTimes(2);
   },
 };
 

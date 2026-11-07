@@ -158,7 +158,6 @@ export function HandoffAVModal({
 
   const handoffButton = (
     <Button
-      size="sm"
       type="submit"
       form={formId}
       variant={domain === 'development' ? 'secondary' : 'primary'}
@@ -175,18 +174,18 @@ export function HandoffAVModal({
     <Modal
       open={open}
       onClose={onClose}
+      busy={loading}
       title="Handoff Added Value"
       size="md"
       showClose={false}
       footer={
         domain === 'development' ? (
           <>
-            <Button variant="tertiary" size="sm" type="button" onClick={onClose}>
+            <Button variant="tertiary" type="button" disabled={loading} onClick={onClose}>
               Cancel
             </Button>
             {handoffButton}
             <Button
-              size="sm"
               type="submit"
               form={formId}
               loading={loading && publishRef.current}
@@ -199,7 +198,7 @@ export function HandoffAVModal({
           </>
         ) : (
           <>
-            <Button variant="secondary" size="sm" type="button" onClick={onClose}>
+            <Button variant="secondary" type="button" disabled={loading} onClick={onClose}>
               Cancel
             </Button>
             {handoffButton}

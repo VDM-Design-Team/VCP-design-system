@@ -101,6 +101,10 @@ Never show both. `error` wins whenever it is set.
   dark. It clears 4.5:1 on those two, but **not** on `surface.neutral.subtle`
   (4.35:1) — don't put a field's error message on that surface.
 
+## The error edge
+
+An `error` turns the control's **edge critical as well as the message red**. `Field` puts `aria-invalid` on the control, and `Input`, `Select`, `Textarea`, `SearchSelect` and `DateField` read it, so a `Field` with an error needs nothing else (their own `invalid` prop still works on its own). The edge stays through focus.
+
 ## Don't
 
 - Don't hardcode colors or spacing. `className="text-[#e7000b]"` is a bug — use a token.
