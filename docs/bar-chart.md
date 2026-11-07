@@ -8,6 +8,7 @@ Grouped bars over a category axis: one group per category (a cycle, a sprint), o
 |---|---|
 | `LegendItem` | atom |
 | `Skeleton` | atom |
+| `ChartLegend` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -38,6 +39,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `grid` | `solid \| dashed` | `solid` | The gridlines |
 | `legend` | `bottom \| none` | `bottom` | Under the chart, always. `none` leaves it out |
 | `maxBarWidth` | `number` | `32` | The widest a bar gets, in px |
+| `formatValue` | `(value, series) => string` | the number, plus `unit` in the tooltip and table | How a value reads on a bar, in the tooltip, the table and the announcement: `$1.2k`. Include the unit yourself if you want it |
+| `formatTick` | `(value) => string` | the number | How a number on the value axis reads |
+| `onSelectDatum` | `(datum, series?) => void` | — | A group was chosen: a click (with the series of the bar it landed on, when it landed on one) or Enter on the keyboard |
+| `renderTooltip` | `({ datum, index, series }) => ReactNode` | — | Replaces what the tooltip says; the card and its position stay. The announcement is still the series' values |
+| `toggleSeries` | `boolean` | — | Makes each legend entry a button that shows or hides its series; the axis follows what is drawn. The last visible series cannot be hidden |
+| `defaultHiddenSeries` / `onToggleSeries` | `ChartSeries[]` / `(series, hidden) => void` | — | Where the toggles start, and a toggle was pressed |
 | `loading` / `empty` | `boolean` / `ReactNode` | — / "Nothing to show for this period." | A placeholder and a status; or what it says with no data |
 | `className`, `ref` | | | On the wrapper |
 
@@ -52,6 +59,20 @@ Pass `data` and `series`; the axis (from 0 to the next readable number above the
 Colours are `CHART_SERIES`'s (`src/lib/chart-series.ts`), shared with the capacity bars, so Completed is the same green and Overdue the same red on every chart. Grid, axis and text are tokens, so dark comes free.
 
 **It does no filtering or arithmetic.** It draws the numbers it is given.
+
+## Formatting, choosing and customising
+
+```tsx
+<BarChart
+  formatValue={(v) => `$${(v / 1000).toFixed(1)}k`}   // bars, tooltip, table, announcement
+  formatTick={(t) => `${t / 1000}k`}                  // the value axis
+  onSelectDatum={(cycle, series) => open(cycle.key)}   // a click or Enter
+  renderTooltip={({ datum, series }) => <MyTooltip datum={datum} series={series} />}
+  toggleSeries                                        // legend entries hide and show series
+/>
+```
+
+These are the options most chart libraries offer, kept small on purpose. What the chart still does not do: stacked or horizontal bars, a second axis, a continuous time axis, animation, or series outside `CHART_SERIES`.
 
 ## Plugging in data
 
@@ -95,7 +116,9 @@ const { data: cycles, isLoading } = useCycles({ timeframe });   // the page's fe
 ## Accessibility
 
 - **The picture is `aria-hidden`; the data is a table.** A visually hidden `<table>` (captioned by `caption`) has a row per category and a column per series, so a screen reader reads the numbers, not "graphic". A missing value reads "no data", not 0.
-- **The tooltip is for the pointer.** Every value in it is also written on the bar (or over it) and in the table. It is not a keyboard stop: nothing in the picture is focusable, which keeps the hidden-picture rule honest.
+- **One keyboard stop, arrow keys inside.** The plot is a focusable group named "Cycle Performance. Use the left and right arrow keys to read each group." Left and right move from group to group, Home and End jump, Escape clears; the tooltip follows, and a polite status announces the group ("Jan C23: Available 130 pts, …"). With `onSelectDatum` the name adds "and Enter to choose one", and Enter chooses. Nothing inside the picture is focusable, which keeps the hidden-picture rule honest.
+- **The tooltip is for the pointer and the keyboard**; every value in it is also written on the bar (or over it) and in the table.
+- **Legend toggles** are real buttons with `aria-pressed` (see `docs/chart-legend.md`).
 - **Contrast, measured in both themes** (the `ContrastHolds` story): the axis text and the numbers over bars hold **10.35:1** light and **11.87:1** dark on the card (`text.secondary`); every bar holds at least **4.77:1** light and **3.84:1** dark against the card (the tightest is Overdue; 3:1 is asked of a graphic); and a number written on a bar holds at least **4.77:1** light and **5.30:1** dark on that bar (4.5:1 is asked).
 - Colour is never the only signal: the legend names each series and the numbers are written out.
 - Loading: one `status` ("Loading Cycle Performance"), the placeholder hidden from assistive tech.

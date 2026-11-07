@@ -30,6 +30,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `unit` | `string` | `pts` | |
 | `height` | `number` | `320` | |
 | `loading` / `empty` | `boolean` / `ReactNode` | | |
+| `formatValue`, `formatTick`, `onSelectDatum`, `renderTooltip`, `toggleSeries`, `defaultHiddenSeries`, `onToggleSeries` | | | Passed to the `BarChart`: how numbers read, choosing a group, your own tooltip, and hiding series from the legend (see `docs/bar-chart.md`) |
 | `className`, `ref` | | | On the section |
 
 ## What it is
