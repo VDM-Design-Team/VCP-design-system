@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { RejectionReason, PENDING_REJECTION_REASONS } from '../../components/rejection-reason';
 import { Button } from '../../atoms/button';
 
@@ -66,11 +66,8 @@ export function RejectPendingAVModal({
       showClose={false}
       footer={
         <>
-          <Button variant="secondary" size="sm" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            size="sm"
+          <ModalCancel />
+          <ModalConfirm
             /* The design's own validation: faded until a reason is chosen. */
             disabled={!reason}
             loading={loading}
@@ -79,7 +76,7 @@ export function RejectPendingAVModal({
             }
           >
             Reject
-          </Button>
+          </ModalConfirm>
         </>
       }
     >

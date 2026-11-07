@@ -8,7 +8,7 @@ import { Select, type SelectOption } from '../../atoms/select';
 import { Stepper } from '../../atoms/stepper';
 import { DomainAccessTable, type DomainAccessRow } from '../../components/domain-access-table';
 import { Field } from '../../components/field';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 
 /**
  * UserAccountModal — adds a user, or edits one, from the Accounts page. Built to Figma's `Accounts_Page_User_Modal`
@@ -181,9 +181,9 @@ export function UserAccountModal({
       title={title ?? (mode === 'edit' ? initial?.name || 'User' : 'User')}
       size="lg"
       footer={
-        <Button size="sm" type="button" loading={submitting} onClick={submit}>
+        <ModalConfirm loading={submitting} onClick={submit}>
           Submit
-        </Button>
+        </ModalConfirm>
       }
     >
       <form

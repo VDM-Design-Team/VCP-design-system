@@ -271,6 +271,56 @@ function getFocusable(root: HTMLElement): HTMLElement[] {
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
+/* What a footer button needs from the dialog around it: its tone (to pick its colour), how to close it, whether the dialog
+   is saving (`busy`, which locks Cancel), and a way for the answer to say it is loading (which makes the dialog busy). */
+const ModalFooterContext = React.createContext<{
+  tone: 'default' | 'critical';
+  onClose: () => void;
+  busy: boolean;
+  reportConfirmLoading: (loading: boolean) => void;
+} | null>(null);
+
+type ModalButtonProps = Omit<React.ComponentProps<typeof Button>, 'variant' | 'size'>;
+
+/**
+ * **Cancel** in a dialog's footer. It picks its own look from the dialog's `tone`: `secondary` in the default tone, the grey `neutral` in the `critical` one (a blue-outlined Cancel beside a red answer is two
+ * competing colours), always at the footer's size (`md`, 40 high). It calls the dialog's `onClose` unless given its own `onClick`. Use it in a hand-built `footer`, so nobody has to remember the colour or the size.
+ * While the dialog is saving (`busy`) it is disabled, unless given its own `disabled`.
+ */
+export const ModalCancel = React.forwardRef<HTMLButtonElement, ModalButtonProps>(function ModalCancel({ children = 'Cancel', type = 'button', onClick, disabled, ...props }, ref) {
+  const dialog = React.useContext(ModalFooterContext);
+  return (
+    <Button
+      ref={ref}
+      variant={dialog?.tone === 'critical' ? 'neutral' : 'secondary'}
+      size="md"
+      type={type}
+      onClick={onClick ?? dialog?.onClose}
+      disabled={disabled ?? (dialog?.busy || undefined)}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
+});
+
+/**
+ * The **answer** in a dialog's footer: `primary` in the default tone, the red `danger` in the `critical` one, always at the footer's size (`md`). Takes a button's own props (`type`, `form`, `loading`, `disabled`,
+ * `onClick`). Use it in a hand-built `footer`, so the colour follows the dialog's `tone` and nobody has to remember it.
+ * While it is `loading` the dialog is busy: nothing closes it until the save finishes (see `Modal`'s `busy`).
+ */
+export const ModalConfirm = React.forwardRef<HTMLButtonElement, ModalButtonProps>(function ModalConfirm({ type = 'button', ...props }, ref) {
+  const dialog = React.useContext(ModalFooterContext);
+  const report = dialog?.reportConfirmLoading;
+  const saving = Boolean(props.loading) && !props.disabled;
+  React.useEffect(() => {
+    if (!report) return;
+    report(saving);
+    return () => report(false);
+  }, [report, saving]);
+  return <Button ref={ref} variant={dialog?.tone === 'critical' ? 'danger' : 'primary'} size="md" type={type} {...props} />;
+});
+
 interface ModalBaseProps
   extends Omit<
       React.HTMLAttributes<HTMLDivElement>,
@@ -312,9 +362,17 @@ interface ModalBaseProps
    * `actions` buttons to their critical pair (grey Cancel, red answer) and
    * defaults the dialog to `role="alertdialog"`, no ✕ and no backdrop dismissal,
    * so a stray click cannot confirm or cancel by accident. Each default can
-   * still be overridden. Escape always closes.
+   * still be overridden. Escape always closes, except while the dialog is `busy`.
    */
   tone?: 'default' | 'critical';
+  /**
+   * The dialog is saving: **nothing closes it** until it is done. Escape, ✕, a
+   * backdrop click and `ModalCancel` all stand down, so a save cannot be
+   * abandoned halfway with its result landing on a closed dialog. On by itself
+   * while the footer's `ModalConfirm` (or `actions.confirm`) is `loading`; set it
+   * yourself when the saving button is a plain `Button`, and `false` to opt out.
+   */
+  busy?: boolean;
   /**
    * `alertdialog` for a destructive confirmation the user must answer. It makes
    * screen readers announce the description immediately, so give one.
@@ -385,6 +443,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     role = tone === 'critical' ? 'alertdialog' : 'dialog',
     dismissible = tone !== 'critical',
     showClose = tone !== 'critical',
+    busy: busyProp,
     closeLabel = 'Close',
     initialFocusRef,
     returnFocusRef,
@@ -396,32 +455,21 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   },
   ref,
 ) {
-  /* The standard action row, unless the caller brought their own footer. */
+  /* The standard action row, unless the caller brought their own footer. It is the same two buttons a hand-built footer uses (`ModalCancel`, `ModalConfirm`), so the colours and size are decided in one place. */
   const footerContent =
     footer ??
     (actions && (
       <>
-        <Button
-          variant={tone === 'critical' ? 'neutral' : 'secondary'}
-          size="sm"
-          type="button"
-          onClick={onClose}
-        >
-          {actions.cancelLabel ?? 'Cancel'}
-        </Button>
-        <Button
-          variant={tone === 'critical' ? 'danger' : 'primary'}
-          size="sm"
-          type={actions.confirm.type ?? 'button'}
-          form={actions.confirm.form}
-          loading={actions.confirm.loading}
-          disabled={actions.confirm.disabled}
-          onClick={actions.confirm.onClick}
-        >
+        <ModalCancel>{actions.cancelLabel ?? 'Cancel'}</ModalCancel>
+        <ModalConfirm type={actions.confirm.type} form={actions.confirm.form} loading={actions.confirm.loading} disabled={actions.confirm.disabled} onClick={actions.confirm.onClick}>
           {actions.confirm.label}
-        </Button>
+        </ModalConfirm>
       </>
     ));
+
+  /* Saving: the caller's `busy` wins; otherwise the footer's answer says so by loading. */
+  const [confirmLoading, setConfirmLoading] = React.useState(false);
+  const busy = busyProp ?? confirmLoading;
 
   /* SSR-safe: `document` is never read during render, only after mount. */
   const [mounted, setMounted] = React.useState(false);
@@ -447,9 +495,9 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
   /* The open/close effect must not re-run when a caller passes a fresh arrow
      function each render, so the live values are read through a ref that is
      refreshed before that effect runs. */
-  const latest = React.useRef({ onClose, initialFocusRef, returnFocusRef });
+  const latest = React.useRef({ onClose, initialFocusRef, returnFocusRef, busy });
   React.useEffect(() => {
-    latest.current = { onClose, initialFocusRef, returnFocusRef };
+    latest.current = { onClose, initialFocusRef, returnFocusRef, busy };
   });
 
   React.useEffect(() => {
@@ -537,6 +585,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       if (openPanels[openPanels.length - 1] !== panelEl) return;
       event.preventDefault();
+      /* Saving: the Escape is used up (nothing behind hears it) but the dialog stays. */
+      if (latest.current.busy) return;
       latest.current.onClose();
     };
 
@@ -571,9 +621,14 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       onPointerDown={(event) => {
         pointerDownOnBackdrop.current = event.target === event.currentTarget;
       }}
+      onMouseDown={(event) => {
+        /* Saving: a click on the backdrop leaves focus where it is (on the button that is saving) rather than blurring it. */
+        if (busy && event.target === event.currentTarget) event.preventDefault();
+      }}
       onClick={(event) => {
         if (event.target !== event.currentTarget || !pointerDownOnBackdrop.current) return;
         pointerDownOnBackdrop.current = false;
+        if (busy) return;
         if (dismissible) onClose();
         /* Not dismissible: the click blurred whatever had focus, so put it
            back inside rather than leave the user parked on <body>. */
@@ -634,6 +689,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
                   'text-text-primary hover:text-text-primary',
                   'hover:bg-surface-neutral-faint active:bg-surface-neutral-subtle',
                 )}
+                /* Saving: the ✕ is out of action until it is done. */
+                disabled={busy}
                 onClick={onClose}
               />
             )}
@@ -676,7 +733,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
             is the same 20 whether the body scrolls or not. */}
         {hasContent(footerContent) && (
           <footer className="flex shrink-0 flex-wrap items-center justify-end gap-3 px-6 pt-4 pb-5">
-            {footerContent}
+            <ModalFooterContext.Provider value={{ tone, onClose, busy, reportConfirmLoading: setConfirmLoading }}>{footerContent}</ModalFooterContext.Provider>
           </footer>
         )}
       </div>
