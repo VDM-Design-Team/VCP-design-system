@@ -248,7 +248,8 @@ export function DataTable<Row extends { id?: string | number }>({
       aria-label={needsStop && caption ? caption : undefined}
       className={cn(
         'overflow-x-auto font-sans',
-        !bare && 'rounded-md border border-stroke-subtle bg-surface-elevated',
+        /* Inside a `TableCard` (`bare`) the card draws the border and fill, but the table keeps its own corners so a header band or hovered row is not square against the card's padding. */
+        bare ? 'rounded-md' : 'rounded-md border border-stroke-subtle bg-surface-elevated',
         needsStop && 'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
         className,
       )}
