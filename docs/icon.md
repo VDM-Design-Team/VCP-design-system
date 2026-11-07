@@ -89,6 +89,18 @@ can be taken for drawing or annotating.
 that really does mean "draw" or "annotate", or a design that specifies it. Say why in the code
 comment or the PR, so the next person doesn't take it for a slip.
 
+## Removing a row vs deleting a thing: `minus-circle` or `trash`
+
+Two glyphs, split by *what is going away*, so the same action is not drawn two ways:
+
+| It is… | Glyph | Examples |
+|---|---|---|
+| **A row in a form you are still filling in** — a repeatable input you added and can take back; nothing is saved yet | `minus-circle`, default colour | An extra assignee in `MoveAVToCycleModal`, an extra demo link in the handoff popup, a feature line in `AnnouncementModal` |
+| **A saved thing** — an entry that exists and is deleted for good | `trash`, in the critical colour | `DeliverableLink`'s Delete Link, a comment's Delete, a table row's delete (`AccountsTable`, `HolidayTable`) |
+
+**Why.** Trash says "this is destroyed"; on a draft row that is more than what happens, and it is the glyph that should keep its weight for deleting saved things. Name the button for its row either way
+("Remove feature 2", "Delete Link").
+
 ## Why the set is trimmed
 
 Phosphor ships 1,512 glyphs per weight. A `name`-driven API needs a dynamic lookup
