@@ -31,7 +31,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `title` | `ReactNode` | `Status History` | The bar's title |
-| `count` | `number` | `entries.length` | Shown as "(3)" after the title; omit both for none |
+| `count` | `number` | `entries.length` | Shown as "(3)" after the title, for a log whose entries are in `children`. **Ignored when `entries` is given** — the count is then the entries', so it can never disagree with them. Omit both for none |
 | `entries` | `StatusHistoryEntry[]` | — | The log: `{ actor, actorSrc?, from, to, when, id? }`. `when` is already worded ("a month ago") |
 | `open` / `onOpenChange` | `boolean` / `(open) => void` | — | Controlled state |
 | `defaultOpen` | `boolean` | `false` | Uncontrolled: starts open |

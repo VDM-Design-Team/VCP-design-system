@@ -13,6 +13,7 @@ import {
   type SearchSelectRows,
 } from '../../components/search-select';
 import { Popover } from '../../components/popover';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
@@ -46,7 +47,7 @@ import { Popover } from '../../components/popover';
  * - **tags** — `SearchSelect` with search, whose picks are removable tags in the field;
  *   give options a `group` for the Global / Domain-Specific headings.
  * - **users** — one `SearchSelect` per entry (Assignee, Initiator…): a searchable
- *   list of people with avatars. Each is named by its `label`.
+ *   list of people with avatars. Each is named by its `label`, and once filled it reads "Assignee: Amy Lee" (or "Assignee: 2 selected"), so the field still says which person it filters.
  * - **children** — more fields in the same row (an assignee picker, say),
  *   shown and hidden with the others.
  *
@@ -145,11 +146,6 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
-/* ISO yyyy-mm-dd → dd/mm/yyyy, as a string split: no Date, no time zone. */
-const display = (iso: string) => {
-  const [y, m, d] = iso.split('-');
-  return `${pad(Number(d))}/${pad(Number(m))}/${y}`;
-};
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 /* ISO yyyy-mm-dd → "Mar 02, 2026", by string split, like the period field: no Date, no time zone. */
@@ -200,6 +196,8 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const [openState, setOpenState] = React.useState(true);
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
+  /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
+  const { format: display } = useDateFormat();
 
   const hasFields = !!(period || cycle || status || priority || tags || users?.length || children);
   /* With no fields showing (folded away, or none passed) the search takes the room they leave. */
@@ -225,6 +223,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     >
       <Input
         type="search"
+        edge="neutral"
         aria-label={searchPlaceholder}
         placeholder={searchPlaceholder}
         value={search ?? ''}
@@ -260,7 +259,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                   type="button"
                   aria-label={periodText ? `Period, ${periodText}` : 'Period'}
                   className={cn(
-                    'flex h-10 w-full items-center gap-2 rounded-md border border-stroke-strong bg-surface-elevated px-3 text-left transition-colors',
+                    'flex h-10 w-full items-center gap-2 rounded-md border border-neutral-outline-border-default bg-surface-elevated px-3 text-left transition-colors',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                   )}
                 >
@@ -300,6 +299,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {cycle && (
             <SearchSelect
+              edge="neutral"
               aria-label="Cycle"
               placeholder={cycle.placeholder ?? 'Select cycle'}
               searchPlaceholder="Search cycles"
@@ -329,6 +329,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {status && (
             <SearchSelect
+              edge="neutral"
               multiple
               display="summary"
               confirm
@@ -341,6 +342,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {priority && (
             <Select
+              edge="neutral"
               aria-label="Priority"
               placeholder="Select priority"
               {...priority}
@@ -349,6 +351,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {tags && (
             <SearchSelect
+              edge="neutral"
               multiple
               display="tags"
               searchPlaceholder="Search tags"
@@ -360,9 +363,12 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
           )}
           {users?.map(({ label, placeholder, ...rest }) => (
             <SearchSelect
+              edge="neutral"
               key={label}
               {...({
                 'aria-label': label,
+                /* Filled, the field still says which person it is ("Assignee: Amy Lee"). */
+                valuePrefix: label,
                 placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
                 searchPlaceholder: 'Search by name',
                 rows: 'avatar',

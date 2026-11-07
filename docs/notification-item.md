@@ -186,7 +186,18 @@ are `MentionInput`'s.
 The reactions work as `EmojiReactionPicker` does: the thumbs-up toggles yours, the smiley
 opens the palette, each pill toggles yours, and extras collapse into "+N".
 
-"Show Reply" / "Hide Reply" carry `aria-expanded` and `aria-controls` for the reply card.
+"Show Reply" / "Hide Reply" carry `aria-expanded` and `aria-controls` for the reply card, and stay on one line.
+
+**Focus never falls to the page.** Each step of the flow puts it on a control that is still there (the control that had it goes with the view):
+
+| After | Focus goes to |
+|---|---|
+| **Reply** (sent) | "Show Reply" (the new reply starts hidden) |
+| **Cancel** a new reply | "Reply", the control that opened the composer |
+| **Save** an edit, or **Cancel** one | "Edit" |
+| **Delete** | "Reply", which comes back in place of the reply |
+
+The component waits for that control to be on screen (the reply is the caller's data, so it may arrive a render after `onReply`), then focuses it. The `ReplyFlow` and `CancelReply` stories assert `document.activeElement`.
 
 ## The comment preview
 

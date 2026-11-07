@@ -13,6 +13,7 @@ import { Popover } from '../../components/popover';
 import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
 import { Tooltip } from '../../atoms/tooltip';
+import { useIsTruncated } from '../../components/truncated-text';
 import {
   buildPeriod,
   columnIndex,
@@ -217,6 +218,30 @@ const statTone = cva('font-numeric text-caption-md-semibold', {
 });
 
 const cardinal = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+/** "1 pt", "5 pts". */
+const pts = (n: number) => cardinal(n, 'pt', 'pts');
+
+/** A user's name as the row's expand button: cut with "…" when it does not fit, and the whole of it on hover and focus when it has been cut (the button is already the tab stop). */
+function UserToggle({ name, expanded, controls, onToggle }: { name: string; expanded: boolean; controls?: string; onToggle: () => void }) {
+  const text = React.useRef<HTMLSpanElement>(null);
+  const truncated = useIsTruncated(text, [name]);
+  return (
+    <Tooltip content={name} describe={false} disabled={!truncated} className="w-full">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        aria-controls={controls}
+        onClick={onToggle}
+        className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
+      >
+        <Icon name={expanded ? 'caret-down' : 'caret-right'} size={16} className="shrink-0 text-text-secondary" />
+        <span ref={text} className="min-w-0 flex-1 truncate font-sans text-body-sm-semibold text-text-primary">
+          {name}
+        </span>
+      </button>
+    </Tooltip>
+  );
+}
 
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 const shortFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
@@ -312,7 +337,7 @@ function TaskBar({
   onSelect?: (task: GanttTask) => void;
 }) {
   const minimised = span <= MINIMISED_SPAN;
-  const label = `${task.title}, ${STATUS[task.status].label}, ${task.points} points, ${formatDate(task.start)} to ${formatDate(task.end)}`;
+  const label = `${task.title}, ${STATUS[task.status].label}, ${cardinal(task.points, 'point', 'points')}, ${formatDate(task.start)} to ${formatDate(task.end)}`;
   const details: GanttTooltipDetail[] = [
     { label: 'Status', value: task.statusLabel ?? STATUS[task.status].label },
     ...(task.initiator ? [{ label: 'Initiator', value: task.initiator }] : []),
@@ -327,7 +352,7 @@ function TaskBar({
         </span>
       )}
       {!minimised && <span className="min-w-0 flex-1 truncate">{task.title}</span>}
-      <span className={pointsPill}>{minimised ? task.points : `${task.points} pts`}</span>
+      <span className={pointsPill}>{minimised ? task.points : pts(task.points)}</span>
     </>
   );
   return (
@@ -673,7 +698,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                 <Icon name={closed ? 'caret-right' : 'caret-down'} size={16} className="shrink-0 text-text-secondary" />
                 <span className="font-sans text-body-sm-semibold text-text-primary">{row.project.name}</span>
                 <span className="rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-medium text-text-secondary">
-                  {cardinal(row.count, 'AV', 'AVs')} | {row.points} pts
+                  {cardinal(row.count, 'AV', 'AVs')} | {pts(row.points)}
                 </span>
               </button>
             </div>
@@ -715,16 +740,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               expanded && 'border-l-4 border-l-stroke-default',
             )}
           >
-            <button
-              type="button"
-              aria-expanded={expanded}
-              aria-controls={stats.length > 0 ? panelId : undefined}
-              onClick={() => toggle(row.id)}
-              className="flex w-full items-center gap-2 px-2 py-4 text-left outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused"
-            >
-              <Icon name={expanded ? 'caret-down' : 'caret-right'} size={16} className="shrink-0 text-text-secondary" />
-              <span className="min-w-0 flex-1 truncate font-sans text-body-sm-semibold text-text-primary">{user.name}</span>
-            </button>
+            <UserToggle name={user.name} expanded={expanded} controls={stats.length > 0 ? panelId : undefined} onToggle={() => toggle(row.id)} />
             {stats.length > 0 && (
               <Slide open={expanded}>
                 <dl id={panelId} className="m-0 flex flex-col gap-1 px-3 pb-4">
@@ -754,7 +770,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                       </span>
                     )}
                     <span className={pointsPill}>
-                      {summary.to === summary.from ? summary.points : `${summary.points} pts`}
+                      {summary.to === summary.from ? summary.points : pts(summary.points)}
                     </span>
                   </div>
                 )}

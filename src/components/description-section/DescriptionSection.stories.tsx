@@ -72,6 +72,59 @@ export const Editing: Story = {
   },
 };
 
+/**
+ * Removing a card only *reports* it (`onRemove`): the card and its remove button go, so the page owns where focus lands. Without that it falls to the page and a keyboard or screen-reader user is sent back to the
+ * top. Here the page puts it in the **next card's field** (the one that moved up into that place), or on **Add problem** when it was the last.
+ */
+export const RemovingACard: Story = {
+  render: () => {
+    const [cards, setCards] = React.useState([
+      { id: 'a', text: 'First problem' },
+      { id: 'b', text: 'Second problem' },
+      { id: 'c', text: 'Third problem' },
+    ]);
+    const root = React.useRef<HTMLDivElement>(null);
+    /* Which place focus goes to once the card has gone. */
+    const focusAt = React.useRef<number | null>(null);
+    React.useEffect(() => {
+      const at = focusAt.current;
+      if (at === null) return;
+      focusAt.current = null;
+      const fields = root.current?.querySelectorAll<HTMLElement>('textarea');
+      const next = fields?.[at];
+      (next ?? root.current?.querySelector<HTMLElement>('button[aria-label="Add problem"], button[title="Add problem"]'))?.focus();
+    }, [cards]);
+    return (
+      <div ref={root}>
+        <DescriptionSection type="problem" onAdd={fn()}>
+          {cards.map((card, index) => (
+            <DescriptionCard
+              key={card.id}
+              editing
+              defaultValue={card.text}
+              onRemove={() => {
+                focusAt.current = index;
+                setCards((now) => now.filter((c) => c.id !== card.id));
+              }}
+            />
+          ))}
+        </DescriptionSection>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* Remove the middle one: focus goes to the card that took its place (the third, now second). */
+    await userEvent.click(canvas.getByRole('textbox', { name: 'Problem 2' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove problem 2' }));
+    await waitFor(() => expect(canvas.getByRole('textbox', { name: 'Problem 2' })).toHaveFocus());
+    await expect(canvas.getByRole('textbox', { name: 'Problem 2' })).toHaveValue('Third problem');
+    /* Remove the last: no card follows, so focus goes to the add button. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove problem 2' }));
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Add problem' })).toHaveFocus());
+  },
+};
+
 /** The four sections, each with its fixed title and its cards in its own colour. */
 export const Types: Story = {
   parameters: { controls: { disable: true } },

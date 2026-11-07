@@ -142,11 +142,18 @@ interface SearchSelectBase
   disabled?: boolean;
   /** `sm` 32 tall, `md` 40 (default), as `Select`. */
   size?: 'sm' | 'md';
+  /** The resting edge, as `Input` and `Select`: `strong` (default) or `neutral` (lighter; a deliberate exception for a row of filters). An error, a warning and focus still win. */
+  edge?: 'strong' | 'neutral';
   /**
    * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
    * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
    */
   emphasis?: 'regular' | 'medium';
+  /**
+   * Words before what is picked, once something is: "Assignee" makes the field read "Assignee: Amy Lee" (or "Assignee: 2 selected"), so a filled field still says what it filters. The placeholder stays as it is.
+   * Visual only: the trigger is already named by its label and then its value, so a screen reader is not told twice. Summary display only (tags have no summary).
+   */
+  valuePrefix?: string;
   /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
   fullWidth?: boolean;
   /**
@@ -300,7 +307,9 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       disabled,
       inline,
       size = 'md',
+      edge = 'strong',
       emphasis = 'medium',
+      valuePrefix,
       fullWidth = false,
       loading,
       onSearch,
@@ -804,7 +813,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   ? 'border-accent-critical-outline-border-default'
                   : isWarning
                     ? 'border-accent-warning-outline-border-default'
-                    : 'border-stroke-strong focus-within:border-stroke-focused'),
+                    : cn('focus-within:border-stroke-focused', edge === 'neutral' ? 'border-neutral-outline-border-default' : 'border-stroke-strong')),
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
               disabled && (inline ? 'cursor-not-allowed' : 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'),
             )}
@@ -911,6 +920,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 <span id={valueId} className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
               ) : (
                 <span id={valueId} className="min-w-0 truncate">
+                  {summary && valuePrefix && <span aria-hidden="true">{valuePrefix}: </span>}
                   {summary ?? placeholder}
                 </span>
               )}

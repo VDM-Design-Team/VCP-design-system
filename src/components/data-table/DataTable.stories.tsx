@@ -539,10 +539,10 @@ export const InlineEditing: Story = {
     await userEvent.keyboard('{Escape}');
 
     /* Calendar: open, pick a day, no confirm. */
-    await expect(canvas.getByText('2026-09-28')).toBeInTheDocument();
+    await expect(canvas.getByText('28/09/2026')).toBeInTheDocument();
     await userEvent.click(canvas.getByRole('button', { name: 'Change due date of AV-2041' }));
     await userEvent.click(await canvas.findByRole('button', { name: /^20 September 2026/ }));
-    await expect(canvas.getByText('2026-09-20')).toBeInTheDocument();
+    await expect(canvas.getByText('20/09/2026')).toBeInTheDocument();
 
     /* Dismissed — by Cancel or by clicking away — the picker is closed and the button
        is no longer held open. (That it is also not drawn without hover depends on the real

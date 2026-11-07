@@ -18,6 +18,7 @@ import { InlineDateEdit, InlineEdit } from '../../components/inline-edit';
 import { StatusTag, STATUS_COLUMN_HINT, type StatusTagProps } from '../../components/status-tag';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { TruncatedText, useIsTruncated } from '../../components/truncated-text';
+import { useDateFormat } from '../../lib/format-date';
 import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
 
 /**
@@ -161,7 +162,8 @@ const FORMULA_HINTS = {
 };
 const ESTIMATE_HINT = 'This date is an estimate and may not be fully accurate.';
 
-const dateText = (d: PlanningDate) => (d.estimated ? `${d.value} (est.)` : d.value);
+/** A date as the system writes dates (dd/mm/yyyy, or the person's locale), with "(est.)" after one the system calculated. */
+const dateText = (d: PlanningDate, format: (iso: string) => string) => (d.estimated ? `${format(d.value)} (est.)` : format(d.value));
 
 /** An estimated date carries the design's caution on hover and focus; a set one has nothing to say. */
 function EstimateHint({ estimated, children }: { estimated?: boolean; children: React.ReactElement }) {
@@ -349,6 +351,7 @@ export function PlanningTable({
   ...props
 }: PlanningTableProps) {
   const baseId = React.useId();
+  const dates = useDateFormat();
   const hints = { ...FORMULA_HINTS, ...hintOverrides };
   /* A Backlog row in the air, and the Cycle it is over. */
   const [dragging, setDragging] = React.useState<{ rowId: string; fromId: string } | null>(null);
@@ -510,7 +513,7 @@ export function PlanningTable({
               <InlineDateEdit
                 label={`start date for ${row.ref}`}
                 value={row.start.value}
-                format={() => dateText(row.start!)}
+                format={() => dateText(row.start!, dates.format)}
                 disabled={!onStartChange}
                 onChange={(iso) => onStartChange?.(row, iso)}
               />
@@ -546,7 +549,7 @@ export function PlanningTable({
               <InlineDateEdit
                 label={`due date for ${row.ref}`}
                 value={row.due.value}
-                format={() => dateText(row.due!)}
+                format={() => dateText(row.due!, dates.format)}
                 align="right"
                 disabled={!onDueChange}
                 onChange={(iso) => onDueChange?.(row, iso)}

@@ -66,9 +66,9 @@ export const UserLabel = React.forwardRef<HTMLSpanElement, UserLabelProps>(funct
         {description && (
           <span
             className={cn(
-              /* Pulled up under the name so the two sit close, as the Assignee chip's do. */
+              /* `sm` is pulled up under the name so the two sit close, as the Assignee chip's do; `md` sits 2 below it. */
               'truncate text-text-tertiary',
-              small ? '-mt-1 text-caption-sm-medium' : '-mt-1.5 text-caption-md-medium',
+              small ? '-mt-1 text-caption-sm-medium' : 'mt-0.5 text-caption-md-medium',
             )}
           >
             {description}
