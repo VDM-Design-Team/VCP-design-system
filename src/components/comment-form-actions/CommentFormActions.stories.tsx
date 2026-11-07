@@ -92,9 +92,9 @@ export const Variants: Story = {
     await expect(replies[0]).toBeEnabled();
     await expect(replies[1]).toBeDisabled();
     await expect(canvas.getAllByRole('button', { name: 'Cancel' })[1]).toBeEnabled();
-    /* Waiting: busy and not clickable twice. */
+    /* Waiting: busy and not clickable twice, but still focusable (a loading button keeps focus). */
     const waiting = canvas.getByRole('button', { name: 'Add Comment' });
-    await expect(waiting).toBeDisabled();
+    await expect(waiting).toHaveAttribute('aria-disabled', 'true');
     await expect(waiting).toHaveAttribute('aria-busy', 'true');
   },
 };
