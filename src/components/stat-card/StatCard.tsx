@@ -136,7 +136,7 @@ const ICON_TONE: Record<StatCardAccent, string> = {
 /* What differs between the two looks — all on Tailwind's numeric scale. The
    stripe is always its own column, as Figma draws it: the content area starts
    after it, so centred content centres in the space beside the stripe.
-   `default` (Value_Card): 8 stripe, left-aligned, 16 either side, no gap
+   `default` (Value_Card): 8 stripe, left-aligned, 16 either side, 4
    between label and value, exactly 100 high and at least 175 wide — the
    content is centred vertically in that height. `superadmin`: 8 stripe,
    centred, 24 either side, 12 between title row and value, exactly 150 high. */
@@ -153,7 +153,7 @@ const VARIANT: Record<
     card: 'h-25 min-w-44',
     stripe: 'w-2',
     content: 'px-4',
-    gap: 'gap-0',
+    gap: 'gap-1',
     valueType: 'text-heading-xl-bold',
     align: 'start',
   },
