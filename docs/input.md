@@ -17,6 +17,7 @@ a `Textarea` for long answers, a `Select` for a closed set, a date picker for da
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `size` | `sm \| md` | `md` | Replaces the native `size` attribute (character count), which is not forwarded |
+| `edge` | `strong \| neutral` | `strong` | The resting edge: `stroke.strong` (3:1) or `neutral.outline.border.default` (about 2.6:1 on white, lighter). `neutral` is a deliberate exception for a row of filters; an error, a warning and focus still win |
 | `invalid` | `boolean` | `false` | Critical border + `aria-invalid`. Must be paired with a visible message |
 | `emphasis` | `regular \| medium` | `regular` | The weight of the value. `medium` is what a *chosen* value reads as in `Select`, `SearchSelect` and `DateField`; the placeholder stays regular either way |
 | `fullWidth` | `boolean` | `false` | Spans the container. Use in forms, modal bodies, and on mobile |

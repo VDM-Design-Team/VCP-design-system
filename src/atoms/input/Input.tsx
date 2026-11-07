@@ -32,11 +32,16 @@ const field = cva(
       invalid: {
         /* accent.critical.outline — held through focus so the error stays legible. */
         true: 'border-accent-critical-outline-border-default',
-        false: 'border-stroke-strong focus-within:border-stroke-focused',
+        false: 'focus-within:border-stroke-focused',
       },
+      edge: { strong: '', neutral: '' },
       fullWidth: { true: 'flex w-full', false: '' },
     },
-    defaultVariants: { size: 'md', invalid: false, fullWidth: false },
+    compoundVariants: [
+      { invalid: false, edge: 'strong', className: 'border-stroke-strong' },
+      { invalid: false, edge: 'neutral', className: 'border-neutral-outline-border-default' },
+    ],
+    defaultVariants: { size: 'md', invalid: false, fullWidth: false, edge: 'strong' },
   },
 );
 
@@ -79,6 +84,11 @@ export interface InputProps
   /** Critical border + `aria-invalid`. Always pair with a visible error message. */
   invalid?: boolean;
   /**
+   * The resting edge: `strong` (default, `stroke.strong`, 3:1) or `neutral` (`neutral.outline.border.default`, lighter, about 2.6:1 on white). `neutral` is a deliberate
+   * exception for a toolbar of filters, where many outlined fields together read as noise; an error, a warning and focus still win over it. Use it only where the field is identified by more than its edge.
+   */
+  edge?: 'strong' | 'neutral';
+  /**
    * The weight of the value: `regular` (the default) or `medium` — what a *chosen* value reads as in `Select`,
    * `SearchSelect` and `DateField`. The placeholder stays regular either way.
    */
@@ -88,11 +98,11 @@ export interface InputProps
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, size, invalid: invalidProp, emphasis, fullWidth, leadingIcon, trailingIcon, trailingAction, disabled, type = 'text', ...props }, ref) => {
+  ({ className, size, edge, invalid: invalidProp, emphasis, fullWidth, leadingIcon, trailingIcon, trailingAction, disabled, type = 'text', ...props }, ref) => {
     /* Invalid by the prop, or by the `aria-invalid` a `Field` with an `error` puts on its control: the error's red edge comes with the message. */
     const invalid = invalidProp || props['aria-invalid'] === true || props['aria-invalid'] === 'true';
     return (
-      <div className={cn(field({ size, invalid, fullWidth }), className)}>
+      <div className={cn(field({ size, invalid, fullWidth, edge }), className)}>
         {leadingIcon && <Adornment disabled={disabled}>{leadingIcon}</Adornment>}
         <input ref={ref} type={type} disabled={disabled} aria-invalid={invalid || undefined} className={control({ size, emphasis })} {...props} />
         {trailingIcon && <Adornment disabled={disabled}>{trailingIcon}</Adornment>}
