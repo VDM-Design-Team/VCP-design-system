@@ -34,6 +34,8 @@ export * from './review-av-modal';
 export * from './sidebar';
 export * from './tag-management-modal';
 export * from './superadmin-metrics';
+export * from './team-capacity';
+export * from './user-capacity';
 export * from './top-bar';
 export * from './task-log-trail';
 export * from './user-account-modal';

@@ -9,7 +9,7 @@ import {
 import { formatCycleRange } from '../../components/cycle-tag';
 import { DateField } from '../../components/date-field';
 import { Field } from '../../components/field';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { SearchSelect } from '../../components/search-select';
 
 /**
@@ -228,12 +228,10 @@ export function MoveAVToCycleModal({
       size="lg"
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm" type="button" loading={loading} onClick={submit}>
+          <ModalCancel />
+          <ModalConfirm loading={loading} onClick={submit}>
             Confirm
-          </Button>
+          </ModalConfirm>
         </>
       }
     >
