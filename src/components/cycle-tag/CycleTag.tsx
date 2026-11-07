@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Tag } from '../../atoms/tag';
+import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
  * CycleTag — the cycle an Added Value belongs to: its code and the dates it
@@ -50,6 +50,8 @@ export interface CycleTagProps extends Omit<React.HTMLAttributes<HTMLSpanElement
   start: string;
   /** ISO `yyyy-mm-dd`. */
   end: string;
+  /** The tag's size. Default `md`. */
+  size?: TagProps['size'];
 }
 
 export const CycleTag = React.forwardRef<HTMLSpanElement, CycleTagProps>(

@@ -20,7 +20,7 @@ The primary interactive control.
 | `variant` | `primary \| secondary \| neutral \| tertiary \| danger \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
-| `loading` | `boolean` | `false` | Disables the button and swaps the left icon for a spinner |
+| `loading` | `boolean` | `false` | Swaps the left icon for a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`) |
 | `iconLeft` / `iconRight` | `ReactNode` | — | 16px icons only |
 
 ### `secondary` or `neutral`?
@@ -53,7 +53,7 @@ holding and the border needs a stronger token.
   hovered and pressed, in both themes. In dark the label is dark, so the fill
   gets **lighter** on hover and press, never darker. The story **Filled text
   contrast, both themes** tests it.
-- `loading` sets `aria-busy` and disables the control; put the outcome in the label ("Saving…") if the wait exceeds ~1s.
+- `loading` sets `aria-busy` and `aria-disabled` and ignores presses (click, Enter, Space, and the implicit submit of the form it submits), but **it is not `disabled`, so it keeps focus**. A disabled button drops focus to the page, and a keyboard or screen-reader user who just pressed Save is lost mid-save. It looks the same as a disabled button. Put the outcome in the label ("Saving…") if the wait exceeds ~1s. The `LoadingKeepsFocus` story is the test.
 - Icon-only buttons **must** have an `aria-label`.
 
 ## Don't

@@ -38,6 +38,9 @@ export const Default: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('John')).toBeVisible();
     await expect(canvas.getByText('Assignee')).toBeVisible();
+    /* At the default size the description sits 2 below the name. */
+    const gap = canvas.getByText('Assignee').getBoundingClientRect().top - canvas.getByText('John').getBoundingClientRect().bottom;
+    await expect(Math.round(gap)).toBe(2);
     /* The avatar beside a visible name is decoration: one announcement, not two. */
     await expect(canvasElement.querySelector('[aria-hidden="true"]')).not.toBeNull();
   },
