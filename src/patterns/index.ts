@@ -8,6 +8,7 @@
 export * from './accept-pending-av-modal';
 export * from './accounts-table';
 export * from './move-av-to-cycle-modal';
+export * from './attachments-modal';
 export * from './av-header';
 export * from './detail-card';
 export * from './av-table';
