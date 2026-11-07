@@ -15,7 +15,7 @@ const button = cva(
     'font-sans text-label-sm-medium whitespace-nowrap',
     'rounded-sm transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    'disabled:pointer-events-none',
+    'disabled:pointer-events-none aria-disabled:pointer-events-none',
   ],
   {
     variants: {
@@ -24,7 +24,7 @@ const button = cva(
         primary: [
           'bg-action-primary-surface-default text-action-primary-content-default',
           'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed',
-          'disabled:bg-action-primary-surface-disabled disabled:text-action-primary-content-disabled',
+          'disabled:bg-action-primary-surface-disabled disabled:text-action-primary-content-disabled aria-disabled:bg-action-primary-surface-disabled aria-disabled:text-action-primary-content-disabled',
         ],
         /* action.secondary — outlined */
         secondary: [
@@ -32,7 +32,7 @@ const button = cva(
           'border border-action-secondary-border-default',
           'hover:bg-action-secondary-surface-hover hover:border-action-secondary-border-hover',
           'active:bg-action-secondary-surface-pressed active:border-action-secondary-border-pressed',
-          'disabled:text-action-secondary-content-disabled disabled:border-action-secondary-border-disabled',
+          'disabled:text-action-secondary-content-disabled disabled:border-action-secondary-border-disabled aria-disabled:text-action-secondary-content-disabled aria-disabled:border-action-secondary-border-disabled',
         ],
         /* neutral.outline — outlined, but grey. The Cancel beside a
            destructive answer: an outlined *brand* button reads as a second
@@ -42,25 +42,25 @@ const button = cva(
           'border border-neutral-outline-border-default',
           'hover:bg-neutral-outline-surface-hover hover:border-neutral-outline-border-hover hover:text-neutral-outline-content-hover',
           'active:bg-neutral-outline-surface-pressed active:border-neutral-outline-border-pressed active:text-neutral-outline-content-pressed',
-          'disabled:text-neutral-outline-content-disabled disabled:border-neutral-outline-border-disabled',
+          'disabled:text-neutral-outline-content-disabled disabled:border-neutral-outline-border-disabled aria-disabled:text-neutral-outline-content-disabled aria-disabled:border-neutral-outline-border-disabled',
         ],
         /* action.tertiary — ghost */
         tertiary: [
           'bg-action-tertiary-surface-default text-action-tertiary-content-default',
           'hover:text-action-tertiary-content-hover active:text-action-tertiary-content-pressed',
-          'disabled:text-action-tertiary-content-disabled',
+          'disabled:text-action-tertiary-content-disabled aria-disabled:text-action-tertiary-content-disabled',
         ],
         /* accent.critical.filled — destructive */
         danger: [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
           'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
-          'disabled:bg-accent-critical-filled-surface-disabled',
+          'disabled:bg-accent-critical-filled-surface-disabled aria-disabled:bg-accent-critical-filled-surface-disabled',
         ],
         /* text.link */
         link: [
           'bg-transparent text-text-link-default underline underline-offset-4',
           'hover:text-text-link-hover active:text-text-link-pressed hover:no-underline',
-          'disabled:text-text-disabled',
+          'disabled:text-text-disabled aria-disabled:text-text-disabled',
         ],
       },
       size: {
@@ -77,26 +77,43 @@ const button = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof button> {
-  /** Renders a spinner and disables the button. */
+  /**
+   * Renders a spinner, looks disabled and ignores presses, but **keeps focus**: it is `aria-disabled`, not `disabled`, so
+   * the person pressing Save is not dropped onto the page while it saves. A press (click, Enter, Space, or Enter in a field
+   * of the form it submits) does nothing until it stops loading.
+   */
   loading?: boolean;
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, fullWidth, loading, iconLeft, iconRight, children, disabled, ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(button({ variant, size, fullWidth }), className)}
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      {...props}
-    >
-      {loading ? <Spinner /> : iconLeft}
-      {children}
-      {!loading && iconRight}
-    </button>
-  ),
+  ({ className, variant, size, fullWidth, loading, iconLeft, iconRight, children, disabled, onClick, ...props }, ref) => {
+    /* Loading but not disabled: still a tab stop and still focused, just inert. A disabled button keeps `disabled`. */
+    const busy = Boolean(loading) && !disabled;
+    return (
+      <button
+        ref={ref}
+        className={cn(button({ variant, size, fullWidth }), className)}
+        {...props}
+        disabled={disabled}
+        aria-disabled={busy || props['aria-disabled'] || undefined}
+        aria-busy={loading || undefined}
+        onClick={(event) => {
+          /* Swallowing the click also stops a submit button's form from submitting, implicit submission included. */
+          if (busy) {
+            event.preventDefault();
+            return;
+          }
+          onClick?.(event);
+        }}
+      >
+        {loading ? <Spinner /> : iconLeft}
+        {children}
+        {!loading && iconRight}
+      </button>
+    );
+  },
 );
 Button.displayName = 'Button';
 
