@@ -17,6 +17,7 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Footer } from '../../atoms/footer';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
+import { useToolbarTheme } from '../../lib/story-theme';
 
 /* One rail with real state, so navigating and collapsing work in the story. */
 const Rail = ({ userType = 'user', collapsed: initial = false }: { userType?: SidebarUserType; collapsed?: boolean }) => {
@@ -33,14 +34,19 @@ const Rail = ({ userType = 'user', collapsed: initial = false }: { userType?: Si
   );
 };
 
-const Bar = () => (
-  <TopBar
-    primaryAction={<Button>Create Added Value</Button>}
-    notifications={3}
-    user={{ name: 'Eve Kestrel' }}
-    onUserMenu={() => {}}
-  />
-);
+/* The bar's light/dark switch is linked to Storybook's own theme control, both ways. */
+const Bar = () => {
+  const theme = useToolbarTheme();
+  return (
+    <TopBar
+      primaryAction={<Button>Create Added Value</Button>}
+      notifications={3}
+      user={{ name: 'Eve Kestrel' }}
+      onUserMenu={() => {}}
+      {...theme}
+    />
+  );
+};
 
 /**
  * Page content, as plain markup. The shell frames whatever it is handed, and

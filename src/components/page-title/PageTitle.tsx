@@ -34,6 +34,8 @@ export interface PageTitleProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   onBack?: () => void;
   /** The back control's accessible name — say where it goes, not "Back". */
   backLabel?: string;
+  /** Something that sits beside the title, on its left: a view switch (the dashboard's Cycle / Quarter), a status. */
+  beside?: React.ReactNode;
   /** The page's actions, on the right. */
   actions?: React.ReactNode;
   /**
@@ -59,7 +61,7 @@ const TITLE_TYPE = {
 } as const;
 
 export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
-  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', actions, size = 'md', ...props }, ref) => (
+  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', beside, actions, size = 'md', ...props }, ref) => (
     /* 32 above, 16 below, 32 each side — the design's own frame. */
     <header
       ref={ref}
@@ -71,7 +73,7 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
     >
       {/* `items-center`: the back control and the title share a centre line —
           Figma's `Back Nav` aligns its counter axis to the centre. */}
-      <div className="flex min-w-0 items-center gap-2">
+      <div className={cn('flex min-w-0 items-center gap-2', beside && 'flex-wrap gap-y-2')}>
         {backHref ? (
           /* A real link — middle-click and open-in-new-tab work, which they
              cannot on a button. Named here, so the glyph stays decorative. */
@@ -94,8 +96,9 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
           <h1 className={cn('min-w-0 truncate text-text-secondary', TITLE_TYPE[size])}>{title}</h1>
           {subtitle && <p className="mt-1 truncate text-body-sm-regular text-text-secondary">{subtitle}</p>}
         </div>
+        {beside}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {actions && <div className="flex min-w-0 max-w-full shrink-0 flex-wrap items-center justify-end gap-2">{actions}</div>}
     </header>
   ),
 );
