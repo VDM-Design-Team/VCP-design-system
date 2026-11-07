@@ -3,6 +3,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
+import { Input } from '../../atoms/input';
 import { Divider } from '../../atoms/divider';
 import { Popover, type PopoverAlign, type PopoverProps } from '../popover';
 
@@ -93,6 +94,13 @@ export interface MenuActionItem {
   disabled?: boolean;
   onClick?: () => void;
   divider?: false;
+  /**
+   * **A submenu**: the choices that open beside this item (Pending Review › Accept, Reject). The item then shows a right caret, opens its submenu on hover, click or
+   * ArrowRight, and is not itself a choice — only the submenu's items are. `onClick` and `onSelect` fire for those, with their own keys.
+   */
+  items?: MenuActionItem[];
+  /** The submenu's heading. Defaults to this item's label (when it is a string). */
+  heading?: string;
 }
 
 /** A rule between groups. Not focusable, not an item. */
@@ -118,6 +126,22 @@ export interface MenuProps
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /**
+   * A heading over the items — "Move to Status", "Urgency". It names the menu (`aria-label`) and is drawn as a quiet line above a rule; it is
+   * not an item, so arrows and type-ahead step over it.
+   */
+  heading?: string;
+  /**
+   * **A search box at the top** (Figma's `_Menu_Item_Search`): typing narrows the items to the ones whose label contains the text. The box has focus when the menu opens; ArrowDown goes
+   * into the list, ArrowUp from the first item comes back, and Enter chooses the first match. Items with a non-text label always stay.
+   */
+  searchable?: boolean;
+  /** The search box's placeholder and name. */
+  searchPlaceholder?: string;
+  /** What the list says when nothing matches. */
+  emptyText?: string;
+  /** Which side of the trigger the menu prefers: `bottom` (the default) or `top`. It still flips when there is no room. */
+  placement?: 'top' | 'bottom';
   /** Which edge of the menu lines up with the trigger's. */
   align?: PopoverAlign;
   /** `Popover`'s `strategy`: `fixed` (default) floats over any `overflow` ancestor; `absolute` only inside a CSS `transform`. */
@@ -130,14 +154,94 @@ export interface MenuProps
 
 const isAction = (item: MenuItem): item is MenuActionItem => item.divider !== true;
 
+/* The category row, as the library's `Menu_Category_Item` draws it without its caret: 40 high, small bold type in the quiet grey, a rule beneath. It names a menu or a submenu. */
+const CATEGORY = 'mb-1 flex h-10 items-center border-b border-stroke-subtle px-3 text-caption-md-bold text-text-tertiary';
+
+/** The panel of a submenu. Fixed to the screen from its parent item's rect so no scrolling or clipping ancestor can cut it off. */
+function SubMenu({
+  heading,
+  items,
+  rect,
+  autoFocus,
+  onChoose,
+  onBack,
+}: {
+  heading: string;
+  items: MenuActionItem[];
+  rect: DOMRect;
+  autoFocus: boolean;
+  onChoose: (item: MenuActionItem) => void;
+  onBack: () => void;
+}) {
+  const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const enabled = items.map((item, i) => (item.disabled ? -1 : i)).filter((i) => i >= 0);
+  const [active, setActive] = React.useState(autoFocus ? (enabled[0] ?? 0) : -1);
+  React.useEffect(() => {
+    if (autoFocus) refs.current[active]?.focus();
+  }, [active, autoFocus]);
+
+  const step = (by: 1 | -1) => {
+    if (!enabled.length) return;
+    const at = enabled.indexOf(active);
+    setActive(enabled[(at + by + enabled.length) % enabled.length] ?? enabled[0]);
+  };
+
+  return (
+    <div
+      role="menu"
+      aria-label={heading}
+      /* The first choice lines up with the parent item, as Figma draws it: the panel starts one category row (and its padding) above. */
+      style={{ left: rect.right, top: rect.top - 44 }}
+      className="fixed z-60 min-w-48 rounded-md border border-stroke-default bg-surface-elevated p-1 font-sans shadow-menu"
+      onKeyDown={(event) => {
+        const handled = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'Escape', 'Home', 'End'];
+        if (!handled.includes(event.key)) return;
+        /* These belong to the submenu: the menu behind it must not also move or close. */
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.key === 'ArrowDown') step(1);
+        else if (event.key === 'ArrowUp') step(-1);
+        else if (event.key === 'Home') setActive(enabled[0] ?? 0);
+        else if (event.key === 'End') setActive(enabled[enabled.length - 1] ?? 0);
+        else onBack();
+      }}
+    >
+      <div aria-hidden="true" className={CATEGORY}>
+        {heading}
+      </div>
+      {items.map((item, i) => (
+        <button
+          key={item.key ?? i}
+          ref={(el) => {
+            refs.current[i] = el;
+          }}
+          type="button"
+          role="menuitem"
+          disabled={item.disabled}
+          tabIndex={i === active ? 0 : -1}
+          onClick={() => onChoose(item)}
+          className={menuItem({ tone: item.tone })}
+        >
+          <span className="min-w-0 flex-1 truncate">{item.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
   {
-    items = [],
+    items: allItems = [],
     onSelect,
     trigger,
     open,
     defaultOpen = false,
     onOpenChange,
+    heading,
+    searchable,
+    searchPlaceholder = 'Search...',
+    emptyText = 'No results',
+    placement,
     align = 'right',
     strategy,
     className,
@@ -149,6 +253,18 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
   const [uncontrolled, setUncontrolled] = React.useState(defaultOpen);
   const isOpen = open !== undefined ? open : uncontrolled;
 
+  /* Searching narrows the list; every index below is into what is shown. */
+  const [query, setQuery] = React.useState('');
+  const searchRef = React.useRef<HTMLInputElement>(null);
+  const needle = query.trim().toLowerCase();
+  const items =
+    searchable && needle
+      ? allItems.filter((item) => isAction(item) && (typeof item.label !== 'string' || item.label.toLowerCase().includes(needle)))
+      : allItems;
+  React.useEffect(() => {
+    if (!isOpen) setQuery('');
+  }, [isOpen]);
+
   const setOpen = React.useCallback(
     (next: boolean) => {
       if (open === undefined) setUncontrolled(next);
@@ -159,6 +275,19 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
 
   const itemRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const [activeIndex, setActiveIndex] = React.useState(-1);
+  /* Which item's submenu is open, where it hangs, and whether focus should go into it (a key or a click does; a hover does not). */
+  const [sub, setSub] = React.useState<{ index: number; rect: DOMRect; focus: boolean } | null>(null);
+  const openSub = (index: number, focus: boolean) => {
+    const el = itemRefs.current[index];
+    if (el) setSub({ index, rect: el.getBoundingClientRect(), focus });
+  };
+  /* Closing the menu, or moving to another item, closes its submenu. */
+  React.useEffect(() => {
+    if (!isOpen) setSub(null);
+  }, [isOpen]);
+  React.useEffect(() => {
+    setSub((current) => (current && current.index !== activeIndex && current.focus ? null : current));
+  }, [activeIndex]);
 
   const selectable = (i: number) => {
     const item = items[i];
@@ -195,8 +324,9 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
      focus in the list on open, and what moves it on every arrow key. */
   React.useEffect(() => {
     if (!isOpen) return;
-    itemRefs.current[activeIndex]?.focus();
-  }, [isOpen, activeIndex]);
+    if (activeIndex < 0 && searchable) searchRef.current?.focus();
+    else itemRefs.current[activeIndex]?.focus();
+  }, [isOpen, activeIndex, searchable]);
 
   /* A menu always opens on its first item unless the key that opened it asked for
      the last one, so closing it forgets where the user was. Opening from anywhere
@@ -204,7 +334,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
      flipped by the caller — then starts at the top. */
   const wasOpen = React.useRef(isOpen);
   React.useEffect(() => {
-    if (isOpen && !wasOpen.current && !selectable(activeIndex)) setActiveIndex(firstSelectable);
+    if (isOpen && !wasOpen.current && !selectable(activeIndex)) setActiveIndex(searchable ? -1 : firstSelectable);
     if (!isOpen && wasOpen.current) setActiveIndex(-1);
     wasOpen.current = isOpen;
   });
@@ -215,7 +345,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
   };
 
   const activate = (item: MenuActionItem) => {
-    if (item.disabled) return;
+    if (item.disabled || item.items?.length) return;
     item.onClick?.();
     onSelect?.(item.key);
     /* Focus is on the item, so Popover hands it back to the trigger. */
@@ -247,6 +377,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
      on the list container rather than an item. Enter and Space are left alone:
      the items are real buttons and the browser already turns both into a click. */
   const onPanelKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const inSearch = event.target === searchRef.current;
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
@@ -254,18 +385,29 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
         break;
       case 'ArrowUp':
         event.preventDefault();
-        move(-1);
+        /* From the first item, back up into the search box. */
+        if (searchable && activeIndex === firstSelectable) setActiveIndex(-1);
+        else if (!inSearch) move(-1);
+        break;
+      case 'Enter':
+        if (inSearch && needle && firstSelectable >= 0) {
+          event.preventDefault();
+          const first = items[firstSelectable];
+          if (isAction(first)) activate(first);
+        }
         break;
       case 'Home':
+        if (inSearch) break;
         event.preventDefault();
         setActiveIndex(firstSelectable);
         break;
       case 'End':
+        if (inSearch) break;
         event.preventDefault();
         setActiveIndex(lastSelectable);
         break;
       default:
-        if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        if (!inSearch && event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
           typeahead(event.key);
         }
     }
@@ -300,12 +442,45 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
       open={isOpen}
       onOpenChange={setOpen}
       align={align}
+      placement={placement}
       strategy={strategy}
       width="auto"
       panelRole="menu"
-      panelClassName={cn('min-w-48 p-1', panelClassName)}
+      /* z-60: a menu is above a tooltip (z-50) — a tooltip that opens while a menu is open must not sit on top of it. */
+      panelClassName={cn('z-60 min-w-48 p-1', panelClassName)}
+      label={heading}
       panelProps={{ onKeyDown: onPanelKeyDown }}
-      content={items.map((item, i) => {
+      content={[
+        heading && (
+          <div key="heading" aria-hidden="true" className={CATEGORY}>
+            {heading}
+          </div>
+        ),
+        searchable && (
+          <div key="search" className="px-1 pb-1">
+            <Input
+              ref={searchRef}
+              fullWidth
+              size="sm"
+              role="searchbox"
+              aria-label={searchPlaceholder}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              leadingIcon={<Icon name="magnifying-glass" size="sm" />}
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setActiveIndex(-1);
+              }}
+            />
+          </div>
+        ),
+        searchable && needle && items.length === 0 && (
+          <p key="empty" className="m-0 px-3 py-2 text-body-sm-regular text-text-tertiary">
+            {emptyText}
+          </p>
+        ),
+        ...items.map((item, i) => {
         if (!isAction(item)) {
           return (
             <Divider
@@ -323,10 +498,11 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
         const glyph: IconName | undefined =
           item.icon === false ? undefined : (item.icon ?? (danger ? 'warning' : undefined));
         const isChoice = item.selected !== undefined;
+        const submenu = item.items?.length ? item.items : null;
 
         return (
+          <React.Fragment key={item.key ?? i}>
           <button
-            key={item.key ?? i}
             ref={(el) => {
               itemRefs.current[i] = el;
             }}
@@ -335,8 +511,22 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             aria-checked={isChoice ? item.selected : undefined}
             disabled={item.disabled}
             tabIndex={i === activeIndex ? 0 : -1}
-            onClick={() => activate(item)}
-            className={menuItem({ tone: item.tone })}
+            /* A click opens it and moves into it (a hover has usually opened it already: the click must not close it again). */
+            onClick={() => (submenu ? openSub(i, true) : activate(item))}
+            onMouseEnter={() => (submenu ? openSub(i, false) : setSub(null))}
+            onKeyDown={(event) => {
+              if (submenu && event.key === 'ArrowRight') {
+                event.preventDefault();
+                openSub(i, true);
+              }
+            }}
+            aria-haspopup={submenu ? 'menu' : undefined}
+            aria-expanded={submenu ? sub?.index === i : undefined}
+            className={cn(
+              menuItem({ tone: item.tone }),
+              /* The open parent keeps the highlight, in the brand blue and bold (Figma's "Pending Review ›"). */
+              submenu && 'aria-expanded:bg-surface-brand-faint aria-expanded:text-text-brand-medium aria-expanded:font-semibold',
+            )}
           >
             {glyph && <Icon name={glyph} size="sm" />}
             <span className="min-w-0 flex-1 truncate">{item.label}</span>
@@ -346,6 +536,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             {item.selected && (
               <Icon name="check" size="sm" aria-hidden="true" className="shrink-0 text-text-primary" />
             )}
+            {submenu && <Icon name="caret-right" size="sm" aria-hidden="true" className="shrink-0" />}
             {/* text.subtle is 4.76:1 on the panel but only 4.09:1 once the item is
                 highlighted with surface.brand.faint — the shortcut has to clear AA in
                 the focused state too, so it takes the next step darker. */}
@@ -355,8 +546,29 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
               </span>
             )}
           </button>
+          {submenu && sub?.index === i && (
+            <SubMenu
+              heading={item.heading ?? (typeof item.label === 'string' ? item.label : '')}
+              items={submenu}
+              rect={sub.rect}
+              autoFocus={sub.focus}
+              onChoose={(choice) => {
+                if (choice.disabled) return;
+                choice.onClick?.();
+                onSelect?.(choice.key);
+                setOpen(false);
+              }}
+              onBack={() => {
+                /* Focus goes back first: removing the focused submenu item would otherwise look like focus leaving the menu, and close it. */
+                itemRefs.current[i]?.focus();
+                setSub(null);
+              }}
+            />
+          )}
+          </React.Fragment>
         );
-      })}
+      }),
+      ]}
       {...props}
     />
   );

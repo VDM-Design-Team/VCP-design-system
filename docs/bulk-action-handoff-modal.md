@@ -1,0 +1,68 @@
+# BulkActionHandoffModal *(pattern)*
+
+Handing several Added Values on at once: **"Handoff 4 Added Values"**, one page per Added Value with a **Handoff Date**, **Demo Links** and **Attachments** (a late one also has the Overdue banner, **Overdue Reason** and **Additional Notes**), **Publish** for Development, and `PaginationDots` between two arrows to step between them. Built to Figma's `Bulk_Action_Handoff_Popup` (both `Overdue` variants) and `_Bulk_Action_Handoff_Popup_Footer`.
+
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Button` | atom |
+| `Checkbox` | atom |
+| `Dropzone` | atom |
+| `Icon` | atom |
+| `IconButton` | atom |
+| `PaginationDots` | atom |
+| `Input` | atom |
+| `Select` | atom |
+| `AttachmentViewer` | component |
+| `Banner` | component |
+| `DateField` | component |
+| `DeliverableLinkForm` | component |
+| `Field` | component |
+| `FileAttachment` | component |
+| `Modal` | component |
+| `HandoffAvModal` | pattern |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
+## When to use
+
+| Use | For |
+|---|---|
+| `BulkActionHandoffModal` | Handing off two or more selected Added Values, each with its own details |
+| `HandoffAVModal` | Handing off one |
+| `BulkActionConfirmModal` | The other bulk actions, which collect one field |
+
+## Props
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `open` / `onClose` | `boolean` / `() => void` | required | |
+| `items` | `BulkHandoffAV[]` | required | `{ ref, title, href?, overdueDays?, attachments?, defaultDate? }`; `overdueDays` gives that Added Value the banner, reason and notes |
+| `domain` | `'design-governance' \| 'development'` | `design-governance` | `development` also draws **Publish** |
+| `onHandoff` | `(drafts: Record<ref, BulkHandoffDraft>) => void` | required | One draft per Added Value, once |
+| `loading` | `boolean` | `false` | Handoff spins and Cancel locks |
+
+## Behaviour
+
+- **Handoff is disabled until every Added Value is complete** (Figma's "All Handoff Details Filled = No"): each needs a **Handoff Date**, a late one needs its **Overdue Reason**, and a link that is typed must be a valid `https://` URL. Its description says how many are missing. *Which other details are mandatory is for design to confirm.*
+- **The date starts blank** and is chosen from a calendar (`DateField`); `defaultDate` (ISO) is there for a caller that has one.
+- **Links are checked** with `DeliverableLinkForm`'s rule once the box is left: "Please enter a valid URL starting with https://". An empty link is fine. Extra links have a **Remove** button (the minus in a circle, as `MoveAVToCycleModal` removes an assignee); the first is cleared, not removed. (Figma draws no remove button here.)
+- **Attachments are `FileAttachment` cards**: the files already on the Added Value and the ones just picked, each reacting on hover and with its own remove ✕. **Clicking one opens its preview** (`AttachmentViewer`) over the popup; Escape closes only the preview. *A modal over a modal: design to confirm.*
+- **The pager is pinned beside the buttons**, so it does not scroll with the form.
+- **Stepping loses nothing**: arrows or dots move between Added Values and each keeps what was typed. It resets when the popup opens.
+- **The reference is a blue link that opens the Added Value in a new tab** when it has an `href`; otherwise plain grey text.
+
+## Tokens
+
+`Modal` (`md`); the line under the title is the reference in `text.link` or `text.tertiary` and the title in `text.primary`.
+
+## Accessibility
+
+- A `dialog` named by its title. The pager is a named group (`PaginationDots`) between two named arrow buttons, disabled at the ends.
+- The disabled Handoff carries a description of what is missing; the Overdue banner is not announced on open.
+
+## Don't
+
+- **Don't enable Handoff with an Added Value still incomplete.** The one you are not looking at is the one that was missed.
+- **Don't use it for one Added Value.** Use `HandoffAVModal`.

@@ -37,4 +37,8 @@ export * from './superadmin-metrics';
 export * from './team-capacity';
 export * from './user-capacity';
 export * from './top-bar';
+export * from './bulk-action-bar';
+export * from './bulk-action-confirm-modal';
+export * from './bulk-action-failed-modal';
+export * from './bulk-action-handoff-modal';
 export * from './user-account-modal';
