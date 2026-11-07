@@ -1,5 +1,6 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect } from 'storybook/test';
+import { expect, fireEvent, userEvent, within } from 'storybook/test';
 import { Button } from './Button';
 
 const meta = {
@@ -54,6 +55,52 @@ export const States: Story = {
       <Button {...args} disabled>Disabled</Button>
     </div>
   ),
+};
+
+/**
+ * **A loading button keeps focus.** It looks disabled and ignores presses, but it is `aria-disabled` rather than
+ * `disabled`, so the person who pressed Save is not dropped onto the page while it saves. Here Save loads for a moment:
+ * pressing it again (Enter, Space or a click) does nothing, and focus never leaves it.
+ */
+export const LoadingKeepsFocus: Story = {
+  render: function Render(args) {
+    const [loading, setLoading] = React.useState(false);
+    const [saves, setSaves] = React.useState(0);
+    return (
+      <div className="flex items-center gap-4">
+        <Button
+          {...args}
+          loading={loading}
+          onClick={() => {
+            setSaves((n) => n + 1);
+            setLoading(true);
+            window.setTimeout(() => setLoading(false), 1500);
+          }}
+        >
+          Save
+        </Button>
+        <span className="text-body-sm-medium text-text-primary">Saved {saves} time{saves === 1 ? '' : 's'}</span>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const save = canvas.getByRole('button', { name: 'Save' });
+    save.focus();
+    await userEvent.keyboard('{Enter}');
+
+    await expect(save).toHaveAttribute('aria-busy', 'true');
+    await expect(save).toHaveAttribute('aria-disabled', 'true');
+    await expect(save).not.toBeDisabled();
+    await expect(save).toHaveFocus();
+
+    /* Pressed again while it loads: nothing happens. (`fireEvent`, because a loading button takes no pointer events.) */
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    fireEvent.click(save);
+    await expect(canvas.getByText('Saved 1 time')).toBeInTheDocument();
+    await expect(save).toHaveFocus();
+  },
 };
 
 const rgb = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 4).map(Number);

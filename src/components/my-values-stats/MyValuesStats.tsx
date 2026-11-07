@@ -126,7 +126,7 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
         aria-label={ariaLabel}
         tabIndex={overflowing ? 0 : undefined}
         className={cn(
-          'flex flex-wrap items-center gap-x-6 gap-y-4 overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated p-4 font-sans',
+          'flex flex-wrap items-center gap-x-6 gap-y-4 overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated p-6 font-sans',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
           className,
         )}
