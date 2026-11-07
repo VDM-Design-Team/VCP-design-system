@@ -26,10 +26,11 @@ that is a pattern asking to be written.
 | `tone` | `brand \| success \| warning \| critical \| info \| pending \| caution` | `brand` | See above — status, not decoration. `info` is `accent.info.filled.surface`, `pending` and `caution` are the bright orange and yellow shades (`accent.pending.outline.border`, `accent.yellow.medium`) and **fail 3:1 on the light track** — only beside a written value |
 | `size` | `sm \| md` | `md` | 4 / 8 tall. `sm` for dense table rows |
 | `labelSize` | `sm \| md` | `sm` | Type size of the label row: 12px caption, or 14px label (`md`) when the words are the main signal. Independent of `size` |
-| `label` | `string` | — | Visible name above the bar, wired via `aria-labelledby` |
+| `label` | `string` | — | Visible name beside the value, above the bar by default, wired via `aria-labelledby` |
 | `showValue` | `boolean` | — | Rounded percentage at the row's end, in the numeric face |
 | `valueLabel` | `string` | — | Words instead of a percentage ("Strong", "34 of 40 used"): painted at the row's end and announced as `aria-valuetext` |
 | `role` | `progressbar \| meter` | `progressbar` | `meter` for a value within a range that is not progress toward finishing — a capacity, a strength |
+| `labelPlacement` | `above \| below` | `above` | Which side of the bar the label row sits on. `below` is what Figma draws for the Domain Budget bar |
 | `className` | `string` | — | Merged via `cn()`; the root is the wrapping `<div>` |
 
 The export's `height?: number` became the `size` variant and its `showLabel`

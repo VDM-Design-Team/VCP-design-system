@@ -24,7 +24,12 @@ const preview: Preview = {
     // The class goes on <html> so portalled overlays (Modal, Toast) are
     // themed too — a wrapper div around the story would miss them.
     (Story, context) => {
-      document.documentElement.classList.toggle('dark', context.globals.theme === 'dark');
+      /* A docs page renders every story of a component in one document, so they share this one <html> class.
+         A story with its own `globals: { theme: 'dark' }` (a DarkTheme story) would win, being last, and turn
+         the whole page dark. So in docs the page follows the toolbar (`userGlobals`), whatever any one story
+         asks for; on the canvas a story's own theme still applies. */
+      const theme = context.viewMode === 'docs' ? (context.userGlobals?.theme ?? context.globals.theme) : context.globals.theme;
+      document.documentElement.classList.toggle('dark', theme === 'dark');
       return Story();
     },
   ],
