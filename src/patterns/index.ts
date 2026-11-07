@@ -38,3 +38,4 @@ export * from './team-capacity';
 export * from './user-capacity';
 export * from './top-bar';
 export * from './user-account-modal';
+export * from './users-table';
