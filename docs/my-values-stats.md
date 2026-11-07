@@ -57,7 +57,7 @@ least 100 (when every count is 0 they share the strip equally, so the outlines s
 
 ## Tokens
 
-The card is `surface.elevated` with a `stroke.subtle` outline, `radius.md`, `space.16` all round. Figures: 24 medium (the marked
+The card is `surface.elevated` with a `stroke.subtle` outline, `radius.md`, `space.24` all round. Figures: 24 medium (the marked
 exception below) in `text.primary`, over their `body-sm-medium` `text.tertiary` labels; the status counts are `body-lg-medium`.
 Contrast on the card: `text.primary` **20.17:1** light / **14.63:1** dark; `text.tertiary` **7.58:1** / **9.85:1**.
 

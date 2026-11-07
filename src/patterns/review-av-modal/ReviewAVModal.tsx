@@ -111,12 +111,13 @@ export function ReviewAVModal({
       <Modal
         open={open}
         onClose={onClose}
+        busy={loading}
         title={`Review Task: ${avName}`}
         size="md"
         showClose={false}
         footer={
           <>
-            <Button variant="danger" onClick={() => setRejecting(true)}>
+            <Button variant="danger" disabled={loading} onClick={() => setRejecting(true)}>
               Reject
             </Button>
             <Button loading={loading} onClick={() => onAccept({ domainOption })}>
@@ -194,13 +195,14 @@ export function ReviewAVModal({
       <Modal
         open={open && rejecting}
         onClose={() => setRejecting(false)}
+        busy={loading}
         title="Rejection Reason"
         size="sm"
         showClose={false}
         footer={
           <>
             {/* A grey Cancel beside the red Reject: a blue-outlined one would be two competing colours. */}
-            <Button variant="neutral" onClick={() => setRejecting(false)}>
+            <Button variant="neutral" disabled={loading} onClick={() => setRejecting(false)}>
               Cancel
             </Button>
             <Button
