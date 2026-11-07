@@ -94,6 +94,7 @@ export * from './components/sidebar-item';
 export * from './components/status-history';
 export * from './components/status-progression';
 export * from './components/status-tag';
+export * from './components/table-card';
 export * from './components/tabs';
 export * from './components/tag-editor';
 export * from './components/timeline';

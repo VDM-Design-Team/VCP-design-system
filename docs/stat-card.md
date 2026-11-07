@@ -88,8 +88,8 @@ tone, and is always its own column: the content area starts after it, so
 centred content centres in the space beside the stripe — as Figma draws it.
 
 **Single, `default` (Value_Card):** an 8 stripe; `space.16` either side of the
-content, left-aligned and centred vertically; no gap between the label and the
-value. Exactly 100 high and at least 11rem wide (`h-25 min-w-44`, Figma's own minimum of 175: it was 16.5rem, which made a row of cards wrap early — six fit a 1187 row in Figma, and now here). The value
+content, left-aligned and centred vertically; `space.4` between the label and the
+value (the same pair `CycleSummary` and `MyValuesStats` use). Exactly 100 high and at least 11rem wide (`h-25 min-w-44`, Figma's own minimum of 175: it was 16.5rem, which made a row of cards wrap early — six fit a 1187 row in Figma, and now here). The value
 is bold on a 44 line.
 
 **Single, `superadmin`:** an 8 stripe — the same as the Value_Card's (design review, October 2026; it was 12); `space.24` either side, content centred
