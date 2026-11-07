@@ -13,6 +13,7 @@ The log of changes made to Added Values: one row per change — **ID**, **Task**
 | `Tag` | atom |
 | `DataTable` | component |
 | `EmptyState` | component |
+| `TableCard` | component |
 | `SourceTag` | component |
 | `StatusTag` | component |
 

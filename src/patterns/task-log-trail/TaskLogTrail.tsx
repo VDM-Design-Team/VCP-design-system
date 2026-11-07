@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
+import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
 import { EmptyState } from '../../components/empty-state';
 import { SourceTag } from '../../components/source-tag';
@@ -185,20 +185,31 @@ export function TaskLogTrail({
   }));
 
   return (
-    <div
-      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
+    <TableCard
+      className={className}
       aria-busy={loading || undefined}
       {...props}
+      filters={filters}
+      footer={
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onChange={onPageChange}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={onPageSizeChange}
+        />
+      }
     >
-      {filters}
       {loading && (
         <span role="status" className="sr-only">
           Loading the task log trail
         </span>
       )}
       <DataTable
+        bare
         caption={caption}
-        className="rounded-none border-0"
         columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
         rows={loading ? placeholders : rows}
         empty={
@@ -214,18 +225,7 @@ export function TaskLogTrail({
           ))
         }
       />
-      <div className="flex justify-end">
-        <Pagination
-          page={page}
-          pageCount={pageCount}
-          onChange={onPageChange}
-          itemCount={itemCount}
-          pageSize={pageSize}
-          pageSizeOptions={pageSizeOptions}
-          onPageSizeChange={onPageSizeChange}
-        />
-      </div>
-    </div>
+    </TableCard>
   );
 }
 TaskLogTrail.displayName = 'TaskLogTrail';
