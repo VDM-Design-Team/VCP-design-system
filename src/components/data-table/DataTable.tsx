@@ -97,6 +97,8 @@ export interface DataTableProps<Row extends { id?: string | number }>
   sort?: DataTableSort;
   /** Clicking an unsorted sortable header asks for `asc`; clicking again flips. */
   onSortChange?: (sort: DataTableSort) => void;
+  /** Drops the table's own border, radius and fill, for a table inside a `TableCard` (which draws them, with the filters and pagination, in one card). */
+  bare?: boolean;
   /** Adds the leading checkbox column with a select-all header. */
   selectable?: boolean;
   /** Selected row ids (`row.id`, falling back to the row index). */
@@ -197,6 +199,7 @@ export function DataTable<Row extends { id?: string | number }>({
   dense,
   caption,
   rowProps,
+  bare,
   ...props
 }: DataTableProps<Row>) {
   /* A table that scrolls sideways has to be reachable by keyboard, or someone who cannot use a mouse cannot see the rest. When it has a control in it, tabbing through the controls scrolls it into view; when it has
@@ -244,7 +247,9 @@ export function DataTable<Row extends { id?: string | number }>({
       role={needsStop && caption ? 'region' : undefined}
       aria-label={needsStop && caption ? caption : undefined}
       className={cn(
-        'overflow-x-auto rounded-md border border-stroke-subtle bg-surface-elevated font-sans',
+        'overflow-x-auto font-sans',
+        /* Inside a `TableCard` (`bare`) the card draws the border and fill, but the table keeps its own corners so a header band or hovered row is not square against the card's padding. */
+        bare ? 'rounded-md' : 'rounded-md border border-stroke-subtle bg-surface-elevated',
         needsStop && 'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-stroke-focused',
         className,
       )}

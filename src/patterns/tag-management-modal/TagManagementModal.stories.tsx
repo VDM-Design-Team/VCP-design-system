@@ -30,7 +30,7 @@ export const AddTag: Story = {};
 
 export const AddDomain: Story = { args: { type: 'domain' } };
 
-export const DeleteDomain: Story = { args: { type: 'delete-domain' } };
+export const DeleteDomain: Story = { args: { type: 'delete-domain', initialName: 'Design' } };
 
 /** Not in the Figma: the pencil's dialog is the add form, reused — name prefilled, Save off until it changes. */
 export const RenameTag: Story = { args: { mode: 'edit', initialName: 'Bug' } };
@@ -64,19 +64,20 @@ export const AddingATag: Story = {
   },
 };
 
-/** A backdrop click does nothing here; Escape closes it, Confirm answers yes. */
+/** It names the domain; a backdrop click does nothing; Escape closes it, Delete answers yes. */
 export const ConfirmingTheDelete: Story = {
-  args: { open: false, type: 'delete-domain' },
+  args: { open: false, type: 'delete-domain', initialName: 'Design' },
   render: AddingATag.render,
   play: async ({ canvasElement, args }) => {
     await userEvent.click(within(canvasElement).getByRole('button', { name: 'Add New' }));
     const dialog = await screen.findByRole('alertdialog', {
       name: 'Are you sure you want to delete this domain?',
     });
+    await expect(within(dialog).getByRole('textbox', { name: 'Domain' })).toHaveValue('Design');
     /* The backdrop is the dialog's parent grid; clicking it must not close it. */
     await userEvent.click(dialog.parentElement as HTMLElement);
     await expect(args.onClose).not.toHaveBeenCalled();
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
     await expect(args.onConfirm).toHaveBeenCalledTimes(1);
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
