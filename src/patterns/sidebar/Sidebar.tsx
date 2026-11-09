@@ -39,6 +39,17 @@ import type { IconName } from '../../atoms/icon';
 /** Who is looking. The design draws a rail per type; `Admin Dev` is one of them. */
 export type SidebarUserType = 'user' | 'admin' | 'admin-dev' | 'super-admin';
 
+/**
+ * A row under `Archive` or `Planning`. With a `key` and no `href` or
+ * `onNavigate` of its own, it is a destination like any top-level row:
+ * pressing it calls the rail's `onNavigate` with the key, and it is the
+ * current page when `active` is that key.
+ */
+export interface SidebarNavSubItem extends SidebarSubItem {
+  /** Stable identity, never shown. What `active` matches and `onNavigate` reports. */
+  key?: string;
+}
+
 export interface SidebarNavItem {
   /** Stable identity, never shown. What `active` matches and `onNavigate` reports. */
   key: string;
@@ -46,7 +57,7 @@ export interface SidebarNavItem {
   icon: IconName;
   href?: string;
   /** Sub-rows. `Archive` and `Planning` are the two the design gives them to. */
-  items?: readonly SidebarSubItem[];
+  items?: readonly SidebarNavSubItem[];
 }
 
 /* The twelve presets, less `Status`. Labels are the design's own; the glyphs
@@ -63,13 +74,21 @@ const ARCHIVE: SidebarNavItem = {
   key: 'archive',
   label: 'Archive',
   icon: 'archive',
-  items: [{ label: 'Completed' }, { label: 'Rejected' }, { label: 'Backlogs' }],
+  items: [
+    { key: 'archive/completed', label: 'Completed' },
+    { key: 'archive/rejected', label: 'Rejected' },
+    { key: 'archive/backlogs', label: 'Backlogs' },
+  ],
 };
 const PLANNING: SidebarNavItem = {
   key: 'planning',
   label: 'Planning',
   icon: 'rows',
-  items: [{ label: 'Planning List' }, { label: 'Gantt Chart' }, { label: 'Holiday Registry' }],
+  items: [
+    { key: 'planning/planning-list', label: 'Planning List' },
+    { key: 'planning/gantt-chart', label: 'Gantt Chart' },
+    { key: 'planning/holiday-registry', label: 'Holiday Registry' },
+  ],
 };
 
 /** Which rows each user type sees. Straight from the eight `VCP_SideBar` variants. */
@@ -90,13 +109,17 @@ export interface SidebarProps extends Omit<React.HTMLAttributes<HTMLElement>, 'o
   userType?: SidebarUserType;
   /** Override the nav set — for a rail the design has not drawn yet. */
   items?: readonly SidebarNavItem[];
-  /** The `key` of the current row. */
+  /**
+   * The `key` of the current row — a top-level row (`'drafts'`) or a sub-row
+   * (`'planning/gantt-chart'`). A sub-row's group starts open.
+   */
   active?: string;
   /**
    * Keys of the rows with sub-items that start open — `'archive'`,
    * `'planning'`. Each still opens and closes on its own after that.
    */
   defaultOpen?: readonly string[];
+  /** A row press, for rows without an `href`: a top-level row's key or a sub-row's. */
   onNavigate?: (key: string) => void;
   /** The 76-wide rail: glyphs only, labels in tooltips. */
   collapsed?: boolean;
@@ -137,6 +160,18 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
     const nav = items ?? NAV_BY_USER_TYPE[userType];
 
     const renderItem = (item: SidebarNavItem) => {
+      /* A keyed sub-row is a destination like a top-level row: the rail reports
+         it and marks it current. A sub-row's own href, onNavigate or selected
+         still wins, so an `items` override behaves as it always has. */
+      const subRows = item.items?.map(({ key, ...sub }): SidebarSubItem => {
+        if (key === undefined) return sub;
+        return {
+          ...sub,
+          onNavigate: sub.href ? undefined : (sub.onNavigate ?? (() => onNavigate?.(key))),
+          selected: sub.selected ?? active === key,
+        };
+      });
+      const holdsActive = !!item.items?.some((sub) => sub.key !== undefined && sub.key === active);
       const row = (
         <SidebarItem
           label={item.label}
@@ -145,8 +180,11 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
           onNavigate={item.href ? undefined : () => onNavigate?.(item.key)}
           selected={active === item.key}
           collapsed={collapsed}
-          items={item.items}
-          defaultOpen={defaultOpen?.includes(item.key)}
+          items={subRows}
+          /* The current page's group starts open, so the selected sub-row shows —
+             in the expanded rail only: collapsed, the group is a flyout, which
+             must not pop open over the page on load. */
+          defaultOpen={defaultOpen?.includes(item.key) || (holdsActive && !collapsed)}
         />
       );
       /* The label is hidden in the rail, so the tooltip is the only way a

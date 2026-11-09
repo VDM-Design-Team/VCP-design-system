@@ -45,7 +45,7 @@ const LEVELS: Array<[PasswordStrengthLevel, string, string?]> = [
 ];
 
 /**
- * Five steps, 20% each: red, orange, yellow, blue, green. The level is always written out beside the bar,
+ * Five steps, 20% each: red, orange, brown, blue, green. The level is always written out beside the bar,
  * so the colour is never the only signal. Only the two weak levels colour the message.
  */
 export const Levels: Story = {
@@ -62,9 +62,9 @@ export const Levels: Story = {
       LEVELS.map(([, text]) => text),
     );
     expect(meters.map((m) => m.getAttribute('aria-valuenow'))).toEqual(['1', '2', '3', '4', '5']);
-    /* Fair is the bright yellow (`accent.yellow.medium`), not the brown `accent.warning.outline.border` became. */
+    /* Fair is the brown `warning` fill (`accent.warning.filled.surface`), as Figma's `_Password_Item_Strength` draws it. */
     const fill = (m: HTMLElement) => getComputedStyle(m.firstElementChild as HTMLElement).backgroundColor;
-    expect(fill(meters[2])).toBe('rgb(253, 199, 0)');
+    expect(fill(meters[2])).toBe('rgb(166, 95, 0)');
     expect(fill(meters[2])).not.toBe(fill(meters[1]));
   },
 };

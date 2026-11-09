@@ -136,6 +136,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `applyLabel` / `clearLabel` | `string` | `Apply` / `Clear all` | — |
 | `placeholder` | `string` | `Select…` | Shown in the field while nothing is picked |
 | `emptyText` | `string` | `No matches` | What the panel says when there are no rows |
+| `edge` | `strong \| neutral` | `strong` | The resting edge: `stroke.strong` (3:1) or `neutral.outline.border.default` (about 2.6:1 on white, lighter). `neutral` is a deliberate exception for a row of filters; an error, a warning and focus still win |
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
 | `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
 | `warning` | `ReactNode` | — | A caution under the field in the warning colour (`accent.warning.outline.content`), with an amber border: the pick is allowed but worth a second look. `error` wins if both are set. Announced with the field |
@@ -145,11 +146,13 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `panelNotice` | `ReactNode` | — | A line above the rows inside the panel, with a divider under it |
 | `disabled` | `boolean` | — | No opening; tags lose their ✕ |
 | `emphasis` | `'medium' \| 'regular'` | `medium` | The weight of a chosen value in the field. **A filter passes `regular`**, so a row of filters sits quietly; the default is what a chosen value in a form reads as. The placeholder is regular either way |
+| `valuePrefix` | `string` | — | Words before what is picked, once something is: "Assignee" makes the field read "Assignee: Amy Lee" (or "Assignee: 2 selected"), so a filled field still says what it filters. The placeholder is unchanged. Drawn only: the trigger is already named by its label and then its value, so a screen reader is not told twice |
 | `size` | `'sm' \| 'md'` | `md` | 32 / 40 tall, as `Select`. `sm` is under the 40 touch minimum, the same exception `Select` makes for its small size |
 | `fullWidth` | `boolean` | `false` | Fill the container, as `Input` and `Select`. Off, the field hugs its content (at least 12rem); the panel still grows to its longest row |
 | `loading` | `boolean` | — | The rows are on their way: `aria-busy`, a spinner in place of the caret, and the panel says "Loading…" instead of the rows |
 | `onSearch` | `(query: string) => void` | — | Search is on your server: called with the text on every change (and `''` when the panel opens), and the component stops filtering `options` itself, so you pass what matches. Debounce on your side and pair it with `loading` while the request runs. A pick keeps its name after it drops out of `options`: the field remembers every option it has been given. For a value set before any search (a saved form), include its option in the first `options` |
 | `loadingText` | `string` | `Loading…` | What the panel says while `loading` |
+| `inline` | `boolean` | — | Draws the button as plain text in a bar instead of a bordered field: no border or fill, the value semibold with a brand caret, a tint on hover. The panel is unchanged. For a picker inside another control's toolbar (the Gantt chart's period bar); the field hugs its value and centres in the width you give the control, and the panel opens from that width's left edge |
 | `id`, `aria-label`, `aria-labelledby` | | | On the trigger button, so a `Field` label's `htmlFor` reaches it |
 | `className`, `ref`, rest | | | On the wrapper, which the panel positions against |
 
@@ -232,7 +235,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
 - **The scrollbar is the browser's.** `Menu_Dropdown` in Figma draws a slim custom scrollbar; this panel scrolls with the platform's.
 - **The tags menu's blue highlighted row** (a single-pick look) is replaced by the checkbox,
   because the field now allows several tags.
-- **The panel is not repositioned.** It opens under the field, growing to the right if its content is wider than the field, and clips inside an `overflow: hidden` ancestor or the viewport edge. No flipping, same as `Popover`.
+- **The panel floats and flips.** It is placed from the field's position on screen (`position: fixed`), so a dialog or a panel that scrolls cannot cut it off. It opens under the field, or above it when the screen has no room below and more above; the side is chosen as it opens and kept while it is open, so filtering does not make it jump. When neither side has room for all of it, it takes the roomier one and the list gets shorter and scrolls, so the search box stays on screen. It grows to the right if its content is wider than the field, and moves left rather than run off the screen. (Until November 2026 it always opened under the field and was clipped by an `overflow: hidden` ancestor or the screen's edge; the `OpensAboveNearTheBottom` story is the regression test.)
 
 ## Don't
 

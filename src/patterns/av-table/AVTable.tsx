@@ -11,6 +11,7 @@ import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../atoms/pagination';
 import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
+import { TruncatedText } from '../../components/truncated-text';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
 import { Button } from '../../atoms/button';
@@ -18,6 +19,7 @@ import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
 import { MultipartParentChip } from '../../components/multipart-parent-chip';
 import { MultipartTableTag } from '../../components/multipart-table-tag';
+import { TableCard } from '../../components/table-card';
 
 /**
  * AVTable — the Added Value table: the list every VCP workspace is built
@@ -119,6 +121,11 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   onOpenParent?: (row: AVTableRow) => void;
   /** Adds the trailing Actions column. Figma's Action Column row variant. */
   actions?: (row: AVTableRow) => React.ReactNode;
+  /**
+   * The page's filters (a `FilterBar`, a search box…). Given, the table is drawn **in a card with its filters above it** (`TableCard`), with the pagination at its foot, and `DataTable` drops its own border. Left out,
+   * the table is as it always was and the page places its filters wherever it likes.
+   */
+  filters?: React.ReactNode;
   /** Shown above the pagination when something is selected. */
   onDeleteSelected?: (ids: readonly string[]) => void;
   deleteSelectedLabel?: (count: number) => string;
@@ -163,6 +170,7 @@ export function AVTable({
   hints: hintOverrides,
   empty,
   caption = 'Added Values',
+  filters,
   ...props
 }: AVTableProps) {
   const hints = { ...DEFAULT_HINTS, ...hintOverrides };
@@ -208,13 +216,8 @@ export function AVTable({
         ) : (
           <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
         );
-        /* One line, ellipsed. The full title is the `title` attribute so a
-           truncated row is still readable on hover. */
-        const title = (
-          <span className="min-w-0 truncate text-label-sm-medium text-text-primary" title={row.title}>
-            {row.title}
-          </span>
-        );
+        /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */
+        const title = <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>;
         const details = (multipart || row.domain || row.attachments || row.comments) && (
           <div className="flex w-max items-center gap-2">
             {multipart && (
@@ -322,35 +325,49 @@ export function AVTable({
 
   const paginated = page !== undefined && pageCount !== undefined && onPageChange !== undefined;
 
+  const table = (
+    <DataTable
+      columns={columns}
+      rows={rows}
+      sort={sort}
+      onSortChange={onSortChange}
+      selectable={selectable}
+      selected={selected}
+      onSelectedChange={(ids) => onSelectedChange?.(ids as string[])}
+      /* Every checkbox says which AV it selects, not "row 3". */
+      selectLabel={(row) => `Select ${row.ref}: ${row.title}`}
+      empty={empty}
+      caption={caption}
+      bare={Boolean(filters)}
+    />
+  );
+
+  const footer = (onDeleteSelected || paginated) && (
+    <div className="flex flex-wrap items-center justify-end gap-6">
+      {/* Destructive, so it appears only when it has something to act on
+          and says how many — a bare "Delete Selected" is an unanswerable
+          question. */}
+      {onDeleteSelected && selected.length > 0 && (
+        <Button variant="danger" size="sm" onClick={() => onDeleteSelected(selected)}>
+          {deleteSelectedLabel(selected.length)}
+        </Button>
+      )}
+      {paginated && <Pagination page={page} pageCount={pageCount} onChange={onPageChange} />}
+    </div>
+  );
+
+  /* With filters, the table, its filters and its pagination are one card; without, as before. */
+  if (filters) {
+    return (
+      <TableCard className={className} filters={filters} footer={footer || undefined} {...props}>
+        {table}
+      </TableCard>
+    );
+  }
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <DataTable
-        columns={columns}
-        rows={rows}
-        sort={sort}
-        onSortChange={onSortChange}
-        selectable={selectable}
-        selected={selected}
-        onSelectedChange={(ids) => onSelectedChange?.(ids as string[])}
-        /* Every checkbox says which AV it selects, not "row 3". */
-        selectLabel={(row) => `Select ${row.ref}: ${row.title}`}
-        empty={empty}
-        caption={caption}
-      />
-
-      {(onDeleteSelected || paginated) && (
-        <div className="flex flex-wrap items-center justify-end gap-6">
-          {/* Destructive, so it appears only when it has something to act on
-              and says how many — a bare "Delete Selected" is an unanswerable
-              question. */}
-          {onDeleteSelected && selected.length > 0 && (
-            <Button variant="danger" size="sm" onClick={() => onDeleteSelected(selected)}>
-              {deleteSelectedLabel(selected.length)}
-            </Button>
-          )}
-          {paginated && <Pagination page={page} pageCount={pageCount} onChange={onPageChange} />}
-        </div>
-      )}
+      {table}
+      {footer}
     </div>
   );
 }

@@ -376,3 +376,47 @@ export const ScrollsWhenNeitherSideFits: Story = {
     await expect(getComputedStyle(panel).outlineStyle).not.toBe('none');
   },
 };
+
+/**
+ * **Flow:** a popover at the foot of a panel that scrolls floats above the panel instead of being cut off
+ * by it, so every option shows and can be clicked. (The panel clipped it until November 2026, unless the
+ * page passed `strategy="fixed"`, which is now the default.)
+ */
+export const FloatsOutOfAScrollingPanel: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true }, controls: { disable: true } },
+  render: () => (
+    <div className="flex max-h-40 w-72 flex-col gap-3 overflow-auto rounded-md border border-stroke-subtle bg-surface-elevated p-4">
+      <span>A side panel that scrolls.</span>
+      <div>
+        <Popover
+          trigger={<Button variant="secondary">Status</Button>}
+          width="sm"
+          content={
+            <div className="flex flex-col gap-1">
+              {['Draft', 'Pending', 'In Progress', 'Review', 'Completed'].map((s) => (
+                <Button key={s} size="sm" variant="tertiary">
+                  {s}
+                </Button>
+              ))}
+            </div>
+          }
+        />
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const trigger = within(canvasElement).getByRole('button', { name: 'Status' });
+    await userEvent.click(trigger);
+    const panel = await waitFor(() => {
+      const el = document.getElementById(trigger.getAttribute('aria-controls') as string);
+      if (!el) throw new Error('The panel has not opened');
+      return el;
+    });
+    /* Each option is what the pointer finds at its own centre: nothing is drawn over it or cuts it off. */
+    for (const option of within(panel).getAllByRole('button')) {
+      const r = option.getBoundingClientRect();
+      await expect(option.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2))).toBe(true);
+    }
+  },
+};

@@ -3,6 +3,7 @@ import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { DatePicker, type DatePickerProps } from '../date-picker';
 import { Popover } from '../popover';
+import { useDateFormat } from '../../lib/format-date';
 
 /** "2026-09-14" → "September 2026". Read in UTC, so no time zone can move the month. */
 export const formatMonth = (iso: string): string => {
@@ -63,6 +64,8 @@ export interface DateFieldProps {
   id?: string;
   'aria-describedby'?: string;
   invalid?: boolean;
+  /** From a `Field` with an error: the field is invalid, as `invalid` says. */
+  'aria-invalid'?: boolean | 'true' | 'false';
   disabled?: boolean;
   /** `min`, `max`, `today` and the rest go to the `DatePicker`. */
   picker?: Omit<DatePickerProps, 'value' | 'onChange' | 'mode' | 'clearable' | 'onClear' | 'clearLabel'>;
@@ -79,7 +82,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       estimated,
       placeholder = '-',
       id,
-      invalid,
+      invalid: invalidProp,
+      'aria-invalid': ariaInvalid,
       disabled,
       picker,
       className,
@@ -89,6 +93,9 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    /* dd/mm/yyyy, or the person's locale when the product sets one (`DateFormatProvider`). */
+    const dates = useDateFormat();
+    const invalid = invalidProp || ariaInvalid === true || ariaInvalid === 'true';
     return (
       <Popover
         open={open}
@@ -114,7 +121,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
             placeholder={placeholder}
             value={
-              !value ? '' : mode === 'month' ? formatMonth(value) : `${value}${estimated ? ' (est.)' : ''}`
+              !value ? '' : mode === 'month' ? formatMonth(value) : `${dates.format(value)}${estimated ? ' (est.)' : ''}`
             }
             onClick={() => !disabled && setOpen(true)}
           />
@@ -123,6 +130,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
           <DatePicker
             mode={mode}
             value={value}
+            /* The picker's Clear has nothing to clear here (`picker` cannot wire it), so the field does not show it. */
+            clearable={false}
             onChange={(iso) => {
               onChange?.(iso);
               setOpen(false);
