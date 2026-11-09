@@ -5,9 +5,9 @@ import { MultipartSection, type MultipartPart } from './MultipartSection';
 import { ChildPartModal } from '../child-part-modal';
 
 const PARTS: MultipartPart[] = [
-  { id: 1, title: '(1/3) Parent AV Title is Here', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: 'October 1, 2025', customStatus: 'Ready for Deploy' },
-  { id: 2, title: 'Some Parent AV Title', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: 'October 1, 2025', status: 'Completed' },
-  { id: 3, title: 'Some Parent AV Title', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: 'October 1, 2025', status: 'Accepted' },
+  { id: 1, title: '(1/3) Parent AV Title is Here', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: '2025-10-01', customStatus: 'Ready for Deploy' },
+  { id: 2, title: 'Some Parent AV Title', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: '2025-10-01', status: 'Completed' },
+  { id: 3, title: 'Some Parent AV Title', assignee: { name: 'Marvin R' }, capacityPoints: 10, dueDate: '2025-10-01', status: 'Accepted' },
 ];
 
 const meta = {
@@ -23,7 +23,7 @@ const meta = {
       },
     },
   },
-  args: { parts: PARTS, hint: 'An Added Value split into parts, each with its own assignee, due date and capacity points.', onOpenPart: fn(), onEditPartTitle: fn() },
+  args: { parts: PARTS, hint: 'This Added Value is split into parts. Each part is tracked on its own; the Added Value is done when every part is completed.', onOpenPart: fn(), onEditPartTitle: fn() },
   decorators: [
     (Story) => (
       <div className="max-w-5xl bg-surface-canvas p-6">
@@ -42,7 +42,7 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByRole('region', { name: 'Multipart' })).toBeVisible();
     await expect(c.getByText('33% (1/3 parts completed)')).toBeVisible();
-    await expect(c.getByRole('progressbar', { name: /33%/ })).toHaveAttribute('aria-valuenow', '33');
+    await expect(c.getByRole('progressbar', { name: 'Multipart progress' })).toHaveAttribute('aria-valuenow', '33');
     await expect(c.getAllByRole('listitem')).toHaveLength(3);
     await userEvent.click(c.getByRole('button', { name: 'Part 3: Some Parent AV Title' }));
     await expect(args.onOpenPart).toHaveBeenCalledWith(expect.objectContaining({ id: 3 }));

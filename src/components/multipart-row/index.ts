@@ -1,2 +1,2 @@
-export { MultipartRow, MultipartRowGroup } from './MultipartRow';
+export { MultipartRow, MultipartRowGroup, isPartCompleted } from './MultipartRow';
 export type { MultipartRowProps } from './MultipartRow';

@@ -20,7 +20,7 @@ const meta = {
     title: 'Some custom title',
     assignee: { name: 'Marvin R' },
     capacityPoints: 10,
-    dueDate: 'October 1, 2025',
+    dueDate: '2025-10-01',
     customStatus: 'Ready for Deploy',
     onOpen: fn(),
     onEditTitle: fn(),
@@ -51,7 +51,7 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByText('10 CP')).toBeVisible();
     await expect(c.getByText('Due Date:')).toBeVisible();
-    await expect(c.getByText('October 1, 2025')).toBeVisible();
+    await expect(c.getByText('01/10/2025')).toBeVisible();
     await expect(c.getByText('Ready for Deploy')).toBeVisible();
     /* The title is the button; its name says which part it is. */
     await userEvent.click(c.getByRole('button', { name: 'Part 1: Some custom title' }));
@@ -141,7 +141,7 @@ export const Aligned: Story = {
       <MultipartRowGroup>
         <MultipartRow {...args} number={1} title="Some Parent Title Here (1/3)" customStatus="Ready for Deploy" />
         <MultipartRow {...args} number={2} title="Some Parent Title Here (2/3)" customStatus={undefined} status="Completed" capacityPoints={5} />
-        <MultipartRow {...args} number={3} title="Some Parent Title Here (3/3)" customStatus={undefined} status="Accepted" dueDate="Oct 1, 2025" />
+        <MultipartRow {...args} number={3} title="Some Parent Title Here (3/3)" customStatus={undefined} status="Accepted" dueDate="2025-10-01" />
       </MultipartRowGroup>
     </div>
   ),

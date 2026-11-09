@@ -1,16 +1,19 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { useDateFormat } from '../../lib/format-date';
 import { Avatar } from '../../atoms/avatar';
 import { Badge } from '../../atoms/badge';
 import { IconButton } from '../../atoms/icon-button';
 import { DueDateTag, type DueDateProximity } from '../due-date-tag';
 import { StatusTag, type AVStatus } from '../status-tag';
+import { TruncatedText, useIsTruncated } from '../truncated-text';
+import { Tooltip } from '../../atoms/tooltip';
 
 /**
  * MultipartRow — one part of a multipart Added Value: its number, its title, who it is assigned to, its capacity points, its due date and its
  * status. Built to Figma's `Multipart_Section` rows (`_Multipart_Row_*`).
  *
- * Left to right: **the number** (a grey disc; **green when the part is completed**), **the title** (cut with "…" when long, and the button
+ * Left to right: **the number** (a grey disc; **green when the part is completed**), **the title** (cut with "…" when long, and the whole of it on hover and focus when it has been cut; the button
  * that opens the part when `onOpen` is given), **the assignee's avatar**, **capacity points** ("10 CP"), **"Due Date:"**, **the date**, a rule,
  * and **the status**. A part with no points or date yet reads "- CP" and "-" (Figma's empty child).
  *
@@ -25,7 +28,7 @@ import { StatusTag, type AVStatus } from '../status-tag';
  * - **Hovering the row shows an edit button after the title** (Figma's `_Edit_Child_Part_Title_IconButton`): a 24 tonal disc with a pencil. It also shows
  *   when something in the row has *keyboard* focus (a mouse click does not hold it open), and always on a touch screen, where there is no hover. `onEditTitle` only asks: the page opens `ChildPartModal`
  *   in `edit` mode. Leave it out and there is no button.
- * - **Nothing is formatted here**: the date is already words ("October 1, 2025").
+ * - **The date is ISO** ("2025-10-01") and is shown the system's way: dd/mm/yyyy, or the person's locale (`useDateFormat`).
  * - **It does nothing itself.** `onOpen` only asks; the page opens the part.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
@@ -40,7 +43,7 @@ export interface MultipartRowProps extends Omit<React.LiHTMLAttributes<HTMLLIEle
   assignee?: { name: string; src?: string };
   /** Capacity points. `null` or left out reads "- CP". */
   capacityPoints?: number | null;
-  /** The due date, already formatted. Left out reads "-". */
+  /** The due date, ISO ("2025-10-01"): shown dd/mm/yyyy, or the person's locale. Left out reads "-". */
   dueDate?: string;
   dueProximity?: DueDateProximity;
   /** A spine status. Use `customStatus` for a domain step's words. */
@@ -54,6 +57,9 @@ export interface MultipartRowProps extends Omit<React.LiHTMLAttributes<HTMLLIEle
   /** The edit button (shown on hover or focus) was pressed. The page asks for the new title (`ChildPartModal`, `edit`). */
   onEditTitle?: () => void;
 }
+
+/** A part is done when it says so (`completed`), or when its status is Completed. One place, so the row and the section's count cannot drift. */
+export const isPartCompleted = (part: { completed?: boolean; status?: AVStatus }): boolean => part.completed ?? part.status === 'Completed';
 
 /**
  * MultipartRowGroup — the list the rows live in, and the grid their columns are shared on: number, title (the spare room), avatar, points,
@@ -107,13 +113,11 @@ export const MultipartRow = React.forwardRef<HTMLLIElement, MultipartRowProps>(
     },
     ref,
   ) => {
-    const done = completed ?? status === 'Completed';
-    const name = (
-      <>
-        <span className="sr-only">Part {number}: </span>
-        {title}
-      </>
-    );
+    const done = isPartCompleted({ completed, status });
+    const dates = useDateFormat();
+    /* The button that opens the part holds the title, so it is the thing that is cut: measured here, with its own tooltip. */
+    const openRef = React.useRef<HTMLButtonElement | null>(null);
+    const openCut = useIsTruncated(openRef, [title]);
     return (
       <li
         ref={ref}
@@ -138,18 +142,25 @@ export const MultipartRow = React.forwardRef<HTMLLIElement, MultipartRowProps>(
         </span>
         <div className="flex min-w-0 items-center @3xl:-ms-2">
           {onOpen ? (
-            <button
-              type="button"
-              onClick={onOpen}
-              className={cn(
-                'min-w-0 truncate rounded-sm text-left text-body-sm-medium text-text-primary',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-              )}
-            >
-              {name}
-            </button>
+            <Tooltip content={title} describe={false} disabled={!openCut} className="min-w-0 max-w-full">
+              <button
+                ref={openRef}
+                type="button"
+                onClick={onOpen}
+                className={cn(
+                  'min-w-0 truncate rounded-sm text-left text-body-sm-medium text-text-primary',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                )}
+              >
+                <span className="sr-only">Part {number}: </span>
+                {title}
+              </button>
+            </Tooltip>
           ) : (
-            <span className="min-w-0 truncate text-body-sm-medium text-text-primary">{name}</span>
+            <>
+              <span className="sr-only">Part {number}: </span>
+              <TruncatedText className="text-body-sm-medium text-text-primary">{title}</TruncatedText>
+            </>
           )}
           {onEditTitle && (
             /* Takes no room until it shows: a zero-width wrapper, so the title runs to the end of its cell and is cut there; on hover, with
@@ -179,7 +190,7 @@ export const MultipartRow = React.forwardRef<HTMLLIElement, MultipartRowProps>(
         </Badge>
         <span className={cn('whitespace-nowrap text-label-sm-medium text-text-tertiary', STACKED)}>Due Date:</span>
         <DueDateTag size="md" proximity={dueProximity} className={STACKED}>
-          {dueDate ?? '-'}
+          {dueDate ? dates.format(dueDate) : '-'}
         </DueDateTag>
         <span aria-hidden="true" className="hidden w-px justify-self-center self-stretch bg-stroke-default @3xl:block" />
         <span className={cn('flex justify-end @3xl:justify-self-stretch', STACKED)}>

@@ -12,6 +12,8 @@ One part of a multipart Added Value: its number, title, assignee, capacity point
 | `IconButton` | atom |
 | `DueDateTag` | component |
 | `StatusTag` | component |
+| `TruncatedText` | component |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -30,7 +32,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `title` | `string` | required | Cut with "…" when long. The button that opens the part, when `onOpen` is given |
 | `assignee` | `{ name, src? }` | — | Their avatar. Without one the place stays empty |
 | `capacityPoints` | `number \| null` | — | "10 CP"; none reads "- CP" |
-| `dueDate` | `string` | — | **Already formatted**: "October 1, 2025". None reads "-" |
+| `dueDate` | `string` | — | **ISO**, "2025-10-01": shown dd/mm/yyyy (or the person's locale, `useDateFormat`). None reads "-" |
 | `dueProximity` | `default \| due-soon \| overdue` | `default` | `DueDateTag`'s |
 | `status` / `customStatus` | `AVStatus` / `string` | — | A spine status, or a domain step's own words ("Ready for Deploy"). `StatusTag` owns the colour |
 | `completed` | `boolean` | `status === 'Completed'` | Turns the number green |
@@ -68,5 +70,5 @@ so 58 high); rows are 12 apart; hover `surface.brand.base`. The number is a 24 d
 
 ## Don't
 
-- **Don't format the date here.** Pass "October 1, 2025".
+- **Don't pre-format the date.** Pass the ISO date; the row shows it the system's way.
 - **Don't pick a status colour at the call site.** `StatusTag` owns it.

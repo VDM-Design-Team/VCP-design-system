@@ -3,8 +3,8 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { ProgressBar } from '../../atoms/progress-bar';
-import { Tooltip } from '../../atoms/tooltip';
-import { MultipartRow, MultipartRowGroup, type MultipartRowProps } from '../../components/multipart-row';
+import { InfoHint } from '../../components/info-hint';
+import { MultipartRow, MultipartRowGroup, isPartCompleted, type MultipartRowProps } from '../../components/multipart-row';
 
 /**
  * MultipartSection — the card on an Added Value's page that lists its parts: a **Multipart** heading (with an info hint), "33% (1/3 parts
@@ -45,7 +45,7 @@ export interface MultipartSectionProps extends Omit<React.HTMLAttributes<HTMLEle
 
 export function MultipartSection({ className, parts, hint, onOpenPart, onEditPartTitle, onAddPart, ...props }: MultipartSectionProps) {
   const total = parts.length;
-  const done = parts.filter((part) => part.completed ?? part.status === 'Completed').length;
+  const done = parts.filter(isPartCompleted).length;
   const percent = total === 0 ? 0 : Math.round((done / total) * 100);
   const summary = `${percent}% (${done}/${total} parts completed)`;
   const headingId = React.useId();
@@ -62,25 +62,11 @@ export function MultipartSection({ className, parts, hint, onOpenPart, onEditPar
             <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
               Multipart
             </h2>
-            {hint && (
-              <Tooltip content={hint}>
-                <button
-                  type="button"
-                  aria-label="About Multipart"
-                  className={cn(
-                    'grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary',
-                    'hover:text-text-secondary',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                  )}
-                >
-                  <Icon name="info" size="sm" />
-                </button>
-              </Tooltip>
-            )}
+            {hint && <InfoHint label="Multipart" content={hint} />}
           </div>
           <span className="text-label-sm-medium text-text-tertiary">{summary}</span>
         </div>
-        <ProgressBar value={percent} aria-label={`Multipart progress: ${summary}`} />
+        <ProgressBar value={percent} aria-label="Multipart progress" />
       </div>
       <div className="flex flex-col gap-3">
         <MultipartRowGroup>

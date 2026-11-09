@@ -10,7 +10,7 @@ The card on an Added Value's page that lists its parts: a **Multipart** heading,
 | `Button` | atom |
 | `Icon` | atom |
 | `ProgressBar` | atom |
-| `Tooltip` | atom |
+| `InfoHint` | component |
 | `MultipartRow` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -28,7 +28,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `parts` | `MultipartPart[]` | required | In order: the first is part 1. `id`, `title`, `assignee?`, `capacityPoints?`, `dueDate?`, `dueProximity?`, `status?`, `customStatus?`, `completed?` |
-| `hint` | `string` | — | The info glyph's words. **Figma draws the glyph, not its text**; without `hint` there is no glyph |
+| `hint` | `string` | — | The info glyph's words. **Figma draws the glyph, not its text**; design chose: "This Added Value is split into parts. Each part is tracked on its own; the Added Value is done when every part is completed." Without `hint` there is no glyph |
 | `onOpenPart` | `(part) => void` | — | A title was pressed. Opening it is the page's |
 | `onEditPartTitle` | `(part) => void` | — | A row's edit button (shown on hover or focus) was pressed. Renaming is the page's: open `ChildPartModal` in `edit` mode |
 | `onAddPart` | `() => void` | — | **Add Part** (editing). Leave it out to hide the button |
@@ -58,7 +58,7 @@ the summary is `label-sm-medium` (14) `text.tertiary`; the bar is `ProgressBar`'
 
 ## Accessibility
 
-- A `section` named by its heading (an `h2`); the parts are a list. The bar is a `progressbar` named by the summary.
+- A `section` named by its heading (an `h2`); the parts are a list. The bar is a `progressbar` named "Multipart progress", with its value in percent; the visible "33% (1/3 parts completed)" is said once, beside it. The info glyph is `InfoHint`.
 - The info glyph is a button ("About Multipart") with a tooltip.
 
 ## Don't
