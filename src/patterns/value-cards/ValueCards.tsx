@@ -54,7 +54,7 @@ export const ValueCards = React.forwardRef<HTMLElement, ValueCardsProps>(
           <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
             {title}
           </h2>
-          {filter && <Select size="sm" emphasis="regular" aria-label={filter.label} className="w-36" value={filter.value} options={filter.options} onChange={filter.onChange} />}
+          {filter && <Select size="sm" edge="neutral" emphasis="regular" aria-label={filter.label} className="w-36" value={filter.value} options={filter.options} onChange={filter.onChange} />}
         </header>
 
         {loading ? (

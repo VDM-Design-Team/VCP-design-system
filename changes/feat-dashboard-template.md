@@ -26,3 +26,5 @@ Super admin: `SuperAdminFilters` (the domain `Select` and the month `DateField`,
 The dashboard's stories are split in two. `Templates / Dashboard / Template` holds `DashboardTemplate`'s own stories (placeholder sections; the layout, the 36-high switch and filters, filters in the title row, narrow and dark), and `Templates / Dashboard / Examples` holds each role's composed dashboard as an example of how to use it, with light checks only. `docs/dashboard-template.md` says which is the library and which are illustrations.
 
 The dashboard's filters use the lighter `neutral` resting edge (`edge`, as `FilterBar` has had since the filter-edge change): `DashboardFilters`' selects and the super admin's domain and month fields, with `DateField` gaining the same `edge` prop. They sit beside many other outlined controls, so the darker `stroke.strong` edge was noisy.
+
+`ValueCards`' "Show" select and `CyclePerformance`'s own quarter and year selects use the neutral edge too, so every filter on the dashboard matches. Fields in a form keep the full `stroke.strong` edge.
