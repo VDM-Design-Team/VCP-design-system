@@ -39,7 +39,7 @@ list drifts, and fails a pattern composing fewer than two pieces.
 | `multipart` | `boolean` | `false` | Controlled |
 | `onMultipartChange` | `(multipart: boolean) => void` | — | The tick |
 | `showMultipart` | `boolean` | `true` | The design's own boolean — it draws the dialog both ways |
-| `parts` | `{ label, preview? }[]` | — | The parts a multipart value would become, one per problem set ("Problem Set 1"). Ticking multipart then shows **Rename Individual parts** |
+| `parts` | `{ label, preview? }[]` | — | The parts a multipart value would become, one per problem set ("Problem Set 1"). Ticking multipart then shows **Rename Individual parts**. Fewer than two: multipart is disabled, with a hint |
 | `title` / `confirmLabel` / `cancelLabel` | `string` | the design's wording | |
 | `loading` | `boolean` | `false` | Spins Confirm while the accept is in flight |
 
@@ -58,6 +58,9 @@ Figma's "Accepting AV with Multipart + Custom Titles" (`1666:263661`): once **Mu
   knows the count and the parent's title — so a blank title reaches `onConfirm` as `''`.
 
 The titles are typed fresh each time the dialog opens, and untick-and-tick keeps them while it's open.
+
+**Fewer than two parts** (one problem set): there is nothing to split, so **Multipart Value** is disabled and adds "It needs at least
+two problem sets to split." to its description (decided 9 Nov 2026). `onConfirm` then always gets `multipart: false`.
 
 ## Benign, and drawn that way
 

@@ -30,6 +30,8 @@ import { Input } from '../../atoms/input';
  * shows "Rename Individual parts": per part, its label, a **Preview** of the
  * set, and an optional title (Figma `1666:263661`). A blank title is the
  * page's default, "Part (X/X) Parent Title"; the titles travel with the answer.
+ * With fewer than two parts there is nothing to split, so the checkbox is
+ * disabled and says why (decided 9 Nov 2026).
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -89,7 +91,10 @@ export function AcceptPendingAVModal({
 }: AcceptPendingAVModalProps) {
   const id = React.useId();
   const descriptionId = `${id}-multipart-description`;
-  const naming = showMultipart && multipart && !!parts?.length;
+  /* One problem set can't be split: the choice is off, and says why. */
+  const tooFew = !!parts && parts.length < 2;
+  const naming = showMultipart && multipart && !tooFew && !!parts?.length;
+  const hintId = `${id}-multipart-hint`;
   /* The titles typed, and which previews are open. Fresh each time it opens. */
   const [titles, setTitles] = React.useState<string[]>([]);
   const [previews, setPreviews] = React.useState<boolean[]>([]);
@@ -101,7 +106,7 @@ export function AcceptPendingAVModal({
     }
   }, [open, parts]);
   const confirm = () =>
-    onConfirm(naming ? { multipart, titles: (parts ?? []).map((_, i) => (titles[i] ?? '').trim()) } : { multipart });
+    onConfirm(naming ? { multipart, titles: (parts ?? []).map((_, i) => (titles[i] ?? '').trim()) } : { multipart: multipart && !tooFew });
 
   return (
     <Modal
@@ -124,13 +129,14 @@ export function AcceptPendingAVModal({
       {showMultipart && (
         <Checkbox
           size="md"
-          checked={multipart}
+          checked={multipart && !tooFew}
           onChange={onMultipartChange}
+          disabled={tooFew}
           /* The card is the label, so the whole thing is a target. The
              announced name is the title alone — reading the explanation as
              part of the name would bury it. */
           aria-label="Multipart Value"
-          aria-describedby={descriptionId}
+          aria-describedby={tooFew ? `${descriptionId} ${hintId}` : descriptionId}
           className={cn(
             'w-full items-start rounded-md border p-4',
             multipart
@@ -144,6 +150,11 @@ export function AcceptPendingAVModal({
                 Split this value into parts based on its sets, while keeping the original as the
                 parent for overall progress tracking.
               </span>
+              {tooFew && (
+                <span id={hintId} className="text-body-sm-medium text-text-secondary">
+                  It needs at least two problem sets to split.
+                </span>
+              )}
             </span>
           }
         />

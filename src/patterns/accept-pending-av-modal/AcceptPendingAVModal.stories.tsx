@@ -120,6 +120,16 @@ export const NamingPartsFlow: Story = {
   },
 };
 
+/** One problem set can't be split: Multipart is disabled and says why (decided 9 Nov 2026). */
+export const OneProblemSet: Story = {
+  args: { parts: PARTS.slice(0, 1) },
+  play: async () => {
+    const multipart = await screen.findByRole('checkbox', { name: 'Multipart Value' });
+    await expect(multipart).toBeDisabled();
+    await expect(multipart).toHaveAccessibleDescription(/at least two problem sets/);
+  },
+};
+
 /** The accept is in flight. Confirm spins and cannot be pressed twice. */
 export const Accepting: Story = {
   args: { loading: true },
