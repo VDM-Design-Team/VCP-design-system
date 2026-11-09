@@ -53,11 +53,16 @@ const shell = cva(
       },
       invalid: {
         true: 'border-accent-critical-outline-border-default',
-        false: 'border-stroke-strong focus-within:border-stroke-focused',
+        false: 'focus-within:border-stroke-focused',
       },
+      edge: { strong: '', neutral: '' },
       fullWidth: { true: 'flex w-full', false: '' },
     },
-    defaultVariants: { size: 'md', invalid: false, fullWidth: false },
+    compoundVariants: [
+      { invalid: false, edge: 'strong', className: 'border-stroke-strong' },
+      { invalid: false, edge: 'neutral', className: 'border-neutral-outline-border-default' },
+    ],
+    defaultVariants: { size: 'md', invalid: false, fullWidth: false, edge: 'strong' },
   },
 );
 
@@ -122,6 +127,11 @@ export interface SelectProps
   /** Critical border + `aria-invalid`. Always pair with a visible error message (or use `error`). */
   invalid?: boolean;
   /**
+   * The resting edge: `strong` (default, `stroke.strong`, 3:1) or `neutral` (`neutral.outline.border.default`, lighter, about 2.6:1 on white). `neutral` is a deliberate
+   * exception for a toolbar of filters, where many outlined fields together read as noise; an error, a warning and focus still win over it. Use it only where the field is identified by more than its edge.
+   */
+  edge?: 'strong' | 'neutral';
+  /**
    * An error message under the select, in the critical colour. Implies `invalid` and is
    * announced with the select (`aria-describedby`). Inside a `Field`, use the `Field`'s `error`
    * instead, not both.
@@ -145,6 +155,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       size,
       emphasis,
       invalid,
+      edge,
       error,
       fullWidth,
       options = [],
@@ -158,13 +169,14 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     ref,
   ) => {
     const errorId = React.useId();
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || props['aria-invalid'] === true || props['aria-invalid'] === 'true';
     /* Keep a describedby a `Field` already set, and add the error's. */
     const describedBy =
       [props['aria-describedby'], error ? errorId : undefined].filter(Boolean).join(' ') || undefined;
 
     const field = (
-      <div className={cn(shell({ size, invalid: isInvalid, fullWidth }), className)}>
+      <div className={cn(shell({ size, invalid: isInvalid, fullWidth, edge }), className)}>
         <select
           ref={ref}
           disabled={disabled}

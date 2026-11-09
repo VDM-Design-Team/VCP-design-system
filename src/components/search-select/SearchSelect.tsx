@@ -8,6 +8,19 @@ import { Spinner } from '../../atoms/spinner';
 import { Input } from '../../atoms/input';
 import { Tag, type TagTone } from '../../atoms/tag';
 
+/* Layout maths, not styling: the gap between field and panel (what `mt-1.5` was), and how near the
+   screen's edge the panel may come. */
+const PANEL_GAP = 6;
+const SCREEN_EDGE = 8;
+
+/** Where the open panel sits on screen: one of `top` / `bottom`, its left edge, and the field's width. */
+interface PanelSpot {
+  top?: number;
+  bottom?: number;
+  left: number;
+  minWidth: number;
+}
+
 /**
  * SearchSelect — the system's dropdown for picking from a list that is too long,
  * or too rich, for the native `Select`: people, tags, statuses. **One field, one
@@ -54,10 +67,15 @@ import { Tag, type TagTone } from '../../atoms/tag';
  * label's `htmlFor` reaches it.
  *
  * A click inside the panel that lands on nothing does nothing: the field keeps
- * focus and the panel stays open. The panel is positioned inline (absolute,
- * under the field, as wide as its longest row, at least the field's width and at
- * most 24rem; a longer label is cut with "…"): no flipping, and it clips inside an
- * `overflow: hidden` ancestor.
+ * focus and the panel stays open. The panel is as wide as its longest row (at
+ * least the field's width and at most 24rem; a longer label is cut with "…") and
+ * floats above the page, placed from the field's position on screen, so a dialog
+ * or a panel that scrolls cannot cut it off. It opens under the field, or above
+ * it when the screen has no room below and more above, and it moves left to stay
+ * on screen. The side is chosen as it opens and kept while it is open, so
+ * filtering the list does not make it jump. When neither side has room for all
+ * of it, it takes the roomier one and the list gets shorter and scrolls. (It sat under the field whatever
+ * the room, clipped by any `overflow: hidden` ancestor, until November 2026.)
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -124,11 +142,18 @@ interface SearchSelectBase
   disabled?: boolean;
   /** `sm` 32 tall, `md` 40 (default), as `Select`. */
   size?: 'sm' | 'md';
+  /** The resting edge, as `Input` and `Select`: `strong` (default) or `neutral` (lighter; a deliberate exception for a row of filters). An error, a warning and focus still win. */
+  edge?: 'strong' | 'neutral';
   /**
    * The weight of a chosen value: `medium` (the default — a chosen value reads heavier than the placeholder) or
    * `regular`, which a **filter** uses so a row of filters sits quietly. The placeholder is regular either way.
    */
   emphasis?: 'regular' | 'medium';
+  /**
+   * Words before what is picked, once something is: "Assignee" makes the field read "Assignee: Amy Lee" (or "Assignee: 2 selected"), so a filled field still says what it filters. The placeholder stays as it is.
+   * Visual only: the trigger is already named by its label and then its value, so a screen reader is not told twice. Summary display only (tags have no summary).
+   */
+  valuePrefix?: string;
   /** Fill the container's width. Off by default, as `Input` and `Select`; the panel still grows to its rows. */
   fullWidth?: boolean;
   /**
@@ -146,6 +171,13 @@ interface SearchSelectBase
   onSearch?: (query: string) => void;
   /** What the panel says while `loading`. */
   loadingText?: string;
+  /**
+   * Draws the field as plain text inside a bar rather than as a bordered input: no
+   * border or fill, the value semibold with a brand caret, a tint on hover. For a
+   * picker that lives in another control's toolbar (the Gantt chart's period bar), where
+   * a boxed field would fight the bar. One line, one pick. The field hugs its value and centres in the width you give the control, and the panel opens from that width's left edge.
+   */
+  inline?: boolean;
   /** Critical border + `aria-invalid`. Pair with a visible message (or use `error`). */
   invalid?: boolean;
   /**
@@ -273,13 +305,17 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       rows = 'text',
       renderOption,
       disabled,
+      inline,
       size = 'md',
+      edge = 'strong',
       emphasis = 'medium',
+      valuePrefix,
       fullWidth = false,
       loading,
       onSearch,
       loadingText = 'Loading…',
       invalid,
+      'aria-invalid': ariaInvalid,
       error,
       warning,
       collapsibleGroups,
@@ -307,6 +343,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const toggleRef = React.useRef<HTMLButtonElement | null>(null);
     const triggerRef = React.useRef<HTMLButtonElement>(null);
     const searchRef = React.useRef<HTMLInputElement>(null);
+    const panelRef = React.useRef<HTMLDivElement>(null);
+    const listRef = React.useRef<HTMLDivElement>(null);
     /* Focus the next place after a tag is removed or "+N" is pressed, since the
        focused control is replaced; a blur in the meantime must not fold the field. */
     const pendingFocus = React.useRef<{ tag: string | null } | { toggle: true } | null>(null);
@@ -339,7 +377,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const committed: readonly string[] =
       value === undefined ? inner : multiple ? (value as readonly string[]) : value ? [value as string] : [];
     const shown = multiple && confirm && open ? draft : committed;
-    const isInvalid = !!invalid || !!error;
+    /* Invalid by the prop, by an `error`, or by the `aria-invalid` a `Field` with an error puts on its control. */
+    const isInvalid = !!invalid || !!error || ariaInvalid === true || ariaInvalid === 'true';
     const isWarning = !isInvalid && !!warning;
     const [collapsedGroups, setCollapsedGroups] = React.useState<readonly string[]>(
       defaultCollapsedGroups ?? [],
@@ -620,6 +659,64 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       return () => observer.disconnect();
     }, []);
 
+    /* ---- The open panel's place on screen. ---- */
+    const [spot, setSpot] = React.useState<PanelSpot | null>(null);
+    /* Below or above, decided when it opens and kept until it closes. */
+    const side = React.useRef<'top' | 'bottom' | null>(null);
+    /* Set only when neither side has room for the whole panel: the list's height gives way, and it
+       scrolls inside this, so the search box and the panel's edges stay on screen. */
+    const [listMax, setListMax] = React.useState<number | undefined>(undefined);
+    const placePanel = React.useCallback(() => {
+      const field = fieldRef.current;
+      const panel = panelRef.current;
+      if (!field || !panel) return;
+      const rect = field.getBoundingClientRect();
+      if (side.current === null) {
+        const need = panel.offsetHeight + PANEL_GAP;
+        const below = window.innerHeight - rect.bottom - SCREEN_EDGE;
+        const above = rect.top - SCREEN_EDGE;
+        side.current = below >= need || below >= above ? 'bottom' : 'top';
+        const room = side.current === 'bottom' ? below : above;
+        const list = listRef.current?.offsetHeight ?? 0;
+        setListMax(need > room ? Math.max(room - PANEL_GAP - (panel.offsetHeight - list), 0) : undefined);
+      }
+      const width = Math.max(panel.offsetWidth, rect.width);
+      const left = Math.max(SCREEN_EDGE, Math.min(rect.left, window.innerWidth - SCREEN_EDGE - width));
+      const next: PanelSpot =
+        side.current === 'bottom'
+          ? { top: rect.bottom + PANEL_GAP, left, minWidth: rect.width }
+          : { bottom: window.innerHeight - rect.top + PANEL_GAP, left, minWidth: rect.width };
+      setSpot((prev) =>
+        prev &&
+        prev.top === next.top &&
+        prev.bottom === next.bottom &&
+        prev.left === next.left &&
+        prev.minWidth === next.minWidth
+          ? prev
+          : next,
+      );
+    }, []);
+    /* Measured before the open panel is painted, and kept on the field while anything scrolls or
+       resizes (capture: scroll does not bubble). */
+    React.useLayoutEffect(() => {
+      if (!open) {
+        side.current = null;
+        setListMax(undefined);
+        return;
+      }
+      placePanel();
+      window.addEventListener('scroll', placePanel, true);
+      window.addEventListener('resize', placePanel);
+      const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(placePanel) : null;
+      if (panelRef.current) observer?.observe(panelRef.current);
+      if (fieldRef.current) observer?.observe(fieldRef.current);
+      return () => {
+        window.removeEventListener('scroll', placePanel, true);
+        window.removeEventListener('resize', placePanel);
+        observer?.disconnect();
+      };
+    }, [open, placePanel]);
+
     /* Focus lands somewhere sensible once a removed tag or the toggle is replaced. */
     React.useEffect(() => {
       const pending = pendingFocus.current;
@@ -704,16 +801,21 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               }
             }}
             className={cn(
-              'flex items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
-              size === 'sm' ? 'min-h-8' : 'min-h-10',
+              inline
+                ? 'mx-auto flex h-7 w-max max-w-full items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
+                : cn(
+                    'flex items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
+                    size === 'sm' ? 'min-h-8' : 'min-h-10',
+                  ),
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
-              isInvalid
-                ? 'border-accent-critical-outline-border-default'
-                : isWarning
-                  ? 'border-accent-warning-outline-border-default'
-                  : 'border-stroke-strong focus-within:border-stroke-focused',
+              !inline &&
+                (isInvalid
+                  ? 'border-accent-critical-outline-border-default'
+                  : isWarning
+                    ? 'border-accent-warning-outline-border-default'
+                    : cn('focus-within:border-stroke-focused', edge === 'neutral' ? 'border-neutral-outline-border-default' : 'border-stroke-strong')),
               'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
-              disabled && 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle',
+              disabled && (inline ? 'cursor-not-allowed' : 'cursor-not-allowed border-stroke-subtle bg-surface-neutral-subtle'),
             )}
           >
             {showTags && (
@@ -801,11 +903,13 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               }}
               onClick={() => (open ? closePanel() : openPanel())}
               className={cn(
-                'flex items-center justify-between gap-2 rounded-sm text-left outline-none',
-                size === 'sm' ? 'h-6' : 'h-8',
+                'flex items-center justify-between rounded-sm text-left outline-none',
+                inline ? 'h-7 gap-1' : cn('gap-2', size === 'sm' ? 'h-6' : 'h-8'),
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
-                  ? cn('text-text-primary', emphasis === 'medium' ? 'text-body-sm-medium' : 'text-body-sm-regular')
+                  ? inline
+                    ? 'text-body-sm-semibold text-text-primary'
+                    : cn('text-text-primary', emphasis === 'medium' ? 'text-body-sm-medium' : 'text-body-sm-regular')
                   : 'text-body-sm-regular text-text-subtle',
                 size === 'sm' && 'text-caption-md-regular',
                 'disabled:cursor-not-allowed disabled:text-text-disabled',
@@ -816,6 +920,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 <span id={valueId} className="sr-only">{`${committed.length} selected. ${placeholder}`}</span>
               ) : (
                 <span id={valueId} className="min-w-0 truncate">
+                  {summary && valuePrefix && <span aria-hidden="true">{valuePrefix}: </span>}
                   {summary ?? placeholder}
                 </span>
               )}
@@ -827,7 +932,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   size="sm"
                   aria-hidden="true"
                   className={cn(
-                    'shrink-0 text-text-tertiary transition-transform motion-reduce:transition-none',
+                    'shrink-0 transition-transform motion-reduce:transition-none',
+                    inline ? 'text-text-brand-medium' : 'text-text-tertiary',
                     open && 'rotate-180',
                   )}
                 />
@@ -836,15 +942,20 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
           </div>
 
           <div
+            ref={panelRef}
             hidden={!open}
+            /* Which side it opened on, for tests. */
+            data-side={open ? (spot?.bottom !== undefined ? 'top' : 'bottom') : undefined}
+            style={open && spot ? spot : undefined}
             /* A click that lands on nothing must not take focus: the field keeps it and the
                panel stays open. Only the search box is allowed to take it. */
             onMouseDown={(e) => {
               if (!(e.target as HTMLElement).closest('input')) e.preventDefault();
             }}
-            /* As wide as its longest row (never narrower than the field, never wider than 24rem), so a
-               narrow field does not cut its options off. Anchored to the field's left edge. */
-            className="absolute top-full left-0 z-50 mt-1.5 w-max max-w-96 min-w-full overflow-hidden rounded-md border border-stroke-default bg-surface-elevated p-1 shadow-menu"
+            /* As wide as its longest row (never narrower than the field, which `spot` sets, never wider
+               than 24rem), so a narrow field does not cut its options off. Fixed, from the field's
+               place on screen (`spot`), so no `overflow` ancestor clips it. */
+            className="fixed z-50 w-max max-w-96 overflow-hidden rounded-md border border-stroke-default bg-surface-elevated p-1 shadow-menu"
           >
             {searchable && (
               <div className="p-2">
@@ -892,6 +1003,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               </div>
             )}
             <div
+              ref={listRef}
               role={collapsibleGroups ? undefined : 'listbox'}
               id={collapsibleGroups ? undefined : listId}
               aria-label={collapsibleGroups ? undefined : ariaLabel}
@@ -899,6 +1011,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               aria-multiselectable={!collapsibleGroups && multiple ? true : undefined}
               hidden={loading || shownRows.length === 0}
               className="max-h-64 overflow-y-auto"
+              style={listMax !== undefined ? { maxHeight: listMax } : undefined}
               /* Reachable by keyboard when it scrolls, though focus never needs it. */
               tabIndex={-1}
             >

@@ -15,15 +15,20 @@ import { cn } from '../../lib/cn';
  * page stays reachable and operable. If the content must be finished before the
  * user does anything else, that is a Modal, not this.
  *
- * **Positioning is modest.** The panel is absolutely positioned inside a
- * relatively positioned wrapper: above or below the trigger, flush to its left
- * or right edge. `placement` and `align` are what you *prefer*: when the panel
- * would run off the screen it opens on the other side (above instead of below,
- * right-flush instead of left-flush) if that fits better, and if neither side
- * has room for it its height gives way and it scrolls. It is measured when it
- * opens and when the window or the panel is resized. There is no shifting, no
- * portal — this system carries no positioning library and this component does not
- * pretend to be one. See docs/popover.md for what that costs you.
+ * **Positioning is modest, but it floats.** The panel is placed from the
+ * trigger's position on screen (`position: fixed`), so a table, a dialog or a
+ * panel that scrolls cannot cut it off: it sits above the page. It opens above
+ * or below the trigger, flush to its left or right edge. `placement` and `align`
+ * are what you *prefer*: when the panel would run off the screen it opens on the
+ * other side (above instead of below, right-flush instead of left-flush) if that
+ * fits better, and if neither side has room for it its height gives way and it
+ * scrolls. It is measured when it opens, when the window or the panel is resized
+ * and when anything scrolls, so it stays on its trigger. It does not portal —
+ * the panel stays in the wrapper, so focus, Escape and click-outside are plain
+ * DOM — and there is no sliding along an edge: this system carries no
+ * positioning library. (It sat inside the wrapper, where any `overflow` ancestor
+ * clipped it, until November 2026; `strategy="absolute"` still does that.) See
+ * docs/popover.md for what that costs you.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -83,7 +88,7 @@ const popoverPanel = cva(
         lg: 'w-96',
       },
     },
-    defaultVariants: { strategy: 'absolute', placement: 'bottom', align: 'left', width: 'md' },
+    defaultVariants: { strategy: 'fixed', placement: 'bottom', align: 'left', width: 'md' },
   },
 );
 
@@ -142,12 +147,13 @@ export interface PopoverProps
    */
   width?: PopoverWidth;
   /**
-   * How the panel is placed. `absolute` (default) sits inside the wrapper, so an ancestor with
-   * `overflow: hidden | auto` clips it. `fixed` places it from the trigger's position on screen, so
-   * it floats over such an ancestor — a date picker opening out of a table cell that scrolls
-   * sideways. It follows the trigger on scroll and resize. It still does not portal: the panel stays
-   * in the wrapper, so focus, Escape and click-outside work as before. (An ancestor with a CSS
-   * `transform` would re-anchor it; none of the system's containers has one.)
+   * How the panel is placed. `fixed` (default) places it from the trigger's position on screen, so
+   * it floats over an ancestor with `overflow: hidden | auto` — a menu in a table's last row, a
+   * filter at the foot of a panel that scrolls — and follows the trigger on scroll and resize. It
+   * still does not portal: the panel stays in the wrapper, so focus, Escape and click-outside work
+   * as before. `absolute` sits inside the wrapper, where such an ancestor clips it; it is for the
+   * one case `fixed` gets wrong: an ancestor with a CSS `transform` (or `filter`), which would
+   * re-anchor a fixed panel to itself. None of the system's containers has one.
    */
   strategy?: 'absolute' | 'fixed';
   /**
@@ -199,7 +205,7 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     placement = 'bottom',
     align = 'left',
     width = 'md',
-    strategy = 'absolute',
+    strategy = 'fixed',
     autoFocus = false,
     label,
     panelRole,
@@ -237,7 +243,9 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
   /* The panel's full height, kept from the last time it was measured unshortened. */
   const naturalHeight = React.useRef(0);
 
-  const measure = React.useCallback(() => {
+  /* `keep`: stay on the side and edge it took, and only move with the trigger — what a scroll does, so
+     an open panel never jumps to the other side under the reader's hands. */
+  const measure = React.useCallback((keep = false) => {
     const wrapper = wrapperRef.current;
     const panel = panelRef.current;
     if (!wrapper || !panel) return;
@@ -258,13 +266,26 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
     const roomAbove = trigger.top - SCREEN_EDGE;
     const room = (side: 'top' | 'bottom') => (side === 'bottom' ? roomBelow : roomAbove);
     const other = placement === 'bottom' ? 'top' : 'bottom';
-    const side = room(placement) >= need || room(placement) >= room(other) ? placement : other;
+    const held = keep ? fitRef.current : null;
+    const side = held
+      ? held.placement
+      : room(placement) >= need || room(placement) >= room(other)
+        ? placement
+        : other;
     /* Neither side holds it: keep the roomier one and let the panel scroll inside it. */
-    const maxHeight = room(side) < need ? Math.max(room(side) - PANEL_GAP, 0) : undefined;
+    const maxHeight = held ? held.maxHeight : room(side) < need ? Math.max(room(side) - PANEL_GAP, 0) : undefined;
 
     const fitsLeft = trigger.left + wide <= window.innerWidth - SCREEN_EDGE;
     const fitsRight = trigger.right - wide >= SCREEN_EDGE;
-    const edge = align === 'left' ? (fitsLeft || !fitsRight ? 'left' : 'right') : fitsRight || !fitsLeft ? 'right' : 'left';
+    const edge = held
+      ? held.align
+      : align === 'left'
+        ? fitsLeft || !fitsRight
+          ? 'left'
+          : 'right'
+        : fitsRight || !fitsLeft
+          ? 'right'
+          : 'left';
 
     const anchor =
       strategy === 'fixed'
@@ -294,17 +315,20 @@ export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function P
       naturalHeight.current = 0;
       return;
     }
-    measure();
+    const refit = () => measure();
+    const follow = () => measure(true);
+    refit();
     const panel = panelRef.current;
-    const observer = panel && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    const observer = panel && typeof ResizeObserver !== 'undefined' ? new ResizeObserver(refit) : null;
     if (panel) observer?.observe(panel);
-    window.addEventListener('resize', measure);
-    /* A fixed panel follows its trigger when anything scrolls (capture: scroll does not bubble). */
-    if (strategy === 'fixed') window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', refit);
+    /* A fixed panel follows its trigger when anything scrolls (capture: scroll does not bubble), on the
+       side it opened on. */
+    if (strategy === 'fixed') window.addEventListener('scroll', follow, true);
     return () => {
       observer?.disconnect();
-      window.removeEventListener('resize', measure);
-      if (strategy === 'fixed') window.removeEventListener('scroll', measure, true);
+      window.removeEventListener('resize', refit);
+      if (strategy === 'fixed') window.removeEventListener('scroll', follow, true);
     };
   }, [isOpen, measure, strategy]);
 
