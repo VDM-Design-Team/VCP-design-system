@@ -1,0 +1,98 @@
+# LineChart
+
+One line per series across an ordered axis (days, sprints), a dot at every point, drawn in SVG. The chart inside Figma's `Cycle_Burndown`. It draws the chart and its legend; the title, totals and card are the pattern's (`CycleBurndown`).
+
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `LegendItem` | atom |
+| `Skeleton` | atom |
+| `ChartLegend` | component |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
+## When to use
+
+| Use | For |
+|---|---|
+| `LineChart` | A trend over an ordered axis, several series at once |
+| `CycleBurndown` | A cycle's burndown, with totals |
+| `BarChart` | Values side by side per category |
+
+## The data you pass
+
+```ts
+data: {
+  key: string | number;                         // stable per point
+  label: string;                                // the axis text: "June 20" (yours to format)
+  title?: string;                               // the tooltip heading, when it should say more than the axis does: "06.20.2025"
+  values: { completed?: number | null; committed?: number | null; overdue?: number | null; available?: number | null; leave?: number | null };
+}[]
+series: ChartSeries[]                           // which lines to draw, in order
+```
+
+- **One entry per point, in order.** Points are **evenly spaced in the order given**: leave weekends out of a working-days axis and the line does not stretch over them. The chart does not sort, fill gaps or work out dates.
+- **A series with no value at a point** (`undefined` or `null`) **breaks its line** there, and has no dot: a series that starts late or ends early is just shorter. `0` is a real point on the axis.
+- **What each series measures is the product's.** The chart draws the numbers it is given; the colours and names are the system's (`CHART_SERIES`), shared with every other chart. Use `seriesLabels` to rename one ("Pts Completed").
+
+## Props
+
+| Prop | Type | Default | Notes |
+|---|---|---|---|
+| `data` | see above | required | |
+| `series` | `ChartSeries[]` | required | `completed`, `committed`, `overdue`, `available`, `leave` |
+| `seriesLabels` | `Partial<Record<ChartSeries, string>>` | — | A different word in this chart |
+| `pointLabel` | `string` | — | What a point is called in the tooltip's heading: `Date` gives "Date: 06.20.2025" (label bold). Without it the heading is just the title |
+| `caption` | `string` | required | The chart's name: the table's caption and the plot's accessible name |
+| `yLabel` | `string` | — | The value axis' title, turned on its side |
+| `unit` | `string` | `pts` | After a number in the tooltip, the table and the announcement |
+| `height` | `number` | `244` | The plot and its axes, in px (the plot itself is `height` less 44) |
+| `yTickCount` | `number` | `7` | About how many gridlines; they round to readable numbers |
+| `yMax` | `number` | next tick above the data | Pin the top so two charts compare |
+| `legend` | `bottom \| none` | `bottom` | Under the chart, always |
+| `formatValue` | `(value, series) => string` | the number, plus `unit` | How a value reads in the tooltip, the table and the announcement: `$1.2k` |
+| `formatTick` | `(value) => string` | the number | How a number on the value axis reads |
+| `onSelectDatum` | `(datum) => void` | — | A point was chosen: a click (the nearest point) or Enter on the keyboard |
+| `renderTooltip` | `({ datum, index, series }) => ReactNode` | — | Replaces what the tooltip says; the card and its position stay. The announcement is still the series' values |
+| `toggleSeries` | `boolean` | — | Makes each legend entry a button that shows or hides its line; the axis follows what is drawn. The last visible line cannot be hidden |
+| `defaultHiddenSeries` / `onToggleSeries` | `ChartSeries[]` / `(series, hidden) => void` | — | Where the toggles start, and a toggle was pressed |
+| `loading` / `empty` | `boolean` / `ReactNode` | | A placeholder and a status; or what it says with no data |
+| `className`, `ref` | | | On the wrapper |
+
+## Responsive, and not only by colour
+
+It measures its own width and draws in real pixels, so type never scales; the axis labels **thin out** (every other, every third …) when they would run into each other. Nothing overflows.
+
+**Lines differ by more than colour:** Committed (the plan) is dashed and Available dotted; Completed and Overdue are solid. The dots, the legend, the tooltip and the table all name the series too.
+
+## Formatting, choosing and customising
+
+`formatValue`, `formatTick`, `onSelectDatum`, `renderTooltip` and `toggleSeries` work as on `BarChart` (see `docs/bar-chart.md`): the same names, the same keyboard model, the same legend. What the chart still does not do: a continuous time axis, a second axis, area fills, animation, or series outside `CHART_SERIES`.
+
+## Tokens
+
+| Part | Style | Colour |
+|---|---|---|
+| Axis numbers and labels | `caption-md-regular` (12) | `text.secondary` |
+| Axis title | `caption-md-semibold` | `text.secondary` |
+| Gridlines | 1 | `stroke.subtle` |
+| Lines | 2, round caps and joins | the series' fill (`stroke-*`) |
+| Dots | radius 3 (5 on the hovered point) | the series' fill |
+| Tooltip | `caption-md` | `surface.elevated`, `stroke.subtle`, `shadow-md` |
+
+**Differences from Figma, on purpose.** The text in the plot is 12 (Figma sets the axis at 10, too small to read comfortably; one size across a chart, with the hover card and legend). The line colours are the series tokens (Figma's blues and greens are not variables); Committed is dashed and Available dotted (Figma draws all lines solid, which leaves two blues distinguishable by colour alone); the plot spaces points evenly and does not draw the weekend.
+
+## Accessibility
+
+- **One keyboard stop, arrow keys inside.** The plot is a focusable group named "Cycle Burndown. Use the left and right arrow keys to read each point." Left and right move from point to point, Home and End jump to the first and last, Escape clears, and (with `onSelectDatum`) Enter chooses the point. The tooltip follows, and a polite status announces the point: "June 20: Completed 0 pts, Committed 145 pts …".
+- **The picture is `aria-hidden`; the data is a table.** A visually hidden `<table>` (captioned by `caption`) has a row per point and a column per series; a missing value reads "no data".
+- **Contrast, measured in both themes** (the `ContrastHolds` story): every line holds 3:1 against the card (1.4.11) and the axis text 4.5:1.
+- Colour is never the only signal: dash patterns, the legend, the tooltip and the table.
+- Loading: one `status` ("Loading Cycle Burndown"), the placeholder hidden from assistive tech.
+
+## Don't
+
+- **Don't pass dates and expect it to space them by time.** It spaces points evenly; label them yourself.
+- **Don't pass `0` for a day with no data.** Leave it out (`undefined` or `null`) so the line breaks.
+- **Don't pass colours.** A new series is a new entry in `CHART_SERIES`.

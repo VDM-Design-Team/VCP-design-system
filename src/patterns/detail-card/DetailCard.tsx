@@ -136,16 +136,7 @@ const LABEL: Partial<Record<DetailCardField, string>> = {
   capacityPoints: 'Capacity Points',
 };
 
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
 const parts = (iso: string) => iso.split('-').map(Number) as [number, number, number];
-/** "October 1, 2025". */
-const longDate = (iso: string) => {
-  const [y, m, d] = parts(iso);
-  return MONTHS[m - 1] ? `${MONTHS[m - 1]} ${d}, ${y}` : iso;
-};
 const toDate = (iso: string) => {
   const [y, m, d] = parts(iso);
   return new Date(y, m - 1, d);
@@ -194,12 +185,14 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     ref,
   ) => {
     const editing = type === 'editing' || type === 'new';
+    /* Every date the card reads out: dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
+    const { format: showDate, range: showRange } = useDateFormat();
     const fields = FIELDS[type].filter((f) => !(domain === 'design' && f === 'cycle'));
     const set = (patch: Partial<DetailCardValue>) => onChange?.({ ...value, ...patch });
     const cycles = options?.cycles ?? [];
     const cycleOptions: SearchSelectOption[] = cycles.map((c) => ({
       value: c.value,
-      label: `${c.code} (${c.start} - ${c.end})`,
+      label: `${c.code} (${showRange(c.start, c.end)})`,
       shortLabel: c.code,
     }));
 
@@ -224,7 +217,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     body.startDate = editing ? (
       <DateField label="Start Date" value={value.startDate} onChange={(v) => set({ startDate: v })} error={errors?.startDate} />
     ) : value.startDate ? (
-      <Tag size="md" tone="neutral">{longDate(value.startDate)}</Tag>
+      <Tag size="md" tone="neutral">{showDate(value.startDate)}</Tag>
     ) : null;
     body.dueDate = editing ? (
       <DateField label="Due Date" value={value.dueDate} onChange={(v) => set({ dueDate: v })} error={errors?.dueDate} />
@@ -233,7 +226,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         size="md"
         proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })}
       >
-        {longDate(value.dueDate)}
+        {showDate(value.dueDate)}
       </DueDateTag>
     ) : null;
 
@@ -389,18 +382,18 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         {fields.map((field) => {
           if (field === 'deploymentDate') {
             return value.deploymentDate ? (
-              <Muted key={field} label="Deployment Date" date={longDate(value.deploymentDate)} />
+              <Muted key={field} label="Deployment Date" date={showDate(value.deploymentDate)} />
             ) : null;
           }
           if (field === 'dateInitiated') {
             if (!value.dateInitiated && !value.dateAccepted) return null;
             return (
               <div key={field} className="flex gap-4">
-                {value.dateInitiated && <Muted label="Date Initiated" date={longDate(value.dateInitiated)} />}
+                {value.dateInitiated && <Muted label="Date Initiated" date={showDate(value.dateInitiated)} />}
                 {value.dateAccepted && (
                   <>
                     <span aria-hidden="true" className="w-px self-stretch bg-stroke-subtle" />
-                    <Muted label="Date Accepted" date={longDate(value.dateAccepted)} />
+                    <Muted label="Date Accepted" date={showDate(value.dateAccepted)} />
                   </>
                 )}
               </div>

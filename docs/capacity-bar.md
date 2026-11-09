@@ -51,11 +51,11 @@ The colour of each series is owned by `src/lib/chart-series.ts` (`CHART_SERIES`)
 
 **Every number is one colour per theme**: white in light, near-black in dark. Every fill follows the system's filled-surface rule, so no series needs the opposite text colour from the others.
 
-The segments sit 1 apart on the `surface.track`, so each is a shape of its own and not only a colour change.
+The segments sit 2 apart on the `surface.track` (the same gap as the bars in `BarChart`), so each is a shape of its own and not only a colour change.
 
 **Differences from Figma, on purpose.**
 - **The fills are tokens.** Figma draws Completed in `#63c270`, Committed in `#5280e5` and Overdue in `#ff5656`, none of them a variable, and the legend swatches in other greens and reds again (`accent.success.outline.border`, a *border* token). White numbers on those are under 4.5:1. Here they are the filled-surface tokens and their content colours.
-- **Committed and Available are two steps of the brand blue**: Committed the deepest (`surface.brand.stronger`), Available the one lighter (`surface.brand.strong`, the primary blue), both with the same number colour. They are 2.14:1 apart in light and 1.57:1 in dark (the ramp flips there, so Committed is the lighter of the two), with a 1 gap between segments. The nearer blue, `accent.info.filled`, is the same colour as Available's, which is why it isn't used.
+- **Committed and Available are two steps of the brand blue**: Committed the deepest (`surface.brand.stronger`), Available the one lighter (`surface.brand.strong`, the primary blue), both with the same number colour. They are 2.14:1 apart in light and 1.57:1 in dark (the ramp flips there, so Committed is the lighter of the two), with a 2 gap between segments. The nearer blue, `accent.info.filled`, is the same colour as Available's, which is why it isn't used.
 - **Leave is amber**, which Figma draws as a grey. A grey Leave read as Available in dark. Amber is also the system's *warning* colour, and Leave is not a warning, so it is read here as a category colour in a chart, not a status (as `CycleSummary`'s brown "Carried Over" already is). If that reading ever becomes a problem, the alternative is a hatched grey, which needs a pattern fill and its number written outside the bar.
 - **Overdue is red everywhere.** Figma's Sprint Metrics drew it orange.
 
