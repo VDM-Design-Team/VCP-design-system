@@ -96,6 +96,8 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 ## Accessibility
 
+- **The fields' edges are the neutral outline** (`neutral.outline.border.default`, slate-400: about 2.6:1 on white), lighter than the 3:1 `stroke.strong` every other field uses, because a whole row of dark outlines is noisy beside a table. This is a deliberate exception: each field here is also identified by its icon (the magnifier, the chevron, the calendar) and its placeholder, and an error, a warning and focus still draw their own stronger edge. If design wants the full 3:1 back, drop the `edge` prop on the fields in `FilterBar`.
+
 - Each field is named: `Status`, `Priority` and `Tags` by `aria-label`, the period
   button by its value ("Period, 09/09/2026-15/09/2026"), the search field by its
   placeholder.

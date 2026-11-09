@@ -29,6 +29,16 @@ A dialog's footer buttons are **`md` (40 high)**, and they take their colour fro
 The `actions` row is these two buttons. A hand-built `footer` uses them too: `<ModalCancel /><ModalConfirm onClick={…}>Delete claim</ModalConfirm>`. **A grey Cancel goes beside a red answer** — a blue-outlined Cancel next to a red button is two competing colours. Extra buttons (a third action, a tertiary Cancel the design draws) can stay plain `Button`s at the
 default size. Buttons inside the *body* of a dialog (not the footer) are not affected.
 
+## While it saves: `busy`
+
+**Nothing closes a dialog while it saves.** While `busy`, Escape, the ✕ and a backdrop click do nothing, `ModalCancel` is disabled, and the ✕ is disabled. A save can't be abandoned halfway with its result landing on a closed dialog. Focus stays where it was: on the saving button, which keeps focus while it loads (see `Button`'s `loading`). A backdrop click doesn't blur it either.
+
+- **It turns on by itself** while the footer's `ModalConfirm` (or `actions.confirm`) is `loading`. Most dialogs need nothing more.
+- **When the saving button is a plain `Button`** (a tertiary Cancel and two answers, or buttons in the body), pass `busy={loading}` yourself, and give any hand-built Cancel `disabled={loading}`.
+- `busy={false}` opts out. Leave it for a dialog that really can be walked away from mid-request.
+
+The `Saving` story is the test: once Publish is loading, Escape and a backdrop click leave the dialog open with focus on Publish, Cancel and ✕ are disabled, and when the save finishes Escape closes it again.
+
 ## The critical tone
 ## The critical tone
 
@@ -85,6 +95,7 @@ Rules of thumb:
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |
 | `showClose` | `boolean` | `true` | The icon-only close button in the header |
+| `busy` | `boolean` | while `ModalConfirm` is `loading` | Saving: nothing closes the dialog (Escape, ✕, backdrop, `ModalCancel`). See "While it saves" |
 | `closeLabel` | `string` | `'Close'` | Accessible name for that button |
 | `initialFocusRef` | `RefObject<HTMLElement \| null>` | — | Where focus goes on open. Defaults to the panel |
 | `returnFocusRef` | `RefObject<HTMLElement \| null>` | — | Where focus goes on close. Defaults to whatever had it when it opened |
@@ -261,11 +272,14 @@ everyone. Fixed 11 September 2026, with the `NestedDialog` story as the
 regression test. The review flow is the design that needs it: a review dialog
 that opens a rejection dialog on top of itself.
 
-**Escape always closes it — including when `dismissible={false}`.**
+**Escape always closes it — including when `dismissible={false}` — except while it saves (`busy`).**
 `dismissible` guards against a *stray click* on the backdrop, which is the
 accidental gesture. Escape is deliberate, it is what WAI-ARIA requires of every
 dialog, and taking it away is how keyboard users get sealed in. If a decision is
 so important that Escape must not dismiss it, it is not a dialog — it is a page.
+The one pause is `busy`: while a save is in flight Escape is used up and the
+dialog stays, so the result never lands on a closed dialog. It works again the
+moment the save finishes.
 A popup open inside the dialog takes the first Escape, but the second one still
 closes it — see the next section.
 
@@ -372,6 +386,7 @@ clauses above rather than describing them:
 | `BackgroundIsInert` | The page carries `inert` while open and loses it on close; the dialog's own portal never gets it |
 | `BackdropClickCloses` | A click on the backdrop closes it, and a press that starts on the panel and ends on the backdrop does not |
 | `NotDismissible` | `dismissible={false}` survives a backdrop click and puts focus back on the panel, Escape still closes, there is no close button, and the first Tab is Cancel rather than Delete |
+| `Saving` | While the answer loads, Escape and a backdrop click leave the dialog open with focus on the loading button, Cancel and ✕ are disabled, and once it finishes Escape closes it |
 | `NestedDialog` | With a dialog open over a dialog, the outer one is inert, Tab cycles in the inner one, and Escape closes the inner one first, then the outer |
 | `EscapeClosesPopupFirst` | With a `Popover` open inside the dialog, the first Escape closes the popover, returns focus to its trigger and leaves the dialog open; the second closes the dialog and returns focus to the dialog's trigger |
 

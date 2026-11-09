@@ -68,6 +68,7 @@ export function ConfirmDeleteAVModal({
     <Modal
       open={open}
       onClose={onClose}
+      busy={loading}
       /* The dialog is named by the heading it renders in its own body, so
          the announced name *is* the visible question. */
       aria-labelledby={titleId}

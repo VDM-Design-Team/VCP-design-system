@@ -166,6 +166,10 @@ No new tokens.
 - **Don't use `selectable` without wiring `selected`** — a checkbox column
   that never changes state is furniture.
 
+## Filters go above the table, in a card
+
+`DataTable` never owns its filters or search. They sit above it, in the same card as the table, drawn by `TableCard` (see `docs/table-card.md`); the table inside is `bare` (no border or fill of its own, corners still `radius.md`). `AVTable` does this when given `filters`.
+
 ## A cut name says the whole of it
 
 A first column that can truncate (`grow`) renders its text with **`TruncatedText`** (or, for a button that opens the row, `useIsTruncated` with its own `Tooltip`), so hovering or focusing a cut name shows it in full — never the browser's `title`. `AVTable` and `PlanningTable` do.
