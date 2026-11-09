@@ -93,7 +93,7 @@ you throw it away.
 | `value` | `string` | — | ISO `yyyy-mm-dd` |
 | `onChange` | `(iso) => void` | — | Fires with the chosen day; the popover then closes |
 | `label` | `string` | required | What the date is — names the button: "Change due date" |
-| `format` | `(iso) => string` | identity | How it reads. The design draws the ISO string |
+| `format` | `(iso) => string` | the system's date format | How it reads: dd/mm/yyyy, or the person's locale under a `DateFormatProvider` (see `docs/date-field.md`) |
 | `placeholder` | `string` | `'No date'` | While there is no value |
 | `picker` | `DatePicker` props | — | `min`, `max`, `today`, `markers`… passed through |
 | `align` | `left \| right` | `left` | Which edge of the picker lines up with the button; `right` opens leftwards, for the last columns |

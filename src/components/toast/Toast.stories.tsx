@@ -4,6 +4,8 @@ import { expect, fireEvent, fn, screen, userEvent, waitFor, within } from 'story
 import { Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 import { Button } from '../../atoms/button';
+import { Input } from '../../atoms/input';
+import { Field } from '../field';
 
 const TONES: ToastTone[] = ['info', 'success', 'warning', 'critical'];
 
@@ -624,5 +626,86 @@ export const ProviderRoutesToLiveRegions: Story = {
       expect(polite).toBeEmptyDOMElement();
       expect(assertive).toBeEmptyDOMElement();
     });
+  },
+};
+
+const MISSING_TITLE = 'You need to fill in this field before submitting the Added Value';
+
+function BlockedSubmitForm() {
+  const { toast, dismissAll } = useToast();
+  const [title, setTitle] = React.useState('');
+  const [error, setError] = React.useState<string | undefined>();
+  return (
+    <form
+      className="flex max-w-md flex-col gap-4"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (title.trim()) {
+          setError(undefined);
+          dismissAll();
+          return;
+        }
+        setError(MISSING_TITLE);
+        toast({
+          tone: 'critical',
+          title: 'Missing Input',
+          description: "Title can't be empty, please fill it in before submitting.",
+          announce: false,
+        });
+      }}
+    >
+      <Field label="Title" required error={error}>
+        <Input
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Type in the title"
+        />
+      </Field>
+      <div>
+        <Button type="submit">Submit</Button>
+      </div>
+    </form>
+  );
+}
+
+/**
+ * **Flow:** a blocked Submit on an Added Value, the one place a toast repeats an
+ * error the user must fix (see the doc). The field's error is the message, and
+ * `Field` announces it with `role="alert"`. The "Missing Input" toast shows the
+ * same problem on screen, so it is raised with `announce: false`: it lands
+ * outside both live regions, and the problem is said once.
+ */
+export const BlockedSubmitIsSaidOnce: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
+    <ToastProvider position="bottom-right">
+      <div className="min-h-96 bg-surface-canvas p-8">
+        <BlockedSubmitForm />
+      </div>
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const polite = screen.getByRole('status');
+    const assertive = screen.getByRole('alert');
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+
+    /* The one announcement: the field's own error. */
+    const fieldError = await canvas.findByText(MISSING_TITLE);
+    await expect(fieldError.closest('[role="alert"]')).not.toBeNull();
+
+    /* The toast is on screen, but in neither live region. */
+    const toastTitle = await screen.findByText('Missing Input');
+    await expect(toastTitle).toBeVisible();
+    await expect(toastTitle.closest('[aria-live]')).toBeNull();
+    await expect(polite).toBeEmptyDOMElement();
+    await expect(assertive).toBeEmptyDOMElement();
+
+    /* It still closes like any toast. */
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss: Missing Input' }));
+    await waitFor(() => expect(screen.queryByText('Missing Input')).toBeNull());
+    await expect(fieldError).toBeVisible();
   },
 };

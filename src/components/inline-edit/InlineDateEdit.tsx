@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import { IconButton } from '../../atoms/icon-button';
 import { DatePicker, type DatePickerProps } from '../date-picker';
 import { Popover } from '../popover';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * InlineDateEdit — a date you can change in place. The date reads as text; a
@@ -46,9 +47,12 @@ export interface InlineDateEditProps
 
 export const InlineDateEdit = React.forwardRef<HTMLDivElement, InlineDateEditProps>(
   (
-    { className, value, onChange, label, format = (iso) => iso, placeholder = 'No date', picker, align = 'left', disabled, ...props },
+    { className, value, onChange, label, format: formatProp, placeholder = 'No date', picker, align = 'left', disabled, ...props },
     ref,
   ) => {
+    /* dd/mm/yyyy, or the person's locale when the product sets one (`DateFormatProvider`); `format` overrides both. */
+    const dates = useDateFormat();
+    const format = formatProp ?? dates.format;
     const [open, setOpen] = React.useState(false);
     /* Opened from the keyboard (a click with no pointer, `detail === 0`)? Then
        focus moves into the picker. Opened with the mouse, focus stays on the

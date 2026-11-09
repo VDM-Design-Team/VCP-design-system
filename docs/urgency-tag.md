@@ -31,6 +31,10 @@ VCP vocabulary it carries doesn't change. (It was an atom before it composed
 `Tag`, when it hand-rolled its own shell instead — see `docs/tag.md` for why
 that changed.)
 
+## Variants
+
+`variant` is `textual` (the default: the glyph and word alone), `tonal` (a pale fill in the glyph's hue family) or `outline` (a bordered pill, same hue), as the Figma set draws them. The label stays neutral on a fill or a border; the glyph carries the colour. `size` takes `Tag`'s.
+
 ## Props
 
 | Prop | Type | Default | Notes |

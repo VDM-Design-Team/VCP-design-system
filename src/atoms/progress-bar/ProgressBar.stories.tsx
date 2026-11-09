@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import { ProgressBar } from './ProgressBar';
 
 const meta = {
@@ -89,6 +90,22 @@ export const RealUnits: Story = {
  * No visible label — the name must come from somewhere, so pass `aria-label`.
  * A bare unnamed meter announces as a percentage of nothing.
  */
+/** The label row can sit under the bar instead — Domain Budget's. The meter is still named by its label. */
+export const LabelBelow: Story = {
+  args: { value: 50, label: 'Budget Usage', showValue: true, labelPlacement: 'below' },
+  render: (args) => (
+    <div className="w-96">
+      <ProgressBar {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bar = canvas.getByRole('progressbar', { name: 'Budget Usage' });
+    const label = canvas.getByText('Budget Usage');
+    await expect(bar.getBoundingClientRect().bottom).toBeLessThanOrEqual(label.getBoundingClientRect().top);
+  },
+};
+
 export const Unlabelled: Story = {
   args: { 'aria-label': 'Upload progress' } as never,
   render: (args) => (
