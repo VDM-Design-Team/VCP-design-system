@@ -43,7 +43,7 @@ const iconButton = cva(
     'inline-flex shrink-0 items-center justify-center',
     'transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    'disabled:pointer-events-none',
+    'disabled:pointer-events-none aria-disabled:pointer-events-none',
   ],
   {
     variants: {
@@ -60,7 +60,7 @@ const iconButton = cva(
         primary: [
           'bg-action-primary-surface-default text-action-primary-content-default',
           'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed',
-          'disabled:bg-action-primary-surface-disabled disabled:text-action-primary-content-disabled',
+          'disabled:bg-action-primary-surface-disabled disabled:text-action-primary-content-disabled aria-disabled:bg-action-primary-surface-disabled aria-disabled:text-action-primary-content-disabled',
         ],
         /* action.secondary — outlined */
         secondary: [
@@ -68,7 +68,7 @@ const iconButton = cva(
           'border border-action-secondary-border-default',
           'hover:bg-action-secondary-surface-hover hover:border-action-secondary-border-hover',
           'active:bg-action-secondary-surface-pressed active:border-action-secondary-border-pressed',
-          'disabled:text-action-secondary-content-disabled disabled:border-action-secondary-border-disabled',
+          'disabled:text-action-secondary-content-disabled disabled:border-action-secondary-border-disabled aria-disabled:text-action-secondary-content-disabled aria-disabled:border-action-secondary-border-disabled',
         ],
         /* neutral.outline — outlined, but grey. The Cancel beside a
            destructive answer: an outlined *brand* button reads as a second
@@ -78,7 +78,7 @@ const iconButton = cva(
           'border border-neutral-outline-border-default',
           'hover:bg-neutral-outline-surface-hover hover:border-neutral-outline-border-hover hover:text-neutral-outline-content-hover',
           'active:bg-neutral-outline-surface-pressed active:border-neutral-outline-border-pressed active:text-neutral-outline-content-pressed',
-          'disabled:text-neutral-outline-content-disabled disabled:border-neutral-outline-border-disabled',
+          'disabled:text-neutral-outline-content-disabled disabled:border-neutral-outline-border-disabled aria-disabled:text-neutral-outline-content-disabled aria-disabled:border-neutral-outline-border-disabled',
         ],
         /* action.tertiary — ghost. The default here: an icon-only control is
            almost always a toolbar or table-row affordance, which docs/button.md
@@ -86,7 +86,7 @@ const iconButton = cva(
         tertiary: [
           'bg-action-tertiary-surface-default text-action-tertiary-content-default',
           'hover:text-action-tertiary-content-hover active:text-action-tertiary-content-pressed',
-          'disabled:text-action-tertiary-content-disabled',
+          'disabled:text-action-tertiary-content-disabled aria-disabled:text-action-tertiary-content-disabled',
         ],
         /* neutral.tonal — a grey disc with a dark glyph. Figma's `Style=Tonal`,
            the table's inline-edit controls (pen, calendar, confirm, cancel):
@@ -95,13 +95,21 @@ const iconButton = cva(
           'bg-neutral-tonal-surface-default text-neutral-tonal-content-default',
           'hover:bg-neutral-tonal-surface-hover hover:text-neutral-tonal-content-hover',
           'active:bg-neutral-tonal-surface-pressed active:text-neutral-tonal-content-pressed',
-          'disabled:bg-neutral-tonal-surface-disabled disabled:text-neutral-tonal-content-disabled',
+          'disabled:bg-neutral-tonal-surface-disabled disabled:text-neutral-tonal-content-disabled aria-disabled:bg-neutral-tonal-surface-disabled aria-disabled:text-neutral-tonal-content-disabled',
+        ],
+        /* accent.critical.outline — textual, like `tertiary` but red: only the
+           glyph colour changes, never a fill. The quiet destructive control (a
+           row's bin). `danger` is the loud filled one. */
+        critical: [
+          'bg-transparent text-accent-critical-outline-content-default',
+          'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
+          'disabled:text-accent-critical-outline-content-disabled aria-disabled:text-accent-critical-outline-content-disabled',
         ],
         /* accent.critical.filled — destructive */
         danger: [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
           'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
-          'disabled:bg-accent-critical-filled-surface-disabled',
+          'disabled:bg-accent-critical-filled-surface-disabled aria-disabled:bg-accent-critical-filled-surface-disabled',
         ],
       },
       /* Equal width and height, on Button's own height scale: 36 / 40 / 48.
@@ -137,13 +145,18 @@ export interface IconButtonProps
    * button does, not what the picture is: "Delete deliverable", not "Bin".
    */
   label: string;
-  /** Renders a spinner and disables the button. The name does not change. */
+  /**
+   * Renders a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`), like `Button`. The name
+   * does not change.
+   */
   loading?: boolean;
 }
 
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ className, variant, size, shape, icon, label, loading, disabled, ...props }, ref) => {
+  ({ className, variant, size, shape, icon, label, loading, disabled, onClick, ...props }, ref) => {
     const scale = size ?? 'md';
+    /* Loading but not disabled: still a tab stop and still focused, just inert. */
+    const busy = Boolean(loading) && !disabled;
     /* `title` gives pointer users a hover hint — but a Tooltip wrapping this
        button already draws one, and marks it: with aria-describedby, or with
        data-tooltip when it shows without describing (`describe={false}`).
@@ -162,9 +175,17 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
            control never changes identity mid-announcement. */
         aria-label={describedBy ? label : undefined}
         title={describedBy ? undefined : label}
-        disabled={disabled || loading}
-        aria-busy={loading || undefined}
         {...props}
+        disabled={disabled}
+        aria-disabled={busy || props['aria-disabled'] || undefined}
+        aria-busy={loading || undefined}
+        onClick={(event) => {
+          if (busy) {
+            event.preventDefault();
+            return;
+          }
+          onClick?.(event);
+        }}
       >
         {loading ? (
           <Spinner size={scale} />

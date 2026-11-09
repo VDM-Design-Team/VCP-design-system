@@ -33,6 +33,7 @@ it needs a visible label, not a better icon.
 | `tertiary` | Toolbars, table rows, card affordances | **The default.** `docs/button.md` already assigns icon-only actions to the ghost treatment |
 | `secondary` | A bordered icon action that must read as a control on a busy surface | |
 | `primary` | The one filled icon action on a screen — a compose or add FAB | At most one |
+| `critical` | A quiet destructive control — a row's bin | Textual, like `tertiary` but red: only the glyph colour changes on hover and press. Many per screen is fine; pair with a confirmation |
 | `danger` | Destructive, irreversible actions only | At most one. Pair with a confirmation |
 
 ## Props
@@ -44,7 +45,7 @@ it needs a visible label, not a better icon.
 | `variant` | `primary \| secondary \| neutral \| tertiary \| tonal \| danger` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls |
 | `size` | `xs \| sm \| md \| lg` | `md` | 24 / 36 / 40 / 48. `xs` and `sm` only in dense contexts. `xs` carries a 16 glyph |
 | `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
-| `loading` | `boolean` | `false` | Swaps the glyph for a spinner, disables the button, sets `aria-busy` |
+| `loading` | `boolean` | `false` | Swaps the glyph for a spinner, ignores presses and sets `aria-busy`, but **keeps focus** (`aria-disabled`, not `disabled`), like `Button` |
 | `disabled` | `boolean` | `false` | Same as Button |
 | `className` | `string` | — | Merged onto the `<button>` via `cn()` |
 | `ref` | `Ref<HTMLButtonElement>` | — | Points at the real `<button>` |
@@ -85,6 +86,7 @@ class.
 | `secondary` content | `action.secondary.content.{default,disabled}` | `text-action-secondary-content-*` |
 | `tertiary` surface | `action.tertiary.surface.default` | `bg-action-tertiary-surface-default` |
 | `tertiary` content | `action.tertiary.content.{default,hover,pressed,disabled}` | `text-action-tertiary-content-*` |
+| `critical` content | `accent.critical.outline.content.{default,hover,pressed,disabled}` | `text-accent-critical-outline-content-*` |
 | `danger` surface | `accent.critical.filled.surface.{default,hover,pressed,disabled}` | `bg-accent-critical-filled-surface-*` |
 | `danger` content | `accent.critical.filled.content.default` | `text-accent-critical-filled-content-default` |
 | Size | Tailwind numeric scale | `size-6` (24) / `size-9` (36) / `size-10` (40) / `size-12` (48) |
@@ -131,7 +133,7 @@ component should paper over locally.
   a shape change, not colour alone. Never remove it — an icon-only button with no
   focus ring is invisible to a keyboard user, since there is no text to follow.
 
-- **`loading` sets `aria-busy` and disables the control**, and the accessible name
+- **`loading` sets `aria-busy` and ignores presses but keeps focus** (`aria-disabled`, not `disabled`, as in `Button`), and the accessible name
   does **not** change while it is busy. The spinner replaces the glyph only. If a
   wait exceeds ~1s, announce the outcome from a live region on the surrounding
   region rather than by mutating this button's name mid-flight.

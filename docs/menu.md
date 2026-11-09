@@ -46,6 +46,7 @@ navigation pattern, not behind an ellipsis.
 | `defaultOpen` | `boolean` | `false` | Uncontrolled starting state |
 | `onOpenChange` | `(open: boolean) => void` | — | Fires on every open and close, including Escape, outside click, tabbing out and selecting |
 | `align` | `left \| right` | `right` | Which edge of the menu lines up with the trigger's |
+| `strategy` | `absolute \| fixed` | `fixed` | `Popover`'s: `fixed` floats the list above any `overflow` ancestor (a `DataTable`). `absolute` only under a CSS `transform`; see `docs/popover.md` |
 | `className` | `string` | — | Merged onto the wrapper via `cn()` |
 | `panelClassName` | `string` | — | Merged onto the `role="menu"` panel via `cn()` |
 | `ref` | `Ref<HTMLDivElement>` | — | Points at the positioning wrapper |
@@ -59,7 +60,7 @@ carry a label and an action cannot accidentally be a rule.
 |---|---|---|---|
 | `key` | `string` | — | What `onSelect` receives |
 | `label` | `ReactNode` | — | **Required on an action.** A string also enables type-ahead for that item |
-| `icon` | `IconName \| null` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative. `null` on a `danger` item leaves out its fallback `warning` glyph |
+| `icon` | `IconName \| false` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative. `false` on a `danger` item leaves out its fallback `warning` glyph |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
 | `tone` | `default \| danger` | `default` | `danger` is for destructive, irreversible actions. See below |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
@@ -185,7 +186,7 @@ three signals, only one of which is colour:
 2. **A glyph.** A danger item always renders an icon. If you gave one (`trash`)
    it is used; if you gave none, it falls back to `warning`. Shape distinguishes
    the row from its neighbours whether or not colour is perceived. Pass
-   `icon: null` to leave a danger item without one, when its label names the
+   `icon: false` to leave a danger item without one, when its label names the
    act itself ("Delete"); colour and the hidden words still say it.
 3. **Words, in the accessible name.** The item's name ends with a visually
    hidden "destructive action", so a screen reader announces
@@ -203,14 +204,17 @@ Items are `min-h-10` — the 40px minimum touch target from `CLAUDE.md`, with th
 label free to wrap taller. The panel is `min-w-48` so short labels do not produce
 a sliver of a menu.
 
-### Positioning — the same honest limits as Popover
+### Positioning — Popover's
 
-Below the trigger, flush left or right. **No collision detection, no flipping, no
-shifting, no portal, no repositioning on scroll.** A menu on a trigger near the
-bottom of the viewport opens off-screen; a menu inside a container with
-`overflow: hidden` is clipped. `align` is how you compensate: `right` (the
-default) for a trigger near the right edge, `left` for one near the left. The
-full explanation is in `docs/popover.md`.
+The list floats above the page (`position: fixed`, from the trigger's place on
+screen), so a container that clips, such as `DataTable` (which scrolls sideways),
+cannot cut off the menu on its last row. It opens below the trigger, or above it
+when the screen has no room below and more above, and flush to the other edge when
+`align`'s edge would run off the screen. While the page scrolls it moves with the
+trigger and keeps its side. It does not slide along an edge and does not portal.
+(Until November 2026 it sat inside the wrapper, and a table cut it off; the
+`FloatsOutOfATable` story is the regression test.) The full explanation is in
+`docs/popover.md`.
 
 ### How this was verified
 

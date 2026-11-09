@@ -17,11 +17,13 @@ a `Textarea` for long answers, a `Select` for a closed set, a date picker for da
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `size` | `sm \| md` | `md` | Replaces the native `size` attribute (character count), which is not forwarded |
+| `edge` | `strong \| neutral` | `strong` | The resting edge: `stroke.strong` (3:1) or `neutral.outline.border.default` (about 2.6:1 on white, lighter). `neutral` is a deliberate exception for a row of filters; an error, a warning and focus still win |
 | `invalid` | `boolean` | `false` | Critical border + `aria-invalid`. Must be paired with a visible message |
 | `emphasis` | `regular \| medium` | `regular` | The weight of the value. `medium` is what a *chosen* value reads as in `Select`, `SearchSelect` and `DateField`; the placeholder stays regular either way |
 | `fullWidth` | `boolean` | `false` | Spans the container. Use in forms, modal bodies, and on mobile |
 | `disabled` | `boolean` | `false` | Greys the whole shell, not just the text |
 | `leadingIcon` / `trailingIcon` | `ReactNode` | — | 16 icons only. Decorative — rendered `aria-hidden` |
+| `trailingAction` | `ReactNode` | — | A **control** at the field's end — a show/hide toggle, a clear button: a real, focusable `IconButton` the caller names. Not decorative, not `aria-hidden` (that is what `trailingIcon` is not for) |
 | `className` | `string` | — | Merged onto the **field wrapper**, not the inner `<input>` |
 | `ref` | `Ref<HTMLInputElement>` | — | Points at the real `<input>`, so `.focus()` and form libraries work |
 
@@ -73,7 +75,7 @@ The dark theme comes for free — every class above is a semantic token that
 - Don't use a placeholder as the label.
 - Don't set `invalid` without also rendering the error text that explains it.
 - Don't put an interactive control (a button, a clear "×") into `trailingIcon` — the
-  slot is `aria-hidden` and outside the tab order. That needs its own component.
+  slot is `aria-hidden` and outside the tab order. That is what `trailingAction` is for.
 - Don't use `sm` on a touch-first screen.
 - Don't pass the native `size` attribute expecting a character count — `size` is the
   height variant here. Constrain width with `fullWidth` or the parent's layout.
