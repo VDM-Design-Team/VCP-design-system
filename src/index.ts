@@ -93,6 +93,7 @@ export * from './components/source-tag';
 export * from './components/sprint-metrics';
 export * from './components/stat-card';
 export * from './components/sidebar-item';
+export * from './components/line-chart';
 export * from './components/status-history';
 export * from './components/status-progression';
 export * from './components/status-tag';
