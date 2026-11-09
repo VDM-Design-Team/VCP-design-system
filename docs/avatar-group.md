@@ -33,7 +33,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N` |
 | `size` | `xs \| sm \| md \| lg` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 |
 | `label` | `string` | — | What the stack **is** — `"Assignees"`. Prefixed to the announced summary |
-| `tooltips` | `boolean` | — | Hover tooltips: each avatar says its name (and `role`), and the `+N` chip lists who it hides. **For the pointer only**: the stack stays one image with no extra tab stops (see Accessibility) |
+| `tooltips` | `boolean` | — | Hover tooltips: each avatar says its name (and `role`), and the `+N` chip lists who it hides, separated by commas ("Priya Nair (Designer), Sofia Almeida"). **For the pointer only**: the stack stays one image with no extra tab stops (see Accessibility) |
 | `className` | `string` | — | Merged onto the row via `cn()` |
 | `ref` | `Ref<HTMLSpanElement>` | — | Points at the row |
 

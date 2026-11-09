@@ -181,13 +181,8 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
               /* Furthest back — behind the last person shown. */
               <Tooltip
                 describe={false}
-                content={
-                  <span className="flex flex-col gap-0.5">
-                    {hidden.map((person, i) => (
-                      <span key={`${i}-${nameOf(person)}`}>{withRole(nameOf(person), person.role)}</span>
-                    ))}
-                  </span>
-                }
+                /* A run of names, with commas: "Priya Nair (Designer), Sofia Almeida". */
+                content={hidden.map((person) => withRole(nameOf(person), person.role)).join(', ')}
                 className={overlap({ size })}
                 style={{ zIndex: 0 }}
               >

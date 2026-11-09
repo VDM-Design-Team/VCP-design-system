@@ -84,7 +84,7 @@ export const Overflow: Story = {
 
 /** The same three steps as `Avatar`, with the overlap scaled to match. */
 /**
- * `tooltips` says who each avatar is when the pointer rests on it: the name, and the `role` when there is one. The `+N` chip lists the people it hides. It is for the pointer only: the stack is still
+ * `tooltips` says who each avatar is when the pointer rests on it: the name, and the `role` when there is one. The `+N` chip lists the people it hides, separated by commas. It is for the pointer only: the stack is still
  * one labelled image with no extra tab stops, and its label carries the same names and roles for a keyboard or screen-reader user.
  */
 export const WithTooltips: Story = {
@@ -121,8 +121,7 @@ export const WithTooltips: Story = {
     const chip = avatars[avatars.length - 1] as HTMLElement;
     await expect(chip).toHaveTextContent('+2');
     await userEvent.hover(chip);
-    await waitFor(() => expect(body.getByText('Priya Nair (Designer)')).toBeVisible());
-    await expect(body.getByText('Sofia Almeida')).toBeInTheDocument();
+    await waitFor(() => expect(body.getByText('Priya Nair (Designer), Sofia Almeida')).toBeVisible());
   },
 };
 
