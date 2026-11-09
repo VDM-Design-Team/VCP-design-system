@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Badge } from '../../atoms/badge';
 import { Button } from '../../atoms/button';
+import { CardHeader } from '../card-header';
 import { Divider } from '../../atoms/divider';
 import { ProgressBar, type ProgressBarProps } from '../../atoms/progress-bar';
 import { Select } from '../../atoms/select';
@@ -177,47 +178,49 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
       >
         {/* Never squeezed below what its figures need: narrower than this, the whole card scrolls sideways. */}
         <div className="min-w-lg">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5">
-            <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
-              {title}
-            </h2>
-            <div className="flex items-center gap-3">
-              {period.kind !== 'current' && (
-                <Button
-                  variant="secondary"
+          <CardHeader
+            className="mb-3"
+            title={title}
+            headingId={headingId}
+            actions={
+              <>
+                {period.kind !== 'current' && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      onGoToCurrent?.();
+                      /* The button goes away once the current quarter shows, taking focus with it: hand it to the quarter picker. */
+                      quarterRef.current?.focus();
+                    }}
+                  >
+                    Go to Current Quarter
+                  </Button>
+                )}
+                <Select
                   size="sm"
-                  onClick={() => {
-                    onGoToCurrent?.();
-                    /* The button goes away once the current quarter shows, taking focus with it: hand it to the quarter picker. */
-                    quarterRef.current?.focus();
+                  ref={quarterRef}
+                  aria-label="Quarter"
+                  value={String(quarter)}
+                  options={QUARTER_OPTIONS}
+                  onChange={(v) => {
+                    const picked = QUARTERS.find((q) => String(q) === v);
+                    if (picked) onQuarterChange?.(picked);
                   }}
-                >
-                  Go to Current Quarter
-                </Button>
-              )}
-              <Select
-                size="sm"
-                ref={quarterRef}
-                aria-label="Quarter"
-                value={String(quarter)}
-                options={QUARTER_OPTIONS}
-                onChange={(v) => {
-                  const picked = QUARTERS.find((q) => String(q) === v);
-                  if (picked) onQuarterChange?.(picked);
-                }}
-              />
-              <Select
-                size="sm"
-                aria-label="Year"
-                value={String(year)}
-                options={years.map(String)}
-                onChange={(v) => {
-                  const picked = years.find((y) => String(y) === v);
-                  if (picked !== undefined) onYearChange?.(picked);
-                }}
-              />
-            </div>
-          </div>
+                />
+                <Select
+                  size="sm"
+                  aria-label="Year"
+                  value={String(year)}
+                  options={years.map(String)}
+                  onChange={(v) => {
+                    const picked = years.find((y) => String(y) === v);
+                    if (picked !== undefined) onYearChange?.(picked);
+                  }}
+                />
+              </>
+            }
+          />
 
           <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-3 @5xl:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
