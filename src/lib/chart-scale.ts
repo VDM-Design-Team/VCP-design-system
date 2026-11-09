@@ -53,3 +53,43 @@ export function useElementWidth<T extends HTMLElement>(): [React.RefObject<T | n
   }, []);
   return [ref, width];
 }
+
+/**
+ * The keyboard model every chart shares: the plot is one tab stop, the left and right arrows move from point to point (Home and End
+ * jump, Escape clears), and Enter or Space chooses the point. The pointer sets the same `active` index, so the tooltip is one thing.
+ */
+export function useChartCursor(count: number, onActivate?: (index: number) => void) {
+  const [active, setActive] = React.useState<number | null>(null);
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const move = (next: number) => {
+      e.preventDefault();
+      setActive(Math.min(count - 1, Math.max(0, next)));
+    };
+    if (e.key === 'ArrowRight') move((active ?? -1) + 1);
+    else if (e.key === 'ArrowLeft') move((active ?? count) - 1);
+    else if (e.key === 'Home') move(0);
+    else if (e.key === 'End') move(count - 1);
+    else if (e.key === 'Escape') setActive(null);
+    else if ((e.key === 'Enter' || e.key === ' ') && active !== null && onActivate) {
+      e.preventDefault();
+      onActivate(active);
+    }
+  };
+  return { active, setActive, onKeyDown };
+}
+
+/**
+ * Which series are drawn when the legend can hide them. Uncontrolled: `defaultHidden` is where it starts, and `onToggle` hears each
+ * change. The last visible series cannot be hidden, so a chart never empties itself.
+ */
+export function useHiddenSeries<S extends string>(series: readonly S[], defaultHidden: readonly S[] = [], onToggle?: (series: S, hidden: boolean) => void) {
+  const [hidden, setHidden] = React.useState<readonly S[]>(defaultHidden);
+  const visible = series.filter((s) => !hidden.includes(s));
+  const toggle = (s: S) => {
+    const isHidden = hidden.includes(s);
+    if (!isHidden && visible.length <= 1) return;
+    setHidden(isHidden ? hidden.filter((h) => h !== s) : [...hidden, s]);
+    onToggle?.(s, !isHidden);
+  };
+  return { hidden, visible, toggle };
+}

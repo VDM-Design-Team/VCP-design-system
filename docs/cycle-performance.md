@@ -31,6 +31,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `unit` | `string` | `pts` | |
 | `height` | `number` | `320` | |
 | `loading` / `empty` | `boolean` / `ReactNode` | | The filters stay either way, so the person can change them |
+| `formatValue`, `formatTick`, `onSelectDatum`, `renderTooltip`, `toggleSeries`, `defaultHiddenSeries`, `onToggleSeries` | | | Passed to the `BarChart`: how numbers read, choosing a group, your own tooltip, and hiding series from the legend (see `docs/bar-chart.md`) |
 | `className`, `ref` | | | On the section |
 
 ## The filters are the page's

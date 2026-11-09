@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import type { ChartSeries } from '../../lib/chart-series';
-import { BarChart, type BarChartDatum } from '../bar-chart';
+import { BarChart, type BarChartDatum, type BarChartProps } from '../bar-chart';
 
 /**
  * SprintMetrics — how each sprint's capacity was used, as grouped bars: for every sprint, its Capacity, Commitment, Completed and
@@ -20,7 +20,9 @@ import { BarChart, type BarChartDatum } from '../bar-chart';
 const SERIES: readonly ChartSeries[] = ['available', 'committed', 'completed', 'overdue'];
 const LABELS = { available: 'Capacity', committed: 'Commitment' } as const;
 
-export interface SprintMetricsProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
+export interface SprintMetricsProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'title'>,
+    Pick<BarChartProps, 'formatValue' | 'formatTick' | 'onSelectDatum' | 'renderTooltip' | 'toggleSeries' | 'defaultHiddenSeries' | 'onToggleSeries'> {
   data: readonly BarChartDatum[];
   title?: string;
   /** The line under the title: "Current: Mar 1 - Mar 15". Yours to write: which sprint is current is the product's. */
@@ -35,7 +37,7 @@ export interface SprintMetricsProps extends Omit<React.HTMLAttributes<HTMLElemen
 }
 
 export const SprintMetrics = React.forwardRef<HTMLElement, SprintMetricsProps>(
-  ({ className, data, title = 'Sprint Metrics', description, series = SERIES, yLabel = 'Points', unit = 'pts', height, loading, empty, ...props }, ref) => {
+  ({ className, data, title = 'Sprint Metrics', description, series = SERIES, yLabel = 'Points', unit = 'pts', height, loading, empty, formatValue, formatTick, onSelectDatum, renderTooltip, toggleSeries, defaultHiddenSeries, onToggleSeries, ...props }, ref) => {
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} className={cn('@container flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
@@ -59,6 +61,13 @@ export const SprintMetrics = React.forwardRef<HTMLElement, SprintMetricsProps>(
           maxBarWidth={64}
           loading={loading}
           empty={empty}
+          formatValue={formatValue}
+          formatTick={formatTick}
+          onSelectDatum={onSelectDatum}
+          renderTooltip={renderTooltip}
+          toggleSeries={toggleSeries}
+          defaultHiddenSeries={defaultHiddenSeries}
+          onToggleSeries={onToggleSeries}
         />
       </section>
     );

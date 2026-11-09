@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { CHART_SERIES, type ChartSeries } from '../../lib/chart-series';
-import { niceTicks, useElementWidth } from '../../lib/chart-scale';
+import { niceTicks, useChartCursor, useElementWidth, useHiddenSeries } from '../../lib/chart-scale';
 import { LegendItem } from '../../atoms/legend-item';
 import { Skeleton } from '../../atoms/skeleton';
+import { ChartLegend } from '../chart-legend';
 
 /**
  * LineChart — one line per series across an ordered axis (days, sprints), a dot at every point. The chart inside Figma's
@@ -19,6 +20,8 @@ import { Skeleton } from '../../atoms/skeleton';
  *   be told apart without the colours (the legend and the tooltip name them too).
  * - **SVG, tokens only.** Colours are the series' (`src/lib/chart-series.ts`); grid and text are tokens, so dark comes free.
  * - **Hover** the plot for a tooltip with every series' value at the nearest point.
+ * - **Numbers are formatted by you** (`formatValue` in the tooltip, table and announcement; `formatTick` on the axis), a point can be **chosen**
+ *   (`onSelectDatum`: a click, or Enter on the keyboard), the tooltip can be **yours** (`renderTooltip`) and the legend can **hide series** (`toggleSeries`).
  * - **Keyboard:** the plot is one tab stop; the arrow keys move from point to point (Home and End jump, Escape clears), the tooltip
  *   follows, and the point is announced ("June 20: Completed 0, Committed 145 pts").
  *
@@ -57,6 +60,20 @@ export interface LineChartProps extends Omit<React.HTMLAttributes<HTMLDivElement
   /** Pin the top of the axis. By default it is the next tick above the largest value. */
   yMax?: number;
   legend?: 'bottom' | 'none';
+  /** How a value reads in the tooltip, the table and the announcement: `1.2k`, `45 pts`. Without it they add `unit`. */
+  formatValue?: (value: number, series: ChartSeries) => string;
+  /** How a number on the value axis reads. */
+  formatTick?: (value: number) => string;
+  /** A point was chosen: clicked (the nearest one) or Enter on the keyboard. */
+  onSelectDatum?: (datum: LineChartDatum) => void;
+  /** Replaces what the tooltip says; the card and its position stay. The announcement is still the series' values. */
+  renderTooltip?: (info: { datum: LineChartDatum; index: number; series: readonly ChartSeries[] }) => React.ReactNode;
+  /** Makes each legend entry a button that shows or hides its line. */
+  toggleSeries?: boolean;
+  /** The series hidden to begin with (with `toggleSeries`). */
+  defaultHiddenSeries?: readonly ChartSeries[];
+  /** A legend entry was toggled. */
+  onToggleSeries?: (series: ChartSeries, hidden: boolean) => void;
   loading?: boolean;
   empty?: React.ReactNode;
 }
@@ -74,14 +91,18 @@ const has = (v: number | null | undefined): v is number => v !== null && v !== u
 
 export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
   (
-    { className, data, series, seriesLabels, caption, pointLabel, yLabel, unit = 'pts', height = 244, yTickCount = 7, yMax, legend = 'bottom', loading, empty = 'Nothing to show for this period.', ...props },
+    { className, data, series, seriesLabels, caption, pointLabel, yLabel, unit = 'pts', height = 244, yTickCount = 7, yMax, legend = 'bottom', formatValue, formatTick, onSelectDatum, renderTooltip, toggleSeries, defaultHiddenSeries, onToggleSeries, loading, empty = 'Nothing to show for this period.', ...props },
     ref,
   ) => {
     const [plotRef, width] = useElementWidth<HTMLDivElement>();
-    const [active, setActive] = React.useState<number | null>(null);
     const statusId = React.useId();
+    const { hidden, visible, toggle } = useHiddenSeries(series, defaultHiddenSeries, onToggleSeries);
+    const shown = toggleSeries ? visible : series;
+    const cursor = useChartCursor(data.length, (i) => onSelectDatum?.(data[i]!));
+    const { active, setActive } = cursor;
+    const full = (v: number, s: ChartSeries) => (formatValue ? formatValue(v, s) : `${v} ${unit}`);
 
-    const values = data.flatMap((d) => series.map((s) => d.values[s])).filter(has);
+    const values = data.flatMap((d) => shown.map((s) => d.values[s])).filter(has);
     const largest = Math.max(0, ...values);
     const ticks = niceTicks(yMax ?? largest, yTickCount, yMax !== undefined);
     const top = yMax ?? ticks[ticks.length - 1]!;
@@ -116,9 +137,9 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
     };
 
     const describe = (d: (typeof data)[number]) =>
-      `${pointLabel ? `${pointLabel} ` : ''}${d.title ?? d.label}: ${series
+      `${pointLabel ? `${pointLabel} ` : ''}${d.title ?? d.label}: ${shown
         .filter((s) => has(d.values[s]))
-        .map((s) => `${label(s, seriesLabels)} ${d.values[s]} ${unit}`)
+        .map((s) => `${label(s, seriesLabels)} ${full(d.values[s] as number, s)}`)
         .join(', ')}`;
 
     const nearest = (clientX: number, el: Element) => {
@@ -128,29 +149,11 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
       return Math.min(n - 1, Math.max(0, Math.round((px - EDGE) / step)));
     };
 
-    const onKeyDown = (e: React.KeyboardEvent) => {
-      const move = (next: number) => {
-        e.preventDefault();
-        setActive(Math.min(n - 1, Math.max(0, next)));
-      };
-      if (e.key === 'ArrowRight') move((active ?? -1) + 1);
-      else if (e.key === 'ArrowLeft') move((active ?? n) - 1);
-      else if (e.key === 'Home') move(0);
-      else if (e.key === 'End') move(n - 1);
-      else if (e.key === 'Escape') setActive(null);
-    };
-
     const legendEl = legend !== 'none' && series.length > 0 && (
-      <ul aria-label="Legend" className="m-0 flex list-none flex-wrap items-center justify-center gap-x-4 gap-y-1 p-0">
-        {series.map((s) => (
-          <li key={s}>
-            <LegendItem label={label(s, seriesLabels)} swatchClassName={CHART_SERIES[s].fill} />
-          </li>
-        ))}
-      </ul>
+      <ChartLegend series={series} labels={seriesLabels} hiddenSeries={toggleSeries ? hidden : undefined} onToggleSeries={toggleSeries ? toggle : undefined} />
     );
 
-    const shown = active !== null ? data[active] : undefined;
+    const point = active !== null ? data[active] : undefined;
     const tipLeft = active !== null ? x(active) : 0;
 
     return (
@@ -161,9 +164,9 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
           style={{ height }}
           tabIndex={!loading && hasData ? 0 : undefined}
           role={!loading && hasData ? 'group' : undefined}
-          aria-label={!loading && hasData ? `${caption}. Use the left and right arrow keys to read each point.` : undefined}
+          aria-label={!loading && hasData ? `${caption}. Use the left and right arrow keys to read each point${onSelectDatum ? ', and Enter to choose one' : ''}.` : undefined}
           aria-describedby={!loading && hasData ? statusId : undefined}
-          onKeyDown={!loading && hasData ? onKeyDown : undefined}
+          onKeyDown={!loading && hasData ? cursor.onKeyDown : undefined}
           onBlur={() => setActive(null)}
         >
           {loading ? (
@@ -183,7 +186,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                     <g key={t}>
                       <line x1={left} x2={left + plotW} y1={y(t)} y2={y(t)} className="stroke-stroke-subtle" strokeWidth={1} />
                       <text x={left - 8} y={y(t)} textAnchor="end" dominantBaseline="central" className="fill-text-secondary text-caption-md-regular">
-                        {t}
+                        {formatTick ? formatTick(t) : t}
                       </text>
                     </g>
                   ))}
@@ -202,10 +205,10 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
 
                   {active !== null && <line x1={x(active)} x2={x(active)} y1={MARGIN.top} y2={base} className="stroke-stroke-default" strokeWidth={1} />}
 
-                  {series.map((s) => (
+                  {shown.map((s) => (
                     <path key={s} d={pathFor(s)} fill="none" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" strokeDasharray={DASH[s]} className={CHART_SERIES[s].svgStroke} />
                   ))}
-                  {series.map((s) =>
+                  {shown.map((s) =>
                     data.map((d, i) => {
                       const v = d.values[s];
                       return has(v) ? <circle key={`${s}-${d.key}`} cx={x(i)} cy={y(v)} r={active === i ? 5 : 3} className={CHART_SERIES[s].svgFill} /> : null;
@@ -221,27 +224,35 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                     fill="transparent"
                     onPointerMove={(e) => setActive(nearest(e.clientX, e.currentTarget))}
                     onPointerLeave={() => setActive(null)}
+                    className={onSelectDatum ? 'cursor-pointer' : undefined}
+                    onClick={(e) => onSelectDatum?.(data[nearest(e.clientX, e.currentTarget)]!)}
                   />
                 </svg>
 
-                {shown && (
+                {point && active !== null && (
                   <div
                     role="presentation"
                     className="pointer-events-none absolute z-10 w-max max-w-60 -translate-x-1/2 rounded-md border border-stroke-subtle bg-surface-elevated px-3 py-2 shadow-md"
                     style={{ left: Math.min(Math.max(tipLeft, 80), Math.max(80, width - 80)), top: MARGIN.top }}
                   >
-                    <p className="m-0 text-caption-md-regular text-text-primary">
-                      {pointLabel && <span className="text-caption-md-semibold">{pointLabel}: </span>}
-                      <span className={pointLabel ? undefined : 'text-caption-md-semibold'}>{shown.title ?? shown.label}</span>
-                    </p>
-                    <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
-                      {series.map((s) => (
-                        <li key={s} className="flex items-center justify-between gap-3 text-caption-md-medium text-text-secondary">
-                          <LegendItem size="sm" label={label(s, seriesLabels)} swatchClassName={CHART_SERIES[s].fill} />
-                          <span className="text-text-primary">{has(shown.values[s]) ? `${shown.values[s]} ${unit}` : 'no data'}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {renderTooltip ? (
+                      renderTooltip({ datum: point, index: active, series: shown })
+                    ) : (
+                      <>
+                        <p className="m-0 text-caption-md-regular text-text-primary">
+                          {pointLabel && <span className="text-caption-md-semibold">{pointLabel}: </span>}
+                          <span className={pointLabel ? undefined : 'text-caption-md-semibold'}>{point.title ?? point.label}</span>
+                        </p>
+                        <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
+                          {shown.map((s) => (
+                            <li key={s} className="flex items-center justify-between gap-3 text-caption-md-medium text-text-secondary">
+                              <LegendItem size="sm" label={label(s, seriesLabels)} swatchClassName={CHART_SERIES[s].fill} />
+                              <span className="text-text-primary">{has(point.values[s]) ? full(point.values[s] as number, s) : 'no data'}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
                   </div>
                 )}
               </>
@@ -252,7 +263,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
             <>
               {/* Announces the point the arrow keys are on. */}
               <p id={statusId} role="status" aria-live="polite" className="sr-only">
-                {shown ? describe(shown) : ''}
+                {point ? describe(point) : ''}
               </p>
               <div className="sr-only">
                 <table>
@@ -272,7 +283,7 @@ export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                       <tr key={d.key}>
                         <th scope="row">{d.title ?? d.label}</th>
                         {series.map((s) => (
-                          <td key={s}>{has(d.values[s]) ? `${d.values[s]} ${unit}` : 'no data'}</td>
+                          <td key={s}>{has(d.values[s]) ? full(d.values[s] as number, s) : 'no data'}</td>
                         ))}
                       </tr>
                     ))}

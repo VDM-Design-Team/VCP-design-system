@@ -68,6 +68,7 @@ The `FromAnApiResponse` story is this mapping, from a raw response, with a butto
 | `unit` | `string` | `pts` | |
 | `height` | `number` | `244` | |
 | `loading` / `empty` | `boolean` / `ReactNode` | | The title stays; the totals go while loading |
+| `formatValue`, `formatTick`, `onSelectDatum`, `renderTooltip`, `toggleSeries`, `defaultHiddenSeries`, `onToggleSeries` | | | Passed to the `LineChart`: how numbers read, choosing a day, your own tooltip, and hiding series from the legend (see `docs/line-chart.md`) |
 | `className`, `ref` | | | On the section |
 
 ## Layout and responsiveness

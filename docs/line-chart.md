@@ -8,6 +8,7 @@ One line per series across an ordered axis (days, sprints), a dot at every point
 |---|---|
 | `LegendItem` | atom |
 | `Skeleton` | atom |
+| `ChartLegend` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -50,6 +51,12 @@ series: ChartSeries[]                           // which lines to draw, in order
 | `yTickCount` | `number` | `7` | About how many gridlines; they round to readable numbers |
 | `yMax` | `number` | next tick above the data | Pin the top so two charts compare |
 | `legend` | `bottom \| none` | `bottom` | Under the chart, always |
+| `formatValue` | `(value, series) => string` | the number, plus `unit` | How a value reads in the tooltip, the table and the announcement: `$1.2k` |
+| `formatTick` | `(value) => string` | the number | How a number on the value axis reads |
+| `onSelectDatum` | `(datum) => void` | — | A point was chosen: a click (the nearest point) or Enter on the keyboard |
+| `renderTooltip` | `({ datum, index, series }) => ReactNode` | — | Replaces what the tooltip says; the card and its position stay. The announcement is still the series' values |
+| `toggleSeries` | `boolean` | — | Makes each legend entry a button that shows or hides its line; the axis follows what is drawn. The last visible line cannot be hidden |
+| `defaultHiddenSeries` / `onToggleSeries` | `ChartSeries[]` / `(series, hidden) => void` | — | Where the toggles start, and a toggle was pressed |
 | `loading` / `empty` | `boolean` / `ReactNode` | | A placeholder and a status; or what it says with no data |
 | `className`, `ref` | | | On the wrapper |
 
@@ -58,6 +65,10 @@ series: ChartSeries[]                           // which lines to draw, in order
 It measures its own width and draws in real pixels, so type never scales; the axis labels **thin out** (every other, every third …) when they would run into each other. Nothing overflows.
 
 **Lines differ by more than colour:** Committed (the plan) is dashed and Available dotted; Completed and Overdue are solid. The dots, the legend, the tooltip and the table all name the series too.
+
+## Formatting, choosing and customising
+
+`formatValue`, `formatTick`, `onSelectDatum`, `renderTooltip` and `toggleSeries` work as on `BarChart` (see `docs/bar-chart.md`): the same names, the same keyboard model, the same legend. What the chart still does not do: a continuous time axis, a second axis, area fills, animation, or series outside `CHART_SERIES`.
 
 ## Tokens
 
@@ -74,7 +85,7 @@ It measures its own width and draws in real pixels, so type never scales; the ax
 
 ## Accessibility
 
-- **One keyboard stop, arrow keys inside.** The plot is a focusable group named "Cycle Burndown. Use the left and right arrow keys to read each point." Left and right move from point to point, Home and End jump to the first and last, Escape clears. The tooltip follows, and a polite status announces the point: "June 20: Completed 0 pts, Committed 145 pts …".
+- **One keyboard stop, arrow keys inside.** The plot is a focusable group named "Cycle Burndown. Use the left and right arrow keys to read each point." Left and right move from point to point, Home and End jump to the first and last, Escape clears, and (with `onSelectDatum`) Enter chooses the point. The tooltip follows, and a polite status announces the point: "June 20: Completed 0 pts, Committed 145 pts …".
 - **The picture is `aria-hidden`; the data is a table.** A visually hidden `<table>` (captioned by `caption`) has a row per point and a column per series; a missing value reads "no data".
 - **Contrast, measured in both themes** (the `ContrastHolds` story): every line holds 3:1 against the card (1.4.11) and the axis text 4.5:1.
 - Colour is never the only signal: dash patterns, the legend, the tooltip and the table.

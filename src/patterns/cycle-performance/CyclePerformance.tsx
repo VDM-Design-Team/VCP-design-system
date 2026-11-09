@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import type { ChartSeries } from '../../lib/chart-series';
 import { Select } from '../../atoms/select';
-import { BarChart, type BarChartDatum } from '../../components/bar-chart';
+import { BarChart, type BarChartDatum, type BarChartProps } from '../../components/bar-chart';
 
 /**
  * CyclePerformance — how each cycle went, as grouped bars: for every cycle, the points Available, Overdue and Completed,
@@ -31,7 +31,9 @@ export interface CyclePerformanceFilter {
   className?: string;
 }
 
-export interface CyclePerformanceProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
+export interface CyclePerformanceProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'title'>,
+    Pick<BarChartProps, 'formatValue' | 'formatTick' | 'onSelectDatum' | 'renderTooltip' | 'toggleSeries' | 'defaultHiddenSeries' | 'onToggleSeries'> {
   data: readonly BarChartDatum[];
   title?: string;
   filters?: readonly CyclePerformanceFilter[];
@@ -45,7 +47,7 @@ export interface CyclePerformanceProps extends Omit<React.HTMLAttributes<HTMLEle
 
 export const CyclePerformance = React.forwardRef<HTMLElement, CyclePerformanceProps>(
   (
-    { className, data, title = 'Cycle Performance', filters, series = ['available', 'overdue', 'completed'], yLabel = 'Development Points', unit = 'pts', height, loading, empty, ...props },
+    { className, data, title = 'Cycle Performance', filters, series = ['available', 'overdue', 'completed'], yLabel = 'Development Points', unit = 'pts', height, loading, empty, formatValue, formatTick, onSelectDatum, renderTooltip, toggleSeries, defaultHiddenSeries, onToggleSeries, ...props },
     ref,
   ) => {
     const headingId = React.useId();
@@ -72,7 +74,7 @@ export const CyclePerformance = React.forwardRef<HTMLElement, CyclePerformancePr
             </div>
           )}
         </header>
-        <BarChart data={data} series={series} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} />
+        <BarChart data={data} series={series} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} formatValue={formatValue} formatTick={formatTick} onSelectDatum={onSelectDatum} renderTooltip={renderTooltip} toggleSeries={toggleSeries} defaultHiddenSeries={defaultHiddenSeries} onToggleSeries={onToggleSeries} />
       </section>
     );
   },
