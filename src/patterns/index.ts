@@ -18,6 +18,7 @@ export * from './confirm-delete-modal';
 export * from './contacts-table';
 export * from './domain-card';
 export * from './filter-bar';
+export * from './cycle-performance';
 export * from './gantt-chart';
 export * from './deliverables-card';
 export * from './handoff-av-modal';
