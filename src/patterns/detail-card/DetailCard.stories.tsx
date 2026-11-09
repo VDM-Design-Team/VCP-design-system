@@ -105,6 +105,26 @@ export const Editing: Story = {
 };
 
 /**
+ * `readOnly`: a multipart part's edit page (Figma `1404:132644`) greys the fields it takes from its parent —
+ * Projects, AV Category, Type and Urgency. They show their values but can't be opened or changed.
+ */
+export const EditingWithReadOnlyFields: Story = {
+  name: 'Editing, some fields read-only',
+  args: { type: 'editing', viewerCount: undefined, onChange: fn(), readOnly: ['projects', 'category', 'type', 'urgency'] },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* Each field's control, by its name (a single select is a combobox; a multiple one, Projects and Tags, a button). */
+    const control = (name: string) => canvas.getAllByLabelText(new RegExp(`^${name}`)).find((el) => el.matches('button, [role="combobox"]'))!;
+    for (const name of ['Projects', 'AV Category', 'Type', 'Urgency']) {
+      await expect(control(name)).toBeDisabled();
+    }
+    /* The rest still change. */
+    await expect(control('Tags')).toBeEnabled();
+    await expect(canvas.getByRole('combobox', { name: /^Capacity Points/ })).toBeEnabled();
+  },
+};
+
+/**
  * People are added, edited and removed in the card, as the design's flow draws it: the + opens a form under the
  * chips (a user, a role, capacity points, then Cancel and Add), a chip's pencil turns it into that form (Save), its ✕
  * removes it. The + is dimmed while a form is open.
