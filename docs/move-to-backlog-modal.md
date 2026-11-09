@@ -6,7 +6,6 @@ Moving an Added Value to the Backlog, with the **Feedback** that says why. One f
 
 | Piece | Tier |
 |---|---|
-| `Button` | atom |
 | `Input` | atom |
 | `Field` | component |
 | `Modal` | component |
@@ -27,7 +26,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `open` / `onClose` | `boolean` / `() => void` | required | Cancel and Escape ask to close |
 | `onMove` | `(feedback: string) => void` | required | Once, with the feedback (`''` when none) |
-| `loading` | `boolean` | `false` | The button spins and Cancel locks |
+| `loading` | `boolean` | `false` | The button spins and Cancel locks. The footer is `Modal`'s own `ModalCancel` and `ModalConfirm` (40 high), like every other dialog's |
 
 ## Behaviour
 

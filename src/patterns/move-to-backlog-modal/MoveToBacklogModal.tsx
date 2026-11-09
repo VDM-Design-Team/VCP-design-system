@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 import { Field } from '../../components/field';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 
 /**
  * MoveToBacklogModal — moving an Added Value to the Backlog, with the **Feedback** that says why. One field, **Cancel** and **Move to Backlog**. Built to Figma's `Move_Backlog_Modal` (`7771:93171`, AV Page
@@ -27,6 +26,8 @@ export interface MoveToBacklogModalProps {
 
 export function MoveToBacklogModal({ open, onClose, onMove, loading }: MoveToBacklogModalProps) {
   const [feedback, setFeedback] = React.useState('');
+  /* A unique id, so two dialogs on one page do not share a form. */
+  const formId = React.useId();
 
   /* A fresh dialog every time it opens. */
   React.useEffect(() => {
@@ -42,17 +43,15 @@ export function MoveToBacklogModal({ open, onClose, onMove, loading }: MoveToBac
       showClose={false}
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" disabled={loading} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm" type="submit" form="move-to-backlog-form" loading={loading}>
+          <ModalCancel disabled={loading} />
+          <ModalConfirm type="submit" form={formId} loading={loading}>
             Move to Backlog
-          </Button>
+          </ModalConfirm>
         </>
       }
     >
       <form
-        id="move-to-backlog-form"
+        id={formId}
         onSubmit={(event) => {
           event.preventDefault();
           onMove(feedback.trim());
