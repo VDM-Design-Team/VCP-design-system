@@ -74,7 +74,7 @@ export const TakingBackTheLastReaction: Story = {
   },
 };
 
-/** More reactions than fit: "+N", read out once as "N more reactions". */
+/** More reactions than fit: "+N" expands the row in place, and "Show less" folds it; focus stays on the button. */
 export const Overflow: Story = {
   args: {
     maxVisible: 2,
@@ -86,7 +86,18 @@ export const Overflow: Story = {
     ],
   },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByText('2 more reactions')).toBeInTheDocument();
+    const canvas = within(canvasElement);
+    const more = canvas.getByRole('button', { name: 'Show 2 more reactions' });
+    await expect(more).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.queryByRole('button', { name: /^3 reactions, 🔥/ })).not.toBeInTheDocument();
+    more.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(canvas.getByRole('button', { name: /^3 reactions, 🔥/ })).toBeInTheDocument();
+    await expect(more).toHaveAttribute('aria-expanded', 'true');
+    await expect(more).toHaveAccessibleName('Show less');
+    await expect(more).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(canvas.queryByRole('button', { name: /^3 reactions, 🔥/ })).not.toBeInTheDocument();
   },
 };
 
@@ -114,7 +125,7 @@ export const WithReactorNames: Story = {
 
 /**
  * The tooltip reads "<strong>Names</strong> reacted with :emojiname:". "You"
- * is just a name in `people`; long lists collapse to "A, B and N others".
+ * is just a name in `people`; up to three names, then "and N others" (Figma's copy).
  */
 export const TooltipForms: Story = {
   args: {
@@ -131,6 +142,13 @@ export const TooltipForms: Story = {
       <EmojiReactionPicker {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const fire = within(canvasElement).getByRole('button', { name: /^5 reactions, 🔥/ });
+    fire.focus();
+    await waitFor(() =>
+      expect(within(document.body).getByRole('tooltip', { name: /Ali Reza, Nora Lindqvist, Marvin Ode and 2 others reacted with :fire:/ })).toBeInTheDocument(),
+    );
+  },
 };
 
 /**

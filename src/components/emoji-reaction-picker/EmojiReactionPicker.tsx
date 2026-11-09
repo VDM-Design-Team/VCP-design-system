@@ -86,9 +86,10 @@ export interface EmojiReactionPickerProps
   /** A pill toggle — also fired by the standalone thumbs-up button. */
   onToggle?: (emoji: string) => void;
   /**
-   * Reaction pills shown before the rest collapse into a trailing "+N" chip.
+   * Reaction pills shown before the rest collapse into a trailing "+N" button.
    * Figma draws an overflow state but doesn't fix a specific number — pick
-   * what reads well for the width this renders in.
+   * what reads well for the width this renders in. Pressing "+N" shows every
+   * pill in the row; "Show less" folds them again.
    */
   maxVisible?: number;
 }
@@ -149,12 +150,16 @@ function emojiName(emoji: string): string | undefined {
   return EMOJI_NAMES[emoji.replace(/️/g, '')];
 }
 
-/** "Eve", "Eve and Marvin", "Eve, Marvin and 3 others" — AvatarGroup's phrasing. */
+/**
+ * Up to three names, then "and N others" (Figma's copy; decided 9 Nov 2026): "Eve", "Eve and Marvin",
+ * "Eve, Marvin and Ali", "Eve, Marvin, Ali and 2 others".
+ */
 function formatReactors(people: readonly string[]): string {
   if (people.length === 1) return people[0];
   if (people.length === 2) return `${people[0]} and ${people[1]}`;
-  const rest = people.length - 2;
-  return `${people[0]}, ${people[1]} and ${rest} ${rest === 1 ? 'other' : 'others'}`;
+  if (people.length === 3) return `${people[0]}, ${people[1]} and ${people[2]}`;
+  const rest = people.length - 3;
+  return `${people[0]}, ${people[1]}, ${people[2]} and ${rest} ${rest === 1 ? 'other' : 'others'}`;
 }
 
 /* Outline style, for other people's reactions and your own alike: no fill at
@@ -234,8 +239,11 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
     ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+    /* "+N" expands the row in place (decided 9 Nov 2026); the same button then folds it. */
+    const [expanded, setExpanded] = React.useState(false);
     const idBase = React.useId();
-    const visible = reactions.slice(0, maxVisible);
+    const folded = reactions.length - Math.min(reactions.length, maxVisible);
+    const visible = expanded ? reactions : reactions.slice(0, maxVisible);
     const overflow = reactions.length - visible.length;
     const mineThumbsUp = reactions.find((r) => r.emoji === '👍')?.mine;
 
@@ -373,19 +381,30 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
             <React.Fragment key={r.emoji}>{pill}</React.Fragment>
           );
         })}
-        {overflow > 0 && (
-          <span
+        {folded > 0 && (
+          /* One button that keeps focus as it flips: "+N" shows every pill, "Show less" folds them. */
+          <button
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((e) => !e)}
             className={cn(
-              'inline-flex h-6 items-center rounded-full border px-2 font-sans',
+              'inline-flex h-6 items-center rounded-full border px-2 font-sans text-caption-md-regular',
               'border-neutral-outline-border-default text-neutral-outline-content-default',
+              'hover:border-neutral-outline-border-hover hover:text-neutral-outline-content-hover',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
           >
-            {/* Not an `aria-label` on a plain span (CLAUDE.md): screen readers skip it. Hidden text says it once. */}
-            <span aria-hidden="true">+{overflow}</span>
-            <span className="sr-only">
-              {overflow} more {overflow === 1 ? 'reaction' : 'reactions'}
-            </span>
-          </span>
+            {overflow > 0 ? (
+              <>
+                <span aria-hidden="true">+{overflow}</span>
+                <span className="sr-only">
+                  Show {overflow} more {overflow === 1 ? 'reaction' : 'reactions'}
+                </span>
+              </>
+            ) : (
+              'Show less'
+            )}
+          </button>
         )}
       </div>
     );
