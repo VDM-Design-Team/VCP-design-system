@@ -136,6 +136,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `applyLabel` / `clearLabel` | `string` | `Apply` / `Clear all` | — |
 | `placeholder` | `string` | `Select…` | Shown in the field while nothing is picked |
 | `emptyText` | `string` | `No matches` | What the panel says when there are no rows |
+| `edge` | `strong \| neutral` | `strong` | The resting edge: `stroke.strong` (3:1) or `neutral.outline.border.default` (about 2.6:1 on white, lighter). `neutral` is a deliberate exception for a row of filters; an error, a warning and focus still win |
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message, or use `error` |
 | `error` | `ReactNode` | — | A message under the field in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the field (`aria-describedby`) |
 | `warning` | `ReactNode` | — | A caution under the field in the warning colour (`accent.warning.outline.content`), with an amber border: the pick is allowed but worth a second look. `error` wins if both are set. Announced with the field |

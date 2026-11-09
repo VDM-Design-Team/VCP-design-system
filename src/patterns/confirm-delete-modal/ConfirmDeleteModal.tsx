@@ -62,6 +62,7 @@ export function ConfirmDeleteModal({
     <Modal
       open={open}
       onClose={onClose}
+      busy={loading}
       /* Named by the heading it renders in its own body, so the announced name *is* the visible question. */
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
