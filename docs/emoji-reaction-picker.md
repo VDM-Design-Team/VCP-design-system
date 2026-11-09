@@ -130,6 +130,12 @@ fonts, so the bug did not show locally. The token names the colour emoji fonts f
 - Pills are toggle buttons: `aria-pressed` for "you reacted", with the name
   saying what a glance says — "3 reactions, 👍, you reacted". Emoji + count
   alone answer neither question a screen reader user has.
+- **Focus never drops.** Taking back the last reaction on a pill removes that pill, and the focus with it.
+  So when the pill pressed last is gone and nothing has focus, focus moves to the pill that took its place,
+  or to **Add reaction** when none is left. A toggle that adds, or a caller that answers later, leaves focus
+  where it is.
+- **The "+N" chip** reads "N more reactions" once, from visually hidden text, not an `aria-label` on a span
+  (which screen readers skip).
 - **The standalone thumbs-up button is a toggle too.** It looks up `👍` in
   `reactions` and mirrors that pill's `mine` state in its own
   `aria-pressed` and name ("React with thumbs up" / "Remove thumbs up

@@ -239,6 +239,27 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
     const overflow = reactions.length - visible.length;
     const mineThumbsUp = reactions.find((r) => r.emoji === '👍')?.mine;
 
+    /* Never drop focus: taking back the last reaction on a pill removes the pill that had focus. When the
+       pill pressed last is gone and focus went with it, focus moves to the pill that took its place, or to
+       Add reaction when none is left. Only then: a caller that adds, or answers later, keeps focus as is. */
+    const rowRef = React.useRef<HTMLDivElement | null>(null);
+    const setRow = (node: HTMLDivElement | null) => {
+      rowRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    };
+    const pressed = React.useRef<{ emoji: string; index: number } | null>(null);
+    React.useLayoutEffect(() => {
+      const last = pressed.current;
+      if (!last || visible.some((r) => r.emoji === last.emoji)) return;
+      pressed.current = null;
+      const active = document.activeElement;
+      if (active && active !== document.body && active.isConnected) return;
+      const pills = rowRef.current?.querySelectorAll<HTMLElement>('[data-reaction-pill]');
+      const next = pills?.length ? pills[Math.min(last.index, pills.length - 1)] : undefined;
+      (next ?? rowRef.current?.querySelector<HTMLElement>('[aria-label="Add reaction"]'))?.focus();
+    });
+
     const pick = (e: string) => {
       onSelect?.(e);
       setOpen(false);
@@ -256,7 +277,7 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
     );
 
     return (
-      <div ref={ref} className={cn('flex flex-wrap items-center gap-2', className)} {...props}>
+      <div ref={setRow} className={cn('flex flex-wrap items-center gap-2', className)} {...props}>
         <button
           type="button"
           aria-pressed={mineThumbsUp || undefined}
@@ -307,14 +328,18 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
             )
           }
         />
-        {visible.map((r) => {
+        {visible.map((r, index) => {
           const name = r.name ?? emojiName(r.emoji);
           const pill = (
             <button
               type="button"
+              data-reaction-pill=""
               aria-pressed={r.mine || undefined}
               aria-label={`${r.count} ${r.count === 1 ? 'reaction' : 'reactions'}, ${r.emoji}${r.mine ? ', you reacted' : ''}`}
-              onClick={() => onToggle?.(r.emoji)}
+              onClick={() => {
+                pressed.current = { emoji: r.emoji, index };
+                onToggle?.(r.emoji);
+              }}
               className={cn(pillBase, r.mine ? pillMine : pillOthers)}
             >
               {/* Same size as the count beside it — the export left the emoji
@@ -354,9 +379,12 @@ export const EmojiReactionPicker = React.forwardRef<HTMLDivElement, EmojiReactio
               'inline-flex h-6 items-center rounded-full border px-2 font-sans',
               'border-neutral-outline-border-default text-neutral-outline-content-default',
             )}
-            aria-label={`${overflow} more ${overflow === 1 ? 'reaction' : 'reactions'}`}
           >
-            +{overflow}
+            {/* Not an `aria-label` on a plain span (CLAUDE.md): screen readers skip it. Hidden text says it once. */}
+            <span aria-hidden="true">+{overflow}</span>
+            <span className="sr-only">
+              {overflow} more {overflow === 1 ? 'reaction' : 'reactions'}
+            </span>
           </span>
         )}
       </div>
