@@ -10,9 +10,9 @@ const MESSAGE =
   'Some changelog message goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
 
 const RELEASES: ChangelogRelease[] = [
-  { id: 3, title: 'Changelog Title', version: 'V.1.3', date: '03/01/2026', dateTime: '2026-03-01', message: MESSAGE, features: FEATURES },
-  { id: 2, title: 'Changelog Title', version: 'V.1.2', date: '02/01/2026', dateTime: '2026-02-01', message: MESSAGE, features: FEATURES },
-  { id: 1, title: 'Changelog Title', version: 'V.1.1', date: '01/01/2026', dateTime: '2026-01-01', message: MESSAGE, features: FEATURES },
+  { id: 3, title: 'Changelog Title', version: 'v1.3.0', date: '2026-03-01', message: MESSAGE, features: FEATURES },
+  { id: 2, title: 'Changelog Title', version: 'v1.2.0', date: '2026-02-01', message: MESSAGE, features: FEATURES },
+  { id: 1, title: 'Changelog Title', version: 'v1.1.0', date: '2026-01-01', message: MESSAGE, features: FEATURES },
 ];
 
 const meta = {
@@ -24,7 +24,7 @@ const meta = {
       description: {
         component:
           'The page that lists every release: a “System Changelog” title over one card per release, in the order given. It shows what ' +
-          'it is given; titles, versions and dates are formatted by the caller.',
+          'it is given; titles and versions as they read, dates as ISO shown the system way.',
       },
     },
   },
@@ -48,7 +48,7 @@ export const Default: Story = {
     await expect(c.getByRole('region', { name: 'System Changelog' })).toBeVisible();
     await expect(c.getByRole('heading', { level: 2, name: 'System Changelog' })).toBeVisible();
     await expect(c.getAllByRole('article')).toHaveLength(3);
-    await expect(c.getByText('V.1.3')).toBeVisible();
+    await expect(c.getByText('v1.3.0')).toBeVisible();
   },
 };
 

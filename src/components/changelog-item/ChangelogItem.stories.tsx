@@ -11,14 +11,14 @@ const meta = {
       description: {
         component:
           'One release in the System Changelog: title and version, when it was posted, the message, and the features and updates ' +
-          'it brought. Nothing is formatted here — the version and date read as given.',
+          'it brought. The version reads as given; the date is ISO and shown dd/mm/yyyy (or the reader locale), in a time element.',
       },
     },
   },
   args: {
     title: 'Changelog Title',
-    version: 'V.1.1',
-    date: '01/01/2026',
+    version: 'v1.18.1',
+    date: '2026-01-01',
     message:
       'Some changelog message goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     features: [
@@ -44,16 +44,18 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByRole('article')).toBeVisible();
     await expect(c.getByRole('heading', { level: 3, name: 'Changelog Title' })).toBeVisible();
-    await expect(c.getByText('V.1.1')).toBeVisible();
-    await expect(c.getByText('Posted on 01/01/2026')).toBeVisible();
+    await expect(c.getByText('v1.18.1')).toBeVisible();
+    /* The ISO date reads dd/mm/yyyy, in a <time> that carries the ISO. */
+    const posted = canvasElement.querySelector('time') as HTMLElement;
+    await expect(posted).toHaveTextContent('01/01/2026');
+    await expect(posted.parentElement).toHaveTextContent('Posted on 01/01/2026');
     await expect(c.getByText('Features/Updates:')).toBeVisible();
     await expect(c.getAllByRole('listitem')).toHaveLength(2);
   },
 };
 
-/** With `dateTime` the date is a `<time>`. */
+/** The date is a `<time>` carrying the ISO date, and reads dd/mm/yyyy. */
 export const WithMachineDate: Story = {
-  args: { dateTime: '2026-01-01' },
   play: async ({ canvasElement }) => {
     await expect(canvasElement.querySelector('time')).toHaveAttribute('datetime', '2026-01-01');
   },

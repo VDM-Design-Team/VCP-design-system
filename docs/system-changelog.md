@@ -26,7 +26,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `releases` | `ChangelogRelease[]` | required | `id`, `title`, `version?`, `date?`, `dateTime?`, `message?`, `features?`. The caller's order is the order shown (newest first) |
+| `releases` | `ChangelogRelease[]` | required | `id`, `title`, `version?`, `date?` (ISO), `message?`, `features?`. The caller's order is the order shown (newest first) |
 | `title` | `string` | `System Changelog` | The page's title |
 | `loading` | `boolean` | — | Three placeholder cards; one status says "Loading changelog" |
 | `empty` | `ReactNode` | `EmptyState` "No releases yet." | |
@@ -42,4 +42,4 @@ A centred column, 896 wide at most, with 24 between cards. The title is `heading
 
 ## Don't
 
-- **Don't sort or format inside it.** Pass the order, the versions and the dates as they should read.
+- **Don't sort inside it.** Pass the order and the versions as they should read, and the dates as ISO (it shows them dd/mm/yyyy, or the person's locale).

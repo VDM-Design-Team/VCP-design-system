@@ -20,9 +20,8 @@ Built to Figma's `_Changelog_Item`.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `title` | `string` | required | The release's title; the card's heading |
-| `version` | `string` | — | As it reads: "V.1.1" |
-| `date` | `string` | — | **Already formatted**: "01/01/2026". The card adds "Posted on" |
-| `dateTime` | `string` | — | "2026-01-01": wraps the date in a `<time>` |
+| `version` | `string` | — | As it reads: "v1.18.1" |
+| `date` | `string` | — | **ISO**, "2026-01-01": shown dd/mm/yyyy (or the person's locale, `useDateFormat`) inside a `<time>`. The card adds "Posted on" |
 | `message` | `string` | — | What the release says. Left out when empty |
 | `features` | `string[]` | `[]` | One bullet each, under **Features/Updates:**. The heading and list go when empty |
 | `headingLevel` | `2 \| 3 \| 4` | `3` | The title's element. Same look at every level |
@@ -40,5 +39,5 @@ Built to Figma's `_Changelog_Item`.
 
 ## Don't
 
-- **Don't format the version or date here.** Pass them as they should read.
+- **Don't pre-format the date.** Pass the ISO date; the version reads as given.
 - **Don't use it for a one-at-a-time announcement.** That is `ChangeLogModal`.

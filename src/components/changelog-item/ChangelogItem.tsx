@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * ChangelogItem — one release in the System Changelog: its title and version, when it was posted, what it says, and the features and
@@ -8,21 +9,18 @@ import { cn } from '../../lib/cn';
  * A card (`surface.elevated`, `elevation-3`) in this order: the title (`body-lg-semibold`) with the version beside it, "Posted on …",
  * the message, then **Features/Updates:** over a bulleted list. The message and the list are left out when empty.
  *
- * - **Nothing is formatted here.** The version ("V.1.1") and the date ("01/01/2026") read as given; the card adds only "Posted on".
+ * - **The version reads as given** ("v1.18.1"). **The date is ISO** ("2026-01-01") and is shown the system's way, dd/mm/yyyy or the person's locale (`useDateFormat`), inside a `<time>`; the card adds "Posted on".
  * - **It is an `article`** whose heading is the title (`headingLevel`, `3` by default, so a page's own title can be the `h2`).
- * - **`date` can be a `<time>`**: pass `dateTime` ("2026-01-01") and the date is wrapped in one for machines.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 export interface ChangelogItemProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
   title: string;
-  /** As it reads: "V.1.1". */
+  /** As it reads: "v1.18.1". */
   version?: string;
-  /** Already formatted: "01/01/2026". */
+  /** ISO, "2026-01-01": shown as dd/mm/yyyy (or the person's locale) in a `<time>`. */
   date?: string;
-  /** Machine-readable date for `<time>`: "2026-01-01". */
-  dateTime?: string;
   /** What the release says. */
   message?: string;
   /** One bullet each, under "Features/Updates:". */
@@ -32,8 +30,9 @@ export interface ChangelogItemProps extends Omit<React.HTMLAttributes<HTMLElemen
 }
 
 export const ChangelogItem = React.forwardRef<HTMLElement, ChangelogItemProps>(
-  ({ className, title, version, date, dateTime, message, features = [], headingLevel = 3, ...props }, ref) => {
+  ({ className, title, version, date, message, features = [], headingLevel = 3, ...props }, ref) => {
     const Heading = `h${headingLevel}` as const;
+    const dates = useDateFormat();
     return (
       <article
         ref={ref}
@@ -47,7 +46,7 @@ export const ChangelogItem = React.forwardRef<HTMLElement, ChangelogItemProps>(
           </div>
           {date && (
             <p className="m-0 text-body-sm-regular text-text-tertiary">
-              Posted on {dateTime ? <time dateTime={dateTime}>{date}</time> : date}
+              Posted on <time dateTime={date}>{dates.format(date)}</time>
             </p>
           )}
         </header>

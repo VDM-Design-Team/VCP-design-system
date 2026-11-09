@@ -9,8 +9,8 @@ import { EmptyState } from '../../components/empty-state';
  * SystemChangelog — the page that lists every release: a "System Changelog" title over one `ChangelogItem` card per release, newest
  * first (the caller's order). Built to Figma's `Admin System Changelog` (`Settings_Changelog_List`).
  *
- * The column is centred and 896 wide at most; cards are 24 apart. **It shows what it is given**: titles, versions and dates are
- * formatted by the caller, and a release's `id` keys its card. `loading` shows placeholder cards under the title (one status says so);
+ * The column is centred and 896 wide at most; cards are 24 apart. **It shows what it is given**: titles and versions as they read, dates as ISO (shown dd/mm/yyyy, or the
+ * person's locale), and a release's `id` keys its card. `loading` shows placeholder cards under the title (one status says so);
  * no releases show an `EmptyState`.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
@@ -19,12 +19,10 @@ import { EmptyState } from '../../components/empty-state';
 export interface ChangelogRelease {
   id: string | number;
   title: string;
-  /** "V.1.1". */
+  /** "v1.18.1". */
   version?: string;
-  /** Already formatted: "01/01/2026". */
+  /** ISO, "2026-01-01": shown dd/mm/yyyy (or the person's locale). */
   date?: string;
-  /** "2026-01-01", for `<time>`. */
-  dateTime?: string;
   message?: string;
   features?: readonly string[];
 }
@@ -47,14 +45,16 @@ export function SystemChangelog({
   empty,
   ...props
 }: SystemChangelogProps) {
+  /* Unique, so two changelogs on one page (the docs page) name their own title. */
+  const titleId = React.useId();
   return (
     <section
-      aria-labelledby="system-changelog-title"
+      aria-labelledby={titleId}
       aria-busy={loading || undefined}
       className={cn('mx-auto flex w-full max-w-4xl flex-col gap-6 font-sans', className)}
       {...props}
     >
-      <h2 id="system-changelog-title" className="m-0 py-4 text-heading-lg-bold text-text-primary">
+      <h2 id={titleId} className="m-0 py-4 text-heading-lg-bold text-text-primary">
         {title}
       </h2>
       {loading ? (
@@ -81,7 +81,6 @@ export function SystemChangelog({
                 title={release.title}
                 version={release.version}
                 date={release.date}
-                dateTime={release.dateTime}
                 message={release.message}
                 features={release.features}
               />
