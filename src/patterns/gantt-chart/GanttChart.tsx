@@ -582,6 +582,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       view === 'cycle' ? (
         /* The cycle field as the filter bar draws it: a search, one pick, each row naming the cycle and its dates. */
         <SearchSelect
+          edge="neutral"
           aria-label="Cycle"
           placeholder="Select cycle"
           searchPlaceholder="Search cycles"
@@ -840,6 +841,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               Reset Filters
             </Button>
             <SearchSelect
+              edge="neutral"
               multiple
               aria-label="Projects"
               disabled={loading}
@@ -850,6 +852,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               onChange={onProjectIdsChange}
             />
             <SearchSelect
+              edge="neutral"
               multiple
               aria-label="Users"
               disabled={loading}
@@ -861,6 +864,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               onChange={onUserIdsChange}
             />
             <Select
+              edge="neutral"
               aria-label="View"
               options={VIEW_OPTIONS}
               value={view}
