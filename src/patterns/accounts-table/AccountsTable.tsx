@@ -6,6 +6,7 @@ import { Input } from '../../atoms/input';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { Tag } from '../../atoms/tag';
+import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
 import { EmptyState } from '../../components/empty-state';
 import { UserLabel } from '../../components/user-label';
@@ -164,29 +165,41 @@ export function AccountsTable({
   }));
 
   return (
-    <div
-      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
+    <TableCard
+      className={className}
       aria-busy={loading || undefined}
       {...props}
+      filters={
+        <Input
+          type="search"
+          aria-label="Search accounts"
+          placeholder={searchPlaceholder}
+          leadingIcon={<Icon name="magnifying-glass" size="sm" />}
+          className="w-full max-w-108"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+      }
+      footer={
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onChange={onPageChange}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={onPageSizeChange}
+        />
+      }
     >
-      <Input
-        type="search"
-        aria-label="Search accounts"
-        placeholder={searchPlaceholder}
-        leadingIcon={<Icon name="magnifying-glass" size="sm" />}
-        className="w-full max-w-108"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-      />
-
       {loading && (
         <span role="status" className="sr-only">
           Loading accounts
         </span>
       )}
       <DataTable
+        bare
         caption={caption}
-        className="rounded-none border-0"
         columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
         rows={loading ? placeholders : rows}
         sort={sort}
@@ -204,19 +217,7 @@ export function AccountsTable({
           ))
         }
       />
-
-      <div className="flex justify-end">
-        <Pagination
-          page={page}
-          pageCount={pageCount}
-          onChange={onPageChange}
-          itemCount={itemCount}
-          pageSize={pageSize}
-          pageSizeOptions={pageSizeOptions}
-          onPageSizeChange={onPageSizeChange}
-        />
-      </div>
-    </div>
+    </TableCard>
   );
 }
 AccountsTable.displayName = 'AccountsTable';
