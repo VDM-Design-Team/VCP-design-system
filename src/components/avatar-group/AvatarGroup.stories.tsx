@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { AvatarGroup } from './AvatarGroup';
 import { Avatar } from '../../atoms/avatar';
 import { Badge } from '../../atoms/badge';
@@ -82,6 +83,49 @@ export const Overflow: Story = {
 };
 
 /** The same three steps as `Avatar`, with the overlap scaled to match. */
+/**
+ * `tooltips` says who each avatar is when the pointer rests on it: the name, and the `role` when there is one. The `+N` chip lists the people it hides. It is for the pointer only: the stack is still
+ * one labelled image with no extra tab stops, and its label carries the same names and roles for a keyboard or screen-reader user.
+ */
+export const WithTooltips: Story = {
+  args: {
+    label: 'Members',
+    tooltips: true,
+    max: 3,
+    people: [
+      { name: 'Ali Rahman', role: 'Assignee' },
+      { name: 'Eve Chen', role: 'Reviewer' },
+      { name: 'Marcus Okonkwo' },
+      { name: 'Priya Nair', role: 'Designer' },
+      { name: 'Sofia Almeida' },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div className="px-8 pb-24 pt-12">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const stack = within(canvasElement).getByRole('img', { name: /Members: Ali Rahman \(Assignee\), Eve Chen \(Reviewer\), Marcus Okonkwo and 2 others/ });
+    /* The stack is still one stop: nothing inside is focusable. */
+    await expect(stack.querySelectorAll('[tabindex], button, a')).toHaveLength(0);
+    const body = within(document.body);
+    const avatars = stack.querySelectorAll('[data-tooltip]');
+    await userEvent.hover(avatars[0] as HTMLElement);
+    /* The bubble opens after the hover delay. */
+    await waitFor(() => expect(body.getByText('Ali Rahman (Assignee)')).toBeVisible());
+    await userEvent.unhover(avatars[0] as HTMLElement);
+    /* The chip lists the two it hides. */
+    const chip = avatars[avatars.length - 1] as HTMLElement;
+    await expect(chip).toHaveTextContent('+2');
+    await userEvent.hover(chip);
+    await waitFor(() => expect(body.getByText('Priya Nair (Designer)')).toBeVisible());
+    await expect(body.getByText('Sofia Almeida')).toBeInTheDocument();
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">

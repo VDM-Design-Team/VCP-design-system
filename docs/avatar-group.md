@@ -11,6 +11,7 @@ VCP.
 | Piece | Tier |
 |---|---|
 | `Avatar` | atom |
+| `Tooltip` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -28,10 +29,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `people` | `Array<string \| { name, initials, src, tone }>` | — | In reading order. A bare string is shorthand for `{ name }` |
+| `people` | `Array<string \| { name, initials, src, tone, role }>` | — | In reading order. A bare string is shorthand for `{ name }`. `role` ("Assignee", "Reviewer") shows after the name in a tooltip and is read after it in the label |
 | `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N` |
 | `size` | `xs \| sm \| md \| lg` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 |
 | `label` | `string` | — | What the stack **is** — `"Assignees"`. Prefixed to the announced summary |
+| `tooltips` | `boolean` | — | Hover tooltips: each avatar says its name (and `role`), and the `+N` chip lists who it hides. **For the pointer only**: the stack stays one image with no extra tab stops (see Accessibility) |
 | `className` | `string` | — | Merged onto the row via `cn()` |
 | `ref` | `Ref<HTMLSpanElement>` | — | Points at the row |
 
@@ -70,6 +72,8 @@ proposed — inventing one for a single component would be a token nobody else c
 use.
 
 ## Accessibility
+
+- **`tooltips` are for the pointer.** Each avatar is wrapped so the pointer can rest on it, but nothing inside the stack is focusable, so it is still one stop. A keyboard or screen-reader user gets the same names, and the roles, from the stack's label ("Members: Ali Rahman (Assignee), Eve Chen (Reviewer) and 2 others"). If people need to be reachable one by one (a profile link, a remove button), render a real list of controls instead.
 
 **The group announces as one labelled image**, not as a list:
 
