@@ -87,7 +87,7 @@ export interface SearchSelectOption {
   label: string;
   /**
    * What the field, the tags and the announcements say when the row's `label` is too long for them —
-   * "C33" in the field for a row that reads "C33 (May 25, 2026 - Jun 08, 2026)". Search still matches
+   * "C33" in the field for a row that reads "C33 (25/05/2026 - 08/06/2026)". Search still matches
    * the full `label`.
    */
   shortLabel?: string;

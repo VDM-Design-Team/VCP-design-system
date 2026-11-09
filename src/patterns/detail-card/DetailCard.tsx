@@ -186,13 +186,13 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
   ) => {
     const editing = type === 'editing' || type === 'new';
     /* Every date the card reads out: dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
-    const { format: showDate } = useDateFormat();
+    const { format: showDate, range: showRange } = useDateFormat();
     const fields = FIELDS[type].filter((f) => !(domain === 'design' && f === 'cycle'));
     const set = (patch: Partial<DetailCardValue>) => onChange?.({ ...value, ...patch });
     const cycles = options?.cycles ?? [];
     const cycleOptions: SearchSelectOption[] = cycles.map((c) => ({
       value: c.value,
-      label: `${c.code} (${c.start} - ${c.end})`,
+      label: `${c.code} (${showRange(c.start, c.end)})`,
       shortLabel: c.code,
     }));
 

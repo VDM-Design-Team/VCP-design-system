@@ -7,6 +7,7 @@ import {
   type AssigneeOption,
 } from '../../components/assignee-selection-dropdown';
 import { formatCycleRange } from '../../components/cycle-tag';
+import { useDateFormat } from '../../lib/format-date';
 import { DateField } from '../../components/date-field';
 import { Field } from '../../components/field';
 import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
@@ -90,7 +91,7 @@ export interface MoveAVToCycleModalProps {
   /** Who can be assigned. A function gets the draft, so availability can follow the dates. */
   people: ReadonlyArray<AssigneeOption> | ((draft: MoveAVToCycleDraft) => ReadonlyArray<AssigneeOption>);
   /**
-   * The cycles on offer: `{ value, code, start, end }` (dates ISO). A cycle reads "C36 (Mar 02, 2026 - Mar 23, 2026)" —
+   * The cycles on offer: `{ value, code, start, end }` (dates ISO). A cycle reads "C36 (02/03/2026 - 23/03/2026)" —
    * `CycleTag`'s own form, from `formatCycleRange` — in the field and in the rows, where the code is bold.
    */
   cycles: ReadonlyArray<{ value: string; code: string; start: string; end: string }>;
@@ -132,6 +133,9 @@ export function MoveAVToCycleModal({
   const [rows, setRows] = React.useState<AssigneeRowDraft[]>([]);
   const [start, setStart] = React.useState<MoveAVToCycleDate | undefined>(initial?.start);
   const [due, setDue] = React.useState<MoveAVToCycleDate | undefined>(initial?.due);
+  /* A cycle's dates read like every date: dd/mm/yyyy, or the person's locale. */
+  const { locale } = useDateFormat();
+  const range = (start: string, end: string) => formatCycleRange(start, end, locale);
   const [cycle, setCycle] = React.useState(initial?.cycle ?? '');
   const [points, setPoints] = React.useState(initial?.points === undefined ? '' : String(initial.points));
   const [errors, setErrors] = React.useState<{ assignee?: string; due?: string; points?: string }>({});
@@ -329,13 +333,13 @@ export function MoveAVToCycleModal({
             value={cycle}
             options={cycles.map((c) => ({
               value: c.value,
-              label: `${c.code} (${formatCycleRange(c.start, c.end)})`,
+              label: `${c.code} (${range(c.start, c.end)})`,
             }))}
             renderOption={(option) => {
               const c = cycles.find((x) => x.value === option.value);
               return c ? (
                 <span className="truncate">
-                  <strong className="text-label-sm-semibold">{c.code}</strong> ({formatCycleRange(c.start, c.end)})
+                  <strong className="text-label-sm-semibold">{c.code}</strong> ({range(c.start, c.end)})
                 </span>
               ) : (
                 option.label
