@@ -55,6 +55,8 @@ A row, right-aligned, `space.8` apart, that wraps when the page is narrow instea
 
 ## Accessibility
 
+- The selects use the neutral resting edge (`edge="neutral"`, slate-400, about 2.6:1 on white), the same deliberate exception as `FilterBar`'s fields: they are also identified by their chevron and their label, and focus and error edges are unchanged. The super admin's domain and month fields use it too.
+
 - A group named "Dashboard filters"; each select is a native select named by its `label`.
 - Reset and Export are real buttons; the export menu is the system's `Menu` (arrow keys, Escape, focus returns to the button).
 

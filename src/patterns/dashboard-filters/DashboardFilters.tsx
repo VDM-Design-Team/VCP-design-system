@@ -78,6 +78,7 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
             <SearchSelect
               key={f.key}
               size="compact"
+              edge="neutral"
               emphasis="regular"
               aria-label={f.label}
               searchPlaceholder={f.searchPlaceholder ?? 'Search...'}
@@ -87,7 +88,7 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
               onChange={f.onChange}
             />
           ) : (
-            <Select key={f.key} size="compact" emphasis="regular" aria-label={f.label} className={f.className ?? 'max-w-80'} value={f.value} options={f.options} onChange={f.onChange} />
+            <Select key={f.key} size="compact" edge="neutral" emphasis="regular" aria-label={f.label} className={f.className ?? 'max-w-80'} value={f.value} options={f.options} onChange={f.onChange} />
           ),
         )}
         {exportButton && exportOptions ? (

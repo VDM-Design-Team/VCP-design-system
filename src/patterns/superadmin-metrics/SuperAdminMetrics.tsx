@@ -115,8 +115,8 @@ export interface SuperAdminFiltersProps extends Omit<React.HTMLAttributes<HTMLDi
 export const SuperAdminFilters = React.forwardRef<HTMLDivElement, SuperAdminFiltersProps>(
   ({ className, domains, domain, onDomainChange, month, onMonthChange, size = 'md', ...props }, ref) => (
     <div ref={ref} role="group" aria-label="Dashboard filters" className={cn('flex flex-wrap items-center gap-3 font-sans', className)} {...props}>
-      <Select size={size} emphasis="regular" aria-label="Domain" className={size === 'md' ? 'w-56' : undefined} value={domain} options={domains} onChange={onDomainChange} />
-      <DateField mode="month" size={size} emphasis="regular" aria-label="Month" className={size === 'md' ? 'w-56' : 'w-48'} value={month} onChange={onMonthChange} />
+      <Select size={size} edge="neutral" emphasis="regular" aria-label="Domain" className={size === 'md' ? 'w-56' : undefined} value={domain} options={domains} onChange={onDomainChange} />
+      <DateField mode="month" size={size} edge="neutral" emphasis="regular" aria-label="Month" className={size === 'md' ? 'w-56' : 'w-48'} value={month} onChange={onMonthChange} />
     </div>
   ),
 );

@@ -32,6 +32,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `size` | `sm \| compact \| md` | `md` | The field's height, as `Input`'s: 32 / 36 / 40. `compact` (36) is a toolbar's field beside a small Button |
 | `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
 | `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
+| `edge` | `strong \| neutral` | `strong` | The resting edge, as `Input`: `neutral` is the lighter edge a row of filters uses |
 | `placeholder` | `string` | `-` | While there is no date |
 | `invalid` / `disabled` | `boolean` | — | As `Input` |
 | `picker` | `DatePickerProps` | — | `min`, `max`, `today` … go to the calendar |
