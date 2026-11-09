@@ -142,15 +142,20 @@ export const Grouped: Story = {
   ),
 };
 
-/** 32 for dense toolbars, 40 default; disabled goes quiet, not invisible. */
+/** 32 for dense toolbars, 36 (`compact`) for a toolbar beside a small Button, 40 default; disabled goes quiet, not invisible. */
 export const SizesAndDisabled: Story = {
   render: (args) => (
     <div className="flex w-72 flex-col gap-3">
       <Select {...args} aria-label="Domain, small" size="sm" />
+      <Select {...args} aria-label="Domain, compact" size="compact" />
       <Select {...args} aria-label="Domain, default" />
       <Select {...args} aria-label="Domain, disabled" disabled />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const height = (name: string) => Math.round(((within(canvasElement).getByRole('combobox', { name }).parentElement) as HTMLElement).getBoundingClientRect().height);
+    await expect([height('Domain, small'), height('Domain, compact'), height('Domain, default')]).toEqual([32, 36, 40]);
+  },
 };
 
 /** Shell and caret are tokens, so dark is free. */

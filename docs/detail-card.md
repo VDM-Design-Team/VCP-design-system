@@ -132,8 +132,8 @@ Everything else is the composed pieces' own. No new tokens.
   with an `errors` entry is `aria-invalid` with the message tied to it.
 - The + beside Initiator and Assignee is 20 to look at and 40 to press, named "Add initiator" and
   "Add assignee". The chips' pencil and ✕ are real buttons in the tab order, shown on hover or focus.
-- Dates read as words ("October 1, 2025"); the due date's colour (soon, overdue) is also in `DueDateTag`'s
-  own text.
+- Dates read **dd/mm/yyyy** ("01/10/2025"), like every date in the system, or the person's locale when the product
+  sets one (`DateFormatProvider`). The due date's colour (soon, overdue) is also in `DueDateTag`'s own text.
 
 ## Don't
 
