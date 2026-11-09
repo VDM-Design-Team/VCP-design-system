@@ -86,6 +86,10 @@ Capacity Remaining in points, in the design's blue — `action.tertiary.content`
 the heading, the caret only its hinge. It is a real button inside the heading (`aria-expanded`,
 `aria-controls`); a folded section shows only its header.
 
+## Filters: the one exception to `TableCard`
+
+Every other table draws one card with its filters above the table (`TableCard`, see `docs/table-card.md`). **`PlanningTable` is the exception, on purpose:** it is several tables, one card per section (Cycle, Backlog…), each with its own header, so there is no single card for the filters to sit in. The page's filter row goes **above all the sections**, outside every card, and filters what each of them shows. Don't copy the filters into each section, and don't wrap the sections in a `TableCard`: that would put a card inside a card.
+
 ## Accessibility
 
 - Each section is a `<section>` named by its heading; the table has a caption ("Cycle 27 Added Values").
@@ -118,8 +122,8 @@ the heading, the caret only its hinge. It is a real button inside the heading (`
 - **The *Add Required Details* dialog** that a drop opens — its own PR. The table only reports the drop.
 - **A keyboard way to move a row.** Dragging is pointer-only; a "Move to cycle…" row action that opens the same dialog
   is tracked with the dialog's PR.
-- **The filter row** above the table (search, status, priority, Reset, View Cycle) is page composition
-  and needs a `FilterBar`; it is tracked separately.
+- **The filter row** above the sections (search, status, priority, Reset, View Cycle) is page composition
+  (`FilterBar`); see "Filters: the one exception to `TableCard`".
 - **Folding is not animated** yet; the body shows and hides.
 
 ## Dragging
