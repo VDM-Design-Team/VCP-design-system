@@ -100,6 +100,8 @@ export const NAV_BY_USER_TYPE: Record<SidebarUserType, readonly SidebarNavItem[]
     DASHBOARD,
     { key: 'accounts', label: 'Accounts', icon: 'users-three' },
     { key: 'domains', label: 'Domains', icon: 'globe' },
+    /* Where a super admin sets each domain's points for a quarter (Figma's Domain Budget Edit, 696:54963). */
+    { key: 'domain-budget', label: 'Domain Budget', icon: 'wallet' },
     { key: 'contact-list', label: 'Contact List', icon: 'list-dashes' },
   ],
 };

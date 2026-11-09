@@ -82,6 +82,20 @@ export const Default: Story = {
   },
 };
 
+/** A super admin's Domain Budget: where every domain's points for a quarter are set (Figma's Domain Budget Edit). */
+export const SuperAdminDomainBudget: Story = {
+  args: { userType: 'super-admin', active: 'domain-budget' },
+  render: (args) => (
+    <Stage>
+      <Sidebar {...args} />
+    </Stage>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Domain Budget' })).toHaveAttribute('aria-current', 'page');
+  },
+};
+
 /**
  * All four user types. `Admin Dev` is the one the Claude Design export did
  * not have — it is the only rail with `Planning`.

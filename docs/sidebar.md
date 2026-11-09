@@ -67,10 +67,13 @@ starts being used routinely, the vocabulary has moved and this should follow.
 | `user` | Dashboard, My Values, Assigned, Drafts, Task Log Trail, Archive▾ |
 | `admin` | + Manage |
 | `admin-dev` | + Planning▾ |
-| `super-admin` | Dashboard, Accounts, Domains, Contact List |
+| `super-admin` | Dashboard, Accounts, Domains, Domain Budget, Contact List |
 
 ▾ = has sub-items. `Archive` opens Completed / Rejected / Backlogs;
 `Planning` opens Planning List / Gantt Chart / Holiday Registry.
+
+**A super admin's Domain Budget** (`domain-budget`, the `wallet` glyph) is where every domain's points for a quarter
+are set, as Figma's super admin rail draws it (Domain Budget Edit, `696:54963`).
 
 ## Sub-rows are destinations
 
