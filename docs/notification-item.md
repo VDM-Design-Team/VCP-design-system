@@ -5,7 +5,7 @@ whether it has been read.
 
 Read off Figma's `Notification_Item` (`2428:4412`): Default, Hover and Focused,
 each with and without a comment preview. The message is `_Message_Content`, its
-thirteen kinds of event; `_Alert_Dot` is the unread dot and `_Mark_Read_Unread` the
+fourteen kinds of event; `_Alert_Dot` is the unread dot and `_Mark_Read_Unread` the
 hover button.
 
 ## Composed of
@@ -27,7 +27,7 @@ hover button.
 | `Toast` | A transient message about something the user just did. A notification is a record that stays until read |
 | The same `NotificationItem`, in a page-length list | A full inbox: the page the popover's footer link (`inboxHref`) goes to. The system has no inbox page of its own yet; build one from these rows |
 
-## The thirteen kinds
+## The fourteen kinds
 
 **The component owns the sentence**, the way `StatusTag` owns status → tone, so no
 call site writes "John moved … to the backlog" itself. Bold is the design's 700;
@@ -48,6 +48,7 @@ the subject is regular.
 | `handoff` | **John handed off** *Title***. Ready for Review.** |
 | `completed` | **John accepted & completed** *Title*. |
 | `viewer` | **John added you as a viewer to** *Title*. |
+| `reacted` | **John reacted to your comment on** *Title*. Pass the comment as `preview` and its `reactions`, so the row shows what was reacted to |
 
 Every sentence ends in a full stop, the component adds it, so a one-sentence line and a two-sentence one end the same way.
 
@@ -75,6 +76,7 @@ themselves.**
 | `commented` | Initiator(s), Assignee(s) | Yes | — | A comment was added to an Added Value they initiated or are assigned to |
 | `mention` | Anyone mentioned | Yes | — | They were mentioned in a comment with @ |
 | `viewer` | Anyone added as a viewer | Yes | — | They were added as a viewer |
+| `reacted` | The comment's author | Yes | — | Someone reacted to their comment or reply (decided 9 Nov 2026). Not when they react to their own |
 
 Both `rejected` rows use the same sentence for now. `updated` and `rejected-feedback` are not in that document.
 
