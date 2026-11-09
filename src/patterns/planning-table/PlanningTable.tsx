@@ -450,7 +450,7 @@ export function PlanningTable({
       width: '9%',
       label: 'Urgency',
       hint: <ColumnHint text={hints?.urgency} column="urgency" />,
-      render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} className="-mx-2 max-w-none" /> : null),
+      render: (row) => (row.urgency ? <UrgencyTag urgency={row.urgency} size="sm" className="-mx-1.5 max-w-none" /> : null),
     },
     {
       key: 'type',
@@ -458,7 +458,7 @@ export function PlanningTable({
       width: '9%',
       label: 'Type',
       hint: <ColumnHint text={hints?.type} column="type" />,
-      render: (row) => (row.type ? <TypeTag type={row.type} className="-mx-2 max-w-none" /> : null),
+      render: (row) => (row.type ? <TypeTag type={row.type} size="sm" className="-mx-1.5 max-w-none" /> : null),
     },
     {
       key: 'initiator',

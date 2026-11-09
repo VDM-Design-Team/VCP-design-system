@@ -179,7 +179,7 @@ Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
 - **The reference and Last Updated** use the repo's `text.tertiary`, which is
   one slate step darker than Figma's — a pre-existing, deliberate contrast fix
   in this repo, not a reading error. See `docs/figma-audit.md`, batch 5.
-- **Tags are 12px**, `Tag`'s own small size, matching Figma. Tables use tags, not
+- **Every tag in a row is `sm`** (24 tall, 12px type): the domain, due date, urgency, type and status tags, so a row's tags are one height. Urgency and type used to take the default `md` (28) while the rest were `sm`; the glyph in the urgency and type tags follows the size (16). Tables use tags, not
   badges (design review, 5 Oct 2026).
 
 Row height, cell padding and avatar size were **measured in the browser against
