@@ -25,8 +25,8 @@ The header does not know roles. It takes the view switch as data and the filters
 
 | Role | View switch | Filters |
 |---|---|---|
-| **Development admin** | Cycle / Quarter | Cycle, year, team, Reset Filters, Export (Cycle view only: the Quarter view's chart has its own) |
-| **Development user** | Cycle / Quarter | Cycle, year, Reset Filters; no team, no export (Cycle view only) |
+| **Development admin** | Cycle / Quarter | Cycle, year, team, Reset, Export (Cycle view only: the Quarter view's chart has its own) |
+| **Development user** | Cycle / Quarter | Cycle, year, Reset; no team, no export (Cycle view only) |
 | **Super admin** | none | Domain and month (`SuperAdminFilters`, 36 high) |
 | **Design user** | none | none |
 | **Design admin** | not designed yet | not designed yet |

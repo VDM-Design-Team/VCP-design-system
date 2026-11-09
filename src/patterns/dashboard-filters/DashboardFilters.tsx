@@ -7,13 +7,13 @@ import { Menu } from '../../components/menu';
 import { SearchSelect } from '../../components/search-select';
 
 /**
- * DashboardFilters — the global filter bar at the top of a dashboard: a **Reset Filters** link, the filters (the cycle, the year, the
- * team) and an **Export** button, in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export`
+ * DashboardFilters — the global filter bar at the top of a dashboard: the filters (the cycle, the year, the
+ * team), then **Reset** and an **Export** button together at the end (as `FilterBar` ends with Reset and its button), in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export`
  * (`7577:107312`).
  *
  * - **It is data, not a layout.** Pass `filters` (each a `{ key, label, value, options, onChange }`, drawn as a quiet `Select`, or as a searchable `SearchSelect` when `searchable`: the cycle's list is long)
  *   and the bar lays them out. A dashboard with two filters passes two; the superadmin's has its own, so it has none of these.
- * - **Reset and Export are optional.** `onReset` shows the Reset Filters button (tertiary); `exportLabel` shows the export button
+ * - **Reset and Export are optional.** `onReset` shows the Reset button (tertiary, "Reset", next to Export); `exportLabel` shows the export button
  *   (secondary, with a caret). Give it `exportOptions` and the button opens a menu of them (the formats, or which report), reported
  *   to `onExport(key)`; without options it is one button, and `onExport()` hears the press.
  * - **It does no filtering.** It reports each choice, and the page changes what the charts and cards are given.
@@ -54,7 +54,7 @@ export interface DashboardFiltersProps extends Omit<React.HTMLAttributes<HTMLDiv
 }
 
 export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFiltersProps>(
-  ({ className, filters, onReset, resetLabel = 'Reset Filters', exportLabel, exportOptions, onExport, ...props }, ref) => {
+  ({ className, filters, onReset, resetLabel = 'Reset', exportLabel, exportOptions, onExport, ...props }, ref) => {
     const exportButton = exportLabel ? (
       <Button
         variant="secondary"
@@ -68,11 +68,6 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
 
     return (
       <div ref={ref} role="group" aria-label="Dashboard filters" className={cn('flex flex-wrap items-center justify-end gap-2 font-sans', className)} {...props}>
-        {onReset && (
-          <Button variant="tertiary" size="sm" onClick={onReset}>
-            {resetLabel}
-          </Button>
-        )}
         {filters.map((f) =>
           f.searchable ? (
             <SearchSelect
@@ -90,6 +85,11 @@ export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFilter
           ) : (
             <Select key={f.key} size="compact" edge="neutral" emphasis="regular" aria-label={f.label} className={f.className ?? 'max-w-80'} value={f.value} options={f.options} onChange={f.onChange} />
           ),
+        )}
+        {onReset && (
+          <Button variant="tertiary" size="sm" onClick={onReset}>
+            {resetLabel}
+          </Button>
         )}
         {exportButton && exportOptions ? (
           <Menu trigger={exportButton} items={exportOptions.map((o) => ({ key: o.key, label: o.label }))} onSelect={(key) => onExport?.(key)} />

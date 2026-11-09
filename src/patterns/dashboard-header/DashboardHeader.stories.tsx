@@ -45,7 +45,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** **Development admin.** The Cycle / Quarter switch beside the title and the global filters on the right: cycle, year, team, Reset Filters and an Export menu. The Quarter view has no global bar (its chart has its own filters), so the filters leave with it. */
+/** **Development admin.** The Cycle / Quarter switch beside the title and the global filters on the right: cycle, year, team, then Reset and an Export menu. The Quarter view has no global bar (its chart has its own filters), so the filters leave with it. */
 export const DevelopmentAdmin: Story = {
   render: () => {
     const [view, setView] = React.useState('cycle');

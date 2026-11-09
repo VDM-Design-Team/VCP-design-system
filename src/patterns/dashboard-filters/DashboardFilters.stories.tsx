@@ -25,7 +25,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The global filter bar at the top of a dashboard: a Reset Filters link, the filters (cycle, year, team) and an Export button. Pass the filters; the bar lays them out and wraps when the page is narrow. It does no filtering: it reports each choice.',
+          'The global filter bar at the top of a dashboard: the filters (cycle, year, team), then Reset and an Export button together. Pass the filters; the bar lays them out and wraps when the page is narrow. It does no filtering: it reports each choice.',
       },
     },
   },
@@ -36,13 +36,13 @@ const meta = {
       </div>
     ),
   ],
-  args: { filters: FILTERS, onReset: fn(), resetLabel: 'Reset Filters', exportLabel: 'Export Cycle Report', onExport: fn() },
+  args: { filters: FILTERS, onReset: fn(), exportLabel: 'Export Cycle Report', onExport: fn() },
 } satisfies Meta<typeof DashboardFilters>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Reset, three filters and an export button, as Figma draws them. */
+/** Three filters, then Reset and an export button together. (Figma draws "Reset Filters" first; see the docs' note on why it moved.) */
 export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
@@ -52,7 +52,7 @@ export const Default: Story = {
     const group = c.getByRole('group', { name: 'Dashboard filters' });
     const heights = [...group.children].map((el) => Math.round(el.getBoundingClientRect().height));
     await expect(new Set(heights)).toEqual(new Set([36]));
-    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await userEvent.click(c.getByRole('button', { name: 'Export Cycle Report' }));
     await expect(args.onExport).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ export const Controlled: Story = {
     const c = within(canvasElement);
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Team' }), 'Platform');
     await expect(c.getByRole('combobox', { name: 'Team' })).toHaveValue('Platform');
-    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
     await expect(c.getByRole('combobox', { name: 'Team' })).toHaveValue('All Teams');
   },
 };

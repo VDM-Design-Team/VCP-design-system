@@ -1,6 +1,6 @@
 # DashboardFilters
 
-The global filter bar at the top of a dashboard: a **Reset Filters** link, the filters (the cycle, the year, the team) and an **Export** button, in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export` (`7577:107312`).
+The global filter bar at the top of a dashboard: the filters (the cycle, the year, the team), then **Reset** and an **Export** button together at the end, as `FilterBar` ends with Reset and its button, in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export` (`7577:107312`).
 
 ## Composed of
 
@@ -28,7 +28,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `filters` | `{ key, label, value, options, onChange, searchable?, searchPlaceholder?, className? }[]` | required | Each a quiet `Select` that hugs its longest option (`className` pins a width). With `searchable` it is a `SearchSelect` instead (a search box in its list, 19.5rem wide): the cycle's list is long. `label` names it for assistive tech ("Cycle", "Year", "Team") |
 | `onReset` | `() => void` | — | Shows the reset button (tertiary) |
-| `resetLabel` | `string` | `Reset Filters` | |
+| `resetLabel` | `string` | `Reset` | |
 | `exportLabel` | `string` | — | Shows the export button (secondary, with a caret): "Export Cycle Report" |
 | `exportOptions` | `{ key, label }[]` | — | The button opens a menu of these |
 | `onExport` | `(key?) => void` | — | The export was chosen: with the option's `key` when there are options, with nothing for a single button |
@@ -40,10 +40,14 @@ Read off the annotated frame (`Main Views: Cycle & Quarter`), so the page knows 
 
 - **The cycle is searchable.** "Searching by text like C39 or Aug 2026 should be possible": `searchable` on that filter, and the search matches every word you type in any order ("Aug 2026" finds the August 2026 cycles).
 - **The year narrows the cycles.** The cycle's list shows the chosen year's cycles; a cycle that spans two years appears in both years' lists. This is the page's to do: pass the narrowed `options`.
-- **Defaults:** the current cycle, the current year, All Teams. **Reset Filters** returns to those three: `onReset` sets the cycle to the current cycle, the year to the current year and the team to All Teams.
+- **Defaults:** the current cycle, the current year, All Teams. **Reset** returns to those three: `onReset` sets the cycle to the current cycle, the year to the current year and the team to All Teams.
 - **The filters affect every visible card on the page**, so the page passes what they choose to all of them.
 - **Export** opens a list of file types (PDF, CSV); choosing one proceeds with the export in that type: `exportOptions` and `onExport(key)`.
 - The filters are on the **Cycle view only**; the Quarter view has none (see `DashboardTemplate`).
+
+## Differences from the design
+
+- **Reset sits next to Export, and says "Reset".** Figma draws "Reset Filters" as the first control in the row, before the filters. Here the filters come first and Reset sits with Export at the end of the row, labelled "Reset" (`resetLabel` changes it). This is a deliberate, small change for consistency: it is how `FilterBar` ends (Reset beside its button), it groups the two actions, and it keeps a text-style button from starting the row. If design agrees, the Figma frame should follow.
 
 ## It does no filtering
 
