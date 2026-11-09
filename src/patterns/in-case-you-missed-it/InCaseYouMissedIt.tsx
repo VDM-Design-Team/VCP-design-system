@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
-import { InfoHint } from '../../components/info-hint';
+import { CardHeader } from '../../components/card-header';
 import {
   InCaseYouMissedItCard,
   type InCaseYouMissedItCardProps,
@@ -135,17 +135,7 @@ export const InCaseYouMissedIt = React.forwardRef<HTMLElement, InCaseYouMissedIt
         className={cn('rounded-md bg-surface-elevated p-4 font-sans', className)}
         {...props}
       >
-        <div className="flex items-center gap-1 p-2">
-          <h2
-            ref={headingRef}
-            id={headingId}
-            tabIndex={-1}
-            className="m-0 text-title-sm-semibold text-text-primary focus:outline-none"
-          >
-            {title}
-          </h2>
-          <InfoHint label={typeof title === 'string' ? title : 'this section'} content={hint} />
-        </div>
+        <CardHeader className="p-2" title={title} headingId={headingId} headingRef={headingRef} headingTabIndex={-1} hint={hint} />
 
         {items.length === 0 && <p className="m-0 p-2 text-body-sm-regular text-text-tertiary">{caughtUpText}</p>}
 
