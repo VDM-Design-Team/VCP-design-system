@@ -26,9 +26,8 @@ container's width.
 
 | Piece | Tier | Role here |
 |---|---|---|
-| `Icon` | atom | The `hint` info glyph |
 | `Divider` | atom | The vertical rule between the items of a `StatCardGroup` |
-| `Tooltip` | atom | The `hint` explanation |
+| `InfoHint` | component | The `hint`: the info glyph and its explanation |
 
 `npm test` checks this list against the real imports.
 
@@ -88,8 +87,8 @@ tone, and is always its own column: the content area starts after it, so
 centred content centres in the space beside the stripe — as Figma draws it.
 
 **Single, `default` (Value_Card):** an 8 stripe; `space.16` either side of the
-content, left-aligned and centred vertically; no gap between the label and the
-value. Exactly 100 high and at least 11rem wide (`h-25 min-w-44`, Figma's own minimum of 175: it was 16.5rem, which made a row of cards wrap early — six fit a 1187 row in Figma, and now here). The value
+content, left-aligned and centred vertically; `space.4` between the label and the
+value (the same pair `CycleSummary` and `MyValuesStats` use). Exactly 100 high and at least 11rem wide (`h-25 min-w-44`, Figma's own minimum of 175: it was 16.5rem, which made a row of cards wrap early — six fit a 1187 row in Figma, and now here). The value
 is bold on a 44 line.
 
 **Single, `superadmin`:** an 8 stripe — the same as the Value_Card's (design review, October 2026; it was 12); `space.24` either side, content centred
@@ -102,7 +101,7 @@ of items; `space.36` between each item and the divider beside it; dividers are
 the `Divider` atom (`stroke.default`, 1px, full height of the items).
 
 **Title row.** Icon 24 × 24 (`size-6`) in the accent tone, the label in
-`label-sm-medium` `text.secondary`, the tooltip glyph 20 in `text.tertiary`;
+`label-sm-medium` `text.secondary`, the `InfoHint` (a 16 glyph in `text.tertiary`, 40 press area);
 `space.6` between the three. (The gap to the value row is per look, above.)
 
 **Value row.** `space.8` between the value and the measurement, bottom-aligned
@@ -174,7 +173,7 @@ they are a known soft spot of `outline.border.default` as a fill. The 1px
   text and the icon's own shape already carry which category a card belongs
   to. Colour is confirmation, not the only signal.
 - `hint` renders a real, focusable `button` (named "About &lt;label&gt;")
-  wrapping the system `Tooltip`, not a `title` attribute — reachable by
+  (`InfoHint`, wrapping the system `Tooltip`), not a `title` attribute — reachable by
   keyboard, not just hover.
 
 ## Don't

@@ -44,6 +44,7 @@ Settled in October 2026. If you are tempted to change it, read the reasons first
 | `children` | `ReactNode` | — | Escape hatch for `<optgroup>` |
 | `value` / `onChange` | `string` / `(value) => void` | — | Controlled pair; uncontrolled works too |
 | `placeholder` | `string` | — | A disabled, hidden `value=""` option — cannot be re-picked. A real "none" choice should be a real option |
+| `edge` | `strong \| neutral` | `strong` | The resting edge: `stroke.strong` (3:1) or `neutral.outline.border.default` (about 2.6:1 on white, lighter). `neutral` is a deliberate exception for a row of filters; an error, a warning and focus still win |
 | `invalid` | `boolean` | — | Critical border + `aria-invalid`. Pair with a visible message (`Field`'s `error`, or this component's own `error`) |
 | `error` | `ReactNode` | — | A message under the select in the critical colour (`accent.critical.outline.content`, as `Field`'s). Implies `invalid` and is announced with the select (`aria-describedby`, merged with any a `Field` set). **Inside a `Field`, use the `Field`'s `error`, not both** |
 | `size` | `sm \| compact \| md` | `md` | 32 / 36 / 40. `sm` and `md` are Input's scale (the export's `small`/`large` renamed to match the system); `compact` (36) is a toolbar's select beside a small Button (36) and a medium SegmentedControl (36), as the dashboard's header row has them |
