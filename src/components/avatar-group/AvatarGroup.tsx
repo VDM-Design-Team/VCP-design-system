@@ -68,7 +68,7 @@ export interface AvatarGroupProps
     VariantProps<typeof overlap> {
   /** The people, in the order they should read. Strings are treated as names. */
   people: readonly AvatarGroupEntry[];
-  /** How many avatars to draw before collapsing the rest into `+N`. */
+  /** How many avatars to draw before collapsing the rest into `+N`. The chip only appears for two or more people: if one would be left out, they are drawn instead of a `+1`. */
   max?: number;
   /**
    * What the stack *is* — `"Assignees"`, `"Reviewers"`, `"Attending"`. Prefixed
@@ -101,7 +101,9 @@ const nameOf = (person: AvatarGroupPerson) => person.name?.trim() || person.init
 
 export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
   ({ className, people, max = 4, size, label, tooltips, ...props }, ref) => {
-    const shown = people.slice(0, Math.max(0, max)).map(toPerson);
+    /* A `+1` chip hides one person it could have shown in the same space, so the chip only appears for two or more: when `max` would leave exactly one out, that person is drawn too. */
+    const limit = Math.max(0, max);
+    const shown = people.slice(0, people.length - limit === 1 ? people.length : limit).map(toPerson);
     const collapsed = people.length - shown.length;
 
     /* Someone with neither a name nor initials cannot be announced by name, so
