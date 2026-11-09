@@ -73,7 +73,7 @@ themselves.**
 | `rejected` (from Review) | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Rejected; the reason shows as a banner on the Added Value page or a tooltip in the table |
 | `backlog` | Initiator(s), Assignee(s), Admin(s); only Initiator(s) if it was in Draft or Pending | Yes, except Admin(s) | Any: Backlog can be applied at any point | Moved to the backlog |
 | `assigned` | The user who was assigned | Yes | — | It was assigned to them and they should work on it |
-| `commented` | Initiator(s), Assignee(s) | Yes | — | A comment was added to an Added Value they initiated or are assigned to |
+| `commented` | Initiator(s), Assignee(s), anyone @mentioned, and anyone who has commented on it before | Yes | — | A comment was added to an Added Value they initiated, are assigned to, are mentioned on, or have commented on (decided 9 Nov 2026). The author is never told of their own comment |
 | `mention` | Anyone mentioned | Yes | — | They were mentioned in a comment with @ |
 | `viewer` | Anyone added as a viewer | Yes | — | They were added as a viewer |
 | `reacted` | The comment's author | Yes | — | Someone reacted to their comment or reply (decided 9 Nov 2026). Not when they react to their own |
