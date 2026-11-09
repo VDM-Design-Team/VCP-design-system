@@ -15,12 +15,14 @@ avatar. `DataTable` specialised, as `AVTable` is. Read off the Figma Planning Pa
 | `CopyText` | atom |
 | `Avatar` | atom |
 | `Icon` | sub-atomic |
+| `IconButton` | atom |
 | `Select` | atom |
 | `Tag` | atom |
 | `Tooltip` | atom |
 | `AssigneeWithStatus` | component |
 | `DataTable` | component |
 | `InlineEdit` | component |
+| `Menu` | component |
 | `StatusTag` | component |
 | `TypeTag` | component |
 | `UrgencyTag` | component |
@@ -43,7 +45,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `collapsed` / `defaultCollapsed` / `onCollapsedChange` | `string[]` | — | Folded section ids. Controlled when `collapsed` is given |
 | `sort` / `onSortChange` | `DataTableSort` | — | The sortable key is `title`. **Sorting is a handler, not the table's job**: the header reports the key and direction and the caller (usually the server) returns the rows in that order. The table never reorders rows in the browser |
 | `onAnimationDismiss` | `(row, field: 'start' \| 'due') => void` | — | A date's animation is over (three loops, hover, or the table left) — clear its `animated` flag |
-| `onMoveRow` | `(row, from, to) => void` | — | A Backlog row was dropped on a Cycle. The table moves nothing — in the design this opens *Add Required Details*. Backlog rows are draggable with or without it |
+| `onMoveRow` | `(row, from, to) => void` | — | A row was moved: dropped on another section, or sent there from its **Move … to…** button. The table moves nothing — in the design a Backlog row dropped on a Cycle opens *Add Required Details*. Given, every movable row gets the button (see "Moving without dragging"). Movable rows are draggable with or without it |
+| `moves` | `'to-cycle' \| 'anywhere'` | `'to-cycle'` | `to-cycle`: a Backlog row onto a Cycle (the original design). `anywhere`: any row onto any other section — another Cycle, or back to the Backlog |
+| `canMove` | `(row, from) => boolean` | every row | Keeps a row where it is — no button, no drag (a Completed one, say) |
 | `onOpen` | `(row) => void` | — | Given, the title is a button. (The ID is click-to-copy, so opening is the title's job) |
 | `onStartChange` / `onDueChange` | `(row, iso) => void` | — | Each date edits in place only if its callback is given |
 | `onPointsChange` | `(row, points) => void` | — | Same, for points — chosen from a dropdown, as the flow draws it |
@@ -120,17 +124,29 @@ Every other table draws one card with its filters above the table (`TableCard`, 
 ## Not here
 
 - **The *Add Required Details* dialog** that a drop opens — its own PR. The table only reports the drop.
-- **A keyboard way to move a row.** Dragging is pointer-only; a "Move to cycle…" row action that opens the same dialog
-  is tracked with the dialog's PR.
 - **The filter row** above the sections (search, status, priority, Reset, View Cycle) is page composition
   (`FilterBar`); see "Filters: the one exception to `TableCard`".
 - **Folding is not animated** yet; the body shows and hides.
 
 ## Dragging
 
-`sections` is a list, so **any number of Cycles can be on the page at once** (and a Backlog, or none). Backlog rows are always draggable and every Cycle is a drop target: it takes a blue outline while a row
-is over it. Dropping calls `onMoveRow(row, from, to)`; **nothing moves until you move it** (the design opens a
-dialog first, and the move happens on confirm).
+`sections` is a list, so **any number of Cycles can be on the page at once** (and a Backlog, or none). Which rows
+drag, and where to, is `moves`: by default Backlog rows onto any Cycle; with `moves="anywhere"`, any row onto any
+other section, the Backlog included. `canMove` keeps a row where it is. A section a row may go to is a drop target
+and takes a blue outline while the row is over it. Dropping calls `onMoveRow(row, from, to)`; **nothing moves until
+you move it** (the design opens a dialog first, and the move happens on confirm).
+
+## Moving without dragging
+
+Dragging is pointer-only, so it can't be the only way (WCAG 2.5.7, and anyone on a keyboard, a switch or a screen
+reader). With `onMoveRow`, every movable row has a **Move … to…** button in a last column ("Move VCP-1234 to…", the
+⇅ glyph): a `Menu` of the sections that row may go to — the same ones a drag allows, each with its dates — never its
+own. Choosing one calls `onMoveRow` exactly as a drop does, so a page handles both in one place (and opens the same
+dialog).
+
+**Focus follows the row.** The button leaves with the row, so when the row next shows up in another section — at once,
+or after the caller's dialog is confirmed — focus goes to its button there. If it stays (the dialog was cancelled),
+focus is back on its own button, as any menu leaves it. A drag moves nothing that had focus, so it needs none of this.
 
 ## Popovers
 
@@ -144,6 +160,7 @@ those floors the spare room is shared by each column's `width` weight, so a wide
 title gives way first; below that the table scrolls sideways, one scroller per section (see `docs/data-table.md`).
 
 ## Don't
+- **Don't make dragging the only way to move a row.** Give `onMoveRow`, and the button is there.
 
 - **Don't re-map statuses, urgencies or availability** to colours here.
 - **Don't sort or page inside the table.** Sorting is a handler (`onSortChange`): the order of a thousand rows is the server's business.

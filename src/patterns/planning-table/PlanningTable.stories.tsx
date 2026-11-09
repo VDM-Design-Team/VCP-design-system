@@ -180,6 +180,123 @@ export const MultipleCycles: Story = {
   },
 };
 
+/**
+ * The table moves nothing itself: this is what a page does with `onMoveRow`. After a move from a row's
+ * menu, the table puts focus on that row's button in its new place.
+ */
+function Moving(args: React.ComponentProps<typeof PlanningTable>) {
+  const [sections, setSections] = React.useState(args.sections);
+  return (
+    <PlanningTable
+      {...args}
+      sections={sections}
+      onMoveRow={(row, from, to) => {
+        args.onMoveRow?.(row, from, to);
+        setSections((now) =>
+          now.map((s) =>
+            s.id === from.id
+              ? { ...s, rows: s.rows.filter((r) => r.id !== row.id) }
+              : s.id === to.id
+                ? { ...s, rows: [...s.rows, row] }
+                : s,
+          ),
+        );
+      }}
+    />
+  );
+}
+
+const THREE_SECTIONS: PlanningSection[] = [
+  SECTIONS[0]!,
+  {
+    id: 'cycle-28',
+    kind: 'cycle',
+    title: 'Cycle 28',
+    dates: '(16/03/2026 - 30/03/2026)',
+    totalCapacity: 240,
+    remainingCapacity: 212,
+    rows: [row(6, { status: { status: 'Completed' } })],
+  },
+  SECTIONS[1]!,
+];
+
+/**
+ * `moves="anywhere"`: any row goes to any other section — a Cycle row to another Cycle, or back to the
+ * Backlog. `canMove` keeps a row where it is: here a Completed one (no button, no drag).
+ */
+export const MoveAnywhere: Story = {
+  args: {
+    sections: THREE_SECTIONS,
+    moves: 'anywhere',
+    canMove: (r) => r.status?.status !== 'Completed',
+    onMoveRow: fn(),
+  },
+  render: (args) => <Moving {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const source = canvas.getByText('VCP-1231').closest('tr')!;
+    const backlog = canvas.getByRole('region', { name: /Backlog/ });
+    const data = new DataTransfer();
+    await fireEvent.dragStart(source, { dataTransfer: data });
+    await fireEvent.dragOver(backlog, { dataTransfer: data });
+    /* The Backlog takes a drop now, and lights up. */
+    await expect(backlog).toHaveClass('outline-2');
+    await fireEvent.drop(backlog, { dataTransfer: data });
+    const [moved, from, to] = (args.onMoveRow as ReturnType<typeof fn>).mock.calls[0]!;
+    await expect([moved.ref, from.id, to.id]).toEqual(['VCP-1231', 'cycle-27', 'backlog']);
+    await waitFor(() => expect(within(backlog).getByText('VCP-1231')).toBeInTheDocument());
+
+    /* The Completed row stays put: no button, not draggable. */
+    const done = canvas.getByText('VCP-1236').closest('tr')!;
+    await expect(within(done).queryByRole('button', { name: /Move VCP-1236/ })).not.toBeInTheDocument();
+    await expect(done).not.toHaveAttribute('draggable', 'true');
+  },
+};
+
+/**
+ * Without dragging: each movable row's "Move … to…" button opens a menu of the sections it can go to —
+ * the keyboard's way (and a screen reader's, a switch's). Here, a Cycle 27 row to Cycle 28 by keyboard;
+ * focus follows the row.
+ */
+export const MoveWithoutDragging: Story = {
+  args: { sections: THREE_SECTIONS, moves: 'anywhere', onMoveRow: fn() },
+  render: (args) => <Moving {...args} />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole('button', { name: 'Move VCP-1232 to…' });
+    button.focus();
+    await userEvent.keyboard('{Enter}');
+    const menu = await within(document.body).findByRole('menu');
+    /* Its own section is not a choice. */
+    await expect(within(menu).queryByRole('menuitem', { name: /Cycle 27/ })).not.toBeInTheDocument();
+    await userEvent.click(within(menu).getByRole('menuitem', { name: /Cycle 28/ }));
+    const [moved, from, to] = (args.onMoveRow as ReturnType<typeof fn>).mock.calls[0]!;
+    await expect([moved.ref, from.id, to.id]).toEqual(['VCP-1232', 'cycle-27', 'cycle-28']);
+    const cycle28 = canvas.getByRole('region', { name: /Cycle 28/ });
+    await waitFor(() => expect(within(cycle28).getByText('VCP-1232')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(document.activeElement).toBe(within(cycle28).getByRole('button', { name: 'Move VCP-1232 to…' })),
+    );
+  },
+};
+
+/** The default, `to-cycle`: only Backlog rows move, and only onto a Cycle — so only they carry the button. */
+export const MoveToCycleOnly: Story = {
+  args: { sections: THREE_SECTIONS, onMoveRow: fn() },
+  render: (args) => <Moving {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByRole('button', { name: 'Move VCP-1231 to…' })).not.toBeInTheDocument();
+    await userEvent.click(canvas.getByRole('button', { name: 'Move VCP-1234 to…' }));
+    const menu = await within(document.body).findByRole('menu');
+    await expect(within(menu).getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
+      'Cycle 27(02/03/2026 - 16/03/2026)',
+      'Cycle 28(16/03/2026 - 30/03/2026)',
+    ]);
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
 /** A Backlog row has nothing planned yet: no dates, no points — each reads as a hyphen. */
 export const EmptyDates: Story = {
   args: {

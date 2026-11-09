@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Icon } from '../../atoms/icon';
+import { IconButton } from '../../atoms/icon-button';
 import { CopyText } from '../../atoms/copy-text';
 import { Select } from '../../atoms/select';
 import { Tag } from '../../atoms/tag';
@@ -15,6 +16,7 @@ import {
   type DataTableSort,
 } from '../../components/data-table';
 import { InlineDateEdit, InlineEdit } from '../../components/inline-edit';
+import { Menu } from '../../components/menu';
 import { StatusTag, STATUS_COLUMN_HINT, type StatusTagProps } from '../../components/status-tag';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { TruncatedText, useIsTruncated } from '../../components/truncated-text';
@@ -121,11 +123,21 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   defaultCollapsed?: readonly string[];
   onCollapsedChange?: (collapsed: string[]) => void;
   /**
-   * A Backlog row was dropped on a Cycle. The table moves nothing: it tells you which row went from
-   * where to where — in the design that opens the *Add Required Details* dialog, and the move happens
-   * when it is confirmed. Backlog rows are draggable either way (a drop with no handler does nothing).
+   * A row was moved — dropped on another section, or sent there from its "Move … to…" button. The
+   * table moves nothing: it tells you which row went from where to where — in the design a Backlog
+   * row dropped on a Cycle opens the *Add Required Details* dialog, and the move happens when it is
+   * confirmed. Given, every row that can move also gets the button: a menu of the sections it can go
+   * to, the way to move a row **without dragging** (the keyboard, a switch, a screen reader). Movable
+   * rows are draggable either way (a drop with no handler does nothing).
    */
   onMoveRow?: (row: PlanningRow, from: PlanningSection, to: PlanningSection) => void;
+  /**
+   * Which moves the table offers. `to-cycle` (the default): a Backlog row onto a Cycle. `anywhere`:
+   * any row onto any other section — another Cycle, or back to the Backlog.
+   */
+  moves?: 'to-cycle' | 'anywhere';
+  /** Whether this row may move at all (a Completed one may not, say). Every row the mode allows, if omitted. */
+  canMove?: (row: PlanningRow, from: PlanningSection) => boolean;
   /** The sortable key is `title` — the one Figma mark. */
   sort?: DataTableSort;
   onSortChange?: (sort: DataTableSort) => void;
@@ -341,6 +353,8 @@ export function PlanningTable({
   onSortChange,
   onOpen,
   onMoveRow,
+  moves = 'to-cycle',
+  canMove,
   onStartChange,
   onDueChange,
   onPointsChange,
@@ -353,10 +367,37 @@ export function PlanningTable({
   const baseId = React.useId();
   const dates = useDateFormat();
   const hints = { ...FORMULA_HINTS, ...hintOverrides };
-  /* A Backlog row in the air, and the Cycle it is over. */
+  /* A row in the air, and the section it is over. */
   const [dragging, setDragging] = React.useState<{ rowId: string; fromId: string } | null>(null);
   const [overId, setOverId] = React.useState<string | null>(null);
   const sectionById = new Map(sections.map((s) => [s.id, s]));
+  /* Where a row may go from its section: in `to-cycle`, only from the Backlog onto a Cycle; in
+     `anywhere`, to every other section. One rule for the drag and the button, so they never differ. */
+  const targetsFrom = (from: PlanningSection) =>
+    moves === 'anywhere'
+      ? sections.filter((s) => s.id !== from.id)
+      : from.kind === 'backlog'
+        ? sections.filter((s) => s.kind === 'cycle')
+        : [];
+  const movable = (row: PlanningRow, from: PlanningSection) =>
+    targetsFrom(from).length > 0 && (canMove?.(row, from) ?? true);
+  /* A row sent from its menu takes its button with it, and focus would fall to the page. So when the row
+     shows up in another section — now, or after the caller's dialog is confirmed — focus goes to its
+     button there. A row that stays (the dialog was cancelled) keeps focus on its own button, as usual. */
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const sent = React.useRef<{ rowId: string; fromId: string } | null>(null);
+  React.useEffect(() => {
+    const pending = sent.current;
+    if (!pending) return;
+    const now = sections.find((sec) => sec.rows.some((r) => r.id === pending.rowId));
+    if (!now || now.id === pending.fromId) return;
+    sent.current = null;
+    /* After whatever closed (the menu, a dialog) has tried to hand focus back to the button that left. */
+    const timer = window.setTimeout(() =>
+      rootRef.current?.querySelector<HTMLElement>(`[data-move-row="${CSS.escape(pending.rowId)}"]`)?.focus(),
+    );
+    return () => window.clearTimeout(timer);
+  });
 
   /* Animated dates. A flag is only a live signal if it was raised after the table appeared (a flag already
      there on the first render is old news — a refreshed page must not replay it) and has not been
@@ -570,14 +611,46 @@ export function PlanningTable({
     },
   ];
 
+  /* The way to move a row without dragging: a button per movable row, opening a menu of the sections
+     it can go to. Only with `onMoveRow`, as without it there is nothing to tell. */
+  const moveColumn = (section: PlanningSection): DataTableColumn<PlanningRow> => ({
+    key: 'move',
+    label: 'Move',
+    fit: true,
+    width: '4%',
+    render: (row) =>
+      movable(row, section) ? (
+        <Menu
+          align="right"
+          trigger={<IconButton icon="arrows-down-up" label={`Move ${row.ref} to…`} data-move-row={row.id} />}
+          items={targetsFrom(section).map((to) => ({
+            key: to.id,
+            label: (
+              <span className="flex items-baseline gap-2">
+                <span>{to.title}</span>
+                {to.dates && <span className="text-body-sm-regular text-text-secondary">{to.dates}</span>}
+              </span>
+            ),
+          }))}
+          onSelect={(key) => {
+            const to = key ? sectionById.get(key) : undefined;
+            if (!to) return;
+            sent.current = { rowId: row.id, fromId: section.id };
+            onMoveRow?.(row, section, to);
+          }}
+        />
+      ) : null,
+  });
+
   return (
-    <div className={cn('flex flex-col gap-5', className)} {...props}>
+    <div ref={rootRef} className={cn('flex flex-col gap-5', className)} {...props}>
       {sections.map((section) => {
         const isFolded = folded.includes(section.id);
         const headingId = `${baseId}-${section.id}-title`;
         const bodyId = `${baseId}-${section.id}-body`;
-        /* A Cycle is a drop target while a Backlog row is being dragged — and lights up when it is over it. */
-        const isDropTarget = !!dragging && section.kind === 'cycle';
+        /* A section is a drop target while a row that may go there is in the air — and lights up when it is over it. */
+        const draggedFrom = dragging ? sectionById.get(dragging.fromId) : undefined;
+        const isDropTarget = !!draggedFrom && targetsFrom(draggedFrom).some((t) => t.id === section.id);
         const isOver = isDropTarget && overId === section.id;
         const hasCapacity = section.totalCapacity !== undefined && section.remainingCapacity !== undefined;
         return (
@@ -658,17 +731,18 @@ export function PlanningTable({
             </header>
             <div id={bodyId} hidden={isFolded} className="border-t border-stroke-default">
               <DataTable
-                columns={columns}
+                columns={onMoveRow ? [...columns, moveColumn(section)] : columns}
                 rows={section.rows}
                 sort={sort}
                 onSortChange={onSortChange}
                 className="rounded-none border-0"
-                rowProps={
-                  section.kind === 'backlog'
-                    ? (row) => ({
+                rowProps={(row) =>
+                  movable(row, section)
+                    ? {
                         draggable: true,
                         onDragStart: (event) => {
                           event.dataTransfer.effectAllowed = 'move';
+                          sent.current = null;
                           setDragging({ rowId: row.id, fromId: section.id });
                         },
                         onDragEnd: () => {
@@ -679,8 +753,8 @@ export function PlanningTable({
                           'cursor-grab',
                           dragging?.rowId === row.id && 'bg-surface-neutral-subtle',
                         ),
-                      })
-                    : undefined
+                      }
+                    : {}
                 }
                 caption={`${section.title} Added Values`}
                 empty={empty}
