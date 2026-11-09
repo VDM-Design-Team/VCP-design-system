@@ -19,6 +19,17 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `DashboardTemplate` | Any role's dashboard: pass the sections that role sees |
 | `AppShell` | Any other signed-in page |
 
+## The template, and the examples
+
+Two things live in Storybook, and only one is the library:
+
+| | Where | What it is |
+|---|---|---|
+| **The template** | `Templates / Dashboard / Template` | `DashboardTemplate` itself: where the title, the view switch, the filters and the sections go, and how they reflow. Its stories use placeholder sections and test what the template guarantees (the layout, 36-high controls, filters in the title row, no overflow when narrow). **This is what developers import.** |
+| **The examples** | `Templates / Dashboard / Examples` | Each role's dashboard composed from the real patterns around the template, with example data, as the Figma pages draw them. **These illustrate how to use the template; they are not part of the library and not a spec.** |
+
+The design system is not a second implementation of the VCP product. Which sections a role sees, in what order and under which titles, is the product's decision: when it changes, the examples follow, and `DashboardTemplate` does not. The example stories carry only light checks (the page renders, its key sections are there) for that reason.
+
 ## One layout; the roles differ in their sections
 
 What differs between a development admin, a development user, a design user and the super admin is **which sections they see**, not how the page is arranged. So the template takes the sections as `children` and does not know roles; each role is a composition (the stories, `Templates/Dashboard`). The sections are patterns, each a full-width card that reflows by its own width, so the page needs no breakpoints.
@@ -31,7 +42,7 @@ What differs between a development admin, a development user, a design user and 
 | **Super admin** | `super-admin` | none | its own domain and month (`SuperAdminFilters`, 36 high) **in the title row, aligned to the right**, passed as `filters`; the metrics draw only the cards (`filters={false}`) | `SuperAdminMetrics` | |
 | **Design admin** | `admin` | not yet designed | | | |
 
-The development user and design user rows come from the product's description, not from a Figma frame (the development user's no-export Cycle filters and its chart's own quarter and year are suggestions); the development admin and super admin rows are read off Figma, except that the super admin's filters now sit in the title row (Figma draws them above the cards).
+This table describes what the **examples** show. It is design's reading of the Figma pages, not a requirement the template enforces. The development user and design user rows come from the product's description, not from a Figma frame (the development user's no-export Cycle filters and its chart's own quarter and year are suggestions); the development admin and super admin rows are read off Figma, except that the super admin's filters now sit in the title row (Figma draws them above the cards).
 
 ## Props
 
