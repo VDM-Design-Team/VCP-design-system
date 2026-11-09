@@ -28,6 +28,8 @@ export * from './report-problem-modal';
 export * from './notification-inbox';
 export * from './notification-popover';
 export * from './budget-table';
+export * from './dashboard-filters';
+export * from './dashboard-header';
 export * from './planning-table';
 export * from './reject-pending-av-modal';
 export * from './review-av-modal';
