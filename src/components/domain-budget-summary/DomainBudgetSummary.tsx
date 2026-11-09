@@ -3,10 +3,9 @@ import { cn } from '../../lib/cn';
 import { Badge } from '../../atoms/badge';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
-import { Icon } from '../../atoms/icon';
 import { ProgressBar, type ProgressBarProps } from '../../atoms/progress-bar';
 import { Select } from '../../atoms/select';
-import { Tooltip } from '../../atoms/tooltip';
+import { InfoHint } from '../info-hint';
 
 /**
  * DomainBudgetSummary — the admin dashboard's view of one domain's development-point budget for one quarter: what was
@@ -135,20 +134,7 @@ function Points({
     <div className="flex min-w-0 flex-1 flex-col gap-2">
       <div className="flex items-center gap-1.5">
         <span className="text-body-sm-medium text-text-secondary">{label}</span>
-        <Tooltip content={hint}>
-          <button
-            type="button"
-            aria-label={`About ${label}`}
-            className={cn(
-              /* A 20 glyph with a 40 press area (the repo's after:-inset-2.5 pattern, as PageTitle). */
-              'relative grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary after:absolute after:-inset-2.5',
-              'hover:text-text-secondary',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-            )}
-          >
-            <Icon name="info" size="md" />
-          </button>
-        </Tooltip>
+        <InfoHint label={label} content={hint} />
       </div>
       <div className={cn('flex items-baseline gap-1.5 whitespace-nowrap', toneClassName)}>
         <span className="text-heading-xl-bold">{value}</span>

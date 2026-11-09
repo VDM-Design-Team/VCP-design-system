@@ -120,6 +120,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     }, [open]); // eslint-disable-line
     /* dd/mm/yyyy, or the person's locale when the product sets one (`DateFormatProvider`). */
     const dates = useDateFormat();
+    /* A caller's `formatDate` wins (it was how the Holiday Registry drew dd/mm/yyyy before the system did); otherwise the system's one format. */
     const show = (iso: string) => (formatDate ? formatDate(iso) : dates.format(iso));
     const invalid = invalidProp || ariaInvalid === true || ariaInvalid === 'true';
     return (
