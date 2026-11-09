@@ -66,7 +66,9 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
     <header
       ref={ref}
       className={cn(
-        'flex flex-wrap items-start justify-between px-8 pb-4 pt-8 font-sans',
+        'flex flex-wrap justify-between px-8 pb-4 pt-8 font-sans',
+        /* A one-line title and its actions share a centre line (a 26 line of text beside 36 high controls would sit 5 high); with a subtitle the title block is two lines, and the actions stay at the top. */
+        subtitle ? 'items-start' : 'items-center',
         /* No column gap beside a view switch: the actions (a row of padded buttons and selects) already stand clear, and the room goes to the filters. */
         beside ? 'gap-x-0 gap-y-4' : 'gap-4',
         className,

@@ -121,7 +121,9 @@ export const WithFilters: Story = {
     const filters = c.getByRole('group', { name: 'Dashboard filters' });
     const band = title.closest('header') as HTMLElement;
     await expect(band).toContainElement(filters);
-    await expect(Math.abs(filters.getBoundingClientRect().top - title.getBoundingClientRect().top)).toBeLessThan(24);
+    /* On one centre line: the title's text and the 36 high filters. */
+    const mid = (el: Element) => el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2;
+    await expect(Math.abs(mid(filters) - mid(title))).toBeLessThan(2);
     /* Aligned to the right: the band's inner edge is 32 in. */
     await expect(Math.abs(band.getBoundingClientRect().right - 32 - filters.getBoundingClientRect().right)).toBeLessThan(4);
     await expect(new Set([...filters.children].map((el) => Math.round(el.getBoundingClientRect().height)))).toEqual(new Set([36]));

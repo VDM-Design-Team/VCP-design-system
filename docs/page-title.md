@@ -33,7 +33,7 @@ list drifts.
 | `onBack` | `() => void` | — | Back as history. Renders a `button` |
 | `backLabel` | `string` | `'Back'` | Say where it goes — "Back to my Added Values" |
 | `beside` | `ReactNode` | — | Something beside the title, on its left: a view switch (the dashboard's Cycle / Quarter). With it set, the left group wraps, so the switch drops under the title in a narrow page instead of squeezing it, and the band has no column gap between its two sides (the actions already stand clear, and the room goes to them) |
-| `actions` | `ReactNode` | — | The page's actions, right-aligned. The slot wraps and is capped to the band's width, so a row of filters breaks onto a second line instead of overflowing |
+| `actions` | `ReactNode` | — | The page's actions, right-aligned, on the title's centre line (at the top when there is a `subtitle`). The slot wraps and is capped to the band's width, so a row of filters breaks onto a second line instead of overflowing |
 | `size` | `sm \| md` | `md` | The title's size: `md` is 18 semibold, `sm` is 14 medium. Both `text.secondary` |
 
 ## Measurements
