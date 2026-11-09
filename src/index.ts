@@ -75,6 +75,7 @@ export * from './components/empty-state';
 export * from './components/field';
 export * from './components/file-attachment';
 export * from './components/gantt-tooltip';
+export * from './components/info-hint';
 export * from './components/in-case-you-missed-it-card';
 export * from './components/inline-edit';
 export * from './components/menu';
