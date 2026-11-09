@@ -2,8 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import type { ChartSeries } from '../../lib/chart-series';
 import { Divider } from '../../atoms/divider';
-import { Icon } from '../../atoms/icon';
-import { Tooltip } from '../../atoms/tooltip';
+import { InfoHint } from '../../components/info-hint';
 import { LineChart, type LineChartDatum } from '../../components/line-chart';
 
 /**
@@ -68,21 +67,11 @@ export const CycleBurndown = React.forwardRef<HTMLElement, CycleBurndownProps>(
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} aria-busy={loading || undefined} className={cn('@container flex flex-col gap-6 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
-        <header className="flex min-w-0 items-center gap-2">
+        <header className="flex min-w-0 items-center gap-1">
           <h2 id={headingId} className="m-0 min-w-0 truncate text-title-sm-semibold text-text-primary">
             {title}
           </h2>
-          {hint && (
-            <Tooltip content={hint}>
-              <button
-                type="button"
-                aria-label={`About ${title}`}
-                className="grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary hover:text-text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-              >
-                <Icon name="info" size="md" />
-              </button>
-            </Tooltip>
-          )}
+          {hint && <InfoHint label={title} content={hint} />}
         </header>
 
         <LineChart data={data} series={series} seriesLabels={seriesLabels} pointLabel={pointLabel} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} />
