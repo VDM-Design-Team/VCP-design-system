@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { formatDateRange, useDateFormat } from '../../lib/format-date';
 import { Tag, type TagProps } from '../../atoms/tag';
 
 /**
  * CycleTag — the cycle an Added Value belongs to: its code and the dates it
- * runs, "C18 (Sep 20, 2025 - Oct 02, 2026)". A component: it is a `Tag` plus
+ * runs, "C18 (20/09/2025 - 02/10/2026)". A component: it is a `Tag` plus
  * the one way VCP writes a cycle.
  *
  * Read off the Figma `Cycle_Tag` (`8562:11083`, Tags page): outlined, no fill,
@@ -20,8 +21,10 @@ import { Tag, type TagProps } from '../../atoms/tag';
  * size every other tag here uses, and `SourceTag` beside it is 28.
  *
  * Cycles are data: pass `code`, `start` and `end` (ISO `yyyy-mm-dd`). The
- * dates are formatted by splitting the string, with no `Date` and no time
- * zone, so a cycle never shows the day before in a western time zone.
+ * dates read dd/mm/yyyy like every date in the system (decided 6 November
+ * 2026; they were "Sep 20, 2025"), or the person's locale under
+ * `DateFormatProvider`, and never pass through the machine's time zone, so a
+ * cycle never shows the day before in a western time zone.
  * `formatCycleRange` is exported so any piece that lists cycles writes them
  * the same way.
  *
@@ -29,19 +32,8 @@ import { Tag, type TagProps } from '../../atoms/tag';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-/** ISO `yyyy-mm-dd` → "Sep 20, 2025". An unparseable value is returned as given. */
-const longDate = (iso: string) => {
-  const [y, m, d] = iso.split('-');
-  const month = MONTHS[Number(m) - 1];
-  if (!y || !month || !d) return iso;
-  return `${month} ${String(Number(d)).padStart(2, '0')}, ${y}`;
-};
-
-/** "Sep 20, 2025 - Oct 02, 2026" — how VCP writes the dates a cycle runs. */
-export const formatCycleRange = (start: string, end: string) =>
-  `${longDate(start)} - ${longDate(end)}`;
+/** "20/09/2025 - 02/10/2026" — how VCP writes the dates a cycle runs. Pass a locale to follow it; inside a component, `useDateFormat().range` does that for you. */
+export const formatCycleRange = (start: string, end: string, locale?: string) => formatDateRange(start, end, locale);
 
 export interface CycleTagProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'> {
   /** "C18". */
@@ -55,16 +47,19 @@ export interface CycleTagProps extends Omit<React.HTMLAttributes<HTMLSpanElement
 }
 
 export const CycleTag = React.forwardRef<HTMLSpanElement, CycleTagProps>(
-  ({ className, code, start, end, ...props }, ref) => (
-    <Tag
-      ref={ref}
-      variant="outline"
-      tone="neutral"
-      className={cn('border-stroke-default', className)}
-      {...props}
-    >
-      {`${code} (${formatCycleRange(start, end)})`}
-    </Tag>
-  ),
+  ({ className, code, start, end, ...props }, ref) => {
+    const { range } = useDateFormat();
+    return (
+      <Tag
+        ref={ref}
+        variant="outline"
+        tone="neutral"
+        className={cn('border-stroke-default', className)}
+        {...props}
+      >
+        {`${code} (${range(start, end)})`}
+      </Tag>
+    );
+  },
 );
 CycleTag.displayName = 'CycleTag';

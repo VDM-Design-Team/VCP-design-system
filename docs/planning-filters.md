@@ -45,6 +45,8 @@ with the calendar glyph) on the right. The row wraps on a narrow screen rather t
 
 ## Accessibility
 
+- The selects use the neutral resting edge (`edge="neutral"`, about 2.6:1 on white), the same deliberate exception as `FilterBar`'s fields: a row of filters is quieter beside a table, each is also identified by its chevron and label, and focus and error edges are unchanged. Fields in a form keep the full edge.
+
 - A `role="search"` region named "Filter the planning list"; the search is a real `type="search"` field named by its placeholder text.
 - The two selects are `SearchSelect`s (keyboard, listbox, announcements — see docs/search-select.md), named "Status" and "Priority". They read **regular** weight (`emphasis="regular"`), as every filter does: a chosen value in a form is medium, but a row of filters sits quietly.
 - The priority placeholder reads "Select priority", the system's wording for a picker. Figma's frame says "Search priority", though

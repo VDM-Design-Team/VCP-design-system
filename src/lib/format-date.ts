@@ -24,6 +24,10 @@ export const formatDate = (iso: string, locale?: string): string => {
   return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)));
 };
 
+/** A span of days, "20/09/2025 - 02/10/2026": each end as `formatDate` writes it. How every cycle's dates read. */
+export const formatDateRange = (start: string, end: string, locale?: string): string =>
+  `${formatDate(start, locale)} - ${formatDate(end, locale)}`;
+
 /** What to write in an empty date field so it says its own format: "DD/MM/YYYY", or the locale's order ("MM/DD/YYYY"). */
 export const datePlaceholder = (locale?: string): string => {
   if (!locale) return 'DD/MM/YYYY';
@@ -43,5 +47,5 @@ export function DateFormatProvider({ locale, children }: { locale?: string; chil
 /** The formatter a component should use for a date it shows: the provider's locale, else dd/mm/yyyy. */
 export function useDateFormat() {
   const locale = React.useContext(DateFormatContext);
-  return React.useMemo(() => ({ format: (iso: string) => formatDate(iso, locale), placeholder: datePlaceholder(locale), locale }), [locale]);
+  return React.useMemo(() => ({ format: (iso: string) => formatDate(iso, locale), range: (start: string, end: string) => formatDateRange(start, end, locale), placeholder: datePlaceholder(locale), locale }), [locale]);
 }

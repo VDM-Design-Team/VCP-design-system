@@ -32,10 +32,10 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
-    const text = 'C18 (Sep 20, 2025 - Oct 02, 2026)';
+    const text = 'C18 (20/09/2025 - 02/10/2026)';
     await expect(within(canvasElement).getByText(text)).toBeInTheDocument();
     await expect(canvasElement.textContent).toBe(text);
-    await expect(formatCycleRange('2026-01-01', '2026-12-31')).toBe('Jan 01, 2026 - Dec 31, 2026');
+    await expect(formatCycleRange('2026-01-01', '2026-12-31')).toBe('01/01/2026 - 31/12/2026');
   },
 };
 
