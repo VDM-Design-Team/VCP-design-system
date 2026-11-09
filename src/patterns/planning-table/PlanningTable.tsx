@@ -99,6 +99,8 @@ export interface PlanningSection {
   /** Points. Cycles only; with `remainingCapacity`, draws the two capacity lines. */
   totalCapacity?: number;
   remainingCapacity?: number;
+  /** `false`: rows can't be moved here — not a drop target, not in a row's Move menu (a Cycle that has ended). */
+  acceptsRows?: boolean;
   rows: readonly PlanningRow[];
 }
 
@@ -374,11 +376,12 @@ export function PlanningTable({
   /* Where a row may go from its section: in `to-cycle`, only from the Backlog onto a Cycle; in
      `anywhere`, to every other section. One rule for the drag and the button, so they never differ. */
   const targetsFrom = (from: PlanningSection) =>
-    moves === 'anywhere'
+    (moves === 'anywhere'
       ? sections.filter((s) => s.id !== from.id)
       : from.kind === 'backlog'
         ? sections.filter((s) => s.kind === 'cycle')
-        : [];
+        : []
+    ).filter((s) => s.acceptsRows !== false);
   const movable = (row: PlanningRow, from: PlanningSection) =>
     targetsFrom(from).length > 0 && (canMove?.(row, from) ?? true);
   /* A row sent from its menu takes its button with it, and focus would fall to the page. So when the row

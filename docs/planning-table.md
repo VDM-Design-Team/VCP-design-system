@@ -41,7 +41,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `sections` | `PlanningSection[]` | required | `{ id, kind?, title, dates?, totalCapacity?, remainingCapacity?, rows }` — `kind` is `cycle` or `backlog` |
+| `sections` | `PlanningSection[]` | required | `{ id, kind?, title, dates?, totalCapacity?, remainingCapacity?, acceptsRows?, rows }` — `kind` is `cycle` or `backlog`; `acceptsRows: false` takes no rows (a Cycle that has ended): no drop target, no menu choice |
 | `collapsed` / `defaultCollapsed` / `onCollapsedChange` | `string[]` | — | Folded section ids. Controlled when `collapsed` is given |
 | `sort` / `onSortChange` | `DataTableSort` | — | The sortable key is `title`. **Sorting is a handler, not the table's job**: the header reports the key and direction and the caller (usually the server) returns the rows in that order. The table never reorders rows in the browser |
 | `onAnimationDismiss` | `(row, field: 'start' \| 'due') => void` | — | A date's animation is over (three loops, hover, or the table left) — clear its `animated` flag |

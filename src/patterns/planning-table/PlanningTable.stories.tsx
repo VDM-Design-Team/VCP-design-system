@@ -280,6 +280,25 @@ export const MoveWithoutDragging: Story = {
   },
 };
 
+/** A Cycle that has ended takes no rows (`acceptsRows: false`): it is no drop target and no choice in the menu. Its own rows can still leave. */
+export const EndedCycle: Story = {
+  args: {
+    sections: [{ ...SECTIONS[0]!, id: 'cycle-26', title: 'Cycle 26', acceptsRows: false, rows: [row(7)] }, ...THREE_SECTIONS],
+    moves: 'anywhere',
+    onMoveRow: fn(),
+  },
+  render: (args) => <Moving {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Move VCP-1234 to…' }));
+    const menu = await within(document.body).findByRole('menu');
+    await expect(within(menu).queryByRole('menuitem', { name: /Cycle 26/ })).not.toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    /* Its own row can still go. */
+    await expect(canvas.getByRole('button', { name: 'Move VCP-1237 to…' })).toBeInTheDocument();
+  },
+};
+
 /** The default, `to-cycle`: only Backlog rows move, and only onto a Cycle — so only they carry the button. */
 export const MoveToCycleOnly: Story = {
   args: { sections: THREE_SECTIONS, onMoveRow: fn() },
