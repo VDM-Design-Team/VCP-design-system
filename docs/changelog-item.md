@@ -26,17 +26,17 @@ An atom: one card, plain markup on tokens, with `Icon` for the kind's glyph. The
 |---|---|---|---|
 | `title` | `string` | required | The release's title; the card's heading |
 | `kind` | `experimental \| update \| feature` | — | The kind of announcement. Draws its glyph (flask, megaphone, rocket) before the title and says "Experimental feature", "Release" or "New feature" to a screen reader. Left out, no glyph |
-| `href` | `string` | — | The release's changelog document. The title becomes a link to it, opening in a new tab |
+| `changelogUrl` | `string` | — | The release's changelog document. The title becomes a link to it, opening in a new tab |
 | `version` | `string` | — | As it reads: "v1.18.1" |
 | `date` | `string` | — | **ISO**, "2026-01-01": shown dd/mm/yyyy (or the person's locale, `useDateFormat`) inside a `<time>`. The card adds "Posted on" |
-| `message` | `string` | — | What the release says. Left out when empty |
+| `description` | `string` | — | What the release says. Left out when empty |
 | `features` | `string[]` | `[]` | One bullet each, under **Features/Updates:**. The heading and list go when empty |
 | `headingLevel` | `2 \| 3 \| 4` | `3` | The title's element. Same look at every level |
 
 ## Tokens
 
 `surface.elevated`, `radius.sm` (6, Figma's `radius-3`), `elevation-3`, `space.24` padding and `space.16` between parts. Title `body-lg-semibold`
-`text.primary`; version and date `body-sm-regular` `text.tertiary`; message and bullets `body-md-regular` `text.secondary`; **Features/Updates:**
+`text.primary`; version and date `body-sm-regular` `text.tertiary`; description and bullets `body-md-regular` `text.secondary`; **Features/Updates:**
 `body-sm-semibold` `text.primary`. A linked title is `text.link.default` (underlined on hover). The kind's glyph is 20 in the kind's own colour
 (`accent.green.strong`, `accent.yellow.medium`, `accent.info.outline.content.default`).
 
