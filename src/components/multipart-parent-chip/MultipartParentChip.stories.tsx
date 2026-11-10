@@ -10,8 +10,8 @@ const meta = {
     docs: {
       description: {
         component:
-          'On a child part’s row, a small link to its parent: “Parent: VCP-4321 ↗”. A link when it has an `href`, a button when it only ' +
-          'has `onOpen`. Underlined on hover; a long reference is cut with an ellipsis.',
+          'On a child part’s row, a small link to its parent: “Parent: VCP-4321 ↗”. With an `href` it opens the parent in a new tab; with only `onOpen` it is a button; ' +
+          'with neither it is plain text (nowhere to go, so nothing to focus). Underlined on hover; a long reference is cut with an ellipsis.',
       },
     },
   },
@@ -37,11 +37,28 @@ export const Default: Story = {
   },
 };
 
-/** With an `href` it is a real link. */
+/** With an `href` it is a real link that opens the parent in a new tab (and says so to a screen reader), and keeps its arrow because the arrow is true. */
 export const AsALink: Story = {
   args: { href: '/added-values/VCP-4321', onOpen: undefined },
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole('link', { name: 'Parent: VCP-4321' })).toHaveAttribute('href', '/added-values/VCP-4321');
+    const link = within(canvasElement).getByRole('link', { name: 'Parent: VCP-4321 (opens in a new tab)' });
+    await expect(link).toHaveAttribute('href', '/added-values/VCP-4321');
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(link.querySelector('svg')).not.toBeNull();
+  },
+};
+
+/** With neither an `href` nor `onOpen` there is nowhere to go, so it is plain text: not focusable, not a button, and no arrow. */
+export const NowhereToGo: Story = {
+  args: { onOpen: undefined },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.queryByRole('button')).toBeNull();
+    await expect(c.queryByRole('link')).toBeNull();
+    const text = c.getByText('Parent: VCP-4321');
+    await expect(text.closest('[tabindex]')).toBeNull();
+    await expect(canvasElement.querySelector('svg')).toBeNull();
   },
 };
 

@@ -57,7 +57,16 @@ import { TableCard } from '../../components/table-card';
  * many of its parts are done. Figma's `_AV_Table_Item_AV_Title_Multipart` (`Multipart Parent=No` / `=Yes`).
  */
 export type AVMultipart =
-  | { kind: 'child'; /** Which part: 1 of `total`. */ position: number; total: number; /** The parent's reference, "VCP-4321". */ parentRef: string }
+  | {
+      kind: 'child';
+      /** Which part: 1 of `total`. */
+      position: number;
+      total: number;
+      /** The parent's reference, "VCP-4321". */
+      parentRef: string;
+      /** Where the parent is. Given, the **Parent** chip is a link that opens it in a new tab; without it (and without `onOpenParent`) the chip is plain text, since there is nowhere to go. */
+      parentHref?: string;
+    }
   | { kind: 'parent'; /** How many parts are completed. */ completed: number; total: number };
 
 export interface AVTableRow {
@@ -67,8 +76,8 @@ export interface AVTableRow {
   ref: string;
   title: string;
   /**
-   * Makes it a multipart row: a tag under the reference (the child's "1/3" or the parent's progress ring), a **Parent: VCP-4321** chip on a child, and a
-   * coloured edge on a parent. See `AVMultipart`.
+   * Makes it a multipart row, in Figma's two columns: a **28 tag under the reference** (the child's "1/3" or the parent's progress ring), the title with its **details starting under it**, a **Parent: VCP-4321**
+   * chip on a child, and a coloured edge at the far left of a parent's row. See `AVMultipart`.
    */
   multipart?: AVMultipart;
   /** The domain badge beside the title — "VCP", "Design". */
@@ -182,19 +191,8 @@ export function AVTable({
       grow: true,
       width: '34%',
       /* The metadata (tag, domain, parent chip, counts) never shrinks or is cut, so a multipart row's cell cannot be narrower than that: the
-         column's floor rises to fit it, and below it the table scrolls sideways. */
-      /* A multipart parent also has a brand edge on its left (Figma's `Multipart Parent=Yes`: a 6 border in surface.brand.medium). It is drawn over this cell,
-         not as a border on the row: a border on a row of a collapsed table nudges the whole table (the header too) to make room for it, and a
-         pseudo-element on the row itself is taken for an extra cell. With `selectable` it sits at the title's left edge, after the checkbox. */
-      cellProps: (row) =>
-        row.multipart
-          ? {
-              className: cn(
-                'min-w-md',
-                row.multipart.kind === 'parent' && 'relative before:absolute before:inset-y-0 before:start-0 before:w-1.5 before:bg-surface-brand-medium',
-              ),
-            }
-          : undefined,
+         column's floor rises to fit it, and below it the table scrolls sideways. (The parent's brand edge is the table's `rowEdge`, at the row's far left.) */
+      cellProps: (row) => (row.multipart ? { className: 'min-w-md' } : undefined),
       render: (row) => {
         const multipart = row.multipart;
         const reference = onOpen ? (
@@ -218,32 +216,45 @@ export function AVTable({
         );
         /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */
         const title = <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>;
-        const details = (multipart || row.domain || row.attachments || row.comments) && (
+        const tag = multipart && (
+          <MultipartTableTag
+            kind={multipart.kind}
+            total={multipart.total}
+            position={multipart.kind === 'child' ? multipart.position : undefined}
+            parentRef={multipart.kind === 'child' ? multipart.parentRef : undefined}
+            completed={multipart.kind === 'parent' ? multipart.completed : undefined}
+          />
+        );
+        const details = (row.domain || multipart?.kind === 'child' || row.attachments || row.comments) && (
           <div className="flex w-max items-center gap-2">
-            {multipart && (
-              <MultipartTableTag
-                kind={multipart.kind}
-                total={multipart.total}
-                position={multipart.kind === 'child' ? multipart.position : undefined}
-                parentRef={multipart.kind === 'child' ? multipart.parentRef : undefined}
-                completed={multipart.kind === 'parent' ? multipart.completed : undefined}
-              />
-            )}
             {row.domain && (
               <Tag tone="brand" size="sm">
                 {row.domain}
               </Tag>
             )}
             {multipart?.kind === 'child' && (
-              <MultipartParentChip parentRef={multipart.parentRef} onOpen={onOpenParent ? () => onOpenParent(row) : undefined} />
+              <MultipartParentChip parentRef={multipart.parentRef} href={multipart.parentHref} onOpen={onOpenParent ? () => onOpenParent(row) : undefined} />
             )}
             <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
             <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
           </div>
         );
 
-        /* 16 top and bottom, Figma's own cell padding. With the two-line title
-             block that makes an 81 row, which is what the canvas draws. */
+        /* A multipart row is Figma's grid: the reference, then the tag under it (28), a rule, and the title with its details starting under it. 16 top and bottom,
+           Figma's own cell padding: that makes the 85-high title cell the canvas draws. */
+        if (multipart) {
+          return (
+            <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 py-4">
+              <div className="col-start-1 row-start-1 flex items-center">{reference}</div>
+              <Divider orientation="vertical" className="col-start-2 row-start-1 h-4 shrink-0 self-center" />
+              <div className="col-start-3 row-start-1 min-w-0">{title}</div>
+              <div className="col-start-1 row-start-2 flex">{tag}</div>
+              <div className="col-start-3 row-start-2 min-w-0">{details}</div>
+            </div>
+          );
+        }
+
+        /* Any other row: the reference, a rule and the title on top, the details under them. */
         return (
           <div className="flex flex-col gap-1 py-4">
             <div className="flex items-center gap-2">
@@ -336,6 +347,7 @@ export function AVTable({
       onSelectedChange={(ids) => onSelectedChange?.(ids as string[])}
       /* Every checkbox says which AV it selects, not "row 3". */
       selectLabel={(row) => `Select ${row.ref}: ${row.title}`}
+      rowEdge={(row) => row.multipart?.kind === 'parent'}
       empty={empty}
       caption={caption}
       bare={Boolean(filters)}

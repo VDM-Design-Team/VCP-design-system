@@ -54,6 +54,28 @@ export const Parent: Story = {
   },
 };
 
+/** Figma's size: 28 high, with 14 type and 20 glyphs. The tooltip opens above, as Figma draws it (`Tooltip` flips and slides now, so the table's edge no longer cuts it off). */
+export const FigmasSize: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div className="pt-32">
+      <MultipartTableTag {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const tag = within(canvasElement).getByText('1/3').closest('[tabindex]') as HTMLElement;
+    await expect(Math.round(tag.getBoundingClientRect().height)).toBe(28);
+    await expect(getComputedStyle(within(canvasElement).getByText('1/3')).fontSize).toBe('14px');
+    await expect(Math.round(tag.querySelector('svg')!.getBoundingClientRect().width)).toBe(20);
+    await userEvent.tab();
+    const tip = await within(document.body).findByRole('tooltip');
+    await waitFor(() => expect(tip).toBeVisible());
+    /* Above the tag (there is room on this page), not beside it. */
+    await waitFor(() => expect(tip.getBoundingClientRect().bottom).toBeLessThanOrEqual(tag.getBoundingClientRect().top + 1));
+  },
+};
+
 /** Both, with their tooltips open (as Figma draws them). */
 export const BothOpen: Story = {
   tags: ['!dev', '!autodocs'],

@@ -1,6 +1,6 @@
 # MultipartParentChip *(component)*
 
-On a child part's row, a small link to its parent: "Parent: VCP-4321 ↗". Built to Figma's `Child_Multipart_Parent_Reference_Chip` (`Default` / `Hover`).
+On a child part's row, a small link to its parent: "Parent: VCP-4321 ↗", **which opens the parent in a new tab**. Built to Figma's `Child_Multipart_Parent_Reference_Chip` (`Default` / `Hover`).
 
 ## Composed of
 
@@ -22,8 +22,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `parentRef` | `string` | required | As it reads: "VCP-4321" |
-| `href` | `string` | — | Given, the chip is a real link |
-| `onOpen` | `() => void` | — | Pressed. With no `href` the chip is a button, and the page opens the parent. It **asks** |
+| `href` | `string` | — | Given, the chip is a real link that **opens the parent in a new tab** (`target="_blank"`, `rel="noopener noreferrer"`, and "(opens in a new tab)" for a screen reader). It keeps its ↗ because the arrow is then true |
+| `onOpen` | `() => void` | — | Pressed. With no `href` the chip is a button, and the page opens the parent. It **asks**. With an `href` it is called as the link opens |
+
+**With neither `href` nor `onOpen` there is nowhere to go**, so the chip is **plain text** ("Parent: VCP-4321", no arrow, no link colour, no focus stop) rather than a focusable control that does nothing.
 
 ## Tokens
 
@@ -31,7 +33,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Accessibility
 
-- A link or a button named by its words ("Parent: VCP-4321"); the arrow is decoration.
+- A link ("Parent: VCP-4321 (opens in a new tab)") or a button named by its words; the arrow is decoration. With nowhere to go it is plain text, so it is not a tab stop.
 - A visible focus ring.
 
 ## Don't

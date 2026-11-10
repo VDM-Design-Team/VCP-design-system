@@ -10,13 +10,12 @@ import { Tooltip } from '../../atoms/tooltip';
  *
  * - **A child** (`kind="child"`) shows the split glyph and **where it sits**: "1/3". Its tooltip: "Multipart Child: This part belongs to a
  *   multipart parent value and is completed independently. Parent ID: VCP-4321" (the ID when `parentRef` is given).
- * - **A parent** (`kind="parent"`) shows VCP's own parent glyph (`arrows-split-source`) and a **progress ring** (a 16 `DonutChart`, 3 thick) of how many of its parts are done. Its tooltip:
+ * - **A parent** (`kind="parent"`) shows VCP's own parent glyph (`arrows-split-source`) and a **progress ring** (a 20 `DonutChart`, 3 thick) of how many of its parts are done. Its tooltip:
  *   "Multipart Parent: This value was split into multiple parts, status is calculated from its parts. It currently has 3 child parts."
  *
- * A white pill with a hairline (`surface.neutral.base`, `stroke.subtle`), 28 high. **It is focusable, so the keyboard gets the tooltip too**, and
- * it carries the same facts as words for a screen reader ("Multipart child, part 1 of 3" / "Multipart parent, 1 of 3 parts completed"): the
- * glyph and the ring are decoration. **Its tooltip opens to the right**, not above as Figma draws it: the tag sits in the table's first column, and `Tooltip` does no collision handling, so a centred
- * bubble above it is cut off by the table's edge.
+ * A white pill with a hairline (`surface.neutral.base`, `stroke.subtle`), **28 high** with 14 type and 20 glyphs, as Figma draws it (design compared it side by side with a 24 one-line version and chose Figma's).
+ * **It is focusable, so the keyboard gets the tooltip too**, and it carries the same facts as words for a screen reader ("Multipart child, part 1 of 3" / "Multipart parent, 1 of 3 parts completed"): the
+ * glyph and the ring are decoration. **Its tooltip opens above**, as Figma draws it: `Tooltip` flips and slides to stay on screen, so the table's edge no longer cuts it off.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -62,13 +61,13 @@ export const MultipartTableTag = React.forwardRef<HTMLSpanElement, MultipartTabl
     );
 
     return (
-      <Tooltip content={tip} placement="right">
+      <Tooltip content={tip} placement="top">
         <span
           ref={ref}
           tabIndex={0}
           className={cn(
-            'inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-sm border border-stroke-subtle bg-surface-neutral-base px-1.5 font-sans',
-            'text-caption-md-medium text-text-secondary',
+            'inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-sm border border-stroke-subtle bg-surface-neutral-base px-2 font-sans',
+            'text-label-sm-medium text-text-secondary',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             className,
           )}
@@ -76,14 +75,14 @@ export const MultipartTableTag = React.forwardRef<HTMLSpanElement, MultipartTabl
         >
           <span className="sr-only">{spoken}</span>
           {/* The child's glyph is Phosphor's split; the parent's is VCP's own `arrows-split-source`. */}
-          <Icon name={child ? 'arrows-split' : 'arrows-split-source'} size="sm" aria-hidden="true" className="shrink-0" />
+          <Icon name={child ? 'arrows-split' : 'arrows-split-source'} size="md" aria-hidden="true" className="shrink-0" />
           {child ? (
             <span aria-hidden="true">
               {position}/{total}
             </span>
           ) : (
             <span aria-hidden="true" className="flex">
-              <DonutChart size={16} thickness={3} label="" value={completed} max={total} />
+              <DonutChart size={20} thickness={3} label="" value={completed} max={total} />
             </span>
           )}
         </span>

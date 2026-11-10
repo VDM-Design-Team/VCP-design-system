@@ -356,3 +356,78 @@ export const Multipart: Story = {
   },
 };
 
+
+/**
+ * Figma's multipart title cell is two columns: the reference with **the 28 tag under it**, a rule, and the title with **the details starting under it** (domain, the Parent chip, the counts).
+ */
+export const MultipartLayout: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { rows: MULTIPART_ROWS },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const child = canvas.getAllByText('Multipart child, part 2 of 3')[0]!.closest('tr') as HTMLElement;
+    const ref = within(child).getAllByRole('button')[0]!;
+    const tag = within(child).getByText('2/3').closest('[tabindex]') as HTMLElement;
+    const parentChip = within(child).getByText(/^Parent:/);
+    const rect = (el: Element) => el.getBoundingClientRect();
+    /* The tag is 28 high and sits under the reference, left-aligned with it. */
+    await expect(Math.round(rect(tag).height)).toBe(28);
+    await expect(rect(tag).top).toBeGreaterThan(rect(ref).bottom - 1);
+    await expect(Math.abs(rect(tag).left - rect(ref).left)).toBeLessThanOrEqual(1);
+    /* The details start under the title, not under the reference: the Parent chip is to the right of the tag. */
+    await expect(rect(parentChip).left).toBeGreaterThan(rect(tag).right);
+  },
+};
+
+/** With `parentHref` the Parent chip is a link that opens the parent in a new tab; without it (and without `onOpenParent`) it is plain text, not a button that does nothing. */
+export const ParentChipOpensInANewTab: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    rows: [
+      { id: 'a', ref: 'VCP-1', title: 'Has a link', multipart: { kind: 'child', position: 1, total: 2, parentRef: 'VCP-9', parentHref: '/added-values/VCP-9' } },
+      { id: 'b', ref: 'VCP-2', title: 'Has nowhere to go', multipart: { kind: 'child', position: 2, total: 2, parentRef: 'VCP-9' } },
+    ],
+  },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: /Parent: VCP-9/ });
+    await expect(link).toHaveAttribute('href', '/added-values/VCP-9');
+    await expect(link).toHaveAttribute('target', '_blank');
+    /* The other chip has no `href` and no `onOpenParent`: plain text, no focus stop. */
+    await expect(canvas.getAllByText(/Parent: VCP-9/)).toHaveLength(2);
+    await expect(canvas.queryByRole('button', { name: /Parent: VCP-9/ })).toBeNull();
+  },
+};
+
+/** A multipart parent's edge is at the row's **far left, before the checkbox** when the table has one, and takes no room: every row's first cell starts at the table's left edge. */
+export const ParentEdgeBeforeTheCheckbox: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { rows: MULTIPART_ROWS, selectable: true },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const rows = within(canvasElement).getAllByRole('row');
+    /* The parent's first cell is the checkbox's: the edge is on it, and no other row has one. */
+    await expect(rows[1].children[0].className).toContain('before:bg-surface-brand-medium');
+    await expect(rows[1].children[0].querySelector('input[type="checkbox"]')).not.toBeNull();
+    await expect(rows[2].children[0].className).not.toContain('before:bg-surface-brand-medium');
+    const left = (el: Element) => Math.round(el.getBoundingClientRect().left);
+    await expect(new Set([...rows].map((row) => left(row.children[0]))).size).toBe(1);
+  },
+};
