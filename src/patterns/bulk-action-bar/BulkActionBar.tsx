@@ -13,10 +13,12 @@ import { Menu, type MenuItem } from '../../components/menu';
  * - **Each action is a menu** that opens **upward** (the bar sits at the bottom of the window) with a category-style heading ("Urgency") and the choices the page gives it. A choice
  *   can have **its own submenu** (Status: Pending Review › Accept, Reject; shown with a right caret). Picking one
  *   only *asks*: `onSelect(key)` — the page then opens a confirmation (`BulkActionConfirmModal`) before anything changes.
- * - **The actions are in the neutral palette** (`neutral.textual.content`, with its hover and pressed), the same the date picker's carets use; **Delete** is the critical red text button; it only asks too (`onDelete`).
+ * - **The actions are `Button`'s `neutral-text`** (`neutral.textual.content`, with its hover and pressed), the same palette the date picker's carets use; **Delete** is its `critical-text` (red text); it only asks too (`onDelete`).
  * - **It shows only while something is selected** (`count > 0`), and one selected looks the same as many ("1 Selected").
  *
- * **On a narrow screen it keeps its size**: nothing wraps or shrinks, and the bar scrolls sideways inside itself (it is `max-w-full`), **clipped to its rounded corners** so the scrollbar never pokes out of them. Its menus are `fixed` to the screen, so that scrolling never clips them.
+ * **On a narrow screen it keeps its size**: nothing wraps or shrinks, and the bar scrolls sideways inside itself (it is `max-w-full`), **clipped to its rounded corners** so the scrollbar never pokes out of them. Its menus float over the bar's scrolling (`Menu`'s default `fixed` strategy), so it never clips them.
+ *
+ * **Focus never drops.** At 0 the bar draws nothing, so a button in it that had focus goes with it (after a confirmed Delete, or the chip): pass `returnFocusRef`, the table's select-all checkbox, and focus goes there once the selection empties.
  *
  * It is a `toolbar` named "Bulk actions". Placing it (stuck to the bottom, centred over the table) is the page's: it is just the bar.
  *
@@ -45,9 +47,29 @@ export interface BulkActionBarProps extends Omit<React.HTMLAttributes<HTMLDivEle
   actions: readonly BulkAction[];
   /** **Delete** was pressed. Leave it out to hide the button. */
   onDelete?: () => void;
+  /**
+   * Where focus goes when the selection empties and the bar goes with it (after a confirmed Delete, a bulk change that clears the selection, or the chip): the table's select-all checkbox. Without it focus falls to the page.
+   * It only moves focus that has been lost: if the person has put it somewhere, it stays.
+   */
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-export function BulkActionBar({ className, count, onClear, actions, onDelete, ...props }: BulkActionBarProps) {
+export function BulkActionBar({ className, count, onClear, actions, onDelete, returnFocusRef, ...props }: BulkActionBarProps) {
+  /* The bar draws nothing at 0, so whatever had focus in it goes with it: after a confirmed Delete (its dialog gives focus back to a button that is gone) or the "N Selected ✕" chip.
+     When the selection empties and focus has fallen to the page, it goes where the caller said. */
+  const before = React.useRef(count);
+  React.useEffect(() => {
+    const had = before.current;
+    before.current = count;
+    if (had <= 0 || count > 0 || !returnFocusRef) return undefined;
+    /* After a dialog has handed focus back to the button that has gone. */
+    const timer = setTimeout(() => {
+      const active = document.activeElement;
+      if (!active || active === document.body) returnFocusRef.current?.focus();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [count, returnFocusRef]);
+
   if (count <= 0) return null;
   return (
     /* The outer box is the card (rounded, bordered, shadowed) and **clips**, so the scrollbar that appears on a narrow screen stays inside its rounded corners instead of poking out of them. The
@@ -78,33 +100,20 @@ export function BulkActionBar({ className, count, onClear, actions, onDelete, ..
             key={action.key}
             align="left"
             placement="top"
-            /* Fixed to the screen, so the bar's own scrolling cannot clip the menu. */
-            strategy="fixed"
             heading={action.heading ?? action.label}
             searchable={action.searchable}
             items={action.items}
             onSelect={action.onSelect}
             trigger={
-              <Button
-                variant="tertiary"
-                size="sm"
-                /* The neutral palette, as the date picker's carets use: `neutral.textual.content` through default, hover, pressed and disabled —
-                   not the ghost button's brand blue, which would make every action read as a call to action. */
-                className="shrink-0 whitespace-nowrap text-neutral-textual-content-default hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed disabled:text-neutral-textual-content-disabled"
-                iconLeft={<Icon name="caret-up" size="sm" aria-hidden="true" />}
-              >
+              /* `neutral-text`: the neutral palette, as the date picker's carets use, not the ghost button's brand blue, which would make every action read as a call to action. */
+              <Button variant="neutral-text" size="sm" className="shrink-0" iconLeft={<Icon name="caret-up" size="sm" aria-hidden="true" />}>
                 {action.label}
               </Button>
             }
           />
         ))}
         {onDelete && (
-          <Button
-            variant="tertiary"
-            size="sm"
-            className="shrink-0 whitespace-nowrap text-accent-critical-outline-content-default hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed"
-            onClick={onDelete}
-          >
+          <Button variant="critical-text" size="sm" className="shrink-0" onClick={onDelete}>
             Delete
           </Button>
         )}

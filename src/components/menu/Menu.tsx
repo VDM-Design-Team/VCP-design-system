@@ -157,23 +157,52 @@ const isAction = (item: MenuItem): item is MenuActionItem => item.divider !== tr
 /* The category row, as the library's `Menu_Category_Item` draws it without its caret: 40 high, small bold type in the quiet grey, a rule beneath. It names a menu or a submenu. */
 const CATEGORY = 'mb-1 flex h-10 items-center border-b border-stroke-subtle px-3 text-caption-md-bold text-text-tertiary';
 
-/** The panel of a submenu. Fixed to the screen from its parent item's rect so no scrolling or clipping ancestor can cut it off. */
+/**
+ * The panel of a submenu. Fixed to the screen, placed from its parent item **as it is now** (so it follows a scrolling table and a resized window), beside it on the right, **flipped to the left
+ * when there is no room**, and kept on screen. Its first choice lines up with the parent item: how far above the item the panel starts is **measured** (the category row and the padding), not a constant.
+ */
 function SubMenu({
   heading,
   items,
-  rect,
+  anchor,
   autoFocus,
   onChoose,
   onBack,
 }: {
   heading: string;
   items: MenuActionItem[];
-  rect: DOMRect;
+  anchor: HTMLElement | null;
   autoFocus: boolean;
   onChoose: (item: MenuActionItem) => void;
   onBack: () => void;
 }) {
   const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const panel = React.useRef<HTMLDivElement>(null);
+  /* Transparent (not `visibility: hidden`, which cannot take focus) until it has been measured and placed, so it never flashes at the corner. */
+  const [position, setPosition] = React.useState<{ left: number; top: number } | null>(null);
+  const place = React.useCallback(() => {
+    const box = panel.current;
+    if (!box || !anchor?.isConnected) return;
+    const parent = anchor.getBoundingClientRect();
+    const own = box.getBoundingClientRect();
+    const first = refs.current[0]?.getBoundingClientRect();
+    /* The first choice sits level with the parent item: the panel starts as far above it as its own first item is below its top. */
+    const lead = first ? first.top - own.top : 0;
+    let left = parent.right;
+    if (left + own.width > window.innerWidth && parent.left - own.width >= 0) left = parent.left - own.width;
+    const top = Math.max(0, Math.min(parent.top - lead, window.innerHeight - own.height));
+    setPosition((now) => (now && now.left === left && now.top === top ? now : { left, top }));
+  }, [anchor]);
+  React.useLayoutEffect(() => {
+    place();
+    /* Capture: a scrolling table, not only the window, moves the parent item. */
+    window.addEventListener('scroll', place, true);
+    window.addEventListener('resize', place);
+    return () => {
+      window.removeEventListener('scroll', place, true);
+      window.removeEventListener('resize', place);
+    };
+  }, [place]);
   const enabled = items.map((item, i) => (item.disabled ? -1 : i)).filter((i) => i >= 0);
   const [active, setActive] = React.useState(autoFocus ? (enabled[0] ?? 0) : -1);
   React.useEffect(() => {
@@ -188,10 +217,10 @@ function SubMenu({
 
   return (
     <div
+      ref={panel}
       role="menu"
       aria-label={heading}
-      /* The first choice lines up with the parent item, as Figma draws it: the panel starts one category row (and its padding) above. */
-      style={{ left: rect.right, top: rect.top - 44 }}
+      style={position ?? { left: 0, top: 0, opacity: 0 }}
       className="fixed z-60 min-w-48 rounded-md border border-stroke-default bg-surface-elevated p-1 font-sans shadow-menu"
       onKeyDown={(event) => {
         const handled = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'Escape', 'Home', 'End'];
@@ -276,10 +305,10 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
   const itemRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const [activeIndex, setActiveIndex] = React.useState(-1);
   /* Which item's submenu is open, where it hangs, and whether focus should go into it (a key or a click does; a hover does not). */
-  const [sub, setSub] = React.useState<{ index: number; rect: DOMRect; focus: boolean } | null>(null);
+  const [sub, setSub] = React.useState<{ index: number; focus: boolean } | null>(null);
   const openSub = (index: number, focus: boolean) => {
     const el = itemRefs.current[index];
-    if (el) setSub({ index, rect: el.getBoundingClientRect(), focus });
+    if (el) setSub({ index, focus });
   };
   /* Closing the menu, or moving to another item, closes its submenu. */
   React.useEffect(() => {
@@ -550,7 +579,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             <SubMenu
               heading={item.heading ?? (typeof item.label === 'string' ? item.label : '')}
               items={submenu}
-              rect={sub.rect}
+              anchor={itemRefs.current[i] ?? null}
               autoFocus={sub.focus}
               onChoose={(choice) => {
                 if (choice.disabled) return;

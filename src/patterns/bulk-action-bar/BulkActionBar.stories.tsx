@@ -265,6 +265,12 @@ function TablePage({ failSome }: { failSome?: boolean }) {
   const [deleting, setDeleting] = React.useState(false);
   const [failures, setFailures] = React.useState<BulkActionFailure[] | null>(null);
   const chosen = rows.filter((r) => selected.includes(r.id));
+  /* Focus goes to the table's select-all checkbox when the selection empties and the bar (and whatever had focus in it) goes. */
+  const root = React.useRef<HTMLDivElement>(null);
+  const selectAll = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    selectAll.current = root.current?.querySelector<HTMLElement>('input[aria-label="Select all rows"]') ?? null;
+  });
 
   const apply = () => {
     if (!pending) return;
@@ -292,7 +298,7 @@ function TablePage({ failSome }: { failSome?: boolean }) {
 
   return (
     /* The bar floats at the bottom of the table, centred over it (Figma draws it over the last rows) — the page sticks it there. */
-    <div className="relative w-full">
+    <div ref={root} className="relative w-full">
       <AVTable rows={rows} selectable selected={selected} onSelectedChange={setSelected} />
       <div className="sticky bottom-6 mt-6 flex justify-center">
         {/* The whole bar, as it always is: Status, Urgency, Type, Cycle and Delete. The page decides what each does; here they all open their confirmation. */}
@@ -300,6 +306,7 @@ function TablePage({ failSome }: { failSome?: boolean }) {
           count={selected.length}
           onClear={() => setSelected([])}
           onDelete={() => setDeleting(true)}
+          returnFocusRef={selectAll}
           actions={actionsFor(DEVELOPMENT_STATUSES, (property, key) => {
             if (!key) return;
             const items = property === 'Status' ? DEVELOPMENT_STATUSES : undefined;
@@ -356,6 +363,30 @@ export const OnTheTable: Story = {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
     await expect(await screen.findByText('Added Values Updated')).toBeVisible();
     await waitFor(() => expect(c.queryByRole('toolbar')).toBeNull());
+    /* The bar went with the selection, and so did the button that opened the dialog: focus did not fall to the page. */
+    await waitFor(() => expect(c.getByRole('checkbox', { name: 'Select all rows' })).toHaveFocus());
+  },
+};
+
+/** The chip ("2 Selected ✕") clears the selection and takes itself away: focus goes to the select-all checkbox too. */
+export const ClearingTheSelection: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <ToastProvider position="top-right">
+      <TablePage />
+      <ToastViewport />
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.click(c.getByRole('checkbox', { name: /Select VCP-12345/ }));
+    const chip = await c.findByRole('button', { name: /1 Selected/ });
+    chip.focus();
+    await userEvent.click(chip);
+    await waitFor(() => expect(c.queryByRole('toolbar')).toBeNull());
+    await waitFor(() => expect(c.getByRole('checkbox', { name: 'Select all rows' })).toHaveFocus());
   },
 };
 
@@ -380,6 +411,8 @@ export const DeletingSeveral: Story = {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(c.queryByText('VCP-12345')).toBeNull());
     await expect(c.getByText('VCP-12347')).toBeVisible();
+    /* The Delete button that opened the dialog went with the bar: focus is on the select-all checkbox, not the page. */
+    await waitFor(() => expect(c.getByRole('checkbox', { name: 'Select all rows' })).toHaveFocus());
   },
 };
 

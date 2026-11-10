@@ -34,6 +34,26 @@ export const Secondary: Story = { args: { variant: 'secondary' } };
 export const Tertiary: Story = { args: { variant: 'tertiary' } };
 /** Outlined, but grey — the Cancel beside a destructive answer. */
 export const Neutral: Story = { args: { variant: 'neutral', children: 'Cancel' } };
+/** A toolbar's actions as text in the neutral palette: controls, not calls to action (the ghost `tertiary` is the brand blue). */
+export const NeutralText: Story = {
+  args: { variant: 'neutral-text', children: 'Status' },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Status' });
+    await expect(button.className).toContain('neutral-textual-content');
+    await expect(button.className).not.toContain('action-tertiary');
+  },
+};
+
+/** A destructive action in a toolbar, as red text; the filled red is `danger`. */
+export const CriticalText: Story = {
+  args: { variant: 'critical-text', children: 'Delete' },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Delete' });
+    await expect(button.className).toContain('accent-critical-outline-content');
+    await expect(button.className).not.toContain('bg-accent-critical-filled');
+  },
+};
+
 export const Danger: Story = { args: { variant: 'danger', children: 'Delete account' } };
 export const Link: Story = { args: { variant: 'link', children: 'Learn more' } };
 

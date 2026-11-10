@@ -130,7 +130,7 @@ The dark theme comes for free — every colour above is a semantic token that
 ## Submenus
 
 An item with `items` is a parent, not a choice: it shows a right caret, is `aria-haspopup="menu"`, and its `aria-expanded` follows the submenu. Hover opens it (without taking focus), a click or ArrowRight opens it **and moves
-into it**. The submenu hangs to the right of the parent with its first choice level with the parent (it starts one category row above), is fixed to the screen so a scrolling menu cannot clip it, and has its own heading. ArrowUp and
+into it**. The submenu hangs to the right of the parent with its first choice level with the parent (how far above the item it starts is measured, the category row and the padding, not a constant), is fixed to the screen so a scrolling menu cannot clip it, **follows its parent item when something scrolls or the window is resized, flips to the left when there is no room on the right, and stays on screen**, and has its own heading. ArrowUp and
 ArrowDown move inside it; **ArrowLeft or Escape closes only the submenu** and puts focus back on the parent; a choice closes everything. One level only.
 
 ## Accessibility
@@ -257,6 +257,5 @@ stories also pass `axe-core` at WCAG 2.1 AA with the menus open.
   the user; Menu does not keep it for you.
 - Don't disable an item with no way for the user to find out why. Disable it and
   explain the condition nearby, or leave it enabled and fail with a message.
-- Don't nest menus. There is no submenu contract here, and a `role="menu"` inside
-  a `role="menu"` without one is worse than a flat list.
+- Don't nest menus more than one level, and don't nest them by hand: a submenu is an item's `items` (see Submenus), which carries the contract. A `role="menu"` inside a `role="menu"` built any other way is worse than a flat list.
 - Don't put it inside a scrolling container and expect it to escape. It cannot.

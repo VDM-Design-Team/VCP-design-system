@@ -394,6 +394,84 @@ export const WithASubmenu: Story = {
   },
 };
 
+const SUB_ITEMS = [
+  { key: 'draft', label: 'Save as Draft' },
+  {
+    key: 'pending',
+    label: 'Pending Review',
+    items: [
+      { key: 'pending-accept', label: 'Accept' },
+      { key: 'pending-reject', label: 'Reject' },
+    ],
+  },
+  { key: 'progress', label: 'In Progress' },
+];
+
+/** The submenu's first choice lines up with its parent item, and it sits beside it. How far above the item the panel starts is measured, not a constant. */
+export const SubmenuAlignsWithItsParent: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    const first = within(sub).getByRole('menuitem', { name: 'Accept' });
+    await waitFor(() => expect(Math.abs(first.getBoundingClientRect().top - parent.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
+    await expect(Math.abs(sub.getBoundingClientRect().left - parent.getBoundingClientRect().right)).toBeLessThanOrEqual(1);
+  },
+};
+
+/** With no room on the right the submenu flips to the left of its parent, and stays on screen. */
+export const SubmenuFlipsLeft: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => (
+    <div className="fixed right-2 top-24">
+      <Menu {...args} align="right" trigger={<Button variant="secondary">Status</Button>} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    await waitFor(() => expect(sub.getBoundingClientRect().right).toBeLessThanOrEqual(parent.getBoundingClientRect().left + 1));
+    await expect(sub.getBoundingClientRect().left).toBeGreaterThanOrEqual(0);
+    await expect(sub.getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth);
+  },
+};
+
+/** The submenu follows its parent item when something scrolls under it, as `Popover` does for the menu itself. */
+export const SubmenuFollowsScroll: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => (
+    <div data-testid="scroller" className="h-64 overflow-auto">
+      <div className="h-24" />
+      <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />
+      <div className="h-96" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    const first = within(sub).getByRole('menuitem', { name: 'Accept' });
+    const before = parent.getBoundingClientRect().top;
+    const scroller = within(canvasElement).getByTestId('scroller');
+    scroller.scrollTop = 16;
+    scroller.dispatchEvent(new Event('scroll'));
+    await waitFor(() => expect(parent.getBoundingClientRect().top).not.toBe(before));
+    await waitFor(() => expect(Math.abs(first.getBoundingClientRect().top - parent.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
+  },
+};
+
 /**
  * `searchable` puts Figma's search item at the top (the Cycle menu): focus starts in the box, typing narrows the list, ArrowDown goes into it, ArrowUp from the first item comes back,
  * and Enter chooses the first match.

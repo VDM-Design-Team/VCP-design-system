@@ -10,6 +10,8 @@ The primary interactive control.
 | `secondary` | Supporting actions next to a primary | no limit |
 | `neutral` | The way *out* — Cancel beside a destructive answer, Dismiss beside a confirm | no limit |
 | `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
+| `neutral-text` | A toolbar's actions, as text in the neutral palette (the bulk bar's Status, Urgency): controls, not calls to action | no limit |
+| `critical-text` | A destructive action in a toolbar, as red text (the bulk bar's Delete). The *filled* red is `danger` | no limit |
 | `danger` | Destructive, irreversible actions only | 1 |
 | `link` | Inline navigation that reads as text | no limit |
 
@@ -17,7 +19,7 @@ The primary interactive control.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| neutral \| tertiary \| danger \| link` | `primary` | |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-text \| critical-text \| danger \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Swaps the left icon for a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`) |
