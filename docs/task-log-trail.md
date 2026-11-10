@@ -34,13 +34,14 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Task** | Its title. **At least 40 characters wide** (`min-w-88`), and it **wraps to three lines at most** before it is cut with "…" (the whole text is the hover `title`) |
 | **Change** | Old value, an arrow (named "changed to"), new value, then **which field changed, in brackets: "(Status)" or "(Workflow)"**. A value is a `StatusTag` (a spine status or a domain step, "Design Review", each in its own colour), or an **event tag** — **Initial Creation** (the AV was just made, so nothing came before) or **Handoff** — in `Tag`'s neutral grey |
 | **Source** | A `SourceTag`. The styling is the same for every source; only the **text inside the tag** changes ("VCP" for now) |
-| **Changed At** / **Changed By** | Plain text. **Already formatted** ("Jun 10, 2026 2:37 PM"): this table does not do dates |
+| **Changed At** | An ISO date and time, shown **"10/06/2026 14:37"**: dd/mm/yyyy (or the person's locale's order), then a 24-hour time, from `useDateFormat().dateTime`, in a `<time>`. The one date-and-time formatter in `lib/format-date` |
+| **Changed By** | Plain text |
 
 ## Props
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `rows` | `TaskLogRow[]` | required | `id`, `ref`, `task`, `change { from, to, field }`, `source`, `changedAt`, `changedBy`. `from` / `to` are `{ status }`, `{ custom }` (a domain step) or `{ event: 'Initial Creation' \| 'Handoff' }`; `field` is `'Status' \| 'Workflow'` |
+| `rows` | `TaskLogRow[]` | required | `id`, `ref`, `task`, `change { from, to, field }`, `source`, `changedAt` (ISO date and time), `changedBy`. `from` / `to` are `{ status }`, `{ custom }` (a domain step) or `{ event: 'Initial Creation' \| 'Handoff' }`; `field` is `'Status' \| 'Workflow'` |
 | `page` / `pageCount` / `onPageChange` | | required | `Pagination`'s |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | The range readout ("1-50 of 1,250") and Items select |
 | `loading` | `boolean` | — | Placeholder rows; headers stay; one status says "Loading the task log trail" |
@@ -70,5 +71,5 @@ The card is `surface.elevated`, `radius.md`; the cells have 16 above and below (
 ## Don't
 
 - **Don't truncate the task.** The log is read for what changed.
-- **Don't format the date here.** Pass "Jun 10, 2026 2:37 PM".
+- **Don't format the time.** Pass the ISO date and time ("2026-06-10T14:37:00"); the table shows it the system's way. A zone-less clock reads as written; with a zone ("…Z") it is shown in the provider's `timeZone`, else the person's own.
 - **Don't filter or page inside it.**

@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { useDateFormat } from '../../lib/format-date';
 import { Icon } from '../../atoms/icon';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
@@ -18,8 +19,8 @@ import { Tag } from '../../atoms/tag';
  * - **ID** — the AV's reference, quiet (`text.tertiary`).
  * - **Task** — its title, in full: **it wraps** (Figma draws three lines) rather than ending in "…", since the log is for reading what changed.
  * - **Change** — the old value, an arrow, the new value, then which field changed in brackets: "(Status)". The values are `StatusTag`s, so a spine status
- *   and a domain step ("Design Review") each keep their own colour; `field` says what was changed ("Status", "Urgency", …).
- * - **Source** — a `SourceTag`. **Changed At** and **Changed By** are plain text, **already formatted** ("Jun 10, 2026 2:37 PM"): this table does not do dates.
+ *   and a domain step ("Design Review") each keep their own colour; `field` says what was changed ("Status" or "Workflow").
+ * - **Source** — a `SourceTag`. **Changed At** is an ISO date and time, shown the system's way, **"10/06/2026 14:37"** (dd/mm/yyyy, or the person's locale's order, then a 24-hour time: `useDateFormat().dateTime`) in a `<time>`. **Changed By** is plain text.
  *
  * **It does nothing itself.** Filtering is the page's: pass the filter row as `filters` and it sits inside the card above the table (there is no filters pattern); paging is
  * `page`, `pageCount` and `onPageChange`.
@@ -59,7 +60,7 @@ export interface TaskLogRow {
   };
   /** Where the change came from, as it should read inside the tag: "VCP". */
   source: string;
-  /** Already formatted: "Jun 10, 2026 2:37 PM". */
+  /** An ISO date and time: "2026-06-10T14:37:00" (no zone: the clock reads as written) or "2026-06-10T14:37:00Z" (an instant, shown in the provider's time zone, else the person's own). */
   changedAt: string;
   /** Who made it. */
   changedBy: string;
@@ -104,6 +105,7 @@ export function TaskLogTrail({
 }: TaskLogTrailProps) {
   /* Figma's rows are roomy: 16 above and below every cell, so a three-line task makes a row of about 95. */
   const roomy = () => ({ className: 'py-4' });
+  const dates = useDateFormat();
   const columns: DataTableColumn<TaskLogRow>[] = [
     {
       key: 'ref',
@@ -154,7 +156,11 @@ export function TaskLogTrail({
       label: 'Changed At',
       fit: true,
       width: '16%',
-      render: (row) => <span className="whitespace-nowrap text-body-sm-regular text-text-secondary">{row.changedAt}</span>,
+      render: (row) => (
+        <time dateTime={row.changedAt} className="whitespace-nowrap text-body-sm-regular text-text-secondary">
+          {dates.dateTime(row.changedAt)}
+        </time>
+      ),
     },
     {
       key: 'changedBy',

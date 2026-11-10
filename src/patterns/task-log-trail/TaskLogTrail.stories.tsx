@@ -13,11 +13,11 @@ const LONG_TASK =
   '[VCP] Automated Planning Workspace for VCP Planning List - DESIGN, including the long tail of follow-ups that nobody will read in full on a log row, the capacity reviews, the cycle hand-offs and every other thing that was ever attached to it';
 
 const ROWS: TaskLogRow[] = [
-  { id: 1, ref: 'VCP-1234', task: TASK, change: { from: { status: 'In Progress' }, to: { custom: 'Design Review' }, field: 'Status' }, source: 'VCP', changedAt: 'Jun 10, 2026 2:37 PM', changedBy: 'User’s Name' },
-  { id: 2, ref: 'VCP-1235', task: 'Rework the notification bell so unread state survives a reload', change: { from: { event: 'Initial Creation' }, to: { status: 'Draft' }, field: 'Status' }, source: 'VCP', changedAt: 'Jun 9, 2026 11:02 AM', changedBy: 'Eve Chen' },
-  { id: 3, ref: 'VCP-1236', task: TASK, change: { from: { event: 'Handoff' }, to: { custom: 'Design Review' }, field: 'Workflow' }, source: 'VCP', changedAt: 'Jun 8, 2026 4:15 PM', changedBy: 'Ali Rahman' },
-  { id: 4, ref: 'VCP-1237', task: LONG_TASK, change: { from: { status: 'Pending' }, to: { status: 'Accepted' }, field: 'Status' }, source: 'VCP', changedAt: 'Jun 7, 2026 9:48 AM', changedBy: 'Dana Lu' },
-  { id: 5, ref: 'VCP-1238', task: TASK, change: { from: { status: 'Accepted' }, to: { status: 'In Progress' }, field: 'Workflow' }, source: 'VCP', changedAt: 'Jun 6, 2026 1:20 PM', changedBy: 'User’s Name' },
+  { id: 1, ref: 'VCP-1234', task: TASK, change: { from: { status: 'In Progress' }, to: { custom: 'Design Review' }, field: 'Status' }, source: 'VCP', changedAt: '2026-06-10T14:37:00', changedBy: 'User’s Name' },
+  { id: 2, ref: 'VCP-1235', task: 'Rework the notification bell so unread state survives a reload', change: { from: { event: 'Initial Creation' }, to: { status: 'Draft' }, field: 'Status' }, source: 'VCP', changedAt: '2026-06-09T11:02:00', changedBy: 'Eve Chen' },
+  { id: 3, ref: 'VCP-1236', task: TASK, change: { from: { event: 'Handoff' }, to: { custom: 'Design Review' }, field: 'Workflow' }, source: 'VCP', changedAt: '2026-06-08T16:15:00', changedBy: 'Ali Rahman' },
+  { id: 4, ref: 'VCP-1237', task: LONG_TASK, change: { from: { status: 'Pending' }, to: { status: 'Accepted' }, field: 'Status' }, source: 'VCP', changedAt: '2026-06-07T09:48:00', changedBy: 'Dana Lu' },
+  { id: 5, ref: 'VCP-1238', task: TASK, change: { from: { status: 'Accepted' }, to: { status: 'In Progress' }, field: 'Workflow' }, source: 'VCP', changedAt: '2026-06-06T13:20:00', changedBy: 'User’s Name' },
 ];
 
 const meta = {
@@ -59,6 +59,12 @@ export const Default: Story = {
     await expect(c.getAllByText('VCP').length).toBe(5);
     /* The arrow is named, so the change reads "In Progress, changed to, Design Review". */
     await expect(c.getAllByRole('img', { name: 'changed to' }).length).toBe(5);
+    /* ISO in, "dd/mm/yyyy HH:mm" out (24-hour), in a <time> that keeps the ISO. */
+    const changed = c.getByText('10/06/2026 14:37');
+    await expect(changed.tagName).toBe('TIME');
+    await expect(changed).toHaveAttribute('datetime', '2026-06-10T14:37:00');
+    await expect(c.getByText('08/06/2026 16:15')).toBeVisible();
+    await expect(c.queryByText(/PM|AM/)).toBeNull();
   },
 };
 
