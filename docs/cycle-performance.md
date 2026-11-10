@@ -8,6 +8,7 @@ How each cycle went, as grouped bars: for every cycle, the points Available, Ove
 |---|---|
 | `Select` | atom |
 | `BarChart` | component |
+| `CardHeader` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

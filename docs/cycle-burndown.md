@@ -8,7 +8,7 @@ How a cycle's points burned down over its days: a line for each of Completed, Co
 |---|---|
 | `Divider` | atom |
 | `Icon` | sub-atomic |
-| `InfoHint` | component |
+| `CardHeader` | component |
 | `LineChart` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -90,7 +90,7 @@ A container query: the plot takes the card's width and thins its date labels whe
 - A `section` named by its title ("Cycle Burndown, region").
 - The chart is a single keyboard stop with arrow-key reading and a data table (see `docs/line-chart.md`).
 - The totals are a description list (a term and its value), so a screen reader pairs each label with its number.
-- The info glyph is a real, focusable `button` (`InfoHint`, wrapping the system `Tooltip`).
+- The info glyph is a real, focusable `button` (`InfoHint`, through `CardHeader`, wrapping the system `Tooltip`).
 - Loading: one `status` ("Loading Cycle Burndown"); the section is `aria-busy`.
 
 ## Don't
