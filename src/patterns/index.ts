@@ -48,3 +48,4 @@ export * from './system-changelog';
 export * from './child-part-modal';
 export * from './multipart-section';
 export * from './user-account-modal';
+export * from './users-table';
