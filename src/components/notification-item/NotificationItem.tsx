@@ -53,7 +53,8 @@ export type NotificationKind =
   | 'backlog'
   | 'handoff'
   | 'completed'
-  | 'viewer';
+  | 'viewer'
+  | 'discarded';
 
 /**
  * Kind → the sentence, in two parts: the `verb` that follows the actor's name
@@ -84,6 +85,8 @@ const NOTIFICATION_PHRASES: Record<
   handoff: { verb: 'handed off', trail: () => '. Ready for Review' },
   completed: { verb: 'accepted & completed' },
   viewer: { verb: 'added you as a viewer to' },
+  /* The Added Value was thrown away (AV · 02): it has no page any more, so the row never opens. */
+  discarded: { verb: 'discarded' },
 };
 
 export interface NotificationActor {
@@ -223,7 +226,9 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
     const phrase = NOTIFICATION_PHRASES[kind];
     const trail = phrase.trail?.(status);
     const markLabel = `${unread ? 'Mark as read' : 'Mark as unread'}: ${subject}`;
-    const interactive = Boolean(href || onSelect);
+    /* A discarded Added Value has no page: its row stays, says so, and opens nothing, whatever is passed. */
+    const opens = kind !== 'discarded';
+    const interactive = opens && Boolean(href || onSelect);
 
     /* The spaces are text nodes of their own: a space at the start of an inline
        `<span>` is dropped when the accessible name is computed, which ran the
@@ -278,11 +283,11 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
           {/* `ring` is the avatar's white outline (a `surface.elevated` ring), as Figma's
               `Profile_Initials` draws its white stroke. */}
           <Avatar name={actor.name} src={actor.src} size="lg" ring className="shrink-0" />
-          {href ? (
+          {href && opens ? (
             <a data-main href={href} className={stretch}>
               {message}
             </a>
-          ) : onSelect ? (
+          ) : onSelect && opens ? (
             <button data-main type="button" onClick={onSelect} className={stretch}>
               {message}
             </button>
