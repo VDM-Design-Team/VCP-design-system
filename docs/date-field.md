@@ -51,6 +51,8 @@ through a `Date`, so no time zone can move the day.
 
 **Optionally, the person's locale.** Wrap the app in `<DateFormatProvider locale="en-US">` and every date reads in that locale's own order and separators ("03/12/2026", or "12.03.2026" for `de-DE`); the placeholder follows ("MM/DD/YYYY"). With no provider, or no `locale`, it is dd/mm/yyyy. `useDateFormat()` gives a component the same `format` and `placeholder`; `InlineDateEdit` can still override with its own `format`.
 
+**A date and a time read "10/06/2026 14:37"**: the date as above, then a **24-hour** time, whatever the locale (the locale orders the date; it does not change the clock). Anything that shows a time uses `useDateFormat().dateTime(iso)` (or `.time(iso)` for the clock alone; `formatDateTime` and `formatTime` outside React), so a time never reads two ways. They take an ISO date-time: **with no zone** ("2026-06-10T14:37") the clock reads as written and nothing is converted; **with a zone** ("…Z", "…+02:00") it is an instant, shown in the provider's `timeZone` (`<DateFormatProvider timeZone="Europe/Athens">`), else in the person's own; a date with no time is just the date; anything that is not ISO comes back as given. Put the ISO in a `<time dateTime>` and the formatted text inside it.
+
 ## Month mode
 
 `mode="month"` is the same field for a month with no day — a reporting period, a billing month. It keeps the calendar glyph and
