@@ -87,7 +87,7 @@ export interface SearchSelectOption {
   label: string;
   /**
    * What the field, the tags and the announcements say when the row's `label` is too long for them —
-   * "C33" in the field for a row that reads "C33 (May 25, 2026 - Jun 08, 2026)". Search still matches
+   * "C33" in the field for a row that reads "C33 (25/05/2026 - 08/06/2026)". Search still matches
    * the full `label`.
    */
   shortLabel?: string;
@@ -140,8 +140,8 @@ interface SearchSelectBase
    */
   renderOption?: (option: SearchSelectOption, state: SearchSelectRowState) => React.ReactNode;
   disabled?: boolean;
-  /** `sm` 32 tall, `md` 40 (default), as `Select`. */
-  size?: 'sm' | 'md';
+  /** `sm` 32 tall, `compact` 36, `md` 40 (default), as `Select`. */
+  size?: 'sm' | 'compact' | 'md';
   /** The resting edge, as `Input` and `Select`: `strong` (default) or `neutral` (lighter; a deliberate exception for a row of filters). An error, a warning and focus still win. */
   edge?: 'strong' | 'neutral';
   /**
@@ -398,7 +398,11 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     /* Everything the search lets through, folded or not: the headings are drawn from this. */
     const shownRows = arrange(
       searchable && query && !onSearch
-        ? all.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+        ? all.filter((o) => {
+            /* Every word typed must be in the label, in any order: "Aug 2026" finds "C37 (Jul 20, 2026 - Aug 03, 2026)". One word is a plain contains. */
+            const label = o.label.toLowerCase();
+            return query.toLowerCase().split(/\s+/).filter(Boolean).every((word) => label.includes(word));
+          })
         : all,
     );
     /* A folded group's rows are not on screen, so they are not in the list the keys walk. A search
@@ -805,7 +809,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 ? 'mx-auto flex h-7 w-max max-w-full items-center rounded-sm border border-transparent px-2 transition-colors hover:bg-surface-brand-subtle'
                 : cn(
                     'flex items-center gap-2 rounded-md border bg-surface-elevated py-1 pr-3 pl-3 transition-colors',
-                    size === 'sm' ? 'min-h-8' : 'min-h-10',
+                    size === 'sm' ? 'min-h-8' : size === 'compact' ? 'min-h-9' : 'min-h-10',
                   ),
               /* Input's, class for class: the border turns focused with the ring, and an error holds its colour through focus. */
               !inline &&
@@ -904,7 +908,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               onClick={() => (open ? closePanel() : openPanel())}
               className={cn(
                 'flex items-center justify-between rounded-sm text-left outline-none',
-                inline ? 'h-7 gap-1' : cn('gap-2', size === 'sm' ? 'h-6' : 'h-8'),
+                inline ? 'h-7 gap-1' : cn('gap-2', size === 'sm' ? 'h-5.5' : size === 'compact' ? 'h-6.5' : 'h-7.5'),
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
                   ? inline

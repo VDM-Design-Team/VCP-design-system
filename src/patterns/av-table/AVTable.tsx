@@ -301,7 +301,7 @@ export function AVTable({
       hint: <ColumnHint text={hints.members} column="members" />,
       render: (row) =>
         row.members?.length ? (
-          <AvatarGroup people={row.members} size="md" max={3} label="Members" />
+          <AvatarGroup people={row.members} size="md" max={2} label="Members" tooltips />
         ) : null,
     },
     {

@@ -31,7 +31,7 @@ const ROWS: AVTableRow[] = [
     urgency: 'Urgent',
     type: 'Type 1',
     status: { status: 'Review' },
-    members: ['Eve Chen', 'Ali Rahman', 'Sam Okafor', 'Dana Lu'],
+    members: [{ name: 'Eve Chen', role: 'Assignee' }, { name: 'Ali Rahman', role: 'Reviewer' }, { name: 'Sam Okafor', role: 'Developer' }, { name: 'Dana Lu', role: 'Designer' }],
     lastUpdated: '2 hours ago',
   },
   {
@@ -58,7 +58,7 @@ const ROWS: AVTableRow[] = [
     urgency: 'High',
     type: 'Type 2',
     status: { status: 'In Progress' },
-    members: ['Sam Okafor', 'Eve Chen'],
+    members: [{ name: 'Sam Okafor', role: 'Assignee' }, { name: 'Eve Chen', role: 'Reviewer' }],
     lastUpdated: '3 days ago',
   },
 ];

@@ -62,7 +62,7 @@ export const CapacityBar = React.forwardRef<HTMLDivElement, CapacityBarProps>(
         ref={ref}
         role="img"
         aria-label={capacityDescription(segments, unit, label)}
-        className={cn('flex min-w-0 flex-1 gap-px overflow-hidden rounded-xs bg-surface-track font-sans', HEIGHT[size], className)}
+        className={cn('flex min-w-0 flex-1 gap-0.5 overflow-hidden rounded-xs bg-surface-track font-sans', HEIGHT[size], className)}
         {...props}
       >
         {drawn.map((s, i) => {
