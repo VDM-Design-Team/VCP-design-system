@@ -8,6 +8,9 @@ import { Tag } from '../../atoms/tag';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
 import { EmptyState } from '../../components/empty-state';
 import { Menu } from '../../components/menu';
+import type { Announcement } from '../../lib/announcement';
+import { CHANGELOG_KINDS } from '../../lib/changelog-kinds';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * AnnouncementsTable — the Announcements tab's list: **New Announcement**, **View Changelog** and **Refresh** above, and a table of
@@ -16,10 +19,11 @@ import { Menu } from '../../components/menu';
  *
  * It is `DataTable` specialised, as `UsersTable` is:
  *
- * - **Version** — a tag ("V1.18.1").
+ * - **Version** — plain text ("v1.18.1"); only Type is a tag, so two blue tags never sit side by side in a Feature row.
  * - **Title** — the announcement's title. It gives way as the table narrows, ending in "…".
- * - **Type** — a tag. `Feature` is blue; **this table owns the type → tone mapping** (any other type is grey until design names them).
- * - **Date** — already formatted ("May 20, 2026").
+ * - **Type** — a tag: the word (Experimental, Update, Feature) and its tone come from the one owner of the kinds, `lib/changelog-kinds`, the
+ *   same one the dialog, the changelog and `ChangeLogModal` read. This table maps nothing itself.
+ * - **Date** — ISO, shown the system's way (dd/mm/yyyy, or the person's locale) in a `<time>`.
  * - **Features** — what shipped, joined with commas and cut with "…" when long.
  * - **Actions** — a "More actions" menu per row, named for the announcement: **Edit** and **Delete**.
  *
@@ -30,18 +34,8 @@ import { Menu } from '../../components/menu';
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 
-export interface AnnouncementRow {
-  id: string | number;
-  /** As it reads: "V1.18.1". */
-  version: string;
-  title: string;
-  /** "Feature". */
-  type: string;
-  /** Already formatted: "May 20, 2026". */
-  date: string;
-  /** What shipped. */
-  features: readonly string[];
-}
+/** A row is an `Announcement` (`lib/announcement`): the same record the dialog and the changelog take. Only the fields the table shows are needed. */
+export type AnnouncementRow = Pick<Announcement, 'id' | 'title' | 'version' | 'kind' | 'date' | 'features'>;
 
 export interface AnnouncementsTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   rows: readonly AnnouncementRow[];
@@ -76,17 +70,14 @@ export function AnnouncementsTable({
   caption = 'Announcements',
   ...props
 }: AnnouncementsTableProps) {
+  const dates = useDateFormat();
   const columns: DataTableColumn<AnnouncementRow>[] = [
     {
       key: 'version',
       label: 'Version',
       fit: true,
       width: '10%',
-      render: (row) => (
-        <Tag size="sm" tone="info">
-          {row.version}
-        </Tag>
-      ),
+      render: (row) => <span className="whitespace-nowrap text-body-sm-medium text-text-tertiary">{row.version}</span>,
     },
     {
       key: 'title',
@@ -101,8 +92,8 @@ export function AnnouncementsTable({
       fit: true,
       width: '12%',
       render: (row) => (
-        <Tag size="sm" tone={row.type.toLowerCase() === 'feature' ? 'info' : 'neutral'}>
-          {row.type}
+        <Tag size="sm" tone={CHANGELOG_KINDS[row.kind].tone}>
+          {CHANGELOG_KINDS[row.kind].name}
         </Tag>
       ),
     },
@@ -111,7 +102,11 @@ export function AnnouncementsTable({
       label: 'Date',
       fit: true,
       width: '12%',
-      render: (row) => <span className="whitespace-nowrap text-body-sm-medium text-text-tertiary">{row.date}</span>,
+      render: (row) => (
+        <time dateTime={row.date} className="whitespace-nowrap text-body-sm-medium text-text-tertiary">
+          {dates.format(row.date)}
+        </time>
+      ),
     },
     {
       key: 'features',
@@ -151,7 +146,7 @@ export function AnnouncementsTable({
     id: `loading-${i}`,
     version: '',
     title: '',
-    type: '',
+    kind: 'update',
     date: '',
     features: [],
   }));

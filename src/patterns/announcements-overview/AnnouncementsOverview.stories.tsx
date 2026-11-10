@@ -11,11 +11,11 @@ const meta = {
       description: {
         component:
           'The top of the Announcements tab: a title card and three facts under it — the total, the latest version and when it was ' +
-          'last updated. It shows what it is given; the page counts and formats.',
+          'last updated. It shows what it is given; the page counts and finds the latest announcement.',
       },
     },
   },
-  args: { total: 11, latestVersion: 'v1.18.1', lastUpdated: 'May 20, 2026' },
+  args: { total: 11, latestVersion: 'v1.18.1', lastUpdated: '2026-05-20' },
   decorators: [
     (Story) => (
       <div className="bg-surface-canvas p-6">
@@ -37,7 +37,10 @@ export const Default: Story = {
     await expect(c.getByText('Total Announcements')).toBeVisible();
     await expect(c.getByText('11')).toBeVisible();
     await expect(c.getByText('v1.18.1')).toBeVisible();
-    await expect(c.getByText('May 20, 2026')).toBeVisible();
+    /* ISO in, dd/mm/yyyy out, in a <time>. */
+    const updated = c.getByText('20/05/2026');
+    await expect(updated).toBeVisible();
+    await expect(updated).toHaveAttribute('datetime', '2026-05-20');
   },
 };
 

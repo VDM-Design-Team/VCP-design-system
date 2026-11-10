@@ -25,10 +25,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `title` / `description` | `string` | `Announcements` / `View and manage announcements` | The title card's words |
 | `total` | `number \| string` | required | "Total Announcements" |
-| `latestVersion` | `string` | required | As it reads: "v1.18.1" |
-| `lastUpdated` | `string` | required | **Already formatted**: "May 20, 2026" |
+| `latestVersion` | `string` | required | An announcement's `version`, as it reads: "v1.18.1" |
+| `lastUpdated` | `string` | required | An announcement's `date`, **ISO** ("2026-05-20"): shown dd/mm/yyyy, or the person's locale (`useDateFormat`), in a `<time>` |
 
-It shows what it is given: the caller counts, finds the newest version and formats the date.
+It shows what it is given: the caller counts and finds the newest announcement (an `Announcement`, `lib/announcement`). It formats the date, the way every date in the system is.
 
 ## Layout
 

@@ -31,10 +31,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Column | What it is |
 |---|---|
-| **Version** | A `Tag`, "V1.18.1" |
+| **Version** | Plain text, "v1.18.1". Only Type is a tag, so a Feature row no longer has two identical blue tags |
 | **Title** | The title; it gives way as the table narrows, ending in "…" |
-| **Type** | A `Tag`. **This table owns the tone**: `Feature` is blue, anything else grey until design names the others |
-| **Date** | **Already formatted** — "May 20, 2026" |
+| **Type** | A `Tag`: the kind's word (Experimental, Update, Feature) and tone (success, warning, info) from the one owner, `lib/changelog-kinds`. **This table maps nothing itself** |
+| **Date** | ISO, shown dd/mm/yyyy or the person's locale (`useDateFormat`), in a `<time>` |
 | **Features** | What shipped, joined with commas, cut with "…" |
 | **Actions** | A "More actions" menu named for the row ("Actions for Faster search"): **Edit**, **Delete** — no icons. Delete is a `danger` item (red) with `icon: false`, so `Menu` leaves out its fallback warning glyph; the word and the hidden "destructive action" still say it, and the confirmation dialog guards it |
 
@@ -42,7 +42,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `rows` | `AnnouncementRow[]` | required | `id`, `version`, `title`, `type`, `date`, `features` |
+| `rows` | `AnnouncementRow[]` | required | An `Announcement` (`lib/announcement`): `id`, `title`, `version`, `kind`, `date` (ISO), `features` |
 | `onNew` / `onViewChangelog` / `onRefresh` | `() => void` | — | The buttons above. They **ask** |
 | `onEdit` / `onDelete` | `(row) => void` | — | From a row's menu. They **ask** |
 | `loading` | `boolean` | — | Placeholder rows; buttons and headers stay; one status says "Loading announcements" |
@@ -62,7 +62,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Tokens
 
 The page's canvas shows around it: the table has `DataTable`'s own look. The title is `body-sm-medium` `text.tertiary`, the features `text.primary`;
-the Version and Type tags are `sm`, tonal. **View Changelog** and **Refresh** are the `neutral` `Button` (grey outline) with a clock and a
+the Type tag is `sm`, tonal. **View Changelog** and **Refresh** are the `neutral` `Button` (grey outline) with a clock and a
 refresh glyph; **New Announcement** is primary with a plus. The ellipsis is the plain `IconButton`.
 
 **Differences from Figma, on purpose.** Figma's label reads "New Announcements"; it is **New Announcement**. Figma draws no pagination, so there is none.
@@ -77,5 +77,5 @@ refresh glyph; **New Announcement** is primary with a plus. The ellipsis is the 
 ## Don't
 
 - **Don't delete on press.** `onDelete` asks; confirm first, then delete, then say so with a toast.
-- **Don't format the date here.** Pass "May 20, 2026".
-- **Don't pick the type colour at the call site.** The mapping lives here.
+- **Don't format the date.** Pass the ISO date ("2026-05-20"); the table shows it the system's way.
+- **Don't pick the type colour at the call site.** The mapping lives in `lib/changelog-kinds`.

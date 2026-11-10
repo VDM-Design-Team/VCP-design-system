@@ -3,10 +3,10 @@ import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { AnnouncementsTable, type AnnouncementRow } from './AnnouncementsTable';
 
 const ROWS: AnnouncementRow[] = [
-  { id: 1, version: 'V1.18.1', title: 'Domain budgets arrive in Settings', type: 'Feature', date: 'May 20, 2026', features: ['Edit budget per domain', 'Cycle summary'] },
-  { id: 2, version: 'V1.18.0', title: 'Title of announcement item goes here (very long title name that must be cut so the table keeps its shape)', type: 'Feature', date: 'May 6, 2026', features: ['Some announcement feature name goes on and on and on and on and on'] },
-  { id: 3, version: 'V1.17.2', title: 'Faster search', type: 'Improvement', date: 'Apr 22, 2026', features: ['Search by role'] },
-  { id: 4, version: 'V1.17.1', title: 'Fixes for the planning table', type: 'Fix', date: 'Apr 9, 2026', features: [] },
+  { id: 1, version: 'v1.18.1', title: 'Domain budgets arrive in Settings', kind: 'feature', date: '2026-05-20', features: ['Edit budget per domain', 'Cycle summary'] },
+  { id: 2, version: 'v1.18.0', title: 'Title of announcement item goes here (very long title name that must be cut so the table keeps its shape)', kind: 'feature', date: '2026-05-06', features: ['Some announcement feature name goes on and on and on and on and on'] },
+  { id: 3, version: 'v1.17.2', title: 'Faster search', kind: 'update', date: '2026-04-22', features: ['Search by role'] },
+  { id: 4, version: 'v1.17.1', title: 'Fixes for the planning table', kind: 'experimental', date: '2026-04-09', features: [] },
 ];
 
 const meta = {
@@ -65,13 +65,29 @@ export const Default: Story = {
   },
 };
 
-/** Feature is blue; any other type is grey until design names them. */
+/** The Type tag is the kind's word and tone from the one owner; Version is plain text, so a Feature row has one blue tag, not two. */
 export const Types: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     const color = (el: HTMLElement) => getComputedStyle(el).color;
-    await expect(color(c.getByText('Improvement'))).toBe(color(c.getByText('Fix')));
-    await expect(color(c.getByText('Improvement'))).not.toBe(color(c.getAllByText('Feature')[0]));
+    const feature = c.getAllByText('Feature')[0] as HTMLElement;
+    const update = c.getByText('Update');
+    const experimental = c.getByText('Experimental');
+    await expect(new Set([color(feature), color(update), color(experimental)]).size).toBe(3);
+    /* The version is text, not a tag: the tag's pill is not around it. */
+    const version = c.getByText('v1.18.1');
+    await expect(getComputedStyle(version).borderRadius).toBe('0px');
+    await expect(getComputedStyle(version).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+  },
+};
+
+/** The date is ISO, shown dd/mm/yyyy (or the person's locale) in a `<time>`. */
+export const Dates: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const date = c.getByText('20/05/2026');
+    await expect(date.tagName).toBe('TIME');
+    await expect(date).toHaveAttribute('datetime', '2026-05-20');
   },
 };
 

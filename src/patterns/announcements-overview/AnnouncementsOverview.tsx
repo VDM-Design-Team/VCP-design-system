@@ -2,13 +2,16 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { MetricTile } from '../../components/metric-tile';
+import type { Announcement } from '../../lib/announcement';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * AnnouncementsOverview — the top of the Announcements tab: a title card ("Announcements — View and manage announcements") and the
  * three facts under it: how many announcements there are, the latest version, and when it was last updated. Built to Figma's
  * `_Announcements_Title` (`Announcement Title Card` and `Metrics`).
  *
- * It only shows what it is given: the caller counts, finds the latest version and formats the date ("May 20, 2026"). The three tiles
+ * It only shows what it is given: the caller counts and finds the latest announcement (an `Announcement`, `lib/announcement`: its `version`
+ * and its ISO `date`); the date is shown the system's way, dd/mm/yyyy or the person's locale. The three tiles
  * share the width equally and stack when the container is narrow (a container query, not the viewport's).
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
@@ -20,10 +23,10 @@ export interface AnnouncementsOverviewProps extends Omit<React.HTMLAttributes<HT
   description?: string;
   /** How many announcements there are. */
   total: number | string;
-  /** The newest version, as it reads: "v1.18.1". */
-  latestVersion: string;
-  /** When the newest was updated, already formatted: "May 20, 2026". */
-  lastUpdated: string;
+  /** The newest announcement's `version`, as it reads: "v1.18.1". */
+  latestVersion: Announcement['version'];
+  /** When the newest was updated: the `date` of an announcement, ISO ("2026-05-20"), shown dd/mm/yyyy or the person's locale. */
+  lastUpdated: Announcement['date'];
 }
 
 export function AnnouncementsOverview({
@@ -35,6 +38,7 @@ export function AnnouncementsOverview({
   lastUpdated,
   ...props
 }: AnnouncementsOverviewProps) {
+  const dates = useDateFormat();
   return (
     <section aria-label={title} className={cn('@container flex flex-col gap-6 font-sans', className)} {...props}>
       <div className="flex items-center gap-4 rounded-md bg-surface-elevated p-8">
@@ -49,7 +53,7 @@ export function AnnouncementsOverview({
       <div className="grid grid-cols-1 gap-6 @3xl:grid-cols-3">
         <MetricTile icon="megaphone" tone="info" label="Total Announcements" value={total} />
         <MetricTile icon="eye" tone="success" label="Latest Version" value={latestVersion} />
-        <MetricTile icon="calendar-blank" tone="brand" label="Last Updated" value={lastUpdated} />
+        <MetricTile icon="calendar-blank" tone="brand" label="Last Updated" value={<time dateTime={lastUpdated}>{dates.format(lastUpdated)}</time>} />
       </div>
     </section>
   );
