@@ -13,6 +13,7 @@ const PEOPLE = ['John', 'Sarah', 'Priya', 'Omar'];
 const MANUALS: ManualRow[] = NAMES.map((name, i) => ({
   id: i,
   name,
+  href: `https://example.com/manuals/${i}`,
   uploadedBy: { name: PEOPLE[i % PEOPLE.length], email: `${PEOPLE[i % PEOPLE.length].toLowerCase()}@vdm.technology` },
   attachmentCount: i % 4,
   dateAdded: `${i + 1} month${i === 0 ? '' : 's'} ago`,
@@ -57,7 +58,11 @@ export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('table', { name: 'Manuals' })).toBeVisible();
-    await expect(c.getByText('Onboarding guide')).toBeVisible();
+    /* The name is the way in: a link to the manual, in a new tab. */
+    const name = c.getByRole('link', { name: 'Onboarding guide (opens in a new tab)' });
+    await expect(name).toHaveAttribute('href', 'https://example.com/manuals/0');
+    await expect(name).toHaveAttribute('target', '_blank');
+    await expect(name).toHaveAttribute('rel', 'noopener noreferrer');
     await expect(c.getAllByText('john@vdm.technology').length).toBeGreaterThan(0);
     await expect(c.getAllByText('None').length).toBeGreaterThan(0);
     await expect(c.getAllByText('1 file').length).toBeGreaterThan(0);
@@ -86,6 +91,16 @@ export const Sorting: Story = {
   },
 };
 
+/** A manual with nowhere to open (no `href`) reads as plain text, not a dead link. */
+export const WithoutLinks: Story = {
+  args: { rows: MANUALS.map(({ href: _href, ...row }) => row) },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('Onboarding guide')).toBeVisible();
+    await expect(c.queryByRole('link')).toBeNull();
+  },
+};
+
 /** Figma's `Filled=No`: the headers and a database glyph over "No items." */
 export const Empty: Story = {
   args: { rows: [], itemCount: 0, pageCount: 1 },
@@ -100,7 +115,7 @@ export const Loading: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('status')).toHaveTextContent('Loading manuals');
-    await expect(c.queryByText('Onboarding guide')).toBeNull();
+    await expect(c.queryByText(/Onboarding guide/)).toBeNull();
     await expect(c.getByRole('columnheader', { name: /Attachments/ })).toBeVisible();
   },
 };

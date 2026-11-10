@@ -5,6 +5,7 @@ import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
 import { EmptyState } from '../../components/empty-state';
+import { TableCard } from '../../components/table-card';
 import { UserLabel } from '../../components/user-label';
 
 /**
@@ -12,14 +13,16 @@ import { UserLabel } from '../../components/user-label';
  * pages beneath. Built to Figma's `Manuals_Table` (`Filled=Yes` / `Filled=No`) and its row cells in the Design Library
  * (`_Manuals_Settings_Table_*`).
  *
- * It is `DataTable` specialised, as `UsersTable` is:
+ * It is `DataTable` specialised, in a `TableCard`, as `AccountsTable` is:
  *
- * - **Name** — the manual's name. Sortable. (Figma's row sketch draws an avatar here; a manual has a name, so it is text.)
+ * - **Name** — the manual's name, and **the way in**: with an `href` it is a link that opens the manual in a new tab (decided with design, 6 Nov 2026).
+ *   Sortable. (Figma's row sketch draws an avatar here; a manual has a name, so it is text.)
  * - **Uploaded by** — the person's avatar, name and email (`UserLabel`).
- * - **Attachments** — how many files it carries. Figma draws no content for this column yet.
+ * - **Attachments** — how many files it carries: "None", "1 file", "3 files" (a count, decided with design).
  * - **Date Added** — already formatted ("4 months ago").
  *
- * No search and no row buttons: Figma draws neither. **Add Manual** is a page-header action (the top bar), not the table's.
+ * No search and no row buttons: Figma draws neither. **Add Manual** is a page-header action (the top bar), not the table's; it opens a dialog, which is
+ * its own piece.
  * **It is controlled and does nothing itself**: the caller sorts by `sort` and pages by `page`.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
@@ -29,6 +32,8 @@ import { UserLabel } from '../../components/user-label';
 export interface ManualRow {
   id: string | number;
   name: string;
+  /** Where the manual opens. With it, the name is a link (a new tab); without, plain text. */
+  href?: string;
   /** Who uploaded it. */
   uploadedBy: { name: string; email: string; avatarSrc?: string };
   /** How many files it carries. */
@@ -75,7 +80,24 @@ export function ManualsTable({
       label: 'Name',
       sortable: true,
       width: '30%',
-      render: (row) => <span className="text-body-sm-medium text-text-primary">{row.name}</span>,
+      render: (row) =>
+        row.href ? (
+          <a
+            href={row.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              'rounded-sm text-body-sm-medium text-text-link-default underline-offset-2',
+              'hover:text-text-link-hover hover:underline active:text-text-link-pressed',
+              'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+            )}
+          >
+            {row.name}
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        ) : (
+          <span className="text-body-sm-medium text-text-primary">{row.name}</span>
+        ),
     },
     {
       key: 'uploadedBy',
@@ -127,27 +149,11 @@ export function ManualsTable({
   }));
 
   return (
-    <div
-      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)}
+    <TableCard
+      className={className}
       aria-busy={loading || undefined}
       {...props}
-    >
-      {loading && (
-        <span role="status" className="sr-only">
-          Loading manuals
-        </span>
-      )}
-      <DataTable
-        caption={caption}
-        className="rounded-none border-0"
-        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
-        rows={loading ? placeholders : rows}
-        sort={sort}
-        onSortChange={onSortChange}
-        empty={empty ?? <EmptyState icon={<Icon name="database" size="lg" />} title="No items." />}
-      />
-
-      <div className="flex justify-end">
+      footer={
         <Pagination
           page={page}
           pageCount={pageCount}
@@ -157,8 +163,23 @@ export function ManualsTable({
           pageSizeOptions={pageSizeOptions}
           onPageSizeChange={onPageSizeChange}
         />
-      </div>
-    </div>
+      }
+    >
+      {loading && (
+        <span role="status" className="sr-only">
+          Loading manuals
+        </span>
+      )}
+      <DataTable
+        bare
+        caption={caption}
+        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
+        rows={loading ? placeholders : rows}
+        sort={sort}
+        onSortChange={onSortChange}
+        empty={empty ?? <EmptyState icon={<Icon name="database" size="lg" />} title="No items." />}
+      />
+    </TableCard>
   );
 }
 ManualsTable.displayName = 'ManualsTable';
