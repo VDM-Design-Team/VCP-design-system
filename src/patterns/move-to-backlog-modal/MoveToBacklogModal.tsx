@@ -8,6 +8,7 @@ import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
  * Details Card).
  *
  * - **Feedback is optional**: the design draws no required marker and no error, so Move to Backlog is always available. What is typed goes to `onMove`; blank is `''`.
+ * - **It opens with the cursor in Feedback**: the one thing to type, so there is nothing to Tab to first.
  * - **It owns the draft** and reports it once; moving, and closing afterwards, is the page's. Everything resets each time it opens, so feedback abandoned half-typed is not there on the next one.
  * - **Title.** Figma writes "Move to backlog Added Value"; this reads "Move Added Value to Backlog", the order the bulk action's popup uses ("Move 2 Added Values to Backlog") and with Backlog capitalised as
  *   everywhere else (decided with design).
@@ -28,6 +29,8 @@ export function MoveToBacklogModal({ open, onClose, onMove, loading }: MoveToBac
   const [feedback, setFeedback] = React.useState('');
   /* A unique id, so two dialogs on one page do not share a form. */
   const formId = React.useId();
+  /* Feedback is the one thing to type here, so the dialog opens with the cursor in it (`docs/modal.md`: one obvious job). */
+  const feedbackRef = React.useRef<HTMLInputElement>(null);
 
   /* A fresh dialog every time it opens. */
   React.useEffect(() => {
@@ -41,6 +44,7 @@ export function MoveToBacklogModal({ open, onClose, onMove, loading }: MoveToBac
       title="Move Added Value to Backlog"
       size="md"
       showClose={false}
+      initialFocusRef={feedbackRef}
       footer={
         <>
           <ModalCancel disabled={loading} />
@@ -58,7 +62,7 @@ export function MoveToBacklogModal({ open, onClose, onMove, loading }: MoveToBac
         }}
       >
         <Field label="Feedback">
-          <Input fullWidth autoComplete="off" value={feedback} onChange={(event) => setFeedback(event.target.value)} />
+          <Input ref={feedbackRef} fullWidth autoComplete="off" value={feedback} onChange={(event) => setFeedback(event.target.value)} />
         </Field>
       </form>
     </Modal>
