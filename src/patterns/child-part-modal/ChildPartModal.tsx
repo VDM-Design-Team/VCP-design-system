@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 import { Banner } from '../../components/banner';
 import { Field } from '../../components/field';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 
 /**
  * ChildPartModal — asks for the title of a part of a multipart Added Value: either a new one ("Add a New Child Part to Multipart AV", **Confirm**) or an
@@ -67,12 +66,10 @@ export function ChildPartModal({
       showClose={false}
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" disabled={confirming} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm" type="submit" form={formId} loading={confirming}>
+          <ModalCancel />
+          <ModalConfirm type="submit" form={formId} loading={confirming}>
             {editing ? 'Save' : 'Confirm'}
-          </Button>
+          </ModalConfirm>
         </>
       }
     >

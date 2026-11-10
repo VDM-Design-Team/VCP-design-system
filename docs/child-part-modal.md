@@ -6,7 +6,6 @@ Asks for the title of a part of a multipart Added Value: a new one (before it is
 
 | Piece | Tier |
 |---|---|
-| `Button` | atom |
 | `Input` | atom |
 | `Banner` | component |
 | `Field` | component |
@@ -40,7 +39,7 @@ parts there are and what the parent is called. The dialog keeps its own draft, e
 
 ## Tokens
 
-`Modal` (`md`), no ✕ (Figma draws none: **Cancel** closes). **Cancel** is `secondary`, **Confirm** `primary`; the warning is a `Banner` (`warning`).
+`Modal` (`md`), no ✕ (Figma draws none: **Cancel** closes). The footer is `Modal`'s own `ModalCancel` and `ModalConfirm` (40 high), like every other dialog's; the warning is a `Banner` (`warning`).
 
 ## Accessibility
 
