@@ -5,7 +5,7 @@ import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
-import { Tag, type TagProps } from '../../atoms/tag';
+import { AccountStatusTag } from '../../components/account-status-tag';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
 import { EmptyState } from '../../components/empty-state';
 import { UserLabel } from '../../components/user-label';
@@ -17,10 +17,9 @@ import { UserLabel } from '../../components/user-label';
  * It is `DataTable` specialised, as `AccountsTable` is:
  *
  * - **Name** — the person's avatar, their name and, under it, their email (`UserLabel`). Sortable.
- * - **Status** — a tag in the words the page gives ("approved"). Sortable. **This table owns the status → tone mapping**:
- *   `approved` is green, `pending` is yellow, `rejected`, `suspended` and `inactive` are red, and anything else is grey — so
- *   call sites never choose a colour.
- * - **Date Added** — already formatted ("4 months ago"). Sortable.
+ * - **Status** — the account's status as an `AccountStatusTag`: Approved (green), Pending (yellow) or Inactive (grey). Sortable.
+ *   **`AccountStatusTag` owns the statuses and their colours**, so neither this table nor a call site chooses one.
+ * - **Date Added** — already formatted ("4 months ago"): a Date Added column is the written exception to dd/mm/yyyy. Sortable.
  * - **Actions** — **+ New User** in the header and **View** on each row, named for the person ("View John"). Both sit at the end of the column.
  *
  * **It is controlled and does nothing itself.** The caller filters by `search`, sorts by `sort`, pages by `page`, and handles
@@ -36,19 +35,11 @@ export interface UserRow {
   email: string;
   /** A photo. Without one the avatar shows initials. */
   avatarSrc?: string;
-  /** Their status, as it should read: "approved". */
+  /** Their account status: "approved", "pending" or "inactive" (`AccountStatusTag` shows it). */
   status: string;
   /** When they were added, already formatted: "4 months ago". */
   dateAdded: string;
 }
-
-const STATUS_TONE: Record<string, NonNullable<TagProps['tone']>> = {
-  approved: 'success',
-  pending: 'warning',
-  rejected: 'critical',
-  suspended: 'critical',
-  inactive: 'critical',
-};
 
 export interface UsersTableProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children' | 'onChange'>,
@@ -65,7 +56,7 @@ export interface UsersTableProps
   /** A row's View was pressed. Opening the dialog is the page's. */
   onView?: (row: UserRow) => void;
   onPageChange?: (page: number) => void;
-  /** Placeholder rows instead of `rows`, while the users load. The search and headers stay. */
+  /** Placeholder rows instead of `rows`, while the users load. The search, the headers and + New User stay. */
   loading?: boolean;
   /** What an empty table says. Defaults to words that depend on whether a search is active. */
   empty?: React.ReactNode;
@@ -109,11 +100,7 @@ export function UsersTable({
       sortable: true,
       fit: true,
       width: '18%',
-      render: (row) => (
-        <Tag size="sm" tone={STATUS_TONE[row.status.toLowerCase()] ?? 'neutral'}>
-          {row.status}
-        </Tag>
-      ),
+      render: (row) => <AccountStatusTag status={row.status} />,
     },
     {
       key: 'dateAdded',
@@ -186,7 +173,8 @@ export function UsersTable({
       <DataTable
         caption={caption}
         className="rounded-none border-0"
-        columns={loading ? columns.map((column) => ({ ...column, action: undefined, render: () => LOADING_CELL[column.key] })) : columns}
+        /* Loading swaps each cell for a placeholder and leaves the header alone: + New User stays, so focus returning to it after a create has somewhere to land. */
+        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
         rows={loading ? placeholders : rows}
         sort={sort}
         onSortChange={onSortChange}

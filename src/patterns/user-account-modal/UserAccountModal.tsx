@@ -21,10 +21,14 @@ import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
  *   **Save** beside it (Figma draws it so: the points save on their own, apart from Submit — `onSaveCapacity`).
  *
  * Both have the same body: a photo with **Upload**, **Status**, **Name**, **Email**, **Proficiency**, then the
- * "Domain Access & Admin Rights" table (`DomainAccessTable`), and **Submit**.
+ * "Domain Access & Admin Rights" table (`DomainAccessTable`), and **Submit**. (With `roles`, below, a Roles checklist stands in for
+ * Proficiency and the table.)
  *
  * - **Upload** opens the browser's file picker and hands the file to `onUploadAvatar`; the chosen image shows at once.
- *   There is no crop or edit, and no way to remove a photo yet (a question for design).
+ *   There is no crop or edit.
+ * - **The photo's buttons** are **Upload** while there is no photo, and **Change** and **Remove** once there is one (a chosen image
+ *   counts at once). **Remove takes effect on Submit**: it clears the picture in the dialog and the draft says `avatarRemoved: true`,
+ *   so Cancel undoes it and there is no confirm step (decided with design, 6 Nov 2026). Nothing is deleted until the page saves.
  * - **The two selects read regular weight** (`emphasis="regular"`), like the Name and Email inputs beside them — Figma draws all four
  *   the same, and a form of mixed weights looks uneven.
  * - **Status and Proficiency are lists the page passes in** (`statusOptions`, `proficiencyOptions`): what they are is the
@@ -34,12 +38,13 @@ import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
  *   wrong under the field and does not go through. `errors` adds what only the server knows ("That email is already
  *   in use").
  *
- * **Two optional extensions make it the Settings Users tab's dialog too** (Figma's "Create New User" / "View User"):
+ * **It is the Settings Users tab's dialog too** (Figma's "Create New User" / "View User"):
  *
  * - **`roles`** swaps the Domain Access table for a **Roles** checklist (`draft.roles`, the ticked values). Pass `roles` and the table
- *   goes; pass `domains` and the checklist goes. Roles and Proficiency overlap in Figma's design (a question for design).
- * - **The photo's buttons follow Figma on both pages**: **Upload** while there is no photo, **Change** and **Remove** once there is one (a
- *   chosen image counts at once). **Remove** clears the picture and calls `onRemoveAvatar`, so the page can delete it.
+ *   goes; pass `domains` and the checklist goes. **With `roles` there is no Proficiency field**: the roles carry seniority (decided
+ *   with design, 6 Nov 2026).
+ * - **Status is one list everywhere**: pass `ACCOUNT_STATUS_OPTIONS` (Approved, Pending, Inactive) from `AccountStatusTag`, the owner
+ *   of account statuses.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -54,8 +59,10 @@ export interface UserAccountDraft {
   capacityPoints: number | null;
   /** What the user can do in each domain. Empty when the dialog has `roles` instead. */
   access: DomainAccessRow[];
-  /** The ticked roles' values. Empty when the dialog has `domains` instead. */
-  roles: string[];
+  /** The ticked roles' values, when the dialog has `roles`. Left out when it has `domains` instead. */
+  roles?: string[];
+  /** Remove was pressed and no new photo was chosen: the page deletes the photo when it saves. Left out otherwise. */
+  avatarRemoved?: boolean;
 }
 
 export interface UserRoleOption {
@@ -76,16 +83,16 @@ export interface UserAccountModalProps {
   domains?: readonly DomainAccessRow[];
   /** The roles a user can hold: a Roles checklist instead of the domain table. Which are ticked is `initial.roles`. */
   roles?: readonly UserRoleOption[];
+  /** The Status list. Pass `ACCOUNT_STATUS_OPTIONS` (from `AccountStatusTag`), so the dialog and the tables agree. */
   statusOptions: ReadonlyArray<string | SelectOption>;
-  proficiencyOptions: ReadonlyArray<string | SelectOption>;
+  /** The Proficiency list. Not needed with `roles`, which shows no Proficiency. */
+  proficiencyOptions?: ReadonlyArray<string | SelectOption>;
   /** Submit, once Name and Email are valid. Gets the whole draft; saves nothing itself. */
   onSubmit: (draft: UserAccountDraft) => void;
   /** Edit only: the Save beside Capacity Points, which saves the points alone. */
   onSaveCapacity?: (points: number | null) => void;
   /** A photo was chosen. There is no crop. */
   onUploadAvatar?: (file: File) => void;
-  /** Remove was pressed: the page deletes the image. Once there is a photo the buttons are **Change** and **Remove**; with none, **Upload**. */
-  onRemoveAvatar?: () => void;
   /** Submit is in flight: the button spins and the dialog's fields lock. */
   submitting?: boolean;
   /** What only the server knows, per field — shown under it. */
@@ -96,8 +103,8 @@ export interface UserAccountModalProps {
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const blank = (initial: UserAccountModalProps['initial']): Omit<UserAccountDraft, 'access'> => ({
-  roles: initial?.roles ?? [],
+const blank = (initial: UserAccountModalProps['initial'], withRoles: boolean): Omit<UserAccountDraft, 'access'> => ({
+  ...(withRoles ? { roles: initial?.roles ?? [] } : {}),
   status: initial?.status ?? '',
   name: initial?.name ?? '',
   email: initial?.email ?? '',
@@ -113,16 +120,15 @@ export function UserAccountModal({
   domains = [],
   roles,
   statusOptions,
-  proficiencyOptions,
+  proficiencyOptions = [],
   onSubmit,
   onSaveCapacity,
   onUploadAvatar,
-  onRemoveAvatar,
   submitting,
   errors,
   title,
 }: UserAccountModalProps) {
-  const [draft, setDraft] = React.useState<UserAccountDraft>(() => ({ ...blank(initial), access: [...domains] }));
+  const [draft, setDraft] = React.useState<UserAccountDraft>(() => ({ ...blank(initial, Boolean(roles)), access: [...domains] }));
   const [photo, setPhoto] = React.useState<string | undefined>(undefined);
   const [removed, setRemoved] = React.useState(false);
   const [invalid, setInvalid] = React.useState<Partial<Record<'name' | 'email', string>>>({});
@@ -135,7 +141,7 @@ export function UserAccountModal({
   /* Each time it opens, start again from what it was given. */
   React.useEffect(() => {
     if (!open) return;
-    setDraft({ ...blank(initial), access: [...domains] });
+    setDraft({ ...blank(initial, Boolean(roles)), access: [...domains] });
     setPhoto(undefined);
     setRemoved(false);
     setInvalid({});
@@ -164,11 +170,15 @@ export function UserAccountModal({
     /* Not through: hand focus to the first field that needs fixing. */
     if (next.name) return nameInput.current?.focus();
     if (next.email) return emailInput.current?.focus();
-    onSubmit({ ...draft, name: draft.name.trim(), email: draft.email.trim() });
+    /* A removed photo goes with the draft, so nothing is deleted unless this is saved. A newly chosen one is not a removal. */
+    onSubmit({ ...draft, name: draft.name.trim(), email: draft.email.trim(), ...(removed ? { avatarRemoved: true } : {}) });
   };
 
   const setRole = (value: string, on: boolean) =>
-    setDraft((d) => ({ ...d, roles: on ? [...d.roles, value] : d.roles.filter((role) => role !== value) }));
+    setDraft((d) => {
+      const ticked = d.roles ?? [];
+      return { ...d, roles: on ? [...ticked, value] : ticked.filter((role) => role !== value) };
+    });
 
   const shownPhoto = removed ? photo : (photo ?? initial?.avatarSrc);
   const message = (field: UserAccountField) => errors?.[field] ?? invalid[field as 'name' | 'email'];
@@ -233,10 +243,10 @@ export function UserAccountModal({
               disabled={locked}
               aria-label="Remove profile photo"
               onClick={() => {
+                /* In the dialog only: the draft carries it to Submit, and Cancel undoes it. */
                 setPhoto(undefined);
                 setRemoved(true);
-                onRemoveAvatar?.();
-                /* The button that had focus is gone: Change is what took its place. */
+                /* The button that had focus is gone: Upload is what took its place. */
                 photoButton.current?.focus();
               }}
             >
@@ -277,17 +287,20 @@ export function UserAccountModal({
             onChange={(event) => set('email', event.target.value)}
           />
         </Field>
-        <Field label="Proficiency" error={message('proficiency')}>
-          <Select
-            fullWidth
-            emphasis="regular"
-            placeholder="Select proficiency"
-            options={proficiencyOptions}
-            value={draft.proficiency}
-            disabled={locked}
-            onChange={(proficiency) => set('proficiency', proficiency)}
-          />
-        </Field>
+        {/* With a Roles checklist the roles carry seniority, so there is no Proficiency. */}
+        {!roles && (
+          <Field label="Proficiency" error={message('proficiency')}>
+            <Select
+              fullWidth
+              emphasis="regular"
+              placeholder="Select proficiency"
+              options={proficiencyOptions}
+              value={draft.proficiency}
+              disabled={locked}
+              onChange={(proficiency) => set('proficiency', proficiency)}
+            />
+          </Field>
+        )}
 
         {mode === 'edit' && (
           <div className="flex flex-col gap-1.5">
@@ -328,7 +341,7 @@ export function UserAccountModal({
               <Checkbox
                 key={role.value}
                 label={role.label}
-                checked={draft.roles.includes(role.value)}
+                checked={(draft.roles ?? []).includes(role.value)}
                 disabled={locked}
                 onChange={(on) => setRole(role.value, on)}
               />

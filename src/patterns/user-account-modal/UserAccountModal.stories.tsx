@@ -33,7 +33,7 @@ const meta = {
     open: true,
     onClose: fn(),
     domains: DOMAINS,
-    statusOptions: ['Approved', 'Pending', 'Suspended'],
+    statusOptions: ['Approved', 'Pending', 'Inactive'],
     proficiencyOptions: ['Junior', 'Mid', 'Senior'],
     onSubmit: fn(),
     onSaveCapacity: fn(),
@@ -150,6 +150,13 @@ export const UploadsAPhoto: Story = {
     await userEvent.click(within(dialog).getByRole('button', { name: 'Remove profile photo' }));
     await waitFor(() => expect(within(dialog).getByRole('button', { name: 'Upload profile photo' })).toHaveFocus());
     await expect(within(dialog).queryByRole('button', { name: 'Remove profile photo' })).toBeNull();
+    /* Choosing again is not a removal: the draft that is submitted says nothing was removed. */
+    await userEvent.upload(input, file);
+    await userEvent.type(within(dialog).getByRole('textbox', { name: 'Name' }), 'Ada');
+    await userEvent.type(within(dialog).getByRole('textbox', { name: 'Email' }), 'ada@vdm.technology');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(args.onSubmit).toHaveBeenCalled());
+    await expect(args.onSubmit).not.toHaveBeenCalledWith(expect.objectContaining({ avatarRemoved: true }));
   },
 };
 
@@ -221,17 +228,20 @@ const ROLES = [
   { value: 'senior', label: 'Senior Product Designer' },
 ];
 
-/** The Settings Users tab's dialog: a Roles checklist stands in for the Domain Access table. Ticking is the user's draft. */
+/** The Settings Users tab's dialog: a Roles checklist stands in for Proficiency and the Domain Access table. Ticking is the user's draft. */
 export const WithRoles: Story = {
   args: {
     mode: 'edit',
     domains: undefined,
     roles: ROLES,
-    initial: { name: 'John', email: 'john@vdm.technology', status: 'Approved', proficiency: 'Senior', capacityPoints: 10, roles: ['senior'] },
+    proficiencyOptions: undefined,
+    initial: { name: 'John', email: 'john@vdm.technology', status: 'Approved', capacityPoints: 10, roles: ['senior'] },
   },
   play: async ({ args }) => {
     const d = within(body().getByRole('dialog', { name: 'John' }));
     await expect(d.queryByRole('heading', { name: 'Domain Access & Admin Rights' })).toBeNull();
+    /* Roles only: the roles carry seniority, so there is no Proficiency. */
+    await expect(d.queryByRole('combobox', { name: 'Proficiency' })).toBeNull();
     await expect(d.getByRole('group', { name: 'Roles' })).toBeVisible();
     await expect(d.getByRole('checkbox', { name: 'Senior Product Designer' })).toBeChecked();
     await userEvent.click(d.getByRole('checkbox', { name: 'Product Designer' }));
@@ -241,24 +251,50 @@ export const WithRoles: Story = {
   },
 };
 
-/** With `onRemoveAvatar`, a photo is Changed or Removed (Upload while there is none); focus lands on the button that is left. */
-export const ChangeAndRemovePhoto: Story = {
+const PHOTO = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+
+/** Remove takes effect on Submit: it clears the picture in the dialog, and the draft says `avatarRemoved`. Focus lands on the button that is left. */
+export const RemovePhotoOnSubmit: Story = {
   args: {
     mode: 'edit',
-    domains: undefined,
-    roles: ROLES,
     title: 'John',
-    initial: { name: 'John', email: 'john@vdm.technology', avatarSrc: 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==' },
-    onRemoveAvatar: fn(),
+    initial: { name: 'John', email: 'john@vdm.technology', avatarSrc: PHOTO },
   },
   play: async ({ args }) => {
     const d = within(body().getByRole('dialog', { name: 'John' }));
     await expect(d.getByRole('button', { name: 'Change profile photo' })).toBeVisible();
     await userEvent.click(d.getByRole('button', { name: 'Remove profile photo' }));
-    await expect(args.onRemoveAvatar).toHaveBeenCalledTimes(1);
-    /* No photo: Upload, and no Remove — and focus did not fall to the page. */
+    /* No photo: Upload, and no Remove — and focus did not fall to the page. Nothing has been sent yet. */
     await waitFor(() => expect(d.getByRole('button', { name: 'Upload profile photo' })).toHaveFocus());
     await expect(d.queryByRole('button', { name: 'Remove profile photo' })).toBeNull();
+    await expect(args.onSubmit).not.toHaveBeenCalled();
+    await userEvent.click(d.getByRole('button', { name: 'Submit' }));
+    await waitFor(() => expect(args.onSubmit).toHaveBeenCalledWith(expect.objectContaining({ avatarRemoved: true })));
   },
 };
 
+/** Cancel undoes a removal: closing without Submit sends nothing, and the photo is back the next time the dialog opens. */
+export const RemovePhotoThenClose: Story = {
+  args: { mode: 'edit', title: 'John', initial: { name: 'John', email: 'john@vdm.technology', avatarSrc: PHOTO } },
+  render: function Reopens(args) {
+    const [open, setOpen] = React.useState(true);
+    return (
+      <>
+        <button type="button" onClick={() => setOpen(true)}>
+          Open again
+        </button>
+        <UserAccountModal {...args} open={open} onClose={() => setOpen(false)} />
+      </>
+    );
+  },
+  play: async ({ args }) => {
+    const first = within(body().getByRole('dialog', { name: 'John' }));
+    await userEvent.click(first.getByRole('button', { name: 'Remove profile photo' }));
+    await userEvent.click(first.getByRole('button', { name: 'Close' }));
+    await waitFor(() => expect(body().queryByRole('dialog')).toBeNull());
+    await expect(args.onSubmit).not.toHaveBeenCalled();
+    await userEvent.click(body().getByRole('button', { name: 'Open again' }));
+    const again = within(await body().findByRole('dialog', { name: 'John' }));
+    await expect(again.getByRole('button', { name: 'Remove profile photo' })).toBeVisible();
+  },
+};
