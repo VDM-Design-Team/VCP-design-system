@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { DateFormatProvider, formatDate, formatDateTime, formatTime, useDateFormat } from '../../lib/format-date';
 import { DateField, formatMonth } from './DateField';
+import { Button } from '../../atoms/button';
+import { Field } from '../field';
 
 const meta = {
   title: 'Components/Forms/DateField',
@@ -192,6 +194,69 @@ export const RangeMode: Story = {
     await userEvent.click(first.getByRole('button', { name: /^6 / }));
     await userEvent.click(body.getByRole('button', { name: 'Apply' }));
     await expect(field).toHaveValue('04/05/2026 - 06/05/2026');
+  },
+};
+
+/**
+ * In a form, under a `Field`'s label. The label names it (by reference, as it names every control in a `Field`), never the placeholder. And **Apply and Clear only apply and clear**: they are
+ * `type="button"`, so the form around the calendar is not submitted. (They used to submit it: in the Holiday dialog that checked the form again before the date had landed, and the error stayed.)
+ */
+export const RangeInAForm: Story = {
+  render: () => {
+    const [range, setRange] = React.useState<{ start?: string; end?: string }>({});
+    const [saves, setSaves] = React.useState(0);
+    return (
+      <form
+        className="flex w-80 flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSaves((n) => n + 1);
+        }}
+      >
+        <Field label="Date">
+          {(c) => (
+            <DateField
+              {...c}
+              mode="range"
+              placeholder="Select period"
+              value={range.start}
+              rangeEnd={range.end}
+              onRangeChange={(start, end) => setRange({ start: start || undefined, end })}
+              picker={{ today: '2026-05-01' }}
+            />
+          )}
+        </Field>
+        <p className="text-body-sm-regular text-text-secondary">Times submitted: {saves}</p>
+        <div>
+          <Button type="submit" size="sm">
+            Save
+          </Button>
+        </div>
+      </form>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('combobox', { name: 'Date' });
+    await expect(field).toHaveAccessibleName('Date');
+    await expect(document.getElementById(field.getAttribute('aria-labelledby') ?? '')).toHaveTextContent('Date');
+    const body = within(document.body);
+
+    await userEvent.click(field);
+    const first = within(await body.findByRole('group', { name: 'First calendar' }));
+    await userEvent.click(first.getByRole('button', { name: /^4 / }));
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await expect(field).toHaveValue('04/05/2026');
+    await expect(c.getByText('Times submitted: 0')).toBeVisible();
+
+    await userEvent.click(field);
+    await userEvent.click(await body.findByRole('button', { name: 'Clear' }));
+    await expect(field).toHaveValue('');
+    await expect(c.getByText('Times submitted: 0')).toBeVisible();
+
+    /* The form's own button still submits it. */
+    await userEvent.click(c.getByRole('button', { name: 'Save' }));
+    await expect(c.getByText('Times submitted: 1')).toBeVisible();
   },
 };
 

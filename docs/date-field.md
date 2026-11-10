@@ -38,7 +38,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `placeholder` | `string` | `-` | While there is no date |
 | `invalid` / `disabled` | `boolean` | — | As `Input` |
 | `picker` | `DatePickerProps` | — | `min`, `max`, `today` … go to the calendar |
-| `id`, `aria-describedby`, `aria-label` | | | From a `Field` (it hands them over), or name it yourself |
+| `id`, `aria-labelledby`, `aria-describedby`, `aria-label` | | | From a `Field` (it hands the first three over: `{(c) => <DateField {...c} />}`), or name it yourself with `aria-label` |
 
 ## Weight
 
@@ -77,6 +77,8 @@ short list of named choices.
 - **A `combobox`, read-only.** It opens a calendar, so it takes the role that allows `aria-expanded`; being read-only, the
   keyboard cannot type a malformed date. Enter or Space opens the calendar.
 - The calendar opens with `strategy="fixed"`, so a scrolling dialog or table cannot clip it; Escape closes it and returns focus.
+- **Named by its label, not its placeholder.** In a `Field` it takes the label's id as `aria-labelledby` (as well as the label's `for`), so "Select period" is never what a screen reader calls it.
+- **In a form, the calendar never submits it.** Apply and Clear are `type="button"`; applying a range returns focus to the field.
 - "(est.)" is in the field's value, so a screen reader hears it with the date.
 
 ## Don't

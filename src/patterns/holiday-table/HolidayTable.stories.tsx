@@ -1,9 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
-import { HolidayTable, holidayDateStatus, type HolidayFilters, type HolidayRow } from './HolidayTable';
+import { HolidayTable, holidayDateStatus, holidayRowName, type HolidayFilters, type HolidayRow } from './HolidayTable';
 import { HolidayModal, type HolidayDraft } from '../holiday-modal';
 import { ConfirmDeleteModal } from '../confirm-delete-modal';
+import { DateFormatProvider } from '../../lib/format-date';
 
 const PEOPLE = ['Jordan Lee', 'Priya Nair', 'Sam Okafor'];
 
@@ -16,6 +17,7 @@ const ROWS: HolidayRow[] = [
 ];
 
 const USERS = PEOPLE.map((name) => ({ value: name, label: name }));
+const TEAMS = ['Design', 'Engineering', 'Operations'].map((name) => ({ value: name, label: name }));
 
 /** Figma's sprint list for the Period filter. */
 const SPRINTS = [
@@ -170,6 +172,108 @@ export const RowActions: Story = {
   },
 };
 
+/**
+ * Each row button says whose holiday it is, so two people's "Annual leave" are told apart by a screen reader: the holiday, then the first person it applies to, then "and 2 others" when there
+ * are more. A public holiday is everyone's, so its name is enough.
+ */
+export const RowActionNames: Story = {
+  args: {
+    rows: [
+      { id: 'a', name: 'Annual leave', start: '2026-05-04', end: '2026-05-08', type: 'individual', appliesTo: ['Jordan Lee'], allDay: true, recurring: false, addedBy: { name: 'Priya Nair' }, source: 'manual' },
+      { id: 'b', name: 'Annual leave', start: '2026-05-11', end: '2026-05-13', type: 'individual', appliesTo: [{ name: 'Sam Okafor' }], allDay: true, recurring: false, addedBy: { name: 'Priya Nair' }, source: 'manual' },
+      { id: 'c', name: 'Team offsite', start: '2026-05-20', type: 'team', appliesTo: PEOPLE, allDay: false, recurring: false, addedBy: { name: 'Priya Nair' }, source: 'manual' },
+      { id: 'd', name: 'Training', start: '2026-05-21', type: 'team', appliesTo: ['Jordan Lee', 'Sam Okafor'], allDay: true, recurring: false, addedBy: { name: 'Priya Nair' }, source: 'manual' },
+      ROWS[0],
+    ],
+  },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    await expect(c.getByRole('button', { name: 'Edit Annual leave, Jordan Lee' })).toBeVisible();
+    await expect(c.getByRole('button', { name: 'Delete Annual leave, Jordan Lee' })).toBeVisible();
+    await expect(c.getByRole('button', { name: 'Delete Annual leave, Sam Okafor' })).toBeVisible();
+    await expect(c.getByRole('button', { name: 'Edit Team offsite, Jordan Lee and 2 others' })).toBeVisible();
+    await expect(c.getByRole('button', { name: 'Delete Training, Jordan Lee and 1 other' })).toBeVisible();
+    /* Public: the name alone. */
+    await expect(c.getByRole('button', { name: 'Delete Labour Day' })).toBeVisible();
+    /* The right row is reported. */
+    await userEvent.click(c.getByRole('button', { name: 'Edit Annual leave, Sam Okafor' }));
+    await expect(args.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: 'b' }));
+  },
+};
+
+/** With the person's locale set (`DateFormatProvider`), the dates read in its order: en-US puts the month first. The en dash between a range's ends stays. */
+export const UsDates: Story = {
+  args: { rows: [{ ...ROWS[2], start: '2026-05-04', end: '2026-05-08' }] },
+  render: (args) => (
+    <DateFormatProvider locale="en-US">
+      <HolidayTable {...args} />
+    </DateFormatProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('05/04/2026 – 05/08/2026', { exact: false })).toBeVisible();
+    await expect(c.queryByText('04/05/2026 – 08/05/2026', { exact: false })).toBeNull();
+  },
+};
+
+/**
+ * About 1120 of room (a 1440 screen with the sidebar open) is less than the columns need, most of all when the Date column carries its status. The table scrolls sideways **inside its own
+ * wrapper**, the page does not, and Actions is reached by scrolling (or by tabbing to it, which brings it into view).
+ */
+export const ScrollsInsideItself: Story = {
+  args: { today: '2026-05-02' },
+  render: (args) => (
+    /* A page's row layout, 1120 wide at most: the table is a flex item in it. */
+    <div data-testid="page-row" className="flex w-full max-w-280">
+      <HolidayTable {...args} className="flex-1" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const page = c.getByTestId('page-row');
+    const scroller = c.getByRole('table', { name: 'Holidays' }).parentElement as HTMLElement;
+    /* The page does not scroll sideways, and the table is no wider than the room it was given. */
+    await expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
+    await expect(page.scrollWidth).toBeLessThanOrEqual(page.clientWidth);
+    /* The table does, inside its own wrapper. */
+    await expect(scroller.scrollWidth).toBeGreaterThan(scroller.clientWidth);
+    /* Actions is the last column: focusing a row's Delete scrolls the wrapper to it. */
+    const remove = c.getByRole('button', { name: 'Delete Labour Day' });
+    remove.focus();
+    await waitFor(() => expect(scroller.scrollLeft).toBeGreaterThan(0));
+    const box = remove.getBoundingClientRect();
+    const frame = scroller.getBoundingClientRect();
+    await expect(box.right).toBeLessThanOrEqual(frame.right + 1);
+    await expect(box.left).toBeGreaterThanOrEqual(frame.left - 1);
+  },
+};
+
+/** The page's side of Reset: it holds the filters, filters the rows by type as a page would, and puts the filters back when asked. */
+function Filtering({ filters: initial, ...args }: React.ComponentProps<typeof HolidayTable>) {
+  const [filters, setFilters] = React.useState<HolidayFilters>(initial);
+  const rows = args.rows.filter((row) => filters.type === '' || row.type === filters.type);
+  return <HolidayTable {...args} rows={rows} filters={filters} onFiltersChange={setFilters} onResetFilters={() => setFilters(NO_FILTERS)} />;
+}
+
+/**
+ * With the keyboard: the filter hides every row, so the table says "No holidays match your filters." with **Reset**. Enter on Reset puts the filters back, the rows return and the button
+ * goes, so focus moves to the first filter (Holiday type) instead of falling to the page.
+ */
+export const ResetKeepsFocus: Story = {
+  args: { rows: [ROWS[0], ROWS[1], ROWS[2]], filters: { type: 'team', period: null, user: 'all' } },
+  render: (args) => <Filtering {...args} />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('No holidays match your filters.')).toBeVisible();
+    c.getByRole('button', { name: 'Reset' }).focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(c.queryByRole('button', { name: 'Reset' })).toBeNull());
+    await expect(c.getByText('Labour Day')).toBeVisible();
+    await expect(document.body).not.toHaveFocus();
+    await expect(c.getByRole('combobox', { name: 'Holiday type' })).toHaveFocus();
+  },
+};
+
 /** The flagged name: a warning glyph whose tooltip says Hubstaff already has the entry (it opens on focus as well as hover). */
 export const DuplicateOfHubstaff: Story = {
   args: { rows: [ROWS[4]] },
@@ -203,10 +307,12 @@ export const PickingAPeriod: Story = {
 /** The whole page: Add Holiday opens the modal, the new holiday lands in the table; Edit opens it filled. */
 export const OnThePage: Story = {
   render: (args) => {
-    const [rows, setRows] = React.useState<readonly HolidayRow[]>(args.rows);
-    const [editing, setEditing] = React.useState<HolidayRow | null>(null);
+    /* A row, with what the page remembers to open it again in the dialog: what was picked in Applies to (teams, for a team holiday) and a partial day's times. */
+    type PageRow = HolidayRow & { picked?: string[]; from?: string; to?: string };
+    const [rows, setRows] = React.useState<readonly PageRow[]>(args.rows);
+    const [editing, setEditing] = React.useState<PageRow | null>(null);
     const [adding, setAdding] = React.useState(false);
-    const [deleting, setDeleting] = React.useState<HolidayRow | null>(null);
+    const [deleting, setDeleting] = React.useState<PageRow | null>(null);
     const root = React.useRef<HTMLDivElement>(null);
     /* The row's Delete goes with the row, so focus goes on: the next row's Delete, else the previous one's, else Add Holiday (the table only asks; this is the page's). */
     const focusAfter = React.useRef<{ name: string | null } | null>(null);
@@ -220,14 +326,18 @@ export const OnThePage: Story = {
       }, 0);
       return () => clearTimeout(timer);
     }, [rows, deleting]);
-    const toRow = (draft: HolidayDraft, id: string): HolidayRow => ({
+    const toRow = (draft: HolidayDraft, id: string): PageRow => ({
       id,
       name: draft.name,
       start: draft.start,
       end: draft.end,
       type: draft.type,
-      appliesTo: PEOPLE,
-      allDay: true,
+      /* An individual holiday is the people picked; a team's or a public one's is everyone here. */
+      appliesTo: draft.type === 'individual' ? draft.appliesTo : PEOPLE,
+      picked: draft.appliesTo,
+      allDay: draft.allDay,
+      from: draft.from,
+      to: draft.to,
       recurring: draft.recurring,
       addedBy: { name: 'Priya Nair' },
       source: 'manual',
@@ -245,7 +355,7 @@ export const OnThePage: Story = {
             if (!deleting) return;
             const at = rows.findIndex((r) => r.id === deleting.id);
             const neighbour = rows[at + 1] ?? rows[at - 1];
-            focusAfter.current = { name: neighbour ? `Delete ${neighbour.name}` : null };
+            focusAfter.current = { name: neighbour ? `Delete ${holidayRowName(neighbour)}` : null };
             setRows((now) => now.filter((r) => r.id !== deleting.id));
             setDeleting(null);
           }}
@@ -253,6 +363,8 @@ export const OnThePage: Story = {
         <HolidayModal
           open={adding}
           onClose={() => setAdding(false)}
+          teams={TEAMS}
+          people={USERS}
           onSubmit={(draft) => {
             setRows((now) => [toRow(draft, `new-${now.length}`), ...now]);
             setAdding(false);
@@ -261,7 +373,23 @@ export const OnThePage: Story = {
         <HolidayModal
           open={editing !== null}
           onClose={() => setEditing(null)}
-          holiday={editing ? { name: editing.name, recurring: editing.recurring, start: editing.start, end: editing.end ?? editing.start, type: editing.type } : undefined}
+          teams={TEAMS}
+          people={USERS}
+          holiday={
+            editing
+              ? {
+                  name: editing.name,
+                  recurring: editing.recurring,
+                  start: editing.start,
+                  end: editing.end ?? editing.start,
+                  type: editing.type,
+                  appliesTo: editing.picked ?? (editing.type === 'individual' ? editing.appliesTo.map((who) => (typeof who === 'string' ? who : (who.name ?? ''))) : []),
+                  allDay: editing.allDay,
+                  from: editing.from,
+                  to: editing.to,
+                }
+              : undefined
+          }
           onSubmit={(draft) => {
             setRows((now) => now.map((r) => (r.id === editing?.id ? toRow(draft, r.id) : r)));
             setEditing(null);
@@ -281,8 +409,16 @@ export const OnThePage: Story = {
     await userEvent.click(within(document.body).getByRole('button', { name: 'Apply' }));
     await userEvent.click(d.getByRole('combobox', { name: 'Holiday Type' }));
     await userEvent.click(await screen.findByRole('option', { name: 'Team Holiday' }));
+    /* A team holiday says which teams, and this one is part of a day. */
+    await userEvent.click(d.getByRole('button', { name: /^Applies to/ }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Design' }));
+    await userEvent.keyboard('{Escape}');
+    await userEvent.click(d.getByRole('switch', { name: 'All Day' }));
+    await userEvent.type(d.getByLabelText('From'), '09:00');
+    await userEvent.type(d.getByLabelText('To'), '12:30');
     await userEvent.click(d.getByRole('button', { name: 'Add' }));
     await waitFor(() => expect(c.getByText('Company Day')).toBeVisible());
+    await expect(within(c.getByRole('row', { name: /Company Day/ })).getByText('Partial Day')).toBeVisible();
 
     /* Delete asks first: Cancel keeps the holiday, Delete removes it, and focus does not fall to the page. */
     await userEvent.click(c.getByRole('button', { name: 'Delete Labour Day' }));
@@ -295,6 +431,8 @@ export const OnThePage: Story = {
     await waitFor(() => expect(c.queryByText('Labour Day')).toBeNull());
     await waitFor(() => expect(document.body).not.toHaveFocus());
     await expect(c.getAllByRole('button').includes(document.activeElement as HTMLElement)).toBe(true);
+    /* It is on the Delete of the row that followed Labour Day, by its full name. */
+    await waitFor(() => expect(c.getByRole('button', { name: 'Delete Some Holiday Name, Jordan Lee and 2 others' })).toHaveFocus());
   },
 };
 

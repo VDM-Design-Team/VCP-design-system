@@ -23,7 +23,8 @@ export const formatMonth = (iso: string): string => {
  * It is `Input` as the trigger — read-only, so the keyboard cannot type a malformed date — with a
  * `DatePicker` in a `Popover`. The field is a `combobox` (it opens a calendar, and that role allows the
  * expanded state the popover sets). The calendar opens with `strategy="fixed"`, so a scrolling dialog or table
- * cannot clip it, and picking a day closes it.
+ * cannot clip it, and picking a day closes it. In a form, the calendar's buttons (Apply and Clear among them) are
+ * `type="button"`: they never submit the form around the field.
  *
  * The chosen date is **medium** weight and the placeholder regular — the rule `Select` and `SearchSelect` follow — so a date
  * field reads the same as the selects beside it. A **filter** passes `emphasis="regular"` (as its `Select`s do), so a row of
@@ -78,8 +79,9 @@ export interface DateFieldProps {
   placeholder?: string;
   /** Names the field when no `Field` label does. */
   'aria-label'?: string;
-  /** From a `Field`: the control's id, and the message it is described by. */
+  /** From a `Field`: the control's id, the label that names it, and the message it is described by. */
   id?: string;
+  'aria-labelledby'?: string;
   'aria-describedby'?: string;
   invalid?: boolean;
   /** From a `Field` with an error: the field is invalid, as `invalid` says. */
@@ -111,6 +113,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       picker,
       className,
       'aria-label': ariaLabel,
+      'aria-labelledby': labelledBy,
       'aria-describedby': describedBy,
     },
     ref,
@@ -149,6 +152,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             disabled={disabled}
             invalid={invalid}
             aria-label={ariaLabel}
+            /* A `Field`'s label, by reference (as it names every other control), so the placeholder is never what names the field. */
+            aria-labelledby={labelledBy}
             aria-describedby={describedBy}
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
             placeholder={placeholder}

@@ -57,6 +57,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 **Two empty messages**, under the headers (the filters and paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset** (`onResetFilters`) when a filter is on and nothing matches.
 
+**Reset hands focus on.** Once the page puts the filters back, Reset goes; so after calling `onResetFilters` the table moves focus to its first filter (Holiday type) rather than let it fall to the page.
+
+## Width
+
+The columns need more room than a 1440 screen with the sidebar open gives them (about 1120), most of all when the Date column carries its status. The table then **scrolls sideways inside its own wrapper** and the page does not: the root can shrink (`min-w-0`) when it is a flex or grid item. Actions is the last column, reached by scrolling or by tabbing to it (focus brings it into view).
+
 ## Tokens
 
 None new. The day count and the date status are `Badge`s (pill, 12): the tonal fill with its own outline (info for the count and Upcoming, success for Today, neutral for Past), since the outline-only style falls under 4.5:1 in dark. **Edit and delete are 40** (`IconButton` `md`, the touch minimum): the delete is `critical-tonal`, so its hover and pressed fills and its glyph change in every state. All Day / Partial Day are `Tag`s at 12 (`sm`), as Figma's Medium. The Name column has a 184 floor (`minWidth`); Recurring is medium weight, like Added By.
@@ -64,6 +70,8 @@ None new. The day count and the date status are `Badge`s (pill, 12): the tonal f
 ## Accessibility
 
 - A real `<table>` (`DataTable`): headers with `scope`, `aria-sort` on Date. Every icon button names its row ("Edit Labour Day", "Delete Labour Day").
+- **A row button also says whose holiday it is**, so two people's "Annual leave" are told apart: "Edit Annual leave, Jordan Lee", "Delete Annual leave, Sam Okafor". The name is the holiday, then the first person it applies to, then "and 2 others" when there are more. A public holiday is everyone's, so its name is enough ("Delete Labour Day").
+- Pressing **Reset** never drops focus: it moves to the Holiday type filter.
 - The flagged name's glyph is a focusable `img` named "Duplicate of a Hubstaff entry" and its tooltip opens on focus as well as hover.
 - Type, source, all-day and the date status say it in words; none rides on colour.
 
@@ -72,3 +80,4 @@ None new. The day count and the date status are `Badge`s (pill, 12): the tonal f
 - **Don't filter, sort or page inside the table.**
 - **Don't map a type or a source here**: `HolidayTypeTag` and `HolidaySourceBadge` own them.
 - **Don't offer Edit on a system entry.**
+- **Don't give it a fixed or minimum width** to stop it scrolling: it scrolls inside itself so the page does not.

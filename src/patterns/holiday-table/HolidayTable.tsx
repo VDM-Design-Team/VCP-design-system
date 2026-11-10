@@ -34,6 +34,9 @@ import { useDateFormat } from '../../lib/format-date';
  * - **Dates read as every date does** (`useDateFormat`: dd/mm/yyyy, or the person's locale). A range reads "01/05/2026 – 03/05/2026" with an en dash.
  * - **The Date column carries the status too** when the caller says what today is (`today`, ISO): **Upcoming** (info), **Today** (success) or **Past** (neutral), beside the date and its day-count pill, as Figma's `Date Status` badge.
  * - **Edit and delete are 40** (`IconButton` `md`, the touch minimum), the delete `critical-tonal`; the table only *asks*: confirming a delete (`ConfirmDeleteModal`) is the page's.
+ * - **Each row button says whose holiday it is** ("Edit Annual leave, Jordan Lee", "… and 2 others"), so two people's "Annual leave" are told apart; a public holiday's name is enough.
+ * - **Reset hands focus on.** It goes once the filters are back, so after calling `onResetFilters` the table moves focus to its first filter (Holiday type) rather than let it fall to the page.
+ * - **Narrower than its columns, it scrolls inside itself**: the table's own wrapper scrolls sideways (Actions is reached by scrolling, or by tabbing to it) and the page does not.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.
@@ -136,6 +139,18 @@ function DateStatus({ start, end, today }: { start: string; end: string; today: 
   );
 }
 
+/**
+ * What a row's buttons call it: the holiday, then who it applies to, so two people's "Annual leave" are told apart ("Edit Annual leave, Jordan Lee"). More than one person reads
+ * "Jordan Lee and 2 others"; a public holiday is everyone's, so its name is enough.
+ */
+export const holidayRowName = (row: HolidayRow): string => {
+  const [first, ...rest] = row.appliesTo;
+  if (row.type === 'public' || first === undefined) return row.name;
+  const person = typeof first === 'string' ? first : first.name;
+  if (!person) return row.name;
+  return rest.length ? `${row.name}, ${person} and ${rest.length} ${rest.length === 1 ? 'other' : 'others'}` : `${row.name}, ${person}`;
+};
+
 const dayCount = (start: string, end: string) => {
   const ms = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
   return Math.round(ms / 86_400_000) + 1;
@@ -167,6 +182,13 @@ export function HolidayTable({
   ...props
 }: HolidayTableProps) {
   const dates = useDateFormat();
+  /* The first filter: where focus goes when Reset is pressed, since Reset itself then leaves the page. */
+  const typeFilterRef = React.useRef<HTMLDivElement>(null);
+  const resetFilters = () => {
+    onResetFilters?.();
+    /* Reset is only there while the filters hide every row, so once the page puts them back it goes: focus moves to the first filter rather than falling to the page. */
+    typeFilterRef.current?.querySelector('button')?.focus();
+  };
   const columns: DataTableColumn<HolidayRow>[] = [
     {
       key: 'name',
@@ -255,9 +277,9 @@ export function HolidayTable({
         <span className="flex items-center gap-2">
           {/* The system's own entries can be removed but not changed. */}
           {row.addedBy !== 'system' && (
-            <IconButton icon="note-pencil" variant="tonal" size="md" shape="round" label={`Edit ${row.name}`} onClick={() => onEdit?.(row)} />
+            <IconButton icon="note-pencil" variant="tonal" size="md" shape="round" label={`Edit ${holidayRowName(row)}`} onClick={() => onEdit?.(row)} />
           )}
-          <IconButton icon="trash" variant="critical-tonal" size="md" shape="round" label={`Delete ${row.name}`} onClick={() => onDelete?.(row)} />
+          <IconButton icon="trash" variant="critical-tonal" size="md" shape="round" label={`Delete ${holidayRowName(row)}`} onClick={() => onDelete?.(row)} />
         </span>
       ),
     });
@@ -274,10 +296,12 @@ export function HolidayTable({
   const paginated = pageCount !== undefined && onPageChange !== undefined;
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    /* `min-w-0`: as a flex or grid item it may be narrower than its columns, so the table scrolls inside its own wrapper and the page does not. */
+    <div className={cn('flex min-w-0 flex-col gap-6', className)} {...props}>
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
           <SearchSelect
+            ref={typeFilterRef}
             className="w-60"
             emphasis="regular"
             searchable={false}
@@ -336,7 +360,7 @@ export function HolidayTable({
               title="No holidays match your filters."
               action={
                 onResetFilters && (
-                  <Button size="sm" variant="secondary" onClick={onResetFilters}>
+                  <Button size="sm" variant="secondary" onClick={resetFilters}>
                     Reset
                   </Button>
                 )
