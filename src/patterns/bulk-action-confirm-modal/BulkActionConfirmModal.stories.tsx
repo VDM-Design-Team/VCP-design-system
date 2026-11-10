@@ -180,7 +180,7 @@ export const RejectPending: Story = {
   },
 };
 
-/** Reject: the same, with a red Confirm — it is the destructive one. */
+/** Reject: the same, with a red Confirm and a grey Cancel — the destructive one. Both rejects (this and Reject Pending) are red. */
 export const Reject: Story = {
   render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="reject" reasons={HANDOFF_REASONS} items={ITEMS} />,
   play: async () => {
@@ -188,6 +188,33 @@ export const Reject: Story = {
     const confirm = d.getByRole('button', { name: 'Confirm' });
     await expect(getComputedStyle(confirm).backgroundColor).not.toBe(getComputedStyle(d.getByRole('button', { name: 'Cancel' })).backgroundColor);
     await expect(confirm.className).toContain('critical');
+    /* Grey (neutral outline) beside the red answer, not the blue outline. */
+    await expect(d.getByRole('button', { name: 'Cancel' }).className).toContain('neutral-outline');
+  },
+};
+
+/** Reject Pending is red too, with the same grey Cancel. */
+export const RejectPendingIsRed: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="reject-pending" reasons={REASONS} items={ITEMS} />,
+  play: async () => {
+    const d = dialog('Reject 2 Pending Added Values');
+    await expect(d.getByRole('button', { name: 'Confirm' }).className).toContain('critical');
+    await expect(d.getByRole('button', { name: 'Cancel' }).className).toContain('neutral-outline');
+  },
+};
+
+/** The status an action changes to is a `StatusTag`: a spine status keeps its colour, a domain step the shared one. */
+export const StatusIsAStatusTag: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="status" value="In Progress" items={ITEMS} />,
+  play: async () => {
+    const d = dialog('Change Status for 2 Added Values');
+    const tag = d.getByText('In Progress');
+    /* In Progress is the info tone, not the neutral grey a plain `Tag` would be. */
+    await expect(tag.className + (tag.parentElement?.className ?? '')).toContain('info');
   },
 };
 
@@ -201,9 +228,9 @@ export const One: Story = {
   },
 };
 
-/** Confirm is in flight: it spins and Cancel locks. */
+/** Confirm is in flight: it spins, Cancel locks and nothing closes the dialog until it is done. */
 export const Confirming: Story = {
-  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="urgency" value="Low" items={ITEMS} confirming />,
+  render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={fn()} action="urgency" value="Low" items={ITEMS} loading />,
   play: async () => {
     await expect(dialog('Change Urgency for 2 Added Values').getByRole('button', { name: 'Cancel' })).toBeDisabled();
   },

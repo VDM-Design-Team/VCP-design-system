@@ -1,23 +1,22 @@
 # BulkActionConfirmModal *(pattern)*
 
 The question after a bulk choice, **one component for every action**. You pass the `action` and the selected Added Values; it draws the title, the field the action collects (or the value it
-changes to), a collapsible **List of Added Values** with a field per Added Value where the action has one, and **Cancel** / **Confirm** (red for **Reject**). Built to Figma's
+changes to), a collapsible **List of Added Values** with a field per Added Value where the action has one, and **Cancel** / **Confirm** (both rejects are red: a grey Cancel and a red Confirm). Built to Figma's
 `Bulk_Action_Accordian_Confirmation_Popup` — all twelve of its variants.
 
 ## Composed of
 
 | Piece | Tier |
 |---|---|
-| `Button` | atom |
 | `Checkbox` | atom |
 | `Divider` | atom |
 | `Icon` | atom |
 | `Input` | atom |
 | `Select` | atom |
-| `Tag` | atom |
 | `CycleTag` | component |
 | `Field` | component |
 | `Modal` | component |
+| `StatusTag` | component |
 | `TypeTag` | component |
 | `UrgencyTag` | component |
 
@@ -41,12 +40,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `urgency` | `value` (`'Low'`…) | Change Urgency for 2 Added Values | "Selected AVs will be updated to:" and the value as an `UrgencyTag` | nothing |
 | `type` | `value` (`'Type 1'`…) | Change Type for 2 Added Values | …as a `TypeTag` | nothing |
 | `cycle` | `value` `{ code, start, end }` | Change Cycle for 2 Added Values | …as a `CycleTag` ("C18 (Sep 20, 2025 - Oct 02, 2026)") | nothing |
-| `status` | `value` (the status) | Change Status for 2 Added Values | …as a `Tag`. **Figma draws no popup for the other statuses** (In Progress, For QA…); this is the plain one | nothing |
+| `status` | `value` (the status) | Change Status for 2 Added Values | …as a `StatusTag` (a spine status in its own colour, a domain step in the shared one). **Figma draws no popup for the other statuses** (In Progress, For QA…); this is the plain one | nothing |
 | `backlog` | — | Move 2 Added Values to Backlog | **Feedback** (optional), and per Added Value "Uses bulk reason unless overridden" | `{ value, overrides, detail?, overrideDetails? }` |
 | `accept-pending` | `domain` | Accept 2 Pending Added Values | `development`: a **Multipart Value** checkbox (with its description), bulk and per Added Value. Otherwise nothing | `{ value: boolean, overrides }`, or `null` |
 | `accept` | `domain` | Accept 2 Added Values | `development`: **Require Cypress Test Script**; `design`: **Copy to Dev**; otherwise nothing | `{ value: boolean, overrides }`, or `null` |
 | `reject-pending` | `reasons` | Reject 2 Pending Added Values | **Rejection Reason** (a select of your `reasons`: `{ value, label, explanation?, other? }`; the chosen reason's `explanation` shows under it, and the one marked `other` shows an optional note field instead), bulk and per Added Value. **Required** | `{ value, overrides, detail?, overrideDetails? }` |
-| `reject` | `reasons` | Reject 2 Added Values | The same, with a **red Confirm** | `{ value, overrides, detail?, overrideDetails? }` |
+| `reject` | `reasons` | Reject 2 Added Values | The same: **both rejects are red** (a grey Cancel, a red Confirm) | `{ value, overrides, detail?, overrideDetails? }` |
 
 `domain` is `development`, `design` or `other`; a single Added Value reads singular ("Accept 1 Pending Added Value").
 
@@ -68,7 +67,7 @@ The bulk field "will be applied to all selected Added Values unless overridden b
 | `onConfirm` | by action | required | The page's cue to make the change, then close, and say so (a toast, or `BulkActionFailedModal`) |
 | `items[].href` | `string` | — | Makes that reference a blue link that opens the Added Value in a new tab; without it the reference is plain grey text |
 | `defaultExpanded` | `boolean` | `false` | Open the list at first. Each time the dialog opens, everything starts again |
-| `confirming` | `boolean` | — | Confirm spins; Cancel locks |
+| `loading` | `boolean` | — | Confirm spins; Cancel locks; nothing closes the dialog until it is done |
 
 ## The list
 
@@ -76,7 +75,7 @@ Collapsed until asked for (a disclosure button, `aria-expanded`). Each line is t
 
 ## Tokens
 
-`Modal` (`lg`, 640: Figma draws 592, between `md` 512 and `lg`; no ✕, Cancel closes). **Cancel** is `secondary`, **Confirm** `primary` (`danger` for `reject`). The fields are the system's own `Input`, `Select` and
+`Modal` (`lg`, 640: Figma draws 592, between `md` 512 and `lg`; no ✕, Cancel closes). The footer is `ModalCancel` and `ModalConfirm` (40 high). **Both rejects** (`reject` and `reject-pending`) use the dialog's `critical` tone: a grey Cancel and a red Confirm; every other action is `secondary` and `primary`. The fields are the system's own `Input`, `Select` and
 `Checkbox`; a checkbox sits in a bordered box as Figma draws it.
 
 ## Accessibility

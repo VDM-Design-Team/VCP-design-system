@@ -1,21 +1,20 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
 import { Checkbox } from '../../atoms/checkbox';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Select, type SelectOption } from '../../atoms/select';
-import { Tag } from '../../atoms/tag';
 import { CycleTag } from '../../components/cycle-tag';
 import { Field } from '../../components/field';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
+import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
 import { TypeTag, type AVType } from '../../components/type-tag';
 import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 
 /**
  * BulkActionConfirmModal — the question after a bulk choice, **one component for every action**: you pass the `action` and the selected Added Values, and it draws the rest — the
  * title ("Move 2 Added Values to Backlog"), the field the action collects (or the value it changes to), a collapsible **List of Added Values** with a field per Added Value where the
- * action has one, and **Cancel** / **Confirm** (red for **Reject**). Built to Figma's `Bulk_Action_Accordian_Confirmation_Popup` — all twelve of its variants.
+ * action has one, and **Cancel** / **Confirm** (both rejects are red: a grey Cancel and a red Confirm, the dialog's `critical` tone). Built to Figma's `Bulk_Action_Accordian_Confirmation_Popup` — all twelve of its variants.
  *
  * | `action` | Title | What it shows | What `onConfirm` gets |
  * |---|---|---|---|
@@ -23,7 +22,7 @@ import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
  * | `backlog` | "Move 2 Added Values to Backlog" | **Feedback** (optional) | `{ value, overrides }` — a reason, text |
  * | `accept-pending` | "Accept 2 Pending Added Values" | `domain="development"`: **Multipart Value** checkbox; otherwise nothing | `{ value, overrides }` (boolean), or `null` |
  * | `accept` | "Accept 2 Added Values" | `development`: **Require Cypress Test Script**; `design`: **Copy to Dev**; otherwise nothing | `{ value, overrides }` (boolean), or `null` |
- * | `reject-pending`, `reject` | "Reject 2 Pending Added Values" / "Reject 2 Added Values" | **Rejection Reason** (a select of your `reasons`), required; Confirm is red for `reject` | `{ value, overrides, detail?, overrideDetails? }` — the chosen reason, and the note typed under Other |
+ * | `reject-pending`, `reject` | "Reject 2 Pending Added Values" / "Reject 2 Added Values" | **Rejection Reason** (a select of your `reasons`), required; **both rejects are red**: a grey Cancel and a red Confirm (the dialog's `critical` tone) | `{ value, overrides, detail?, overrideDetails? }` — the chosen reason, and the note typed under Other |
  *
  * - **A bulk field and one per Added Value.** The bulk field "will be applied to all selected Added Values unless overridden below": in the list each Added Value has its own, which
  *   starts as the bulk one and, once changed, **overrides** it. `onConfirm` gets `{ value, overrides }`: the bulk value, and `overrides[ref]` for each Added Value that differs.
@@ -75,8 +74,8 @@ interface BaseProps {
   items: readonly BulkActionAV[];
   /** Open the list at first. */
   defaultExpanded?: boolean;
-  /** Confirm is in flight: it spins and Cancel locks. */
-  confirming?: boolean;
+  /** Confirm is in flight: it spins, Cancel locks, and nothing closes the dialog until it is done. */
+  loading?: boolean;
 }
 
 export type BulkActionConfirmModalProps = BaseProps &
@@ -186,7 +185,7 @@ const specFor = (props: BulkActionConfirmModalProps): Spec | null => {
 type Value = string | boolean;
 
 export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
-  const { open, onClose, items, defaultExpanded = false, confirming } = props;
+  const { open, onClose, items, defaultExpanded = false, loading } = props;
   const spec = specFor(props);
   const [expanded, setExpanded] = React.useState(defaultExpanded);
   const [bulk, setBulk] = React.useState<Value>(spec?.kind === 'check' ? false : '');
@@ -269,7 +268,8 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
     ) : props.action === 'cycle' ? (
       <CycleTag code={props.value.code} start={props.value.start} end={props.value.end} />
     ) : props.action === 'status' ? (
-      <Tag>{props.value}</Tag>
+      /* A spine status keeps its own colour and a domain step the shared one: `StatusTag` owns that mapping. */
+      (AV_STATUSES as readonly string[]).includes(props.value) ? <StatusTag status={props.value as AVStatus} /> : <StatusTag custom={props.value} />
     ) : null;
 
   /* Under a chosen rejection reason: its explanation, or — for Other — an optional note in its place. */
@@ -360,7 +360,7 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
       return (
         <div className="rounded-sm border border-stroke-default p-1">
           <Checkbox
-            label={<span aria-label={`${spec.label} for ${item.ref}`}>{spec.label}</span>}
+            label={spec.label}
             aria-label={`${spec.label} for ${item.ref}`}
             checked={Boolean(effective(item.ref))}
             onChange={(checked) => setOverride(item.ref, checked)}
@@ -391,14 +391,16 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
       title={titleFor(props, items.length)}
       size="lg"
       showClose={false}
+      /* Both rejects are red: a grey Cancel and a red answer. */
+      tone={props.action === 'reject' || props.action === 'reject-pending' ? 'critical' : undefined}
+      /* It asks for a reason, so it is a form to fill in, not an alert to answer: the critical tone's default `alertdialog` would want a description it does not have. */
+      role="dialog"
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" disabled={confirming} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm" type="button" variant={props.action === 'reject' ? 'danger' : 'primary'} loading={confirming} onClick={confirm}>
+          <ModalCancel disabled={loading} />
+          <ModalConfirm loading={loading} onClick={confirm}>
             Confirm
-          </Button>
+          </ModalConfirm>
         </>
       }
     >
