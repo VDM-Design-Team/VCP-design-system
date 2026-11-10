@@ -69,7 +69,9 @@ on blur.
 
 ## The bar's status
 
-It is the Domain Budget card's, once (`budgetStatus`): under 75% used is brand blue, 75–99% warning, 100% and over critical.
+It is the Domain Budget card's, once (`budgetStatus`), drawn as **Figma's table draws it: brand blue, or its bright red
+(`alert`, `accent.critical.outline.border`) at 100% and over. No amber**: the card has a 75–99% warning, the table does not
+(decided 9 Nov 2026: follow Figma on each surface).
 Importing it means this table and `DomainBudgetSummary` can never disagree about when a budget is in trouble. A domain with no
 allocation and nothing consumed reads 0%; with no allocation and points consumed, it reads over budget.
 
