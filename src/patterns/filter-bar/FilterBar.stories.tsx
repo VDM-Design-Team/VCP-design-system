@@ -156,18 +156,19 @@ export const Default: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByRole('button', { name: 'Remove VCP' })).toBeVisible();
 
-    /* Period: a preset closes the calendar and fills the field. */
-    await userEvent.click(canvas.getByRole('button', { name: 'Period' }));
+    /* Date (the period): a preset closes the calendar and fills the field. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Date' }));
     await userEvent.click(within(canvasElement.ownerDocument.body).getByRole('button', { name: 'Last 7 days' }));
     await waitFor(() =>
-      expect(canvas.getByRole('button', { name: /Period, 09\/09\/2026-15\/09\/2026/ })).toBeVisible(),
+      expect(canvas.getByRole('button', { name: /Date, 09\/09\/2026-15\/09\/2026/ })).toBeVisible(),
     );
 
     /* Users: a searchable list that then says who. */
     await userEvent.click(canvas.getByRole('button', { name: /^Assignee/ }));
     await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
-    /* Filled, the field still says which person it is. */
-    await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveTextContent('Assignee: Amy Lee');
+    /* Filled, the label above still says which person it is; the field holds the name (Figma 940:171256). */
+    await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveTextContent('Amy Lee');
+    await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveAccessibleName('Assignee Amy Lee');
 
     /* Reset clears every value the page holds. */
     await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
@@ -189,14 +190,11 @@ export const FiltersHidden: Story = {
     await expect(toggle).toHaveAttribute('aria-expanded', 'true');
     await expect(canvas.getByRole('combobox', { name: /^Status/ })).toBeVisible();
 
-    const searchWidth = () => canvas.getByRole('searchbox').parentElement!.getBoundingClientRect().width;
-    const withFilters = searchWidth();
-
     await userEvent.click(toggle);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.getByRole('combobox', { name: /^Status/, hidden: true })).not.toBeVisible();
-    /* The search takes the room the fields leave. */
-    await expect(searchWidth()).toBeGreaterThan(withFilters);
+    /* The search keeps its row; the labels fold away with their fields. */
+    await expect(canvas.getByText('Status', { selector: 'label' })).not.toBeVisible();
 
     await userEvent.click(toggle);
     await expect(canvas.getByRole('combobox', { name: /^Status/ })).toHaveTextContent('Pending');
@@ -241,7 +239,7 @@ export const MultipleUsers: Story = {
     await userEvent.click(field);
     await userEvent.click(canvas.getByRole('option', { name: 'Adam' }));
     await userEvent.click(canvas.getByRole('option', { name: 'Amy Lee' }));
-    await expect(field).toHaveTextContent('Watchers: 2 selected');
+    await expect(field).toHaveTextContent('2 selected');
     /* Said once to a screen reader: its name is its label and its value, the prefix is only drawn. */
     await expect(field).toHaveAccessibleName('Watchers 2 selected');
   },
