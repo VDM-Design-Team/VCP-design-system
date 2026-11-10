@@ -15,6 +15,7 @@ the Actions header, and the pages beneath. Built to Figma's `Settings_Users`.
 | `AccountStatusTag` | component |
 | `DataTable` | component |
 | `EmptyState` | component |
+| `TableCard` | component |
 | `UserLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -66,7 +67,7 @@ In an `EmptyState`: "No users yet.", or while a search is typed, **No users matc
 
 ## Tokens
 
-As `AccountsTable`: `surface.elevated` card, `radius.md`, `space.16`; Date Added `body-sm-medium` `text.tertiary`; the status is `AccountStatusTag`'s (`sm`; success, warning or neutral). Both buttons are the primary `sm` `Button` (36 high).
+The card is `TableCard`'s, as `AccountsTable`'s is (`surface.elevated`, `radius.md`, `space.24`), with the search in its filters and the pagination in its footer; Date Added `body-sm-medium` `text.tertiary`; the status is `AccountStatusTag`'s (`sm`; success, warning or neutral). Both buttons are the primary `sm` `Button` (36 high).
 
 **Differences from Figma, on purpose.** The search has a magnifying glass (as `PlanningFilters`' does). Figma draws only "approved"; Pending and Inactive, and their
 colours, were decided with design and live in `AccountStatusTag`. Statuses read capitalised ("Approved").
