@@ -30,6 +30,7 @@ export * from './planning-filters';
 export * from './report-problem-modal';
 export * from './notification-inbox';
 export * from './notification-popover';
+export * from './personal-info-form';
 export * from './budget-table';
 export * from './dashboard-filters';
 export * from './dashboard-header';
