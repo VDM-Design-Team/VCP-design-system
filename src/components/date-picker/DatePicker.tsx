@@ -739,16 +739,17 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
             ))}
           </div>
           {/* Outside `calendar()`, so it is the same button in the same place in
-              the day and month views. */}
+              the day and month views. `type="button"`: a picker inside a form (a `DateField` in a dialog)
+              must not submit that form when Apply or Clear is pressed. */}
           {(clearable || onApply) && (
             <div className="flex justify-end gap-2">
               {clearable && (
-                <Button variant="secondary" size="sm" onClick={onClear} className="cursor-pointer">
+                <Button type="button" variant="secondary" size="sm" onClick={onClear} className="cursor-pointer">
                   {clearLabel}
                 </Button>
               )}
               {onApply && (
-                <Button size="sm" onClick={onApply} className="cursor-pointer">
+                <Button type="button" size="sm" onClick={onApply} className="cursor-pointer">
                   {applyLabel}
                 </Button>
               )}

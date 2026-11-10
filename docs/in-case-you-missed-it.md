@@ -9,7 +9,7 @@ card (with an ⓘ that says what it is for) over a row of `InCaseYouMissedItCard
 | Piece | Tier |
 |---|---|
 | `Icon` | sub-atomic |
-| `InfoHint` | component |
+| `CardHeader` | component |
 | `InCaseYouMissedItCard` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.

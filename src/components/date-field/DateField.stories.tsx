@@ -1,8 +1,10 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { DateFormatProvider } from '../../lib/format-date';
+import { DateFormatProvider, formatDate, formatDateTime, formatTime, useDateFormat } from '../../lib/format-date';
 import { DateField, formatMonth } from './DateField';
+import { Button } from '../../atoms/button';
+import { Field } from '../field';
 
 const meta = {
   title: 'Components/Forms/DateField',
@@ -166,7 +168,7 @@ export const ValueWeight: Story = {
 };
 
 /**
- * Range mode: two clicks on a two-month calendar, then **Apply**. Nothing reaches the page until then; **Clear** empties it. The field reads the range in the day format it is given.
+ * Range mode: two clicks on a two-month calendar, then **Apply**. Nothing reaches the page until then; **Clear** empties it. The field reads the range as every date reads, dd/mm/yyyy.
  */
 export const RangeMode: Story = {
   render: () => {
@@ -177,7 +179,6 @@ export const RangeMode: Story = {
         placeholder="Select period"
         value={range.start}
         rangeEnd={range.end}
-        formatDate={(iso) => iso.split('-').reverse().join('/')}
         onRangeChange={(start, end) => setRange({ start: start || undefined, end })}
         picker={{ today: '2026-05-01' }}
       />
@@ -193,6 +194,69 @@ export const RangeMode: Story = {
     await userEvent.click(first.getByRole('button', { name: /^6 / }));
     await userEvent.click(body.getByRole('button', { name: 'Apply' }));
     await expect(field).toHaveValue('04/05/2026 - 06/05/2026');
+  },
+};
+
+/**
+ * In a form, under a `Field`'s label. The label names it (by reference, as it names every control in a `Field`), never the placeholder. And **Apply and Clear only apply and clear**: they are
+ * `type="button"`, so the form around the calendar is not submitted. (They used to submit it: in the Holiday dialog that checked the form again before the date had landed, and the error stayed.)
+ */
+export const RangeInAForm: Story = {
+  render: () => {
+    const [range, setRange] = React.useState<{ start?: string; end?: string }>({});
+    const [saves, setSaves] = React.useState(0);
+    return (
+      <form
+        className="flex w-80 flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSaves((n) => n + 1);
+        }}
+      >
+        <Field label="Date">
+          {(c) => (
+            <DateField
+              {...c}
+              mode="range"
+              placeholder="Select period"
+              value={range.start}
+              rangeEnd={range.end}
+              onRangeChange={(start, end) => setRange({ start: start || undefined, end })}
+              picker={{ today: '2026-05-01' }}
+            />
+          )}
+        </Field>
+        <p className="text-body-sm-regular text-text-secondary">Times submitted: {saves}</p>
+        <div>
+          <Button type="submit" size="sm">
+            Save
+          </Button>
+        </div>
+      </form>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('combobox', { name: 'Date' });
+    await expect(field).toHaveAccessibleName('Date');
+    await expect(document.getElementById(field.getAttribute('aria-labelledby') ?? '')).toHaveTextContent('Date');
+    const body = within(document.body);
+
+    await userEvent.click(field);
+    const first = within(await body.findByRole('group', { name: 'First calendar' }));
+    await userEvent.click(first.getByRole('button', { name: /^4 / }));
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await expect(field).toHaveValue('04/05/2026');
+    await expect(c.getByText('Times submitted: 0')).toBeVisible();
+
+    await userEvent.click(field);
+    await userEvent.click(await body.findByRole('button', { name: 'Clear' }));
+    await expect(field).toHaveValue('');
+    await expect(c.getByText('Times submitted: 0')).toBeVisible();
+
+    /* The form's own button still submits it. */
+    await userEvent.click(c.getByRole('button', { name: 'Save' }));
+    await expect(c.getByText('Times submitted: 1')).toBeVisible();
   },
 };
 
@@ -239,5 +303,68 @@ export const InThePersonsLocale: Story = {
   ),
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).getByRole('combobox', { name: 'Due date' })).toHaveValue('03/12/2026');
+  },
+};
+
+/** A component that shows a time asks the hook; the provider's locale orders the date and its time zone places an instant. The clock is 24-hour whatever the locale. */
+function WhenShown({ iso }: { iso: string }) {
+  const dates = useDateFormat();
+  return <time dateTime={iso}>{dates.dateTime(iso)}</time>;
+}
+
+export const DateAndTime: Story = {
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <WhenShown iso="2026-06-10T14:37:00" />
+      <DateFormatProvider locale="en-US">
+        <WhenShown iso="2026-06-10T14:37:00" />
+      </DateFormatProvider>
+      <DateFormatProvider timeZone="Europe/Athens">
+        <WhenShown iso="2026-06-10T11:37:00Z" />
+      </DateFormatProvider>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    /* No provider: dd/mm/yyyy and 24-hour. */
+    await expect(c.getAllByText('10/06/2026 14:37')).toHaveLength(2);
+    /* A US locale reorders the date ("06/10/2026") and keeps the 24-hour clock. */
+    await expect(c.getByText('06/10/2026 14:37')).toBeVisible();
+  },
+};
+
+/** The formatter's rules (hidden, tested): zone-less clocks read as written, instants are placed in the zone given, date-only is a date, junk comes back. */
+export const DateAndTimeRules: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <div />,
+  play: async () => {
+    /* No zone: as written, never converted. */
+    await expect(formatDateTime('2026-06-10T14:37')).toBe('10/06/2026 14:37');
+    await expect(formatDateTime('2026-06-10 14:37:59')).toBe('10/06/2026 14:37');
+    await expect(formatDateTime('2026-06-10T14:37:00.123')).toBe('10/06/2026 14:37');
+    await expect(formatDateTime('2026-06-10T00:05')).toBe('10/06/2026 00:05');
+    await expect(formatDateTime('2026-06-10T23:59')).toBe('10/06/2026 23:59');
+    /* The locale orders the date, the clock stays 24-hour. */
+    await expect(formatDateTime('2026-06-10T14:37', 'en-US')).toBe('06/10/2026 14:37');
+    await expect(formatDateTime('2026-06-10T14:37', 'de-DE')).toBe('10.06.2026 14:37');
+    /* An instant is placed in the zone given: Athens is UTC+3 in June, and a date can cross midnight. */
+    await expect(formatDateTime('2026-06-10T11:37:00Z', undefined, 'Europe/Athens')).toBe('10/06/2026 14:37');
+    await expect(formatDateTime('2026-06-10T22:30:00Z', undefined, 'Europe/Athens')).toBe('11/06/2026 01:30');
+    await expect(formatDateTime('2026-06-10T14:37:00+02:00', undefined, 'UTC')).toBe('10/06/2026 12:37');
+    await expect(formatDateTime('2026-06-10T14:37:00+0200', undefined, 'UTC')).toBe('10/06/2026 12:37');
+    await expect(formatDateTime('2026-06-10T14:37Z', 'en-US', 'UTC')).toBe('06/10/2026 14:37');
+    /* Midnight is 00:00, not 24:00. */
+    await expect(formatDateTime('2026-06-10T21:00:00Z', undefined, 'Europe/Athens')).toBe('11/06/2026 00:00');
+    /* Just the time. */
+    await expect(formatTime('2026-06-10T14:37')).toBe('14:37');
+    await expect(formatTime('2026-06-10T11:37:00Z', 'Europe/Athens')).toBe('14:37');
+    /* No time: just the date. Not a date: as given. */
+    await expect(formatDateTime('2026-06-10')).toBe(formatDate('2026-06-10'));
+    await expect(formatDateTime('2026-06-10', 'en-US')).toBe('06/10/2026');
+    await expect(formatTime('2026-06-10')).toBe('2026-06-10');
+    await expect(formatDateTime('Jun 10, 2026 2:37 PM')).toBe('Jun 10, 2026 2:37 PM');
+    await expect(formatDateTime('')).toBe('');
+    await expect(formatDateTime('2026-06-10Z')).toBe('2026-06-10Z');
   },
 };

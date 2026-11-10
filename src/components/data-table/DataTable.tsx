@@ -78,6 +78,12 @@ export interface DataTableColumn<Row> {
    * keyboard.
    */
   hint?: React.ReactNode;
+  /**
+   * A control that lives in the header instead of a visible label — the Users table's "+ New User". The `label` stays as
+   * the column's name for assistive tech, visually hidden. Not for sortable columns. **An `action` column is the actions
+   * column: its header control sits at the end, with room above and below it** (its cells align there too — see `cellProps`).
+   */
+  action?: React.ReactNode;
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
   /**
@@ -290,7 +296,7 @@ export function DataTable<Row extends { id?: string | number }>({
                   aria-sort={
                     sorted ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined
                   }
-                  className={cn(headerCell, columnSizing(c))}
+                  className={cn(headerCell, columnSizing(c), c.action && 'h-auto py-3')}
                   style={c.minWidth ? { minWidth: c.minWidth } : undefined}
                 >
                   {/* Label, then the hint, then the sort arrows — in that order, as
@@ -298,7 +304,7 @@ export function DataTable<Row extends { id?: string | number }>({
                       label alone; its `::after` stretches over the whole row so a
                       click on the arrows sorts too, and the hint (raised above the
                       overlay) keeps its own click. One tab stop per control. */}
-                  <span className={cn(headerInner, 'group/sort relative w-fit')}>
+                  <span className={cn(headerInner, 'group/sort relative w-fit', c.action && 'ml-auto')}>
                     {c.sortable ? (
                       <button
                         type="button"
@@ -312,6 +318,11 @@ export function DataTable<Row extends { id?: string | number }>({
                       >
                         {c.label}
                       </button>
+                    ) : c.action ? (
+                      <>
+                        <span className="sr-only">{c.label}</span>
+                        {c.action}
+                      </>
                     ) : (
                       <span className="text-label-sm-medium text-text-secondary">{c.label}</span>
                     )}

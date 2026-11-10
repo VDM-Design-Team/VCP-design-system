@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { AvatarGroup } from './AvatarGroup';
 import { Avatar } from '../../atoms/avatar';
 import { Badge } from '../../atoms/badge';
@@ -82,6 +83,73 @@ export const Overflow: Story = {
 };
 
 /** The same three steps as `Avatar`, with the overlap scaled to match. */
+/**
+ * `tooltips` says who each avatar is when the pointer rests on it: the name, and the `role` when there is one. The `+N` chip lists the people it hides, separated by commas. It is for the pointer only: the stack is still
+ * one labelled image with no extra tab stops, and its label carries the same names and roles for a keyboard or screen-reader user.
+ */
+export const WithTooltips: Story = {
+  args: {
+    label: 'Members',
+    tooltips: true,
+    max: 3,
+    people: [
+      { name: 'Ali Rahman', role: 'Assignee' },
+      { name: 'Eve Chen', role: 'Reviewer' },
+      { name: 'Marcus Okonkwo' },
+      { name: 'Priya Nair', role: 'Designer' },
+      { name: 'Sofia Almeida' },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div className="px-8 pb-24 pt-12">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const stack = within(canvasElement).getByRole('img', { name: /Members: Ali Rahman \(Assignee\), Eve Chen \(Reviewer\), Marcus Okonkwo and 2 others/ });
+    /* The stack is still one stop: nothing inside is focusable. */
+    await expect(stack.querySelectorAll('[tabindex], button, a')).toHaveLength(0);
+    const body = within(document.body);
+    const avatars = stack.querySelectorAll('[data-tooltip]');
+    await userEvent.hover(avatars[0] as HTMLElement);
+    /* The bubble opens after the hover delay. */
+    await waitFor(() => expect(body.getByText('Ali Rahman (Assignee)')).toBeVisible());
+    await userEvent.unhover(avatars[0] as HTMLElement);
+    /* The chip lists the two it hides. */
+    const chip = avatars[avatars.length - 1] as HTMLElement;
+    await expect(chip).toHaveTextContent('+2');
+    await userEvent.hover(chip);
+    await waitFor(() => expect(body.getByText('Priya Nair (Designer), Sofia Almeida')).toBeVisible());
+  },
+};
+
+/**
+ * A `+1` would hide one person it could have shown, so the chip only appears for two or more. With `max={2}` (what a table uses, three slots in all): three people are all drawn, four are two faces and a `+2`.
+ */
+export const NeverPlusOne: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {[3, 4, 5].map((count) => (
+        <div key={count} className="flex items-center gap-3">
+          <AvatarGroup people={TEAM.slice(0, count)} max={2} label="Members" />
+          <span className="text-caption-sm-semibold text-text-tertiary">{count} people, max=2</span>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    /* Three: all drawn, no chip. Four: two faces and "+2". */
+    await expect(c.getByRole('img', { name: 'Members: Ali Rahman, Eve Chen and Marcus Okonkwo' })).toBeInTheDocument();
+    await expect(c.getByRole('img', { name: 'Members: Ali Rahman, Eve Chen and 2 others' })).toBeInTheDocument();
+    await expect(c.getByRole('img', { name: 'Members: Ali Rahman, Eve Chen and 3 others' })).toBeInTheDocument();
+    await expect(c.queryByText('+1')).toBeNull();
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">

@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { CHART_SERIES, seriesIn } from '../../lib/chart-series';
-import { Icon } from '../../atoms/icon';
 import { LegendItem } from '../../atoms/legend-item';
 import { Skeleton } from '../../atoms/skeleton';
-import { Tooltip } from '../../atoms/tooltip';
+import { CardHeader } from '../../components/card-header';
 import { CapacityBar, capacityTotal, type CapacitySegment } from '../../components/capacity-bar';
 
 /**
@@ -56,25 +55,10 @@ export const TeamCapacity = React.forwardRef<HTMLElement, TeamCapacityProps>(
         className={cn('@container flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
-        <header className="flex min-w-0 flex-col gap-2">
-          <div className="flex min-w-0 items-center gap-1">
-            <h2 id={headingId} className="m-0 min-w-0 truncate text-title-sm-semibold text-text-primary">
-              {title}
-            </h2>
-            {hint && (
-              <Tooltip content={hint}>
-                <button
-                  type="button"
-                  aria-label={`About ${title}`}
-                  className="grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary hover:text-text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-                >
-                  <Icon name="info" size="md" />
-                </button>
-              </Tooltip>
-            )}
-          </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <CardHeader title={title} headingId={headingId} hint={hint} />
           {line && <p className="m-0 text-body-sm-regular text-text-primary">{line}</p>}
-        </header>
+        </div>
 
         {loading ? (
           <>

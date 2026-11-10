@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '../../lib/cn';
 import { Avatar } from '../../atoms/avatar';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
@@ -17,7 +18,7 @@ import { HOLIDAY_TYPES, HolidayTypeTag, holidayTypeLabel, type HolidayType } fro
 import { HolidaySourceBadge, type HolidaySource } from '../../components/holiday-source-badge';
 import { TruncatedText } from '../../components/truncated-text';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
-import { formatDayMonthYear } from '../../lib/format-date';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * HolidayTable — the Holiday Registry: the filter row (holiday type, period, who it applies to) with **Add Holiday** and **Import from Hubstaff** for an admin, the table of holidays,
@@ -30,8 +31,13 @@ import { formatDayMonthYear } from '../../lib/format-date';
  * **Holiday Type**, **Applies to** (a stack of people, "+2" for the rest), **All Day** (or Partial Day), **Recurring** (Yearly / One-Time), **Added By** ("System", or the person) and **Source**.
  * An **admin** also has **Actions**: edit and delete. A holiday the system added can be deleted but not edited, as Figma draws it (no pencil on those rows).
  *
- * - **An empty table** says "No holidays have been added yet." under its headers; the filters and the paging stay.
- * - **Dates are `dd/mm/yyyy`.** A range reads "01/05/2026 – 03/05/2026" with an en dash.
+ * - **Two empty messages**, under the headers (the filters and the paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset** (`onResetFilters`) when a filter is on and nothing matches.
+ * - **Dates read as every date does** (`useDateFormat`: dd/mm/yyyy, or the person's locale). A range reads "01/05/2026 – 03/05/2026" with an en dash.
+ * - **The Date column carries the status too** when the caller says what today is (`today`, ISO): **Upcoming** (info), **Today** (success) or **Past** (neutral), beside the date and its day-count pill, as Figma's `Date Status` badge.
+ * - **Edit and delete are 40** (`IconButton` `md`, the touch minimum), the delete `critical-tonal`; the table only *asks*: confirming a delete (`ConfirmDeleteModal`) is the page's.
+ * - **Each row button says whose holiday it is** ("Edit Annual leave, Jordan Lee", "… and 2 others"), so two people's "Annual leave" are told apart; a public holiday's name is enough.
+ * - **Reset hands focus on.** It goes once the filters are back, so after calling `onResetFilters` the table moves focus to its first filter (Holiday type) rather than let it fall to the page.
+ * - **Narrower than its columns, it scrolls inside itself**: the table's own wrapper scrolls sideways (Actions is reached by scrolling, or by tabbing to it) and the page does not.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.
@@ -81,6 +87,10 @@ export interface HolidayTableProps extends Omit<React.HTMLAttributes<HTMLDivElem
   periodPresets?: readonly DatePickerPreset[];
   sort?: DataTableSort;
   onSortChange?: (sort: DataTableSort) => void;
+  /** What today is (ISO `yyyy-mm-dd`): the caller owns it. Given, each Date cell wears Upcoming, Today or Past; left out, none does. */
+  today?: string;
+  /** **Reset** in the "No holidays match your filters." message: put the filters back. */
+  onResetFilters?: () => void;
   /** An admin sees Add Holiday, Import from Hubstaff and the Actions column. */
   admin?: boolean;
   onAdd?: () => void;
@@ -108,6 +118,40 @@ const lastDayOf = (iso: string) => {
   return `${year}-${pad(month)}-${pad(new Date(year, month, 0).getDate())}`;
 };
 
+type DateStatusKind = 'Upcoming' | 'Today' | 'Past';
+
+/** Where a holiday sits against today: not begun, under way (today is one of its days), or over. ISO dates compare as text. */
+export const holidayDateStatus = (start: string, end: string, today: string): DateStatusKind => (today < start ? 'Upcoming' : today > end ? 'Past' : 'Today');
+
+/* Figma's Date Status badge: a tonal fill with its own outline, info (Upcoming), success (Today) or neutral (Past). */
+const STATUS_STYLE: Record<DateStatusKind, { tone: 'info' | 'success' | 'neutral'; border: string }> = {
+  Upcoming: { tone: 'info', border: 'border-accent-info-outline-border-default' },
+  Today: { tone: 'success', border: 'border-accent-success-outline-border-default' },
+  Past: { tone: 'neutral', border: 'border-neutral-outline-border-default' },
+};
+
+function DateStatus({ start, end, today }: { start: string; end: string; today: string }) {
+  const status = holidayDateStatus(start, end, today);
+  const style = STATUS_STYLE[status];
+  return (
+    <Badge variant="tonal" tone={style.tone} size="md" className={cn('border', style.border)}>
+      {status}
+    </Badge>
+  );
+}
+
+/**
+ * What a row's buttons call it: the holiday, then who it applies to, so two people's "Annual leave" are told apart ("Edit Annual leave, Jordan Lee"). More than one person reads
+ * "Jordan Lee and 2 others"; a public holiday is everyone's, so its name is enough.
+ */
+export const holidayRowName = (row: HolidayRow): string => {
+  const [first, ...rest] = row.appliesTo;
+  if (row.type === 'public' || first === undefined) return row.name;
+  const person = typeof first === 'string' ? first : first.name;
+  if (!person) return row.name;
+  return rest.length ? `${row.name}, ${person} and ${rest.length} ${rest.length === 1 ? 'other' : 'others'}` : `${row.name}, ${person}`;
+};
+
 const dayCount = (start: string, end: string) => {
   const ms = Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`);
   return Math.round(ms / 86_400_000) + 1;
@@ -120,6 +164,8 @@ export function HolidayTable({
   onFiltersChange,
   users,
   periodPresets,
+  today,
+  onResetFilters,
   sort,
   onSortChange,
   admin,
@@ -136,6 +182,14 @@ export function HolidayTable({
   caption = 'Holidays',
   ...props
 }: HolidayTableProps) {
+  const dates = useDateFormat();
+  /* The first filter: where focus goes when Reset is pressed, since Reset itself then leaves the page. */
+  const typeFilterRef = React.useRef<HTMLDivElement>(null);
+  const resetFilters = () => {
+    onResetFilters?.();
+    /* Reset is only there while the filters hide every row, so once the page puts them back it goes: focus moves to the first filter rather than falling to the page. */
+    typeFilterRef.current?.querySelector('button')?.focus();
+  };
   const columns: DataTableColumn<HolidayRow>[] = [
     {
       key: 'name',
@@ -167,12 +221,13 @@ export function HolidayTable({
         const days = end ? dayCount(row.start, end) : 1;
         return (
           <span className="flex items-center gap-2 text-label-sm-medium text-text-primary">
-            {formatDayMonthYear(row.start)}
-            {end && ` – ${formatDayMonthYear(end)}`}
+            {dates.format(row.start)}
+            {end && ` – ${dates.format(end)}`}
             {/* The info tonal fill with the info outline around it (as `SourceTag`): the outline-only style falls under 4.5:1 in dark at this size. */}
             <Badge variant="tonal" tone="info" size="md" className="border border-accent-info-outline-border-default">
               {days === 1 ? '1 day' : `${days} days`}
             </Badge>
+            {today && <DateStatus start={row.start} end={end ?? row.start} today={today} />}
           </span>
         );
       },
@@ -223,17 +278,9 @@ export function HolidayTable({
         <span className="flex items-center gap-2">
           {/* The system's own entries can be removed but not changed. */}
           {row.addedBy !== 'system' && (
-            <IconButton icon="note-pencil" variant="tonal" size="xs" shape="round" label={`Edit ${row.name}`} onClick={() => onEdit?.(row)} />
+            <IconButton icon="note-pencil" variant="tonal" size="md" shape="round" label={`Edit ${holidayRowName(row)}`} onClick={() => onEdit?.(row)} />
           )}
-          <IconButton
-            icon="trash"
-            variant="tonal"
-            size="xs"
-            shape="round"
-            label={`Delete ${row.name}`}
-            onClick={() => onDelete?.(row)}
-            className="text-accent-critical-tonal-content-default bg-accent-critical-tonal-surface-default hover:bg-accent-critical-tonal-surface-hover active:bg-accent-critical-tonal-surface-pressed"
-          />
+          <IconButton icon="trash" variant="critical-tonal" size="md" shape="round" label={`Delete ${holidayRowName(row)}`} onClick={() => onDelete?.(row)} />
         </span>
       ),
     });
@@ -245,16 +292,20 @@ export function HolidayTable({
   ];
   const userOptions: SearchSelectOption[] = [{ value: ALL_USERS, label: 'All Users' }, ...users];
 
+  /* A filter is on: an empty table then says nothing matches, and offers Reset. */
+  const filtered = filters.type !== '' || filters.period !== null || (filters.user !== '' && filters.user !== ALL_USERS);
   const paginated = pageCount !== undefined && onPageChange !== undefined;
 
   return (
+    /* `min-w-0`: as a flex or grid item the card may be narrower than the table's columns, so the table scrolls inside its own wrapper and the page does not. */
     <TableCard
-      className={className}
+      className={cn('min-w-0', className)}
       {...props}
       filters={
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex min-w-0 flex-wrap items-center gap-3">
               <SearchSelect
+                ref={typeFilterRef}
                 className="w-60"
                 emphasis="regular"
                 searchable={false}
@@ -314,7 +365,22 @@ export function HolidayTable({
         sort={sort}
         onSortChange={onSortChange}
         caption={caption}
-        empty={<EmptyState title="No holidays have been added yet." />}
+        empty={
+          filtered ? (
+            <EmptyState
+              title="No holidays match your filters."
+              action={
+                onResetFilters && (
+                  <Button size="sm" variant="secondary" onClick={resetFilters}>
+                    Reset
+                  </Button>
+                )
+              }
+            />
+          ) : (
+            <EmptyState title="No holidays have been added yet." />
+          )
+        }
       />
     </TableCard>
   );

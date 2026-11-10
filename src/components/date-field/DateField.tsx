@@ -23,13 +23,14 @@ export const formatMonth = (iso: string): string => {
  * It is `Input` as the trigger — read-only, so the keyboard cannot type a malformed date — with a
  * `DatePicker` in a `Popover`. The field is a `combobox` (it opens a calendar, and that role allows the
  * expanded state the popover sets). The calendar opens with `strategy="fixed"`, so a scrolling dialog or table
- * cannot clip it, and picking a day closes it.
+ * cannot clip it, and picking a day closes it. In a form, the calendar's buttons (Apply and Clear among them) are
+ * `type="button"`: they never submit the form around the field.
  *
  * The chosen date is **medium** weight and the placeholder regular — the rule `Select` and `SearchSelect` follow — so a date
  * field reads the same as the selects beside it. A **filter** passes `emphasis="regular"` (as its `Select`s do), so a row of
  * filters sits quietly.
  *
- * **`mode="range"`** picks a period: two clicks on a two-month calendar, then **Apply** (or **Clear**). The field reads "01/05/2026 - 02/05/2026" (give `formatDate` for the day format); `value` is the start and `rangeEnd` the end.
+ * **`mode="range"`** picks a period: two clicks on a two-month calendar, then **Apply** (or **Clear**). The field reads "01/05/2026 - 02/05/2026" (each day as every date reads, dd/mm/yyyy or the person's locale); `value` is the start and `rangeEnd` the end.
  *
  * **`mode="month"`** is the same field for a month with no day (a reporting period): it reads "September 2026", the
  * calendar opens on `DatePicker`'s month grid, and `onChange` gets the first of the chosen month. `estimated` means
@@ -63,8 +64,10 @@ export interface DateFieldProps {
    * not cleared — a form field usually is not optional; a **filter** is, and passes this.
    */
   onClear?: () => void;
-  /** How a date reads in the field. Default is the ISO date as it is; a page may want `dd/mm/yyyy`. Month mode ignores it. */
-  formatDate?: (iso: string) => string;
+  /** The field's height, as `Input`'s: `md` 40 (default), `compact` 36 (a toolbar beside a small Button), `sm` 32. */
+  size?: 'sm' | 'compact' | 'md';
+  /** The resting edge, as `Input`: `strong` (default) or `neutral` (lighter; a deliberate exception for a row of filters). */
+  edge?: 'strong' | 'neutral';
   /**
    * The weight of the chosen date: `medium` (the default, as `Select`'s value) or `regular` — what a **filter** uses so a
    * row of filters sits quietly. The placeholder is regular either way.
@@ -76,8 +79,9 @@ export interface DateFieldProps {
   placeholder?: string;
   /** Names the field when no `Field` label does. */
   'aria-label'?: string;
-  /** From a `Field`: the control's id, and the message it is described by. */
+  /** From a `Field`: the control's id, the label that names it, and the message it is described by. */
   id?: string;
+  'aria-labelledby'?: string;
   'aria-describedby'?: string;
   invalid?: boolean;
   /** From a `Field` with an error: the field is invalid, as `invalid` says. */
@@ -93,12 +97,13 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     {
       mode = 'day',
       emphasis = 'medium',
+      size = 'md',
+      edge,
       value,
       onChange,
       rangeEnd,
       onRangeChange,
       onClear,
-      formatDate,
       estimated,
       placeholder = '-',
       id,
@@ -108,6 +113,7 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
       picker,
       className,
       'aria-label': ariaLabel,
+      'aria-labelledby': labelledBy,
       'aria-describedby': describedBy,
     },
     ref,
@@ -120,8 +126,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     }, [open]); // eslint-disable-line
     /* dd/mm/yyyy, or the person's locale when the product sets one (`DateFormatProvider`). */
     const dates = useDateFormat();
-    /* A caller's `formatDate` wins (it was how the Holiday Registry drew dd/mm/yyyy before the system did); otherwise the system's one format. */
-    const show = (iso: string) => (formatDate ? formatDate(iso) : dates.format(iso));
+    /* One format rule: the system's. */
+    const show = dates.format;
     const invalid = invalidProp || ariaInvalid === true || ariaInvalid === 'true';
     return (
       <Popover
@@ -140,10 +146,14 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             readOnly
             role="combobox"
             emphasis={emphasis}
+            size={size}
+            edge={edge}
             fullWidth
             disabled={disabled}
             invalid={invalid}
             aria-label={ariaLabel}
+            /* A `Field`'s label, by reference (as it names every other control), so the placeholder is never what names the field. */
+            aria-labelledby={labelledBy}
             aria-describedby={describedBy}
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
             placeholder={placeholder}
