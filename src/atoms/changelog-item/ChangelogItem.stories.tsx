@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { ChangelogItem } from './ChangelogItem';
 
 const meta = {
-  title: 'Components/Data Display/ChangelogItem',
+  title: 'Atoms/ChangelogItem',
   component: ChangelogItem,
   parameters: {
     layout: 'padded',
@@ -58,6 +58,46 @@ export const Default: Story = {
 export const WithMachineDate: Story = {
   play: async ({ canvasElement }) => {
     await expect(canvasElement.querySelector('time')).toHaveAttribute('datetime', '2026-01-01');
+  },
+};
+
+/** `kind` draws the announcement's glyph before the title; a screen reader hears what it is. The glyph and words come from the one owner `ChangeLogModal` reads. */
+export const WithKind: Story = {
+  args: { kind: 'feature' },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('New feature')).toBeInTheDocument();
+    await expect(c.getByRole('heading', { level: 3, name: 'Changelog Title' })).toBeVisible();
+  },
+};
+
+/** The three kinds: a flask, a megaphone and a rocket. */
+export const Kinds: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-6">
+      <ChangelogItem {...args} kind="experimental" title="Experimental Features Available" />
+      <ChangelogItem {...args} kind="update" title="New Release" />
+      <ChangelogItem {...args} kind="feature" title="New Feature" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('Experimental feature')).toBeInTheDocument();
+    await expect(c.getByText('Release')).toBeInTheDocument();
+    await expect(c.getByText('New feature')).toBeInTheDocument();
+  },
+};
+
+/** `href` makes the title a link to the release's changelog document. It opens in a new tab, and says so. */
+export const LinkedTitle: Story = {
+  args: { href: 'https://example.com/changelog/v1.18.1' },
+  play: async ({ canvasElement }) => {
+    const link = within(canvasElement).getByRole('link', { name: 'Changelog Title (opens in a new tab)' });
+    await expect(link).toHaveAttribute('href', 'https://example.com/changelog/v1.18.1');
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    /* Still the card's heading. */
+    await expect(within(canvasElement).getByRole('heading', { level: 3 })).toContainElement(link);
   },
 };
 

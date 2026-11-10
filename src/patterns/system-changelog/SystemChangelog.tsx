@@ -1,17 +1,22 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
+import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
-import { ChangelogItem } from '../../components/changelog-item';
+import { ChangelogItem } from '../../atoms/changelog-item';
 import { EmptyState } from '../../components/empty-state';
+import type { ChangeLogKind } from '../../lib/changelog-kinds';
 
 /**
  * SystemChangelog — the page that lists every release: a "System Changelog" title over one `ChangelogItem` card per release, newest
  * first (the caller's order). Built to Figma's `Admin System Changelog` (`Settings_Changelog_List`).
  *
  * The column is centred and 896 wide at most; cards are 24 apart. **It shows what it is given**: titles and versions as they read, dates as ISO (shown dd/mm/yyyy, or the
- * person's locale), and a release's `id` keys its card. `loading` shows placeholder cards under the title (one status says so);
- * no releases show an `EmptyState`.
+ * person's locale), and a release's `id` keys its card. A release's `kind` draws its glyph and its `href` makes its title a link to the changelog document.
+ * `loading` shows placeholder cards under the title (one status says so); no releases show an `EmptyState`.
+ *
+ * **Many releases are paged** with `Pagination`, under the cards: pass `page` and `pageCount` (and `onPageChange`). It is controlled, like the tables:
+ * the caller passes the releases of the page that is showing. With one page or none, no pagination shows.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -19,6 +24,10 @@ import { EmptyState } from '../../components/empty-state';
 export interface ChangelogRelease {
   id: string | number;
   title: string;
+  /** The kind of announcement: its glyph sits before the title. */
+  kind?: ChangeLogKind;
+  /** The release's changelog document; the title links to it. */
+  href?: string;
   /** "v1.18.1". */
   version?: string;
   /** ISO, "2026-01-01": shown dd/mm/yyyy (or the person's locale). */
@@ -27,8 +36,13 @@ export interface ChangelogRelease {
   features?: readonly string[];
 }
 
-export interface SystemChangelogProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
+export interface SystemChangelogProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, 'title'>,
+    Partial<Pick<PaginationProps, 'page' | 'pageCount' | 'itemCount' | 'pageSize' | 'pageSizeOptions' | 'onPageSizeChange'>> {
+  /** The releases of the page that is showing. */
   releases: readonly ChangelogRelease[];
+  /** A page was picked. Fetching it is the caller's. */
+  onPageChange?: (page: number) => void;
   /** The page's title. */
   title?: string;
   /** Placeholder cards instead of `releases`, while they load. */
@@ -43,8 +57,16 @@ export function SystemChangelog({
   title = 'System Changelog',
   loading,
   empty,
+  page,
+  pageCount,
+  onPageChange,
+  itemCount,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   ...props
 }: SystemChangelogProps) {
+  const paged = page !== undefined && pageCount !== undefined && pageCount > 1;
   /* Unique, so two changelogs on one page (the docs page) name their own title. */
   const titleId = React.useId();
   return (
@@ -79,6 +101,8 @@ export function SystemChangelog({
             <li key={release.id}>
               <ChangelogItem
                 title={release.title}
+                kind={release.kind}
+                href={release.href}
                 version={release.version}
                 date={release.date}
                 message={release.message}
@@ -87,6 +111,17 @@ export function SystemChangelog({
             </li>
           ))}
         </ul>
+      )}
+      {paged && !loading && releases.length > 0 && (
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onChange={onPageChange}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={onPageSizeChange}
+        />
       )}
     </section>
   );
