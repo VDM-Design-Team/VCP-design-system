@@ -8,7 +8,7 @@ The top of the Announcements tab: a title card and three facts under it. Built t
 | Piece | Tier |
 |---|---|
 | `Icon` | atom |
-| `MetricTile` | component |
+| `MetricTile` | atom |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

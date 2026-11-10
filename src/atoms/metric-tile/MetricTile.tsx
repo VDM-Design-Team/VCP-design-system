@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon, type IconName } from '../../atoms/icon';
+import { Icon, type IconName } from '../icon';
 
 /**
  * MetricTile — one number with a name and a tinted icon tile beside it: "Total Announcements 11". Built to Figma's

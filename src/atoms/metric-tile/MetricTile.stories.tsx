@@ -3,7 +3,7 @@ import { expect, within } from 'storybook/test';
 import { MetricTile } from './MetricTile';
 
 const meta = {
-  title: 'Components/Data Display/MetricTile',
+  title: 'Atoms/MetricTile',
   component: MetricTile,
   parameters: {
     layout: 'padded',

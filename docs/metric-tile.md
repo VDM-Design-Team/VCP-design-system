@@ -1,4 +1,4 @@
-# MetricTile *(component)*
+# MetricTile *(atom)*
 
 One number with its name and a tinted icon tile: "Total Announcements 11". The quiet settings-page tile, built to Figma's
 `Announcement Total` / `Latest Version` / `Last Updated` tiles.
@@ -8,6 +8,8 @@ One number with its name and a tinted icon tile: "Total Announcements 11". The q
 | Piece | Tier |
 |---|---|
 | `Icon` | atom |
+
+An atom: one tile, plain markup on tokens, with `Icon` for the tinted glyph. Nothing else is composed.
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -33,8 +35,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 `accent.info.tonal`, `success` is `accent.success.tonal`, `brand` is `surface.brand.base` with `text.brand.medium`. Label `label-md-medium`
 `text.tertiary`; value `heading-md-bold` `text.primary`.
 
-**Differences from Figma, on purpose.** Figma's third tile (Last Updated) is a purple that no token names; it is `brand` here until
-design picks a colour (a question for design).
+**Differences from Figma, on purpose.** Figma's third tile (Last Updated) is a purple that no token names. Design's decision: an existing
+colour and no new token, so it is `brand`.
 
 ## Accessibility
 

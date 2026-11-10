@@ -28,7 +28,9 @@ import { useDateFormat } from '../../lib/format-date';
  * - **Actions** — a "More actions" menu per row, named for the announcement: **Edit** and **Delete**.
  *
  * **It is controlled and does nothing itself.** `onNew`, `onViewChangelog`, `onRefresh`, `onEdit` and `onDelete` only *ask*: opening
- * the dialog, confirming the delete (`ConfirmDeleteModal`), going to the changelog and reloading are the page's.
+ * the dialog, confirming the delete (`ConfirmDeleteModal`), going to the changelog and reloading are the page's. **Refreshing** (`refreshing`)
+ * puts **Refresh** in its loading state and leaves the rows where they are: a reload is not a first load, so no placeholders replace the list.
+ * **After a delete the page moves focus on** (the row's menu button goes with the row): see the doc's "Focus after a delete".
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -49,8 +51,10 @@ export interface AnnouncementsTableProps extends Omit<React.HTMLAttributes<HTMLD
   onEdit?: (row: AnnouncementRow) => void;
   /** Delete, from a row's menu. It only asks: confirm first. */
   onDelete?: (row: AnnouncementRow) => void;
-  /** Placeholder rows instead of `rows`, while they load. The buttons and headers stay. */
+  /** Placeholder rows instead of `rows`, while they first load. The buttons and headers stay. */
   loading?: boolean;
+  /** A reload is in flight: **Refresh** shows its loading state and the rows stay on screen (no placeholders). The page clears it when the list is back. */
+  refreshing?: boolean;
   /** What an empty table says. */
   empty?: React.ReactNode;
   /** The table's accessible name. */
@@ -66,6 +70,7 @@ export function AnnouncementsTable({
   onEdit,
   onDelete,
   loading,
+  refreshing,
   empty,
   caption = 'Announcements',
   ...props
@@ -152,7 +157,7 @@ export function AnnouncementsTable({
   }));
 
   return (
-    <div className={cn('flex flex-col gap-6 font-sans', className)} aria-busy={loading || undefined} {...props}>
+    <div className={cn('flex flex-col gap-6 font-sans', className)} aria-busy={loading || refreshing || undefined} {...props}>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
           <Button type="button" iconLeft={<Icon name="plus" size="sm" />} onClick={() => onNew?.()}>
@@ -171,15 +176,16 @@ export function AnnouncementsTable({
           type="button"
           variant="neutral"
           iconLeft={<Icon name="arrows-clockwise" size="sm" />}
+          loading={refreshing}
           onClick={() => onRefresh?.()}
         >
           Refresh
         </Button>
       </div>
 
-      {loading && (
+      {(loading || refreshing) && (
         <span role="status" className="sr-only">
-          Loading announcements
+          {loading ? 'Loading announcements' : 'Refreshing announcements'}
         </span>
       )}
       <DataTable

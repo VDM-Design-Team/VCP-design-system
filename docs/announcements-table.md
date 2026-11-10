@@ -45,7 +45,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `rows` | `AnnouncementRow[]` | required | An `Announcement` (`lib/announcement`): `id`, `title`, `version`, `kind`, `date` (ISO), `features` |
 | `onNew` / `onViewChangelog` / `onRefresh` | `() => void` | — | The buttons above. They **ask** |
 | `onEdit` / `onDelete` | `(row) => void` | — | From a row's menu. They **ask** |
-| `loading` | `boolean` | — | Placeholder rows; buttons and headers stay; one status says "Loading announcements" |
+| `loading` | `boolean` | — | A first load: placeholder rows; buttons and headers stay; one status says "Loading announcements" |
+| `refreshing` | `boolean` | — | A reload: **Refresh** shows its loading state and **the rows stay on screen**, no placeholders; one status says "Refreshing announcements". The page clears it when the list is back |
 | `empty` | `ReactNode` | `EmptyState` "No announcements yet." | |
 | `caption` | `string` | `Announcements` | The table's accessible name |
 
@@ -58,6 +59,20 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Delete** | Opens `ConfirmDeleteModal` first — **nothing is deleted until it is confirmed** — then removes the row and shows a toast |
 | **View Changelog** | Goes to the System Changelog |
 | **Refresh** | Reloads the list |
+
+### Focus after a delete — the page's job
+
+The table only reports the delete, and when the row goes its **menu button goes with it** ("Actions for …"): the dialog tries to hand focus back to a button that no
+longer exists, so focus falls to the page. CLAUDE.md's "Never drop focus" names this case. After the row is removed, move focus on purpose:
+
+| What is left | Focus goes to |
+|---|---|
+| A row after the deleted one | That row's **menu button** |
+| It was the last row | The **previous** row's menu button |
+| The table is empty | **New Announcement** |
+
+Do it after the dialog has closed (it restores focus first, to the button that has gone). Cancel needs nothing: the row stays and the dialog returns focus to its menu button.
+The `OnThePage` story does this and asserts the focused element at each step.
 
 ## Tokens
 

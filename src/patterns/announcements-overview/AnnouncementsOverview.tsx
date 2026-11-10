@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
-import { MetricTile } from '../../components/metric-tile';
+import { MetricTile } from '../../atoms/metric-tile';
 import type { Announcement } from '../../lib/announcement';
 import { useDateFormat } from '../../lib/format-date';
 
