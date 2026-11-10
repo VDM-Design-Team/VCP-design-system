@@ -30,6 +30,16 @@ export const Default: Story = {
   },
 };
 
+/** It opens with the cursor in Feedback, so typing goes straight in and Enter moves it. */
+export const OpensInFeedback: Story = {
+  play: async ({ args }) => {
+    const field = dialog().getByRole('textbox', { name: 'Feedback' });
+    await waitFor(() => expect(field).toHaveFocus());
+    await userEvent.keyboard('Not this cycle{Enter}');
+    await waitFor(() => expect(args.onMove).toHaveBeenCalledWith('Not this cycle'));
+  },
+};
+
 /** Typed feedback goes with the move; blank is `''`. */
 export const WithFeedback: Story = {
   play: async ({ args }) => {
