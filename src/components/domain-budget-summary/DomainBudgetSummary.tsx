@@ -92,7 +92,7 @@ const HINTS = {
 } as const;
 
 /* Figma's fills (decided 9 Nov 2026: follow Figma): brand blue, its bright yellow (`caution`, the closest token to
-   Figma's #f0b100), its bright red (`alert`, accent.critical.outline.border). */
+   Figma's yellow-500), its bright red (`alert`, accent.critical.outline.border). */
 const TONE = { fine: 'brand', warning: 'caution', over: 'alert' } as const satisfies Record<
   BudgetStatus,
   NonNullable<ProgressBarProps['tone']>
