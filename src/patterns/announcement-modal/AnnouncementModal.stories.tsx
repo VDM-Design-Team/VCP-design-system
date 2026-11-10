@@ -21,7 +21,6 @@ const meta = {
     open: true,
     onClose: fn(),
     latestVersion: 'v1.18.1',
-    typeOptions: ['Feature', 'Improvement', 'Fix'],
     onSubmit: fn(),
   },
 } satisfies Meta<typeof AnnouncementModal>;
@@ -55,7 +54,7 @@ export const Edit: Story = {
       version: 'v1.18.1',
       description: 'Budgets are editable per domain.',
       changelogUrl: 'https://example.com/changelog',
-      type: 'Feature',
+      kind: 'feature',
       features: ['Edit budget per domain', 'Cycle summary'],
     },
   },
@@ -64,6 +63,13 @@ export const Edit: Story = {
     await expect(d.getByRole('textbox', { name: /Title/ })).toHaveValue('Domain budgets arrive in Settings');
     await expect(d.getByRole('textbox', { name: 'Feature 2' })).toHaveValue('Cycle summary');
     await expect(d.getByRole('button', { name: 'Save' })).toBeVisible();
+    /* The version is read-only once created, and says so; the latest version is no guide for it. */
+    const version = d.getByRole('textbox', { name: /Version/ });
+    await expect(version).toHaveAttribute('readonly');
+    await expect(version).toHaveValue('v1.18.1');
+    await expect(d.getByText('The version cannot be changed once the announcement is created.')).toBeVisible();
+    await expect(d.queryByText('Latest version: v1.18.1')).toBeNull();
+    await expect(d.getByRole('combobox', { name: /Announcement Type/ })).toHaveValue('feature');
   },
 };
 
@@ -93,6 +99,10 @@ export const FormatChecks: Story = {
     await userEvent.selectOptions(d.getByRole('combobox', { name: /Announcement Type/ }), 'Feature');
     await userEvent.click(d.getByRole('button', { name: 'Create' }));
     await expect(await d.findByText('Use semantic versioning, like v1.0.0.')).toBeVisible();
+    /* The latest version stays beside the error, where it is needed, and the field is described by both. */
+    await expect(d.getByText('Latest version: v1.18.1')).toBeVisible();
+    const described = d.getByRole('textbox', { name: /Version/ }).getAttribute('aria-describedby')?.split(' ') ?? [];
+    await expect(described.length).toBe(2);
     await expect(d.getByText('Enter a web address, like https://example.com/changelog.')).toBeVisible();
     await expect(args.onSubmit).not.toHaveBeenCalled();
   },
@@ -103,8 +113,9 @@ export const Submits: Story = {
   play: async ({ args }) => {
     const d = dialog();
     await userEvent.type(d.getByRole('textbox', { name: /Title/ }), '  Faster search ');
-    await userEvent.type(d.getByRole('textbox', { name: /Version/ }), 'v1.19.0');
-    await userEvent.selectOptions(d.getByRole('combobox', { name: /Announcement Type/ }), 'Improvement');
+    /* Typed without the "v": what is handed over always has it. */
+    await userEvent.type(d.getByRole('textbox', { name: /Version/ }), '1.19.0');
+    await userEvent.selectOptions(d.getByRole('combobox', { name: /Announcement Type/ }), 'Update');
     await userEvent.type(d.getByRole('textbox', { name: 'Feature 1' }), 'Search by role');
     await userEvent.click(d.getByRole('button', { name: 'Add Features' }));
     await userEvent.click(d.getByRole('button', { name: 'Create' }));
@@ -114,7 +125,7 @@ export const Submits: Story = {
         version: 'v1.19.0',
         description: '',
         changelogUrl: '',
-        type: 'Improvement',
+        kind: 'update',
         features: ['Search by role'],
       }),
     );
@@ -140,12 +151,24 @@ export const Features: Story = {
   },
 };
 
-/** What only the server knows. */
+/** The three kinds, in the owner's order, with the owner's words. */
+export const Types: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async () => {
+    const d = dialog();
+    const options = within(d.getByRole('combobox', { name: /Announcement Type/ })).getAllByRole('option');
+    await expect(options.map((o) => o.textContent)).toEqual(['Experimental', 'Update', 'Feature']);
+  },
+};
+
+/** What only the server knows. The latest version stays beside it. */
 export const ServerErrors: Story = {
   args: { errors: { version: 'That version already exists.' } },
   play: async () => {
     const d = dialog();
     await expect(d.getByText('That version already exists.')).toBeVisible();
+    await expect(d.getByText('Latest version: v1.18.1')).toBeVisible();
     await expect(d.getByRole('textbox', { name: /Version/ })).toHaveAttribute('aria-invalid', 'true');
   },
 };

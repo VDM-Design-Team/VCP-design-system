@@ -38,10 +38,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Field | Notes |
 |---|---|
 | **Title** * | Required |
-| **Version** * | Required, semantic versioning ("v1.0.0"; the "v" is optional). `latestVersion` shows under it: "Latest version: v1.18.1" |
+| **Version** * | Required, semantic versioning ("v1.0.0"; the "v" is optional, and what is handed over always has it). `latestVersion` shows under it, "Latest version: v1.18.1", **and stays there when the version has an error**. **Read-only when editing**: a version cannot change once created. Whether it already exists is the server's to say (`errors`) |
 | **Description** | A multi-line `Textarea` |
 | **Changelog Document URL** | Optional; when given it must be an `http(s)` address |
-| **Announcement Type** * | A list the page passes in (`typeOptions`) |
+| **Announcement Type** * | The three kinds, Experimental, Update and Feature, from the one owner (`lib/changelog-kinds`). The draft calls it `kind` |
 | **Features** | One line each, a remove (the minus in a circle) beside each, **Add Features** beneath. Blank lines are dropped on submit |
 
 ## Props
@@ -50,12 +50,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `open` / `onClose` | `boolean` / `() => void` | required | You own `open`; Escape and Cancel ask to close |
 | `mode` | `new \| edit` | `new` | |
-| `initial` | `Partial<AnnouncementDraft>` | — | The starting values. The dialog keeps its own draft |
+| `initial` | `Partial<Announcement>` fields | — | The starting values: an `Announcement` (`lib/announcement`) or part of one. The dialog keeps its own draft |
 | `latestVersion` | `string` | — | Shown under Version |
-| `typeOptions` | `Array<string \| { value, label }>` | required | **The page passes these in**: the types are the product's |
 | `onSubmit` | `(draft) => void` | required | Valid, it gets the whole draft (trimmed). Saves nothing itself |
 | `submitting` | `boolean` | — | The button spins and every field locks |
-| `errors` | `Partial<Record<'title' \| 'version' \| 'description' \| 'changelogUrl' \| 'type', string>>` | — | What only the server knows |
+| `errors` | `Partial<Record<'title' \| 'version' \| 'description' \| 'changelogUrl' \| 'kind', string>>` | — | What only the server knows |
 
 ## The draft
 
@@ -85,5 +84,5 @@ focus never falls to the page. Each input is named "Feature 1", "Feature 2"…; 
 ## Don't
 
 - **Don't close it on submit inside the dialog.** The page owns `open`: close it, then toast.
-- **Don't hard-code the types.** Pass `typeOptions`.
+- **Don't list the types yourself.** They are `CHANGELOG_KINDS`'s, so the table, the changelog and this list agree.
 - **Don't validate the version on the server only.** The dialog checks the format first; the server still decides if it already exists.

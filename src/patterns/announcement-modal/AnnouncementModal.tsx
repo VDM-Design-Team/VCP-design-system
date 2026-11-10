@@ -3,10 +3,12 @@ import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Input } from '../../atoms/input';
-import { Select, type SelectOption } from '../../atoms/select';
+import { Select } from '../../atoms/select';
 import { Textarea } from '../../atoms/textarea';
 import { Field } from '../../components/field';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
+import { formatVersion, VERSION_PATTERN, type Announcement } from '../../lib/announcement';
+import { CHANGELOG_KIND_ORDER, CHANGELOG_KINDS, type ChangeLogKind } from '../../lib/changelog-kinds';
 
 /**
  * AnnouncementModal — writes an announcement, or edits one, from the Announcements tab. Built to Figma's "Create Announcement" dialog.
@@ -15,9 +17,11 @@ import { Modal } from '../../components/modal';
  * filled from `initial`). The body is the same: **Title** and **Version** (both required), **Description**, **Changelog Document URL**,
  * **Announcement Type** (required) and a **Features** list — one line each, with a remove beside it and **Add Features** beneath.
  *
- * - **Version** takes semantic versioning ("v1.0.0"; the "v" is optional). Under it, `latestVersion` reads "Latest version: v1.18.1", so
- *   the next one is easy to pick.
- * - **Announcement Type is a list the page passes in** (`typeOptions`): what the types are is the product's.
+ * - **Version** takes semantic versioning ("v1.0.0"; the "v" is optional, and what is handed over always has it). Under it, `latestVersion`
+ *   reads "Latest version: v1.18.1", so the next one is easy to pick, **and it stays there when the version has an error**, which is when it is
+ *   needed. Whether a version already exists is the server's to say (`errors`). **Editing cannot change the version**: it is read-only once created.
+ * - **Announcement Type is the three kinds** (Experimental, Update, Feature) from the one owner, `lib/changelog-kinds`, in that order, and the draft calls it `kind`.
+ * - **The draft is an `Announcement`'s fields** (`lib/announcement`), so the page passes the same record to the table, the changelog and here.
  * - **Features** start as one empty line; a blank line is dropped on submit. Removing a line moves focus to the next one (or the one
  *   before it, or **Add Features** when none is left).
  * - **It keeps its own draft**, reset each time it opens from `initial`. **Create** hands the whole draft to `onSubmit` — it saves nothing
@@ -29,29 +33,25 @@ import { Modal } from '../../components/modal';
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 
-export interface AnnouncementDraft {
-  title: string;
-  version: string;
+export interface AnnouncementDraft
+  extends Pick<Announcement, 'title' | 'version' | 'kind'> {
   description: string;
   changelogUrl: string;
-  type: string;
   /** One line each, blank lines dropped. */
   features: string[];
 }
 
-export type AnnouncementField = 'title' | 'version' | 'description' | 'changelogUrl' | 'type';
+export type AnnouncementField = 'title' | 'version' | 'description' | 'changelogUrl' | 'kind';
 
 export interface AnnouncementModalProps {
   open: boolean;
   onClose: () => void;
   /** `new` ("Create Announcement") or `edit` ("Edit Announcement"). */
   mode?: 'new' | 'edit';
-  /** The starting values. The modal keeps its own draft, reset each time it opens. */
-  initial?: Partial<AnnouncementDraft>;
+  /** The starting values: an `Announcement`, or part of one. The modal keeps its own draft, reset each time it opens. */
+  initial?: Partial<Pick<Announcement, 'title' | 'version' | 'kind' | 'description' | 'changelogUrl' | 'features'>>;
   /** The newest version, shown under Version: "Latest version: v1.18.1". */
   latestVersion?: string;
-  /** The announcement types. The page passes these in. */
-  typeOptions: ReadonlyArray<string | SelectOption>;
   /** Create / Save, once the fields are valid. Gets the whole draft; saves nothing itself. */
   onSubmit: (draft: AnnouncementDraft) => void;
   /** Create / Save is in flight: the button spins and the fields lock. */
@@ -60,7 +60,6 @@ export interface AnnouncementModalProps {
   errors?: Partial<Record<AnnouncementField, string>>;
 }
 
-const SEMVER = /^v?\d+\.\d+\.\d+$/i;
 const URL_HTTP = /^https?:\/\/\S+$/i;
 
 let nextLine = 0;
@@ -71,8 +70,10 @@ const blank = (initial: AnnouncementModalProps['initial']) => ({
   version: initial?.version ?? '',
   description: initial?.description ?? '',
   changelogUrl: initial?.changelogUrl ?? '',
-  type: initial?.type ?? '',
+  kind: (initial?.kind ?? '') as ChangeLogKind | '',
 });
+
+const KIND_OPTIONS = CHANGELOG_KIND_ORDER.map((kind) => ({ value: kind, label: CHANGELOG_KINDS[kind].name }));
 
 
 export function AnnouncementModal({
@@ -81,19 +82,19 @@ export function AnnouncementModal({
   mode = 'new',
   initial,
   latestVersion,
-  typeOptions,
   onSubmit,
   submitting,
   errors,
 }: AnnouncementModalProps) {
   const formId = React.useId();
+  const versionHintId = React.useId();
   const [draft, setDraft] = React.useState(() => blank(initial));
   const [features, setFeatures] = React.useState(() => (initial?.features?.length ? initial.features.map(line) : [line()]));
   const [invalid, setInvalid] = React.useState<Partial<Record<AnnouncementField, string>>>({});
   const titleRef = React.useRef<HTMLInputElement>(null);
   const versionRef = React.useRef<HTMLInputElement>(null);
   const urlRef = React.useRef<HTMLInputElement>(null);
-  const typeRef = React.useRef<HTMLSelectElement>(null);
+  const kindRef = React.useRef<HTMLSelectElement>(null);
   const addRef = React.useRef<HTMLButtonElement>(null);
   const lineRefs = React.useRef(new Map<number, HTMLInputElement>());
 
@@ -129,30 +130,36 @@ export function AnnouncementModal({
   const submit = () => {
     const next: typeof invalid = {};
     if (!draft.title.trim()) next.title = 'Enter a title.';
-    if (!draft.version.trim()) next.version = 'Enter a version, like v1.0.0.';
-    else if (!SEMVER.test(draft.version.trim())) next.version = 'Use semantic versioning, like v1.0.0.';
+    /* Editing leaves the version as it was: it is read-only, so there is nothing to say about it. */
+    if (mode !== 'edit') {
+      if (!draft.version.trim()) next.version = 'Enter a version, like v1.0.0.';
+      else if (!VERSION_PATTERN.test(draft.version.trim())) next.version = 'Use semantic versioning, like v1.0.0.';
+    }
     if (draft.changelogUrl.trim() && !URL_HTTP.test(draft.changelogUrl.trim())) {
       next.changelogUrl = 'Enter a web address, like https://example.com/changelog.';
     }
-    if (!draft.type) next.type = 'Choose a type.';
+    if (!draft.kind) next.kind = 'Choose a type.';
     setInvalid(next);
     /* Not through: hand focus to the first field that needs fixing. */
     if (next.title) return titleRef.current?.focus();
     if (next.version) return versionRef.current?.focus();
     if (next.changelogUrl) return urlRef.current?.focus();
-    if (next.type) return typeRef.current?.focus();
+    if (next.kind) return kindRef.current?.focus();
+    if (!draft.kind) return;
     onSubmit({
       title: draft.title.trim(),
-      version: draft.version.trim(),
+      version: formatVersion(draft.version),
       description: draft.description.trim(),
       changelogUrl: draft.changelogUrl.trim(),
-      type: draft.type,
+      kind: draft.kind,
       features: features.map((f) => f.text.trim()).filter(Boolean),
     });
   };
 
   const message = (field: AnnouncementField) => errors?.[field] ?? invalid[field];
   const locked = Boolean(submitting);
+  /* New announcements only: an edit cannot change its version, so the latest one is no guide. */
+  const showLatest = Boolean(latestVersion) && mode !== 'edit';
 
   return (
     <Modal
@@ -162,12 +169,10 @@ export function AnnouncementModal({
       size="md"
       footer={
         <>
-          <Button variant="secondary" size="sm" type="button" disabled={locked} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button size="sm" type="submit" form={formId} loading={submitting}>
+          <ModalCancel disabled={locked} />
+          <ModalConfirm type="submit" form={formId} loading={submitting}>
             {mode === 'edit' ? 'Save' : 'Create'}
-          </Button>
+          </ModalConfirm>
         </>
       }
     >
@@ -190,24 +195,35 @@ export function AnnouncementModal({
             onChange={(event) => set('title', event.target.value)}
           />
         </Field>
-        <Field
-          label="Version"
-          required
-          error={message('version')}
-          helper={
-            latestVersion ? <span className="text-text-link-default">Latest version: {latestVersion}</span> : undefined
-          }
-        >
-          <Input
-            ref={versionRef}
-            fullWidth
-            autoComplete="off"
-            placeholder="Use semantic versioning, e.g., v1.0.0"
-            value={draft.version}
-            disabled={locked}
-            onChange={(event) => set('version', event.target.value)}
-          />
-        </Field>
+        <div className="flex flex-col gap-1.5">
+          <Field
+            label="Version"
+            required
+            error={message('version')}
+            helper={mode === 'edit' ? 'The version cannot be changed once the announcement is created.' : undefined}
+          >
+            {(control) => (
+              <Input
+                {...control}
+                ref={versionRef}
+                fullWidth
+                autoComplete="off"
+                placeholder="Use semantic versioning, e.g., v1.0.0"
+                value={draft.version}
+                readOnly={mode === 'edit'}
+                disabled={locked}
+                /* The latest version is named too, next to the error as well as in its place: it is when the version is wrong that it is needed. */
+                aria-describedby={[control['aria-describedby'], showLatest ? versionHintId : undefined].filter(Boolean).join(' ') || undefined}
+                onChange={(event) => set('version', event.target.value)}
+              />
+            )}
+          </Field>
+          {showLatest && (
+            <p id={versionHintId} className="m-0 text-body-sm-regular text-text-link-default">
+              Latest version: {latestVersion}
+            </p>
+          )}
+        </div>
         <Field label="Description" error={message('description')}>
           <Textarea
             placeholder="Enter announcement description"
@@ -228,16 +244,16 @@ export function AnnouncementModal({
             onChange={(event) => set('changelogUrl', event.target.value)}
           />
         </Field>
-        <Field label="Announcement Type" required error={message('type')}>
+        <Field label="Announcement Type" required error={message('kind')}>
           <Select
-            ref={typeRef}
+            ref={kindRef}
             fullWidth
             emphasis="regular"
             placeholder="Select type"
-            options={typeOptions}
-            value={draft.type}
+            options={KIND_OPTIONS}
+            value={draft.kind}
             disabled={locked}
-            onChange={(type) => set('type', type)}
+            onChange={(kind) => set('kind', kind)}
           />
         </Field>
 
