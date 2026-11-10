@@ -236,6 +236,9 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
             <Menu
               className="w-full"
               panelClassName="w-full"
+              /* `absolute`, so `w-full` is the trigger's width: a `fixed` panel's
+                 `w-full` is the whole screen's. The rail has no `overflow` to clip it. */
+              strategy="absolute"
               align="left"
               items={(domains ?? []).map((name) => ({
                 key: name,

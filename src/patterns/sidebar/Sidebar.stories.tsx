@@ -227,6 +227,20 @@ export const WithDomainSelector: Story = {
       </Stage>
     );
   },
+  play: async ({ canvasElement }) => {
+    const rail = within(canvasElement);
+    const trigger = rail.getByRole('button', { name: 'Domain: Design. Change domain' });
+    await userEvent.click(trigger);
+    const menu = await rail.findByRole('menu');
+    /* Flush to the trigger: as wide as it, and no wider (a fixed panel's
+       `w-full` once spanned the screen). */
+    const t = trigger.getBoundingClientRect();
+    const m = menu.getBoundingClientRect();
+    await expect(Math.round(m.width)).toBe(Math.round(t.width));
+    await expect(Math.round(m.left)).toBe(Math.round(t.left));
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(trigger).toHaveFocus());
+  },
 };
 
 /* Controls are off in the side-by-side story, so each rail keeps its own
