@@ -29,6 +29,21 @@ list drifts, and fails a pattern composing fewer than two pieces.
 | `update` | megaphone | `accent.yellow.medium` |
 | `feature` | rocket | `accent.info.outline.content.default` |
 
+**The mapping has one owner, `src/lib/changelog-kinds.ts`** (`CHANGELOG_KINDS`), which
+`ChangelogItem`'s cards read too, so the dialog and the changelog page cannot drift apart.
+It also holds each kind's Type word and tag tone, for the places that show the kind as a tag or in a list
+(the Announcements table, the announcement dialog):
+
+| `kind` | Type word | Tag tone |
+|---|---|---|
+| `experimental` | Experimental | `success` |
+| `update` | Update | `warning` |
+| `feature` | Feature | `info` |
+
+**An announcement is one record, `Announcement` (`src/lib/announcement.ts`)**: `id`, `title`, `version` ("v1.18.1"),
+`kind`, `date` (ISO), `description?`, `changelogUrl?` and `features`. Every announcement component takes the fields it
+shows from it, so a page hands one object to all of them.
+
 All three are the design's own variables, read off the file rather than matched
 by eye. The glyph is decorative and the kind is also given as screen-reader-only
 text, because a colour and a shape are not a label.

@@ -34,6 +34,8 @@ export interface PageTitleProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   onBack?: () => void;
   /** The back control's accessible name — say where it goes, not "Back". */
   backLabel?: string;
+  /** Something that sits beside the title, on its left: a view switch (the dashboard's Cycle / Quarter), a status. */
+  beside?: React.ReactNode;
   /** The page's actions, on the right. */
   actions?: React.ReactNode;
   /**
@@ -59,19 +61,23 @@ const TITLE_TYPE = {
 } as const;
 
 export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
-  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', actions, size = 'md', ...props }, ref) => (
+  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', beside, actions, size = 'md', ...props }, ref) => (
     /* 32 above, 16 below, 32 each side — the design's own frame. */
     <header
       ref={ref}
       className={cn(
-        'flex flex-wrap items-start justify-between gap-4 px-8 pb-4 pt-8 font-sans',
+        'flex flex-wrap justify-between px-8 pb-4 pt-8 font-sans',
+        /* A one-line title and its actions share a centre line (a 26 line of text beside 36 high controls would sit 5 high); with a subtitle the title block is two lines, and the actions stay at the top. */
+        subtitle ? 'items-start' : 'items-center',
+        /* No column gap beside a view switch: the actions (a row of padded buttons and selects) already stand clear, and the room goes to the filters. */
+        beside ? 'gap-x-0 gap-y-4' : 'gap-4',
         className,
       )}
       {...props}
     >
       {/* `items-center`: the back control and the title share a centre line —
           Figma's `Back Nav` aligns its counter axis to the centre. */}
-      <div className="flex min-w-0 items-center gap-2">
+      <div className={cn('flex min-w-0 items-center gap-2', beside && 'flex-wrap gap-y-2')}>
         {backHref ? (
           /* A real link — middle-click and open-in-new-tab work, which they
              cannot on a button. Named here, so the glyph stays decorative. */
@@ -94,8 +100,9 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
           <h1 className={cn('min-w-0 truncate text-text-secondary', TITLE_TYPE[size])}>{title}</h1>
           {subtitle && <p className="mt-1 truncate text-body-sm-regular text-text-secondary">{subtitle}</p>}
         </div>
+        {beside}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {actions && <div className="flex min-w-0 max-w-full shrink-0 flex-wrap items-center justify-end gap-2">{actions}</div>}
     </header>
   ),
 );
