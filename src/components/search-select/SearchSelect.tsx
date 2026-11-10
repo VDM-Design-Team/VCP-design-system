@@ -908,7 +908,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
               onClick={() => (open ? closePanel() : openPanel())}
               className={cn(
                 'flex items-center justify-between rounded-sm text-left outline-none',
-                inline ? 'h-7 gap-1' : cn('gap-2', size === 'sm' ? 'h-6' : size === 'compact' ? 'h-6.5' : 'h-8'),
+                inline ? 'h-7 gap-1' : cn('gap-2', size === 'sm' ? 'h-5.5' : size === 'compact' ? 'h-6.5' : 'h-7.5'),
                 showTags ? 'w-6 shrink-0 justify-end' : 'min-w-12 flex-1',
                 summary && !showTags
                   ? inline
