@@ -57,10 +57,10 @@ export const Development: Story = {
   },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
-    /* Before the account is linked: greyed out, with its note and an example in the placeholder. */
+    /* Before the account is linked: greyed out, with its note. No example to copy: the id is never typed. */
     const id = c.getByRole('textbox', { name: 'Jira Account ID' });
     await expect(id).toBeDisabled();
-    await expect(id).toHaveAttribute('placeholder', 'e.g. 712020:abc123...');
+    await expect(id).not.toHaveAttribute('placeholder');
     await expect(c.getByText('Auto populated after Jira connection')).toBeVisible();
     /* The card only reports its press: what connecting does is the page's. */
     await userEvent.click(c.getByRole('button', { name: 'Connect Jira' }));
@@ -86,21 +86,67 @@ export const JiraConnected: Story = {
   },
 };
 
-/**
- * `accountIdEditable`: the id can be typed by hand as well as filled in by the connection (Figma does not say whether it can). It is then an
- * ordinary input, and `onSave` hands its value back as `jiraAccountId`.
- */
-export const JiraIdEditable: Story = {
-  args: { jira: { logo: LOGO, status: 'Not connected', accountIdEditable: true } },
+/** The id is filled in by the connection only. Connecting after the form is on screen fills it in, and Save never sends it. */
+export const JiraConnectsLater: Story = {
+  args: { jira: { logo: LOGO, status: 'Not connected' } },
+  render: function ConnectsLater(args) {
+    const [accountId, setAccountId] = React.useState<string>();
+    return (
+      <PersonalInfoForm
+        {...args}
+        jira={{
+          logo: LOGO,
+          accountId,
+          status: accountId ? 'Connected' : 'Not connected',
+          actionLabel: accountId ? 'Disconnect' : 'Connect',
+          onConnect: () => setAccountId(accountId ? undefined : '712020:abc123def456'),
+        }}
+      />
+    );
+  },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     const id = c.getByRole('textbox', { name: 'Jira Account ID' });
-    await expect(id).toBeEnabled();
-    await expect(id).not.toHaveAttribute('readonly');
+    await expect(id).toHaveValue('');
+    await userEvent.click(c.getByRole('button', { name: 'Connect Jira' }));
+    await expect(id).toHaveValue('712020:abc123def456');
+    await expect(id).toHaveAttribute('readonly');
     await expect(c.queryByText('Auto populated after Jira connection')).toBeNull();
-    await userEvent.type(id, '  712020:typed ');
     await userEvent.click(c.getByRole('button', { name: 'Save' }));
-    await expect(args.onSave).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@vdm.technology', jiraAccountId: '712020:typed' });
+    await expect(args.onSave).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@vdm.technology' });
+  },
+};
+
+/** The profile loads after the form is on screen: the fields fill in. Once the person has typed, a later load does not overwrite it. */
+export const ProfileArrivesLater: Story = {
+  args: { initial: undefined },
+  render: function ArrivesLater(args) {
+    const [initial, setInitial] = React.useState<{ name: string; email: string }>();
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setInitial({ name: 'Ada Lovelace', email: 'ada@vdm.technology' })}>
+            Load profile
+          </button>
+          <button type="button" onClick={() => setInitial({ name: 'Someone Else', email: 'else@vdm.technology' })}>
+            Load again
+          </button>
+        </div>
+        <PersonalInfoForm {...args} initial={initial} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const name = c.getByRole('textbox', { name: 'Name' });
+    await expect(name).toHaveValue('');
+    await userEvent.click(c.getByRole('button', { name: 'Load profile' }));
+    await expect(name).toHaveValue('Ada Lovelace');
+    await expect(c.getByRole('textbox', { name: 'Email' })).toHaveValue('ada@vdm.technology');
+    /* Typing makes the draft the person's: a later load leaves it alone. */
+    await userEvent.type(name, ' King');
+    await userEvent.click(c.getByRole('button', { name: 'Load again' }));
+    await expect(name).toHaveValue('Ada Lovelace King');
   },
 };
 
@@ -112,7 +158,8 @@ export const Validation: Story = {
     await userEvent.click(c.getByRole('button', { name: 'Save' }));
     /* Figma's own words for the Error variant. */
     await expect(c.getByText('Name is required')).toBeVisible();
-    await expect(c.getByText('Email is required')).toBeVisible();
+    /* The same words as `UserAccountModal`. */
+    await expect(c.getByText('Enter an email address.')).toBeVisible();
     await expect(args.onSave).not.toHaveBeenCalled();
     await expect(c.getByRole('textbox', { name: 'Name' })).toHaveFocus();
     /* Fixing a field clears what was said about it. */
@@ -125,19 +172,27 @@ export const Validation: Story = {
   },
 };
 
-/** Figma's disabled Email: shown, but not editable here — and not checked, since it is not the person's to fix. */
-export const EmailDisabled: Story = {
-  args: { emailDisabled: true },
+/** An email this person cannot change here (a single sign-on's, or an admin's): read-only, so it can still be reached, selected and copied. It is not checked. */
+export const EmailReadOnly: Story = {
+  args: { emailReadOnly: true },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
-    await expect(c.getByRole('textbox', { name: 'Email' })).toBeDisabled();
-    await expect(c.getByRole('textbox', { name: 'Email' })).toHaveValue('ada@vdm.technology');
+    const email = c.getByRole('textbox', { name: 'Email' });
+    await expect(email).toHaveAttribute('readonly');
+    await expect(email).toBeEnabled();
+    await expect(email).toHaveValue('ada@vdm.technology');
+    /* Reachable with the keyboard, and typing changes nothing. */
+    await userEvent.click(c.getByRole('textbox', { name: 'Name' }));
+    await userEvent.tab();
+    await expect(email).toHaveFocus();
+    await userEvent.keyboard('x');
+    await expect(email).toHaveValue('ada@vdm.technology');
     await userEvent.click(c.getByRole('button', { name: 'Save' }));
     await expect(args.onSave).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@vdm.technology' });
   },
 };
 
-/** What only the server knows. */
+/** What only the server knows. An editable Email shows it under the field. */
 export const ServerErrors: Story = {
   args: { errors: { email: 'That email address is already in use.' } },
   play: async ({ canvasElement }) => {

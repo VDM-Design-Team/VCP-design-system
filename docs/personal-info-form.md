@@ -32,31 +32,35 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `initial` | `{ name, email }` | — | What the fields start as. The form keeps its own draft |
+| `initial` | `{ name, email }` | — | What the fields hold. The draft **follows it until the person edits a field**, so it may arrive after the form is on screen |
 | `onSave` | `(values) => void` | required | Valid, it gets the whole draft (trimmed). **Saves nothing itself** |
-| `jira` | `PersonalInfoJira` | — | `{ accountId?, accountIdEditable?, logo, status, actionLabel?, onConnect?, connecting? }`. Left out, there is no Jira section |
+| `jira` | `PersonalInfoJira` | — | `{ accountId?, logo, status, actionLabel?, onConnect?, connecting? }`. Left out, there is no Jira section |
 | `saving` | `boolean` | — | Save spins and every field (and the Jira button) locks |
-| `emailDisabled` | `boolean` | — | Figma's disabled Email: shown, not editable here (an email an admin or a single sign-on owns). It is then not validated |
+| `emailReadOnly` | `boolean` | — | An email this person cannot change here (a single sign-on's, or one an admin owns). **Read-only, not disabled**: still reachable with the keyboard, selectable and copyable, on a grey fill. It is then not validated |
 | `errors` | `{ name?, email? }` | — | What only the server knows, shown under the field |
 
 ## The draft and the validation
 
-It **keeps its own draft** and hands the whole of it to `onSave`. Name and Email are required and Email must look like one: Save then says what is wrong
-under the field, **moves focus to the first problem** and does not call `onSave`; fixing a field clears what was said about it. The messages are
-Figma's own words where it draws them (its Error variant of Name reads "Name is required"; Email's matches: "Email is required"). Figma draws no
-Error variant for Email, and none for a wrongly shaped address, so those are additions.
+It **keeps its own draft** and hands the whole of it to `onSave`. **The draft follows `initial` until the person edits a field**: a profile that
+loads after the form is on screen still fills it in, and once something has been typed a later `initial` does not overwrite it. (To throw a draft away
+and start again, remount the form with a new `key`.)
+
+Name and Email are required and Email must look like one: Save then says what is wrong under the field, **moves focus to the first problem** and does
+not call `onSave`; fixing a field clears what was said about it. Name's message is Figma's own ("Name is required", its Error variant). **An editable
+Email shows its errors with the same words as `UserAccountModal`**: "Enter an email address." and "Enter a valid email address, like
+name@company.com." A read-only Email is not checked, since it is not the person's to fix.
 
 **No tooltips.** Figma draws none on this tab.
 
 ## Jira
 
-Figma draws **two states** for the **Jira Account ID**: **before** the account is linked it is greyed out (disabled) with the note "Auto populated after
-Jira connection" and an example in its placeholder ("e.g. 712020:abc123..."); **after**, a plain white field holding the id, with no note. By default the
-connection fills it, so it is read-only in both.
+**The Jira Account ID is filled in by the connection only** (decided with design, 6 Nov 2026). It is never typed, so it has no placeholder and
+`onSave` does not send it. Figma draws **two states**: **before** the account is linked it is greyed out (disabled) with the note "Auto populated
+after Jira connection"; **after**, a plain read-only field holding the id, with no note. The field shows `jira.accountId` as given, so a connection
+that lands while the form is open fills it in.
 
-**Can the id be typed by hand?** Figma does not say. **`jira.accountIdEditable`** is the prop that decides: off (the default), the connection is the only way in;
-on, it is an ordinary input and `onSave` hands its value back as `jiraAccountId`. (A question for design.) The **card only reports its press** (`jira.onConnect`): what connecting does — a redirect, a popup, a request — is the page's, and so are the
-words for each state (`jira.status`, `jira.actionLabel`).
+The **card only reports its press** (`jira.onConnect`): what connecting does — a redirect, a popup, a request — is the page's, and so are the words
+for each state (`jira.status`, `jira.actionLabel`).
 
 ## Tokens
 
@@ -67,6 +71,7 @@ Jira note ("Auto populated after Jira connection") is `Field`'s helper under the
 
 - A real `<form>`; every field has a visible label; an error sits under its field, is announced (`aria-invalid`, `role="alert"`) and takes focus.
 - `autocomplete` is `name` and `email`, so a browser can fill them.
+- **A read-only Email stays in the tab order** and can be selected and copied; a disabled one could not. Its grey fill keeps the full-strength edge and text, so it still clears contrast.
 - Before it is linked the Jira Account ID is disabled, so it is skipped by the keyboard but read by a screen reader with its note; after, it is read-only but focusable, so the id can be selected and copied.
 
 ## Don't
@@ -74,3 +79,5 @@ Jira note ("Auto populated after Jira connection") is `Field`'s helper under the
 - **Don't save inside it.** It hands the draft to `onSave`.
 - **Don't connect inside it.** The card reports a press; the page connects.
 - **Don't decide here which domains get Jira.** Pass `jira` or don't.
+- **Don't let the Jira Account ID be typed.** Connecting is the only way in.
+- **Don't disable a locked Email.** Use `emailReadOnly`, so it can still be read, reached and copied.
