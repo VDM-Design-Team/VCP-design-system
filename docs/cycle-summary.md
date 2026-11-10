@@ -57,7 +57,7 @@ A container query, so the card reflows by **its own** width, not the screen's â€
 
 ## Tokens
 
-Figures: a 12 dot (`action.primary.surface` blue, `accent.success.outline.border` green, `accent.warning.outline.content` brown), the
+Figures: a 12 dot (`action.primary.surface` blue, `accent.success.outline.border` green, `accent.yellow.medium` amber: Figma's yellow-500, decided 10 Nov 2026; the system's `accent.warning.outline.border` is yellow-700 in light, too dark to read as Figma's amber), the
 title `label-sm-medium` in `text.secondary`, the value `heading-xl-bold`. Figma's value is 28 bold; the ramp has no 28, so this uses
 the 32 (`heading-xl`) the system's other headline figures use. The gauge is `DonutChart` (half, segmented, 200, thickness 8).
 
