@@ -424,6 +424,20 @@ export const SubmenuAlignsWithItsParent: Story = {
   },
 };
 
+/** The open submenu's parent keeps its highlight in the dark theme too, at a contrast that clears 4.5:1 (it was the medium blue on the faint fill, 3.5:1). The accessibility check runs on the open state. */
+export const SubmenuOpenInDark: Story = {
+  globals: { theme: 'dark' },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    await screen.findByRole('menu', { name: 'Pending Review' });
+    await expect(parent).toHaveAttribute('aria-expanded', 'true');
+  },
+};
+
 /** With no room on the right the submenu flips to the left of its parent, and stays on screen. */
 export const SubmenuFlipsLeft: Story = {
   tags: ['!dev', '!autodocs'],

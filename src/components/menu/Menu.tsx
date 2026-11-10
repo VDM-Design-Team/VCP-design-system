@@ -560,8 +560,8 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             aria-expanded={submenu ? sub?.index === i : undefined}
             className={cn(
               menuItem({ tone: item.tone }),
-              /* The open parent keeps the highlight, in the brand blue and bold (Figma's "Pending Review ›"). */
-              submenu && 'aria-expanded:bg-surface-brand-faint aria-expanded:text-text-brand-medium aria-expanded:font-semibold',
+              /* The open parent keeps the highlight, in the brand blue and bold (Figma's "Pending Review ›"). `strong`, not `medium`: medium on this faint fill is 3.5:1 in dark. */
+              submenu && 'aria-expanded:bg-surface-brand-faint aria-expanded:text-text-brand-strong aria-expanded:font-semibold',
             )}
           >
             {glyph && <Icon name={glyph} size="sm" />}
