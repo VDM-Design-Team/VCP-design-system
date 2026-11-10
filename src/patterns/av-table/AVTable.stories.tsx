@@ -231,6 +231,38 @@ export const FullyLoaded: Story = {
   },
 };
 
+/** Figma's Manage table (`940:167946`): the pagination with the Items select and the "1-50 of 1,250" range. */
+export const WithPageSize: Story = {
+  render: (args) => {
+    const [page, setPage] = React.useState(2);
+    const [pageSize, setPageSize] = React.useState(50);
+    const itemCount = 1250;
+    return (
+      <div className="bg-surface-canvas p-6">
+        <AVTable
+          {...args}
+          onOpen={() => {}}
+          page={page}
+          pageCount={Math.ceil(itemCount / pageSize)}
+          onPageChange={setPage}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('51-100 of 1,250')).toBeInTheDocument();
+    await userEvent.selectOptions(c.getByRole('combobox', { name: /Items/i }), '25');
+    await expect(c.getByText('1-25 of 1,250')).toBeInTheDocument();
+  },
+};
+
 /**
  * The reference opens the AV — a real button, not a whole-row click target.
  * Its accessible name carries the title too, so a screen-reader user hears
