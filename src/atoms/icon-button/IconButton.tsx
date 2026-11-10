@@ -111,6 +111,13 @@ const iconButton = cva(
           'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
           'disabled:text-accent-critical-outline-content-disabled aria-disabled:text-accent-critical-outline-content-disabled',
         ],
+        /* accent.critical.tonal — a red disc with a dark red glyph, as `tonal` is a grey one: a row's delete beside its edit, in every state (hover and pressed fill, content, disabled). */
+        'critical-tonal': [
+          'bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default',
+          'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover',
+          'active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed',
+          'disabled:bg-accent-critical-tonal-surface-disabled disabled:text-accent-critical-tonal-content-disabled aria-disabled:bg-accent-critical-tonal-surface-disabled aria-disabled:text-accent-critical-tonal-content-disabled',
+        ],
         /* accent.critical.filled — destructive */
         danger: [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
