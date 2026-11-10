@@ -85,10 +85,11 @@ export interface DomainBudgetSummaryProps
   title?: string;
 }
 
+/* Figma's tooltips, with "quarter" where they say "cycle": a budget is per quarter; a cycle is a planning fortnight. */
 const HINTS = {
-  allocated: 'Total development points assigned for the selected cycle. Unused points do not roll over.',
+  allocated: 'Total development points assigned for the selected quarter. Unused points do not roll over.',
   consumed: 'Development points used by planned AVs, calculated automatically from their points and active dates.',
-  remaining: 'Remaining = Allocated - Consumed points for the cycle. Negative values indicate overspend.',
+  remaining: 'Remaining = Allocated - Consumed points for the quarter. Negative values indicate overspend.',
 } as const;
 
 /* Figma's fills (decided 9 Nov 2026: follow Figma): brand blue, its bright yellow (`caution`, the closest token to

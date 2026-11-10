@@ -99,6 +99,8 @@ textarea can't truncate with one, and the field has to be a textarea to grow. Ve
 
 ## Don't
 
+- **Don't say "cycle" for the budget's period.** A budget is per quarter; a cycle is a planning fortnight. Figma's tooltips say "cycle"; the system says "quarter".
+
 - **Don't keep Remaining or the bar in state.** Derive them from `allocated` and `consumed`.
 - **Don't map a number to a bar tone at the call site.** The bands live in `budgetStatus`.
 - **Don't put Save in the table.** One button for the whole page, with `disabled` on the table while it saves.

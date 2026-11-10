@@ -109,6 +109,8 @@ sit beside the written percentage, so the bar is never the only signal.
 
 ## Don't
 
+- **Don't say "cycle" for the budget's period.** A budget is per quarter; a cycle is a planning fortnight. Figma's tooltips say "cycle"; the system says "quarter".
+
 - **Don't map a number to a tone at the call site.** The bands live in `budgetStatus`.
 - **Don't pass a third number for Remaining.** It is `allocated − consumed`.
 - **Don't use it for a cycle** — a cycle's committed / completed / carried over is `CycleSummary`.
