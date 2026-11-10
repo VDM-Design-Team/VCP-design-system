@@ -38,6 +38,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onQuarterChange` / `onYearChange` | `(Quarter) => void` / `(number) => void` | — | A pick in the pickers. Only a value the pickers offer is ever reported |
 | `onGoToCurrent` | `() => void` | — | "Go to Current Quarter", which shows only for a past or upcoming `period` |
 | `title` | `string` | `Domain Budget` | The heading |
+| `note` | `string` | — | The super admin's note on this domain's budget for the quarter (`BudgetTable`'s Optional Notes), under the bar as "**Note:** …" (decided 9 Nov 2026: the admin sees it). Empty or omitted, nothing is drawn |
+| `noteLabel` | `string` | `Note` | What introduces it |
 | `className`, `ref` | | | On the section |
 
 Which quarter is the current one, its dates and its days left are the caller's: a date calculation is not this card's to make.

@@ -83,6 +83,13 @@ export interface DomainBudgetSummaryProps
   onGoToCurrent?: () => void;
   /** The card's heading. */
   title?: string;
+  /**
+   * The super admin's note on this domain's budget for the quarter (`BudgetTable`'s Optional Notes), shown under the
+   * bar (decided 9 Nov 2026: the admin sees it). Omit it, or pass an empty string, and nothing is drawn.
+   */
+  note?: string;
+  /** What the note is introduced with. */
+  noteLabel?: string;
 }
 
 const HINTS = {
@@ -159,6 +166,8 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
       onYearChange,
       onGoToCurrent,
       title = 'Domain Budget',
+      note,
+      noteLabel = 'Note',
       ...props
     },
     ref,
@@ -286,6 +295,12 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
               tone={TONE[status]}
               value={budgetUsage(consumed, allocated)}
             />
+            {note?.trim() && (
+              /* One paragraph: the label reads first, so "Note: …" is heard as one thing. */
+              <p className="m-0 text-body-sm-regular text-text-secondary">
+                <span className="text-body-sm-semibold text-text-primary">{noteLabel}:</span> {note}
+              </p>
+            )}
           </div>
         </div>
       </section>
