@@ -253,6 +253,23 @@ export const Clearable: Story = {
  * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
  * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
  */
+/** In a `Field` (a `<label for>`) the ✕ takes its name from the label: "Clear Assignee". */
+export const ClearableInAField: Story = {
+  render: () => {
+    const [value, setValue] = React.useState('carl');
+    return (
+      <Field label="Assignee" htmlFor="clear-in-field">
+        <SearchSelect id="clear-in-field" rows="avatar" clearable options={PEOPLE} value={value} onChange={setValue} />
+      </Field>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear Assignee' }));
+    await expect(canvas.getByRole('button', { name: 'Assignee' })).toHaveFocus();
+  },
+};
+
 export const RegularForFilters: Story = {
   render: () => {
     const options = [

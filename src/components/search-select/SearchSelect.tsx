@@ -588,7 +588,14 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
        hears what was picked. An `aria-label` is named by the trigger itself; a `<label for>` (a Field)
        is found through the button's `labels`, and given an id if it has none. */
     const [labelIds, setLabelIds] = React.useState<string[]>([]);
+    const [labelText, setLabelText] = React.useState('');
     React.useLayoutEffect(() => {
+      /* The ✕'s name says which field it clears ("Clear Assignee"): from `aria-labelledby`, or the `<label for>`. */
+      const named = ariaLabelledBy
+        ? ariaLabelledBy.split(/\s+/).map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
+        : Array.from(triggerRef.current?.labels ?? []).map((label) => label.textContent?.trim() ?? '');
+      const text = named.filter(Boolean).join(' ');
+      setLabelText((prev) => (prev === text ? prev : text));
       if (ariaLabel || ariaLabelledBy) return;
       const ids = Array.from(triggerRef.current?.labels ?? []).map((label, i) => {
         if (!label.id) label.id = `${listId}-label-${i}`;
@@ -958,7 +965,13 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                  with a 16 ✕ in `neutral.outline.content`, just before the caret. */
               <button
                 type="button"
-                aria-label={typeof clearable === 'string' ? clearable : ariaLabel ? `Clear ${ariaLabel}` : 'Clear'}
+                aria-label={
+                  typeof clearable === 'string'
+                    ? clearable
+                    : ariaLabel || labelText
+                      ? `Clear ${ariaLabel || labelText}`
+                      : 'Clear'
+                }
                 onClick={() => {
                   commit([]);
                   closePanel(true);
