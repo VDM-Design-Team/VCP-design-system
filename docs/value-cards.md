@@ -9,6 +9,7 @@ The dashboard's count of Added Values by status: a titled card holding a row of 
 | `Select` | atom |
 | `Skeleton` | atom |
 | `StatCard` | component |
+| `CardHeader` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

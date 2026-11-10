@@ -8,7 +8,7 @@ How a team's capacity for a cycle is spent, as one stacked bar: a title (with an
 |---|---|
 | `LegendItem` | atom |
 | `Skeleton` | atom |
-| `InfoHint` | component |
+| `CardHeader` | component |
 | `CapacityBar` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -60,7 +60,7 @@ A container query, so it follows its card, not the viewport. The bar takes the w
 
 - A `section` named by its title ("Team Capacity, region").
 - The bar is one image named by its values (see `docs/capacity-bar.md`); the legend is a list named "Legend", and each entry is its text.
-- The info glyph is a real, focusable `button`, "About Team Capacity", (`InfoHint`, wrapping the system `Tooltip`).
+- The info glyph is a real, focusable `button`, "About Team Capacity", (`InfoHint`, through `CardHeader`, wrapping the system `Tooltip`).
 - Loading: the placeholders are hidden from assistive tech and one `status` says "Loading Team Capacity".
 
 ## Don't
