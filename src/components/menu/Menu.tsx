@@ -198,7 +198,14 @@ function SubMenu({
     /* Capture: a scrolling table, not only the window, moves the parent item. */
     window.addEventListener('scroll', place, true);
     window.addEventListener('resize', place);
+    /* The menu behind it re-anchors itself on scroll too, a frame later, and that moves the parent item again: so the submenu looks once a frame while it is open, and moves only when the
+       parent item has. (Placing on the scroll event alone can run before the menu behind has moved, and leave the submenu where the item was.) */
+    let frame = requestAnimationFrame(function tick() {
+      place();
+      frame = requestAnimationFrame(tick);
+    });
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener('scroll', place, true);
       window.removeEventListener('resize', place);
     };
