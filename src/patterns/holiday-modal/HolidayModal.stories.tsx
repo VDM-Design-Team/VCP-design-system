@@ -90,7 +90,15 @@ export const RecurringTooltip: Story = {
   },
 };
 
-export const Saving: Story = { args: { loading: true } };
+/** Saving: the button spins and nothing closes the dialog (Escape, ✕ and the backdrop stand down) until it is done. */
+export const Saving: Story = {
+  args: { loading: true },
+  play: async ({ args }) => {
+    await userEvent.keyboard('{Escape}');
+    await expect(args.onClose).not.toHaveBeenCalled();
+    await expect(await screen.findByRole('dialog', { name: 'Add Holiday' })).toBeVisible();
+  },
+};
 
 /** Tokens only, so dark comes for free. */
 export const DarkTheme: Story = { globals: { theme: 'dark' } };

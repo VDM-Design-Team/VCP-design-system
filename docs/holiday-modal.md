@@ -7,14 +7,12 @@ Built to Figma's `Holiday_Registry_Modal` (`6169:75761`) and the Admin Actions f
 
 | Piece | Tier |
 |---|---|
-| `Button` | atom |
-| `Icon` | sub-atomic |
 | `Input` | atom |
 | `Toggle` | atom |
-| `Tooltip` | atom |
 | `DateField` | component |
 | `Field` | component |
 | `HolidayTypeTag` | component |
+| `InfoHint` | component |
 | `Modal` | component |
 | `SearchSelect` | component |
 
@@ -25,7 +23,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `HolidayModal` | Adding or editing one registry entry |
-| `ConfirmDeleteAVModal`-style confirmation | Removing one (the design draws "Remove Manual Holiday Entry?" as a future popup) |
+| `ConfirmDeleteModal` | Removing one. The design draws "Remove Manual Holiday Entry?" as a "(Future)" popup, so until it is designed the page confirms with `ConfirmDeleteModal` (the `OnThePage` story does) |
 
 ## Props
 
@@ -34,7 +32,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `open` / `onClose` | `boolean` / `() => void` | required | |
 | `holiday` | `HolidayDraft` | — | Pass it to **edit**: "Edit Holiday", filled, **Save**. Omit to add: "Add Holiday", empty, Recurring Yearly on, **Add** |
 | `onSubmit` | `(draft) => void` | required | Once, with `{ name, recurring, start, end, type }` (ISO dates; a single day has `end === start`) |
-| `loading` | `boolean` | `false` | Add / Save spins |
+| `loading` | `boolean` | `false` | Add / Save spins, and **nothing closes the dialog until it is done**: Escape, ✕ and the backdrop stand down (`Modal`'s `busy`) |
 
 ## Behaviour
 
@@ -44,11 +42,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Tokens
 
-`Modal` (`md`) with its ✕; the ⓘ is `text.tertiary`. No new tokens.
+`Modal` (`md`) with its ✕; the answer is `ModalConfirm` (40 high; the form's id is `useId`, so two dialogs never share one); the ⓘ is `InfoHint`, the system's 16 info icon (a 40 press area). No new tokens.
 
 ## Accessibility
 
-- A form in a dialog; the switch is named by its visible label ("Recurring Yearly") and the ⓘ is a real button ("About Recurring Yearly") whose tooltip also opens on focus.
+- A form in a dialog; the switch is named by its visible label ("Recurring Yearly") and the ⓘ is a real button ("About Recurring Yearly", `InfoHint`) whose tooltip also opens on focus.
 - Errors are announced with their field and not by colour alone.
 
 ## Don't

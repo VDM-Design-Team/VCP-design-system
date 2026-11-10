@@ -1,15 +1,12 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
-import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Toggle } from '../../atoms/toggle';
-import { Tooltip } from '../../atoms/tooltip';
 import { DateField } from '../../components/date-field';
 import { Field } from '../../components/field';
 import { HOLIDAY_TYPES, holidayTypeLabel, type HolidayType } from '../../components/holiday-type-tag';
-import { Modal } from '../../components/modal';
+import { InfoHint } from '../../components/info-hint';
+import { Modal, ModalConfirm } from '../../components/modal';
 import { SearchSelect } from '../../components/search-select';
-import { formatDayMonthYear } from '../../lib/format-date';
 
 /**
  * HolidayModal — adding a holiday to the registry, or changing one: **Holiday Name**, **Recurring Yearly** (a switch, with an ⓘ that says what it does), the **Date** (a period, picked on
@@ -22,6 +19,7 @@ import { formatDayMonthYear } from '../../lib/format-date';
  *   type". The first one that fails takes focus. A message clears when its field changes.
  * - **A single day is a period of one**: pick the same day twice, or one day and Apply.
  * - **It owns the draft** and reports it once through `onSubmit`; what saving does, and closing afterwards, is the page's. Everything resets each time it opens.
+ * - **While saving, nothing closes it**: the answer is `ModalConfirm`, so Escape, ✕ and the backdrop stand down until `loading` ends (`Modal`'s `busy`).
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.
@@ -43,7 +41,7 @@ export interface HolidayModalProps {
   /** The holiday being changed. Omit it to add one. */
   holiday?: HolidayDraft;
   onSubmit: (draft: HolidayDraft) => void;
-  /** Saving is in flight: the button spins and Close locks. */
+  /** Saving is in flight: the button spins and nothing closes the dialog (Escape, ✕ and the backdrop stand down) until it is done. */
   loading?: boolean;
 }
 
@@ -61,6 +59,7 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
   const dateRef = React.useRef<HTMLInputElement>(null);
   const typeRef = React.useRef<HTMLDivElement>(null);
   const recurringLabel = React.useId();
+  const formId = React.useId();
 
   /* Each time it opens: the holiday being changed, or an empty one. */
   React.useEffect(() => {
@@ -91,12 +90,12 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
       title={editing ? 'Edit Holiday' : 'Add Holiday'}
       size="md"
       footer={
-        <Button type="submit" form="holiday-modal-form" size="sm" loading={loading}>
+        <ModalConfirm type="submit" form={formId} loading={loading}>
           {editing ? 'Save' : 'Add'}
-        </Button>
+        </ModalConfirm>
       }
     >
-      <form id="holiday-modal-form" noValidate className="flex flex-col gap-6" onSubmit={submit}>
+      <form id={formId} noValidate className="flex flex-col gap-6" onSubmit={submit}>
         <Field label="Holiday Name" error={errors.name}>
           <Input
             ref={nameRef}
@@ -114,15 +113,7 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
         <div className="flex flex-col gap-2">
           <span className="flex items-center gap-1.5 text-label-sm-medium text-text-primary">
             <span id={recurringLabel}>Recurring Yearly</span>
-            <Tooltip content="Repeat this holiday every year, or keep it as a one-time event." placement="bottom">
-              <button
-                type="button"
-                aria-label="About Recurring Yearly"
-                className="grid size-4 place-items-center rounded-sm text-text-tertiary hover:text-text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-              >
-                <Icon name="info" size="sm" aria-hidden="true" />
-              </button>
-            </Tooltip>
+            <InfoHint label="Recurring Yearly" content="Repeat this holiday every year, or keep it as a one-time event." />
           </span>
           <Toggle aria-labelledby={recurringLabel} checked={draft.recurring} onChange={(recurring) => setDraft({ ...draft, recurring })} />
         </div>
