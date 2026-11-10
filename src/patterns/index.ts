@@ -43,6 +43,7 @@ export * from './superadmin-metrics';
 export * from './team-capacity';
 export * from './user-capacity';
 export * from './top-bar';
+export * from './manuals-table';
 export * from './system-changelog';
 export * from './child-part-modal';
 export * from './multipart-section';
