@@ -18,11 +18,11 @@ const meta = {
       story: OVERLAY_DOCS_STORY,
       description: {
         component:
-          'Adding files to an Added Value: the files already attached as cards (removable, and opening a preview on click), the drop area, and Upload, which sends only what was just picked.',
+          'Adding files to an Added Value: the files already attached as cards (removable, and opening a preview on click), the drop area, and Upload, which sends what was just picked and what was removed. Removing a file already attached is staged until Upload (or Save); Cancel undoes it.',
       },
     },
   },
-  args: { open: true, onClose: fn(), onUpload: fn(), onRemoveAttachment: fn() },
+  args: { open: true, onClose: fn(), onUpload: fn() },
 } satisfies Meta<typeof AttachmentsModal>;
 
 export default meta;
@@ -48,14 +48,59 @@ export const WithFiles: Story = {
   },
 };
 
-/** The ✕ removes a file that was already attached, and says so. */
+/** The ✕ on a file already attached is **staged**: the card goes, and nothing is removed until Save. Cancel undoes it. */
 export const RemovingAFile: Story = {
   args: { attachments: FILES },
   play: async ({ args }) => {
     const d = dialog();
+    await expect(d.getByRole('button', { name: 'Upload' })).toBeDisabled();
     await userEvent.click(d.getByRole('button', { name: 'Remove image.png' }));
     await expect(d.queryByRole('button', { name: 'Remove image.png' })).toBeNull();
-    await expect(args.onRemoveAttachment).toHaveBeenCalledWith(expect.objectContaining({ id: 'b' }));
+    /* Nothing is sent yet; the only change is a removal, so the button says Save. */
+    await expect(args.onUpload).not.toHaveBeenCalled();
+    const save = d.getByRole('button', { name: 'Save' });
+    await expect(save).toBeEnabled();
+    await userEvent.click(save);
+    await expect(args.onUpload).toHaveBeenCalledWith({ files: [], removed: [expect.objectContaining({ id: 'b' })] });
+  },
+};
+
+/** Cancel puts a staged removal back: the dialog reopens with the file still there, and nothing was sent. */
+export const CancelUndoesARemoval: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { attachments: FILES, open: false },
+  render: (args) => {
+    const [open, setOpen] = React.useState(false);
+    return (
+      <>
+        <button onClick={() => setOpen(true)}>Open</button>
+        <AttachmentsModal {...args} open={open} onClose={() => setOpen(false)} />
+      </>
+    );
+  },
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Open' }));
+    await userEvent.click(await within(screen.getByRole('dialog', { name: 'Attachments' })).findByRole('button', { name: 'Remove image.png' }));
+    await userEvent.click(dialog().getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Attachments' })).toBeNull());
+    await expect(args.onUpload).not.toHaveBeenCalled();
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Open' }));
+    await expect(await dialog().findByRole('button', { name: 'Remove image.png' })).toBeInTheDocument();
+  },
+};
+
+/** The ✕ takes its card with it, so focus moves on: the next card's ✕, else the previous one's, else the drop area. It never falls to the page. */
+export const FocusAfterRemove: Story = {
+  args: { attachments: FILES },
+  play: async () => {
+    const d = dialog();
+    const first = d.getByRole('button', { name: `Remove ${FILES[0]!.name}` });
+    first.focus();
+    await userEvent.click(first);
+    await waitFor(() => expect(d.getByRole('button', { name: 'Remove image.png' })).toHaveFocus());
+    await userEvent.click(d.getByRole('button', { name: 'Remove image.png' }));
+    await waitFor(() => expect(document.querySelector('input[type="file"]')).toHaveFocus());
   },
 };
 
@@ -72,7 +117,7 @@ export const PreviewingAFile: Story = {
   },
 };
 
-/** Picked files become cards; Upload enables and sends only those. */
+/** Picked files become cards; Upload enables and sends only those (and what was removed, none here). */
 export const PickingAndUploading: Story = {
   args: { attachments: FILES },
   play: async ({ args }) => {
@@ -83,8 +128,59 @@ export const PickingAndUploading: Story = {
     await expect(await d.findByRole('button', { name: 'Remove notes.pdf' })).toBeInTheDocument();
     await userEvent.click(d.getByRole('button', { name: 'Upload' }));
     await waitFor(() => expect(args.onUpload).toHaveBeenCalled());
-    const sent = (args.onUpload as ReturnType<typeof fn>).mock.calls[0][0] as File[];
-    await expect(sent.map((f) => f.name)).toEqual(['notes.pdf']);
+    const sent = (args.onUpload as ReturnType<typeof fn>).mock.calls[0][0] as { files: File[]; removed: unknown[] };
+    await expect(sent.files.map((f) => f.name)).toEqual(['notes.pdf']);
+    await expect(sent.removed).toEqual([]);
+  },
+};
+
+/** A PDF just picked gets a document glyph, not an image one, and the card is named for the file. */
+export const PickedPdfIsNotAnImage: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async () => {
+    const d = dialog();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, new File(['x'], 'plan.pdf', { type: 'application/pdf' }));
+    const card = await d.findByTitle('plan.pdf');
+    await expect(card.querySelector('img')).toBeNull();
+  },
+};
+
+/** An upload that failed says so under the drop area, and keeps the files so it can be tried again. */
+export const UploadFailed: Story = {
+  args: { error: 'The upload failed. Try again.' },
+  play: async () => {
+    await expect(dialog().getByText('The upload failed. Try again.')).toBeVisible();
+  },
+};
+
+/** A dialog left open after an upload has nothing left to send: once it settles without an error the picked files are cleared, so Upload cannot send them twice. */
+export const NotSentTwice: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => {
+    const [loading, setLoading] = React.useState(false);
+    return (
+      <AttachmentsModal
+        {...args}
+        loading={loading}
+        onUpload={(change) => {
+          args.onUpload(change);
+          setLoading(true);
+          setTimeout(() => setLoading(false), 200);
+        }}
+      />
+    );
+  },
+  play: async ({ args }) => {
+    const d = dialog();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    await userEvent.upload(input, new File(['x'], 'once.pdf', { type: 'application/pdf' }));
+    await userEvent.click(await d.findByRole('button', { name: 'Upload' }));
+    await waitFor(() => expect(d.queryByTitle('once.pdf')).toBeNull(), { timeout: 2000 });
+    await expect(d.getByRole('button', { name: 'Upload' })).toBeDisabled();
+    await expect(args.onUpload).toHaveBeenCalledTimes(1);
   },
 };
 
