@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { CHART_SERIES, seriesIn } from '../../lib/chart-series';
 import { LegendItem } from '../../atoms/legend-item';
 import { Skeleton } from '../../atoms/skeleton';
-import { InfoHint } from '../../components/info-hint';
+import { CardHeader } from '../../components/card-header';
 import { CapacityBar, capacityTotal, type CapacitySegment } from '../../components/capacity-bar';
 
 /**
@@ -55,17 +55,10 @@ export const TeamCapacity = React.forwardRef<HTMLElement, TeamCapacityProps>(
         className={cn('@container flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
-        <header className="flex min-w-0 flex-col gap-2">
-          <div className="flex min-w-0 items-center gap-1">
-            <h2 id={headingId} className="m-0 min-w-0 truncate text-title-sm-semibold text-text-primary">
-              {title}
-            </h2>
-            {hint && (
-              <InfoHint label={title} content={hint} />
-            )}
-          </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <CardHeader title={title} headingId={headingId} hint={hint} />
           {line && <p className="m-0 text-body-sm-regular text-text-primary">{line}</p>}
-        </header>
+        </div>
 
         {loading ? (
           <>

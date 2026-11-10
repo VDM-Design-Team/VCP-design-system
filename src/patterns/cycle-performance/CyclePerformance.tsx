@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import type { ChartSeries } from '../../lib/chart-series';
 import { Select } from '../../atoms/select';
 import { BarChart, type BarChartDatum, type BarChartProps } from '../../components/bar-chart';
+import { CardHeader } from '../../components/card-header';
 
 /**
  * CyclePerformance — how each cycle went, as grouped bars: for every cycle, the points Available, Overdue and Completed,
@@ -53,27 +54,28 @@ export const CyclePerformance = React.forwardRef<HTMLElement, CyclePerformancePr
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} className={cn('@container flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
-        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
-            {title}
-          </h2>
-          {filters && filters.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              {filters.map((f) => (
-                <Select
-                  key={f.key}
-                  size="sm"
-                  emphasis="regular"
-                  aria-label={f.label}
-                  className={f.className ?? 'w-32'}
-                  value={f.value}
-                  options={f.options}
-                  onChange={f.onChange}
-                />
-              ))}
-            </div>
-          )}
-        </header>
+        <CardHeader
+          title={title}
+          headingId={headingId}
+          actions={
+            filters && filters.length > 0 ? (
+              <>
+                {filters.map((f) => (
+                  <Select
+                    key={f.key}
+                    size="sm"
+                    emphasis="regular"
+                    aria-label={f.label}
+                    className={f.className ?? 'w-32'}
+                    value={f.value}
+                    options={f.options}
+                    onChange={f.onChange}
+                  />
+                ))}
+              </>
+            ) : undefined
+          }
+        />
         <BarChart data={data} series={series} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} formatValue={formatValue} formatTick={formatTick} onSelectDatum={onSelectDatum} renderTooltip={renderTooltip} toggleSeries={toggleSeries} defaultHiddenSeries={defaultHiddenSeries} onToggleSeries={onToggleSeries} />
       </section>
     );

@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { AccountsTable, type AccountRow } from './AccountsTable';
+import { ACCOUNT_STATUS_OPTIONS } from '../../components/account-status-tag';
 import type { DataTableSort } from '../../components/data-table';
 import type { DomainAccessRow } from '../../components/domain-access-table';
 import { Button } from '../../atoms/button';
@@ -255,11 +256,11 @@ function AccountsPage() {
         mode={editing === 'new' ? 'new' : 'edit'}
         initial={
           editing && editing !== 'new'
-            ? { name: editing.name, email: editing.email, status: 'Approved', proficiency: 'Junior', capacityPoints: 10 }
+            ? { name: editing.name, email: editing.email, status: 'approved', proficiency: 'Junior', capacityPoints: 10 }
             : undefined
         }
         domains={DOMAINS}
-        statusOptions={['Approved', 'Pending', 'Suspended']}
+        statusOptions={ACCOUNT_STATUS_OPTIONS}
         proficiencyOptions={['Junior', 'Mid', 'Senior']}
         onSubmit={submit}
       />

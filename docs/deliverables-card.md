@@ -10,12 +10,10 @@ Read off Figma's `Deliverables_Card` (`3234:10776`): View and Edit, for the Desi
 |---|---|
 | `Icon` | atom |
 | `IconButton` | atom |
-| `AttachmentViewer` | component |
 | `DeliverableLink` | component |
 | `DeliverableLinkForm` | component |
 | `DomainLabel` | component |
-| `Dropzone` | atom |
-| `FileAttachment` | component |
+| `Attachments` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import type { ChartSeries } from '../../lib/chart-series';
 import { Divider } from '../../atoms/divider';
-import { InfoHint } from '../../components/info-hint';
+import { CardHeader } from '../../components/card-header';
 import { LineChart, type LineChartDatum, type LineChartProps } from '../../components/line-chart';
 
 /**
@@ -69,12 +69,7 @@ export const CycleBurndown = React.forwardRef<HTMLElement, CycleBurndownProps>(
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} aria-busy={loading || undefined} className={cn('@container flex flex-col gap-6 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
-        <header className="flex min-w-0 items-center gap-1">
-          <h2 id={headingId} className="m-0 min-w-0 truncate text-title-sm-semibold text-text-primary">
-            {title}
-          </h2>
-          {hint && <InfoHint label={title} content={hint} />}
-        </header>
+        <CardHeader title={title} headingId={headingId} hint={hint} />
 
         <LineChart data={data} series={series} seriesLabels={seriesLabels} pointLabel={pointLabel} caption={title} yLabel={yLabel} unit={unit} height={height} loading={loading} empty={empty} formatValue={formatValue} formatTick={formatTick} onSelectDatum={onSelectDatum} renderTooltip={renderTooltip} toggleSeries={toggleSeries} defaultHiddenSeries={defaultHiddenSeries} onToggleSeries={onToggleSeries} />
 

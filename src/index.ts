@@ -35,11 +35,13 @@ export * from './atoms/tooltip';
 export * from './atoms/toggle';
 
 /* Components — units assembled from atoms (and other components). */
+export * from './components/account-status-tag';
 export * from './components/accordion';
 export * from './components/attachment-preview';
 export * from './components/assignee-selection-dropdown';
 export * from './components/assignee-with-status';
 export * from './components/attachment-viewer';
+export * from './components/attachments';
 export * from './components/avatar-group';
 export * from './components/banner';
 export * from './components/breadcrumb';
@@ -50,6 +52,7 @@ export * from './components/comment-form-actions';
 export * from './components/comment-reply';
 export * from './components/comment-reply-thread';
 export * from './components/comment-sort-chip';
+export * from './components/connection-card';
 export * from './components/cycle-tag';
 export * from './components/data-table';
 export * from './components/description-card';
@@ -120,6 +123,7 @@ export { CHANGELOG_KINDS } from './lib/changelog-kinds';
 export type { ChangeLogKindStyle } from './lib/changelog-kinds';
 export { CHART_SERIES, CHART_SERIES_ORDER, seriesIn } from './lib/chart-series';
 export type { ChartSeries, ChartSeriesStyle } from './lib/chart-series';
-export { DateFormatProvider, useDateFormat, formatDate, formatDateRange, formatDayMonthYear, datePlaceholder } from './lib/format-date';
+export { fileKind, useAttachmentFiles } from './lib/attachment-files';
+export { DateFormatProvider, useDateFormat, formatDate, formatDateTime, formatTime, formatDateRange, formatDayMonthYear, datePlaceholder } from './lib/format-date';
 /* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
 export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';
