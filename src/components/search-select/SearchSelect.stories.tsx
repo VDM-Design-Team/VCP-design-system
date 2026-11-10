@@ -225,6 +225,31 @@ export const Single: Story = {
 };
 
 /**
+ * `clearable`: with a person picked, a ✕ before the caret empties the field and gives focus back to it, as Figma's
+ * Manage filters draw it ("Filter by Assignee and Clear", `940:171256`). `FilterBar` turns it on for its one-person
+ * fields. Nothing picked, no ✕.
+ */
+export const Clearable: Story = {
+  args: { rows: 'avatar', clearable: true },
+  render: (args) => <Controlled {...args} aria-label="Assignee" />,
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button', { name: 'Assignee' });
+    await expect(canvas.queryByRole('button', { name: 'Clear Assignee' })).toBeNull();
+    await userEvent.click(trigger);
+    await userEvent.click(canvas.getByRole('option', { name: 'Carl Baker' }));
+    await expect(trigger).toHaveTextContent('Carl Baker');
+    const clear = canvas.getByRole('button', { name: 'Clear Assignee' });
+    await userEvent.click(clear);
+    await expect(args.onChange).toHaveBeenLastCalledWith('');
+    await expect(trigger).toHaveTextContent('Select user');
+    /* The ✕ has gone, so focus is back on the field, not dropped. */
+    await expect(trigger).toHaveFocus();
+    await expect(canvas.queryByRole('button', { name: 'Clear Assignee' })).toBeNull();
+  },
+};
+
+/**
  * `emphasis="regular"` is for a **filter**: the chosen value reads regular, so a row of filters sits quietly. The default
  * (`medium`) is what a chosen value in a form reads as. The placeholder is regular either way.
  */
