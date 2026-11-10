@@ -11,15 +11,15 @@ const MESSAGE =
   'Some changelog message goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
 
 const RELEASES: ChangelogRelease[] = [
-  { id: 3, title: 'Changelog Title', kind: 'feature', href: 'https://example.com/changelog/v1.3.0', version: 'v1.3.0', date: '2026-03-01', message: MESSAGE, features: FEATURES },
-  { id: 2, title: 'Changelog Title', kind: 'update', href: 'https://example.com/changelog/v1.2.0', version: 'v1.2.0', date: '2026-02-01', message: MESSAGE, features: FEATURES },
-  { id: 1, title: 'Changelog Title', kind: 'experimental', href: 'https://example.com/changelog/v1.1.0', version: 'v1.1.0', date: '2026-01-01', message: MESSAGE, features: FEATURES },
+  { id: 3, title: 'Changelog Title', kind: 'feature', changelogUrl: 'https://example.com/changelog/v1.3.0', version: 'v1.3.0', date: '2026-03-01', description: MESSAGE, features: FEATURES },
+  { id: 2, title: 'Changelog Title', kind: 'update', changelogUrl: 'https://example.com/changelog/v1.2.0', version: 'v1.2.0', date: '2026-02-01', description: MESSAGE, features: FEATURES },
+  { id: 1, title: 'Changelog Title', kind: 'experimental', changelogUrl: 'https://example.com/changelog/v1.1.0', version: 'v1.1.0', date: '2026-01-01', description: MESSAGE, features: FEATURES },
 ];
 
 /* Twelve releases, three to a page, for the paged story. */
 const MANY: ChangelogRelease[] = Array.from({ length: 12 }, (_, i) => {
   const n = 12 - i;
-  return { id: n, title: `Release ${n}`, kind: 'update', href: `https://example.com/changelog/v1.${n}.0`, version: `v1.${n}.0`, date: `2026-${String(n).padStart(2, '0')}-01`, message: MESSAGE, features: FEATURES };
+  return { id: n, title: `Release ${n}`, kind: 'update', changelogUrl: `https://example.com/changelog/v1.${n}.0`, version: `v1.${n}.0`, date: `2026-${String(n).padStart(2, '0')}-01`, description: MESSAGE, features: FEATURES };
 });
 
 const meta = {
