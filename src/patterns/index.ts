@@ -23,6 +23,7 @@ export * from './cycle-burndown';
 export * from './cycle-performance';
 export * from './gantt-chart';
 export * from './deliverables-card';
+export * from './handoff-form';
 export * from './handoff-av-modal';
 export * from './in-case-you-missed-it';
 export * from './comment-section';

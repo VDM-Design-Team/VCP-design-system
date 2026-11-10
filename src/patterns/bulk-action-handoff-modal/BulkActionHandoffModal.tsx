@@ -1,36 +1,28 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
+import { cn } from '../../lib/cn';
 import { Checkbox } from '../../atoms/checkbox';
-import { Dropzone } from '../../atoms/dropzone';
-import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
-import { Input } from '../../atoms/input';
 import { PaginationDots } from '../../atoms/pagination-dots';
-import { Select } from '../../atoms/select';
-import { Banner } from '../../components/banner';
-import { AttachmentViewer } from '../../components/attachment-viewer';
-import { DateField } from '../../components/date-field';
-import { isValidLinkUrl, LINK_URL_ERROR } from '../../components/deliverable-link-form';
-import { Field } from '../../components/field';
-import { FileAttachment, type FileAttachmentKind } from '../../components/file-attachment';
-import { Modal } from '../../components/modal';
-import { OVERDUE_REASONS, type HandoffDomain } from '../handoff-av-modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
+import { HandoffForm, blankHandoffEntry, isHandoffComplete, type HandoffAttachment, type HandoffEntry } from '../handoff-form';
+import type { HandoffDomain } from '../handoff-av-modal';
 
 /**
- * BulkActionHandoffModal — handing several Added Values on at once. One page per Added Value, a **Handoff Date**, **Demo Links** and **Attachments** each (and, for a late one,
+ * BulkActionHandoffModal — handing several Added Values on at once. One page per Added Value, each the shared **`HandoffForm`** (a **Handoff Date**, **Demo Links** and **Attachments** and, for a late one,
  * the banner, the **Overdue Reason** and **Additional Notes**), a **Publish** checkbox for Development, and `PaginationDots` between two arrow buttons to step between them. Built to Figma's
  * `Bulk_Action_Handoff_Popup` (both `Overdue` variants) and its `_Bulk_Action_Handoff_Popup_Footer`.
  *
- * - **Handoff waits until every Added Value is complete** ("All Handoff Details Filled = No" is the disabled button): each needs a **date**, a late one needs its reason, and a link that is typed must be a valid `https://` URL. Which other details are mandatory is for design to confirm.
- * - **The pager is pinned with the buttons**, not in the scroll. Cancel is
- *   always there. Stepping to an incomplete Added Value is how you finish it; the button's description says how many are still missing.
- * - **What you filled in stays while you step**: going to the next page and back loses nothing. Everything resets each time the popup opens.
+ * - **The form is the one `HandoffAVModal` draws**, so a single handoff and a bulk one ask for the same things: a date, chosen from the calendar, is required; a late one must say why; links, files and notes are optional; a link that is typed must be a valid `https://` address.
+ * - **Handoff waits until every Added Value is complete** ("All Handoff Details Filled = No" is the disabled button), by `isHandoffComplete`. The pager is pinned with the buttons, not in the scroll; stepping to an incomplete Added Value is how you finish it, and the button's description says how many are still missing.
+ * - **What you filled in stays while you step**: every page stays mounted (the others are hidden), so going to the next and back loses nothing. Everything resets each time the popup opens.
+ * - **The arrows never drop focus.** At the first or last Added Value the arrow you pressed is `aria-disabled`, not `disabled`, so it keeps focus instead of sending it to the page.
  * - **`onHandoff` gets one draft per Added Value** (by `ref`), once. The page then makes the change and says so (a toast, or `BulkActionFailedModal` for the ones that failed).
  * - **Publish is Development's.** Other domains do not draw it.
  * - **A reference with an `href` is a blue link that opens the Added Value in a new tab**; without one it is plain grey text.
+ * - **The popup is the system's `lg` (640)**, not Figma's 592.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
- * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
+ * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.
  */
 export interface BulkHandoffAV {
   /** "VCP-12345". */
@@ -40,8 +32,8 @@ export interface BulkHandoffAV {
   href?: string;
   /** How many days late it is. Given, this Added Value's page has the banner, the reason and the notes. */
   overdueDays?: number;
-  /** Files already attached to it. */
-  attachments?: Array<{ name: string; thumb?: string }>;
+  /** Files already attached to it: each a card that previews on click and can be removed. */
+  attachments?: readonly HandoffAttachment[];
   /** Prefills its date (ISO `yyyy-mm-dd`). It starts blank: a handoff date is chosen, not assumed. */
   defaultDate?: string;
 }
@@ -50,7 +42,7 @@ export interface BulkHandoffDraft {
   date: string;
   links: string[];
   attachments: File[];
-  /** Names of the files already on the Added Value that were removed here. */
+  /** The ids (the names, when none was given) of the files already on the Added Value that were removed here. */
   removedAttachments: string[];
   /** Development only. */
   publish: boolean;
@@ -67,145 +59,92 @@ export interface BulkActionHandoffModalProps {
   domain?: HandoffDomain;
   /** The handoffs, once, by `ref`. */
   onHandoff: (drafts: Record<string, BulkHandoffDraft>) => void;
-  /** Handoff is in flight: it spins and Cancel locks. */
+  /** Handoff is in flight: it spins, Cancel locks, and nothing closes the dialog until it is done. */
   loading?: boolean;
 }
 
-interface Entry {
-  date: string;
-  links: string[];
-  files: File[];
-  removed: string[];
-  publish: boolean;
-  overdueReason: string;
-  notes: string;
-}
-
-/** The card's glyph for a file the person picked. */
-const kindOf = (file: File): FileAttachmentKind =>
-  file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : file.type === 'application/pdf' ? 'pdf' : file.type === 'text/csv' ? 'csv' : 'doc';
-
-/* The neutral palette, as `Carousel`'s arrows: the colour of a control that is not an action. */
-const ARROW = 'text-neutral-outline-content-default hover:text-neutral-outline-content-hover active:text-neutral-outline-content-pressed disabled:text-neutral-outline-content-disabled';
-
-/** An address for each picked image, so its card can show a crop of it and the viewer can open it. Let go when the files change or the popup goes. */
-function useFileUrls(files: readonly File[]): Array<string | undefined> {
-  const [urls, setUrls] = React.useState<Array<string | undefined>>([]);
-  React.useEffect(() => {
-    const made = files.map((file) => (file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined));
-    setUrls(made);
-    return () => made.forEach((url) => url && URL.revokeObjectURL(url));
-  }, [files]);
-  return urls;
-}
-
-const NO_FILES: File[] = [];
-
-const blank = (item: BulkHandoffAV): Entry => ({ date: item.defaultDate ?? '', links: [''], files: [], removed: [], publish: false, overdueReason: '', notes: '' });
-
-/** A link may be left empty, but one that is typed must be a valid `https://` URL. */
-const linksValid = (entry: Entry) => entry.links.every((link) => link.trim() === '' || isValidLinkUrl(link));
-
-/** What a handoff needs: a date (and, if late, why). A link that is typed must be valid. Which other details are mandatory is for design to confirm. */
-const complete = (item: BulkHandoffAV, entry: Entry) => entry.date !== '' && (item.overdueDays == null || entry.overdueReason !== '') && linksValid(entry);
-
 export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-governance', onHandoff, loading }: BulkActionHandoffModalProps) {
   const [page, setPage] = React.useState(0);
-  const [entries, setEntries] = React.useState<Record<string, Entry>>({});
+  const [entries, setEntries] = React.useState<Record<string, HandoffEntry>>({});
+  const [publish, setPublish] = React.useState<Record<string, boolean>>({});
   const missingId = React.useId();
-  /* The card whose preview is open, as an index into this page's attachments. */
-  const [viewing, setViewing] = React.useState<number | null>(null);
-  /* Which link boxes have been left (blurred), so a half-typed URL is not shouted at while it is typed. */
-  const [touched, setTouched] = React.useState<Record<string, boolean>>({});
 
-  /* Each time it opens, start again. */
+  /* Each time it opens, start again (the forms start again with it: they are mounted only while it is open). */
   React.useEffect(() => {
     if (!open) return;
     setPage(0);
-    setViewing(null);
-    setTouched({});
-    setEntries(Object.fromEntries(items.map((item) => [item.ref, blank(item)])));
+    setEntries({});
+    setPublish({});
     /* On open only. */
   }, [open]); // eslint-disable-line
 
-  const item = items[Math.min(page, items.length - 1)];
-  const entry = (item && entries[item.ref]) ?? (item ? blank(item) : undefined);
-  const pickedUrls = useFileUrls(entry?.files ?? NO_FILES);
-  if (!item || !entry) return null;
-  const patch = (change: Partial<Entry>) => setEntries((current) => ({ ...current, [item.ref]: { ...(current[item.ref] ?? blank(item)), ...change } }));
-
-  /* One list for the preview and the cards: what is already attached, then what was just picked. */
-  const cards = [
-    ...(item.attachments ?? [])
-      .filter((file) => !entry.removed.includes(file.name))
-      .map((file) => ({
-        id: `existing-${file.name}`,
-        name: file.name,
-        kind: 'image' as FileAttachmentKind,
-        thumb: file.thumb,
-        remove: () => patch({ removed: [...entry.removed, file.name] }),
-      })),
-    ...entry.files.map((file, fileIndex) => ({
-      id: `new-${fileIndex}-${file.name}`,
-      name: file.name,
-      kind: kindOf(file),
-      thumb: pickedUrls[fileIndex],
-      remove: () => patch({ files: entry.files.filter((_, i) => i !== fileIndex) }),
-    })),
-  ];
-
-  const missing = items.filter((each) => !complete(each, entries[each.ref] ?? blank(each))).length;
   const n = items.length;
+  const current = Math.min(page, Math.max(n - 1, 0));
+  const entryOf = (each: BulkHandoffAV) => entries[each.ref] ?? blankHandoffEntry(each.defaultDate);
+  const missing = items.filter((each) => !isHandoffComplete(each.overdueDays != null, entryOf(each))).length;
 
   const submit = () => {
     const drafts: Record<string, BulkHandoffDraft> = {};
     for (const each of items) {
-      const e = entries[each.ref] ?? blank(each);
+      const e = entryOf(each);
       drafts[each.ref] = {
         date: e.date,
         links: e.links.filter((link) => link.trim() !== ''),
         attachments: e.files,
         removedAttachments: e.removed,
-        publish: domain === 'development' && e.publish,
+        publish: domain === 'development' && Boolean(publish[each.ref]),
         ...(each.overdueDays != null ? { overdueReason: e.overdueReason, notes: e.notes } : {}),
       };
     }
     onHandoff(drafts);
   };
 
+  if (n === 0) return null;
+
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={onClose}
-        title={`Handoff ${n} Added Value${n === 1 ? '' : 's'}`}
-        size="md"
-        showClose={false}
-        footer={
-          <>
-            {/* Pinned with the buttons, so stepping does not scroll away. A full row of its own above them. */}
-            {n > 1 && (
-              <div className="flex basis-full items-center justify-center gap-2">
-                <IconButton icon="caret-left" label="Previous Added Value" variant="tertiary" className={ARROW} disabled={page <= 0} onClick={() => setPage(page - 1)} />
-                <PaginationDots count={n} index={page} onChange={setPage} label="Added Values" />
-                <IconButton icon="caret-right" label="Next Added Value" variant="tertiary" className={ARROW} disabled={page >= n - 1} onClick={() => setPage(page + 1)} />
-              </div>
-            )}
-            <Button variant="secondary" size="sm" type="button" disabled={loading} onClick={onClose}>
-              Cancel
-            </Button>
-            <Button size="sm" type="button" disabled={missing > 0} loading={loading} aria-describedby={missing > 0 ? missingId : undefined} onClick={submit}>
-              Handoff
-            </Button>
-            {missing > 0 && (
-              <span id={missingId} className="sr-only">
-                {`${missing} of ${n} Added Values still need their handoff details.`}
-              </span>
-            )}
-          </>
-        }
-      >
-        <div key={item.ref} className="flex flex-col gap-6">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={`Handoff ${n} Added Value${n === 1 ? '' : 's'}`}
+      size="lg"
+      showClose={false}
+      footer={
+        <>
+          {/* Pinned with the buttons, so stepping does not scroll away. A full row of its own above them. */}
+          {n > 1 && (
+            <div className="flex basis-full items-center justify-center gap-2">
+              {/* `aria-disabled`, not `disabled`: at the end the arrow you pressed keeps focus instead of dropping it to the page. */}
+              <IconButton
+                icon="caret-left"
+                label="Previous Added Value"
+                variant="neutral-text"
+                aria-disabled={current <= 0 || undefined}
+                onClick={() => current > 0 && setPage(current - 1)}
+              />
+              <PaginationDots count={n} index={current} onChange={setPage} label="Added Values" />
+              <IconButton
+                icon="caret-right"
+                label="Next Added Value"
+                variant="neutral-text"
+                aria-disabled={current >= n - 1 || undefined}
+                onClick={() => current < n - 1 && setPage(current + 1)}
+              />
+            </div>
+          )}
+          <ModalCancel disabled={loading} />
+          <ModalConfirm disabled={missing > 0} loading={loading} aria-describedby={missing > 0 ? missingId : undefined} onClick={submit}>
+            Handoff
+          </ModalConfirm>
+          {missing > 0 && (
+            <span id={missingId} className="sr-only">
+              {`${missing} of ${n} Added Values still need their handoff details.`}
+            </span>
+          )}
+        </>
+      }
+    >
+      {items.map((item, index) => (
+        <div key={item.ref} hidden={index !== current} className={cn('flex-col gap-6', index === current ? 'flex' : 'hidden')}>
           <p className="m-0 flex min-w-0 gap-2 text-body-sm-regular" data-testid="handoff-av">
             {item.href ? (
               <a
@@ -224,100 +163,18 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
               {item.title}
             </span>
           </p>
-
-          {item.overdueDays != null && (
-            <Banner tone="warning">
-              This value is <strong>Overdue</strong> by{' '}
-              <strong>
-                {item.overdueDays} {item.overdueDays === 1 ? 'day' : 'days'}
-              </strong>
-              .
-            </Banner>
+          <HandoffForm
+            overdueDays={item.overdueDays}
+            attachments={item.attachments}
+            defaultDate={item.defaultDate}
+            onChange={(entry) => setEntries((now) => ({ ...now, [item.ref]: entry }))}
+          />
+          {domain === 'development' && (
+            <Checkbox label="Publish" checked={Boolean(publish[item.ref])} onChange={(checked) => setPublish((now) => ({ ...now, [item.ref]: checked }))} />
           )}
-
-          <Field label="Handoff Date">{(c) => <DateField {...c} value={entry.date || undefined} onChange={(iso) => patch({ date: iso })} placeholder="Select a date" />}</Field>
-
-          {item.overdueDays != null && (
-            <>
-              <Field label="Overdue Reason">
-                <Select
-                  fullWidth
-                  options={OVERDUE_REASONS.map((reason) => ({ value: reason.value, label: `${reason.label}: ${reason.description}` }))}
-                  value={entry.overdueReason}
-                  onChange={(value) => patch({ overdueReason: value })}
-                  placeholder="Select a reason"
-                />
-              </Field>
-              <Field label="Additional Notes (optional)">
-                <Input fullWidth value={entry.notes} onChange={(event) => patch({ notes: event.target.value })} />
-              </Field>
-            </>
-          )}
-
-          <Field label="Demo Links">
-            <div className="flex flex-col items-start gap-2">
-              {entry.links.map((link, index) => {
-                const key = `${item.ref}-${index}`;
-                const bad = touched[key] && link.trim() !== '' && !isValidLinkUrl(link);
-                return (
-                  <div key={index} className="flex w-full flex-col gap-1">
-                    <div className="flex w-full items-center gap-2">
-                      <Input
-                        fullWidth
-                        value={link}
-                        aria-label={`Demo link ${index + 1}`}
-                        placeholder="Paste Link Here"
-                        invalid={bad}
-                        aria-describedby={bad ? `${missingId}-link-${index}` : undefined}
-                        onBlur={() => setTouched((current) => ({ ...current, [key]: true }))}
-                        onChange={(event) => patch({ links: entry.links.map((value, i) => (i === index ? event.target.value : value)) })}
-                      />
-                      {/* The first box is cleared, not removed: there is always one to type in. */}
-                      {entry.links.length > 1 && <IconButton icon="minus-circle" label={`Remove demo link ${index + 1}`} onClick={() => patch({ links: entry.links.filter((_, i) => i !== index) })} />}
-                    </div>
-                    {bad && (
-                      <p id={`${missingId}-link-${index}`} role="alert" className="m-0 text-caption-md-medium text-accent-critical-outline-content-default">
-                        {LINK_URL_ERROR}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-              <Button type="button" size="sm" iconLeft={<Icon name="plus" size="sm" />} onClick={() => patch({ links: [...entry.links, ''] })}>
-                Add Another Link
-              </Button>
-            </div>
-          </Field>
-
-          <Field label="Attachments">
-            <div className="flex flex-col gap-3">
-              {/* The files already on it and the ones just picked, each a card that reacts, previews on click and can be removed. */}
-              {cards.length > 0 && (
-                <ul className="m-0 flex list-none flex-wrap gap-2.5 p-0">
-                  {cards.map((card, cardIndex) => (
-                    <li key={card.id}>
-                      <FileAttachment name={card.name} kind={card.kind} thumb={card.thumb} onClick={() => setViewing(cardIndex)} onRemove={card.remove} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <Dropzone multiple onFiles={(picked) => patch({ files: [...entry.files, ...picked] })} />
-            </div>
-          </Field>
-
-          {domain === 'development' && <Checkbox label="Publish" checked={entry.publish} onChange={(checked) => patch({ publish: checked })} />}
         </div>
-      </Modal>
-      {/* A second modal over the first — the Escape that closes it must not also close the handoff. */}
-      {cards.length > 0 && (
-        <AttachmentViewer
-          open={viewing !== null}
-          index={viewing ?? 0}
-          onIndexChange={setViewing}
-          onClose={() => setViewing(null)}
-          files={cards.map((card) => ({ id: card.id, name: card.name, kind: card.kind, src: card.thumb, thumb: card.thumb }))}
-        />
-      )}
-    </>
+      ))}
+    </Modal>
   );
 }
+BulkActionHandoffModal.displayName = 'BulkActionHandoffModal';

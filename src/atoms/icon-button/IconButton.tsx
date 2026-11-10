@@ -88,6 +88,12 @@ const iconButton = cva(
           'hover:text-action-tertiary-content-hover active:text-action-tertiary-content-pressed',
           'disabled:text-action-tertiary-content-disabled aria-disabled:text-action-tertiary-content-disabled',
         ],
+        /* neutral.textual — a bare glyph in the neutral palette, as `Button`'s `neutral-text`: a control that is not an action (a pager's arrows). */
+        'neutral-text': [
+          'bg-transparent text-neutral-textual-content-default',
+          'hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed',
+          'disabled:text-neutral-textual-content-disabled aria-disabled:text-neutral-textual-content-disabled',
+        ],
         /* neutral.tonal — a grey disc with a dark glyph. Figma's `Style=Tonal`,
            the table's inline-edit controls (pen, calendar, confirm, cancel):
            quiet until it is the thing you are reaching for. */
