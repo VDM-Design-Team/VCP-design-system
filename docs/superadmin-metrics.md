@@ -45,6 +45,7 @@ Every figure has an ⓘ with Figma's copy (`SUPERADMIN_METRIC_HINTS`; override a
 | `metrics` | `SuperAdminMetricsData` | required | `valuesCreated`, `valuesCompleted`, `overdueRate`, `activeUsers`, `totalUsers`, `avgPendingDays`, `avgReviewDays`, `acceptanceRate`, `valuesRejected`. The rates and averages are `number \| null` |
 | `domains` / `domain` / `onDomainChange` | `readonly string[]` / `string` / `(domain) => void` | required / required / — | The filter's options (named as they read: "Development Domain"), the choice, and a pick |
 | `month` / `onMonthChange` | `string` / `(iso) => void` | required / — | Any ISO date in the month; a pick reports the **first of the month** |
+| `filters` | `boolean` | `true` | Draw the domain and month filters above the cards. Turn it off when the page puts them in its title band (`SuperAdminFilters`, below): the metrics then draw only the cards |
 | `loading` | `boolean` | — | Each figure becomes a placeholder; the section is `aria-busy` |
 | `hints` | `Partial<SuperAdminMetricsHints>` | Figma's copy | |
 | `className`, `ref` | | | On the section |
@@ -60,6 +61,10 @@ each is. The one rule it has is how an unavailable figure reads:
 | A rate or average that cannot be worked out (`null`): Overdue Value Rate with no Active Values, an average with nothing to average, Acceptance Rate with nothing reviewed | `--`, with its unit still beside it |
 
 That is Figma's empty state: counts at 0, the rest at "--", users "0 / 0".
+
+## `SuperAdminFilters`
+
+The two filters on their own, a sibling in the same module: the domain `Select` and the month `DateField`, in regular weight. `size="md"` (the default) is what `SuperAdminMetrics` draws above its cards (40 high, 14rem wide). `size="compact"` is **36 high** and hugs its content, for the **title band, aligned to the right**, level with the development admin's filters: pass it as `DashboardTemplate`'s `filters` and give the metrics `filters={false}`. Same props as the metrics' filters: `domains`, `domain`, `onDomainChange`, `month`, `onMonthChange`.
 
 ## Layout
 

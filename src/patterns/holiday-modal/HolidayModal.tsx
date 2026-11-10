@@ -136,7 +136,6 @@ export function HolidayModal({ open, onClose, holiday, onSubmit, loading }: Holi
               placeholder="Select period"
               value={draft.start || undefined}
               rangeEnd={draft.end || undefined}
-              formatDate={formatDayMonthYear}
               onRangeChange={(start, end) => {
                 setDraft({ ...draft, start, end: end ?? '' });
                 setErrors({ ...errors, date: undefined });

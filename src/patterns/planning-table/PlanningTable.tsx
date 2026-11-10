@@ -92,7 +92,7 @@ export interface PlanningSection {
   kind?: 'cycle' | 'backlog';
   /** "Cycle 27" or "Backlog". */
   title: string;
-  /** "(Mar 02, 2026 - Mar 16, 2026)" — already formatted. Cycles only. */
+  /** "(02/03/2026 - 16/03/2026)" — already formatted. Cycles only. */
   dates?: string;
   /** Points. Cycles only; with `remainingCapacity`, draws the two capacity lines. */
   totalCapacity?: number;

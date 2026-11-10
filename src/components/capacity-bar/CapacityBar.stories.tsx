@@ -41,7 +41,7 @@ export const Default: Story = {
     const bar = within(canvasElement).getByRole('img', { name: 'Team capacity: Completed 60, Committed 30, Overdue 30, Available 60, total 180 pts' });
     await expect(bar).toBeInTheDocument();
     const widths = [...bar.children].map((c) => (c as HTMLElement).getBoundingClientRect().width);
-    /* 60 : 30 : 30 : 60, give or take the 1px gaps. */
+    /* 60 : 30 : 30 : 60, give or take the 2px gaps. */
     await expect(widths[0]! / widths[1]!).toBeGreaterThan(1.9);
     await expect(widths[0]! / widths[1]!).toBeLessThan(2.1);
     await expect(capacityTotal(args.segments)).toBe(180);
