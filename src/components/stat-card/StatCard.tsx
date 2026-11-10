@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
 import { Divider } from '../../atoms/divider';
-import { Tooltip } from '../../atoms/tooltip';
+import { InfoHint } from '../info-hint';
 
 /**
  * StatCard — one number that matters, on a card: open claims, points
@@ -199,19 +198,7 @@ function Metric({
         )}
         <span className="text-label-sm-medium text-text-secondary">{label}</span>
         {hint && (
-          <Tooltip content={hint}>
-            <button
-              type="button"
-              aria-label={`About ${typeof label === 'string' ? label : 'this metric'}`}
-              className={cn(
-                'grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary',
-                'hover:text-text-secondary',
-                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-              )}
-            >
-              <Icon name="info" size="md" />
-            </button>
-          </Tooltip>
+          <InfoHint label={typeof label === 'string' ? label : 'this metric'} content={hint} />
         )}
       </div>
       <div className={cn('flex w-full flex-wrap items-baseline gap-2', a.justify)}>

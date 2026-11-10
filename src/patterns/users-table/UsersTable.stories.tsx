@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { UsersTable, type UserRow } from './UsersTable';
+import { ACCOUNT_STATUS_OPTIONS } from '../../components/account-status-tag';
 import type { DataTableSort } from '../../components/data-table';
 import { ToastProvider, ToastViewport, useToast } from '../../components/toast';
 import { UserAccountModal, type UserAccountDraft } from '../user-account-modal';
@@ -11,7 +12,7 @@ const PEOPLE = [
   'John', 'Michael', 'Sarah', 'David', 'Jessica', 'Daniel', 'Laura', 'Emily', 'Priya', 'Omar',
   'Chen', 'Ingrid', 'Tomas', 'Aisha', 'Lucas', 'Nadia', 'Felix', 'Mina', 'Hugo', 'Zara',
 ];
-const STATUSES = ['approved', 'approved', 'pending', 'approved', 'suspended', 'approved', 'approved', 'pending', 'approved', 'approved'];
+const STATUSES = ['approved', 'approved', 'pending', 'approved', 'inactive', 'approved', 'approved', 'pending', 'approved', 'approved'];
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'} ago`;
 const ago = (days: number) =>
   days < 30 ? plural(days, 'day') : days < 365 ? plural(Math.round(days / 30), 'month') : plural(Math.round(days / 365), 'year');
@@ -119,22 +120,21 @@ export const Default: Story = {
   },
 };
 
-/** The status tag's colour is this table's to choose: approved green, pending yellow, suspended red, anything else grey. */
+/** The status is an `AccountStatusTag`, the owner of account statuses: Approved green, Pending yellow, Inactive grey. No status is red. */
 export const StatusTones: Story = {
   args: {
     rows: [
       { id: 1, name: 'Ada', email: 'ada@vdm.technology', status: 'approved', dateAdded: '1 month ago' },
       { id: 2, name: 'Ben', email: 'ben@vdm.technology', status: 'pending', dateAdded: '2 months ago' },
-      { id: 3, name: 'Cy', email: 'cy@vdm.technology', status: 'suspended', dateAdded: '3 months ago' },
-      { id: 4, name: 'Di', email: 'di@vdm.technology', status: 'invited', dateAdded: '4 months ago' },
+      { id: 3, name: 'Cy', email: 'cy@vdm.technology', status: 'inactive', dateAdded: '3 months ago' },
     ],
-    itemCount: 4,
+    itemCount: 3,
     pageCount: 1,
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     const color = (text: string) => getComputedStyle(c.getByText(text)).color;
-    await expect(new Set([color('approved'), color('pending'), color('suspended'), color('invited')]).size).toBe(4);
+    await expect(new Set([color('Approved'), color('Pending'), color('Inactive')]).size).toBe(3);
   },
 };
 
@@ -175,14 +175,20 @@ export const Sorting: Story = {
 /** No users at all. */
 export const Empty: Story = { args: { rows: [], itemCount: 0, pageCount: 1 } };
 
-/** While the users load: the search and headers stay, each cell is a placeholder, and one status says so. */
+/** While the users load: the search, the headers and + New User stay, each cell is a placeholder, and one status says so. */
 export const Loading: Story = {
   args: { loading: true },
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('status')).toHaveTextContent('Loading users');
     await expect(c.queryByRole('button', { name: /^View/ })).toBeNull();
     await expect(c.getByRole('searchbox', { name: 'Search users' })).toBeVisible();
+    /* + New User stays, so focus returning to it after a create does not fall to the page. */
+    const add = c.getByRole('button', { name: 'New User' });
+    add.focus();
+    await expect(add).toHaveFocus();
+    await userEvent.click(add);
+    await expect(args.onNewUser).toHaveBeenCalled();
   },
 };
 
@@ -206,7 +212,7 @@ function UsersPage() {
         id: draft.name.toLowerCase(),
         name: draft.name,
         email: draft.email,
-        status: draft.status.toLowerCase() || 'pending',
+        status: draft.status || 'pending',
         dateAdded: 'just now',
         days: 0,
       };
@@ -228,15 +234,13 @@ function UsersPage() {
         title={open === 'new' ? 'Create New User' : undefined}
         initial={
           open === 'new'
-            ? { status: 'Pending' }
+            ? { status: 'pending' }
             : open
-              ? { name: open.name, email: open.email, status: 'Approved', proficiency: 'Senior', capacityPoints: 10, roles: ['senior'] }
+              ? { name: open.name, email: open.email, status: open.status, capacityPoints: 10, roles: ['senior'] }
               : undefined
         }
         roles={ROLES}
-        statusOptions={['Approved', 'Pending', 'Suspended']}
-        proficiencyOptions={['Junior', 'Mid', 'Senior']}
-        onRemoveAvatar={fn()}
+        statusOptions={ACCOUNT_STATUS_OPTIONS}
         onSubmit={submit}
       />
     </>
@@ -245,7 +249,7 @@ function UsersPage() {
 
 /**
  * The tab around the table: **+ New User** opens “Create New User”, **View** opens the user (their name as the title, with Roles
- * and Change / Remove for the photo), and Submit says so with a toast. The table only asked; the page did the rest.
+ * in place of Proficiency), and Submit says so with a toast. The table only asked; the page did the rest.
  */
 export const OnThePage: Story = {
   render: () => (
@@ -261,6 +265,11 @@ export const OnThePage: Story = {
     const view = await screen.findByRole('dialog', { name: 'John' });
     await expect(within(view).getByRole('checkbox', { name: 'Senior Product Designer' })).toBeChecked();
     await expect(within(view).getByRole('checkbox', { name: 'Junior Product Designer' })).not.toBeChecked();
+    /* Roles only: no Proficiency. The Status list is the owner's three. */
+    await expect(within(view).queryByRole('combobox', { name: 'Proficiency' })).toBeNull();
+    await expect(within(within(view).getByRole('combobox', { name: 'Status' })).getAllByRole('option').map((o) => o.textContent).filter(Boolean)).toEqual(
+      expect.arrayContaining(['Approved', 'Pending', 'Inactive']),
+    );
     await userEvent.click(within(view).getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 

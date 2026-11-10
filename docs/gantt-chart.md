@@ -164,6 +164,8 @@ widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
 
 ## Accessibility
 
+- The toolbar's filters (cycle, projects, users, view) use the neutral resting edge (`edge="neutral"`, about 2.6:1 on white), the same deliberate exception as `FilterBar`'s fields; focus and error edges are unchanged.
+
 - Every task bar is a real `<a>` or `<button>` named with its title, status and dates,
   so it is reachable by keyboard, and its tooltip opens on focus as well as hover. A
   closed row's summary bar is not interactive: the row's own button opens it.

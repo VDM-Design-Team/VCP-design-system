@@ -1,16 +1,16 @@
 ---
 bump: minor
 ---
-### `UsersTable` and the Settings user dialog (November 2026)
+### `UsersTable`, `AccountStatusTag` and the Settings user dialog (November 2026)
 
-New pattern **`UsersTable`**, built to Figma's `Settings_Users`: search, Name / Status / Date Added (sortable), **View** on each row, **+ New User** in the Actions header, pagination. Controlled like `AccountsTable`; it owns the status → tone mapping (`approved` green, `pending` yellow, `rejected`/`suspended`/`inactive` red, else grey).
+New pattern **`UsersTable`**, built to Figma's `Settings_Users`: search, Name / Status / Date Added (sortable), **View** on each row, **+ New User** in the Actions header, pagination. Controlled like `AccountsTable`. Its empty table is an `EmptyState`, with the words searched when a search is active. **+ New User** stays while the table loads.
 
-`UserAccountModal` becomes the one user dialog for Accounts and Settings: `roles` swaps the Domain Access table for a Roles checklist (`draft.roles`, `initial.roles`), `onRemoveAvatar` gives the photo **Change** and **Remove**, and `domains` is now optional. Existing callers are unchanged.
+New component **`AccountStatusTag`**, the one owner of account statuses: **Approved** (green), **Pending** (yellow) and **Inactive** (grey), with no red status. `UsersTable` draws it, and `ACCOUNT_STATUS_OPTIONS` is the user dialog's Status list, so tables and dialogs agree.
 
-`DataTableColumn` gains `action`: a control in the header in place of the visible label (the label stays as the hidden name).
+`UserAccountModal` becomes the one user dialog for Accounts and Settings:
 
-Its empty table is an `EmptyState`, with the words searched when a search is active.
+- `roles` swaps Proficiency and the Domain Access table for a Roles checklist (`draft.roles`, `initial.roles`). `domains` and `proficiencyOptions` are now optional.
+- The photo's buttons are **Upload** with no photo, **Change** + **Remove** once there is one (a freshly chosen image counts). **Remove takes effect on Submit**: the draft carries `avatarRemoved: true`, so Cancel undoes it.
+- `draft.roles` and `draft.avatarRemoved` are optional, so existing typed callers are unchanged.
 
-An `action` column sits at the end: right-aligned, with room above and below the header control (Users table's + New User and View).
-
-The photo's buttons follow Figma on every user dialog: **Upload** with no photo, **Change** + **Remove** once there is one (a freshly chosen image counts). `onRemoveAvatar` is now just the callback.
+`DataTableColumn` gains `action`: a control in the header in place of the visible label (the label stays as the hidden name). An `action` column sits at the end: right-aligned, with room above and below the header control.

@@ -13,6 +13,7 @@ delete button on every row and the pages beneath. Built to Figma's `Contact_List
 | `Skeleton` | atom |
 | `DataTable` | component |
 | `EmptyState` | component |
+| `TableCard` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
