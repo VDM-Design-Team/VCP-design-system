@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useDateFormat } from '../../lib/format-date';
 import { Icon } from '../../atoms/icon';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
@@ -16,10 +17,13 @@ import { Tag } from '../../atoms/tag';
  * It is `DataTable` specialised, as `AccountsTable` is:
  *
  * - **ID** — the AV's reference, quiet (`text.tertiary`).
- * - **Task** — its title, in full: **it wraps** (Figma draws three lines) rather than ending in "…", since the log is for reading what changed.
- * - **Change** — the old value, an arrow, the new value, then which field changed in brackets: "(Status)". The values are `StatusTag`s, so a spine status
- *   and a domain step ("Design Review") each keep their own colour; `field` says what was changed ("Status", "Urgency", …).
- * - **Source** — a `SourceTag`. **Changed At** and **Changed By** are plain text, **already formatted** ("Jun 10, 2026 2:37 PM"): this table does not do dates.
+ * - **Task** — its title, **in full**: it wraps, at least 40 characters wide, and is never cut or reduced to a `title`, since the log is read for what changed (and a
+ *   hover-only title is out of a keyboard's reach).
+ * - **Change** — the old value, an arrow, the new value, then which field changed in brackets: "(Status)". **The new value is the one that is coloured**: a status is a
+ *   `StatusTag` (the owner of the status mapping), so a spine status and a domain step ("Design Review") each keep their own colour. **The old value is a quiet grey tag** — as
+ *   `StatusHistory` draws it — whatever it was, and so are "Initial Creation" and "Handoff", which stand in for a first value. `field` says what changed: **Status, Workflow,
+ *   Assignee, Start Date or Due Date**; an assignee is a person's name and a date is ISO, shown the system's way.
+ * - **Source** — a `SourceTag`. **Changed At** is an ISO date and time, shown the system's way, **"10/06/2026 14:37"** (dd/mm/yyyy, or the person's locale's order, then a 24-hour time: `useDateFormat().dateTime`) in a `<time>`. **Changed By** is plain text.
  *
  * **It does nothing itself.** Filtering is the page's: pass the filter row as `filters` and it sits inside the card above the table (there is no filters pattern); paging is
  * `page`, `pageCount` and `onPageChange`.
@@ -28,38 +32,51 @@ import { Tag } from '../../atoms/tag';
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-/** The two things a log entry can be about, in brackets after the change. */
-export type TaskLogField = 'Status' | 'Workflow';
+/** What a log entry can be about, in brackets after the change: the AV's status or workflow step, who it is assigned to, and its two dates. */
+export type TaskLogField = 'Status' | 'Workflow' | 'Assignee' | 'Start Date' | 'Due Date';
 
 /**
- * One side of a change: a status (`{ status }` for a spine status, `{ custom }` for a domain step's own words), or an **event** that stands in for one —
- * `{ event: 'Initial Creation' }` (the AV was just created, so there is nothing before it) or `{ event: 'Handoff' }`.
+ * A value in a change: a status (`{ status }` for a spine status, `{ custom }` for a domain step's own words), a person (`{ person: 'Eve Chen' }`, an assignee)
+ * or a date (`{ date: '2026-06-10' }`, ISO).
  */
-export type TaskLogValue = StatusTagProps | { event: 'Initial Creation' | 'Handoff' };
+export type TaskLogValue = StatusTagProps | { person: string } | { date: string };
 
-const isEvent = (value: TaskLogValue): value is { event: 'Initial Creation' | 'Handoff' } => 'event' in value;
+/** What stands in for the old value when there was none: `{ event: 'Initial Creation' }` (the AV was just created) or `{ event: 'Handoff' }`. Only ever the old side. */
+export type TaskLogEvent = { event: 'Initial Creation' | 'Handoff' };
 
-function ValueTag({ value }: { value: TaskLogValue }) {
-  return isEvent(value) ? <Tag size="md">{value.event}</Tag> : <StatusTag {...value} />;
+/** A value as words, for the grey old-value tag. */
+function useValueText() {
+  const dates = useDateFormat();
+  return (value: TaskLogValue | TaskLogEvent): string => {
+    if ('event' in value) return value.event;
+    if ('person' in value) return value.person;
+    if ('date' in value) return dates.format(value.date);
+    return value.custom ?? value.status ?? '';
+  };
+}
+
+/** The new value: a status in its own colour (`StatusTag` owns the mapping), anything else a quiet tag. */
+function NewValue({ value, text }: { value: TaskLogValue; text: string }) {
+  return 'status' in value || 'custom' in value ? <StatusTag {...value} /> : <Tag size="md">{text}</Tag>;
 }
 
 export interface TaskLogRow {
   id: string | number;
   /** The Added Value's reference: "VCP-1234". */
   ref: string;
-  /** Its title, in full. */
+  /** Its title, shown in full. */
   task: string;
   change: {
-    /** What it was. */
-    from: TaskLogValue;
-    /** What it became. */
+    /** What it was: a quiet grey tag, or an event when there was nothing before. */
+    from: TaskLogValue | TaskLogEvent;
+    /** What it became: a status is coloured. */
     to: TaskLogValue;
-    /** Which field changed, as it reads in brackets: "Status" or "Workflow". */
+    /** Which field changed, as it reads in brackets: "Status", "Workflow", "Assignee", "Start Date" or "Due Date". */
     field: TaskLogField;
   };
   /** Where the change came from, as it should read inside the tag: "VCP". */
   source: string;
-  /** Already formatted: "Jun 10, 2026 2:37 PM". */
+  /** An ISO date and time: "2026-06-10T14:37:00" (no zone: the clock reads as written) or "2026-06-10T14:37:00Z" (an instant, shown in the provider's time zone, else the person's own). */
   changedAt: string;
   /** Who made it. */
   changedBy: string;
@@ -73,8 +90,8 @@ export interface TaskLogTrailProps
   /** Placeholder rows instead of `rows`, while the log loads. The headers stay. */
   loading?: boolean;
   /**
-   * The page's filters (a search box, selects, dates, Reset…), drawn **inside the card, above the table** — as `AccountsTable` and `ContactsTable` carry
-   * their search. There is no filters pattern: build the row from the system's own fields.
+   * The page's filters: pass a `FilterBar` (search, the period, a select for the kind of change, **Reset**), drawn **inside the card, above the table** — as `AccountsTable` and
+   * `ContactsTable` carry their search.
    */
   filters?: React.ReactNode;
   /** Filters are narrowing the trail: an empty table then says "No changes match these filters." instead of "No changes yet." */
@@ -104,6 +121,8 @@ export function TaskLogTrail({
 }: TaskLogTrailProps) {
   /* Figma's rows are roomy: 16 above and below every cell, so a three-line task makes a row of about 95. */
   const roomy = () => ({ className: 'py-4' });
+  const dates = useDateFormat();
+  const valueText = useValueText();
   const columns: DataTableColumn<TaskLogRow>[] = [
     {
       key: 'ref',
@@ -117,13 +136,9 @@ export function TaskLogTrail({
       key: 'task',
       label: 'Task',
       width: '21%',
-      /* At least 40 characters wide, and at most three lines before the title is cut with "…" (the whole of it is still the hover title). */
+      /* At least 40 characters wide, and the whole title: it wraps. Nothing cuts it, so nothing is left to a hover title. */
       cellProps: () => ({ className: 'min-w-88 py-4' }),
-      render: (row) => (
-        <span className="line-clamp-3 text-body-sm-medium text-text-primary" title={row.task}>
-          {row.task}
-        </span>
-      ),
+      render: (row) => <span className="text-body-sm-medium text-text-primary">{row.task}</span>,
     },
     {
       key: 'change',
@@ -133,9 +148,9 @@ export function TaskLogTrail({
       width: '27%',
       render: (row) => (
         <div className="flex items-center gap-2 whitespace-nowrap">
-          <ValueTag value={row.change.from} />
+          <Tag size="md">{valueText(row.change.from)}</Tag>
           <Icon name="arrow-right" size="sm" label="changed to" className="shrink-0 text-text-secondary" />
-          <ValueTag value={row.change.to} />
+          <NewValue value={row.change.to} text={valueText(row.change.to)} />
           <span className="text-body-sm-regular text-text-tertiary">({row.change.field})</span>
         </div>
       ),
@@ -154,7 +169,11 @@ export function TaskLogTrail({
       label: 'Changed At',
       fit: true,
       width: '16%',
-      render: (row) => <span className="whitespace-nowrap text-body-sm-regular text-text-secondary">{row.changedAt}</span>,
+      render: (row) => (
+        <time dateTime={row.changedAt} className="whitespace-nowrap text-body-sm-regular text-text-secondary">
+          {dates.dateTime(row.changedAt)}
+        </time>
+      ),
     },
     {
       key: 'changedBy',

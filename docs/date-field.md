@@ -29,8 +29,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `mode` | `'day' \| 'month'` | `'day'` | What it picks: a day, or a month with no day (see below). `DatePicker`'s own prop |
 | `value` | `string` | — | ISO `yyyy-mm-dd` (in month mode, any day in the month). Empty shows the placeholder. It **reads dd/mm/yyyy** (see below) |
 | `onChange` | `(iso) => void` | — | The chosen day (in month mode, the **first of the month**); the calendar then closes |
+| `size` | `sm \| compact \| md` | `md` | The field's height, as `Input`'s: 32 / 36 / 40. `compact` (36) is a toolbar's field beside a small Button |
 | `emphasis` | `medium \| regular` | `medium` | The weight of the chosen date. A filter passes `regular` |
 | `estimated` | `boolean` | — | A calculated date — reads "(est.)". Picking a day yourself is the cue to clear it. Day mode only |
+| `edge` | `strong \| neutral` | `strong` | The resting edge, as `Input`: `neutral` is the lighter edge a row of filters uses |
 | `placeholder` | `string` | `-` | While there is no date |
 | `invalid` / `disabled` | `boolean` | — | As `Input` |
 | `picker` | `DatePickerProps` | — | `min`, `max`, `today` … go to the calendar |
@@ -48,6 +50,8 @@ Dates travel as ISO `yyyy-mm-dd` and **read dd/mm/yyyy** ("12/03/2026") in every
 through a `Date`, so no time zone can move the day.
 
 **Optionally, the person's locale.** Wrap the app in `<DateFormatProvider locale="en-US">` and every date reads in that locale's own order and separators ("03/12/2026", or "12.03.2026" for `de-DE`); the placeholder follows ("MM/DD/YYYY"). With no provider, or no `locale`, it is dd/mm/yyyy. `useDateFormat()` gives a component the same `format` and `placeholder`; `InlineDateEdit` can still override with its own `format`.
+
+**A date and a time read "10/06/2026 14:37"**: the date as above, then a **24-hour** time, whatever the locale (the locale orders the date; it does not change the clock). Anything that shows a time uses `useDateFormat().dateTime(iso)` (or `.time(iso)` for the clock alone; `formatDateTime` and `formatTime` outside React), so a time never reads two ways. They take an ISO date-time: **with no zone** ("2026-06-10T14:37") the clock reads as written and nothing is converted; **with a zone** ("…Z", "…+02:00") it is an instant, shown in the provider's `timeZone` (`<DateFormatProvider timeZone="Europe/Athens">`), else in the person's own; a date with no time is just the date; anything that is not ISO comes back as given. Put the ISO in a `<time dateTime>` and the formatted text inside it.
 
 ## Month mode
 

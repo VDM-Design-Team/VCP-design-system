@@ -472,8 +472,8 @@ export const ShortLabelInField: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
   args: {
     options: [
-      { value: 'c33', label: 'C33 (May 25, 2026 - Jun 08, 2026)', shortLabel: 'C33' },
-      { value: 'c34', label: 'C34 (Jun 09, 2026 - Jun 23, 2026)', shortLabel: 'C34' },
+      { value: 'c33', label: 'C33 (25/05/2026 - 08/06/2026)', shortLabel: 'C33' },
+      { value: 'c34', label: 'C34 (09/06/2026 - 23/06/2026)', shortLabel: 'C34' },
     ],
     placeholder: 'Select cycle',
     searchPlaceholder: 'Search cycles',
@@ -484,12 +484,12 @@ export const ShortLabelInField: Story = {
     const field = canvas.getByRole('button', { name: /^Cycle/ });
     await userEvent.click(field);
     /* The row says everything, and search matches the dates, not just the code. */
-    fireEvent.change(canvas.getByRole('combobox', { name: 'Search cycles' }), { target: { value: 'Jun 09' } });
+    fireEvent.change(canvas.getByRole('combobox', { name: 'Search cycles' }), { target: { value: '09/06' } });
     await waitFor(() => expect(canvas.getAllByRole('option')).toHaveLength(1));
-    await userEvent.click(canvas.getByRole('option', { name: 'C34 (Jun 09, 2026 - Jun 23, 2026)' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'C34 (09/06/2026 - 23/06/2026)' }));
     /* The field keeps it short. */
     await expect(field).toHaveTextContent('C34');
-    await expect(field).not.toHaveTextContent('Jun');
+    await expect(field).not.toHaveTextContent('09/06');
   },
 };
 
@@ -598,9 +598,9 @@ export const Inline: Story = {
           value={value}
           onChange={setValue}
           options={[
-            { value: 'c43', label: 'Cycle 43 (Oct 13, 2026 - Oct 26, 2026)', shortLabel: 'Cycle 43' },
-            { value: 'c44', label: 'Cycle 44 (Oct 27, 2026 - Nov 09, 2026)', shortLabel: 'Cycle 44' },
-            { value: 'c45', label: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)', shortLabel: 'Cycle 45' },
+            { value: 'c43', label: 'Cycle 43 (13/10/2026 - 26/10/2026)', shortLabel: 'Cycle 43' },
+            { value: 'c44', label: 'Cycle 44 (27/10/2026 - 09/11/2026)', shortLabel: 'Cycle 44' },
+            { value: 'c45', label: 'Cycle 45 (10/11/2026 - 23/11/2026)', shortLabel: 'Cycle 45' },
           ]}
         />
       </div>
@@ -611,7 +611,7 @@ export const Inline: Story = {
     const button = canvas.getByRole('button', { name: /^Cycle/ });
     await expect(button).toHaveTextContent('Cycle 44');
     await userEvent.click(button);
-    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 45 (Nov 10, 2026 - Nov 23, 2026)' }));
+    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 45 (10/11/2026 - 23/11/2026)' }));
     await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Cycle 45');
   },
 };
@@ -851,10 +851,57 @@ export const SizesWidthAndLoading: Story = {
     await expect(field('Small').getBoundingClientRect().height).toBeLessThan(
       field('Medium (default)').getBoundingClientRect().height,
     );
+    /* The heights the docs promise, as `Select`'s: the trigger inside the field is sized to fit, so it never pushes the field past them (it did, to 34 and 42). */
+    await expect(Math.round(field('Small').getBoundingClientRect().height)).toBe(32);
+    await expect(Math.round(field('Medium (default)').getBoundingClientRect().height)).toBe(40);
     await expect(field('Full width').getBoundingClientRect().width).toBeGreaterThan(
       field('Medium (default)').getBoundingClientRect().width,
     );
     await expect(canvasElement.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+  },
+};
+
+/** `compact` is 36 tall, between small and medium: a toolbar's field beside a small Button (36). */
+export const Compact: Story = {
+  render: (args) => (
+    <div className="flex flex-col items-start gap-3">
+      <Controlled {...args} size="compact" aria-label="Compact" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole('button', { name: /Compact/ }).parentElement!;
+    await expect(Math.round(field.getBoundingClientRect().height)).toBe(36);
+  },
+};
+
+/** The search matches every word you type, in any order: "Aug 2026" finds "C37 (Jul 20, 2026 - Aug 03, 2026)". One word is a plain contains. */
+export const SearchMatchesEveryWord: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <Controlled
+      {...args}
+      aria-label="Cycle"
+      options={[
+        { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' },
+        { value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' },
+        { value: 'C38', label: 'C38 (Aug 03, 2026 - Aug 17, 2026)' },
+        { value: 'C39', label: 'C39 (Aug 17, 2026 - Aug 31, 2026)' },
+      ]}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /Cycle/ }));
+    const search = await within(document.body).findByRole('combobox', { name: /search/i });
+    await userEvent.type(search, 'Aug 2026');
+    await waitFor(() => expect(within(document.body).getAllByRole('option')).toHaveLength(3));
+    await userEvent.clear(search);
+    await userEvent.type(search, '2026 aug');
+    await waitFor(() => expect(within(document.body).getAllByRole('option')).toHaveLength(3));
+    await userEvent.clear(search);
+    await userEvent.type(search, 'C39');
+    await waitFor(() => expect(within(document.body).getAllByRole('option')).toHaveLength(1));
   },
 };
 
