@@ -115,6 +115,17 @@ export const Empty: Story = {
   },
 };
 
+/** `filters={false}` draws only the cards, for a page that puts the filters in its title band (`SuperAdminFilters`, 36 high). */
+export const WithoutItsOwnFilters: Story = {
+  args: { filters: false },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.queryByRole('group', { name: 'Dashboard filters' })).toBeNull();
+    await expect(c.queryByRole('combobox', { name: 'Domain' })).toBeNull();
+    await expect(c.getByText('Values Created')).toBeVisible();
+  },
+};
+
 /** While the figures load: a placeholder for each, and the section says it is busy. */
 export const Loading: Story = {
   args: { loading: true },

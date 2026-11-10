@@ -36,8 +36,8 @@ import { useDateFormat } from '../../lib/format-date';
  * - **period** — a field that opens a range calendar (`DatePicker`, two months
  *   and your `presets`). The value is `{ start, end }` in ISO `yyyy-mm-dd`;
  *   the field reads it as `dd/mm/yyyy-dd/mm/yyyy`, as Figma draws it.
- * - **cycle** — `SearchSelect` with search, one pick. Each row reads **C33** (May 25,
- *   2026 - Jun 08, 2026) as in the AV details card; the field says just the code, so
+ * - **cycle** — `SearchSelect` with search, one pick. Each row reads **C33** (25/05/
+ *   2026 - 08/06/2026) as in the AV details card; the field says just the code, so
  *   it stays narrow enough to share a row. Cycles are data: pass `code`, `start` and
  *   `end` (ISO).
  * - **status** — `SearchSelect` (several picks, no search box) with the Clear all /
@@ -145,15 +145,6 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
 }
 
-const pad = (n: number) => String(n).padStart(2, '0');
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-/* ISO yyyy-mm-dd → "Mar 02, 2026", by string split, like the period field: no Date, no time zone. */
-const longDate = (iso: string) => {
-  const [y, m, d] = iso.split('-');
-  return `${MONTHS[Number(m) - 1]} ${pad(Number(d))}, ${y}`;
-};
-const cycleRange = (c: FilterBarCycleOption) => `${longDate(c.start)} - ${longDate(c.end)}`;
 
 /* Below `md` the calendar takes its touch layout, one month wide. */
 function useNarrow() {
@@ -197,7 +188,9 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
   /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
-  const { format: display } = useDateFormat();
+  const { format: display, range: dateRange } = useDateFormat();
+  /* A cycle's dates read like every date: dd/mm/yyyy, or the person's locale. */
+  const cycleRange = (c: FilterBarCycleOption) => dateRange(c.start, c.end);
 
   const hasFields = !!(period || cycle || status || priority || tags || users?.length || children);
   /* With no fields showing (folded away, or none passed) the search takes the room they leave. */

@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { CHART_SERIES, seriesIn } from '../../lib/chart-series';
-import { Icon } from '../../atoms/icon';
 import { LegendItem } from '../../atoms/legend-item';
 import { Skeleton } from '../../atoms/skeleton';
-import { Tooltip } from '../../atoms/tooltip';
+import { InfoHint } from '../../components/info-hint';
 import { CapacityBar, capacityTotal, type CapacitySegment } from '../../components/capacity-bar';
 import { TruncatedText } from '../../components/truncated-text';
 
@@ -71,15 +70,7 @@ export const UserCapacity = React.forwardRef<HTMLElement, UserCapacityProps>(
             {title}
           </h2>
           {hint && (
-            <Tooltip content={hint}>
-              <button
-                type="button"
-                aria-label={`About ${title}`}
-                className="grid size-5 shrink-0 place-items-center rounded-sm text-text-tertiary hover:text-text-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-              >
-                <Icon name="info" size="md" />
-              </button>
-            </Tooltip>
+            <InfoHint label={title} content={hint} />
           )}
         </header>
 

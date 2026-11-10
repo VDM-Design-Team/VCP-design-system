@@ -1,7 +1,7 @@
 # CycleTag
 
-The cycle an Added Value belongs to: its code and the dates it runs, "C18 (Sep 20,
-2025 - Oct 02, 2026)" — a component, and a `Tag` plus the one way VCP writes a
+The cycle an Added Value belongs to: its code and the dates it runs, "C18 (20/09/2025 -
+02/10/2026)" — a component, and a `Tag` plus the one way VCP writes a
 cycle.
 
 Read off the Figma `Cycle_Tag` (`8562:11083`, Tags page).
@@ -32,12 +32,15 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `className` | `string` | — | Merged via `cn()` |
 | `ref`, rest | | | On the `<span>` |
 
-`formatCycleRange(start, end)` is exported: "Sep 20, 2025 - Oct 02, 2026". Any
-piece that lists cycles should use it, so the dates read the same everywhere.
+`formatCycleRange(start, end, locale?)` is exported: "20/09/2025 - 02/10/2026". Inside
+a component, `useDateFormat().range` does the same and follows `DateFormatProvider`.
+Any piece that lists cycles should use one of them, so the dates read the same
+everywhere. (Until November 2026 cycles read "Sep 20, 2025 - Oct 02, 2026"; every date
+now reads dd/mm/yyyy, decided 6 November.)
 
-**The dates are written from the string.** The ISO value is split, with no `Date`
-and no time zone, so a cycle never shows the day before in a western time zone. A
-value that is not a date is shown as given rather than as "undefined".
+**The dates never pass through the machine's time zone.** With no locale the ISO
+value is split; with one it is formatted in UTC. A cycle never shows the day before in
+a western time zone, and a value that is not a date is shown as given.
 
 ## Tokens
 
@@ -68,7 +71,7 @@ The dark theme comes for free — every colour above is a semantic token.
 ## Accessibility
 
 - Plain text in a `<span>`: no focus, no events, and the cycle is announced as
-  one string, "C18 (Sep 20, 2025 - Oct 02, 2026)".
+  one string, "C18 (20/09/2025 - 02/10/2026)".
 - Meaning is in the words, not the border.
 
 ## Don't

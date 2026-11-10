@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
+import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
 import { EmptyState } from '../../components/empty-state';
 
@@ -119,25 +119,11 @@ export function ContactsTable({
   }));
 
   return (
-    <div
-      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
+    <TableCard
+      className={className}
       aria-busy={loading || undefined}
       {...props}
-    >
-      {loading && (
-        <span role="status" className="sr-only">
-          Loading messages
-        </span>
-      )}
-      <DataTable
-        caption={caption}
-        className="rounded-none border-0"
-        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
-        rows={loading ? placeholders : rows}
-        empty={empty}
-      />
-
-      <div className="flex justify-end">
+      footer={
         <Pagination
           page={page}
           pageCount={pageCount}
@@ -147,8 +133,21 @@ export function ContactsTable({
           pageSizeOptions={pageSizeOptions}
           onPageSizeChange={onPageSizeChange}
         />
-      </div>
-    </div>
+      }
+    >
+      {loading && (
+        <span role="status" className="sr-only">
+          Loading messages
+        </span>
+      )}
+      <DataTable
+        bare
+        caption={caption}
+        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
+        rows={loading ? placeholders : rows}
+        empty={empty}
+      />
+    </TableCard>
   );
 }
 ContactsTable.displayName = 'ContactsTable';

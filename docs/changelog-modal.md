@@ -29,6 +29,9 @@ list drifts, and fails a pattern composing fewer than two pieces.
 | `update` | megaphone | `accent.yellow.medium` |
 | `feature` | rocket | `accent.info.outline.content.default` |
 
+**The mapping has one owner, `src/lib/changelog-kinds.ts`** (`CHANGELOG_KINDS`), which
+`ChangelogItem`'s cards read too, so the dialog and the changelog page cannot drift apart.
+
 All three are the design's own variables, read off the file rather than matched
 by eye. The glyph is decorative and the kind is also given as screen-reader-only
 text, because a colour and a shape are not a label.

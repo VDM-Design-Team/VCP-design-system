@@ -331,7 +331,7 @@ export const Flow: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
     await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Cycle 44');
     await userEvent.click(canvas.getByRole('button', { name: /^Cycle/ }));
-    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 43 (Oct 13, 2026 - Oct 26, 2026)' }));
+    await userEvent.click(await canvas.findByRole('option', { name: 'Cycle 43 (13/10/2026 - 26/10/2026)' }));
     await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Cycle 43');
     await userEvent.click(canvas.getByRole('button', { name: 'Today' }));
     await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Cycle 44');
