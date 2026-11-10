@@ -13,7 +13,6 @@ Read off the Figma `Confirm_Delete_AV_Popup` (`7829:105404`, audit batch 4,
 | `Field` | component | Labels the read-only AV title |
 | `Input` | atom | Shows the AV title, read-only |
 | `Textarea` | atom | Shows several AV titles, one per line, read-only (`avTitles`) |
-| `Button` | atom | Cancel, and the destructive answer |
 | `Icon` | atom | The warning glyph above the question |
 
 The import rows are checked against the real imports — `npm test` fails if this
@@ -57,7 +56,7 @@ an alert-layout dialog had to repeat its heading as an `aria-label`.
 
 ## Accessibility
 
-- **`role="alertdialog"`**, and `description` is wired to `aria-describedby`,
+- **`role="alertdialog"`** (from `Modal`'s `tone="critical"`, which also drops the ✕), the footer buttons are `ModalCancel` (grey) and `ModalConfirm` (red) at `md`, and `description` is wired to `aria-describedby`,
   so the consequence is part of the initial announcement rather than something
   the user has to go looking for.
 - **A backdrop click does nothing.** `dismissible={false}`, because the

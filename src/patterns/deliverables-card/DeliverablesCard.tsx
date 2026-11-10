@@ -5,9 +5,7 @@ import { IconButton } from '../../atoms/icon-button';
 import { DeliverableLink } from '../../components/deliverable-link';
 import { DeliverableLinkForm, type DeliverableLinkDraft } from '../../components/deliverable-link-form';
 import type { DomainKey } from '../../components/domain-label';
-import { AttachmentViewer } from '../../components/attachment-viewer';
-import { Dropzone, type DropzoneProps } from '../../atoms/dropzone';
-import { FileAttachment, type FileAttachmentKind } from '../../components/file-attachment';
+import { Attachments, type AttachmentItem, type AttachmentsProps } from '../../components/attachments';
 
 /**
  * DeliverablesCard — what an Added Value delivers: the links to it and the files attached. Read off
@@ -40,7 +38,7 @@ export interface DeliverableLinkItem {
 export interface DeliverableFile {
   id: string;
   name: string;
-  kind?: FileAttachmentKind;
+  kind?: AttachmentItem['kind'];
   /** An image's own thumbnail, for the card and the viewer's strip. */
   thumb?: string;
   /** The file itself: what the viewer shows when its card is pressed. */
@@ -68,7 +66,7 @@ export interface DeliverablesCardProps extends Omit<React.HTMLAttributes<HTMLEle
   /** Renders the viewer's download button and fires with the open file's id. The page does the download. */
   onDownloadFile?: (id: string) => void;
   /** The drop area's own message, for a rejected file. */
-  fileError?: DropzoneProps['error'];
+  fileError?: AttachmentsProps['error'];
   /** The drop area's accepted-types line. */
   fileHint?: string;
   fileAccept?: string;
@@ -99,8 +97,6 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
   ) => {
     const editing = mode === 'edit';
     const headingId = React.useId();
-    /* Which file the viewer has open, if any. A press on any file card opens it, in view or edit. */
-    const [viewing, setViewing] = React.useState<number | null>(null);
 
     return (
       <section
@@ -136,48 +132,16 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
         {(files.length > 0 || editing) && (
           <div className="flex flex-col gap-2">
             <h3 className="text-body-sm-medium text-text-primary">Attachments</h3>
-            {files.length > 0 && (
-              <ul className="flex flex-wrap gap-2.5">
-                {files.map((file, fileIndex) => (
-                  <li key={file.id}>
-                    <FileAttachment
-                      name={file.name}
-                      kind={file.kind}
-                      thumb={file.thumb}
-                      domain={file.domain}
-                      onClick={() => setViewing(fileIndex)}
-                      onRemove={editing ? () => onRemoveFile?.(file.id) : undefined}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-            {editing && (
-              <Dropzone
-                multiple
-                onFiles={onFiles}
-                error={fileError}
-                hint={fileHint}
-                accept={fileAccept}
-              />
-            )}
+            <Attachments
+              items={files}
+              onFiles={editing ? onFiles : undefined}
+              onRemove={editing ? (file) => onRemoveFile?.(file.id) : undefined}
+              onDownload={onDownloadFile ? (file) => onDownloadFile(file.id) : undefined}
+              error={fileError}
+              hint={fileHint}
+              accept={fileAccept}
+            />
           </div>
-        )}
-        {files.length > 0 && (
-          <AttachmentViewer
-            open={viewing !== null}
-            index={viewing ?? 0}
-            onIndexChange={setViewing}
-            onClose={() => setViewing(null)}
-            onDownload={onDownloadFile ? (file) => onDownloadFile(file.id) : undefined}
-            files={files.map((f) => ({
-              id: f.id,
-              name: f.name,
-              kind: f.kind ?? 'doc',
-              src: f.src,
-              thumb: f.thumb,
-            }))}
-          />
         )}
       </section>
     );

@@ -49,6 +49,10 @@ export interface DateFieldProps {
   value?: string;
   /** Fires with the chosen ISO date (in month mode, the first of the month); the calendar then closes. */
   onChange?: (iso: string) => void;
+  /** The field's height, as `Input`'s: `md` 40 (default), `compact` 36 (a toolbar beside a small Button), `sm` 32. */
+  size?: 'sm' | 'compact' | 'md';
+  /** The resting edge, as `Input`: `strong` (default) or `neutral` (lighter; a deliberate exception for a row of filters). */
+  edge?: 'strong' | 'neutral';
   /**
    * The weight of the chosen date: `medium` (the default, as `Select`'s value) or `regular` — what a **filter** uses so a
    * row of filters sits quietly. The placeholder is regular either way.
@@ -77,6 +81,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
     {
       mode = 'day',
       emphasis = 'medium',
+      size = 'md',
+      edge,
       value,
       onChange,
       estimated,
@@ -113,6 +119,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
             readOnly
             role="combobox"
             emphasis={emphasis}
+            size={size}
+            edge={edge}
             fullWidth
             disabled={disabled}
             invalid={invalid}
