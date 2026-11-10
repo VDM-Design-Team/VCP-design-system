@@ -11,10 +11,10 @@ remains, which quarter this is, and a bar of how much of the budget is used. Bui
 | `Badge` | atom |
 | `Button` | atom |
 | `Divider` | atom |
-| `Icon` | atom |
 | `ProgressBar` | atom |
 | `Select` | atom |
-| `Tooltip` | atom |
+| `CardHeader` | component |
+| `InfoHint` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -98,7 +98,7 @@ moved to yellow-700 for contrast in November and Figma still shows the old one.
 
 - A `section` named by its heading, so a screen reader announces "Domain Budget, region".
 - Each info glyph is a real, focusable `button` named "About Allocated" (and so on) wrapping the system `Tooltip` — the definition is
-  reachable by keyboard, not only on hover. The glyph is 20, with a 40 press area.
+  reachable by keyboard, not only on hover. It is `InfoHint`: a 16 glyph with a 40 press area.
 - "Go to Current Quarter" goes away once the current quarter shows, so focus moves to the quarter picker instead of dropping to the page.
 - The bar is a `role="progressbar"` named "Budget Usage", with its value in percent, so what is announced is what is shown.
   The status is also in the numbers beside it (a negative Remaining, "142%"): colour is never the only signal.

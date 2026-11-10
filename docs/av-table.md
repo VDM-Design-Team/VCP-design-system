@@ -58,7 +58,7 @@ order of a thousand Added Values is the server's business.
 | Urgency | — | `UrgencyTag` |
 | Type | — | `TypeTag` |
 | Status | — | `StatusTag` |
-| Members | — | `AvatarGroup` |
+| Members | — | `AvatarGroup`, with `tooltips`: hover an avatar for the name and `role` (the `+N` lists the rest) |
 | Last Updated | ✓ `lastUpdated` | Already-formatted text |
 | Actions | — | Optional. `actions` |
 

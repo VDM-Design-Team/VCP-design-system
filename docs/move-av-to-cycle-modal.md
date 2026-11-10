@@ -38,7 +38,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onConfirm` | `(details) => void` | required | `{ assignees: [{ person, role, points }], start?, due?, cycle?, points }` — only when complete and no assignee is unavailable |
 | `onInvalid` | `(reason) => void` | — | `'missing-details'` or `'unavailable-assignee'`: Confirm did not go through. Where the product's "Unavailable Assignee" toast belongs |
 | `people` | `AssigneeOption[] \| (draft) => AssigneeOption[]` | required | A function gets the draft, so availability can follow the dates |
-| `cycles` | `{ value, code, start, end }[]` | required | Dates ISO. Picked in a `SearchSelect`. A cycle reads "C36 (Mar 02, 2026 - Mar 23, 2026)" — `CycleTag`'s own form, from `formatCycleRange` — in the field and in the rows, where the code is bold |
+| `cycles` | `{ value, code, start, end }[]` | required | Dates ISO. Picked in a `SearchSelect`. A cycle reads "C36 (02/03/2026 - 23/03/2026)" — `CycleTag`'s own form, from `formatCycleRange` — in the field and in the rows, where the code is bold |
 | `roles` | `string[]` | `Assignee, QA, Design` | |
 | `pointOptions` | `number[]` | `0, 1, 2, 3, 5, 8, 13` | The capacity scale, for an assignee's points and the AV's |
 | `initial` | `{ start?, due?, cycle?, points? }` | — | What is known on open, e.g. a Backlog row's own dates. `start` / `due` are `{ value, estimated? }` |

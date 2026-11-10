@@ -137,7 +137,7 @@ export const Default: Story = {
     /* Priority: the native select, with an explicit "All priorities". */
     /* Cycle: the row says the code and the dates, the field keeps just the code. */
     await userEvent.click(canvas.getByRole('button', { name: /^Cycle/ }));
-    await userEvent.click(canvas.getByRole('option', { name: 'C33 (May 25, 2026 - Jun 08, 2026)' }));
+    await userEvent.click(canvas.getByRole('option', { name: 'C33 (25/05/2026 - 08/06/2026)' }));
     await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('C33');
 
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Priority' }), 'high');
