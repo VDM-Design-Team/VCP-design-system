@@ -851,6 +851,9 @@ export const SizesWidthAndLoading: Story = {
     await expect(field('Small').getBoundingClientRect().height).toBeLessThan(
       field('Medium (default)').getBoundingClientRect().height,
     );
+    /* The heights the docs promise, as `Select`'s: the trigger inside the field is sized to fit, so it never pushes the field past them (it did, to 34 and 42). */
+    await expect(Math.round(field('Small').getBoundingClientRect().height)).toBe(32);
+    await expect(Math.round(field('Medium (default)').getBoundingClientRect().height)).toBe(40);
     await expect(field('Full width').getBoundingClientRect().width).toBeGreaterThan(
       field('Medium (default)').getBoundingClientRect().width,
     );
