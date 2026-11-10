@@ -212,6 +212,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     tags: `${fieldsId}-tags`,
     user: (i: number) => `${fieldsId}-user-${i}`,
   };
+  /* `min-w-0` on every control: a SearchSelect's own minimum (12rem) is wider than a sixth of a 1120 bar. */
   const labelled = (id: string, label: string, control: React.ReactNode, wide = false) => (
     <div key={id} className={cn('flex min-w-0 flex-col gap-1.5', wide && 'col-span-2 md:col-span-1')}>
       <label htmlFor={id} className="text-label-sm-medium text-text-primary">
@@ -264,7 +265,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
             labelled(
               ids.priority,
               'Priority',
-              <Select edge="neutral" placeholder="Select priority" {...priority} id={ids.priority} className="w-full" />,
+              <Select edge="neutral" placeholder="Select priority" {...priority} id={ids.priority} className="w-full min-w-0" />,
             )}
           {tags &&
             labelled(
@@ -278,7 +279,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                 placeholder="Select tags"
                 {...tags}
                 id={ids.tags}
-                className="w-full"
+                className="w-full min-w-0"
               />,
               true,
             )}
@@ -295,7 +296,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                 placeholder="Select status"
                 {...status}
                 id={ids.status}
-                className="w-full"
+                className="w-full min-w-0"
               />,
             )}
           {period &&
@@ -308,7 +309,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                 width="auto"
                 align="right"
                 panelClassName="p-0"
-                className="w-full"
+                className="w-full min-w-0"
                 trigger={
                   <button
                     id={ids.period}
@@ -383,7 +384,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                     option.label
                   );
                 }}
-                className="w-full"
+                className="w-full min-w-0"
               />,
               true,
             )}
@@ -399,7 +400,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                   searchPlaceholder: 'Search by name',
                   rows: 'avatar',
                   ...rest,
-                  className: 'w-full',
+                  className: 'w-full min-w-0',
                 } as SearchSelectProps)}
               />,
             ),

@@ -156,6 +156,13 @@ export const Default: Story = {
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByRole('button', { name: 'Remove VCP' })).toBeVisible();
 
+    /* Every field fits its labelled cell: none spills into the next (a SearchSelect's own minimum is wider than a cell). */
+    for (const label of Array.from(canvasElement.querySelectorAll<HTMLLabelElement>('label[for]'))) {
+      const cell = label.parentElement!.getBoundingClientRect();
+      const control = (label.parentElement!.children[1] as HTMLElement).getBoundingClientRect();
+      await expect(Math.round(control.right)).toBeLessThanOrEqual(Math.round(cell.right));
+    }
+
     /* Date (the period): a preset closes the calendar and fills the field. */
     await userEvent.click(canvas.getByRole('button', { name: 'Date' }));
     await userEvent.click(within(canvasElement.ownerDocument.body).getByRole('button', { name: 'Last 7 days' }));
