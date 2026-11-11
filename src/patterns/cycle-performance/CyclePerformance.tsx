@@ -64,6 +64,7 @@ export const CyclePerformance = React.forwardRef<HTMLElement, CyclePerformancePr
                   <Select
                     key={f.key}
                     size="sm"
+                    edge="neutral"
                     emphasis="regular"
                     aria-label={f.label}
                     className={f.className ?? 'w-32'}
