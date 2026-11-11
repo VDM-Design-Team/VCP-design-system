@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { useDateFormat } from '../../lib/format-date';
 import { Avatar } from '../../atoms/avatar';
 import { Badge } from '../../atoms/badge';
 import { IconButton } from '../../atoms/icon-button';
@@ -28,7 +27,7 @@ import { Tooltip } from '../../atoms/tooltip';
  * - **Hovering the row shows an edit button after the title** (Figma's `_Edit_Child_Part_Title_IconButton`): a 24 tonal disc with a pencil. It also shows
  *   when something in the row has *keyboard* focus (a mouse click does not hold it open), and always on a touch screen, where there is no hover. `onEditTitle` only asks: the page opens `ChildPartModal`
  *   in `edit` mode. Leave it out and there is no button.
- * - **The date is ISO** ("2025-10-01") and is shown the system's way: dd/mm/yyyy, or the person's locale (`useDateFormat`).
+ * - **The date is ISO** ("2025-10-01") and is shown the system's way: dd/mm/yyyy, or the person's locale (`DueDateTag` formats it).
  * - **It does nothing itself.** `onOpen` only asks; the page opens the part.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
@@ -114,7 +113,6 @@ export const MultipartRow = React.forwardRef<HTMLLIElement, MultipartRowProps>(
     ref,
   ) => {
     const done = isPartCompleted({ completed, status });
-    const dates = useDateFormat();
     /* The button that opens the part holds the title, so it is the thing that is cut: measured here, with its own tooltip. */
     const openRef = React.useRef<HTMLButtonElement | null>(null);
     const openCut = useIsTruncated(openRef, [title]);
@@ -189,8 +187,8 @@ export const MultipartRow = React.forwardRef<HTMLLIElement, MultipartRowProps>(
           {capacityPoints == null ? '-' : capacityPoints} CP
         </Badge>
         <span className={cn('whitespace-nowrap text-label-sm-medium text-text-tertiary', STACKED)}>Due Date:</span>
-        <DueDateTag size="md" proximity={dueProximity} className={STACKED}>
-          {dueDate ? dates.format(dueDate) : '-'}
+        <DueDateTag size="md" proximity={dueProximity} date={dueDate} className={STACKED}>
+          {dueDate ? undefined : '-'}
         </DueDateTag>
         <span aria-hidden="true" className="hidden w-px justify-self-center self-stretch bg-stroke-default @3xl:block" />
         <span className={cn('flex justify-end @3xl:justify-self-stretch', STACKED)}>

@@ -27,7 +27,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `children` | `ReactNode` | — | The date, already formatted |
+| `date` | `string` | — | The due date, **ISO `yyyy-mm-dd`**. It reads dd/mm/yyyy (or the person's locale, `DateFormatProvider`) inside a `<time>` that carries the ISO date |
+| `children` | `ReactNode` | — | Text in place of `date`, for what is not a date ("-"). Do not pass a date you formatted yourself |
 | `proximity` | `DueDateProximity` | `'default'` | `default` · `due-soon` · `overdue` |
 | `size` | `'sm' \| 'md'` | `'sm'` | Inherited from `Tag`. The AV table uses `sm` |
 
@@ -39,21 +40,19 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `due-soon` | `warning` | `accent.warning.tonal.*` |
 | `overdue` | `critical` | `accent.critical.tonal.*` |
 
-**Two things this does not own.**
+**How the date reads is the system's, not the caller's.** Give the tag `date` (ISO) and it goes through the one
+formatter every date in the system uses (`src/lib/format-date.ts`): dd/mm/yyyy, or the person's locale when the
+product sets one. A due date then never reads one way in the table and another on the page it opens. (Until
+November 2026 the tag took ready-made text; that is how "October 1, 2025" got onto screens whose other dates read
+01/10/2025. Decided with design, 6 Nov 2026: one format everywhere.)
 
-*The text.* It takes an already-formatted string. How a date reads —
-"October 1, 2025", "1 Oct", "in 3 days" — is a locale and product decision a
-design-system tag has no business making.
-
-*The threshold.* `dueDateTone` does the comparing, but `soonWithinDays` has no
+**One thing this does not own: the threshold.** `dueDateTone` does the comparing, but `soonWithinDays` has no
 default and never will get one here. How many days ahead counts as "soon" is a
 product rule that differs by domain, and a design system that invents one has
 quietly made a product decision on someone else's behalf.
 
 ```tsx
-<DueDateTag proximity={dueDateTone({ due, soonWithinDays: 7 })}>
-  {due.toLocaleDateString('en-US', { dateStyle: 'long' })}
-</DueDateTag>
+<DueDateTag date="2026-09-14" proximity={dueDateTone({ due, soonWithinDays: 7 })} />
 ```
 
 Both dates are floored to local midnight before comparing, so a task due today
