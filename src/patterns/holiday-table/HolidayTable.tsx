@@ -10,6 +10,7 @@ import { Tag } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { DateField } from '../../components/date-field';
+import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
 import type { DatePickerPreset } from '../../components/date-picker';
 import { EmptyState } from '../../components/empty-state';
@@ -296,59 +297,69 @@ export function HolidayTable({
   const paginated = pageCount !== undefined && onPageChange !== undefined;
 
   return (
-    /* `min-w-0`: as a flex or grid item it may be narrower than its columns, so the table scrolls inside its own wrapper and the page does not. */
-    <div className={cn('flex min-w-0 flex-col gap-6', className)} {...props}>
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
-          <SearchSelect
-            ref={typeFilterRef}
-            className="w-60"
-            emphasis="regular"
-            searchable={false}
-            placeholder="All Holiday Types"
-            aria-label="Holiday type"
-            options={typeOptions}
-            value={filters.type}
-            onChange={(type) => onFiltersChange({ ...filters, type: type as HolidayType | '' })}
-          />
-          {/* The existing month picker with the sprints passed in as its presets: a month picks the month, a sprint its own dates, Clear empties the filter. */}
-          <DateField
-            className="w-60"
-            mode="month"
-            emphasis="regular"
-            placeholder="Select Period"
-            aria-label="Period"
-            value={filters.period?.start}
-            rangeEnd={filters.period?.end}
-            picker={{ presets: periodPresets }}
-            onChange={(first) => onFiltersChange({ ...filters, period: { start: first, end: lastDayOf(first) } })}
-            onRangeChange={(start, end) => onFiltersChange({ ...filters, period: { start, end: end ?? lastDayOf(start) } })}
-            onClear={() => onFiltersChange({ ...filters, period: null })}
-          />
-          <SearchSelect
-            className="w-60"
-            emphasis="regular"
-            rows="avatar"
-            placeholder="All Users"
-            aria-label="Applies to"
-            options={userOptions}
-            value={filters.user}
-            onChange={(user) => onFiltersChange({ ...filters, user })}
-          />
-        </div>
-        {admin && (
-          <div className="ml-auto flex items-center gap-2">
-            <Button size="sm" iconLeft={<Icon name="plus" size="sm" aria-hidden="true" />} onClick={onAdd}>
-              Add Holiday
-            </Button>
-            <Button size="sm" variant="secondary" onClick={onImport}>
-              Import from Hubstaff
-            </Button>
+    /* `min-w-0`: as a flex or grid item the card may be narrower than the table's columns, so the table scrolls inside its own wrapper and the page does not. */
+    <TableCard
+      className={cn('min-w-0', className)}
+      {...props}
+      filters={
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-3">
+              <SearchSelect
+                ref={typeFilterRef}
+                className="w-60"
+                emphasis="regular"
+                searchable={false}
+                placeholder="All Holiday Types"
+                aria-label="Holiday type"
+                options={typeOptions}
+                value={filters.type}
+                onChange={(type) => onFiltersChange({ ...filters, type: type as HolidayType | '' })}
+              />
+              {/* The existing month picker with the sprints passed in as its presets: a month picks the month, a sprint its own dates, Clear empties the filter. */}
+              <DateField
+                className="w-60"
+                mode="month"
+                emphasis="regular"
+                placeholder="Select Period"
+                aria-label="Period"
+                value={filters.period?.start}
+                rangeEnd={filters.period?.end}
+                picker={{ presets: periodPresets }}
+                onChange={(first) => onFiltersChange({ ...filters, period: { start: first, end: lastDayOf(first) } })}
+                onRangeChange={(start, end) => onFiltersChange({ ...filters, period: { start, end: end ?? lastDayOf(start) } })}
+                onClear={() => onFiltersChange({ ...filters, period: null })}
+              />
+              <SearchSelect
+                className="w-60"
+                emphasis="regular"
+                rows="avatar"
+                placeholder="All Users"
+                aria-label="Applies to"
+                options={userOptions}
+                value={filters.user}
+                onChange={(user) => onFiltersChange({ ...filters, user })}
+              />
+            </div>
+            {admin && (
+              <div className="ml-auto flex items-center gap-2">
+                <Button size="sm" iconLeft={<Icon name="plus" size="sm" aria-hidden="true" />} onClick={onAdd}>
+                  Add Holiday
+                </Button>
+                <Button size="sm" variant="secondary" onClick={onImport}>
+                  Import from Hubstaff
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-
+      }
+      footer={
+        paginated ? (
+          <Pagination page={page} pageCount={pageCount} onChange={onPageChange} itemCount={itemCount} pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
+        ) : undefined
+      }
+    >
       <DataTable
+        bare
         columns={columns}
         rows={rows}
         sort={sort}
@@ -371,13 +382,7 @@ export function HolidayTable({
           )
         }
       />
-
-      {paginated && (
-        <div className="flex justify-end">
-          <Pagination page={page} pageCount={pageCount} onChange={onPageChange} itemCount={itemCount} pageSize={pageSize} onPageSizeChange={onPageSizeChange} />
-        </div>
-      )}
-    </div>
+    </TableCard>
   );
 }
 HolidayTable.displayName = 'HolidayTable';
