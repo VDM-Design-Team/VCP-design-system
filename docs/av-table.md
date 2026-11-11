@@ -84,6 +84,7 @@ rather than a `variant` prop.
 | `onDeleteSelected` | `(ids) => void` | — | The destructive button above the pagination |
 | `deleteSelectedLabel` | `(count) => string` | `Delete Selected (n)` | |
 | `page` / `pageCount` / `onPageChange` | — | — | Pagination renders only when **all three** are given |
+| `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | — | — | Passed to `Pagination`: the "1-50 of 1,250" range (`itemCount` and `pageSize`) and the Items select (`onPageSizeChange`), as Figma's Manage table draws them. The rows stay yours to slice |
 | `hints` | `AVTableHints` | Urgency, Type, Status: the product's copy | The info tooltips — see below |
 | `empty` | `ReactNode` | `DataTable`'s | An `<EmptyState>` fits |
 | `caption` | `string` | `'Added Values'` | Visually hidden `<caption>` |
@@ -192,8 +193,8 @@ An Added Value split into parts shows in the table (Figma's `Multipart in AV Tab
 - **Pagination is the repo's `Pagination`**, which since 5 Oct 2026 draws
   Figma's `VCP_Pagination`: First/Last, an ellipsis for long page counts, and —
   when given `itemCount`, `pageSize` and `onPageSizeChange` — the Items select
-  and the "1-50 of 1,250" range. `AVTable` passes only the page props today,
-  so it shows Figma's Small version.
+  and the "1-50 of 1,250" range. `AVTable` passes them through, so a page can
+  draw Figma's full version (Manage) or, leaving them out, its Small one.
 - **Column widths** are `<col>` percentages, not Figma's grid `fr` tracks —
   `1fr` has no meaning in a table. Task Title takes 40%, matching its 4fr
   against six roughly-1fr columns.

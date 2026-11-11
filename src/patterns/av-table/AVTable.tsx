@@ -145,6 +145,14 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   page?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
+  /**
+   * Passed to `Pagination`: with `itemCount` and `pageSize` it shows the "1-50 of 1,250" range, and with
+   * `onPageSizeChange` the Items select (Figma's Manage table, `940:167946`). The rows stay the caller's to slice.
+   */
+  itemCount?: number;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (pageSize: number) => void;
   /** The info tooltips. Urgency, Type and Status default to the product's copy — see `AVTableHints`. */
   hints?: AVTableHints;
   empty?: React.ReactNode;
@@ -179,6 +187,10 @@ export function AVTable({
   page,
   pageCount,
   onPageChange,
+  itemCount,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   hints: hintOverrides,
   empty,
   caption = 'Added Values',
@@ -369,7 +381,17 @@ export function AVTable({
           {deleteSelectedLabel(selected.length)}
         </Button>
       )}
-      {paginated && <Pagination page={page} pageCount={pageCount} onChange={onPageChange} />}
+      {paginated && (
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onChange={onPageChange}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={onPageSizeChange}
+        />
+      )}
     </div>
   );
 
