@@ -53,6 +53,8 @@ None of its own: `EmptyState`'s (tile `surface.brand.base`, glyph `text.brand.me
 
 - The title is a real heading, as in `EmptyState`; the tile is decorative.
 - **Reset** is a real button named "Reset" (40 high targets follow `Button`'s `sm` rule inside the table card).
+- **Reset goes away when it works** (the filters clear, the rows return), so the focused button unmounts. The page must move focus on, to the first filter, instead of letting it fall to the page: `HolidayTable` does, and its `ResetKeepsFocus` story shows it. `TableEmpty` cannot do this itself, because the filters are the page's.
+- Tab reaches **Reset** in one stop, in reading order after the text, with `Button`'s 2px focus ring (checked: solid 2px, offset 2).
 - When a search or filter *just* emptied the table, pair it with the live region of what did the searching; this piece owns no `aria-live`.
 
 ## Don't
