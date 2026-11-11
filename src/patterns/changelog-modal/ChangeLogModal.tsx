@@ -4,8 +4,9 @@ import { Carousel } from '../../components/carousel';
 import { Tooltip } from '../../atoms/tooltip';
 import { Badge } from '../../atoms/badge';
 import { Button } from '../../atoms/button';
-import { Icon, type IconName } from '../../atoms/icon';
+import { Icon } from '../../atoms/icon';
 import { PaginationDots } from '../../atoms/pagination-dots';
+import { CHANGELOG_KINDS, type ChangeLogKind } from '../../lib/changelog-kinds';
 
 /**
  * ChangeLogModal — what a user sees when the product has something to tell them
@@ -27,22 +28,8 @@ import { PaginationDots } from '../../atoms/pagination-dots';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type ChangeLogKind = 'experimental' | 'update' | 'feature';
-
-/** The glyph and colour for each kind, read off `_Changelog_Main_Content`. */
-const KIND: Record<ChangeLogKind, { icon: IconName; className: string; what: string }> = {
-  experimental: {
-    icon: 'flask',
-    className: 'text-accent-green-strong',
-    what: 'Experimental feature',
-  },
-  update: { icon: 'megaphone', className: 'text-accent-yellow-medium', what: 'Release' },
-  feature: {
-    icon: 'rocket',
-    className: 'text-accent-info-outline-content-default',
-    what: 'New feature',
-  },
-};
+/* The kinds, and each one's glyph, colour and words, have one owner: `src/lib/changelog-kinds.ts`. `ChangelogItem` reads it too. */
+export type { ChangeLogKind };
 
 export interface ChangeLogEntry {
   kind: ChangeLogKind;
@@ -98,7 +85,7 @@ export function ChangeLogModal({
 
   const entry = entries[index];
   if (!entry) return null;
-  const kind = KIND[entry.kind];
+  const kind = CHANGELOG_KINDS[entry.kind];
 
   return (
     <Modal
@@ -143,7 +130,7 @@ export function ChangeLogModal({
         <div className="flex flex-col gap-3">
           {/* 32, which is off the Icon scale — see the doc. */}
           <Icon name={kind.icon} aria-hidden="true" className={`size-8 ${kind.className}`} />
-          <span className="sr-only">{kind.what}</span>
+          <span className="sr-only">{kind.label}</span>
 
           <div className="flex flex-wrap items-center gap-2">
             <h2 id={titleId} className="text-title-md-semibold text-text-primary">
@@ -153,7 +140,7 @@ export function ChangeLogModal({
               <Tooltip content={entry.hint}>
                 <button
                   type="button"
-                  aria-label={`About this ${kind.what.toLowerCase()}`}
+                  aria-label={`About this ${kind.label.toLowerCase()}`}
                   className="rounded-sm text-text-tertiary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
                 >
                   <Icon name="info" size="sm" aria-hidden="true" />
