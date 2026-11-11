@@ -52,6 +52,14 @@ export interface NotificationInboxProps extends React.HTMLAttributes<HTMLDivElem
   >;
   /** The rows — `NotificationItem`s. Each is wrapped in a `<li>`. */
   children?: React.ReactNode;
+  /**
+   * The rows in groups, each under its own heading: by day ("Today", "Yesterday", "3 November"), as the
+   * inbox reads (decided 9 Nov 2026). Given, it is used instead of `children`. The grouping is yours; the
+   * inbox draws it. A group with no rows is left out.
+   */
+  groups?: ReadonlyArray<{ label: string; children: React.ReactNode }>;
+  /** The groups' heading level. `2` by default: under the page's own title. */
+  groupHeadingLevel?: 2 | 3 | 4;
   /** What an empty list says. Defaults to "No notifications". */
   emptyLabel?: string;
   /** Names the list for assistive tech. Defaults to "Notifications". */
@@ -67,6 +75,8 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
       onMarkAllRead,
       pagination,
       children,
+      groups,
+      groupHeadingLevel = 2,
       emptyLabel = 'No notifications',
       listLabel = 'Notifications',
       ...props
@@ -76,6 +86,18 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
     const [unreadState, setUnreadState] = React.useState(false);
     const onlyUnread = unreadOnly ?? unreadState;
     const items = React.Children.toArray(children);
+    const baseId = React.useId();
+    const filled = (groups ?? [])
+      .map((g) => ({ label: g.label, items: React.Children.toArray(g.children) }))
+      .filter((g) => g.items.length > 0);
+    const Heading = `h${groupHeadingLevel}` as 'h2' | 'h3' | 'h4';
+    const list = (rows: React.ReactNode[], label: { aria?: string; by?: string }) => (
+      <ul aria-label={label.aria} aria-labelledby={label.by}>
+        {rows.map((child, index) => (
+          <li key={React.isValidElement(child) && child.key != null ? child.key : index}>{child}</li>
+        ))}
+      </ul>
+    );
 
     return (
       <div
@@ -102,14 +124,22 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
           />
         </div>
 
-        {items.length > 0 ? (
-          <ul aria-label={listLabel}>
-            {items.map((child, index) => (
-              <li key={React.isValidElement(child) && child.key != null ? child.key : index}>
-                {child}
-              </li>
-            ))}
-          </ul>
+        {groups ? (
+          filled.length > 0 ? (
+            /* One list per day, named by its heading, so a screen reader can move by day. */
+            filled.map((g, i) => (
+              <section key={g.label} aria-labelledby={`${baseId}-g${i}`} className="flex flex-col gap-1 pt-2">
+                <Heading id={`${baseId}-g${i}`} className="m-0 text-label-sm-medium text-text-secondary">
+                  {g.label}
+                </Heading>
+                {list(g.items, { by: `${baseId}-g${i}` })}
+              </section>
+            ))
+          ) : (
+            <p className="py-12 text-center text-body-sm-regular text-text-tertiary">{emptyLabel}</p>
+          )
+        ) : items.length > 0 ? (
+          list(items, { aria: listLabel })
         ) : (
           <p className="py-12 text-center text-body-sm-regular text-text-tertiary">{emptyLabel}</p>
         )}

@@ -14,8 +14,8 @@ button on every row, and the pages beneath. Built to Figma's `Accounts_Page_Cont
 | `Skeleton` | atom |
 | `Tag` | atom |
 | `DataTable` | component |
-| `EmptyState` | component |
 | `TableCard` | component |
+| `TableEmpty` | component |
 | `UserLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -82,7 +82,7 @@ asserts `document.activeElement` after confirming, for the next-row and the empt
 
 ## Empty
 
-With no rows it says so in an `EmptyState` (the system's empty look): "No accounts yet." — or, while a search is typed, **No accounts match “…”.** with the words searched and a hint ("Try a different name, email or domain."). Pass `empty` to say
+With no rows it says so in a `TableEmpty` (the system's one empty-table look): "No accounts yet." — or, while a search is typed, **No accounts match “…”.** with the words searched and a hint ("Try a different name, email or domain."). Pass `empty` to say
 something else.
 
 ## Tokens

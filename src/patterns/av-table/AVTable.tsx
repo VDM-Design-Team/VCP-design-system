@@ -85,8 +85,11 @@ export interface AVTableRow {
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
-  /** The date, already formatted, and how near it is. See `DueDateTag`. */
-  due?: { label: string; proximity?: DueDateProximity };
+  /**
+   * The due date and how near it is. `date` is ISO `yyyy-mm-dd`: `DueDateTag` shows it dd/mm/yyyy (or the person's locale). `label` is text in its
+   * place for what is not a date; do not pass a date you formatted yourself.
+   */
+  due?: { date?: string; label?: string; proximity?: DueDateProximity };
   urgency?: AVUrgency;
   type?: AVType;
   /** `{ status }` for a spine status, `{ custom }` for a domain step. */
@@ -142,6 +145,14 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   page?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
+  /**
+   * Passed to `Pagination`: with `itemCount` and `pageSize` it shows the "1-50 of 1,250" range, and with
+   * `onPageSizeChange` the Items select (Figma's Manage table, `940:167946`). The rows stay the caller's to slice.
+   */
+  itemCount?: number;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (pageSize: number) => void;
   /** The info tooltips. Urgency, Type and Status default to the product's copy — see `AVTableHints`. */
   hints?: AVTableHints;
   empty?: React.ReactNode;
@@ -176,6 +187,10 @@ export function AVTable({
   page,
   pageCount,
   onPageChange,
+  itemCount,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   hints: hintOverrides,
   empty,
   caption = 'Added Values',
@@ -275,7 +290,9 @@ export function AVTable({
       sortable: true,
       render: (row) =>
         row.due ? (
-          <DueDateTag proximity={row.due.proximity}>{row.due.label}</DueDateTag>
+          <DueDateTag proximity={row.due.proximity} date={row.due.date}>
+            {row.due.label}
+          </DueDateTag>
         ) : null,
     },
     {
@@ -364,7 +381,17 @@ export function AVTable({
           {deleteSelectedLabel(selected.length)}
         </Button>
       )}
-      {paginated && <Pagination page={page} pageCount={pageCount} onChange={onPageChange} />}
+      {paginated && (
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onChange={onPageChange}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={onPageSizeChange}
+        />
+      )}
     </div>
   );
 

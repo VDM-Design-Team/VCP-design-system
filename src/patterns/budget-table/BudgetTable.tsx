@@ -21,7 +21,7 @@ import type { ProgressBarProps } from '../../atoms/progress-bar';
  *   "Set Budget", and clearing the field takes it back to unset. A nudge commits at once; typing commits after a brief
  *   pause (`commitDelay`, 600 ms) or on blur or Enter, clamped. Only a number can be typed.
  * - **Consumed** is the points used and a bar of how much of the allocation they are. **The bar's status is the
- *   Domain Budget card's** (`budgetStatus`: under 75% brand blue, 75–99% warning, 100% and over critical) — one
+ *   Domain Budget card's** (`budgetStatus`: 100% and over is over budget), drawn as Figma's table draws it: brand blue, or bright red when over — one
  *   owner, so the table and the summary above it never disagree.
  * - **Remaining** is `allocated − consumed`, derived here so the three never disagree, and red when it goes negative.
  *   A domain with no allocation counts as 0.
@@ -56,11 +56,11 @@ export interface BudgetTableHints {
   remaining?: React.ReactNode;
 }
 
-/** What each numeric column's ⓘ says, from Figma. Override any with `hints`. */
+/** What each numeric column's ⓘ says: Figma's, with "quarter" where it says "cycle" (a budget is per quarter; a cycle is a planning fortnight). Override any with `hints`. */
 export const BUDGET_COLUMN_HINTS = {
-  allocated: 'Total development points assigned for the selected cycle. Unused points do not roll over.',
+  allocated: 'Total development points assigned for the selected quarter. Unused points do not roll over.',
   consumed: 'Development points used by planned AVs, calculated automatically from their points and active dates.',
-  remaining: 'Remaining = Allocated - Consumed points for the cycle. Negative values indicate overspend.',
+  remaining: 'Remaining = Allocated - Consumed points for the quarter. Negative values indicate overspend.',
 } as const satisfies Required<Record<keyof BudgetTableHints, string>>;
 
 export interface BudgetTableProps
@@ -127,7 +127,9 @@ function NoteField({
 
 const pts = (n: number) => `${n} pts`;
 
-const TONE = { fine: 'brand', warning: 'warning', over: 'critical' } as const satisfies Record<
+/* Figma's table draws two fills only (decided 9 Nov 2026: follow Figma): brand blue, and its bright red when over budget.
+   No amber here, unlike the Domain Budget card. */
+const TONE = { fine: 'brand', warning: 'brand', over: 'alert' } as const satisfies Record<
   BudgetStatus,
   NonNullable<ProgressBarProps['tone']>
 >;

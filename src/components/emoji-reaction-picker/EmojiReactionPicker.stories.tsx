@@ -52,6 +52,56 @@ export const Default: Story = {
 };
 
 /**
+ * Never drop focus: taking back the last reaction on a pill removes the pill. Focus moves to the pill that
+ * took its place, or to Add reaction when none is left.
+ */
+export const TakingBackTheLastReaction: Story = {
+  render: (args) => {
+    const [reactions, setReactions] = React.useState<EmojiReaction[]>([
+      { emoji: '🙌', count: 1, mine: true },
+      { emoji: '🎉', count: 1, mine: true },
+    ]);
+    const toggle = (emoji: string) => setReactions((rs) => rs.filter((r) => r.emoji !== emoji));
+    return <EmojiReactionPicker {...args} reactions={reactions} onToggle={toggle} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /^1 reaction, 🙌/ }));
+    const party = canvas.getByRole('button', { name: /^1 reaction, 🎉/ });
+    await waitFor(() => expect(party).toHaveFocus());
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Add reaction' })).toHaveFocus());
+  },
+};
+
+/** More reactions than fit: "+N" expands the row in place, and "Show less" folds it; focus stays on the button. */
+export const Overflow: Story = {
+  args: {
+    maxVisible: 2,
+    reactions: [
+      { emoji: '👍', count: 2 },
+      { emoji: '🎉', count: 1 },
+      { emoji: '👀', count: 1 },
+      { emoji: '🔥', count: 3 },
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const more = canvas.getByRole('button', { name: 'Show 2 more reactions' });
+    await expect(more).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.queryByRole('button', { name: /^3 reactions, 🔥/ })).not.toBeInTheDocument();
+    more.focus();
+    await userEvent.keyboard('{Enter}');
+    await expect(canvas.getByRole('button', { name: /^3 reactions, 🔥/ })).toBeInTheDocument();
+    await expect(more).toHaveAttribute('aria-expanded', 'true');
+    await expect(more).toHaveAccessibleName('Show less');
+    await expect(more).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(canvas.queryByRole('button', { name: /^3 reactions, 🔥/ })).not.toBeInTheDocument();
+  },
+};
+
+/**
  * The design's Hover Tooltip state: pass `people` and the pill names who
  * reacted, on the system `Tooltip` — which opens on keyboard focus too, so
  * the names are not pointer-only. Hover or Tab to a pill to see it.
@@ -75,7 +125,7 @@ export const WithReactorNames: Story = {
 
 /**
  * The tooltip reads "<strong>Names</strong> reacted with :emojiname:". "You"
- * is just a name in `people`; long lists collapse to "A, B and N others".
+ * is just a name in `people`; up to three names, then "and N others" (Figma's copy).
  */
 export const TooltipForms: Story = {
   args: {
@@ -92,6 +142,13 @@ export const TooltipForms: Story = {
       <EmojiReactionPicker {...args} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const fire = within(canvasElement).getByRole('button', { name: /^5 reactions, 🔥/ });
+    fire.focus();
+    await waitFor(() =>
+      expect(within(document.body).getByRole('tooltip', { name: /Ali Reza, Nora Lindqvist, Marvin Ode and 2 others reacted with :fire:/ })).toBeInTheDocument(),
+    );
+  },
 };
 
 /**

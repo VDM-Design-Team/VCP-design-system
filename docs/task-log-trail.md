@@ -12,10 +12,10 @@ The log of changes made to Added Values: one row per change — **ID**, **Task**
 | `Skeleton` | atom |
 | `Tag` | atom |
 | `DataTable` | component |
-| `EmptyState` | component |
 | `TableCard` | component |
 | `SourceTag` | component |
 | `StatusTag` | component |
+| `TableEmpty` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -48,7 +48,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `loading` | `boolean` | — | Placeholder rows; headers stay; one status says "Loading the task log trail" |
 | `filters` | `ReactNode` | — | The page's `FilterBar`, drawn **inside the card above the table** (as `AccountsTable` carries its search) |
 | `filtered` | `boolean` | — | Filters are on: an empty table says "No changes match these filters." (magnifier, with a hint) instead of "No changes yet." |
-| `empty` | `ReactNode` | `EmptyState`, by `filtered` | |
+| `empty` | `ReactNode` | `TableEmpty`, by `filtered` | |
 | `caption` | `string` | `Task log trail` | The table's accessible name |
 
 ## It does nothing itself

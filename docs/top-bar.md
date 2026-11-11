@@ -42,6 +42,7 @@ title, no `h1`, no back.
 | `homeHref` | `string` | — | The logo's home link (no-action version) |
 | `notifications` | `number` | — | Bell renders whenever this is a number; `> 0` shows the design's red dot — the count lives in the bell's name |
 | `onNotifications` | `() => void` | — | The bell's click |
+| `notificationPopover` | `ReactNode` | — | The bell's place, filled by you: a `NotificationPopover`, which brings its own bell as its trigger. Given, it replaces the plain bell, and `notifications` / `onNotifications` are ignored. The divider still sits after it |
 | `theme` / `onThemeChange` | `'light' \| 'dark'` / `(t) => void` | — | The mode `Toggle`. **Controlled**: it reports the wish; the app owns the theme and the `.dark` class |
 | `user` | `{ name, src? }` | — | Avatar + name + caret, inline — as the design draws it. No role badge (design review, 3 Sep 2026: no design for it) |
 | `userMenuItems` | `MenuItem[]` | Settings, Logout | The account menu's rows, as `Menu` takes them. Given with `user`, the chip becomes a `UserMenu` that opens them |

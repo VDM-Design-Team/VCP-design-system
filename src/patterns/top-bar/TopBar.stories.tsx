@@ -4,6 +4,8 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { TopBar } from './TopBar';
 import { Button } from '../../atoms/button';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
+import { NotificationItem } from '../../components/notification-item';
+import { NotificationPopover } from '../notification-popover';
 
 const meta = {
   title: 'Patterns/TopBar',
@@ -99,6 +101,26 @@ export const LiveThemeToggle: Story = {
         </div>
       </div>
     );
+  },
+};
+
+/** The bell's place filled with a `NotificationPopover`: its bell opens the latest notifications, in the bar. */
+export const WithNotificationPopover: Story = {
+  args: {
+    notificationPopover: (
+      <NotificationPopover count={2} inboxHref="#inbox" onMarkAllRead={fn()}>
+        <NotificationItem kind="commented" actor={{ name: 'Marvin Ode' }} subject="Filters for the notification inbox" time="5 minutes ago" unread />
+        <NotificationItem kind="mention" actor={{ name: 'Marvin Ode' }} subject="Filters for the notification inbox" time="an hour ago" unread />
+      </NotificationPopover>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* One bell: the popover's, not the bar's own. */
+    await expect(canvas.getAllByRole('button', { name: /^Notifications/ })).toHaveLength(1);
+    await userEvent.click(canvas.getByRole('button', { name: /^Notifications/ }));
+    await expect(await within(document.body).findByRole('heading', { name: 'Notifications' })).toBeInTheDocument();
+    await expect(within(document.body).getByText(/mentioned you in a comment on/)).toBeInTheDocument();
   },
 };
 

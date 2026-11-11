@@ -14,7 +14,7 @@ const ROWS: AVTableRow[] = [
     domain: 'VCP',
     attachments: 3,
     comments: 1,
-    due: { label: 'October 1, 2025', proximity: 'due-soon' },
+    due: { date: '2025-10-01', proximity: 'due-soon' },
     urgency: 'Normal',
     type: 'Type 3',
     status: { custom: 'Ready for Deploy' },
@@ -27,7 +27,7 @@ const ROWS: AVTableRow[] = [
     title: 'Rework the notification bell so unread state survives a reload',
     domain: 'VCP',
     attachments: 1,
-    due: { label: 'August 3, 2026', proximity: 'overdue' },
+    due: { date: '2026-08-03', proximity: 'overdue' },
     urgency: 'Urgent',
     type: 'Type 1',
     status: { status: 'Review' },
@@ -40,7 +40,7 @@ const ROWS: AVTableRow[] = [
     title: 'Audit every empty state for copy that blames the reader',
     domain: 'Design',
     comments: 12,
-    due: { label: 'March 4, 2027' },
+    due: { date: '2027-03-04' },
     urgency: 'Low',
     type: 'Type 3',
     status: { status: 'Draft' },
@@ -54,7 +54,7 @@ const ROWS: AVTableRow[] = [
     domain: 'VCP',
     attachments: 2,
     comments: 4,
-    due: { label: 'December 19, 2026', proximity: 'due-soon' },
+    due: { date: '2026-12-19', proximity: 'due-soon' },
     urgency: 'High',
     type: 'Type 2',
     status: { status: 'In Progress' },
@@ -98,6 +98,12 @@ export const Default: Story = {
       <AVTable {...args} onOpen={() => {}} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    /* A row's due date is ISO and reads dd/mm/yyyy, as every date does, in a <time> carrying the ISO date. */
+    const due = Array.from(canvasElement.querySelectorAll('time')).find((time) => time.getAttribute('datetime') === '2025-10-01');
+    await expect(due).toHaveTextContent('01/10/2025');
+    await expect(canvasElement).not.toHaveTextContent('October 1, 2025');
+  },
 };
 
 /**
@@ -231,6 +237,38 @@ export const FullyLoaded: Story = {
   },
 };
 
+/** Figma's Manage table (`940:167946`): the pagination with the Items select and the "1-50 of 1,250" range. */
+export const WithPageSize: Story = {
+  render: (args) => {
+    const [page, setPage] = React.useState(2);
+    const [pageSize, setPageSize] = React.useState(50);
+    const itemCount = 1250;
+    return (
+      <div className="bg-surface-canvas p-6">
+        <AVTable
+          {...args}
+          onOpen={() => {}}
+          page={page}
+          pageCount={Math.ceil(itemCount / pageSize)}
+          onPageChange={setPage}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('51-100 of 1,250')).toBeInTheDocument();
+    await userEvent.selectOptions(c.getByRole('combobox', { name: /Items/i }), '25');
+    await expect(c.getByText('1-25 of 1,250')).toBeInTheDocument();
+  },
+};
+
 /**
  * The reference opens the AV — a real button, not a whole-row click target.
  * Its accessible name carries the title too, so a screen-reader user hears
@@ -300,7 +338,7 @@ const MULTIPART_ROWS: AVTableRow[] = [
     attachments: 3,
     comments: 1,
     multipart: { kind: 'parent', completed: 1, total: 3 },
-    due: { label: 'October 1, 2025', proximity: 'due-soon' },
+    due: { date: '2025-10-01', proximity: 'due-soon' },
     urgency: 'Normal',
     type: 'Type 3',
     status: { custom: 'Ready for Deploy' },
@@ -316,7 +354,7 @@ const MULTIPART_ROWS: AVTableRow[] = [
       attachments: position === 1 ? 3 : undefined,
       comments: position === 1 ? 1 : undefined,
       multipart: { kind: 'child', position, total: 3, parentRef: 'VCP-4321' },
-      due: { label: 'October 1, 2025' },
+      due: { date: '2025-10-01' },
       urgency: 'Normal',
       type: 'Type 3',
       status: position === 2 ? { status: 'Completed' } : { custom: 'Ready for Deploy' },

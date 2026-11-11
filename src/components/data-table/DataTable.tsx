@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { Checkbox } from '../../atoms/checkbox';
 import { Tooltip } from '../../atoms/tooltip';
+import { TableEmpty } from '../table-empty';
 
 /**
  * DataTable — the generic table: columns, rows, sortable headers, optional
@@ -120,7 +121,7 @@ export interface DataTableProps<Row extends { id?: string | number }>
    * "Select AV-2041" — or every checkbox announces alike.
    */
   selectLabel?: (row: Row) => string;
-  /** Shown when `rows` is empty — an `<EmptyState>` fits. */
+  /** Shown when `rows` is empty. Defaults to a generic `TableEmpty`; pass the table's own (`<TableEmpty noun="accounts" icon="users" />`) so it names what is missing. */
   empty?: React.ReactNode;
   /** 44 rows instead of 56 — audit-style density. */
   dense?: boolean;
@@ -364,7 +365,7 @@ export function DataTable<Row extends { id?: string | number }>({
                 colSpan={columns.length + (selectable ? 1 : 0)}
                 className="px-4 py-12 text-center text-body-sm-regular text-text-tertiary"
               >
-                {empty ?? 'Nothing here yet.'}
+                {empty ?? <TableEmpty />}
               </td>
             </tr>
           ) : (
