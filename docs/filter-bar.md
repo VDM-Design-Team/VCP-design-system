@@ -1,8 +1,7 @@
 # FilterBar
 
-The row of filters above a list or table: a search field, the filter fields
-(period, status, priority, tags), Reset, and a Filters button that shows or hides
-the fields.
+The filters above a list or table: a search field, Reset and a Filters button that shows or hides
+the fields, then the labelled fields (priority, tags, status, date, people).
 
 ## Composed of
 
@@ -35,7 +34,7 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 | Prop | Type | Notes |
 |---|---|---|
 | `search` / `onSearchChange` | `string` / `(value) => void` | The search field. `searchPlaceholder` defaults to "Search by title or ID" |
-| `period` | `{ value?: { start?, end? }, onChange?, presets?, placeholder? }` | A field that opens a two-month range calendar. ISO `yyyy-mm-dd` in and out; the field reads `dd/mm/yyyy-dd/mm/yyyy`. `onChange({})` when cleared. `presets` are `DatePicker`'s quick picks |
+| `period` | `{ value?: { start?, end? }, onChange?, presets?, placeholder?, label? }` | A field that opens a two-month range calendar, labelled "Date" (`label` changes it). ISO `yyyy-mm-dd` in and out; the field reads `dd/mm/yyyy-dd/mm/yyyy`. `onChange({})` when cleared. `presets` are `DatePicker`'s quick picks |
 | `cycle` | `{ options: Array<{ value, code, start, end }>, value?, onChange?, placeholder? }` | A one-pick `SearchSelect` with search. Each row reads **C33** (25/05/2026 - 08/06/2026), as in the AV details card (`start` and `end` are ISO `yyyy-mm-dd`); search matches the dates as well as the code; the field says just the code (`C33`), so it stays narrow. Placeholder defaults to "Select cycle" |
 | `status` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` (several picks, no search box by default) with the Clear all / Apply footer, shown as a summary ("In progress", "3 selected") |
 | `priority` | `{ options, value?, onChange?, placeholder? }` | `Select`. For "no filter" as a choice, add an "All priorities" option |
@@ -64,29 +63,21 @@ leaving a prop out is already the switch, and role rules belong to the page that
 
 ## Layout
 
-From `md` up, three columns — the search at the left, the fields, and Reset and
-Filters at the right. The search and the fields share the width in proportion (one part to four), so both
-stretch and shrink with the page: the search is at least 12rem wide and its box at most 24rem, and each
-field is fluid between a minimum and a maximum (below). The buttons stay at the top right; the fields right-align
-between and wrap onto more lines when they do not fit, so a Tags field holding many
-tags drops under the others. Below `md` it stacks, as Figma's Mobile: Reset and
-Filters, then search, then the fields two across (period and tags full width), and
-the calendar takes its touch layout, one month wide.
+Built to Figma's Manage table (`940:167946`), decided 10 Nov 2026 for every list that uses the bar:
 
-Fields are 40 tall and fluid between a minimum and a maximum, growing to fill the row before the next
-wraps: cycle 9rem to 16rem, status 9rem to 16rem, priority 9.5rem to 16rem, user fields 10.5rem to 16rem, period 14.5rem to 18rem, tags 9.5rem to 42.5rem, search
-12rem and up. The minimums are measured, not guessed: each is what its placeholder (or longest value, for
-the period) needs in the real type, so nothing is cut off at the minimum. A dropdown panel is as wide as its
-longest option regardless (see `SearchSelect`), so a narrow field never cuts options off.
+- **The top row**: the search at the left (up to 20rem), **Reset** and **Filters** at the right.
+- **The fields**, under it, **each with its label above** (`text.primary`, label-sm medium, the same as
+  `Field`'s), in Figma's order: **Priority, Tags, Status, Date** (the period), then Cycle, then the people
+  (Assignee, Initiator…), then `children`. From `lg` six to a row, three from `md`, two below; each
+  fills its cell. A Tags field holding many tags grows down, not across.
+- **Below `md`** it stacks, as Figma's Mobile: Reset and Filters, then search, then the fields two across
+  (Tags, Date and Cycle full width), and the calendar takes its touch layout, one month wide.
+- **With the filters folded away** (Filters pressed, or a page that passes none) the fields and their labels
+  go; the search and the buttons keep their row.
+- A filled people field holds just the name ("Amy Lee"): its label above says which person it is (Figma `940:171256`).
 
-**With the filters folded away** (the Filters button pressed, or a page that passes none), the search takes the room the fields leave: it widens from its 24rem cap to 32rem, and Reset and Filters stay at the right edge.
-
-**Design target: 1440.** With the expanded sidebar (256) and the page's 32 of padding either side, a 1440
-screen leaves 1120 for the bar, and a page with period, status, priority and tags fits on **one row** there.
-Adding the cycle (the field says just its code, to stay narrow) still fits period, cycle, status and priority
-on the first row, with the tags field wrapping to a second. A page that adds both user fields (an admin
-view) needs another row at that width; if more filters join, check
-the sum of the minimums against 1120 before adding them.
+**Design target: 1440.** With the expanded sidebar (256) and 32 of padding either side, the bar has 1120:
+six fields of about 170 each, so Manage's six (Priority, Tags, Status, Date, Assignee, Initiator) fit on one row.
 
 ## Tokens
 
@@ -98,9 +89,10 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 - **The fields' edges are the neutral outline** (`neutral.outline.border.default`, slate-400: about 2.6:1 on white), lighter than the 3:1 `stroke.strong` every other field uses, because a whole row of dark outlines is noisy beside a table. This is a deliberate exception: each field here is also identified by its icon (the magnifier, the chevron, the calendar) and its placeholder, and an error, a warning and focus still draw their own stronger edge. If design wants the full 3:1 back, drop the `edge` prop on the fields in `FilterBar`.
 
-- Each field is named: `Status`, `Priority` and `Tags` by `aria-label`, the period
-  button by its value ("Period, 09/09/2026-15/09/2026"), the search field by its
-  placeholder.
+- Each field is named by its visible label (`<label for>`): "Priority", "Tags", "Status", and the people by
+  theirs, with the value after it ("Assignee Amy Lee"). The period button's name starts with its label, then
+  the range ("Date, 09/09/2026-15/09/2026"), so what is read starts with what is on screen. The search field is
+  named by its placeholder.
 - Filters is a disclosure button: `aria-expanded` and `aria-controls` point at the
   fields. With no fields (a search-only bar) it claims no panel.
 - Hidden fields stay mounted, so their uncommitted state survives a hide and show; they
@@ -110,10 +102,10 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 ## Differences from the design
 
-- **Users follow tags.** Figma's bar draws Assignee and Initiator in its "current design" frame, not in `_Filter_Bar`; they are placed after tags, one `SearchSelect` each, with avatars and search.
-- **Field order.** Period, status, priority, tags, as `_Filter_Bar`'s first row draws them.
-  Its second row draws a filled version in another order (tags first); that is read as a state,
-  not a layout.
+- **Field order and labels** are Manage's (`940:167946`): Priority, Tags, Status, Date, Assignee, Initiator,
+  labelled. `_Filter_Bar` (`3094:8860`) drew unlabelled fields in another order (period first); Manage's wins
+  (decided 10 Nov 2026). Cycle, which Manage doesn't have, follows Date.
+- **Filters** is the filled (primary) button, as Manage draws it.
 - **Priority placeholder.** Figma reads "Search priority"; the field is a plain select, so it
   says "Select priority".
 - **Status is a draft until Apply**, as the status menu draws; tags apply on every tick.

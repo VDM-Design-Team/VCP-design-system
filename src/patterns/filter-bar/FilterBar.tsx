@@ -20,12 +20,11 @@ import { useDateFormat } from '../../lib/format-date';
  * filter fields (period, status, priority, tags), "Reset" and a "Filters"
  * button that shows or hides the fields.
  *
- * Built to Figma's `_Filter_Bar` (`3094:8860`) and the filter menus beside it
- * (`Filters` page). Desktop is one row: the search field at the left, the
- * fields, Reset and Filters at the right; a field that grows — Tags, once it
- * holds several tags — wraps the rest onto a second row. Below `md` the bar
- * stacks as Figma's Mobile does: Reset and Filters, then search, then the
- * fields in two columns.
+ * Built to Figma's Manage table (`940:167946`, decided 10 Nov 2026 for every list): the search field
+ * at the left with Reset and Filters at the right, then the fields under them, **each with its label
+ * above** (Priority, Tags, Status, Date, then the people), six to a row on a wide screen. Below `md`
+ * the bar stacks as Figma's Mobile does: Reset and Filters, then search, then the fields in two
+ * columns. The filter menus are Figma's `Filters` page.
  *
  * **The filters are yours.** Each one is controlled: you pass its `options`,
  * its `value` and an `onChange`, and filter your own list. The bar draws the
@@ -63,6 +62,8 @@ export interface FilterBarPeriod {
   value?: { start?: string; end?: string };
   /** The range changed. `{}` when it was cleared. */
   onChange?: (range: { start?: string; end?: string }) => void;
+  /** The field's label. Figma's is "Date". */
+  label?: string;
   /** Quick picks beside the calendar ("Last 7 days"…). What they mean is yours. */
   presets?: readonly DatePickerPreset[];
   placeholder?: string;
@@ -202,201 +203,213 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
       : display(range.start)
     : null;
 
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        'flex flex-col gap-2 font-sans md:grid md:items-start',
-        showFields
-          ? 'md:grid-cols-[minmax(12rem,1fr)_minmax(0,4fr)_auto]'
-          : 'md:grid-cols-[minmax(12rem,1fr)_auto]',
-        className,
-      )}
-      {...props}
-    >
-      <Input
-        type="search"
-        edge="neutral"
-        aria-label={searchPlaceholder}
-        placeholder={searchPlaceholder}
-        value={search ?? ''}
-        onChange={(e) => onSearchChange?.(e.target.value)}
-        leadingIcon={<Icon name="magnifying-glass" size="sm" />}
-        className={cn(
-          'order-2 w-full md:order-none md:col-start-1',
-          showFields ? 'md:max-w-96' : 'md:max-w-128',
-        )}
-      />
+  /* One label per field, above it, as Figma's Manage table draws them: the label names the control too. */
+  const ids = {
+    period: `${fieldsId}-period`,
+    cycle: `${fieldsId}-cycle`,
+    status: `${fieldsId}-status`,
+    priority: `${fieldsId}-priority`,
+    tags: `${fieldsId}-tags`,
+    user: (i: number) => `${fieldsId}-user-${i}`,
+  };
+  /* `min-w-0` on every control: a SearchSelect's own minimum (12rem) is wider than a sixth of a 1120 bar. */
+  const labelled = (id: string, label: string, control: React.ReactNode, wide = false) => (
+    <div key={id} className={cn('flex min-w-0 flex-col gap-1.5', wide && 'col-span-2 md:col-span-1')}>
+      <label htmlFor={id} className="text-label-sm-medium text-text-primary">
+        {label}
+      </label>
+      {control}
+    </div>
+  );
+  const periodLabel = period?.label ?? 'Date';
 
-      {/* From `md` the bar is three columns — search, fields, buttons — so the
-          buttons stay at the top right however the fields wrap in the middle.
-          On mobile each takes its place in the stack by `order`. */}
+  return (
+    <div ref={ref} className={cn('flex flex-col gap-4 font-sans', className)} {...props}>
+      {/* The top row: search at the left, Reset and Filters at the right. On a phone the buttons come first. */}
+      <div className="flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-between">
+        <Input
+          type="search"
+          edge="neutral"
+          aria-label={searchPlaceholder}
+          placeholder={searchPlaceholder}
+          value={search ?? ''}
+          onChange={(e) => onSearchChange?.(e.target.value)}
+          leadingIcon={<Icon name="magnifying-glass" size="sm" />}
+          className="w-full md:max-w-80"
+        />
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="tertiary" onClick={onReset}>
+            {resetLabel}
+          </Button>
+          <Button
+            /* Figma's Filters is the filled button. */
+            variant="primary"
+            aria-expanded={hasFields ? open : undefined}
+            aria-controls={hasFields ? fieldsId : undefined}
+            onClick={() => {
+              setOpenState(!open);
+              onFiltersOpenChange?.(!open);
+            }}
+          >
+            {filtersLabel}
+          </Button>
+        </div>
+      </div>
+
       {hasFields && (
         <div
           id={fieldsId}
-          className={cn(
-            'order-3 md:order-none md:col-start-2 md:min-w-0 md:flex-wrap md:items-start md:justify-end md:gap-2',
-            open ? 'grid grid-cols-2 gap-2 md:flex' : 'hidden',
-          )}
+          className={cn(open ? 'grid grid-cols-2 items-start gap-x-4 gap-y-3 md:grid-cols-3 lg:grid-cols-6' : 'hidden')}
         >
-          {period && (
-            <Popover
-              open={periodOpen}
-              onOpenChange={setPeriodOpen}
-              width="auto"
-              align="right"
-              panelClassName="p-0"
-              className="col-span-2 md:max-w-72 md:min-w-58 md:flex-1"
-              trigger={
-                <button
-                  type="button"
-                  aria-label={periodText ? `Period, ${periodText}` : 'Period'}
-                  className={cn(
-                    'flex h-10 w-full items-center gap-2 rounded-md border border-neutral-outline-border-default bg-surface-elevated px-3 text-left transition-colors',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                  )}
-                >
-                  <Icon name="calendar-blank" size="sm" aria-hidden="true" className="shrink-0 text-text-subtle" />
-                  <span
+          {priority &&
+            labelled(
+              ids.priority,
+              'Priority',
+              <Select edge="neutral" placeholder="Select priority" {...priority} id={ids.priority} className="w-full min-w-0" />,
+            )}
+          {tags &&
+            labelled(
+              ids.tags,
+              'Tags',
+              <SearchSelect
+                edge="neutral"
+                multiple
+                display="tags"
+                searchPlaceholder="Search tags"
+                placeholder="Select tags"
+                {...tags}
+                id={ids.tags}
+                className="w-full min-w-0"
+              />,
+              true,
+            )}
+          {status &&
+            labelled(
+              ids.status,
+              'Status',
+              <SearchSelect
+                edge="neutral"
+                multiple
+                display="summary"
+                confirm
+                searchable={false}
+                placeholder="Select status"
+                {...status}
+                id={ids.status}
+                className="w-full min-w-0"
+              />,
+            )}
+          {period &&
+            labelled(
+              ids.period,
+              periodLabel,
+              <Popover
+                open={periodOpen}
+                onOpenChange={setPeriodOpen}
+                width="auto"
+                align="right"
+                panelClassName="p-0"
+                className="w-full min-w-0"
+                trigger={
+                  <button
+                    id={ids.period}
+                    type="button"
+                    /* The visible label first, then the range, so the name starts with what is on screen. */
+                    aria-label={periodText ? `${periodLabel}, ${periodText}` : periodLabel}
                     className={cn(
-                      'min-w-0 flex-1 truncate',
-                      periodText
-                        ? 'text-body-sm-medium text-text-primary'
-                        : 'text-body-sm-regular text-text-subtle',
+                      'flex h-10 w-full items-center gap-2 rounded-md border border-neutral-outline-border-default bg-surface-elevated px-3 text-left transition-colors',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
                     )}
                   >
-                    {periodText ?? period.placeholder ?? 'Select period'}
-                  </span>
-                </button>
-              }
-              content={
-                <DatePicker
-                  mode="range"
-                  dualView={!narrow}
-                  mobile={narrow}
-                  presets={period.presets}
-                  value={range?.start}
-                  rangeEnd={range?.end}
-                  onRangeChange={(start, end) => {
-                    period.onChange?.(end ? { start, end } : { start });
-                    if (end) setPeriodOpen(false);
-                  }}
-                  onClear={() => {
-                    period.onChange?.({});
-                    setPeriodOpen(false);
-                  }}
-                  className="shadow-none"
-                />
-              }
-            />
+                    <Icon name="calendar-blank" size="sm" aria-hidden="true" className="shrink-0 text-text-subtle" />
+                    <span
+                      className={cn(
+                        'min-w-0 flex-1 truncate',
+                        periodText ? 'text-body-sm-medium text-text-primary' : 'text-body-sm-regular text-text-subtle',
+                      )}
+                    >
+                      {periodText ?? period.placeholder ?? 'Select period'}
+                    </span>
+                  </button>
+                }
+                content={
+                  <DatePicker
+                    mode="range"
+                    dualView={!narrow}
+                    mobile={narrow}
+                    presets={period.presets}
+                    value={range?.start}
+                    rangeEnd={range?.end}
+                    onRangeChange={(start, end) => {
+                      period.onChange?.(end ? { start, end } : { start });
+                      if (end) setPeriodOpen(false);
+                    }}
+                    onClear={() => {
+                      period.onChange?.({});
+                      setPeriodOpen(false);
+                    }}
+                    className="shadow-none"
+                  />
+                }
+              />,
+              true,
+            )}
+          {cycle &&
+            labelled(
+              ids.cycle,
+              'Cycle',
+              <SearchSelect
+                edge="neutral"
+                id={ids.cycle}
+                placeholder={cycle.placeholder ?? 'Select cycle'}
+                searchPlaceholder="Search cycles"
+                value={cycle.value ?? ''}
+                onChange={cycle.onChange}
+                /* The row says everything (and search matches the dates); the field says the code. */
+                options={cycle.options.map((c) => ({
+                  value: c.value,
+                  label: `${c.code} (${cycleRange(c)})`,
+                  shortLabel: c.code,
+                }))}
+                renderOption={(option) => {
+                  const c = cycle.options.find((x) => x.value === option.value);
+                  return c ? (
+                    <span className="min-w-0 truncate">
+                      <span className="text-label-sm-bold text-text-primary">{c.code}</span>
+                      {/* The space is its own text node: a leading space inside an inline span is dropped from the accessible name. */}
+                      {' '}
+                      <span className="text-label-sm-regular">{`(${cycleRange(c)})`}</span>
+                    </span>
+                  ) : (
+                    option.label
+                  );
+                }}
+                className="w-full min-w-0"
+              />,
+              true,
+            )}
+          {users?.map(({ label, placeholder, ...rest }, i) =>
+            labelled(
+              ids.user(i),
+              label,
+              <SearchSelect
+                edge="neutral"
+                {...({
+                  id: ids.user(i),
+                  placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
+                  searchPlaceholder: 'Search by name',
+                  rows: 'avatar',
+                  /* One person: a ✕ empties the field (Figma's "Filter by Assignee and Clear", 940:171256). */
+                  ...(rest.multiple ? {} : { clearable: true }),
+                  ...rest,
+                  className: 'w-full min-w-0',
+                } as SearchSelectProps)}
+              />,
+            ),
           )}
-          {cycle && (
-            <SearchSelect
-              edge="neutral"
-              aria-label="Cycle"
-              placeholder={cycle.placeholder ?? 'Select cycle'}
-              searchPlaceholder="Search cycles"
-              value={cycle.value ?? ''}
-              onChange={cycle.onChange}
-              /* The row says everything (and search matches the dates); the field says the code. */
-              options={cycle.options.map((c) => ({
-                value: c.value,
-                label: `${c.code} (${cycleRange(c)})`,
-                shortLabel: c.code,
-              }))}
-              renderOption={(option) => {
-                const c = cycle.options.find((x) => x.value === option.value);
-                return c ? (
-                  <span className="min-w-0 truncate">
-                    <span className="text-label-sm-bold text-text-primary">{c.code}</span>
-                    {/* The space is its own text node: a leading space inside an inline span is dropped from the accessible name. */}
-                    {' '}
-                    <span className="text-label-sm-regular">{`(${cycleRange(c)})`}</span>
-                  </span>
-                ) : (
-                  option.label
-                );
-              }}
-              className="col-span-2 md:max-w-64 md:min-w-36 md:flex-1"
-            />
-          )}
-          {status && (
-            <SearchSelect
-              edge="neutral"
-              multiple
-              display="summary"
-              confirm
-              searchable={false}
-              aria-label="Status"
-              placeholder="Select status"
-              {...status}
-              className="md:max-w-64 md:min-w-36 md:flex-1"
-            />
-          )}
-          {priority && (
-            <Select
-              edge="neutral"
-              aria-label="Priority"
-              placeholder="Select priority"
-              {...priority}
-              className="w-full md:max-w-64 md:min-w-38 md:flex-1"
-            />
-          )}
-          {tags && (
-            <SearchSelect
-              edge="neutral"
-              multiple
-              display="tags"
-              searchPlaceholder="Search tags"
-              aria-label="Tags"
-              placeholder="Select tags"
-              {...tags}
-              className="col-span-2 md:max-w-170 md:min-w-38 md:flex-1"
-            />
-          )}
-          {users?.map(({ label, placeholder, ...rest }) => (
-            <SearchSelect
-              edge="neutral"
-              key={label}
-              {...({
-                'aria-label': label,
-                /* Filled, the field still says which person it is ("Assignee: Amy Lee"). */
-                valuePrefix: label,
-                placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
-                searchPlaceholder: 'Search by name',
-                rows: 'avatar',
-                /* One person: a ✕ empties the field (Figma's "Filter by Assignee and Clear", 940:171256). */
-                ...(rest.multiple ? {} : { clearable: true }),
-                ...rest,
-                className: 'md:max-w-64 md:min-w-42 md:flex-1',
-              } as SearchSelectProps)}
-            />
-          ))}
           {children}
         </div>
       )}
-
-      <div
-        className={cn(
-          'order-1 flex items-center justify-end gap-2 md:order-none',
-          showFields ? 'md:col-start-3' : 'md:col-start-2',
-        )}
-      >
-        <Button variant="tertiary" onClick={onReset}>
-          {resetLabel}
-        </Button>
-        <Button
-          variant="secondary"
-          aria-expanded={hasFields ? open : undefined}
-          aria-controls={hasFields ? fieldsId : undefined}
-          onClick={() => {
-            setOpenState(!open);
-            onFiltersOpenChange?.(!open);
-          }}
-        >
-          {filtersLabel}
-        </Button>
-      </div>
     </div>
   );
 });
