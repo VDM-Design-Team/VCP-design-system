@@ -13,7 +13,7 @@ import { DateField } from '../../components/date-field';
 import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
 import type { DatePickerPreset } from '../../components/date-picker';
-import { EmptyState } from '../../components/empty-state';
+import { TableEmpty } from '../../components/table-empty';
 import { HOLIDAY_TYPES, HolidayTypeTag, holidayTypeLabel, type HolidayType } from '../../components/holiday-type-tag';
 import { HolidaySourceBadge, type HolidaySource } from '../../components/holiday-source-badge';
 import { TruncatedText } from '../../components/truncated-text';
@@ -366,20 +366,14 @@ export function HolidayTable({
         onSortChange={onSortChange}
         caption={caption}
         empty={
-          filtered ? (
-            <EmptyState
-              title="No holidays match your filters."
-              action={
-                onResetFilters && (
-                  <Button size="sm" variant="secondary" onClick={resetFilters}>
-                    Reset
-                  </Button>
-                )
-              }
-            />
-          ) : (
-            <EmptyState title="No holidays have been added yet." />
-          )
+          <TableEmpty
+            noun="holidays"
+            icon="calendar-blank"
+            /* Figma's words, kept: "No holidays have been added yet." and "No holidays match your filters." */
+            title={filtered ? 'No holidays match your filters.' : 'No holidays have been added yet.'}
+            filtered={filtered}
+            onReset={onResetFilters && resetFilters}
+          />
         }
       />
     </TableCard>

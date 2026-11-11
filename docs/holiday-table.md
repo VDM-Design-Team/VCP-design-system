@@ -19,8 +19,8 @@ Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty
 | `AvatarGroup` | component |
 | `DataTable` | component |
 | `DatePicker` | component |
-| `EmptyState` | component |
 | `TableCard` | component |
+| `TableEmpty` | component |
 | `HolidayTypeTag` | component |
 | `HolidaySourceBadge` | component |
 | `DateField` | component |
@@ -56,7 +56,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `page` / `pageCount` / `onPageChange` | | | Pagination shows when `pageCount` and `onPageChange` are given |
 | `itemCount` / `pageSize` / `onPageSizeChange` | | | The readout ("51-100 of 1,250") and the Items select |
 
-**Two empty messages**, under the headers (the filters and paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset** (`onResetFilters`) when a filter is on and nothing matches.
+**Two empty messages**, under the headers (the filters and paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset** (`onResetFilters`) when a filter is on and nothing matches (Figma's words, passed as `title`; the icon tile and **Reset** are `TableEmpty`'s).
 
 **Reset hands focus on.** Once the page puts the filters back, Reset goes; so after calling `onResetFilters` the table moves focus to its first filter (Holiday type) rather than let it fall to the page.
 

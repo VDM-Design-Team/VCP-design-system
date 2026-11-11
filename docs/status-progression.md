@@ -92,6 +92,7 @@ Development, all roles that see the middle of the lifecycle:
 |---|---|---|
 | Draft † | Save as Draft | Submit |
 | Pending ‡ | Reject *(danger)* | Accept |
+| `Backlog` (spine) ‡ | Reject *(outline)* | Accept |
 | `Accepted` (spine) | — | Move to In Progress |
 | `In Progress` (spine) | — | Move to *first chain step* |
 | first chain step | Return to In Progress | Move to *next* |
@@ -114,6 +115,11 @@ assignee's to undo.
 handed the AV off and isn't the one deciding. Its Reject is `variant="secondary"`
 (outline), not the solid `variant="danger"` one `Pending` uses — the design
 draws these two Rejects differently depending on lifecycle stage, not role.
+
+`Backlog` offers moves to `admin` only: the same outline Reject and Accept as
+`Review`, as Figma's admin Backlog page draws them (`1094:97734`, decided
+9 Nov 2026). Taking it back to Pending or Draft without deciding is
+`DetailCardMenu`'s, not a button here.
 
 ## Resolved: issue #60's seven unnamed Figma variants
 
@@ -155,9 +161,9 @@ something to design around.
 
 - **Don't re-derive the mapping at a call site.** That is the whole point of
   this component. Use `avTransitions()` if you need the list without buttons.
-- **Don't expect a spine status other than `Draft`, `Pending`, `Accepted`,
-  `Review`, or Development's `Completed` with `pendingDeploy` to offer
-  moves.** `Backlog`, `Rejected` and `Reopened` are driven elsewhere; this
+- **Don't expect a spine status other than `Draft`, `Pending`, `Backlog`,
+  `Accepted`, `Review`, or Development's `Completed` with `pendingDeploy` to
+  offer moves.** `Rejected` and `Reopened` are driven elsewhere; this
   renders `null` for them rather than an empty toolbar.
 - **Don't build a transition label from a step's `id`.** The id is a stable
   key, not prose — `label` is the only field that knows what the step is

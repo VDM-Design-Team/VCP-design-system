@@ -45,8 +45,9 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
         ref={ref}
         className={cn(
           /* 56 vertical, 24 horizontal — enough air that "nothing" reads as
-             deliberate, not broken. */
-          'flex flex-col items-center justify-center gap-2.5 px-6 py-14 text-center',
+             deliberate, not broken. The words sit close (4 between title and
+             explanation); the tile and the button each stand 16 off them. */
+          'flex flex-col items-center justify-center gap-1 px-6 py-14 text-center',
           className,
         )}
         {...props}
@@ -56,7 +57,7 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
             aria-hidden="true"
             /* surface.brand.base tile, text.brand.medium glyph — the icon
                inherits via currentColor, exactly as everywhere else. */
-            className="mb-1 grid size-12 shrink-0 place-items-center rounded-md bg-surface-brand-base text-text-brand-medium"
+            className="mb-3 grid size-12 shrink-0 place-items-center rounded-md bg-surface-brand-base text-text-brand-medium"
           >
             {icon}
           </div>
@@ -66,7 +67,7 @@ export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
           /* max-w-96 (384) — the export's 380 measure, on the spacing scale. */
           <p className="m-0 max-w-96 font-sans text-body-sm-regular text-text-tertiary">{description}</p>
         )}
-        {action && <div className="mt-1.5">{action}</div>}
+        {action && <div className="mt-3">{action}</div>}
       </div>
     );
   },
