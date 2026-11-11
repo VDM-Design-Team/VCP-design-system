@@ -84,6 +84,8 @@ export * from './components/info-hint';
 export * from './components/in-case-you-missed-it-card';
 export * from './components/inline-edit';
 export * from './components/menu';
+export * from './components/multipart-parent-chip';
+export * from './components/multipart-table-tag';
 export * from './components/multipart-row';
 export * from './components/my-values-stats';
 export * from './components/modal';
