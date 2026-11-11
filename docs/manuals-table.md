@@ -7,12 +7,11 @@ Built to Figma's `Manuals_Table` (`Filled=Yes` / `Filled=No`) and the Design Lib
 
 | Piece | Tier |
 |---|---|
-| `Icon` | atom |
 | `Pagination` | atom |
 | `Skeleton` | atom |
 | `DataTable` | component |
-| `EmptyState` | component |
 | `TableCard` | component |
+| `TableEmpty` | component |
 | `UserLabel` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -43,7 +42,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `page` / `pageCount` / `onPageChange` | | required | `Pagination`'s |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | The range readout and Items select |
 | `loading` | `boolean` | — | Placeholder rows; headers stay; one status says "Loading manuals" |
-| `empty` | `ReactNode` | `EmptyState` "No items." | |
+| `empty` | `ReactNode` | `TableEmpty` "No items." | |
 | `caption` | `string` | `Manuals` | The table's accessible name |
 
 ## It is controlled, and does nothing itself
@@ -58,7 +57,7 @@ underlined on hover. Name is `body-sm-medium` `text.primary`; Attachments and Da
 `body-sm-medium` `text.tertiary`.
 
 **Differences from Figma, on purpose.** Figma's row sketch is a copy of the Users row (an avatar where the name goes); the name is text here.
-There is no search and no row action, because none is drawn; the name is the way to open a manual. The empty glyph sits in `EmptyState`'s tile.
+There is no search and no row action, because none is drawn; the name is the way to open a manual. The empty glyph sits in the `TableEmpty` tile.
 
 ## Accessibility
 

@@ -76,6 +76,7 @@ export * from './components/due-date-tag';
 export * from './components/duplicate-to-other-domain';
 export * from './components/emoji-reaction-picker';
 export * from './components/empty-state';
+export * from './components/table-empty';
 export * from './components/field';
 export * from './components/file-attachment';
 export * from './components/gantt-tooltip';
