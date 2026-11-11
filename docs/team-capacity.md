@@ -6,10 +6,9 @@ How a team's capacity for a cycle is spent, as one stacked bar: a title (with an
 
 | Piece | Tier |
 |---|---|
-| `Icon` | sub-atomic |
 | `LegendItem` | atom |
 | `Skeleton` | atom |
-| `Tooltip` | atom |
+| `CardHeader` | component |
 | `CapacityBar` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -55,13 +54,13 @@ A container query, so it follows its card, not the viewport. The bar takes the w
 | Title | `title-sm-semibold` | `text.primary` |
 | Line | `body-sm-regular` | `text.primary` |
 | Total | `label-sm-semibold` | `text.primary` |
-| Info glyph | 20 | `text.tertiary` |
+| Info glyph | 16 (`InfoHint`, 40 press area) | `text.tertiary` |
 
 ## Accessibility
 
 - A `section` named by its title ("Team Capacity, region").
 - The bar is one image named by its values (see `docs/capacity-bar.md`); the legend is a list named "Legend", and each entry is its text.
-- The info glyph is a real, focusable `button`, "About Team Capacity", wrapping the system `Tooltip`.
+- The info glyph is a real, focusable `button`, "About Team Capacity", (`InfoHint`, through `CardHeader`, wrapping the system `Tooltip`).
 - Loading: the placeholders are hidden from assistive tech and one `status` says "Loading Team Capacity".
 
 ## Don't

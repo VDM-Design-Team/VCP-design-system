@@ -31,7 +31,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, fit?, grow?, sortable?, hint?, render? }` |
+| `columns` | `DataTableColumn<Row>[]` | required | `{ key, label, width?, fit?, grow?, sortable?, hint?, action?, render? }`; `action` is a control in the header (the Users table's "+ New User") in place of the visible label, which stays as the column's hidden name; **an `action` column sits at the end** (right-aligned, with room above and below the control in the header — its cells align themselves) |
 | `rows` | `Row[]` | required | Rendered **in the order given** — sorting is the caller's job |
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
@@ -43,6 +43,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `caption` | `string` | — | Visually hidden `<caption>` naming the table. Strongly encouraged |
 | `cellProps` (on a column) | `(row) => HTMLAttributes<td>` | — | Extra attributes for that column's `<td>` in a row — a class that lets something fill the whole cell, a pointer handler on the cell. `className` is merged |
 | `rowProps` | `(row) => HTMLAttributes<tr>` | — | Extra attributes for a row — a drag source, a data attribute. `className` is merged; the row stays a plain row |
+| `rowEdge` | `(row) => boolean` | — | A 6 brand edge at the row's **far left**, before the checkbox when the table has one (a multipart parent). Drawn over the row's first cell, so it takes no room and nudges nothing |
 | `className` | `string` | — | On the scrolling container |
 
 `DataTableColumn.hint` renders after the label and **before the sort arrows** — a
