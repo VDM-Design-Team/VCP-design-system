@@ -172,12 +172,12 @@ export const WithFilters: Story = {
     await expect(c.getAllByRole('row')).toHaveLength(1 + 2);
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Changed' }), 'Assignee');
     await expect(c.getAllByRole('row')).toHaveLength(1 + 1);
-    /* The period: a preset fills it and narrows the log to those days. */
+    /* The date range: a preset fills it and narrows the log to those days. */
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Changed' }), '');
-    await userEvent.click(c.getByRole('button', { name: 'Period' }));
+    await userEvent.click(c.getByRole('button', { name: 'Date' }));
     await userEvent.click(within(document.body).getByRole('button', { name: 'First week' }));
     await waitFor(() => expect(c.getAllByRole('row')).toHaveLength(1 + 4));
-    await expect(c.getByRole('button', { name: /^Period, / })).toBeVisible();
+    await expect(c.getByRole('button', { name: /^Date, / })).toBeVisible();
     /* Reset puts everything back. */
     await userEvent.click(c.getByRole('button', { name: 'Reset' }));
     await expect(c.getAllByRole('row')).toHaveLength(1 + 7);
