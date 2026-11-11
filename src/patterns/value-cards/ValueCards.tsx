@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import { Select } from '../../atoms/select';
 import { Skeleton } from '../../atoms/skeleton';
 import { StatCard, type StatCardAccent } from '../../components/stat-card';
+import { CardHeader } from '../../components/card-header';
 
 /**
  * ValueCards — the dashboard's count of Added Values by status: a titled card holding a row of `StatCard`s (Figma draws six: Completed, In
@@ -57,12 +58,11 @@ export const ValueCards = React.forwardRef<HTMLElement, ValueCardsProps>(
     const headingId = React.useId();
     return (
       <section ref={ref} aria-labelledby={headingId} aria-busy={loading || undefined} className={cn('@container flex flex-col gap-4 rounded-md bg-surface-elevated p-6 font-sans', className)} {...props}>
-        <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-          <h2 id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
-            {title}
-          </h2>
-          {filter && <Select size="sm" edge="neutral" emphasis="regular" aria-label={filter.label} className="w-36" value={filter.value} options={filter.options} onChange={filter.onChange} />}
-        </header>
+        <CardHeader
+          title={title}
+          headingId={headingId}
+          actions={filter ? <Select size="sm" edge="neutral" emphasis="regular" aria-label={filter.label} className="w-36" value={filter.value} options={filter.options} onChange={filter.onChange} /> : undefined}
+        />
 
         {loading ? (
           <>
