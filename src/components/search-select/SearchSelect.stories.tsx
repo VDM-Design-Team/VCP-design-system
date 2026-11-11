@@ -851,10 +851,57 @@ export const SizesWidthAndLoading: Story = {
     await expect(field('Small').getBoundingClientRect().height).toBeLessThan(
       field('Medium (default)').getBoundingClientRect().height,
     );
+    /* The heights the docs promise, as `Select`'s: the trigger inside the field is sized to fit, so it never pushes the field past them (it did, to 34 and 42). */
+    await expect(Math.round(field('Small').getBoundingClientRect().height)).toBe(32);
+    await expect(Math.round(field('Medium (default)').getBoundingClientRect().height)).toBe(40);
     await expect(field('Full width').getBoundingClientRect().width).toBeGreaterThan(
       field('Medium (default)').getBoundingClientRect().width,
     );
     await expect(canvasElement.querySelectorAll('[aria-busy="true"]')).toHaveLength(1);
+  },
+};
+
+/** `compact` is 36 tall, between small and medium: a toolbar's field beside a small Button (36). */
+export const Compact: Story = {
+  render: (args) => (
+    <div className="flex flex-col items-start gap-3">
+      <Controlled {...args} size="compact" aria-label="Compact" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole('button', { name: /Compact/ }).parentElement!;
+    await expect(Math.round(field.getBoundingClientRect().height)).toBe(36);
+  },
+};
+
+/** The search matches every word you type, in any order: "Aug 2026" finds "C37 (Jul 20, 2026 - Aug 03, 2026)". One word is a plain contains. */
+export const SearchMatchesEveryWord: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <Controlled
+      {...args}
+      aria-label="Cycle"
+      options={[
+        { value: 'C36', label: 'C36 (Jul 06, 2026 - Jul 20, 2026)' },
+        { value: 'C37', label: 'C37 (Jul 20, 2026 - Aug 03, 2026)' },
+        { value: 'C38', label: 'C38 (Aug 03, 2026 - Aug 17, 2026)' },
+        { value: 'C39', label: 'C39 (Aug 17, 2026 - Aug 31, 2026)' },
+      ]}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /Cycle/ }));
+    const search = await within(document.body).findByRole('combobox', { name: /search/i });
+    await userEvent.type(search, 'Aug 2026');
+    await waitFor(() => expect(within(document.body).getAllByRole('option')).toHaveLength(3));
+    await userEvent.clear(search);
+    await userEvent.type(search, '2026 aug');
+    await waitFor(() => expect(within(document.body).getAllByRole('option')).toHaveLength(3));
+    await userEvent.clear(search);
+    await userEvent.type(search, 'C39');
+    await waitFor(() => expect(within(document.body).getAllByRole('option')).toHaveLength(1));
   },
 };
 
