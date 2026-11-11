@@ -3,6 +3,8 @@ import { cn } from '../../lib/cn';
 import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { Button } from '../../atoms/button';
 import { Checkbox } from '../../atoms/checkbox';
+import { Icon } from '../../atoms/icon';
+import { Input } from '../../atoms/input';
 
 /**
  * AcceptPendingAVModal — the confirmation an admin answers to accept a pending
@@ -24,16 +26,35 @@ import { Checkbox } from '../../atoms/checkbox';
  * is a card rather than a line: the title, what it does, and a target big
  * enough to hit.
  *
+ * **Naming the parts.** Given `parts` (one per problem set), ticking multipart
+ * shows "Rename Individual parts": per part, its label, a **Preview** of the
+ * set, and an optional title (Figma `1666:263661`). A blank title is the
+ * page's default, "Part (X/X) Parent Title"; the titles travel with the answer.
+ * With fewer than two parts there is nothing to split, so the checkbox is
+ * disabled and says why (decided 9 Nov 2026).
+ *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
+/** One part a multipart value would be split into: a problem set. */
+export interface AcceptMultipartPart {
+  /** What the design calls it: "Problem Set 1". */
+  label: string;
+  /** The set's text, shown under **Preview**. Without it there is no Preview. */
+  preview?: React.ReactNode;
+}
+
 export interface AcceptPendingAVModalProps {
   open: boolean;
   /** Escape, Cancel, or a backdrop click. Nothing is destroyed by closing. */
   onClose: () => void;
-  /** Accepted, carrying the one decision. The dialog does not close itself. */
-  onConfirm: (options: { multipart: boolean }) => void;
+  /**
+   * Accepted, carrying the decision. With `parts` and multipart ticked,
+   * `titles` holds one title per part, trimmed, in order; `''` means "use the
+   * default". The dialog does not close itself.
+   */
+  onConfirm: (options: { multipart: boolean; titles?: string[] }) => void;
   /** Whether the value is split into parts. Controlled. */
   multipart?: boolean;
   onMultipartChange?: (multipart: boolean) => void;
@@ -42,6 +63,12 @@ export interface AcceptPendingAVModalProps {
    * The design's own boolean — it draws the dialog both ways.
    */
   showMultipart?: boolean;
+  /**
+   * The parts a multipart value would become, one per problem set. Ticking
+   * multipart then shows "Rename Individual parts" with a title field for
+   * each. Leave it out and the dialog is the checkbox alone.
+   */
+  parts?: readonly AcceptMultipartPart[];
   title?: string;
   confirmLabel?: string;
   cancelLabel?: string;
@@ -56,6 +83,7 @@ export function AcceptPendingAVModal({
   multipart = false,
   onMultipartChange,
   showMultipart = true,
+  parts,
   title = 'Are you sure you want to accept this task?',
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
@@ -63,6 +91,22 @@ export function AcceptPendingAVModal({
 }: AcceptPendingAVModalProps) {
   const id = React.useId();
   const descriptionId = `${id}-multipart-description`;
+  /* One problem set can't be split: the choice is off, and says why. */
+  const tooFew = !!parts && parts.length < 2;
+  const naming = showMultipart && multipart && !tooFew && !!parts?.length;
+  const hintId = `${id}-multipart-hint`;
+  /* The titles typed, and which previews are open. Fresh each time it opens. */
+  const [titles, setTitles] = React.useState<string[]>([]);
+  const [previews, setPreviews] = React.useState<boolean[]>([]);
+  React.useEffect(() => {
+    if (open) {
+      setTitles([]);
+      /* The design draws the first preview open. */
+      setPreviews((parts ?? []).map((_, i) => i === 0));
+    }
+  }, [open, parts]);
+  const confirm = () =>
+    onConfirm(naming ? { multipart, titles: (parts ?? []).map((_, i) => (titles[i] ?? '').trim()) } : { multipart: multipart && !tooFew });
 
   return (
     <Modal
@@ -76,7 +120,7 @@ export function AcceptPendingAVModal({
       footer={
         <>
           <ModalCancel>{cancelLabel}</ModalCancel>
-          <ModalConfirm loading={loading} onClick={() => onConfirm({ multipart })}>
+          <ModalConfirm loading={loading} onClick={confirm}>
             {confirmLabel}
           </ModalConfirm>
         </>
@@ -85,13 +129,14 @@ export function AcceptPendingAVModal({
       {showMultipart && (
         <Checkbox
           size="md"
-          checked={multipart}
+          checked={multipart && !tooFew}
           onChange={onMultipartChange}
+          disabled={tooFew}
           /* The card is the label, so the whole thing is a target. The
              announced name is the title alone — reading the explanation as
              part of the name would bury it. */
           aria-label="Multipart Value"
-          aria-describedby={descriptionId}
+          aria-describedby={tooFew ? `${descriptionId} ${hintId}` : descriptionId}
           className={cn(
             'w-full items-start rounded-md border p-4',
             multipart
@@ -105,9 +150,67 @@ export function AcceptPendingAVModal({
                 Split this value into parts based on its sets, while keeping the original as the
                 parent for overall progress tracking.
               </span>
+              {tooFew && (
+                <span id={hintId} className="text-body-sm-medium text-text-secondary">
+                  It needs at least two problem sets to split.
+                </span>
+              )}
             </span>
           }
         />
+      )}
+      {naming && (
+        <div className="mt-6 flex flex-col gap-4">
+          <p className="text-body-sm-medium text-text-tertiary">Rename Individual parts</p>
+          {(parts ?? []).map((part, i) => {
+            const inputId = `${id}-part-${i}`;
+            const previewId = `${id}-preview-${i}`;
+            const showing = !!previews[i];
+            return (
+              <div key={i} className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor={inputId} className="text-body-sm-semibold text-text-primary">
+                    {part.label}
+                  </label>
+                  {part.preview != null && (
+                    <Button
+                      variant="tertiary"
+                      size="sm"
+                      aria-expanded={showing}
+                      aria-controls={previewId}
+                      iconRight={<Icon name={showing ? 'caret-up' : 'caret-down'} aria-hidden="true" />}
+                      onClick={() => setPreviews((p) => p.map((v, j) => (j === i ? !v : v)))}
+                    >
+                      Preview<span className="sr-only"> {part.label}</span>
+                    </Button>
+                  )}
+                </div>
+                {part.preview != null && showing && (
+                  <div
+                    id={previewId}
+                    className="line-clamp-2 rounded-md border border-stroke-default bg-surface-neutral-subtle px-3 py-2 text-body-sm-regular text-text-secondary"
+                  >
+                    {part.preview}
+                  </div>
+                )}
+                <Input
+                  id={inputId}
+                  fullWidth
+                  value={titles[i] ?? ''}
+                  placeholder="Enter a title, or leave blank for “Part (X/X) Parent Title”."
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setTitles((t) => {
+                      const next = [...t];
+                      next[i] = value;
+                      return next;
+                    });
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
       )}
     </Modal>
   );
