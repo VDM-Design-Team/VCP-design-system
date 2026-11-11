@@ -85,8 +85,11 @@ export interface AVTableRow {
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
-  /** The date, already formatted, and how near it is. See `DueDateTag`. */
-  due?: { label: string; proximity?: DueDateProximity };
+  /**
+   * The due date and how near it is. `date` is ISO `yyyy-mm-dd`: `DueDateTag` shows it dd/mm/yyyy (or the person's locale). `label` is text in its
+   * place for what is not a date; do not pass a date you formatted yourself.
+   */
+  due?: { date?: string; label?: string; proximity?: DueDateProximity };
   urgency?: AVUrgency;
   type?: AVType;
   /** `{ status }` for a spine status, `{ custom }` for a domain step. */
@@ -275,7 +278,9 @@ export function AVTable({
       sortable: true,
       render: (row) =>
         row.due ? (
-          <DueDateTag proximity={row.due.proximity}>{row.due.label}</DueDateTag>
+          <DueDateTag proximity={row.due.proximity} date={row.due.date}>
+            {row.due.label}
+          </DueDateTag>
         ) : null,
     },
     {
