@@ -132,6 +132,7 @@ nowhere. We kept the *name* and replaced the *design*: the old one is not coming
 | `rows` | `'text' \| 'avatar' \| 'icon' \| 'tag'` | `text` | What a row looks like: plain labels, an avatar, a glyph, or a `Tag` |
 | `renderOption` | `(option, { selected, active }) => ReactNode` | — | Draws a row's content, replacing what `rows` would. The checkbox or check, states, keyboard and ARIA stay the component's — keep it to content, no buttons or links |
 | `display` | `'summary' \| 'tags'` | `summary` | `multiple` only: "Amy Lee" / "3 selected", or a removable tag per pick |
+| `clearable` | `boolean \| string` | — | One pick only: with a value, a ✕ before the caret empties the field (`onChange('')`) and gives focus back to it (Figma's Manage filters, `940:171256`). Named "Clear" and the field's `aria-label` ("Clear Assignee"), or the string you pass. A sibling of the trigger, never inside it |
 | `confirm` | `boolean` | — | `multiple` only: ticks are a draft behind a Clear all / Apply footer. `onChange` fires on Apply; Escape or a click away discards |
 | `applyLabel` / `clearLabel` | `string` | `Apply` / `Clear all` | — |
 | `placeholder` | `string` | `Select…` | Shown in the field while nothing is picked |
