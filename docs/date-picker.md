@@ -58,6 +58,7 @@ controls flip every axis.
 | `presets` | `{ label, value, rangeEnd?, filter?, onSelect? }[]` | — | Quick picks; pressed while their dates are the value |
 | `clearable` | `boolean` | `true` | The footer Clear button. On by default; `false` hides it. The same button in the same place in the day and month views |
 | `onClear` | `() => void` | — | What Clear does. The panel holds no value of its own to reset, so supply this whenever the button is shown |
+| `onApply` / `applyLabel` | `() => void` / `string` | — / `'Apply'` | A primary **Apply** beside Clear, for a picker that commits only when told (the Holiday modal's period). Omit `onApply` and there is none. Apply and Clear are `type="button"`: in a form they never submit it |
 | `clearLabel` | `string` | `'Clear'` | Figma labels the range variant's button "Cancel" |
 | `min` / `max` | ISO | — | Inclusive bounds; outside days and months disable, arrows refuse to leave |
 | `markers` | `Record<iso, 'success' \| 'warning' \| 'critical'>` | `{}` | Dot under the day — pair with a legend |

@@ -14,6 +14,7 @@ import { SearchSelect } from '../../components/search-select';
 import { GanttTooltip, type GanttTooltipDetail } from '../../components/gantt-tooltip';
 import { Tooltip } from '../../atoms/tooltip';
 import { useIsTruncated } from '../../components/truncated-text';
+import { useDateFormat } from '../../lib/format-date';
 import {
   buildPeriod,
   columnIndex,
@@ -246,13 +247,6 @@ function UserToggle({ name, expanded, controls, onToggle }: { name: string; expa
 const dateFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 const shortFormat = new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
 const formatDate = (iso: string) => dateFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`));
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-/** "Oct 27, 2026" — a cycle's dates as the filter bar's cycle field writes them, by string split: no Date, no time zone. */
-const longDate = (iso: string) => {
-  const [y, m, d] = iso.slice(0, 10).split('-');
-  return `${MONTHS[Number(m) - 1]} ${d}, ${y}`;
-};
-const cycleRange = (c: { start: string; end: string }) => `${longDate(c.start)} - ${longDate(c.end)}`;
 
 /** "03.02" — the availability date as the stats panel writes it. */
 const formatShort = (iso: string) => shortFormat.format(new Date(`${iso.slice(0, 10)}T00:00:00Z`)).replace('/', '.');
@@ -473,6 +467,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
     ref,
   ) => {
     const hatch = `gantt-hatch-${React.useId().replace(/:/g, '')}`;
+    /* A cycle's dates read like every date: dd/mm/yyyy, or the person's locale — as the filter bar's cycle field writes them. */
+    const { range } = useDateFormat();
+    const cycleRange = (c: { start: string; end: string }) => range(c.start.slice(0, 10), c.end.slice(0, 10));
     const period = React.useMemo(() => buildPeriod(view, date, cycles), [view, date, cycles]);
     const { columns } = period;
     const todayDay = toDay(today ?? new Date().toISOString().slice(0, 10));
@@ -582,6 +579,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       view === 'cycle' ? (
         /* The cycle field as the filter bar draws it: a search, one pick, each row naming the cycle and its dates. */
         <SearchSelect
+          edge="neutral"
           aria-label="Cycle"
           placeholder="Select cycle"
           searchPlaceholder="Search cycles"
@@ -840,6 +838,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               Reset Filters
             </Button>
             <SearchSelect
+              edge="neutral"
               multiple
               aria-label="Projects"
               disabled={loading}
@@ -850,6 +849,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               onChange={onProjectIdsChange}
             />
             <SearchSelect
+              edge="neutral"
               multiple
               aria-label="Users"
               disabled={loading}
@@ -861,6 +861,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               onChange={onUserIdsChange}
             />
             <Select
+              edge="neutral"
               aria-label="View"
               options={VIEW_OPTIONS}
               value={view}

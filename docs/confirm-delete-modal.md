@@ -10,7 +10,6 @@ The confirmation anything has to pass before it is deleted — a user, a contact
 | `Modal` | component | The dialog itself — portal, focus trap, Escape, inert background |
 | `Field` | component | Labels the read-only name |
 | `Input` | atom | Shows the name, read-only |
-| `Button` | atom | Cancel, and the destructive answer |
 | `Icon` | atom | The warning glyph above the question |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -41,7 +40,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 - **It asks and reports; it deletes nothing.** `onConfirm` fires, the page deletes, then closes it — and says so with a toast.
 - **An alert layout, not `Modal`'s default:** a warning glyph, the question, the consequence, all centred, with the name beneath in a
   read-only field (so it can be selected and copied before it goes). `Modal`'s header is unused; the heading lives in the body.
-- **Not dismissible by a backdrop click**, and `role="alertdialog"` so the consequence is announced. Escape still closes it.
+- **Not dismissible by a backdrop click**, and `role="alertdialog"` so the consequence is announced (both come from `Modal`'s `tone="critical"`). Escape still closes it. The footer buttons are `ModalCancel` (grey) and `ModalConfirm` (red), at `md`.
 
 ## Tokens
 

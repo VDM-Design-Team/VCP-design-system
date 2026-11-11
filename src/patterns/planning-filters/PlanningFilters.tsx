@@ -94,6 +94,7 @@ export const PlanningFilters = React.forwardRef<HTMLDivElement, PlanningFiltersP
 
       <div className="flex flex-wrap items-center gap-2">
         <SearchSelect
+          edge="neutral"
           aria-label="Status"
           emphasis="regular"
           placeholder={statusPlaceholder}
@@ -104,6 +105,7 @@ export const PlanningFilters = React.forwardRef<HTMLDivElement, PlanningFiltersP
           className="w-40"
         />
         <SearchSelect
+          edge="neutral"
           aria-label="Priority"
           emphasis="regular"
           placeholder={priorityPlaceholder}
