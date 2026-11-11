@@ -7,7 +7,7 @@ import { DonutChart } from '../../atoms/donut-chart';
  * half-ring gauge of the completion rate. Built to Figma's `Cycle_Summary` (`7498:5354`), `_Cycle_Summary_Card_Base` and
  * `_Cycle_Summary_Half_Donut_Chart`.
  *
- * - **The three figures** each have a title, a coloured dot (blue committed, green completed, brown carried over) and a value.
+ * - **The three figures** each have a title, a coloured dot (blue committed, green completed, amber carried over) and a value.
  * - **The gauge** is `DonutChart` in its flat-ended, gapped half-ring form, 200 across with an 8 stroke. Its colour is the
  *   *completion band*, which this card owns, once (`completionBand`): 90% and above is green (100% included), 70–89% amber,
  *   below 70% red, and no rate yet a grey ring over "-%".
@@ -123,7 +123,10 @@ export const CycleSummary = React.forwardRef<HTMLElement, CycleSummaryProps>(
             <Figure label="Points Completed" dotClassName="bg-accent-success-outline-border-default" value={completed} />
           </div>
           <div className={cn('h-25 min-w-50 @4xl:border-l', divide)}>
-            <Figure label="Carried Over" dotClassName="bg-accent-warning-outline-content-default" value={carriedOver} />
+            {/* Figma's amber (`accent/warning/outline/border`, yellow-500; decided 10 Nov 2026). The system's token of that
+                name is yellow-700 in light, nearly brown, so the dot takes `accent.yellow.medium`, the amber the
+                budget card's bar uses too. Decorative: the title says what the figure is. */}
+            <Figure label="Carried Over" dotClassName="bg-accent-yellow-medium" value={carriedOver} />
           </div>
           <div className={cn('flex h-25 min-w-50 items-center justify-center px-6 @md:border-l', divide)}>
             <DonutChart
