@@ -26,6 +26,8 @@ page, audit batch 5, 11 September 2026.
 | `DueDateTag` | component |
 | `Pagination` | atom |
 | `StatusTag` | component |
+| `MultipartParentChip` | component |
+| `MultipartTableTag` | component |
 | `TableCard` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -102,7 +104,7 @@ value someone chose.
   domain: 'VCP',
   attachments: 3,
   comments: 1,
-  due: { label: 'October 1, 2025', proximity: 'due-soon' },
+  due: { date: '2025-10-01', proximity: 'due-soon' },
   urgency: 'Normal',
   type: 'Type 3',
   status: { custom: 'Ready for Deploy' },   // or { status: 'Review' }
@@ -111,7 +113,9 @@ value someone chose.
 }
 ```
 
-`due.label` and `lastUpdated` are **already formatted**. This table does no
+`due.date` is **ISO** (`yyyy-mm-dd`): `DueDateTag` shows it dd/mm/yyyy, or the person's
+locale. Do not format it yourself (`due.label` is only for text that is not a date).
+`lastUpdated` is **already formatted** ("7 days ago"). This table does no
 date maths and no relative time — see `docs/due-date-tag.md` for why the
 threshold is not a design-system decision.
 
@@ -129,6 +133,23 @@ every table says the same thing:
 
 **Members has no copy** — Figma draws the glyph and writes nothing — so it renders only for a hint you supply.
 Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
+
+## Multipart rows
+
+An Added Value split into parts shows in the table (Figma's `Multipart in AV Table`, `_AV_Table_Item_AV_Title_Multipart`). Give a row `multipart`:
+
+| `multipart` | What the row shows |
+|---|---|
+| `{ kind: 'parent', completed, total }` | **The parent.** A `MultipartTableTag` under its reference with a progress ring of how many parts are done, and **a 6 brand edge at the row's far left** (`surface.brand.medium`) |
+| `{ kind: 'child', position, total, parentRef, parentHref? }` | **A part.** A `MultipartTableTag` with its place ("2/3"), and a **Parent: VCP-4321** chip (`MultipartParentChip`) among the details. With `parentHref` the chip is a link that **opens the parent in a new tab**; with only `onOpenParent` it is a button that asks; with neither it is plain text (nowhere to go) |
+
+**The layout is Figma's two columns** (`_AV_Table_Item_AV_Title_Multipart`): the reference with **the 28 tag under it**, a rule, and the title with **the details starting under it** (the domain tag, the Parent chip, the attachments and the comments, 8 apart). The tag is Figma's own size, 28 high with 14 type and 20 glyphs, and its tooltip opens above; design compared this with a 24-high one-line version side by side and chose Figma's. A row without `multipart` is unchanged.
+
+**The metadata never shrinks or is cut** (the tag, domain tag, parent chip, counts): it hugs its content. So a multipart row's title column has a floor of 28rem, and below it the table scrolls sideways; only the title itself gives way, ending in "…" (and says the whole of it on hover and focus: `TruncatedText`).
+
+**The parent's edge is at the row's far left**, before the checkbox when the table is `selectable` (design's decision), and takes no room. It is `DataTable`'s `rowEdge`, drawn over the row's first cell, not as a border on the row: a border on a row of a collapsed table nudges the whole table (the header too) to make room for it.
+
+*Not built yet, and fine to leave for later:* the rejected and backlogged indicators in the title cell (Figma draws them after the counts).
 
 ## Accessibility
 
