@@ -28,7 +28,7 @@ const SECTIONS: PlanningSection[] = [
     id: 'cycle-27',
     kind: 'cycle',
     title: 'Cycle 27',
-    dates: '(Mar 02, 2026 - Mar 16, 2026)',
+    dates: '(02/03/2026 - 16/03/2026)',
     totalCapacity: 237,
     remainingCapacity: 130,
     rows: [
@@ -154,7 +154,7 @@ export const MultipleCycles: Story = {
         id: 'cycle-28',
         kind: 'cycle',
         title: 'Cycle 28',
-        dates: '(Mar 16, 2026 - Mar 30, 2026)',
+        dates: '(16/03/2026 - 30/03/2026)',
         totalCapacity: 240,
         remainingCapacity: 212,
         rows: [row(6)],

@@ -2,9 +2,13 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { Avatar, type AvatarProps } from '../../atoms/avatar';
+import { Tooltip } from '../../atoms/tooltip';
 
 /** A person in the stack. A bare string is shorthand for `{ name }`. */
-export type AvatarGroupPerson = Pick<AvatarProps, 'name' | 'initials' | 'src' | 'tone'>;
+export type AvatarGroupPerson = Pick<AvatarProps, 'name' | 'initials' | 'src' | 'tone'> & {
+  /** What they are to this stack ("Assignee", "Reviewer"). Shown after the name in the hover tooltip and read after the name in the stack's announcement. */
+  role?: string;
+};
 export type AvatarGroupEntry = string | AvatarGroupPerson;
 
 /**
@@ -64,7 +68,7 @@ export interface AvatarGroupProps
     VariantProps<typeof overlap> {
   /** The people, in the order they should read. Strings are treated as names. */
   people: readonly AvatarGroupEntry[];
-  /** How many avatars to draw before collapsing the rest into `+N`. */
+  /** How many avatars to draw before collapsing the rest into `+N`. The chip only appears for two or more people: if one would be left out, they are drawn instead of a `+1`. */
   max?: number;
   /**
    * What the stack *is* — `"Assignees"`, `"Reviewers"`, `"Attending"`. Prefixed
@@ -72,6 +76,11 @@ export interface AvatarGroupProps
    * 3 others". Without it the summary is just the names.
    */
   label?: string;
+  /**
+   * Say who each avatar is on hover: a tooltip with the person's name (and `role`, when given), and one on the `+N` chip listing the people it hides. **For the pointer only**: the stack stays
+   * one labelled image with no extra tab stops, and a keyboard or screen-reader user gets the same names (and roles) from its label.
+   */
+  tooltips?: boolean;
 }
 
 /** "Ali Rahman, Eve Chen and 3 others" — the stack, in words. */
@@ -86,16 +95,20 @@ function summarise(names: readonly string[], others: number): string {
 const toPerson = (entry: AvatarGroupEntry): AvatarGroupPerson =>
   typeof entry === 'string' ? { name: entry } : entry;
 
+/** "Ali Rahman (Assignee)", or just the name. */
+const withRole = (name: string, role?: string) => (role?.trim() ? `${name} (${role.trim()})` : name);
+const nameOf = (person: AvatarGroupPerson) => person.name?.trim() || person.initials?.trim() || '';
+
 export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
-  ({ className, people, max = 4, size, label, ...props }, ref) => {
-    const shown = people.slice(0, Math.max(0, max)).map(toPerson);
+  ({ className, people, max = 4, size, label, tooltips, ...props }, ref) => {
+    /* A `+1` chip hides one person it could have shown in the same space, so the chip only appears for two or more: when `max` would leave exactly one out, that person is drawn too. */
+    const limit = Math.max(0, max);
+    const shown = people.slice(0, people.length - limit === 1 ? people.length : limit).map(toPerson);
     const collapsed = people.length - shown.length;
 
     /* Someone with neither a name nor initials cannot be announced by name, so
        they are counted among the "others" rather than silently dropped. */
-    const named = shown
-      .map((person) => person.name?.trim() || person.initials?.trim() || '')
-      .filter((value) => value.length > 0);
+    const named = shown.filter((person) => nameOf(person)).map((person) => withRole(nameOf(person), person.role));
     const others = collapsed + (shown.length - named.length);
 
     const summary = summarise(named, others);
@@ -128,26 +141,59 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
         aria-hidden={announced ? undefined : true}
         {...props}
       >
-        {shown.map((person, index) => (
-          <span
-            key={`${index}-${person.name ?? person.initials ?? ''}`}
-            className={cn('relative inline-flex', index > 0 && overlap({ size }))}
-            /* Leftmost highest: the first person is on top of everyone after them. */
-            style={{ zIndex: shown.length - index }}
-          >
-            <Avatar {...person} size={size} ring />
-          </span>
-        ))}
-        {collapsed > 0 && (
-          <span
-            aria-hidden="true"
-            className={cn('relative', overflow({ size }), overlap({ size }))}
-            /* Furthest back — behind the last person shown. */
-            style={{ zIndex: 0 }}
-          >
-            +{collapsed}
-          </span>
-        )}
+        {shown.map((person, index) => {
+          const { role: _role, ...avatar } = person;
+          const slot = (
+            <span
+              key={`${index}-${person.name ?? person.initials ?? ''}`}
+              className={cn('relative inline-flex', index > 0 && overlap({ size }))}
+              /* Leftmost highest: the first person is on top of everyone after them. */
+              style={{ zIndex: shown.length - index }}
+            >
+              <Avatar {...avatar} size={size} ring />
+            </span>
+          );
+          const text = nameOf(person);
+          /* For the pointer only: the wrapper is not focusable, so the stack stays one stop. `describe={false}`: the stack's label already says it. */
+          return tooltips && text ? (
+            <Tooltip
+              key={`${index}-${person.name ?? person.initials ?? ''}`}
+              describe={false}
+              content={withRole(text, person.role)}
+              className={cn(index > 0 && overlap({ size }))}
+              style={{ zIndex: shown.length - index }}
+            >
+              <span className="inline-flex">
+                <Avatar {...avatar} size={size} ring />
+              </span>
+            </Tooltip>
+          ) : (
+            slot
+          );
+        })}
+        {collapsed > 0 &&
+          (() => {
+            const chip = (
+              <span aria-hidden="true" className={cn('relative', overflow({ size }), !tooltips && overlap({ size }))} style={tooltips ? undefined : { zIndex: 0 }}>
+                +{collapsed}
+              </span>
+            );
+            const hidden = people.slice(shown.length).map(toPerson).filter((person) => nameOf(person));
+            return tooltips && hidden.length > 0 ? (
+              /* Furthest back — behind the last person shown. */
+              <Tooltip
+                describe={false}
+                /* A run of names, with commas: "Priya Nair (Designer), Sofia Almeida". */
+                content={hidden.map((person) => withRole(nameOf(person), person.role)).join(', ')}
+                className={overlap({ size })}
+                style={{ zIndex: 0 }}
+              >
+                {chip}
+              </Tooltip>
+            ) : (
+              chip
+            );
+          })()}
       </span>
     );
   },

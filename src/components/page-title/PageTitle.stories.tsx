@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { PageTitle } from './PageTitle';
 import { Button } from '../../atoms/button';
+import { SegmentedControl } from '../../atoms/segmented-control';
+import { Select } from '../../atoms/select';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 
 const meta = {
@@ -146,6 +148,36 @@ export const WithActions: Story = {
       <PageTitle {...args} />
     </Page>
   ),
+};
+
+/**
+ * `beside` puts something next to the title (a view switch), and `actions` can be a whole row of 36 high controls. A one-line title and its actions share a centre line (a 26 high line of text would sit
+ * 5 above the middle of 36 high filters), and the band wraps rather than overflowing when there is not room.
+ */
+export const WithSwitchAndFilters: Story = {
+  args: {
+    title: 'Dashboard',
+    beside: <SegmentedControl size="md" aria-label="View" options={[{ value: 'cycle', label: 'Cycle' }, { value: 'quarter', label: 'Quarter' }]} value="cycle" onChange={() => {}} />,
+    actions: (
+      <>
+        <Select size="compact" aria-label="Year" value="2026" options={['2026', '2025']} onChange={() => {}} />
+        <Button variant="secondary" size="sm">
+          Export
+        </Button>
+      </>
+    ),
+  },
+  render: (args) => (
+    <Page>
+      <PageTitle {...args} />
+    </Page>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const view = c.getByRole('radiogroup', { name: 'View' });
+    await expect(Math.round(view.getBoundingClientRect().height)).toBe(36);
+    await expect(Math.round(c.getByRole('button', { name: 'Export' }).getBoundingClientRect().height)).toBe(36);
+  },
 };
 
 /** A long title truncates rather than wrapping, so the actions keep their row. */
