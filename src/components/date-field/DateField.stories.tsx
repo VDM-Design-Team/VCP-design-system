@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { DateFormatProvider, formatDate, formatDateTime, formatTime, useDateFormat } from '../../lib/format-date';
 import { DateField, formatMonth } from './DateField';
+import { Button } from '../../atoms/button';
+import { Field } from '../field';
 
 const meta = {
   title: 'Components/Forms/DateField',
@@ -162,6 +164,133 @@ export const ValueWeight: Story = {
     await expect(weight('Empty')).toBe(400);
     /* A filter passes `emphasis="regular"`. */
     await expect(weight('Filter')).toBe(400);
+  },
+};
+
+/**
+ * Range mode: two clicks on a two-month calendar, then **Apply**. Nothing reaches the page until then; **Clear** empties it. The field reads the range as every date reads, dd/mm/yyyy.
+ */
+export const RangeMode: Story = {
+  render: () => {
+    const [range, setRange] = React.useState<{ start?: string; end?: string }>({});
+    return (
+      <DateField
+        mode="range"
+        placeholder="Select period"
+        value={range.start}
+        rangeEnd={range.end}
+        onRangeChange={(start, end) => setRange({ start: start || undefined, end })}
+        picker={{ today: '2026-05-01' }}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole('combobox');
+    await userEvent.click(field);
+    const body = within(document.body);
+    const first = within(await body.findByRole('group', { name: 'First calendar' }));
+    await userEvent.click(first.getByRole('button', { name: /^4 / }));
+    await expect(field).toHaveValue('');
+    await userEvent.click(first.getByRole('button', { name: /^6 / }));
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await expect(field).toHaveValue('04/05/2026 - 06/05/2026');
+  },
+};
+
+/**
+ * In a form, under a `Field`'s label. The label names it (by reference, as it names every control in a `Field`), never the placeholder. And **Apply and Clear only apply and clear**: they are
+ * `type="button"`, so the form around the calendar is not submitted. (They used to submit it: in the Holiday dialog that checked the form again before the date had landed, and the error stayed.)
+ */
+export const RangeInAForm: Story = {
+  render: () => {
+    const [range, setRange] = React.useState<{ start?: string; end?: string }>({});
+    const [saves, setSaves] = React.useState(0);
+    return (
+      <form
+        className="flex w-80 flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setSaves((n) => n + 1);
+        }}
+      >
+        <Field label="Date">
+          {(c) => (
+            <DateField
+              {...c}
+              mode="range"
+              placeholder="Select period"
+              value={range.start}
+              rangeEnd={range.end}
+              onRangeChange={(start, end) => setRange({ start: start || undefined, end })}
+              picker={{ today: '2026-05-01' }}
+            />
+          )}
+        </Field>
+        <p className="text-body-sm-regular text-text-secondary">Times submitted: {saves}</p>
+        <div>
+          <Button type="submit" size="sm">
+            Save
+          </Button>
+        </div>
+      </form>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const field = c.getByRole('combobox', { name: 'Date' });
+    await expect(field).toHaveAccessibleName('Date');
+    await expect(document.getElementById(field.getAttribute('aria-labelledby') ?? '')).toHaveTextContent('Date');
+    const body = within(document.body);
+
+    await userEvent.click(field);
+    const first = within(await body.findByRole('group', { name: 'First calendar' }));
+    await userEvent.click(first.getByRole('button', { name: /^4 / }));
+    await userEvent.click(body.getByRole('button', { name: 'Apply' }));
+    await expect(field).toHaveValue('04/05/2026');
+    await expect(c.getByText('Times submitted: 0')).toBeVisible();
+
+    await userEvent.click(field);
+    await userEvent.click(await body.findByRole('button', { name: 'Clear' }));
+    await expect(field).toHaveValue('');
+    await expect(c.getByText('Times submitted: 0')).toBeVisible();
+
+    /* The form's own button still submits it. */
+    await userEvent.click(c.getByRole('button', { name: 'Save' }));
+    await expect(c.getByText('Times submitted: 1')).toBeVisible();
+  },
+};
+
+/** A filter's Period: month mode with named periods (sprints) passed in as presets, and Clear. A sprint reads after its month. */
+export const MonthWithSprints: Story = {
+  render: () => {
+    const [period, setPeriod] = React.useState<{ start: string; end: string } | null>(null);
+    return (
+      <DateField
+        mode="month"
+        emphasis="regular"
+        placeholder="Select Period"
+        value={period?.start}
+        rangeEnd={period?.end}
+        picker={{
+          presets: [
+            { label: 'Sprint 34 (19-22 May)', value: '2026-05-19', rangeEnd: '2026-05-22' },
+            { label: 'Sprint 33 (1-15 May)', value: '2026-05-01', rangeEnd: '2026-05-15' },
+          ],
+        }}
+        onChange={(first) => setPeriod({ start: first, end: first })}
+        onRangeChange={(start, end) => setPeriod(end ? { start, end } : null)}
+        onClear={() => setPeriod(null)}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const field = within(canvasElement).getByRole('combobox');
+    await userEvent.click(field);
+    await userEvent.click(await within(document.body).findByRole('button', { name: 'Sprint 33 (1-15 May)' }));
+    await expect(field).toHaveValue('May 2026, Sprint 33 (1-15 May)');
+    await userEvent.click(field);
+    await userEvent.click(await within(document.body).findByRole('button', { name: 'Clear' }));
+    await expect(field).toHaveValue('');
   },
 };
 

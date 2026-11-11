@@ -222,12 +222,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     body.dueDate = editing ? (
       <DateField label="Due Date" value={value.dueDate} onChange={(v) => set({ dueDate: v })} error={errors?.dueDate} />
     ) : value.dueDate ? (
-      <DueDateTag
-        size="md"
-        proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })}
-      >
-        {showDate(value.dueDate)}
-      </DueDateTag>
+      <DueDateTag size="md" date={value.dueDate} proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })} />
     ) : null;
 
     const cycle = cycles.find((c) => c.value === value.cycle);

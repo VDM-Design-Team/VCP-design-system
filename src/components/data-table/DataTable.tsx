@@ -64,6 +64,11 @@ export interface DataTableColumn<Row> {
    * much of the spare room it takes; with none it takes what the others leave.
    */
   grow?: boolean;
+  /**
+   * A floor for the column's width, as a CSS length (`'11.5rem'`): the table scrolls sideways before it goes narrower. For a column that is not `fit` (it may wrap) and not `grow` (it does not
+   * truncate), like a name that should not be squeezed into three lines. ds-lint-ignore
+   */
+  minWidth?: string;
   sortable?: boolean;
   /**
    * Rendered after the label and **before** the sort arrows — a tooltip
@@ -73,6 +78,12 @@ export interface DataTableColumn<Row> {
    * keyboard.
    */
   hint?: React.ReactNode;
+  /**
+   * A control that lives in the header instead of a visible label — the Users table's "+ New User". The `label` stays as
+   * the column's name for assistive tech, visually hidden. Not for sortable columns. **An `action` column is the actions
+   * column: its header control sits at the end, with room above and below it** (its cells align there too — see `cellProps`).
+   */
+  action?: React.ReactNode;
   /** Cell content. Defaults to `row[key]` rendered as text. */
   render?: (row: Row) => React.ReactNode;
   /**
@@ -120,6 +131,11 @@ export interface DataTableProps<Row extends { id?: string | number }>
    * the row's own; the handlers are yours. The row stays a plain row: nothing here makes it a control.
    */
   rowProps?: (row: Row) => React.HTMLAttributes<HTMLTableRowElement>;
+  /**
+   * A 6 brand edge at the row's **far left**, before the checkbox when the table has one (a multipart parent). It is drawn over the row's first cell, not as a border on the row: a border on a
+   * row of a collapsed table nudges the whole table (the header too) to make room for it, and a pseudo-element on the `<tr>` is taken for an extra cell. It takes no room.
+   */
+  rowEdge?: (row: Row) => boolean;
 }
 
 const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-4 last:pr-4';
@@ -199,6 +215,7 @@ export function DataTable<Row extends { id?: string | number }>({
   dense,
   caption,
   rowProps,
+  rowEdge,
   bare,
   ...props
 }: DataTableProps<Row>) {
@@ -285,14 +302,15 @@ export function DataTable<Row extends { id?: string | number }>({
                   aria-sort={
                     sorted ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined
                   }
-                  className={cn(headerCell, columnSizing(c))}
+                  className={cn(headerCell, columnSizing(c), c.action && 'h-auto py-3')}
+                  style={c.minWidth ? { minWidth: c.minWidth } : undefined}
                 >
                   {/* Label, then the hint, then the sort arrows — in that order, as
                       Figma draws a header that has both. The sort button is the
                       label alone; its `::after` stretches over the whole row so a
                       click on the arrows sorts too, and the hint (raised above the
                       overlay) keeps its own click. One tab stop per control. */}
-                  <span className={cn(headerInner, 'group/sort relative w-fit')}>
+                  <span className={cn(headerInner, 'group/sort relative w-fit', c.action && 'ml-auto')}>
                     {c.sortable ? (
                       <button
                         type="button"
@@ -306,6 +324,11 @@ export function DataTable<Row extends { id?: string | number }>({
                       >
                         {c.label}
                       </button>
+                    ) : c.action ? (
+                      <>
+                        <span className="sr-only">{c.label}</span>
+                        {c.action}
+                      </>
                     ) : (
                       <span className="text-label-sm-medium text-text-secondary">{c.label}</span>
                     )}
@@ -348,6 +371,7 @@ export function DataTable<Row extends { id?: string | number }>({
             rows.map((row, i) => {
               const id = rowId(row, i);
               const extra = rowProps?.(row);
+              const edged = rowEdge?.(row) ?? false;
               return (
                 <tr
                   key={id}
@@ -360,7 +384,7 @@ export function DataTable<Row extends { id?: string | number }>({
                   )}
                 >
                   {selectable && (
-                    <td className={cell(dense)}>
+                    <td className={cn(cell(dense), edged && ROW_EDGE)}>
                       <Checkbox
                         aria-label={selectLabel?.(row) ?? `Select row ${id}`}
                         checked={selected.includes(id)}
@@ -368,11 +392,12 @@ export function DataTable<Row extends { id?: string | number }>({
                       />
                     </td>
                   )}
-                  {columns.map((c) => (
+                  {columns.map((c, columnIndex) => (
                     <td
                       key={c.key}
                       {...c.cellProps?.(row)}
-                      className={cn(cell(dense), 'text-left', columnSizing(c), c.cellProps?.(row)?.className)}
+                      style={c.minWidth ? { ...c.cellProps?.(row)?.style, minWidth: c.minWidth } : c.cellProps?.(row)?.style}
+                      className={cn(cell(dense), 'text-left', columnSizing(c), edged && !selectable && columnIndex === 0 && ROW_EDGE, c.cellProps?.(row)?.className)}
                     >
                       {c.render
                         ? c.render(row)
@@ -396,6 +421,9 @@ export function DataTable<Row extends { id?: string | number }>({
    `width` weight. */
 const columnSizing = (c: { fit?: boolean; grow?: boolean; width?: string }) =>
   c.grow ? cn('min-w-64 max-w-0', !c.width && 'w-full') : c.fit ? 'whitespace-nowrap' : undefined;
+
+/* Figma's `Multipart Parent=Yes`: a 6 border in surface.brand.medium, drawn over the first cell. */
+const ROW_EDGE = 'relative before:absolute before:inset-y-0 before:start-0 before:w-1.5 before:bg-surface-brand-medium';
 
 const cell = (dense?: boolean) =>
   cn(
