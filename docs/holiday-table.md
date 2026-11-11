@@ -20,6 +20,7 @@ Built to Figma's `_Holiday_Registry_Table` (`8056:126395`: with rows, and `Empty
 | `DataTable` | component |
 | `DatePicker` | component |
 | `EmptyState` | component |
+| `TableCard` | component |
 | `HolidayTypeTag` | component |
 | `HolidaySourceBadge` | component |
 | `DateField` | component |
