@@ -103,7 +103,7 @@ value someone chose.
   domain: 'VCP',
   attachments: 3,
   comments: 1,
-  due: { label: 'October 1, 2025', proximity: 'due-soon' },
+  due: { date: '2025-10-01', proximity: 'due-soon' },
   urgency: 'Normal',
   type: 'Type 3',
   status: { custom: 'Ready for Deploy' },   // or { status: 'Review' }
@@ -112,7 +112,9 @@ value someone chose.
 }
 ```
 
-`due.label` and `lastUpdated` are **already formatted**. This table does no
+`due.date` is **ISO** (`yyyy-mm-dd`): `DueDateTag` shows it dd/mm/yyyy, or the person's
+locale. Do not format it yourself (`due.label` is only for text that is not a date).
+`lastUpdated` is **already formatted** ("7 days ago"). This table does no
 date maths and no relative time — see `docs/due-date-tag.md` for why the
 threshold is not a design-system decision.
 
