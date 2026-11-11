@@ -96,6 +96,11 @@ export const PastQuarter: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Past Quarter')).toBeVisible();
     await expect(canvas.getByText('Started On')).toBeVisible();
+    /* The button and the two pickers beside it are one height: 36. */
+    const height = (el: HTMLElement) => Math.round(el.getBoundingClientRect().height);
+    await expect(height(canvas.getByRole('button', { name: 'Go to Current Quarter' }))).toBe(36);
+    await expect(height(canvas.getByRole('combobox', { name: 'Quarter' }).parentElement as HTMLElement)).toBe(36);
+    await expect(height(canvas.getByRole('combobox', { name: 'Year' }).parentElement as HTMLElement)).toBe(36);
     await userEvent.click(canvas.getByRole('button', { name: 'Go to Current Quarter' }));
     await expect(args.onGoToCurrent).toHaveBeenCalledTimes(1);
   },
