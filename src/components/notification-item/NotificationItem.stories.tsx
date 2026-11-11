@@ -80,6 +80,7 @@ const meta = {
         'handoff',
         'completed',
         'viewer',
+        'reacted',
         'discarded',
       ] satisfies NotificationKind[],
     },
@@ -236,6 +237,23 @@ export const Read: Story = {
   },
 };
 
+/** Someone reacted to your comment (decided 9 Nov 2026): the comment is the preview, with its reactions. */
+export const Reacted: Story = {
+  args: {
+    kind: 'reacted',
+    actor: { name: 'Marvin Ode' },
+    preview: 'On it: the handoff goes out this afternoon.',
+    reactions: [{ emoji: '👍', count: 2, mine: true, people: ['You', 'Marvin Ode'] }],
+    onToggleReaction: fn(),
+    onSelectEmoji: fn(),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText(/reacted to your comment on/)).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: /^2 reactions, 👍, you reacted/ })).toBeInTheDocument();
+  },
+};
+
 /** Every kind of event, with the sentence the design draws for it. */
 export const Kinds: Story = {
   render: (args) => {
@@ -253,6 +271,7 @@ export const Kinds: Story = {
       { kind: 'handoff', time: '3 hours ago', expect: /handed off .*\. Ready for Review/ },
       { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
+      { kind: 'reacted', time: 'a few seconds ago', expect: /reacted to your comment on/ },
       { kind: 'discarded', time: '5 minutes ago', expect: /discarded/ },
     ];
     return (
@@ -267,8 +286,8 @@ export const Kinds: Story = {
   },
   play: async ({ canvasElement }) => {
     const links = within(canvasElement).getAllByRole('link');
-    /* Thirteen open their Added Value; a discarded one has no page, so its row is plain text. */
-    await expect(links).toHaveLength(13);
+    /* Fourteen open their Added Value; a discarded one has no page, so its row is plain text. */
+    await expect(links).toHaveLength(14);
     const discarded = Array.from(canvasElement.querySelectorAll('li p')).find((p) => p.textContent?.includes('discarded'));
     await expect(discarded).toHaveTextContent('John Kestrel discarded Change the notification layout for testing.');
     await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod.');
