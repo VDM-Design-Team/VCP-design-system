@@ -5,9 +5,9 @@ import { Icon } from '../../atoms/icon';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
-import { EmptyState } from '../../components/empty-state';
 import { SourceTag } from '../../components/source-tag';
 import { StatusTag, type StatusTagProps } from '../../components/status-tag';
+import { TableEmpty } from '../../components/table-empty';
 import { Tag } from '../../atoms/tag';
 
 /**
@@ -27,7 +27,7 @@ import { Tag } from '../../atoms/tag';
  *
  * **It does nothing itself.** Filtering is the page's: pass the filter row as `filters` and it sits inside the card above the table (there is no filters pattern); paging is
  * `page`, `pageCount` and `onPageChange`.
- * `loading` shows placeholder rows and one status says so; an empty trail is an `EmptyState`.
+ * `loading` shows placeholder rows and one status says so; an empty trail is a `TableEmpty`.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -221,16 +221,7 @@ export function TaskLogTrail({
         columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
         rows={loading ? placeholders : rows}
         empty={
-          empty ??
-          (filtered ? (
-            <EmptyState
-              icon={<Icon name="magnifying-glass" size="lg" />}
-              title="No changes match these filters."
-              description="Try widening the dates, or reset the filters."
-            />
-          ) : (
-            <EmptyState icon={<Icon name="list-bullets" size="lg" />} title="No changes yet." />
-          ))
+          empty ?? <TableEmpty noun="changes" icon="list-bullets" filtered={filtered} hint="Try widening the dates, or reset the filters." />
         }
       />
       <div className="flex justify-end">
