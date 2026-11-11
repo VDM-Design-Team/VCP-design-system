@@ -44,6 +44,7 @@ export * from './tag-management-modal';
 export * from './superadmin-metrics';
 export * from './team-capacity';
 export * from './user-capacity';
+export * from './value-cards';
 export * from './top-bar';
 export * from './manuals-table';
 export * from './system-changelog';
