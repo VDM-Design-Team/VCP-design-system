@@ -125,6 +125,31 @@ export const WithTooltips: Story = {
   },
 };
 
+/**
+ * A `+1` would hide one person it could have shown, so the chip only appears for two or more. With `max={2}` (what a table uses, three slots in all): three people are all drawn, four are two faces and a `+2`.
+ */
+export const NeverPlusOne: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {[3, 4, 5].map((count) => (
+        <div key={count} className="flex items-center gap-3">
+          <AvatarGroup people={TEAM.slice(0, count)} max={2} label="Members" />
+          <span className="text-caption-sm-semibold text-text-tertiary">{count} people, max=2</span>
+        </div>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    /* Three: all drawn, no chip. Four: two faces and "+2". */
+    await expect(c.getByRole('img', { name: 'Members: Ali Rahman, Eve Chen and Marcus Okonkwo' })).toBeInTheDocument();
+    await expect(c.getByRole('img', { name: 'Members: Ali Rahman, Eve Chen and 2 others' })).toBeInTheDocument();
+    await expect(c.getByRole('img', { name: 'Members: Ali Rahman, Eve Chen and 3 others' })).toBeInTheDocument();
+    await expect(c.queryByText('+1')).toBeNull();
+  },
+};
+
 export const Sizes: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">

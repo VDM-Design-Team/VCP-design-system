@@ -30,7 +30,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `people` | `Array<string \| { name, initials, src, tone, role }>` | — | In reading order. A bare string is shorthand for `{ name }`. `role` ("Assignee", "Reviewer") shows after the name in a tooltip and is read after it in the label |
-| `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N` |
+| `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N`. **The chip only appears for two or more people**: when `max` would leave exactly one out, that person is drawn too (so no `+1`) |
 | `size` | `xs \| sm \| md \| lg` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 |
 | `label` | `string` | — | What the stack **is** — `"Assignees"`. Prefixed to the announced summary |
 | `tooltips` | `boolean` | — | Hover tooltips: each avatar says its name (and `role`), and the `+N` chip lists who it hides, separated by commas ("Priya Nair (Designer), Sofia Almeida"). **For the pointer only**: the stack stays one image with no extra tab stops (see Accessibility) |
