@@ -31,7 +31,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'critical', 'danger'],
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'critical', 'critical-tonal', 'danger'],
     },
     size: { control: 'radio', options: ['xs', 'sm', 'md', 'lg'] },
     shape: { control: 'radio', options: ['round', 'square'] },
@@ -44,6 +44,11 @@ type Story = StoryObj<typeof meta>;
 /** The quiet destructive control — a row's bin. A red glyph; only its colour changes on hover and press, like `tertiary`. */
 export const Critical: Story = {
   args: { variant: 'critical', icon: 'trash-simple', label: 'Delete tag' },
+};
+
+/** The tonal destructive control — a red disc for a row's delete beside a `tonal` edit, as the Holiday Registry's rows draw it. The fill and the glyph both change on hover and press. */
+export const CriticalTonal: Story = {
+  args: { variant: 'critical-tonal', shape: 'round', icon: 'trash', label: 'Delete holiday' },
 };
 
 export const Default: Story = {};
