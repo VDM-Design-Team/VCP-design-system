@@ -11,13 +11,14 @@ The primary interactive control.
 | `neutral` | The way *out* — Cancel beside a destructive answer, Dismiss beside a confirm | no limit |
 | `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
 | `danger` | Destructive, irreversible actions only | 1 |
+| `danger-tertiary` | A destructive answer that sits quietly beside others: red text, no fill (Figma's Style=Text, red: the AV edit page's **Discard**). It asks first (a confirm), like `danger` | 1 |
 | `link` | Inline navigation that reads as text | no limit |
 
 ## Props
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| neutral \| tertiary \| danger \| link` | `primary` | |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| danger \| danger-tertiary \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Swaps the left icon for a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`) |
