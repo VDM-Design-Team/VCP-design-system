@@ -82,6 +82,22 @@ export const Default: Story = {
   },
 };
 
+/** A user reads the Holiday Registry: a top-level row of its own, with the Planning sub-row's key, so one route serves both. */
+export const UserHolidayRegistry: Story = {
+  args: { userType: 'user', active: 'planning/holiday-registry' },
+  render: (args) => (
+    <Stage>
+      <Sidebar {...args} />
+    </Stage>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Holiday Registry' })).toHaveAttribute('aria-current', 'page');
+    /* No Planning group in a user's rail. */
+    await expect(canvas.queryByRole('button', { name: /^Planning/ })).not.toBeInTheDocument();
+  },
+};
+
 /**
  * All four user types. `Admin Dev` is the one the Claude Design export did
  * not have — it is the only rail with `Planning`.

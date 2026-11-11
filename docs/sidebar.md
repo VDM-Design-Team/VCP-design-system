@@ -64,13 +64,19 @@ starts being used routinely, the vocabulary has moved and this should follow.
 
 | User type | Rows |
 |---|---|
-| `user` | Dashboard, My Values, Assigned, Drafts, Task Log Trail, Archive▾ |
-| `admin` | + Manage |
+| `user` | Dashboard, My Values, Assigned, Drafts, Task Log Trail, Holiday Registry, Archive▾ |
+| `admin` | Dashboard, My Values, Manage, Assigned, Drafts, Task Log Trail, Archive▾ |
 | `admin-dev` | + Planning▾ |
 | `super-admin` | Dashboard, Accounts, Domains, Contact List |
 
 ▾ = has sub-items. `Archive` opens Completed / Rejected / Backlogs;
 `Planning` opens Planning List / Gantt Chart / Holiday Registry.
+
+**A user's Holiday Registry is a top-level row** (decided 9 Nov 2026). A user reads the registry but has no
+Planning group, so the row stands on its own, after Task Log Trail, with the `calendar-dots` glyph. Its key is
+the Planning sub-row's, `planning/holiday-registry`: one page and one route for everyone, and `active` marks
+whichever row the rail has. (Figma's user rail drew the entry twice and no Planning group; this is the
+resolved version.)
 
 ## Sub-rows are destinations
 
