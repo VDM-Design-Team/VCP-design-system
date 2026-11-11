@@ -41,6 +41,9 @@ const fill = cva('h-full rounded-full transition-[width] duration-300', {
          the light track, so use it only where the value is also written out (valueLabel), never as the only
          signal. */
       caution: 'bg-accent-yellow-medium',
+      /* accent.critical.outline.border — Figma's bright over-budget red (Domain Budget, decided 9 Nov 2026 to
+         follow Figma). 3.09:1 on the light track, 2.17:1 on the dark one: only beside a written value. */
+      alert: 'bg-accent-critical-outline-border-default',
       /* accent.info.filled.surface — a level that is neither good nor bad, just
          "further along": password strength's Good. */
       info: 'bg-accent-info-filled-surface-default',

@@ -56,6 +56,7 @@ Fill against track, measured (3:1 is the bar for meaningful graphics):
 | `info` | **4.26:1** | **2.75:1** ⚠ |
 | `pending` | **2.27:1** ⚠ | **2.91:1** ⚠ |
 | `caution` | **1.28:1** ⚠ | **5.42:1** |
+| `alert` | **3.09:1** | **2.17:1** ⚠ |
 
 The trade: the track itself whispers against surfaces (1.23:1 light on white,
 1.41:1 dark on `surface.elevated`, 1.72:1 on the dark canvas), so a bar or ring
