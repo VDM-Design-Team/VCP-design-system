@@ -1,5 +1,453 @@
 # Changelog
 
+## 0.4.0 — 2026-11-11
+
+### `TableEmpty` — one empty-table look, and `DataTable` uses it (November 2026)
+
+New **`TableEmpty`**: what every table says when it has no rows. A table passes its plural `noun` and its `icon`; the words ("No accounts yet.", "No accounts match “zzz”."), the magnifying-glass icon when filtered, a hint and **Reset** (`onReset`) come from here, so tables cannot drift apart. A table whose Figma draws other words can pass `title`. **Reset** is optional: without `onReset` it is not drawn.
+
+`EmptyState`'s text sits closer: 4 between the title and its line (was 10), and the icon tile and the action stand 16 off the text.
+
+`DataTable` shows a generic `TableEmpty` ("Nothing here yet.", with the icon tile) when a page sets no `empty`, instead of bare text. `AccountsTable`, `UsersTable`, `ContactsTable`, `ManualsTable` and `HolidayTable` use it: their wording is unchanged, `HolidayTable` gains the icon tile and a hint under its filtered message, and `ManualsTable` and `HolidayTable` keep Figma's words through `title`.
+
+### `DueDateTag` and `AVTable` — due dates read dd/mm/yyyy (November 2026)
+
+A due date in the Added Value table could read "October 1, 2025" while every other date read 01/10/2025, because the tag took ready-made text and each page formatted its own.
+
+- **`DueDateTag` takes `date`** (ISO `yyyy-mm-dd`) and shows it through the system's one formatter: dd/mm/yyyy, or the person's locale (`DateFormatProvider`), inside a `<time>`. `children` is still accepted for text that is not a date ("-").
+- **`AVTable` rows take `due.date`** (ISO). `due.label` still works, for text that is not a date.
+- `DetailCard` and `MultipartRow` pass the date the same way; they read as before.
+
+Callers that pass a formatted date as `children` or `due.label` keep working, but should switch to `date`.
+
+### `AddManualModal` — the dialog behind Add Manual (November 2026)
+
+New pattern **`AddManualModal`**: what Settings › Manuals' **Add Manual** opens. Figma draws the button and not the dialog; decided 10 Nov 2026, it asks for **a name and one or more files**, picked with the shared `Attachments`. Submit checks both ("Give the manual a name.", "Add at least one file.") and hands over `{ name, files }`; the page uploads them, with `submitting` and `errors` for what only the server knows. Each opening starts empty.
+
+### `NotificationItem` — `discarded`: the Added Value was thrown away (November 2026)
+
+A fourteenth kind, "**John discarded** *Title*." For an Added Value that was discarded (AV · 02): the notification someone already had stays, says it was discarded, and no longer opens it. The component makes sure of that last part: a `discarded` row is never a link or a button, whatever `href` or `onSelect` it is given. Decided 10 Nov 2026.
+
+### `Button` — `danger-tertiary`: a destructive answer as red text (November 2026)
+
+A new variant for a destructive action that sits quietly beside others, as Figma's AV edit page draws Discard beside Save as Draft and Submit: red text (`accent.critical.outline.content`, the hover step at rest, as Figma has it), no fill. It asks first, like `danger`.
+
+### Holiday Registry: `HolidayModal`, `HolidayTypeTag`, and a range mode for `DateField` (November 2026)
+
+New **`HolidayModal`** (Figma's `Holiday_Registry_Modal`): add or edit a holiday — name, Recurring Yearly (a switch with an ⓘ), a period picked on a two-month calendar and applied, and the type — checked when Add or Save is pressed. New **`HolidayTypeTag`**: Public (globe), Team (group), Individual (person).
+
+`DateField` gains `mode="range"` (with `rangeEnd` and `onRangeChange`; its days read as every date does, so there is no `formatDate` prop): two clicks on a two-month calendar, then **Apply** or **Clear**; nothing reaches the page until Apply. `DatePicker` gains `onApply` / `applyLabel`: a primary Apply beside Clear.
+
+**Table and row:** new **`HolidayTable`** (Figma's `_Holiday_Registry_Table` and `Holiday_Registry_Row`): the filter row (type, period, applies to) with Add Holiday and Import from Hubstaff for an admin, the rows (name with its Hubstaff-duplicate flag, date with its day count, type, applies to, all day, recurring, added by, source, and edit / delete for an admin), the empty state and the pagination. New **`HolidaySourceBadge`** (Manual Entry, Google Calendar, In Hubstaff). The Period filter is the existing `DateField` in month mode with the sprints passed in as `presets`: `DateField` gains `onClear` (the picker's own Clear, for a filter) and, in month mode, reports a named period's start and end through `onRangeChange` and reads it after its month. `DatePicker` in month mode shows range presets (a named stretch beside the months); day mode still hides them.
+
+`DataTable` columns gain `minWidth` (a floor in CSS length). `DatePicker`'s preset column is as wide as its longest name (it was a fixed 140), still centred.
+
+**Review fixes (6 Nov).** The Date column carries the **status** too: given `today` (ISO), each row wears **Upcoming** (info), **Today** (success) or **Past** (neutral) beside the date and its day-count pill, as Figma's Date Status badge. The table has **two empty messages**: "No holidays have been added yet." and, when a filter is on and nothing matches, "No holidays match your filters." with a **Reset** (`onResetFilters`). Dates use `useDateFormat()` (a locale is respected). Edit and delete are 40 (the touch minimum), and the delete is the new **`IconButton` `critical-tonal`** variant (`accent.critical.tonal`, with its own hover, pressed and disabled), so nobody recolours it by hand. `HolidayModal`'s answer is `ModalConfirm` (so nothing closes the dialog while it saves), its form id is `useId`, and its ⓘ is `InfoHint`. A delete is confirmed with `ConfirmDeleteModal` until the "(Future)" dialog is designed (the `OnThePage` story does). `fix-field-error-border.md` is gone (released in 0.3.0).
+
+**Review additions (10 Nov).** `HolidayModal` can now set what the table's two columns show. **All Day** is a switch, on to start; off, it asks **From** and **To** (both required; for a one-day holiday To must be after From), and turning it back on drops the times. **Applies to** follows the type: a Team holiday picks teams (new prop `teams`), an Individual one picks people (new prop `people`), and it is required; a Public holiday is everyone's and has no field; changing the type clears what was picked. `HolidayDraft` gains `appliesTo: string[]` (`[]` for Public), `allDay: boolean` and, when it is not all day, `from` and `to` as 24-hour "HH:mm". A failed Add or Save puts focus on the first field that failed, in the order they are drawn.
+
+`HolidayTable`'s row buttons say whose holiday it is ("Edit Annual leave, Jordan Lee", "Delete Founders Day, Jordan Lee and 2 others"; a public holiday's name is enough), so two people's entries with the same name are told apart. Narrower than its columns (about 1120 of room), the table scrolls inside its own wrapper and the page does not. Pressing **Reset** moves focus to the first filter, since the button then goes.
+
+**Fixed:** `DatePicker`'s **Clear** and **Apply** no longer submit a form the picker sits in; they are `type="button"`. In `HolidayModal` that submit re-checked the form before the date had landed, so "Select a date" and the red edge stayed after a date was applied; Clear in any `DateField` inside a form used to submit that form. In a `Field`, `DateField` now takes the label's `aria-labelledby` too, as every other control does, so it is named by its label and never by its placeholder.
+
+### `FilterBar` — labelled fields in Figma's order, under the search (November 2026)
+
+Decided 10 Nov 2026: every list's filters follow Figma's Manage table. The search sits at the left with Reset and Filters (now the filled button) at the right; the fields go under them, each with its label above, in Figma's order: Priority, Tags, Status, Date, then Cycle and the people. A filled people field holds just the name, since its label says which. The period field is labelled and named "Date" (Figma's word); `period.label` changes it.
+
+Migration: nothing to change at call sites. A test that finds the period by the name "Period" now finds "Date"; a test that reads "Assignee: Amy Lee" in the field now reads "Amy Lee".
+
+### `CycleSummary` — the Carried Over dot is amber, as Figma draws it (November 2026)
+
+The dot beside Carried Over was brown; Figma draws it amber (yellow-500). It now takes `accent.yellow.medium`, the amber the budget card's bar uses. (Figma names the variable `accent/warning/outline/border`, but the system's token of that name is yellow-700 in light, nearly brown.) Decided 10 Nov 2026.
+
+### `Attachments` — one piece for the cards, the drop area and the viewer (November 2026)
+
+New component **`Attachments`**: a set of attached files as `FileAttachment` cards, the `Dropzone` and the `AttachmentViewer`, together. The attachments dialog, the handoff forms and the deliverables card each assembled these by hand, with their own copies of the glyph and object-URL logic. It holds no files (`items` in, `onFiles`, `onRemove` and `onDownload` out) and **never drops focus**: a removed card's ✕ goes with it, so focus moves to the next card's ✕, else the previous one's, else the drop area.
+
+New `lib/attachment-files`: **`fileKind(file)`** picks a card's glyph by type and, when the browser gives none (it often does not, for a `.csv` or `.docx`), by extension; **`useAttachmentFiles()`** keeps the files just picked as cards, makes an image's address when it is picked and lets it go when its card goes, so a card never shows the previous file's picture.
+
+`DeliverablesCard` now uses it. No props change.
+
+### `SearchSelect` — a ✕ to clear one pick; `FilterBar`'s people fields have it (November 2026)
+
+A one-pick `SearchSelect` can be `clearable`: with a value, a ✕ before the caret empties the field and gives focus back to it, as Figma's Manage filters draw it ("Filter by Assignee and Clear"). `FilterBar` turns it on for its one-person fields (Assignee, Initiator), so a filter by person can be undone without Reset Filters.
+
+### `AVTable` — the Items select and the "1-50 of 1,250" range (November 2026)
+
+`AVTable` passes `itemCount`, `pageSize`, `pageSizeOptions` and `onPageSizeChange` to its `Pagination`, so a list can draw Figma's full pagination (Manage): how many items a page shows, and which of them you're looking at. Leave them out and it is the Small version, as before.
+
+### `AvatarGroup` — a person's domain in the tooltip (November 2026)
+
+A person in the stack can carry a `domain`. With it, the hover tooltip and the stack's label read as Figma's Manage table draws them, "Jack Morgan (Development) — Assignee", and the `+N` chip lists the people it hides one to a line. Without a domain nothing changes ("Ali Rahman (Assignee)").
+
+### One date-and-time formatter: "10/06/2026 14:37" (November 2026)
+
+`src/lib/format-date.ts` gains `formatDateTime` and `formatTime` (exported from the package) and `useDateFormat()` gains `dateTime(iso)` and `time(iso)`: anything that shows a time now has one way to write it, the date as every date reads (dd/mm/yyyy, or the person's locale's order) and then a **24-hour** time, whatever the locale. An ISO date-time with **no zone** reads as written and is never converted; one **with a zone** is an instant, shown in the provider's `timeZone` (new on `DateFormatProvider`) or the person's own; a date with no time is just the date; anything else comes back as given. Nothing existing changes: `format`, `range` and `placeholder` read as before.
+
+### `SearchSelect` is 32 / 36 / 40 tall, as `Select` (November 2026)
+
+The trigger inside the field was 24 / 26 / 32 high with 4 of padding and a 1 border either side, so `sm` measured 34 and `md` 42 (only `compact` was right, at 36). The trigger is now 22 / 26 / 30, so the field is exactly 32 / 36 / 40, level with `Select` and `Input` beside it. A field with tags still grows past its minimum.
+
+### Five dashboard cards draw their header with `CardHeader` (November 2026)
+
+`TeamCapacity`, `UserCapacity`, `CycleBurndown`, `CyclePerformance` and `ValueCards` each hand-drew the card's head (the `h2`, the ⓘ and the filters). They now use `CardHeader`, the one version `InCaseYouMissedIt` and `DomainBudgetSummary` already use, so every card's title, 16 info icon (40 press area), truncation and wrapping filters read the same. No props change. Small differences that come with sharing one header: the filters sit 12 apart (was 8) and the title and filters wrap with the same gaps as the other cards; titles that were not truncating (`CyclePerformance`, `ValueCards`) now truncate with "…" when too long.
+
+### One announcement record, and one owner for its type (November 2026)
+
+New `Announcement` (`src/lib/announcement.ts`): `id`, `title`, `version` ("v1.18.1"), `kind`, `date` (ISO), `description?`, `changelogUrl?`, `features`. The Announcements table, overview, dialog and the System Changelog all take their fields from it, so a page passes one object to all of them and the names agree. It also exports `VERSION_PATTERN` and `formatVersion` ("1.18.1" and "V1.18.1" both become "v1.18.1").
+
+`CHANGELOG_KINDS` (`src/lib/changelog-kinds.ts`), the one owner of an announcement kind's glyph, colour and words, now also holds each kind's **Type word** (Experimental, Update, Feature) and **tag tone** (success, warning, info, the glyph's own hue), and `CHANGELOG_KIND_ORDER` gives the order lists show them. The table's Type tag and the dialog's Type list read these instead of mapping types themselves.
+
+**Renamed to match the record** (both shipped in the System Changelog, days ago): `ChangelogItem` and `ChangelogRelease` take `description` (was `message`) and `changelogUrl` (was `href`). `ChangelogRelease` is now derived from `Announcement`.
+
+### `ValueCards` and `ChartLegend` — now in the package (November 2026)
+
+Both shipped with stories and docs but weren't exported, so an app couldn't import them: `import { ValueCards, ChartLegend } from '@vdm-design-team/vcp-design-system'` now works. Nothing else changes.
+
+### `Sidebar` — the domain switcher's list is as wide as the switcher (November 2026)
+
+Opening the domain switcher at the top of the rail showed a list that ran across the whole screen. It now opens under the switcher at the switcher's own width, as the design draws it. Nothing to change at call sites.
+
+### `MoveToBacklogModal` opens with the cursor in Feedback (November 2026)
+
+The dialog opened with focus on itself, so the one field had to be reached with Tab. It now opens with the cursor in **Feedback**: type the reason and press Enter.
+
+### `DomainBudgetSummary` — the super admin's note (November 2026)
+
+A new prop, `note`: the super admin's note on the domain's budget for the quarter (what `BudgetTable`'s Optional Notes
+holds), shown under the bar as "**Note:** …" (decided 9 Nov 2026: the admin sees it). `noteLabel` changes the word.
+
+### `DomainBudgetSummary` / `BudgetTable` / `ProgressBar` — budget bars and copy as Figma draws them (November 2026)
+
+Decided 10 Nov 2026: follow Figma's colours on each surface. Wording: a budget is per **quarter**, and "quarter" and
+"cycle" (a planning fortnight) are different things, so the budget never says "cycle", even where Figma's tooltips do.
+
+- **`BudgetTable`**: two fills only, as Figma's table draws: brand blue, or bright red when over budget. No amber at 75%.
+- **`DomainBudgetSummary`**: Figma's fills: brand blue under 75%, its bright yellow (`accent.yellow.medium`) at 75–99%, its
+  bright red at 100% and over.
+- **`ProgressBar`** gains a tone, `alert` (`accent.critical.outline.border`, Figma's bright red): 3.09:1 on the light track,
+  2.17:1 on the dark one, so only beside a written value.
+- **Both tooltips** say **quarter** where they said "cycle": Allocated is "Total development points assigned for the
+  selected quarter. Unused points do not roll over." and Remaining is "Remaining = Allocated - Consumed points for the
+  quarter. Negative values indicate overspend." (Figma's say "cycle" there: a Figma wording fix.) Consumed is unchanged.
+
+### `CardHeader` — one title for every dashboard card (November 2026)
+
+New component: the head of a dashboard card, with its title (the card's `h2`), an optional info icon (`InfoHint`, 4 from the title) and an optional slot for controls on the right (a filter, a period picker) that wraps under the title in a narrow card. The cards had each drawn this by hand with slightly different gaps and heading wiring.
+
+`InCaseYouMissedIt` and `DomainBudgetSummary` use it now (no visual change beyond aligning their spacing to the one version); the other cards adopt it as their PRs land: `TeamCapacity`, `UserCapacity` and `CycleBurndown`, `CyclePerformance` and `ValueCards`.
+
+`DomainBudgetSummary`'s Go to Current Quarter button, quarter picker and year picker are one height, 36: the pickers were small (32) beside a small button (36), so its row had two heights. They use the `compact` (36) select size from the header-foundations change.
+
+### `ValueCards` — the dashboard's status counts (November 2026)
+
+New pattern, read off the Figma `Value_Cards`: a titled card holding a `StatCard` for each status, with an optional "whose" filter beside the title (Figma lists All, Initiated, Assigned and Team). Figma draws six (Completed, In Review, Overdue, In Progress, Pending, Draft), and the stories show those six: Completed `success`, In Review and In Progress `brand`, Overdue `critical`, Pending `yellow`, Draft `neutral`. Which statuses a role sees is the page's: pass the items, it does no counting.
+
+It reflows with its card's own width (a container query): six cards are one row from 71rem (six 176 cards and five gaps of 16, a 1440 window less the 256 rail), then three by two, two by three and one column; four or fewer are four across, two by two, then one column. Loading shows placeholders, and with no items it says so.
+
+### `Sidebar` / `Icon` — a super admin's Domain Budget (November 2026)
+
+A super admin's rail gets **Domain Budget** (`domain-budget`), between Domains and Contact List, as Figma's super admin
+rail draws it: where every domain's points for a quarter are set. Its glyph is new to the set: Phosphor's `wallet`
+(and `wallet-fill`).
+
+### `DashboardHeader` and `DashboardFilters` — the top of a dashboard (November 2026)
+
+New patterns, read off the Figma dashboards (development admin, super admin).
+
+`DashboardHeader`: the page's title, an optional Cycle / Quarter view switch beside it and the role's filters on its right, as one pattern. One header for every role: the switch is data (`views`, `view`, `onViewChange`) and the filters are a slot, so the role is what you put in. The stories compose the development admin (Cycle and Quarter), development user, super admin and design user headers; `docs/dashboard-header.md` has the role table.
+
+`DashboardFilters`: the filters (data-driven: cycle, year, team; the cycle is searchable), then Reset ("Reset", as `FilterBar` calls it) and an Export button (one button, or a menu with `exportOptions`) together at the end, every control 36 high, the selects hugging their longest option.
+
+The super admin's domain and month filters are exported as `SuperAdminFilters` (`size="compact"` is 36) so the header can hold them, and `SuperAdminMetrics` takes `filters={false}` to draw only its cards (its own filters, 40 high above the cards, remain the default).
+
+Reset sits next to Export at the end of the row and reads "Reset" (Figma draws "Reset Filters" first in the row), to be consistent with `FilterBar`; the docs record it as a difference from the design.
+
+### A 36 high `compact` size, and a `PageTitle` that holds a view switch and a row of filters (November 2026)
+
+A page header with a view switch and a row of filters needs every control at one height. 36 is the height a small `Button` and a medium `SegmentedControl` already have, so `Select`, `Input`, `SearchSelect` and `DateField` gain `size="compact"` (36), between small (32) and medium (40); small and medium are unchanged. `DateField` also takes `edge`, as `Input` does.
+
+`PageTitle` gains `beside` (a slot beside the title, for a view switch; the left group wraps so the switch drops under the title in a narrow page). Its `actions` slot now wraps, is capped to the band's width and shares a centre line with a one-line title (it sat 5 above the middle of 36 high controls); with a `subtitle` the actions stay at the top as before.
+
+### `NotificationInbox` — rows grouped by day (November 2026)
+
+A new prop, `groups`: the rows under a heading per day ("Today", "Yesterday", "3 November"), each day its own list named
+by its heading, so a screen reader can move by day (decided 9 Nov 2026: the inbox groups by day, the popover stays a
+flat list). `groupHeadingLevel` sets the headings' level (2 by default). An empty group is left out.
+
+### `AvatarGroup`: no `+1`; the Added Value table shows at most three slots (November 2026)
+
+The `+N` chip now only appears when it hides two or more people. When `max` would leave exactly one person out, that person is drawn instead of a `+1` (a chip that hides one person it could have shown in the same space). This applies to every `AvatarGroup`; a stack with one hidden person now shows one more face.
+
+`AVTable`'s Members column uses `max={2}`, so a row has at most three slots: three members are all shown, four are two faces and a `+2` ("EC, AR, +2"). It showed up to three faces and then a chip.
+
+### `TopBar` — the bell's place takes a `NotificationPopover` (November 2026)
+
+A new prop, `notificationPopover`: pass a `NotificationPopover` and it takes the bell's place in the bar (it brings its
+own bell as its trigger), so the bell opens the latest notifications. Without it, `notifications` and
+`onNotifications` draw the plain bell as before.
+
+### `NotificationItem` — "reacted to your comment" (November 2026)
+
+A new `kind`, `reacted`: "**John reacted to your comment on** *Title*." The comment's author is told when someone
+reacts to their comment or reply (decided 9 Nov 2026; not when they react to their own). Pass the comment as
+`preview`, with its `reactions`, so the row shows what was reacted to.
+
+Its "Who gets it" table also says who hears of a new comment: the initiator(s), assignee(s), anyone @mentioned, and
+anyone who has commented on it before (decided 9 Nov 2026).
+
+### `EmojiReactionPicker` — "+N" expands the row, three names in the tooltip, focus stays (November 2026)
+
+- **"+N" is a button now** (decided 9 Nov 2026): it shows every pill in the row, and "Show less" folds them again.
+  Named "Show N more reactions", with `aria-expanded`; the same button both ways, so focus stays on it.
+- **Who reacted names up to three people, then "and N others"** ("You, Marvin Ode, Ali and 2 others"), Figma's copy.
+  It named two before.
+- **Focus no longer drops** when you take back the last reaction on a pill: it moves to the pill that took its place,
+  or to Add reaction.
+
+### `AvatarGroup` hover tooltips; the Added Value table's Members column uses them (November 2026)
+
+`AvatarGroup` gains `tooltips`: each avatar says who it is when the pointer rests on it (the name, and the new optional `role` on a person: "Ali Rahman (Assignee)"), and the `+N` chip lists the people it hides, separated by commas. It is for the pointer only: the stack stays one labelled image with no extra tab stops, and its label now reads each person's role after the name ("Members: Ali Rahman (Assignee), Eve Chen and 2 others") so a keyboard or screen-reader user gets the same information. `AVTable`'s Members column turns `tooltips` on; give a member a `role` to show it. Without `tooltips` nothing changes.
+
+### `Sidebar` — a user's rail has the Holiday Registry (November 2026)
+
+Users read the Holiday Registry but have no Planning group, so their rail now has it as a top-level row, after
+Task Log Trail, with the `calendar-dots` glyph. Its key is the Planning sub-row's, `planning/holiday-registry`,
+so one page and one route serve every role. Figma's user rail drew the entry twice and no Planning group; this is
+the resolved version (decided 9 Nov 2026).
+
+### `PlanningTable` — move a row anywhere, and without dragging (November 2026)
+
+Planning review: AVs need to move between Cycles and back to the Backlog, and by keyboard as well as by mouse.
+
+- **`moves="anywhere"`**: any row drags onto any other section, another Cycle or the Backlog. The default,
+  `to-cycle`, keeps today's behaviour (a Backlog row onto a Cycle).
+- **`acceptsRows: false`** on a section takes no rows (a Cycle that has ended): no drop target, no menu choice.
+- **`canMove(row, from)`** keeps a row where it is (no button, no drag), e.g. a Completed one.
+- **A "Move … to…" button** on every movable row when `onMoveRow` is given: a menu of the sections the row may go to,
+  calling `onMoveRow` as a drop does. It is the way to move a row without dragging (WCAG 2.5.7).
+- **Focus follows the row**: after a move from its menu, focus goes to the row's button in its new section.
+
+The table gains a narrow last column for the button when `onMoveRow` is given.
+
+### `DetailCard` — read-only fields while editing (November 2026)
+
+New `readOnly` prop (a list of fields). In the editing and new cards, those dropdowns and dates show their value but can't be opened or changed, using each control's disabled state. Figma's multipart part edit page (`1404:132644`) needs it: a part's Projects, AV Category, Type and Urgency come from its parent.
+
+### `AcceptPendingAVModal` — naming the parts of a multipart value (November 2026)
+
+New `parts` prop (`{ label, preview? }[]`, one per problem set). With multipart ticked, the dialog shows **Rename Individual parts**: each part's label, a **Preview** of its set and an optional title ("Enter a title, or leave blank for “Part (X/X) Parent Title”."), as Figma's "Accepting AV with Multipart + Custom Titles" (`1666:263661`) draws it. `onConfirm` now also hands back `titles` (one per part, trimmed, `''` for the default). Without `parts` the dialog is unchanged. With fewer than two parts, **Multipart Value** is disabled and says why ("It needs at least two problem sets to split.").
+
+### Planning filters and the Gantt toolbar use the lighter filter edge (November 2026)
+
+`PlanningFilters`' selects and the Gantt chart's toolbar filters (cycle, projects, users, view) now use `edge="neutral"`, the lighter resting edge `FilterBar` has had since the filter-edge change, so every row of filters reads the same. Fields in a form or dialog keep the full `stroke.strong` edge. This is the deliberate exception documented in `docs/filter-bar.md` (about 2.6:1 on white against the usual 3:1).
+
+### Dates in the details card and every cycle read dd/mm/yyyy (November 2026)
+
+Every date reads **dd/mm/yyyy** (decided 6 November), or the person's locale under `DateFormatProvider`. Two places still wrote dates in words:
+
+- **`DetailCard`** wrote Start Date, Due Date, Deployment Date, Date Initiated and Date Accepted as "November 5, 2026". They now read "05/11/2026". Its cycle picker showed the raw ISO dates ("2025-09-20 - 2026-10-02"); it now reads like the tag.
+- **Cycles** read "C18 (Sep 20, 2025 - Oct 02, 2026)" in `CycleTag`, `MoveAVToCycleModal`, `FilterBar`'s cycle field and `GanttChart`'s cycle picker. They now read "C18 (20/09/2025 - 02/10/2026)", all from one formatter: `formatDateRange` (new, in the date helpers) and `useDateFormat().range`. `formatCycleRange` stays and takes an optional locale.
+
+### `StatusProgression` / `AVHeader` — Accept and Reject on a Backlog AV (November 2026)
+
+An admin can now decide a backlogged Added Value from its page: `Backlog` offers the admin an outline **Reject** and **Accept**, as Figma's admin Backlog page draws them (`1094:97734`), the same pair `Review` uses. Other roles still get no moves on `Backlog`, and moving it back to Pending or Draft stays in `DetailCardMenu`. `avTransitions({ role: 'admin', status: 'Backlog' })` returns the two.
+
+### `CycleBurndown` uses `InfoHint` (November 2026)
+
+`CycleBurndown`'s title info icon is now `InfoHint` (a 16 glyph, 4 from the title, a 40 press area, the tooltip opening below), the same as the other cards, instead of a hand-made 20 button.
+
+### Capacity cards use `InfoHint` (November 2026)
+
+`TeamCapacity` and `UserCapacity` draw their title's info icon with `InfoHint` (a 16 glyph, 4 from the title, a 40 press area, the tooltip opening below), the same as `InCaseYouMissedIt`, instead of a hand-made 20 button.
+
+### `InfoHint` — one info icon for every card (November 2026)
+
+New component: the small "i" beside a card's title or a stat's label, with its explanation in a tooltip. A 16 glyph in `text.tertiary`, a real button named "About {label}", the `Tooltip` opening below it, and a **40 press area** around the glyph (a `::after`), so the touch minimum holds without a bigger icon.
+
+It replaces the control `InCaseYouMissedIt`, `StatCard` and `DomainBudgetSummary` each drew by hand, in two sizes (16 beside a card title, 20 beside a label). One size is the precedent now: 16. Visible changes: `StatCard` and `DomainBudgetSummary`'s icons go from 20 to 16, and every hint's pointer target is 40 (it was 16 in `InCaseYouMissedIt` and `StatCard`). `InCaseYouMissedIt`'s hint is unchanged to look at.
+
+### `edge` on `Input`, `Select` and `SearchSelect`; `FilterBar` uses the neutral edge (November 2026)
+
+`Input`, `Select` and `SearchSelect` gain `edge`: `strong` (the default, `stroke.strong`, unchanged) or `neutral` (`neutral.outline.border.default`, lighter). `FilterBar`'s search, selects and period button use `neutral`, so a row of filters is quieter beside a table. It is about 2.6:1 on white, below the 3:1 every other field edge holds, so it is a deliberate exception documented in `docs/filter-bar.md`: the fields are also identified by their icons and placeholders, and error, warning and focus edges are unchanged.
+
+### `TableCard` spacing and a rounded `bare` table (November 2026)
+
+A `bare` table (inside a `TableCard`) draws no border or fill but now keeps `radius.md` (8) corners, so its header band and hovered rows are rounded rather than square against the card's padding.
+
+`TableCard` padding is now 24 all round (was 16); so is the gap between its filters, table and pagination (was 16). Every table drawn in a `TableCard` gets the roomier card.
+
+`MyValuesStats` padding is now 24 all round (was 16), to match the table card beside it on My Values.
+
+### `CapacityBar` — 2 between segments (November 2026)
+
+The segments of a `CapacityBar` (so `TeamCapacity` and `UserCapacity`) sit 2 apart, up from 1, the same gap as the bars in `BarChart`, so each segment reads as its own and not only as a change of colour. The segments still share the bar's width by value.
+
+### Charts — formatters, choosing, a custom tooltip, legend toggles and keyboard reading (November 2026)
+
+The options most chart libraries offer, on `BarChart` and `LineChart` (and passed through by `CyclePerformance`, `SprintMetrics` and `CycleBurndown`):
+- **`formatValue(value, series)`** and **`formatTick(value)`**: how a number reads on a bar, in the tooltip, the table and the announcement, and on the value axis.
+- **`onSelectDatum(datum, series?)`**: a group or point was chosen, by a click (with the series of the bar it landed on) or by Enter.
+- **`renderTooltip({ datum, index, series })`**: replaces what the tooltip says, keeping the card and its position.
+- **`toggleSeries`** (with `defaultHiddenSeries`, `onToggleSeries`): each legend entry becomes a button that shows or hides its series; the axis follows what is drawn, and the last visible series cannot be hidden.
+- **Keyboard reading on the bar chart**, as the line chart has: one tab stop, the arrow keys move from group to group, Home and End jump, Escape clears, the tooltip follows and the group is announced.
+
+New `ChartLegend` (the series key, with optional show/hide buttons: `aria-pressed`, a 40 press area) and the shared `useChartCursor` and `useHiddenSeries` in `src/lib/chart-scale.ts`. The names avoid the DOM's own (`onSelect`, `onToggle`, `hidden`).
+
+### `LineChart` and `CycleBurndown` — line charts you can feed data (November 2026)
+
+New, built to Figma's `Cycle_Burndown`, drawn in SVG with no chart library. `LineChart`: pass `data` (one entry per point: a `label` and a `values` map of series to numbers, `null` or missing to break a line) and `series`; the axis (0 up to a readable top), the lines, a dot at every point, the hover tooltip (a heading such as "Date: 06.20.2025" over each line's colour and value) and the legend follow. Points are evenly spaced in the order given, so a burndown over working days has no gap for the weekend. It redraws as its card narrows and thins its axis labels so none collide.
+
+Lines differ by more than colour (Committed is dashed, Available dotted). The plot is one keyboard stop: the arrow keys read each point, with a tooltip and a polite announcement; the data is also in a visually hidden table. Loading and empty states.
+
+`CycleBurndown` is the card: title with an optional hint, the chart with all four lines (Completed, Committed, Overdue, Available), a row of totals (`stats`: label, value, tone) and the legend at the bottom. No filters of its own: the page's global filters decide the `data`. The `FromAnApiResponse` story and `docs/cycle-burndown.md` show the whole mapping from a raw API response.
+
+Differences from Figma, on purpose: line colours are the series tokens, lines are not all solid, the legend is at the bottom as on every chart, and the totals use token colours.
+
+The axis text is 12, not Figma's 10: one readable size across a chart, with the hover card and legend.
+
+### Saving: a dialog can't close mid-save, and a loading button keeps focus (November 2026)
+
+**`Modal` takes `busy`.** While it is set, nothing closes the dialog: Escape is used up, a backdrop click does nothing (and doesn't blur the focused button), and the ✕ and `ModalCancel` are disabled. It turns on by itself while the footer's `ModalConfirm` (or `actions.confirm`) is `loading`. `ConfirmDeleteModal`, `ConfirmDeleteAVModal`, `HandoffAVModal`, `ReportProblemModal`, `ReviewAVModal` and `TagManagementModal`, whose saving buttons are plain `Button`s, pass it themselves and lock their own Cancel. Before, Cancel locked but Escape, ✕ and the backdrop still closed a dialog halfway through a save. `busy={false}` opts out.
+
+**`Button` and `IconButton` keep focus while `loading`.** A loading button is now `aria-disabled` rather than `disabled`. It looks the same and ignores presses (click, Enter, Space, and a form's implicit submit), but focus stays on it instead of dropping to the page. A button that is both `disabled` and `loading` is still `disabled`. Decided 6 Nov 2026 (#320).
+
+Visible change: none at rest. While saving, Escape and backdrop clicks no longer close dialogs, and focus stays on the saving button. Code that checked a loading button's `disabled` property should check `aria-disabled` (or `aria-busy`).
+
+### `BarChart`, `CyclePerformance` and `SprintMetrics` — bar charts you can feed data (November 2026)
+
+New, built to Figma's `Cycle_Performance` and `Sprint_Metrics`, and drawn in SVG with no chart library: pass `data` (a label and a values map per category) and `series`, and the axis (0 up to a readable top: 157 gives 175), the bars, the hover tooltip and the legend follow. They measure their own width and redraw as the card narrows: bars narrow, drop a number that will not fit, and category labels thin out so none overlap. Loading and empty states. The picture is hidden from assistive tech and the same numbers are in a visually hidden table.
+
+`CyclePerformance` adds data-driven filters (`{ key, label, value, options, onChange }`, each a small `Select`); `SprintMetrics` is the number-over-bar, dashed-grid look with Capacity and Commitment as the system's Available and Committed series.
+
+`CHART_SERIES` gains `svgFill`, `svgStroke` and `svgContent` for SVG shapes, and `src/lib/chart-scale.ts` (`niceTicks`, `useElementWidth`) is the shared axis arithmetic for the line chart that follows.
+
+Differences from Figma, on purpose: fills are the series tokens (Figma's are not variables, with white numbers under 4.5:1) and Sprint Metrics' orange Overdue is the system's red.
+
+Bars sit 2 apart within a group so each reads as its own. The legend is always under the chart (Sprint Metrics' Figma draws it above; the system keeps every legend at the bottom), so `BarChart`'s `legend` is `bottom` or `none`.
+
+The text in the plot (axis numbers, category labels, the numbers on and over bars) is 12, not Figma's 10: one readable size across a chart, with the hover card and legend. A bar now needs about 24 to hold its number.
+
+### `CapacityBar`, `TeamCapacity` and `UserCapacity` — how a team's capacity is spent (November 2026)
+
+New, built to Figma's `Team_Capacity` and `User_Capacity` and driven by data: pass `segments` (a series and a value each) and the bar, the total and the legend follow; pass `members` and each person gets a row. They fill the width they are given, reflow with their card, and have loading and empty states.
+
+New `src/lib/chart-series.ts` (`CHART_SERIES`, `CHART_SERIES_ORDER`, `seriesIn`, exported from the package): the five series every chart draws — Completed, Committed, Overdue, Available, Leave — and the one place that says what each looks like, so a legend, a bar and (soon) a line chart agree and "Overdue" is the same red everywhere. Each is a filled-surface token with its content colour, measured at 4.5:1 or more in both themes.
+
+Differences from Figma, on purpose: the fills are tokens (Figma's are not variables, and white numbers on them fall short of 4.5:1), and every number is one colour per theme; Available is the brand blue and Committed the step darker (`surface.brand.stronger`), Leave is amber, and Overdue is red on every chart.
+
+### `StatCard` — 4 between the label and the value (November 2026)
+
+The default (Value_Card) card had no gap between its label and its value; it now has `space.4`, the same as the label-over-figure pairs in `CycleSummary` and `MyValuesStats`. The card is still exactly 100 high and its content still centred. The superadmin card and the group items (12) are unchanged.
+
+### `ConfirmDeleteAVModal` — footer buttons are `ModalCancel` and `ModalConfirm` (November 2026)
+
+As `ConfirmDeleteModal`: the dialog uses `Modal`'s `tone="critical"` and its footer, with `ModalCancel` (grey) and `ModalConfirm` (red) instead of two plain `Button`s in the body. Same behaviour; the buttons sit in the system footer, 12 apart (were 16).
+
+### `ConfirmDeleteModal` — footer buttons are `ModalCancel` and `ModalConfirm` (November 2026)
+
+The dialog now uses `Modal`'s `tone="critical"` and its footer, with `ModalCancel` (grey) and `ModalConfirm` (red) instead of two plain `Button`s inside the body. Same dialog, same behaviour (alertdialog, no ✕, no backdrop dismissal); the buttons sit in the system's footer, 12 apart (they were 16), and follow the tone.
+
+### `TagManagementModal` — the domain delete is `ConfirmDeleteModal` (November 2026)
+
+`type="delete-domain"` now hands over to `ConfirmDeleteModal`, the system's one delete confirmation: the question, the consequence, the domain's name (new: pass it as `initialName`), a grey Cancel and a red **Delete** (it said "Confirm"). It was a plain critical `Modal` before. Without `initialName` the name field is empty.
+
+### `ContactsTable` — drawn by `TableCard` (November 2026)
+
+The table and its pagination now sit in a `TableCard` and the table inside is `bare`, instead of the pattern drawing its own card. It looks the same; the card is now the one every table shares.
+
+### `HolidayTable` — drawn by `TableCard` (November 2026)
+
+The filters (and the admin's Add Holiday / Import buttons) above the table, the table and the pagination now share one `TableCard`, and the table inside is `bare`. Before, the filter row floated above a table with its own border.
+
+### `UsersTable` — drawn by `TableCard` (November 2026)
+
+The search box above, the table and the pagination now sit in a `TableCard` and the table inside is `bare`, instead of the pattern drawing its own card. It looks the same; the card is now the one every table shares.
+
+### `AccountsTable` — drawn by `TableCard` (November 2026)
+
+The search box above, the table and the pagination below now sit in a `TableCard` and the table inside is `bare`, instead of the pattern drawing its own card. It looks the same; the card is now the one every table shares.
+
+### `TableCard` — a table's filters, table and pagination in one card (November 2026)
+
+New `TableCard`: filters above the table, the table, then pagination, in one `surface.elevated` card — the rule for where a table's filters go. `DataTable` gains `bare` (no border or fill, for use inside the card). `AVTable` gains `filters`: given, it draws a `TableCard`; without it nothing changes.
+
+### Dialog footer buttons: `ModalCancel`, `ModalConfirm`, and `md` (November 2026)
+
+New **`ModalCancel`** and **`ModalConfirm`** for a dialog's footer. They take their colour from the dialog's `tone` (`secondary` + `primary`; grey `neutral` + red `danger` in the `critical` tone) and are `md` (40 high), so a hand-built footer no longer has to remember either. The `actions` row is these two buttons. The footers of the accept, reject, move-to-cycle and user dialogs use them; the report, handoff and review dialogs' own buttons are `md` too, and the review dialog's red Reject now has a grey Cancel. Before, the `actions` row and the dialogs drew 36-high (`sm`) buttons while `ConfirmDeleteAVModal` and the Modal stories drew 40, so a delete dialog looked different from the rest. See `docs/modal.md`.
+
+Visible change: dialog footer buttons are 40 high instead of 36.
+
+### `MoveToBacklogModal` (November 2026)
+
+New **`MoveToBacklogModal`** (Figma's `Move_Backlog_Modal`): the optional Feedback field with Cancel and Move to Backlog, reporting the feedback once through `onMove`.
+
+### Multipart in the AV table: `MultipartTableTag`, `MultipartParentChip`, `AVTable` rows (November 2026)
+
+New **`MultipartTableTag`** (a child's "1/3" or a parent's progress ring, with the tooltip from Figma's `_Multipart_Table_Tag`; focusable, and its words are read out), new **`MultipartParentChip`** ("Parent: VCP-4321 ↗", which opens the parent in a new tab), and `AVTable` rows take `multipart`, in **Figma's two-column title cell** (`_AV_Table_Item_AV_Title_Multipart`): the reference with the **28 tag under it** (14 type, 20 glyphs, its tooltip above), a rule, and the title with the details starting under it. A parent gets a brand edge at the row's **far left** (before the checkbox when the table is selectable); a child gets its tag and the Parent chip (`parentHref` opens it in a new tab, `onOpenParent` asks, and with neither it is plain text, not a button that does nothing). Rows without `multipart` are unchanged. New icon `arrow-up-right`.
+
+`DataTable` gains **`rowEdge`**: a 6 brand edge at a row's far left, drawn over its first cell (so it takes no room and, with `selectable`, sits before the checkbox). The metadata in a title cell hugs its content and never shrinks (the table scrolls instead), and the parent's glyph is VCP's own `arrows-split-source` (new in-house icon, no fill version).
+
+### Multipart: `MultipartSection`, `MultipartRow`, `ChildPartModal` (November 2026)
+
+New **`MultipartRow`** (a part: number — green when completed —, title, assignee, "10 CP", due date, status), new **`MultipartSection`** (the AV page's card: a Multipart heading, "33% (1/3 parts completed)", a progress bar worked out from the parts, the rows, and **Add Part** when editing; its rows share one grid, so the points, dates and status tags line up in columns — and stack when the section is narrow), and new **`ChildPartModal`** ("Add a New Child Part to Multipart AV": a Title that may be left blank, with a "Status will change" warning for a completed AV). Built to Figma's `Multipart_Section`, rows and `Multipart_Child_Part_Modal`. Each only asks: opening a part, adding one and working out the default title are the page's.
+
+Hovering a row shows an edit button after its title (a 24 tonal pencil; also shown on focus and on touch screens) — `MultipartRow.onEditTitle`, `MultipartSection.onEditPartTitle` — and `ChildPartModal` gains `mode="edit"` ("Edit Child Part Title", **Save**, `initialTitle`) for renaming; a blank title means "use the default" in both modes.
+
+Review changes: a long part title shows in full on hover and focus (`TruncatedText`, or a tooltip on the title button), the progress bar is named "Multipart progress" so the summary is said once, `dueDate` is ISO shown dd/mm/yyyy (or the person's locale), "a part is done" is one helper (`isPartCompleted`), and the info glyph is `InfoHint` with design's text. `ChildPartModal`'s footer is `ModalCancel` and `ModalConfirm` (40 high), like every other dialog's.
+
+### `SystemChangelog` and `ChangelogItem` — the admin's list of releases (November 2026)
+
+New atom **`ChangelogItem`** (a release card: the kind's glyph, title and version, "Posted on …", message, Features/Updates bullets) and new pattern **`SystemChangelog`** (a "System Changelog" title over a card per release, with loading and empty states), built to Figma's `Admin System Changelog`.
+
+- **Dates** are ISO and shown through `useDateFormat` (dd/mm/yyyy, or the person's locale) inside a `<time>`. Versions read as given ("v1.18.1").
+- **Kinds:** a card's `kind` (`experimental`, `update`, `feature`) draws its glyph and names it for screen readers. The glyph, colour and words now have one owner, `CHANGELOG_KINDS` (`src/lib/changelog-kinds.ts`), which `ChangeLogModal` reads too. `ChangeLogModal` looks and behaves as before.
+- **Links:** a card's `href` makes its title a link to the release's changelog document, opening in a new tab.
+- **Many releases** are paged with the existing `Pagination` under the cards (`page`, `pageCount`, `onPageChange`), controlled like the tables.
+- The title's id is `useId`, so two changelogs on a page each name their own.
+
+### `ManualsTable` — the Settings Manuals tab's list (November 2026)
+
+New pattern, built to Figma's `Manuals_Table`: Name (sortable), Uploaded by, Attachments (a count: "None", "1 file", "3 files"), Date Added, pagination, and Figma's "No items." empty state. **A manual's name opens it**: give a row an `href` and the name is a link, in a new tab. It is drawn by `TableCard` and controlled like `AccountsTable`; loading shows placeholder rows.
+
+### `UsersTable`, `AccountStatusTag` and the Settings user dialog (November 2026)
+
+New pattern **`UsersTable`**, built to Figma's `Settings_Users`: search, Name / Status / Date Added (sortable), **View** on each row, **+ New User** in the Actions header, pagination. Controlled like `AccountsTable`. Its empty table is an `EmptyState`, with the words searched when a search is active. **+ New User** stays while the table loads.
+
+New component **`AccountStatusTag`**, the one owner of account statuses: **Approved** (green), **Pending** (yellow) and **Inactive** (grey), with no red status. `UsersTable` draws it, and `ACCOUNT_STATUS_OPTIONS` is the user dialog's Status list, so tables and dialogs agree.
+
+`UserAccountModal` becomes the one user dialog for Accounts and Settings:
+
+- `roles` swaps Proficiency and the Domain Access table for a Roles checklist (`draft.roles`, `initial.roles`). `domains` and `proficiencyOptions` are now optional.
+- The photo's buttons are **Upload** with no photo, **Change** + **Remove** once there is one (a freshly chosen image counts). **Remove takes effect on Submit**: the draft carries `avatarRemoved: true`, so Cancel undoes it.
+- `draft.roles` and `draft.avatarRemoved` are optional, so existing typed callers are unchanged.
+
+`DataTableColumn` gains `action`: a control in the header in place of the visible label (the label stays as the hidden name). An `action` column sits at the end: right-aligned, with room above and below the header control.
+
+### `PersonalInfoForm` and `ConnectionCard` — the Personal Info tab of Settings (November 2026)
+
+New component **`ConnectionCard`**, built to Figma's `_Personal_Info_Item_Jira_Connect`: a brand logo tile, the service's name, a one-line status and one action button. Generic on purpose — the status, the button's words and what the press does are the caller's, so "Not connected / Connect", "Connected as … / Disconnect" and "Connecting…" are all the same card. It only reports the press.
+
+New pattern **`PersonalInfoForm`**, built to Figma's `Settings_Personal_Info`: Name and Email with Save, and — when given `jira` — a Jira Account ID and a `ConnectionCard` to link the account (the Development domain's extra). It saves and connects nothing itself.
+
+- **The draft follows `initial` until the person edits a field**, so a profile that loads late still fills the form, and typing is never overwritten. `onSave` gets the whole draft.
+- **Name and Email are required**; Save says what is wrong under the field and moves focus to it. Name's words are Figma's ("Name is required"); Email's are `UserAccountModal`'s. `errors` carries what only the server knows.
+- **`emailReadOnly`** is an email the person cannot change here (a single sign-on's, or an admin's): read-only rather than disabled, so it can still be reached, selected and copied.
+- **The Jira Account ID is filled in by the connection only**: greyed with its note before the link, a plain read-only field after. It is never typed and has no placeholder.
+- `saving` spins Save and locks the fields.
+
+### `MyValuesStats` — the strip across the top of My Values (November 2026)
+
+New, built to Figma's `My_AVs_Stats`: the person's avatar and name, their Total AVs and Completed figures, and a segmented status breakdown whose segments are as wide as their counts (never narrower than 100). A segment with a count is filled in its tone; one with none is an empty outline. It owns one mapping — a tone to its colour — and takes the statuses, labels, counts and totals as data. Too narrow, it wraps the breakdown onto its own line first, and scrolls sideways once that cannot get any narrower.
+
+With every count at 0 the segments share the strip equally, so the empty outlines span the width instead of bunching on the left. Draft's grey is `stroke.strong` (Figma's slate-500 in light, a quiet mid grey in dark). Each segment has the light 2px line down its left, beside its count and name.
+
+### `CycleSummary` — how a cycle went (November 2026)
+
+New, built to Figma's `Cycle_Summary`: points committed, completed and carried over (each with its coloured dot), and a half-ring `DonutChart` gauge of the completion rate. The gauge's band colour — green at 90% and above, amber 70–89%, red below, grey with "-%" when there is no rate — is owned by the card (`completionBand`). It reflows by its own width with a container query: four across, two by two, stacked. The completion rate is the caller's.
+
+The completion band is picked from the rate **as shown** (rounded first): 89.5 reads "90%" and is green, 69.5 reads "70%" and is amber. The gauge is named "Completion" and valued by its number, so a screen reader no longer hears the percentage twice; with no rate it says "No rate yet" instead of announcing 0.
+
 ## 0.3.0 — 2026-11-06
 
 ### `GanttChart`: a cut name can be read, and "1 pt" (November 2026)
