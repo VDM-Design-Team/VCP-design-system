@@ -13,8 +13,8 @@ type, date and features, with **Edit** and **Delete** in a menu on every row. Bu
 | `Skeleton` | atom |
 | `Tag` | atom |
 | `DataTable` | component |
-| `EmptyState` | component |
 | `Menu` | component |
+| `TableEmpty` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -47,7 +47,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onEdit` / `onDelete` | `(row) => void` | — | From a row's menu. They **ask** |
 | `loading` | `boolean` | — | A first load: placeholder rows; buttons and headers stay; one status says "Loading announcements" |
 | `refreshing` | `boolean` | — | A reload: **Refresh** shows its loading state and **the rows stay on screen**, no placeholders; one status says "Refreshing announcements". The page clears it when the list is back |
-| `empty` | `ReactNode` | `EmptyState` "No announcements yet." | |
+| `empty` | `ReactNode` | `TableEmpty` "No announcements yet." | |
 | `caption` | `string` | `Announcements` | The table's accessible name |
 
 ## It is controlled, and does nothing itself

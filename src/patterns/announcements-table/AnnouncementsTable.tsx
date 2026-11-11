@@ -6,8 +6,8 @@ import { IconButton } from '../../atoms/icon-button';
 import { Skeleton } from '../../atoms/skeleton';
 import { Tag } from '../../atoms/tag';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
-import { EmptyState } from '../../components/empty-state';
 import { Menu } from '../../components/menu';
+import { TableEmpty } from '../../components/table-empty';
 import type { Announcement } from '../../lib/announcement';
 import { CHANGELOG_KINDS } from '../../lib/changelog-kinds';
 import { useDateFormat } from '../../lib/format-date';
@@ -192,7 +192,7 @@ export function AnnouncementsTable({
         caption={caption}
         columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
         rows={loading ? placeholders : rows}
-        empty={empty ?? <EmptyState icon={<Icon name="megaphone" size="lg" />} title="No announcements yet." />}
+        empty={empty ?? <TableEmpty noun="announcements" icon="megaphone" />}
       />
     </div>
   );
