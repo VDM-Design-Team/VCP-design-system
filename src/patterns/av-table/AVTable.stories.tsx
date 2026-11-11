@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { AVTable, type AVTableRow } from './AVTable';
 import { IconButton } from '../../atoms/icon-button';
 import { FilterBar } from '../filter-bar';
@@ -14,7 +14,7 @@ const ROWS: AVTableRow[] = [
     domain: 'VCP',
     attachments: 3,
     comments: 1,
-    due: { label: 'October 1, 2025', proximity: 'due-soon' },
+    due: { date: '2025-10-01', proximity: 'due-soon' },
     urgency: 'Normal',
     type: 'Type 3',
     status: { custom: 'Ready for Deploy' },
@@ -27,7 +27,7 @@ const ROWS: AVTableRow[] = [
     title: 'Rework the notification bell so unread state survives a reload',
     domain: 'VCP',
     attachments: 1,
-    due: { label: 'August 3, 2026', proximity: 'overdue' },
+    due: { date: '2026-08-03', proximity: 'overdue' },
     urgency: 'Urgent',
     type: 'Type 1',
     status: { status: 'Review' },
@@ -40,7 +40,7 @@ const ROWS: AVTableRow[] = [
     title: 'Audit every empty state for copy that blames the reader',
     domain: 'Design',
     comments: 12,
-    due: { label: 'March 4, 2027' },
+    due: { date: '2027-03-04' },
     urgency: 'Low',
     type: 'Type 3',
     status: { status: 'Draft' },
@@ -54,7 +54,7 @@ const ROWS: AVTableRow[] = [
     domain: 'VCP',
     attachments: 2,
     comments: 4,
-    due: { label: 'December 19, 2026', proximity: 'due-soon' },
+    due: { date: '2026-12-19', proximity: 'due-soon' },
     urgency: 'High',
     type: 'Type 2',
     status: { status: 'In Progress' },
@@ -98,6 +98,12 @@ export const Default: Story = {
       <AVTable {...args} onOpen={() => {}} />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    /* A row's due date is ISO and reads dd/mm/yyyy, as every date does, in a <time> carrying the ISO date. */
+    const due = Array.from(canvasElement.querySelectorAll('time')).find((time) => time.getAttribute('datetime') === '2025-10-01');
+    await expect(due).toHaveTextContent('01/10/2025');
+    await expect(canvasElement).not.toHaveTextContent('October 1, 2025');
+  },
 };
 
 /**
@@ -231,6 +237,38 @@ export const FullyLoaded: Story = {
   },
 };
 
+/** Figma's Manage table (`940:167946`): the pagination with the Items select and the "1-50 of 1,250" range. */
+export const WithPageSize: Story = {
+  render: (args) => {
+    const [page, setPage] = React.useState(2);
+    const [pageSize, setPageSize] = React.useState(50);
+    const itemCount = 1250;
+    return (
+      <div className="bg-surface-canvas p-6">
+        <AVTable
+          {...args}
+          onOpen={() => {}}
+          page={page}
+          pageCount={Math.ceil(itemCount / pageSize)}
+          onPageChange={setPage}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
+          }}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('51-100 of 1,250')).toBeInTheDocument();
+    await userEvent.selectOptions(c.getByRole('combobox', { name: /Items/i }), '25');
+    await expect(c.getByText('1-25 of 1,250')).toBeInTheDocument();
+  },
+};
+
 /**
  * The reference opens the AV — a real button, not a whole-row click target.
  * Its accessible name carries the title too, so a screen-reader user hears
@@ -288,4 +326,146 @@ export const SparseRows: Story = {
       />
     </div>
   ),
+};
+
+/* A multipart AV and its three parts: the parent shows its progress, each child says which part it is and links back. */
+const MULTIPART_ROWS: AVTableRow[] = [
+  {
+    id: 'mp-parent',
+    ref: 'VCP-4321',
+    title: '[VCP] Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard',
+    domain: 'VCP',
+    attachments: 3,
+    comments: 1,
+    multipart: { kind: 'parent', completed: 1, total: 3 },
+    due: { date: '2025-10-01', proximity: 'due-soon' },
+    urgency: 'Normal',
+    type: 'Type 3',
+    status: { custom: 'Ready for Deploy' },
+    members: ['Ali Rahman'],
+    lastUpdated: '7 days ago',
+  },
+  ...[1, 2, 3].map(
+    (position): AVTableRow => ({
+      id: `mp-child-${position}`,
+      ref: `VCP-4321-${position}`,
+      title: `(${position}/3) [VCP] Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard`,
+      domain: 'VCP',
+      attachments: position === 1 ? 3 : undefined,
+      comments: position === 1 ? 1 : undefined,
+      multipart: { kind: 'child', position, total: 3, parentRef: 'VCP-4321' },
+      due: { date: '2025-10-01' },
+      urgency: 'Normal',
+      type: 'Type 3',
+      status: position === 2 ? { status: 'Completed' } : { custom: 'Ready for Deploy' },
+      members: ['Ali Rahman'],
+      lastUpdated: '7 days ago',
+    }),
+  ),
+];
+
+/**
+ * Multipart (Figma's `Multipart in AV Table`). **The parent** has a brand edge on its left and a tag under its reference that shows how many of
+ * its parts are done; **each child** has a tag with its place ("2/3") and a **Parent: VCP-4321** chip that opens the parent. The tags' tooltips say
+ * what they mean, on hover and on keyboard focus.
+ */
+export const Multipart: Story = {
+  args: { rows: MULTIPART_ROWS, onOpenParent: fn() },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    /* The tags say, in words, what the glyph and the ring only draw. */
+    await expect(canvas.getByText('Multipart parent, 1 of 3 parts completed')).toBeInTheDocument();
+    await expect(canvas.getByText('Multipart child, part 2 of 3')).toBeInTheDocument();
+    /* Each child links back to the parent. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Parent: VCP-4321' })[0]);
+    await expect(args.onOpenParent).toHaveBeenCalledWith(expect.objectContaining({ id: 'mp-child-1' }));
+    /* The parent carries the edge; a child does not. */
+    const rows = canvas.getAllByRole('row');
+    await expect(rows[1].children[0].className).toContain('before:bg-surface-brand-medium');
+    await expect(rows[2].children[0].className).not.toContain('before:bg-surface-brand-medium');
+    /* And it takes no room: every row's first cell starts at the table's left edge, header included. */
+    const left = (el: Element) => Math.round(el.getBoundingClientRect().left);
+    await expect(new Set([...rows].map((row) => left(row.children[0]))).size).toBe(1);
+  },
+};
+
+
+/**
+ * Figma's multipart title cell is two columns: the reference with **the 28 tag under it**, a rule, and the title with **the details starting under it** (domain, the Parent chip, the counts).
+ */
+export const MultipartLayout: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { rows: MULTIPART_ROWS },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const child = canvas.getAllByText('Multipart child, part 2 of 3')[0]!.closest('tr') as HTMLElement;
+    const ref = within(child).getAllByRole('button')[0]!;
+    const tag = within(child).getByText('2/3').closest('[tabindex]') as HTMLElement;
+    const parentChip = within(child).getByText(/^Parent:/);
+    const rect = (el: Element) => el.getBoundingClientRect();
+    /* The tag is 28 high and sits under the reference, left-aligned with it. */
+    await expect(Math.round(rect(tag).height)).toBe(28);
+    await expect(rect(tag).top).toBeGreaterThan(rect(ref).bottom - 1);
+    await expect(Math.abs(rect(tag).left - rect(ref).left)).toBeLessThanOrEqual(1);
+    /* The details start under the title, not under the reference: the Parent chip is to the right of the tag. */
+    await expect(rect(parentChip).left).toBeGreaterThan(rect(tag).right);
+  },
+};
+
+/** With `parentHref` the Parent chip is a link that opens the parent in a new tab; without it (and without `onOpenParent`) it is plain text, not a button that does nothing. */
+export const ParentChipOpensInANewTab: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    rows: [
+      { id: 'a', ref: 'VCP-1', title: 'Has a link', multipart: { kind: 'child', position: 1, total: 2, parentRef: 'VCP-9', parentHref: '/added-values/VCP-9' } },
+      { id: 'b', ref: 'VCP-2', title: 'Has nowhere to go', multipart: { kind: 'child', position: 2, total: 2, parentRef: 'VCP-9' } },
+    ],
+  },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const link = canvas.getByRole('link', { name: /Parent: VCP-9/ });
+    await expect(link).toHaveAttribute('href', '/added-values/VCP-9');
+    await expect(link).toHaveAttribute('target', '_blank');
+    /* The other chip has no `href` and no `onOpenParent`: plain text, no focus stop. */
+    await expect(canvas.getAllByText(/Parent: VCP-9/)).toHaveLength(2);
+    await expect(canvas.queryByRole('button', { name: /Parent: VCP-9/ })).toBeNull();
+  },
+};
+
+/** A multipart parent's edge is at the row's **far left, before the checkbox** when the table has one, and takes no room: every row's first cell starts at the table's left edge. */
+export const ParentEdgeBeforeTheCheckbox: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { rows: MULTIPART_ROWS, selectable: true },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const rows = within(canvasElement).getAllByRole('row');
+    /* The parent's first cell is the checkbox's: the edge is on it, and no other row has one. */
+    await expect(rows[1].children[0].className).toContain('before:bg-surface-brand-medium');
+    await expect(rows[1].children[0].querySelector('input[type="checkbox"]')).not.toBeNull();
+    await expect(rows[2].children[0].className).not.toContain('before:bg-surface-brand-medium');
+    const left = (el: Element) => Math.round(el.getBoundingClientRect().left);
+    await expect(new Set([...rows].map((row) => left(row.children[0]))).size).toBe(1);
+  },
 };

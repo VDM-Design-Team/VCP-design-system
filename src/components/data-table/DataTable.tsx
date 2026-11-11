@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import { Icon, type IconName } from '../../atoms/icon';
 import { Checkbox } from '../../atoms/checkbox';
 import { Tooltip } from '../../atoms/tooltip';
+import { TableEmpty } from '../table-empty';
 
 /**
  * DataTable — the generic table: columns, rows, sortable headers, optional
@@ -64,6 +65,11 @@ export interface DataTableColumn<Row> {
    * much of the spare room it takes; with none it takes what the others leave.
    */
   grow?: boolean;
+  /**
+   * A floor for the column's width, as a CSS length (`'11.5rem'`): the table scrolls sideways before it goes narrower. For a column that is not `fit` (it may wrap) and not `grow` (it does not
+   * truncate), like a name that should not be squeezed into three lines. ds-lint-ignore
+   */
+  minWidth?: string;
   sortable?: boolean;
   /**
    * Rendered after the label and **before** the sort arrows — a tooltip
@@ -115,7 +121,7 @@ export interface DataTableProps<Row extends { id?: string | number }>
    * "Select AV-2041" — or every checkbox announces alike.
    */
   selectLabel?: (row: Row) => string;
-  /** Shown when `rows` is empty — an `<EmptyState>` fits. */
+  /** Shown when `rows` is empty. Defaults to a generic `TableEmpty`; pass the table's own (`<TableEmpty noun="accounts" icon="users" />`) so it names what is missing. */
   empty?: React.ReactNode;
   /** 44 rows instead of 56 — audit-style density. */
   dense?: boolean;
@@ -126,6 +132,11 @@ export interface DataTableProps<Row extends { id?: string | number }>
    * the row's own; the handlers are yours. The row stays a plain row: nothing here makes it a control.
    */
   rowProps?: (row: Row) => React.HTMLAttributes<HTMLTableRowElement>;
+  /**
+   * A 6 brand edge at the row's **far left**, before the checkbox when the table has one (a multipart parent). It is drawn over the row's first cell, not as a border on the row: a border on a
+   * row of a collapsed table nudges the whole table (the header too) to make room for it, and a pseudo-element on the `<tr>` is taken for an extra cell. It takes no room.
+   */
+  rowEdge?: (row: Row) => boolean;
 }
 
 const headerCell = 'h-11 bg-surface-canvas px-2 text-left align-middle first:pl-4 last:pr-4';
@@ -205,6 +216,7 @@ export function DataTable<Row extends { id?: string | number }>({
   dense,
   caption,
   rowProps,
+  rowEdge,
   bare,
   ...props
 }: DataTableProps<Row>) {
@@ -292,6 +304,7 @@ export function DataTable<Row extends { id?: string | number }>({
                     sorted ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined
                   }
                   className={cn(headerCell, columnSizing(c), c.action && 'h-auto py-3')}
+                  style={c.minWidth ? { minWidth: c.minWidth } : undefined}
                 >
                   {/* Label, then the hint, then the sort arrows — in that order, as
                       Figma draws a header that has both. The sort button is the
@@ -352,13 +365,14 @@ export function DataTable<Row extends { id?: string | number }>({
                 colSpan={columns.length + (selectable ? 1 : 0)}
                 className="px-4 py-12 text-center text-body-sm-regular text-text-tertiary"
               >
-                {empty ?? 'Nothing here yet.'}
+                {empty ?? <TableEmpty />}
               </td>
             </tr>
           ) : (
             rows.map((row, i) => {
               const id = rowId(row, i);
               const extra = rowProps?.(row);
+              const edged = rowEdge?.(row) ?? false;
               return (
                 <tr
                   key={id}
@@ -371,7 +385,7 @@ export function DataTable<Row extends { id?: string | number }>({
                   )}
                 >
                   {selectable && (
-                    <td className={cell(dense)}>
+                    <td className={cn(cell(dense), edged && ROW_EDGE)}>
                       <Checkbox
                         aria-label={selectLabel?.(row) ?? `Select row ${id}`}
                         checked={selected.includes(id)}
@@ -379,11 +393,12 @@ export function DataTable<Row extends { id?: string | number }>({
                       />
                     </td>
                   )}
-                  {columns.map((c) => (
+                  {columns.map((c, columnIndex) => (
                     <td
                       key={c.key}
                       {...c.cellProps?.(row)}
-                      className={cn(cell(dense), 'text-left', columnSizing(c), c.cellProps?.(row)?.className)}
+                      style={c.minWidth ? { ...c.cellProps?.(row)?.style, minWidth: c.minWidth } : c.cellProps?.(row)?.style}
+                      className={cn(cell(dense), 'text-left', columnSizing(c), edged && !selectable && columnIndex === 0 && ROW_EDGE, c.cellProps?.(row)?.className)}
                     >
                       {c.render
                         ? c.render(row)
@@ -407,6 +422,9 @@ export function DataTable<Row extends { id?: string | number }>({
    `width` weight. */
 const columnSizing = (c: { fit?: boolean; grow?: boolean; width?: string }) =>
   c.grow ? cn('min-w-64 max-w-0', !c.width && 'w-full') : c.fit ? 'whitespace-nowrap' : undefined;
+
+/* Figma's `Multipart Parent=Yes`: a 6 border in surface.brand.medium, drawn over the first cell. */
+const ROW_EDGE = 'relative before:absolute before:inset-y-0 before:start-0 before:w-1.5 before:bg-surface-brand-medium';
 
 const cell = (dense?: boolean) =>
   cn(

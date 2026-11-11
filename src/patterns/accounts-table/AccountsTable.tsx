@@ -8,7 +8,7 @@ import { Skeleton } from '../../atoms/skeleton';
 import { Tag } from '../../atoms/tag';
 import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
-import { EmptyState } from '../../components/empty-state';
+import { TableEmpty } from '../../components/table-empty';
 import { UserLabel } from '../../components/user-label';
 
 /**
@@ -206,15 +206,7 @@ export function AccountsTable({
         onSortChange={onSortChange}
         empty={
           empty ??
-          (search.trim() ? (
-            <EmptyState
-              icon={<Icon name="magnifying-glass" size="lg" />}
-              title={`No accounts match “${search.trim()}”.`}
-              description="Try a different name, email or domain."
-            />
-          ) : (
-            <EmptyState icon={<Icon name="users" size="lg" />} title="No accounts yet." />
-          ))
+          <TableEmpty noun="accounts" icon="users" search={search} hint="Try a different name, email or domain." />
         }
       />
     </TableCard>

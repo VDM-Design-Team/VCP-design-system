@@ -38,6 +38,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onQuarterChange` / `onYearChange` | `(Quarter) => void` / `(number) => void` | — | A pick in the pickers. Only a value the pickers offer is ever reported |
 | `onGoToCurrent` | `() => void` | — | "Go to Current Quarter", which shows only for a past or upcoming `period` |
 | `title` | `string` | `Domain Budget` | The heading |
+| `note` | `string` | — | The super admin's note on this domain's budget for the quarter (`BudgetTable`'s Optional Notes), under the bar as "**Note:** …" (decided 9 Nov 2026: the admin sees it). Empty or omitted, nothing is drawn |
+| `noteLabel` | `string` | `Note` | What introduces it |
 | `className`, `ref` | | | On the section |
 
 Which quarter is the current one, its dates and its days left are the caller's: a date calculation is not this card's to make.
@@ -49,8 +51,8 @@ Which quarter is the current one, its dates and its days left are the caller's: 
 | Used | Status | Bar |
 |---|---|---|
 | under 75% | `fine` | brand blue |
-| 75–99% | `warning` | warning |
-| 100% and over | `over` | critical; **the bar stops at full, the number does not** |
+| 75–99% | `warning` | Figma's bright yellow (`caution`, `accent.yellow.medium`) |
+| 100% and over | `over` | Figma's bright red (`alert`, `accent.critical.outline.border`); **the bar stops at full, the number does not** |
 
 **Over budget the label says the real figure.** 170 of 120 reads **142%**, not 100%: the bar can stop at full, but the number is not capped (`budgetUsagePercent`; the bar's `valueLabel` carries it, so a screen reader hears 142% too). With no allocation there is no percentage to give, so the bar's own capped value shows.
 
@@ -91,8 +93,10 @@ The card is `surface.elevated`, `radius.md`, `space.24` all round, no outline �
 **Differences from Figma, on purpose.** The figure is `heading-xl-bold` (32), not Figma's 28, which has no step on the
 ramp — the same call `StatCard` made. The 24 medium for "pts" and the details has no step either (`heading-lg` ships bold,
 semibold and regular), so it is the one marked exception, as in `StatCard`. The bar is `ProgressBar`'s 8 high, not Figma's 12 (its label row is below the bar, as Figma draws it, but in the atom's caption type), and its
-warning fill is the atom's accessible `accent.warning.filled` rather than Figma's bright yellow: the warning border token
-moved to yellow-700 for contrast in November and Figma still shows the old one.
+fills are Figma's (decided 9 Nov 2026): the warning is the bright yellow (`accent.yellow.medium`; Figma's
+`accent/warning/outline/border` is #f0b100, which the system's token of that name no longer is, since it moved to yellow-700
+for contrast; `accent.yellow.medium` is #fdc700 in light and #f0b100 in dark), and over budget is Figma's bright red. Both
+sit beside the written percentage, so the bar is never the only signal.
 
 ## Accessibility
 
@@ -106,6 +110,8 @@ moved to yellow-700 for contrast in November and Figma still shows the old one.
 - "Days left" reads "48 of 90": the slash is hidden from assistive tech and "of" read instead.
 
 ## Don't
+
+- **Don't say "cycle" for the budget's period.** A budget is per quarter; a cycle is a planning fortnight. Figma's tooltips say "cycle"; the system says "quarter".
 
 - **Don't map a number to a tone at the call site.** The bands live in `budgetStatus`.
 - **Don't pass a third number for Remaining.** It is `allocated − consumed`.

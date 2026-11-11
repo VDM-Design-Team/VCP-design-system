@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
-import { Icon } from '../../atoms/icon';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
-import { EmptyState } from '../../components/empty-state';
+import { TableEmpty } from '../../components/table-empty';
 import { TableCard } from '../../components/table-card';
 import { UserLabel } from '../../components/user-label';
 
@@ -177,7 +176,7 @@ export function ManualsTable({
         rows={loading ? placeholders : rows}
         sort={sort}
         onSortChange={onSortChange}
-        empty={empty ?? <EmptyState icon={<Icon name="database" size="lg" />} title="No items." />}
+        empty={empty ?? <TableEmpty noun="items" icon="database" title="No items." />}
       />
     </TableCard>
   );
