@@ -27,7 +27,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `releases` | `ChangelogRelease[]` | required | `id`, `title`, `kind?`, `href?`, `version?`, `date?` (ISO), `message?`, `features?`. The caller's order is the order shown (newest first). When paged, the releases of the page that is showing |
+| `releases` | `ChangelogRelease[]` | required | An `Announcement` (`lib/announcement`) of which only `id` and `title` are needed: `kind?`, `changelogUrl?`, `version?`, `date?` (ISO), `description?`, `features?`. The caller's order is the order shown (newest first). When paged, the releases of the page that is showing |
 | `page` / `pageCount` | `number` | — | Shows `Pagination` under the cards when there is more than one page |
 | `onPageChange` | `(page: number) => void` | — | A page was picked. Fetching it is the caller's |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | as `Pagination` | — | The range readout ("1-10 of 42") and the Items select, as on the tables |
@@ -37,7 +37,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Kinds and links
 
-A release's `kind` draws its glyph before the title, and its `href` makes the title a link to the changelog document (the URL the announcement
+A release's `kind` draws its glyph before the title, and its `changelogUrl` makes the title a link to the changelog document (the URL the announcement
 dialog collects), opening in a new tab. Both are `ChangelogItem`'s; the kinds are owned by `src/lib/changelog-kinds.ts`.
 
 ## Many releases

@@ -31,6 +31,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Behaviour
 
 - **Feedback is optional**: the design draws no required marker and no error, so Move to Backlog is always available. Enter in the field submits.
+- **It opens with the cursor in Feedback**, the one thing to type here, so typing and Enter are enough.
 - It resets each time it opens, and does nothing itself.
 - **Title:** "Move Added Value to Backlog" — the bulk popup's order with Backlog capitalised. Figma's text reads "Move to backlog Added Value"; the wording here was decided with design.
 
@@ -40,7 +41,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Accessibility
 
-A dialog named by its title; the field is named "Feedback" by its label.
+A dialog named by its title; the field is named "Feedback" by its label. Focus starts in Feedback when it opens (`Modal`'s `initialFocusRef`, for a dialog with one obvious job) and returns to what opened it on close.
 
 ## Don't
 

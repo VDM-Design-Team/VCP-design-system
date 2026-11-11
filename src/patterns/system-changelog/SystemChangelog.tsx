@@ -5,14 +5,14 @@ import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { ChangelogItem } from '../../atoms/changelog-item';
 import { EmptyState } from '../../components/empty-state';
-import type { ChangeLogKind } from '../../lib/changelog-kinds';
+import type { Announcement } from '../../lib/announcement';
 
 /**
  * SystemChangelog — the page that lists every release: a "System Changelog" title over one `ChangelogItem` card per release, newest
  * first (the caller's order). Built to Figma's `Admin System Changelog` (`Settings_Changelog_List`).
  *
  * The column is centred and 896 wide at most; cards are 24 apart. **It shows what it is given**: titles and versions as they read, dates as ISO (shown dd/mm/yyyy, or the
- * person's locale), and a release's `id` keys its card. A release's `kind` draws its glyph and its `href` makes its title a link to the changelog document.
+ * person's locale), and a release's `id` keys its card. A release's `kind` draws its glyph and its `changelogUrl` makes its title a link to the changelog document.
  * `loading` shows placeholder cards under the title (one status says so); no releases show an `EmptyState`.
  *
  * **Many releases are paged** with `Pagination`, under the cards: pass `page` and `pageCount` (and `onPageChange`). It is controlled, like the tables:
@@ -21,20 +21,12 @@ import type { ChangeLogKind } from '../../lib/changelog-kinds';
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export interface ChangelogRelease {
-  id: string | number;
-  title: string;
-  /** The kind of announcement: its glyph sits before the title. */
-  kind?: ChangeLogKind;
-  /** The release's changelog document; the title links to it. */
-  href?: string;
-  /** "v1.18.1". */
-  version?: string;
-  /** ISO, "2026-01-01": shown dd/mm/yyyy (or the person's locale). */
-  date?: string;
-  message?: string;
-  features?: readonly string[];
-}
+/**
+ * A release is an `Announcement` (`lib/announcement`): the same record the table and the dialog use. Only `id` and `title` are needed; `kind`
+ * draws the glyph, `changelogUrl` links the title, `version` and `date` (ISO) sit under it, `description` and `features` are the body.
+ */
+export type ChangelogRelease = Pick<Announcement, 'id' | 'title'> &
+  Partial<Pick<Announcement, 'kind' | 'changelogUrl' | 'version' | 'date' | 'description' | 'features'>>;
 
 export interface SystemChangelogProps
   extends Omit<React.HTMLAttributes<HTMLElement>, 'title'>,
@@ -102,10 +94,10 @@ export function SystemChangelog({
               <ChangelogItem
                 title={release.title}
                 kind={release.kind}
-                href={release.href}
+                changelogUrl={release.changelogUrl}
                 version={release.version}
                 date={release.date}
-                message={release.message}
+                description={release.description}
                 features={release.features}
               />
             </li>
