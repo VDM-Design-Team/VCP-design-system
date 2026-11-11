@@ -91,15 +91,21 @@ const PLANNING: SidebarNavItem = {
   ],
 };
 
-/** Which rows each user type sees. Straight from the eight `VCP_SideBar` variants. */
+/* A user reads the Holiday Registry but has no Planning group, so for them it is a row of its own (decided
+   9 Nov 2026; Figma's user rail drew it, twice). Same key as the Planning sub-row: one page, one route. */
+const HOLIDAY_REGISTRY: SidebarNavItem = { key: 'planning/holiday-registry', label: 'Holiday Registry', icon: 'calendar-dots' };
+
+/** Which rows each user type sees. From the eight `VCP_SideBar` variants, plus the user's Holiday Registry. */
 export const NAV_BY_USER_TYPE: Record<SidebarUserType, readonly SidebarNavItem[]> = {
-  user: [DASHBOARD, MY_VALUES, ASSIGNED, DRAFTS, TASK_LOG, ARCHIVE],
+  user: [DASHBOARD, MY_VALUES, ASSIGNED, DRAFTS, TASK_LOG, HOLIDAY_REGISTRY, ARCHIVE],
   admin: [DASHBOARD, MY_VALUES, MANAGE, ASSIGNED, DRAFTS, TASK_LOG, ARCHIVE],
   'admin-dev': [DASHBOARD, MY_VALUES, PLANNING, MANAGE, ASSIGNED, DRAFTS, TASK_LOG, ARCHIVE],
   'super-admin': [
     DASHBOARD,
     { key: 'accounts', label: 'Accounts', icon: 'users-three' },
     { key: 'domains', label: 'Domains', icon: 'globe' },
+    /* Where a super admin sets each domain's points for a quarter (Figma's Domain Budget Edit, 696:54963). */
+    { key: 'domain-budget', label: 'Domain Budget', icon: 'wallet' },
     { key: 'contact-list', label: 'Contact List', icon: 'list-dashes' },
   ],
 };
@@ -236,6 +242,9 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
             <Menu
               className="w-full"
               panelClassName="w-full"
+              /* `absolute`, so `w-full` is the trigger's width: a `fixed` panel's
+                 `w-full` is the whole screen's. The rail has no `overflow` to clip it. */
+              strategy="absolute"
               align="left"
               items={(domains ?? []).map((name) => ({
                 key: name,

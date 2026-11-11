@@ -81,6 +81,15 @@ export const OverBudget: Story = {
   },
 };
 
+/** The super admin's note on the budget (decided 9 Nov 2026), under the bar. */
+export const WithNote: Story = {
+  args: { note: 'Holiday weeks in December: kept lower than the Q3 plan.' },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText(/Holiday weeks in December/)).toBeInTheDocument();
+    await expect(within(canvasElement).getByText('Note:')).toBeInTheDocument();
+  },
+};
+
 /** Nothing consumed yet — an empty bar and the full allocation remaining. */
 export const Untouched: Story = { args: { consumed: 0 } };
 

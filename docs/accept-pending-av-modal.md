@@ -14,7 +14,9 @@ offered as a general accept dialog.
 |---|---|---|
 | `Modal` | component | The dialog — header, focus trap, Escape, inert background |
 | `Checkbox` | atom | The multipart decision; its label is the whole card |
-| `Button` | atom | Cancel and Confirm |
+| `Button` | atom | Cancel and Confirm; each part's **Preview** toggle |
+| `Icon` | atom | The Preview toggle's caret |
+| `Input` | atom | Each part's optional title |
 
 The import rows are checked against the real imports — `npm test` fails if this
 list drifts, and fails a pattern composing fewer than two pieces.
@@ -33,16 +35,32 @@ list drifts, and fails a pattern composing fewer than two pieces.
 |---|---|---|---|
 | `open` | `boolean` | required | You own it. The dialog never closes itself |
 | `onClose` | `() => void` | required | Escape, Cancel, or a backdrop click |
-| `onConfirm` | `({ multipart }) => void` | required | Accepted, **carrying the decision** |
+| `onConfirm` | `({ multipart, titles? }) => void` | required | Accepted, **carrying the decision**. `titles` (one per part, trimmed, `''` for "use the default") comes with `parts` and multipart ticked |
 | `multipart` | `boolean` | `false` | Controlled |
 | `onMultipartChange` | `(multipart: boolean) => void` | — | The tick |
 | `showMultipart` | `boolean` | `true` | The design's own boolean — it draws the dialog both ways |
+| `parts` | `{ label, preview? }[]` | — | The parts a multipart value would become, one per problem set ("Problem Set 1"). Ticking multipart then shows **Rename Individual parts**. Fewer than two: multipart is disabled, with a hint |
 | `title` / `confirmLabel` / `cancelLabel` | `string` | the design's wording | |
 | `loading` | `boolean` | `false` | Spins Confirm while the accept is in flight |
 
 **The decision travels with the answer.** `onConfirm` is handed
 `{ multipart }` rather than leaving the caller to read it back off its own
 state, so there is no window where the two disagree.
+
+## Naming the parts
+
+Figma's "Accepting AV with Multipart + Custom Titles" (`1666:263661`): once **Multipart Value** is ticked, the dialog lists
+**Rename Individual parts**, one per problem set, each with:
+
+- its label ("Problem Set 1"), the title field's name;
+- a **Preview** toggle (when the part has a `preview`) that shows the set's text, two lines at most; the first starts open, as drawn;
+- an optional title: "Enter a title, or leave blank for “Part (X/X) Parent Title”." The default is the page's to work out — it
+  knows the count and the parent's title — so a blank title reaches `onConfirm` as `''`.
+
+The titles are typed fresh each time the dialog opens, and untick-and-tick keeps them while it's open.
+
+**Fewer than two parts** (one problem set): there is nothing to split, so **Multipart Value** is disabled and adds "It needs at least
+two problem sets to split." to its description (decided 9 Nov 2026). `onConfirm` then always gets `multipart: false`.
 
 ## Benign, and drawn that way
 
@@ -71,7 +89,10 @@ as a second call to action, which is why that one is grey. See
   plus Escape, which every dialog keeps.
 - **Focus starts on the panel**, which is `Modal`'s default, so the first Tab is
   the checkbox rather than an answer.
-- **Interaction test.** `AcceptingIt` is a `play` story and runs under
+- **Each part's title field is named by its label** ("Problem Set 1", a real `label`). The Preview toggle is a button with
+  `aria-expanded` and `aria-controls`, named "Preview Problem Set 1" so a list of them can be told apart.
+- **Interaction test.** `NamingPartsFlow` ticks multipart, checks the fields' names and the previews, and confirms two of three titles.
+  `AcceptingIt` is a `play` story and runs under
   `npm test`: it checks the name and description, ticks the card by clicking
   the explanation, confirms the decision travels with the answer, and checks
   the backdrop closes it.

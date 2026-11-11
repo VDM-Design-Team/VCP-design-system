@@ -84,6 +84,7 @@ rather than a `variant` prop.
 | `onDeleteSelected` | `(ids) => void` | — | The destructive button above the pagination |
 | `deleteSelectedLabel` | `(count) => string` | `Delete Selected (n)` | |
 | `page` / `pageCount` / `onPageChange` | — | — | Pagination renders only when **all three** are given |
+| `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | — | — | Passed to `Pagination`: the "1-50 of 1,250" range (`itemCount` and `pageSize`) and the Items select (`onPageSizeChange`), as Figma's Manage table draws them. The rows stay yours to slice |
 | `hints` | `AVTableHints` | Urgency, Type, Status: the product's copy | The info tooltips — see below |
 | `empty` | `ReactNode` | `DataTable`'s | An `<EmptyState>` fits |
 | `caption` | `string` | `'Added Values'` | Visually hidden `<caption>` |
@@ -103,7 +104,7 @@ value someone chose.
   domain: 'VCP',
   attachments: 3,
   comments: 1,
-  due: { label: 'October 1, 2025', proximity: 'due-soon' },
+  due: { date: '2025-10-01', proximity: 'due-soon' },
   urgency: 'Normal',
   type: 'Type 3',
   status: { custom: 'Ready for Deploy' },   // or { status: 'Review' }
@@ -112,7 +113,9 @@ value someone chose.
 }
 ```
 
-`due.label` and `lastUpdated` are **already formatted**. This table does no
+`due.date` is **ISO** (`yyyy-mm-dd`): `DueDateTag` shows it dd/mm/yyyy, or the person's
+locale. Do not format it yourself (`due.label` is only for text that is not a date).
+`lastUpdated` is **already formatted** ("7 days ago"). This table does no
 date maths and no relative time — see `docs/due-date-tag.md` for why the
 threshold is not a design-system decision.
 
@@ -190,8 +193,8 @@ An Added Value split into parts shows in the table (Figma's `Multipart in AV Tab
 - **Pagination is the repo's `Pagination`**, which since 5 Oct 2026 draws
   Figma's `VCP_Pagination`: First/Last, an ellipsis for long page counts, and —
   when given `itemCount`, `pageSize` and `onPageSizeChange` — the Items select
-  and the "1-50 of 1,250" range. `AVTable` passes only the page props today,
-  so it shows Figma's Small version.
+  and the "1-50 of 1,250" range. `AVTable` passes them through, so a page can
+  draw Figma's full version (Manage) or, leaving them out, its Small one.
 - **Column widths** are `<col>` percentages, not Figma's grid `fr` tracks —
   `1fr` has no meaning in a table. Task Title takes 40%, matching its 4fr
   against six roughly-1fr columns.

@@ -46,6 +46,90 @@ export const WithoutMultipart: Story = {
   args: { showMultipart: false },
 };
 
+const PARTS = [
+  { label: 'Problem Set 1', preview: 'Planners can’t see which suppliers are behind until a delivery is already late, so they chase them by email.' },
+  { label: 'Problem Set 2', preview: 'The scorecard export drops suppliers with no deliveries this quarter.' },
+  { label: 'Problem Set 3', preview: 'Overdue counts reset at midnight UTC, not in the planner’s own day.' },
+];
+
+/**
+ * With `parts`: ticking multipart shows "Rename Individual parts", one title
+ * per problem set, each optional (Figma `1666:263661`). The first preview
+ * starts open, as the design draws it.
+ */
+export const NamingParts: Story = {
+  args: { multipart: true, parts: PARTS },
+};
+
+/**
+ * Naming two of three parts and confirming: the titles travel with the
+ * answer, in order, `''` where a part was left blank.
+ */
+export const NamingPartsFlow: Story = {
+  args: { open: false },
+  render: function NamingPartsStory(args) {
+    const [open, setOpen] = React.useState(false);
+    const [multipart, setMultipart] = React.useState(false);
+    const [result, setResult] = React.useState('nothing yet');
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <Button variant="secondary" onClick={() => setOpen(true)}>
+          Accept AV
+        </Button>
+        <p className="text-caption-md-regular text-text-tertiary">Result: {result}</p>
+        <AcceptPendingAVModal
+          {...args}
+          open={open}
+          parts={PARTS}
+          multipart={multipart}
+          onMultipartChange={setMultipart}
+          onClose={() => setOpen(false)}
+          onConfirm={({ multipart: isMultipart, titles }) => {
+            setResult(`${isMultipart ? 'multipart' : 'single'}: ${JSON.stringify(titles ?? null)}`);
+            setOpen(false);
+          }}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Accept AV' }));
+    await screen.findByRole('dialog');
+
+    /* Nothing to name until multipart is ticked. */
+    await expect(screen.queryByText('Rename Individual parts')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Multipart Value' }));
+    await expect(screen.getByText('Rename Individual parts')).toBeInTheDocument();
+
+    /* Each title field is named by its part; the first preview is open. */
+    const first = screen.getByRole('textbox', { name: 'Problem Set 1' });
+    const preview1 = screen.getByRole('button', { name: 'Preview Problem Set 1' });
+    await expect(preview1).toHaveAttribute('aria-expanded', 'true');
+    const preview2 = screen.getByRole('button', { name: 'Preview Problem Set 2' });
+    await expect(preview2).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(preview2);
+    await expect(preview2).toHaveAttribute('aria-expanded', 'true');
+    await expect(screen.getByText(/drops suppliers with no deliveries/)).toBeInTheDocument();
+
+    await userEvent.type(first, '  Supplier chasing  ');
+    await userEvent.type(screen.getByRole('textbox', { name: 'Problem Set 3' }), 'Local-day overdue');
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await expect(canvas.getByText('Result: multipart: ["Supplier chasing","","Local-day overdue"]')).toBeInTheDocument();
+  },
+};
+
+/** One problem set can't be split: Multipart is disabled and says why (decided 9 Nov 2026). */
+export const OneProblemSet: Story = {
+  args: { parts: PARTS.slice(0, 1) },
+  play: async () => {
+    const multipart = await screen.findByRole('checkbox', { name: 'Multipart Value' });
+    await expect(multipart).toBeDisabled();
+    await expect(multipart).toHaveAccessibleDescription(/at least two problem sets/);
+  },
+};
+
 /** The accept is in flight. Confirm spins and cannot be pressed twice. */
 export const Accepting: Story = {
   args: { loading: true },
