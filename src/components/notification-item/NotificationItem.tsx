@@ -14,7 +14,7 @@ import { ReplyCard, ReplyComposer, ReplyControl } from './NotificationReply';
  *
  * Read off Figma's `Notification_Item` (`2428:4412`): Default, Hover and Focused,
  * each with or without a comment preview. The message is Figma's
- * `_Message_Content`, thirteen kinds of event, which **this component owns** — the
+ * `_Message_Content`, fourteen kinds of event, which **this component owns** — the
  * way `StatusTag` owns status → tone — so no call site writes "John moved … to
  * the backlog" itself, and the bold and regular runs are the same everywhere.
  *
@@ -53,7 +53,8 @@ export type NotificationKind =
   | 'backlog'
   | 'handoff'
   | 'completed'
-  | 'viewer';
+  | 'viewer'
+  | 'reacted';
 
 /**
  * Kind → the sentence, in two parts: the `verb` that follows the actor's name
@@ -84,6 +85,8 @@ const NOTIFICATION_PHRASES: Record<
   handoff: { verb: 'handed off', trail: () => '. Ready for Review' },
   completed: { verb: 'accepted & completed' },
   viewer: { verb: 'added you as a viewer to' },
+  /* Decided 9 Nov 2026: the author hears of a reaction to their comment. The comment, with its reactions, is the preview. */
+  reacted: { verb: 'reacted to your comment on' },
 };
 
 export interface NotificationActor {
