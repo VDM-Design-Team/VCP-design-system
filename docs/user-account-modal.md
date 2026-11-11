@@ -9,6 +9,7 @@ the empty "Add New User").
 |---|---|
 | `Avatar` | atom |
 | `Button` | atom |
+| `Checkbox` | atom |
 | `Divider` | atom |
 | `Input` | atom |
 | `Select` | atom |
@@ -35,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Capacity Points | Not shown | Shown, with its own **Save** |
 
 Both share the body: a photo with **Upload**, **Status**, **Name**, **Email**, **Proficiency**, the "Domain Access & Admin Rights" table and
-**Submit**.
+**Submit**. With `roles`, a Roles checklist stands in for Proficiency and the table.
 
 ## Props
 
@@ -44,29 +45,34 @@ Both share the body: a photo with **Upload**, **Status**, **Name**, **Email**, *
 | `open` / `onClose` | `boolean` / `() => void` | required | You own `open`; the dialog asks to close on Escape and the ✕ |
 | `mode` | `new \| edit` | `new` | |
 | `initial` | `{ status, name, email, proficiency, capacityPoints, avatarSrc }` | — | The starting values. The dialog keeps its own draft |
-| `domains` | `DomainAccessRow[]` | required | The domains and what the user can do in each |
-| `statusOptions` / `proficiencyOptions` | `Array<string \| { value, label }>` | required | **The page passes these in**: what they are is the product's |
-| `onSubmit` | `(draft) => void` | required | Valid, it gets the whole draft — the fields (trimmed) and every domain's access. Saves nothing itself |
+| `domains` | `DomainAccessRow[]` | — | The domains and what the user can do in each: the Domain Access & Admin Rights table |
+| `roles` | `{ value, label }[]` | — | **Instead of `domains`**: a Roles checklist (the Settings Users tab's dialog), and **no Proficiency field**. Ticked values are `initial.roles` and `draft.roles` |
+| `statusOptions` | `Array<string \| { value, label }>` | required | The Status list. **Pass `ACCOUNT_STATUS_OPTIONS`** (Approved, Pending, Inactive) from `AccountStatusTag`, the owner of account statuses |
+| `proficiencyOptions` | `Array<string \| { value, label }>` | — | The Proficiency list; the page passes it in. Not needed with `roles` |
+| `onSubmit` | `(draft) => void` | required | Valid, it gets the whole draft — the fields (trimmed), every domain's access or the ticked `roles`, and `avatarRemoved: true` when the photo was removed. Saves nothing itself |
 | `onSaveCapacity` | `(points: number \| null) => void` | — | Edit only: the Save beside Capacity Points, which saves **the points alone** |
 | `onUploadAvatar` | `(file: File) => void` | — | A photo was chosen |
 | `submitting` | `boolean` | — | The button spins and every field locks |
 | `errors` | `Partial<Record<'status' \| 'name' \| 'email' \| 'proficiency', string>>` | — | What only the server knows, shown under the field |
 | `title` | `string` | name / "User" | |
 
-## The draft
+## One dialog for Accounts and Settings
 
-The dialog **keeps its own draft and resets it every time it opens**, from `initial` and `domains`: close it, reopen it, and nothing typed last time
-survives. (A new `initial` object on a re-render does not wipe what is being typed — the reset is on opening only.)
+Settings' "Create New User" / "View User" is this dialog with **`roles`**: a Roles checklist in place of Proficiency and the domain table. **Roles
+only** (decided with design, 6 Nov 2026): Figma's View User draws both Proficiency and Roles, and the roles already carry seniority. Give it a
+`title` ("Create New User") where Figma's differs.
 
-**Validation.** Name and Email are required, and Email must look like one. Submit then says what is wrong under the field, moves focus to the
-first problem, and does not call `onSubmit`; fixing a field clears what was said about it. Status and Proficiency are not required here.
+`draft.roles` and `draft.avatarRemoved` are optional, so a caller written before them still type-checks.
+
 Anything only the server can know ("already in use") comes in through `errors`.
 
 ## Upload
 
 **Upload** opens the browser's file picker (images only) and hands the chosen `File` to `onUploadAvatar`; the image shows in the dialog at once.
-There is **no crop or edit**, and **no way to remove a photo** yet — both are open questions for design. With no photo and no name the avatar is
-the blank silhouette.
+Once there is a photo (a chosen image counts at once) the buttons are **Change** and **Remove**, on every user dialog. **Remove takes effect on
+Submit** (decided with design, 6 Nov 2026): it clears the picture in the dialog and puts **Upload** back (focus stays on it), and the draft handed
+to `onSubmit` carries `avatarRemoved: true`. Nothing is deleted until the page saves, so **Cancel undoes it** and there is no confirm step. Choosing
+a new photo after Remove is not a removal. There is **no crop or edit**. With no photo and no name the avatar is the blank silhouette.
 
 ## Capacity Points
 
@@ -93,5 +99,6 @@ both 40 high (Figma's Save is a 36 small button).
 ## Don't
 
 - **Don't fetch or save inside it.** It hands the draft to `onSubmit` and the points to `onSaveCapacity`.
-- **Don't hard-code the status or proficiency lists in the page's markup** — pass them in, so the product can change them.
+- **Don't hard-code the status list.** Pass `ACCOUNT_STATUS_OPTIONS`; `AccountStatusTag` owns account statuses. Pass the proficiency list in too, so the product can change it.
+- **Don't delete a photo when Remove is pressed.** Delete it when the submitted draft says `avatarRemoved`.
 - **Don't encode access rules here.** The table applies none; the page decides what a combination of ticks means.

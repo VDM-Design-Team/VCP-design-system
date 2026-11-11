@@ -13,6 +13,7 @@ remains, which quarter this is, and a bar of how much of the budget is used. Bui
 | `Divider` | atom |
 | `ProgressBar` | atom |
 | `Select` | atom |
+| `CardHeader` | component |
 | `InfoHint` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.

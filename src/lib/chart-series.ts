@@ -31,14 +31,20 @@ export interface ChartSeriesStyle {
   fill: string;
   /** The colour of a number written on that fill, as a `text-*` class. */
   content: string;
+  /** The same fill, for an SVG shape (`fill-*`). */
+  svgFill: string;
+  /** The same fill, for an SVG line (`stroke-*`). */
+  svgStroke: string;
+  /** The same number colour, for SVG text (`fill-*`). */
+  svgContent: string;
 }
 
 export const CHART_SERIES: Record<ChartSeries, ChartSeriesStyle> = {
-  completed: { label: 'Completed', fill: 'bg-accent-success-filled-surface-default', content: 'text-accent-success-filled-content-default' },
-  committed: { label: 'Committed', fill: 'bg-surface-brand-stronger', content: 'text-action-primary-content-default' },
-  overdue: { label: 'Overdue', fill: 'bg-accent-critical-filled-surface-default', content: 'text-accent-critical-filled-content-default' },
-  available: { label: 'Available', fill: 'bg-surface-brand-strong', content: 'text-action-primary-content-default' },
-  leave: { label: 'Leave', fill: 'bg-accent-warning-filled-surface-default', content: 'text-accent-warning-filled-content-default' },
+  completed: { label: 'Completed', fill: 'bg-accent-success-filled-surface-default', content: 'text-accent-success-filled-content-default', svgFill: 'fill-accent-success-filled-surface-default', svgStroke: 'stroke-accent-success-filled-surface-default', svgContent: 'fill-accent-success-filled-content-default' },
+  committed: { label: 'Committed', fill: 'bg-surface-brand-stronger', content: 'text-action-primary-content-default', svgFill: 'fill-surface-brand-stronger', svgStroke: 'stroke-surface-brand-stronger', svgContent: 'fill-action-primary-content-default' },
+  overdue: { label: 'Overdue', fill: 'bg-accent-critical-filled-surface-default', content: 'text-accent-critical-filled-content-default', svgFill: 'fill-accent-critical-filled-surface-default', svgStroke: 'stroke-accent-critical-filled-surface-default', svgContent: 'fill-accent-critical-filled-content-default' },
+  available: { label: 'Available', fill: 'bg-surface-brand-strong', content: 'text-action-primary-content-default', svgFill: 'fill-surface-brand-strong', svgStroke: 'stroke-surface-brand-strong', svgContent: 'fill-action-primary-content-default' },
+  leave: { label: 'Leave', fill: 'bg-accent-warning-filled-surface-default', content: 'text-accent-warning-filled-content-default', svgFill: 'fill-accent-warning-filled-surface-default', svgStroke: 'stroke-accent-warning-filled-surface-default', svgContent: 'fill-accent-warning-filled-content-default' },
 };
 
 /** The order a legend lists them in, and a stacked bar draws them in. */
