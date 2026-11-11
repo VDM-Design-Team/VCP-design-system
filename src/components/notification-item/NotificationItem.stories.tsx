@@ -81,6 +81,7 @@ const meta = {
         'completed',
         'viewer',
         'reacted',
+        'discarded',
       ] satisfies NotificationKind[],
     },
     status: {
@@ -271,6 +272,7 @@ export const Kinds: Story = {
       { kind: 'completed', time: '3 hours ago', expect: /accepted & completed .*testing/ },
       { kind: 'viewer', time: '3 hours ago', expect: /added you as a viewer to/ },
       { kind: 'reacted', time: 'a few seconds ago', expect: /reacted to your comment on/ },
+      { kind: 'discarded', time: '5 minutes ago', expect: /discarded/ },
     ];
     return (
       <ul className="w-96">
@@ -284,7 +286,10 @@ export const Kinds: Story = {
   },
   play: async ({ canvasElement }) => {
     const links = within(canvasElement).getAllByRole('link');
+    /* Fourteen open their Added Value; a discarded one has no page, so its row is plain text. */
     await expect(links).toHaveLength(14);
+    const discarded = Array.from(canvasElement.querySelectorAll('li p')).find((p) => p.textContent?.includes('discarded'));
+    await expect(discarded).toHaveTextContent('John Kestrel discarded Change the notification layout for testing.');
     await expect(links[2]).toHaveTextContent('John Kestrel moved Change the notification layout for testing to Confirmed prod.');
     await expect(links[10]).toHaveTextContent(/handed off .*testing\. Ready for Review\./);
     await expect(links[11]).toHaveTextContent(/accepted & completed .*testing\./);

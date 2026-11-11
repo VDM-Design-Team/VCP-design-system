@@ -49,6 +49,7 @@ the subject is regular.
 | `completed` | **John accepted & completed** *Title*. |
 | `viewer` | **John added you as a viewer to** *Title*. |
 | `reacted` | **John reacted to your comment on** *Title*. Pass the comment as `preview` and its `reactions`, so the row shows what was reacted to |
+| `discarded` | **John discarded** *Title*. The row **never opens**: the Added Value has no page any more, so `href` and `onSelect` are ignored (AV · 02, decided 10 Nov 2026) |
 
 Every sentence ends in a full stop, the component adds it, so a one-sentence line and a two-sentence one end the same way.
 
@@ -77,6 +78,7 @@ themselves.**
 | `mention` | Anyone mentioned | Yes | — | They were mentioned in a comment with @ |
 | `viewer` | Anyone added as a viewer | Yes | — | They were added as a viewer |
 | `reacted` | The comment's author | Yes | — | Someone reacted to their comment or reply (decided 9 Nov 2026). Not when they react to their own |
+| `discarded` | Whoever had been told about it: the Admin(s) of a Pending one. Their earlier row turns into this one | Yes | Draft or Pending | The Added Value was discarded (AV · 02), so the earlier notification says so and no longer opens it |
 
 Both `rejected` rows use the same sentence for now. `updated` and `rejected-feedback` are not in that document.
 
