@@ -6,10 +6,9 @@ How each person's capacity for a cycle is spent: a title (with an optional hint)
 
 | Piece | Tier |
 |---|---|
-| `Icon` | sub-atomic |
 | `LegendItem` | atom |
 | `Skeleton` | atom |
-| `Tooltip` | atom |
+| `CardHeader` | component |
 | `CapacityBar` | component |
 | `TruncatedText` | component |
 
@@ -61,7 +60,7 @@ Figma sets the name in `#212b36`, which is not a token; it is `text.primary` her
 - A `section` named by its title.
 - The rows are a list; each is its name, a bar that is one image ("Completed 15, Committed 15, total 30 pts") and the total.
 - A cut name is a tab stop only while it is cut (`TruncatedText`); the full name is always in the page.
-- The legend is a list named "Legend"; the info glyph is a focusable button wrapping the system `Tooltip`.
+- The legend is a list named "Legend"; the info glyph is a focusable button (`InfoHint`, through `CardHeader`, wrapping the system `Tooltip`).
 - Loading: one `status` ("Loading User Capacity"), the placeholders hidden from assistive tech.
 
 ## Don't

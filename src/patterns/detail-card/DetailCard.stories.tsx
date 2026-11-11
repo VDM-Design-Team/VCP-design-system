@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DetailCard, type DetailCardValue } from './DetailCard';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
+import { DateFormatProvider } from '../../lib/format-date';
 
 const PEOPLE = [{ name: 'Marvin R' }, { name: 'John Kestrel' }, { name: 'Jane Doe' }, { name: 'Amy Lee' }];
 
@@ -81,8 +82,26 @@ export const Viewing: Story = {
     for (const name of ['Initiator', 'Assignee', 'Start Date', 'Due Date', 'Cycle', 'Status', 'Urgency', 'Type', 'Projects', 'AV Category', 'Tags', 'Capacity Points']) {
       await expect(canvas.getByRole('group', { name })).toBeVisible();
     }
+    /* Every date reads dd/mm/yyyy, like every date in the system. */
+    for (const date of ['01/10/2025', '01/10/2099', '07/10/2025', '01/09/2025', '12/09/2025']) {
+      await expect(canvas.getByText(date)).toBeVisible();
+    }
     await userEvent.click(canvas.getByRole('button', { name: '3 viewers' }));
     await expect(args.onViewers).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** Give the app the person's locale (`DateFormatProvider`) and the card's dates follow it: here en-US, month first. */
+export const InThePersonsLocale: Story = {
+  render: (args) => (
+    <DateFormatProvider locale="en-US">
+      <DetailCard {...args} />
+    </DateFormatProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('09/12/2025')).toBeVisible();
+    await expect(canvas.getByText('10/07/2025')).toBeVisible();
   },
 };
 
