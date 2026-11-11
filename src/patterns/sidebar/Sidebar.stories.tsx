@@ -82,6 +82,22 @@ export const Default: Story = {
   },
 };
 
+/** A user reads the Holiday Registry: a top-level row of its own, with the Planning sub-row's key, so one route serves both. */
+export const UserHolidayRegistry: Story = {
+  args: { userType: 'user', active: 'planning/holiday-registry' },
+  render: (args) => (
+    <Stage>
+      <Sidebar {...args} />
+    </Stage>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('button', { name: 'Holiday Registry' })).toHaveAttribute('aria-current', 'page');
+    /* No Planning group in a user's rail. */
+    await expect(canvas.queryByRole('button', { name: /^Planning/ })).not.toBeInTheDocument();
+  },
+};
+
 /**
  * All four user types. `Admin Dev` is the one the Claude Design export did
  * not have — it is the only rail with `Planning`.
@@ -226,6 +242,20 @@ export const WithDomainSelector: Story = {
         <Sidebar {...args} collapsed={collapsed} onToggleCollapse={toggle} />
       </Stage>
     );
+  },
+  play: async ({ canvasElement }) => {
+    const rail = within(canvasElement);
+    const trigger = rail.getByRole('button', { name: 'Domain: Design. Change domain' });
+    await userEvent.click(trigger);
+    const menu = await rail.findByRole('menu');
+    /* Flush to the trigger: as wide as it, and no wider (a fixed panel's
+       `w-full` once spanned the screen). */
+    const t = trigger.getBoundingClientRect();
+    const m = menu.getBoundingClientRect();
+    await expect(Math.round(m.width)).toBe(Math.round(t.width));
+    await expect(Math.round(m.left)).toBe(Math.round(t.left));
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(trigger).toHaveFocus());
   },
 };
 
