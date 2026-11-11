@@ -365,6 +365,8 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                 placeholder: placeholder ?? `Select ${label.toLowerCase()}`,
                 searchPlaceholder: 'Search by name',
                 rows: 'avatar',
+                /* One person: a ✕ empties the field (Figma's "Filter by Assignee and Clear", 940:171256). */
+                ...(rest.multiple ? {} : { clearable: true }),
                 ...rest,
                 className: 'md:max-w-64 md:min-w-42 md:flex-1',
               } as SearchSelectProps)}

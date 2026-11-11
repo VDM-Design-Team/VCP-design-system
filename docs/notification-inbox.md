@@ -36,6 +36,8 @@ the two lists cannot drift apart.
 | `onMarkAllRead` | `() => void` | — | Draws "Mark all as read" and fires when it is pressed. Without it the button is not drawn, as in `NotificationPopover` |
 | `pagination` | `{ page, pageCount, onChange?, itemCount?, pageSize?, pageSizeOptions?, onPageSizeChange?, variant? }` | — | The large pager: numbers, range and Items select. Shown whenever given, even on one page |
 | `children` | `ReactNode` | — | The `NotificationItem`s. Each is wrapped in a `<li>` |
+| `groups` | `{ label, children }[]` | — | The rows in groups, by day ("Today", "Yesterday", "3 November"; decided 9 Nov 2026). Each group is a heading and its own list, named by the heading, so a screen reader can move by day. Given, it is used instead of `children`; a group with no rows is left out. The grouping is yours |
+| `groupHeadingLevel` | `2 \| 3 \| 4` | `2` | The groups' heading level, under the page's own title |
 | `emptyLabel` | `string` | `No notifications` | What an empty list says |
 | `listLabel` | `string` | `Notifications` | Names the list for assistive tech |
 | `className`, `ref`, rest | | | On the card |

@@ -55,6 +55,11 @@ export interface TopBarProps extends React.HTMLAttributes<HTMLElement> {
   /** Unread count. The bell renders whenever this is a number; `> 0` shows the dot. */
   notifications?: number;
   onNotifications?: () => void;
+  /**
+   * The bell's place, filled by you: a `NotificationPopover`, which brings its own bell as its
+   * trigger. Given, it replaces the plain bell (`notifications` and `onNotifications` are ignored).
+   */
+  notificationPopover?: React.ReactNode;
   /** The mode switch from the design. Controlled by the app's theme state. */
   theme?: 'light' | 'dark';
   onThemeChange?: (theme: 'light' | 'dark') => void;
@@ -80,6 +85,7 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
       homeHref,
       notifications,
       onNotifications,
+      notificationPopover,
       theme,
       onThemeChange,
       user,
@@ -118,12 +124,11 @@ export const TopBar = React.forwardRef<HTMLElement, TopBarProps>(
             <Logo size="md" />
           )))}
         <div className="ml-auto flex shrink-0 items-center gap-4">
-          {notifications != null && (
-            <NotificationBell count={notifications} onClick={onNotifications} />
-          )}
+          {notificationPopover ??
+            (notifications != null && <NotificationBell count={notifications} onClick={onNotifications} />)}
           {/* The design's divider between the bell and the mode and user group.
               Only when there is something on both sides of it. */}
-          {notifications != null && (theme || user) && (
+          {(notificationPopover || notifications != null) && (theme || user) && (
             <Divider orientation="vertical" className="h-10 min-h-0 self-center" />
           )}
           {/* The mode switch and the user chip are one group with their own 8
