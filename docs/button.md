@@ -56,6 +56,7 @@ holding and the border needs a stronger token.
   gets **lighter** on hover and press, never darker. The story **Filled text
   contrast, both themes** tests it.
 - `loading` sets `aria-busy` and `aria-disabled` and ignores presses (click, Enter, Space, and the implicit submit of the form it submits), but **it is not `disabled`, so it keeps focus**. A disabled button drops focus to the page, and a keyboard or screen-reader user who just pressed Save is lost mid-save. It looks the same as a disabled button. Put the outcome in the label ("Saving…") if the wait exceeds ~1s. The `LoadingKeepsFocus` story is the test.
+- **`aria-disabled` ignores presses the same way.** Pass it instead of `disabled` when the button must keep focus as it stops applying (a pager's Next at the last step). It looks disabled, blocks the pointer, and Button swallows Enter, Space and the click they fire, so your `onClick` does not run (nor does a submit button's form submit). Only `true` or `"true"` counts. The `AriaDisabledIgnoresPresses` story is the test.
 - Icon-only buttons **must** have an `aria-label`.
 
 ## Don't
@@ -63,3 +64,4 @@ holding and the border needs a stronger token.
 - Don't hardcode colors or spacing. `className="bg-[#336afa]"` is a bug — add a token instead.
 - Don't stack two `primary` buttons side by side.
 - Don't use `critical-primary` for "Cancel".
+- Don't handle a press in `onClick` to explain why a button is `aria-disabled`. It never runs: put the reason in the button's description (`aria-describedby`) or beside it.

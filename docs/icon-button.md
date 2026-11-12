@@ -46,7 +46,7 @@ it needs a visible label, not a better icon.
 | `size` | `xs \| sm \| md \| lg` | `md` | 24 / 36 / 40 / 48. `xs` and `sm` only in dense contexts. `xs` carries a 16 glyph |
 | `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, ignores presses and sets `aria-busy`, but **keeps focus** (`aria-disabled`, not `disabled`), like `Button` |
-| `disabled` | `boolean` | `false` | Same as Button |
+| `disabled` | `boolean` | `false` | Same as Button. To keep focus while it does not apply, pass `aria-disabled` instead: it ignores presses too (see Accessibility) |
 | `className` | `string` | — | Merged onto the `<button>` via `cn()` |
 | `ref` | `Ref<HTMLButtonElement>` | — | Points at the real `<button>` |
 
@@ -137,6 +137,12 @@ component should paper over locally.
   does **not** change while it is busy. The spinner replaces the glyph only. If a
   wait exceeds ~1s, announce the outcome from a live region on the surrounding
   region rather than by mutating this button's name mid-flight.
+
+- **`aria-disabled` ignores presses the same way**, as in `Button`. A pager's arrow
+  uses it instead of `disabled` so the arrow you pressed keeps focus at the last
+  page. It looks disabled, blocks the pointer, and IconButton swallows Enter,
+  Space and the click they fire, so your `onClick` does not run. Only `true` or
+  `"true"` counts. The `AriaDisabledIgnoresPresses` story is the test.
 
 - **One attribute carries both the name and the hover hint, never two.** Alone, the
   button is named by its `title`, which pointer users also see as the browser's
