@@ -206,7 +206,7 @@ export const AllLevels: Story = {
 /** Narrower than the side-by-side layout needs (560, the narrowest it stays whole at): points on top, the quarter's details beneath. */
 export const Narrow: Story = {
   render: (args) => (
-    <div className="w-140">
+    <div className="w-140 max-w-full">
       <DomainBudgetSummary {...args} />
     </div>
   ),
@@ -219,7 +219,7 @@ export const Narrow: Story = {
 /** Narrower than that, nothing is squeezed further: the whole card scrolls sideways. */
 export const ScrollsWhenTooNarrow: Story = {
   render: (args) => (
-    <div className="w-96">
+    <div className="w-96 max-w-full">
       <DomainBudgetSummary {...args} />
     </div>
   ),
