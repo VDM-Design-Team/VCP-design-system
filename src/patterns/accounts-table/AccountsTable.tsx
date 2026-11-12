@@ -172,6 +172,7 @@ export function AccountsTable({
       filters={
         <Input
           type="search"
+          edge="neutral"
           aria-label="Search accounts"
           placeholder={searchPlaceholder}
           leadingIcon={<Icon name="magnifying-glass" size="sm" />}

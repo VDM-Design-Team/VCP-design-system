@@ -45,7 +45,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Tokens
 
 `Modal`'s, with the warning glyph in `accent.critical.outline.content`, the question `title-md-semibold` and the consequence
-`caption-md-regular` `text.tertiary` (7.58:1 light / 9.85:1 dark). Cancel is `neutral`, the answer `danger`. No new tokens.
+`caption-md-regular` `text.tertiary` (7.58:1 light / 9.85:1 dark). Cancel is `neutral`, the answer `critical-primary`. No new tokens.
 
 ## Accessibility
 

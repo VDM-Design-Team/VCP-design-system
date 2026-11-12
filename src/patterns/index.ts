@@ -8,6 +8,7 @@
 export * from './accept-pending-av-modal';
 export * from './accounts-table';
 export * from './move-av-to-cycle-modal';
+export * from './attachments-modal';
 export * from './move-to-backlog-modal';
 export * from './av-header';
 export * from './detail-card';
@@ -47,6 +48,7 @@ export * from './team-capacity';
 export * from './user-capacity';
 export * from './value-cards';
 export * from './top-bar';
+export * from './task-log-trail';
 export * from './manuals-table';
 export * from './system-changelog';
 export * from './child-part-modal';

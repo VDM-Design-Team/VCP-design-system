@@ -82,7 +82,7 @@ export interface AVTransition {
   /** What the button says. */
   label: string;
   /** Which `Button` treatment the design gives it. */
-  variant: 'primary' | 'secondary' | 'danger';
+  variant: 'primary' | 'secondary' | 'critical-primary';
 }
 
 const move = (to: string, label: string): AVTransition => ({
@@ -103,12 +103,12 @@ const accept: AVTransition = { kind: 'accept', label: 'Accept', variant: 'primar
 /**
  * Two different Reject buttons, same `kind`, different `variant` — the
  * design draws them differently depending on lifecycle stage, not role.
- * `reject` (solid, danger) is `Pending`: an initiator's first submission.
+ * `reject` (solid, critical-primary) is `Pending`: an initiator's first submission.
  * `rejectSoft` (outline, secondary) is `Review`: a decision made after the
  * assignee has already handed the AV off. Named in issue #60, 7 Sep 2026.
  * `Backlog` uses `rejectSoft` too, as Figma's admin Backlog page draws it.
  */
-const reject: AVTransition = { kind: 'reject', label: 'Reject', variant: 'danger' };
+const reject: AVTransition = { kind: 'reject', label: 'Reject', variant: 'critical-primary' };
 const rejectSoft: AVTransition = { kind: 'reject', label: 'Reject', variant: 'secondary' };
 const handoff = (label: string): AVTransition => ({ kind: 'handoff', label, variant: 'primary' });
 const deploy: AVTransition = { kind: 'deploy', label: 'Deploy', variant: 'primary' };

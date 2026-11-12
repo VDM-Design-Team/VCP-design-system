@@ -84,6 +84,7 @@ export const PlanningFilters = React.forwardRef<HTMLDivElement, PlanningFiltersP
     >
       <Input
         type="search"
+        edge="neutral"
         aria-label={searchPlaceholder}
         placeholder={searchPlaceholder}
         leadingIcon={<Icon name="magnifying-glass" size="sm" />}

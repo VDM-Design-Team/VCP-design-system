@@ -199,7 +199,8 @@ export const DateField = React.forwardRef<HTMLInputElement, DateFieldProps>(
           ) : (
             <DatePicker
               mode={mode}
-              value={value}
+              /* An empty string is no date, as `undefined` is: the calendar opens on today's month either way. */
+              value={value || undefined}
               /* Month mode with named periods (`presets` that have an end): picking one reports its start and end. */
               rangeEnd={mode === 'month' ? rangeEnd : undefined}
               /* The picker's Clear is shown only when the page says what clearing does. */
