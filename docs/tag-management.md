@@ -47,6 +47,7 @@ no pencil; no `onDelete`, no bin.
 | Press | Dialog |
 |---|---|
 | **Add New** on a tag list | "Add a new Tag": one Tag Name field, Submit |
+| **Add New** on a list with a `noun` (`'Role'`) | "Add a new Role": one Role Name field. The pencil says "Rename Role" and the bin asks "…delete this role?" |
 | **Add New** on a `kind: 'domain'` list | "Add a new Domain" |
 | A row's pencil | The same form, "Rename Tag", starting as the current name, Save |
 | A tag's bin | "Are you sure you want to delete this tag?" (`ConfirmDeleteModal`, with the tag's name) |
@@ -64,7 +65,7 @@ cannot be closed.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `lists` | `TagManagementList[]` | required | `{ id, title, items, kind?, addLabel? }`; `kind` is `tag` (default) or `domain` |
+| `lists` | `TagManagementList[]` | required | `{ id, title, items, kind?, noun?, addLabel? }`; `kind` is `tag` (default) or `domain`; `noun` is the word for one row ("Role", "Project"), which the dialogs say instead of "Tag" |
 | `onAdd` | `(list, name) => void \| Promise` | — | A name was submitted. Leave out: no Add New |
 | `onRename` | `(list, item, name) => void \| Promise` | — | A new name was saved. Leave out: no pencils |
 | `onDelete` | `(list, item) => void \| Promise` | — | A deletion was confirmed. Leave out: no bins |
@@ -93,3 +94,4 @@ the same height. It responds to its own width, not the screen's, so it fits wher
 - Don't pass lists a person may not manage: leaving a list out is how you hide it, not a prop.
 - Don't open the dialogs yourself; they are this pattern's. If you need one elsewhere, use `TagManagementModal` directly.
 - Don't use a domain's delete question for a tag (its wording says "domain"): give the list its `kind`.
+- Don't let a role, a status or a project be called a tag: give the list its `noun`.

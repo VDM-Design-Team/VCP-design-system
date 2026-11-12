@@ -13,9 +13,12 @@ import { TagManagementModal } from '../tag-management-modal';
  * the same form to rename it, and a row's bin asks before deleting. Which lists a person sees (Super Admin: Domains and Global Tags; Design Admin:
  * the rest) is the page's choice: pass only those.
  *
- * - **A list's `kind`** is `tag` (the default) or `domain`. It picks the dialog's words, and the delete question: a domain's is the system's
- *   "Are you sure you want to delete this domain?" (`TagManagementModal`); a tag's is the same `ConfirmDeleteModal` with "Tag". Figma draws only
+ * - **A list's `kind`** is `tag` (the default) or `domain`. It picks the delete question: a domain's is the system's
+ *   "Are you sure you want to delete this domain?" (`TagManagementModal`); any other list's is the same `ConfirmDeleteModal`. Figma draws only
  *   the domain's.
+ * - **A list's `noun`** is the word for one of its rows: "Role", "Status", "Project". The dialogs say it ("Add a new Role", "Role Name",
+ *   "Are you sure you want to delete this role?"), so a role is never called a tag. Left out, it is "Tag" (or "Domain"). Figma draws only
+ *   "Add New Tag" and "Add New Domain".
  * - **It is controlled.** `lists` is the truth, and `onAdd`, `onRename`, `onDelete` and `onReorder` only *ask*. A callback may return a promise: the
  *   dialog's button spins until it settles, the dialog closes when it succeeds, and it **stays open when the promise rejects**, so the page can say
  *   why (a toast, say) and the person can try again. A callback that returns nothing closes the dialog at once.
@@ -32,8 +35,10 @@ export interface TagManagementList {
   /** The card's heading. */
   title: string;
   items: DomainCardItem[];
-  /** What the list holds: it picks the dialogs' words. Default `tag`. */
+  /** What the list holds: it picks the delete question. Default `tag`. */
   kind?: 'tag' | 'domain';
+  /** The word for one row, as the dialogs say it: "Role", "Project". Default "Tag" (or "Domain" for `kind: 'domain'`). */
+  noun?: string;
   /** The add button's label. Default "Add New". */
   addLabel?: string;
 }
@@ -69,6 +74,7 @@ export function TagManagement({ className, lists, onAdd, onRename, onDelete, onR
   const item = dialog && dialog.action !== 'add' ? list?.items.find((i) => i.id === dialog.itemId) : undefined;
   const open = Boolean(dialog && list && (dialog.action === 'add' || item));
   const kind = list?.kind ?? 'tag';
+  const noun = list?.noun ?? (kind === 'domain' ? 'Domain' : 'Tag');
 
   /* A deleted row takes focus with it: hand it to the card's Add New, once the dialog has finished closing and given its own focus back. */
   React.useEffect(() => {
@@ -124,6 +130,7 @@ export function TagManagement({ className, lists, onAdd, onRename, onDelete, onR
         open={open && (dialog?.action === 'add' || dialog?.action === 'rename')}
         type={kind}
         mode={dialog?.action === 'rename' ? 'edit' : 'add'}
+        noun={noun}
         initialName={item?.label}
         loading={busy}
         onClose={close}
@@ -134,7 +141,7 @@ export function TagManagement({ className, lists, onAdd, onRename, onDelete, onR
         }}
       />
 
-      {/* Delete: a domain's question is Tag Management's own; a tag's is the system's confirmation, with the tag's wording. */}
+      {/* Delete: a domain's question is Tag Management's own; any other list's is the system's confirmation, in the list's own word. */}
       {kind === 'domain' ? (
         <TagManagementModal
           open={open && dialog?.action === 'delete'}
@@ -149,9 +156,9 @@ export function TagManagement({ className, lists, onAdd, onRename, onDelete, onR
       ) : (
         <ConfirmDeleteModal
           open={open && dialog?.action === 'delete'}
-          itemLabel="Tag"
+          itemLabel={noun}
           itemName={item?.label ?? ''}
-          title="Are you sure you want to delete this tag?"
+          title={`Are you sure you want to delete this ${noun.toLowerCase()}?`}
           loading={busy}
           onClose={close}
           onConfirm={() => {

@@ -10,10 +10,11 @@ const rows = (...labels: string[]): DomainCardItem[] => labels.map((label) => ({
 const DOMAINS: TagManagementList = { id: 'domains', title: 'Domains', kind: 'domain', items: rows('Design', 'BESA Content', 'BESA Partner') };
 const GLOBAL: TagManagementList = { id: 'global-tags', title: 'Global Tags', items: rows('Bug', 'New Feature', 'Improvement') };
 const DOMAIN_TAGS: TagManagementList = { id: 'domain-tags', title: 'Domain Tags', items: rows('General Design') };
-const ROLES: TagManagementList = { id: 'roles', title: 'Roles', items: rows('Product Designer', 'Senior Product Designer', 'Design Lead') };
+const ROLES: TagManagementList = { id: 'roles', title: 'Roles', noun: 'Role', items: rows('Product Designer', 'Senior Product Designer', 'Design Lead') };
 const STATUS: TagManagementList = {
   id: 'status',
   title: 'Status',
+  noun: 'Status',
   items: [
     { id: 'pending', label: 'Pending', variant: 'locked' },
     { id: 'accepted', label: 'Accepted', variant: 'locked' },
@@ -22,8 +23,8 @@ const STATUS: TagManagementList = {
     { id: 'completed', label: 'Completed', variant: 'locked' },
   ],
 };
-const ASSIGNEE_TYPES: TagManagementList = { id: 'assignee-types', title: 'Assignee Types', items: rows('Designer', 'Reviewer') };
-const PROJECTS: TagManagementList = { id: 'projects', title: 'Projects', items: rows('VCP', 'BESA', 'Design System') };
+const ASSIGNEE_TYPES: TagManagementList = { id: 'assignee-types', title: 'Assignee Types', noun: 'Assignee Type', items: rows('Designer', 'Reviewer') };
+const PROJECTS: TagManagementList = { id: 'projects', title: 'Projects', noun: 'Project', items: rows('VCP', 'BESA', 'Design System') };
 
 /** Super Admin sees Domains and Global Tags; Design Admin the rest. Which lists show is the page's choice. */
 const SUPER_ADMIN = [DOMAINS, GLOBAL];
@@ -123,6 +124,37 @@ export const AddingATag: Story = {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     await expect(card.getByText('Chore')).toBeVisible();
     await waitFor(() => expect(add).toHaveFocus());
+  },
+};
+
+/**
+ * A list says what it holds (`noun`), and its dialogs use that word: a role is added, renamed and deleted as a **role**, never as a tag.
+ * Figma draws only "Add New Tag"; without the word every list that is not a domain would say Tag.
+ */
+export const EachListSaysItsOwnWord: Story = {
+  args: { lists: DESIGN_ADMIN },
+  render: (args) => <Harness initial={args.lists} />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const card = within(c.getByRole('heading', { name: 'Roles' }).closest('section')!);
+    await userEvent.click(card.getByRole('button', { name: 'Add New' }));
+    const add = await screen.findByRole('dialog', { name: 'Add a new Role' });
+    await expect(within(add).getByLabelText('Role Name')).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await userEvent.click(card.getByRole('button', { name: 'Edit Design Lead' }));
+    await expect(await screen.findByRole('dialog', { name: 'Rename Role' })).toBeVisible();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await userEvent.click(card.getByRole('button', { name: 'Delete Design Lead' }));
+    const question = await screen.findByRole('alertdialog', { name: 'Are you sure you want to delete this role?' });
+    await expect(within(question).getByRole('textbox', { name: 'Role' })).toHaveValue('Design Lead');
+    /* A list with no word of its own is still a tag list. */
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+    const tags = within(c.getByRole('heading', { name: 'Domain Tags' }).closest('section')!);
+    await userEvent.click(tags.getByRole('button', { name: 'Add New' }));
+    await expect(await screen.findByRole('dialog', { name: 'Add a new Tag' })).toBeVisible();
   },
 };
 
