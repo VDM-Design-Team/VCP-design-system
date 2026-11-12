@@ -181,11 +181,13 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
     const status = budgetStatus(consumed, allocated);
     const percent = budgetUsagePercent(consumed, allocated);
 
+    /* `relative`: the card scrolls sideways when it is too narrow, but a visually hidden span (`sr-only`, absolutely positioned) is not clipped by a scroller
+       that is not its containing block, and one that sits past the edge widens the whole page. The card being the containing block keeps it inside. */
     return (
       <section
         ref={ref}
         aria-labelledby={headingId}
-        className={cn('@container overflow-x-auto rounded-md bg-surface-elevated p-6 font-sans', className)}
+        className={cn('@container relative overflow-x-auto rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
         {/* Never squeezed below what its figures need: narrower than this, the whole card scrolls sideways. */}
