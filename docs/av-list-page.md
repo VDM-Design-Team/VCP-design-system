@@ -13,6 +13,7 @@ Built to Figma's list pages in Pages & Flows: **My Values**, **Assigned**, **Dra
 | `PageTitle` | component |
 | `TableEmpty` | component |
 | `AvTable` (exported as `AVTable`) | pattern |
+| `BulkActionBar` | pattern |
 | `FilterBar` | pattern |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -31,8 +32,8 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | **My Values** | `stats` (the totals strip) and `table.actions` (the ⋯ column) |
 | **Assigned** | The title "Assigned Values" and the table. In the Development domain, also a `cycle` filter (below) |
-| **Drafts** | `table.selectable` (the checkbox column) |
-| **Manage Added Value** | `filters` with the Assignee and Initiator fields (`users`). In the Development domain, also a `cycle` filter (below) |
+| **Drafts** | `table.selectable` (the checkbox column) and `bulk` (the bar over the table while rows are selected) |
+| **Manage Added Value** | `filters` with the Assignee and Initiator fields (`users`), and `table.selectable` with `bulk`. In the Development domain, also a `cycle` filter (below) |
 | **Archive** | The titles "Archived Values: Completed", "Archived Values: Rejected" and "Archived Values: Backlogged", and `filters` with **Priority, Tags and Date** only (each tab holds one status, so no Status filter). Only the status the rows carry changes |
 
 The page names itself in `title` ("My Values", "Assigned Values", "Archived Values: Completed"…): Figma's frames all say the placeholder "Page Title".
@@ -74,10 +75,18 @@ The page owns the rows, the sort, the page, the search, the selection and whethe
 | `stats` | `MyValuesStatsProps` | — | The totals strip. Only My Values has one |
 | `filters` | `FilterBarProps` | — | In the table's card. Leave out: no filters |
 | `table` | `Omit<AVTableProps, 'filters'>` | required | The rows and everything `AVTable` takes |
+| `bulk` | `BulkActionBarProps` | — | The bar over the table while rows are selected. Pass it with `table.selectable`. `returnFocusRef` defaults to the table's select-all checkbox |
 
-## Not here yet
+## Bulk actions
 
-- **Bulk actions** (the bar that appears when rows are selected on Drafts and Manage) are `BulkActionBar` in #279, still in review. Once it is in `main`, this takes it and shows it above the pager.
+On **Drafts** and **Manage**, pass `bulk` (`BulkActionBar`'s props) along with `table.selectable`, `selected` and `onSelectedChange`. While rows are selected, the bar sits **stuck to the bottom of the table, centred over it** (Figma draws it over the
+last rows): "N Selected ✕", a menu for each thing you can change, and **Delete**. The table's own **Delete Selected** (`table.onDeleteSelected`) is left out, because the bar's Delete replaces it.
+
+The page owns the choices and what they do: the bar and its confirmation dialogs (`BulkActionConfirmModal`, `BulkActionFailedModal`, `ConfirmDeleteAVModal`) only ask. **Focus is never dropped**: when the selection empties and the bar goes, focus
+goes to the table's select-all checkbox, found by the pattern, so the page does not wire it. Pass your own `bulk.returnFocusRef` to send it elsewhere.
+
+## Differences from Figma
+
 - Figma's My Values frame draws an **ID** column; `AVTable` keeps the reference with the title, as on every other page.
 - The **Archive Backlog** frame draws the search, Reset and Filters mirrored left to right. That is a Figma slip and is not copied.
 

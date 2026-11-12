@@ -4,6 +4,7 @@ import { MyValuesStats, type MyValuesStatsProps } from '../../components/my-valu
 import { PageTitle } from '../../components/page-title';
 import { TableEmpty } from '../../components/table-empty';
 import { AVTable, type AVTableProps } from '../av-table';
+import { BulkActionBar, type BulkActionBarProps } from '../bulk-action-bar';
 import { FilterBar, type FilterBarProps } from '../filter-bar';
 
 /**
@@ -23,6 +24,10 @@ import { FilterBar, type FilterBarProps } from '../filter-bar';
  * **The filters sit inside the table's card**, above the rows (`TableCard`'s rule, as `AccountsTable` and `TaskLogTrail` do): the search, **Reset** and **Filters** button, then the
  * field row the button opens. Figma draws them on the canvas above the card; the system puts them in it, so every table reads the same.
  *
+ * **Bulk actions** (Drafts and Manage): pass `bulk` (`BulkActionBar`'s props) along with `table.selectable`, and the bar is stuck to the bottom of the table, centred over it, while rows
+ * are selected. The table's own **Delete Selected** is left out (`table.onDeleteSelected`): the bar's **Delete** replaces it. When the selection empties and the bar goes, focus goes to the table's
+ * select-all checkbox, so it is never dropped. Opening the confirmation and doing the change are the page's: the bar only asks.
+ *
  * **An empty table says why**, through `TableEmpty` ("No added values yet.", or "No added values match “…”." with **Reset** while a search is typed). Pass `table.empty` for other words.
  *
  * **It is controlled and holds no data.** The page owns the rows, the sort, the page, the search and which filters are open; this puts them in order, 16 apart and 32 in
@@ -40,10 +45,17 @@ export interface AVListPageProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   filters?: FilterBarProps;
   /** The table: `AVTable`'s own props, without `filters` (those are the `filters` above). */
   table: Omit<AVTableProps, 'filters'>;
+  /** The bar that appears over the table while rows are selected (Drafts, Manage). Pass it with `table.selectable`. `returnFocusRef` is the table's select-all checkbox unless you give another. */
+  bulk?: BulkActionBarProps;
 }
 
-export function AVListPage({ className, title, stats, filters, table, ...props }: AVListPageProps) {
+export function AVListPage({ className, title, stats, filters, table, bulk, ...props }: AVListPageProps) {
   const root = React.useRef<HTMLDivElement>(null);
+  /* When the selection empties the bar goes, and whatever had focus in it. Focus goes to the table's select-all checkbox, found in the page once it has drawn. */
+  const selectAll = React.useRef<HTMLElement | null>(null);
+  React.useEffect(() => {
+    selectAll.current = root.current?.querySelector<HTMLElement>('input[aria-label="Select all rows"]') ?? null;
+  });
   const search = filters?.search;
   const onReset = filters?.onReset;
   /* With nothing to show the table says why, in the system's words: nothing yet, or (while a search is typed) nothing matches it. Its Reset puts the filters back
@@ -68,7 +80,14 @@ export function AVListPage({ className, title, stats, filters, table, ...props }
       <PageTitle title={title} />
       <div className="flex min-w-0 flex-col gap-4 px-8 pb-8">
         {stats && <MyValuesStats {...stats} />}
-        <AVTable {...table} empty={empty} filters={filters ? <FilterBar {...filters} /> : undefined} />
+        <div className="relative min-w-0">
+          <AVTable {...table} empty={empty} filters={filters ? <FilterBar {...filters} /> : undefined} />
+          {bulk && (
+            <div className={cn('sticky bottom-6 flex justify-center', bulk.count > 0 && 'mt-6')}>
+              <BulkActionBar {...bulk} returnFocusRef={bulk.returnFocusRef ?? selectAll} />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

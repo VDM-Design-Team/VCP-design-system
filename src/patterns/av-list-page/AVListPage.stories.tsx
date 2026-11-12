@@ -62,6 +62,12 @@ const withCurrentCycle = (filters: NonNullable<AVListPageProps['filters']>): Non
   cycle: { options: CYCLES, value: 'c37', placeholder: 'Select cycle' },
 });
 
+/** What the bar offers. The page owns the choices (statuses differ by domain, cycles by date); here each only asks. */
+const BULK_ACTIONS = [
+  { key: 'urgency', label: 'Urgency', heading: 'Urgency', items: ['Urgent', 'High', 'Normal', 'Low'].map((label) => ({ key: label.toLowerCase(), label })), onSelect: fn() },
+  { key: 'type', label: 'Type', heading: 'Type', items: ['Type 1', 'Type 2', 'Type 3'].map((label) => ({ key: label, label })), onSelect: fn() },
+];
+
 const pager = (count: number) => ({ page: 2, pageCount: 25, itemCount: 1250, pageSize: 50, pageSizeOptions: [25, 50, 100], onPageChange: fn(), onPageSizeChange: fn(), caption: `${count} Added Values` });
 
 /** A page owns what it lists: here the search narrows the rows. */
@@ -145,42 +151,65 @@ export const Assigned: Story = {
   },
 };
 
-/** Drafts: the leading checkbox column; selecting is the page's. */
+/** Drafts: the leading checkbox column, and the bar over the table while rows are selected. Selecting is the page's; the bar only asks. */
 export const Drafts: Story = {
   args: { title: 'Drafts' },
   render: function Render(args) {
     const [selected, setSelected] = React.useState<string[]>([]);
-    return <Page {...args} all={rows(3, { status: 'Draft' })} filters={baseFilters()} table={{ rows: [], selectable: true, selected, onSelectedChange: setSelected, ...pager(3) }} />;
+    return (
+      <Page
+        {...args}
+        all={rows(3, { status: 'Draft' })}
+        filters={baseFilters()}
+        table={{ rows: [], selectable: true, selected, onSelectedChange: setSelected, ...pager(3) }}
+        bulk={{ count: selected.length, onClear: () => setSelected([]), onDelete: fn(), actions: BULK_ACTIONS }}
+      />
+    );
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    const boxes = c.getAllByRole('checkbox');
-    await expect(boxes.length).toBeGreaterThan(3);
+    /* No rows selected: no bar. */
+    await expect(c.queryByText(/Selected/)).toBeNull();
     await userEvent.click(c.getAllByRole('checkbox')[1]);
     await expect(c.getAllByRole('checkbox')[1]).toBeChecked();
+    /* One selected: the bar, with Delete (the table's own Delete Selected is left out). */
+    await expect(c.getByText(/1 Selected/)).toBeVisible();
+    await expect(c.getByRole('button', { name: 'Delete' })).toBeVisible();
+    await expect(c.queryByRole('button', { name: /Delete Selected/ })).toBeNull();
+    /* The chip clears the selection and the bar goes; focus is not dropped but lands on the table's select-all checkbox. */
+    await userEvent.click(c.getByRole('button', { name: /Selected/ }));
+    await expect(c.queryByText(/Selected/)).toBeNull();
+    await expect(c.getByLabelText('Select all rows')).toHaveFocus();
   },
 };
 
-/** Manage Added Value: the filter row also has Assignee and Initiator. */
+/** Manage Added Value: the filter row also has Assignee and Initiator, and rows can be selected for the bar. */
 export const Manage: Story = {
   args: { title: 'Manage Added Value' },
-  render: (args) => (
-    <Page
-      {...args}
-      all={rows(4)}
-      filters={baseFilters({
-        users: [
-          { label: 'Assignee', options: PEOPLE, placeholder: 'Select User' },
-          { label: 'Initiator', options: PEOPLE, placeholder: 'Select User' },
-        ],
-      })}
-      table={{ rows: [], ...pager(4) }}
-    />
-  ),
+  render: function Render(args) {
+    const [selected, setSelected] = React.useState<string[]>([]);
+    return (
+      <Page
+        {...args}
+        all={rows(4)}
+        filters={baseFilters({
+          users: [
+            { label: 'Assignee', options: PEOPLE, placeholder: 'Select User' },
+            { label: 'Initiator', options: PEOPLE, placeholder: 'Select User' },
+          ],
+        })}
+        table={{ rows: [], selectable: true, selected, onSelectedChange: setSelected, ...pager(4) }}
+        bulk={{ count: selected.length, onClear: () => setSelected([]), onDelete: fn(), actions: BULK_ACTIONS }}
+      />
+    );
+  },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByText('Assignee')).toBeVisible();
     await expect(c.getByText('Initiator')).toBeVisible();
+    await userEvent.click(c.getAllByRole('checkbox')[1]);
+    await userEvent.click(c.getAllByRole('checkbox')[2]);
+    await expect(c.getByText(/2 Selected/)).toBeVisible();
   },
 };
 
