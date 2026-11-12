@@ -165,19 +165,21 @@ The checklist:
 **Reviewing** (reading, commenting, asking questions) is every designer's
 job. **Approving and merging** belongs to the seats:
 
-- **Lead** — approves and merges any change.
-- **Design-system owner** — approves and merges everything **except big
-  changes**, which need the lead. The owner's own PRs are approved by the
-  lead.
+- **Lead** — approves every change. **No PR joins `main` without the lead's
+  approval**, whoever wrote it and however small; GitHub enforces it (see
+  [Protecting `main`](#protecting-main)). The lead merges any change.
+- **Design-system owner** — reviews every change first and merges it once
+  the lead has approved. The owner's own PRs are approved by the lead, like
+  everyone's.
 - **Designers** — review and comment on any PR, but do not merge. A
-  designer's approval greenlights a **contributor's** normal change (the
-  owner or lead then does the merge). Consistently good reviews are the
-  path to the owner seat.
+  designer's review is what the lead reads first on a **contributor's**
+  change (the owner or lead then does the merge). Consistently good reviews
+  are the path to the owner seat.
 - **Contributors** — team members who aren't designers. They design with
   Claude and open pull requests exactly like everyone else — same branches,
   same template, same checks, same visual review comment — but they never
-  review, approve, or merge. A contributor's PR waits for a designer, the
-  owner, or the lead.
+  review, approve, or merge. A contributor's PR waits for a designer's or
+  the owner's review, then the lead's approval.
 
 A **big change** is any of: a new component or pattern, a change to core or
 semantic tokens, or a breaking change (rename/removal). Everything else —
@@ -186,19 +188,20 @@ normal change.
 
 | Change | Who approves the merge |
 |---|---|
-| Normal change | Design-system owner or lead |
-| Normal change **from a contributor** | Any designer (owner or lead merges), or the owner/lead directly |
+| Normal change | Lead (the owner reviews first) |
+| Normal change **from a contributor** | Lead, after a designer's or the owner's review |
 | New component or pattern | Lead |
 | Core or semantic tokens | Lead |
 | Breaking change (rename/removal) | Lead, plus the engineering owner |
 | Accessibility-sensitive change | As above, plus the accessibility owner |
 
-Nobody approves their own PR. The two edge cases that creates:
+Nobody approves their own PR, and a green check is not an approval: a PR
+whose checks pass still waits for the lead. The one edge case that creates:
 
-- The **owner's** own PRs are approved by the lead.
-- The **lead's** own big changes get the owner's review on the PR before the
-  lead merges — a documented second pair of eyes, since nobody outranks the
-  lead to formally approve.
+- The **lead's** own PRs are not held up by the approval rule, since nobody
+  outranks the lead to formally approve. The lead's big changes get the
+  owner's review on the PR before the lead merges — a documented second pair
+  of eyes.
 
 Chromatic visual diffs on a PR are approved by
 the PR's **reviewer**, never its author.
@@ -240,18 +243,19 @@ locally with `npm run test:flows`, or from the Storybook sidebar. `npm test`
 runs every check above except the `dist/` check and Chromatic; if you changed
 `tokens/`, run `npm run tokens` first and commit what it rebuilds.
 
-Deliberately deferred, with the trigger that un-defers them:
+Deliberately deferred, with the trigger that un-defers it:
 
-- **Required PR approvals** in the ruleset — when at least two people can
-  independently review most changes.
 - **Merge queue** — when several approved PRs regularly wait simultaneously.
 
 ## Protecting `main`
 
 The `Protect main` ruleset (bypass list **empty** — applies to everyone):
-restrict deletions, require a PR, require checks to pass, block force pushes.
-Merged branches are deleted. As the team grows, required approvals and a merge
-queue switch on per the triggers above.
+restrict deletions, require a PR, require checks to pass, **require the code
+owner's review**, block force pushes. `.github/CODEOWNERS` names the lead as
+the owner of every file, so that review is the lead's approval; a PR the lead
+wrote is the one case it does not hold up. Merged branches are deleted. As the
+team grows, CODEOWNERS can name more owners, and a merge queue switches on per
+the trigger above.
 
 ## Avoiding collisions
 

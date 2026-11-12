@@ -325,7 +325,7 @@ Every rule an agent could forget is a script that fails the build. `npm test` ru
 
 **CI** (`.github/workflows/ci.yml`, job `verify`, on every PR and push to `main`): checkout with full history → Node 22 with the `@vdm-design-team` scope on GitHub Packages → `npm ci` with `NODE_AUTH_TOKEN=GITHUB_TOKEN` and `packages: read` → `npm run tokens` → fail if `dist/` changed → each check above as its own named step → `npm run build` → install Playwright Chromium → `npm run test:flows`. The Chromatic workflow runs beside it.
 
-**Protecting `main`**: a ruleset named “Protect main” with an empty bypass list. It requires a PR and passing checks (`verify` and `chromatic`), blocks force pushes and deletion, and merged branches are deleted. Required approvals and a merge queue are deliberately deferred until the team is big enough to need them.
+**Protecting `main`**: a ruleset named “Protect main” with an empty bypass list. It requires a PR, passing checks (`verify` and `chromatic`) and the code owner's review, blocks force pushes and deletion, and merged branches are deleted. `.github/CODEOWNERS` names the lead as the owner of every file, so no PR joins `main` without the lead's approval (a PR the lead wrote is the one case it does not hold up). A merge queue is deliberately deferred until the team is big enough to need it.
 
 When a review finds the same mistake twice, the fix is a new check, not a reminder. `lint:stories`, `check:field-contrast` and `vcp-description-repeats-name` were all born that way.
 
@@ -416,14 +416,14 @@ Review starts from the pictures: Chromatic before/after diffs first, then the br
 
 | Change | Who approves the merge |
 | --- | --- |
-| Normal change (fix, docs, adjustment, new variant) | Design-system owner or lead |
-| Normal change from a contributor | Any designer (owner or lead merges) |
+| Normal change (fix, docs, adjustment, new variant) | Lead (the owner reviews first) |
+| Normal change from a contributor | Lead, after a designer's or the owner's review |
 | New component or pattern | Lead |
 | Core or semantic tokens | Lead |
 | Breaking change | Lead plus the engineering owner |
 | Accessibility-sensitive change | As above plus the accessibility owner |
 
-Nobody approves their own PR. Roles, not names, are written everywhere; one “Current holders” table in `docs/workflow.md` maps roles to people.
+Nobody approves their own PR, and passing checks are not an approval: every PR waits for the lead. Roles, not names, are written everywhere; one “Current holders” table in `docs/workflow.md` maps roles to people.
 
 ### Around the PRs
 
@@ -612,7 +612,7 @@ Each of these cost the team real time once. Most now have a check or a helper; t
 | Theme switch before hydration | The server can't know the theme | Render the switch as light until mounted (`useSyncExternalStore`) |
 | Package auth tokens | A `read:packages` token returns E403 on publish; CI can't install a private package by default | A `write:packages` token for publish; grant the consuming repo Actions access |
 | Handoff numbers go stale | A handoff doc was wrong about itself ninety seconds after it merged | Link to live views (commits, PR lists); put dated facts in prose |
-| Swapping in a third-party kit | shadcn was evaluated side by side and dropped on 4 Nov 2026 | Keep VCP's API (`variant="danger"`, not `destructive`); fix VCP's own bugs instead |
+| Swapping in a third-party kit | shadcn was evaluated side by side and dropped on 4 Nov 2026 | Keep VCP's API (`variant="critical-primary"`, not `destructive`); fix VCP's own bugs instead |
 
 ## Bootstrapping a new design system from this blueprint
 

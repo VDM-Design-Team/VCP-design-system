@@ -88,6 +88,12 @@ const iconButton = cva(
           'hover:text-action-tertiary-content-hover active:text-action-tertiary-content-pressed',
           'disabled:text-action-tertiary-content-disabled aria-disabled:text-action-tertiary-content-disabled',
         ],
+        /* neutral.textual — a bare glyph in the neutral palette, as `Button`'s `neutral-tertiary`: a control that is not an action (a pager's arrows). */
+        'neutral-tertiary': [
+          'bg-transparent text-neutral-textual-content-default',
+          'hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed',
+          'disabled:text-neutral-textual-content-disabled aria-disabled:text-neutral-textual-content-disabled',
+        ],
         /* neutral.tonal — a grey disc with a dark glyph. Figma's `Style=Tonal`,
            the table's inline-edit controls (pen, calendar, confirm, cancel):
            quiet until it is the thing you are reaching for. */
@@ -99,8 +105,8 @@ const iconButton = cva(
         ],
         /* accent.critical.outline — textual, like `tertiary` but red: only the
            glyph colour changes, never a fill. The quiet destructive control (a
-           row's bin). `danger` is the loud filled one. */
-        critical: [
+           row's bin). `critical-primary` is the loud filled one. */
+        'critical-tertiary': [
           'bg-transparent text-accent-critical-outline-content-default',
           'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
           'disabled:text-accent-critical-outline-content-disabled aria-disabled:text-accent-critical-outline-content-disabled',
@@ -113,7 +119,7 @@ const iconButton = cva(
           'disabled:bg-accent-critical-tonal-surface-disabled disabled:text-accent-critical-tonal-content-disabled aria-disabled:bg-accent-critical-tonal-surface-disabled aria-disabled:text-accent-critical-tonal-content-disabled',
         ],
         /* accent.critical.filled — destructive */
-        danger: [
+        'critical-primary': [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
           'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
           'disabled:bg-accent-critical-filled-surface-disabled aria-disabled:bg-accent-critical-filled-surface-disabled',

@@ -377,7 +377,7 @@ export function AVTable({
           and says how many — a bare "Delete Selected" is an unanswerable
           question. */}
       {onDeleteSelected && selected.length > 0 && (
-        <Button variant="danger" size="sm" onClick={() => onDeleteSelected(selected)}>
+        <Button variant="critical-primary" size="sm" onClick={() => onDeleteSelected(selected)}>
           {deleteSelectedLabel(selected.length)}
         </Button>
       )}

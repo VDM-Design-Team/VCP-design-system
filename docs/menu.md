@@ -14,6 +14,7 @@ component is still a component — see the tiering rules in `CLAUDE.md`.
 | `Divider` | atom |
 | `Icon` | atom |
 | `IconButton` | atom |
+| `Input` | atom |
 | `Popover` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -46,6 +47,9 @@ navigation pattern, not behind an ellipsis.
 | `defaultOpen` | `boolean` | `false` | Uncontrolled starting state |
 | `onOpenChange` | `(open: boolean) => void` | — | Fires on every open and close, including Escape, outside click, tabbing out and selecting |
 | `align` | `left \| right` | `right` | Which edge of the menu lines up with the trigger's |
+| `heading` | `string` | — | A heading over the items ("Move to Status", "Urgency"), in the library's **category** style without its caret: 40 high, small bold type in `text.tertiary`, a rule beneath. It names the menu (`aria-label`) and is not an item: arrows and type-ahead step over it |
+| `searchable` | `boolean` | `false` | A search box at the top (Figma's `_Menu_Item_Search`): typing narrows the items by label, it has focus on open, ArrowDown enters the list, ArrowUp from the first item comes back, Enter chooses the first match. `searchPlaceholder` ("Search...") and `emptyText` ("No results") |
+| `placement` | `top \| bottom` | `bottom` | Which side the menu prefers. It still flips when there is no room — set `top` for a trigger at the bottom of the window (the bulk action bar) |
 | `strategy` | `absolute \| fixed` | `fixed` | `Popover`'s: `fixed` floats the list above any `overflow` ancestor (a `DataTable`). `absolute` only under a CSS `transform`; see `docs/popover.md` |
 | `className` | `string` | — | Merged onto the wrapper via `cn()` |
 | `panelClassName` | `string` | — | Merged onto the `role="menu"` panel via `cn()` |
@@ -62,7 +66,9 @@ carry a label and an action cannot accidentally be a rule.
 | `label` | `ReactNode` | — | **Required on an action.** A string also enables type-ahead for that item |
 | `icon` | `IconName` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
-| `tone` | `default \| danger` | `default` | `danger` is for destructive, irreversible actions. See below |
+| `tone` | `default \| critical` | `default` | `critical` is for destructive, irreversible actions (it was `danger` before November 2026). See below |
+| `items` (on an item) | `MenuActionItem[]` | — | **A submenu.** The item shows a right caret (`caret-right`), opens its choices beside it on hover, click or ArrowRight, and keeps the brand-blue highlight while open. Only the submenu's items are choices; `onSelect` gets their own `key`. ArrowLeft or Escape closes just the submenu |
+| `heading` (on an item) | `string` | the item's label | The submenu's own heading |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
 | `disabled` | `boolean` | `false` | Stays visible and announced, but the keyboard steps over it |
 | `onClick` | `() => void` | — | Runs before `onSelect` |
@@ -73,7 +79,7 @@ carry a label and an action cannot accidentally be a rule.
 | | Source | Here | Why |
 |---|---|---|---|
 | `icon` | `string` | `IconName` | A glyph name that the library does not ship should not survive to runtime as an empty square. It is now a compile error |
-| `MenuItem` | one shape, everything optional | `MenuActionItem \| MenuDividerItem` | `{ divider: true, label: 'Delete', tone: 'danger' }` used to type-check and render nothing but a rule |
+| `MenuItem` | one shape, everything optional | `MenuActionItem \| MenuDividerItem` | `{ divider: true, label: 'Delete', tone: 'critical' }` used to type-check and render nothing but a rule |
 | `style` | `CSSProperties` | **removed** | Inline styles route around the token system. Use `className` / `panelClassName` |
 | keyboard | none at all | the full contract below | An action list that cannot be operated from the keyboard is a mouse feature |
 | focus | never moved | moves into the list on open, returns to the trigger on close | Required for `role="menu"` |
@@ -94,8 +100,8 @@ carry a label and an action cannot accidentally be a rule.
 | Item resting fill | `action.tertiary.surface.default` (transparent) | `bg-action-tertiary-surface-default` |
 | Item content | `text.secondary` → `text.primary` on hover / keyboard focus | `text-text-secondary`, `hover:text-text-primary`, `focus-visible:text-text-primary` |
 | Item highlight | `surface.brand.faint` | `hover:bg-surface-brand-faint`, `focus-visible:bg-surface-brand-faint` |
-| Danger content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
-| Danger highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover`, `focus-visible:bg-accent-critical-outline-surface-hover` |
+| Critical content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
+| Critical highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover`, `focus-visible:bg-accent-critical-outline-surface-hover` |
 | Disabled content | `text.disabled` | `disabled:text-text-disabled` |
 | Selected check | `text.primary` (`Icon`, `check`) | `text-text-primary` |
 | Shortcut | `type.caption-md-medium` + `text.subtle` | `text-caption-md-medium text-text-subtle` |
@@ -120,6 +126,12 @@ The dark theme comes for free — every colour above is a semantic token that
 - **`shadow.menu` has no dark-theme override**, so in dark the panel's edge is
   carried by `stroke.default` alone.
 - **No motion tokens** for the colour transition.
+
+## Submenus
+
+An item with `items` is a parent, not a choice: it shows a right caret, is `aria-haspopup="menu"`, and its `aria-expanded` follows the submenu. Hover opens it (without taking focus), a click or ArrowRight opens it **and moves
+into it**. The submenu hangs to the right of the parent with its first choice level with the parent (how far above the item it starts is measured, the category row and the padding, not a constant), is fixed to the screen so a scrolling menu cannot clip it, **follows its parent item when something scrolls or the window is resized, flips to the left when there is no room on the right, and stays on screen**, and has its own heading. ArrowUp and
+ArrowDown move inside it; **ArrowLeft or Escape closes only the submenu** and puts focus back on the parent; a choice closes everything. One level only.
 
 ## Accessibility
 
@@ -176,14 +188,14 @@ reopening never lands on a previously-chosen destructive item.
   true after a keyboard one: a mouse opens a clean menu, and a keyboard still sees
   where it is, with the 2px `stroke.focused` ring on top.
 
-### Danger items — the tone is not the only signal
+### Critical items — the tone is not the only signal
 
 Colour is invisible to a screen reader, unreliable for a colour-blind user, and
-gone entirely in high-contrast mode. A `tone: 'danger'` item therefore carries
+gone entirely in high-contrast mode. A `tone: 'critical'` item therefore carries
 three signals, only one of which is colour:
 
 1. **Colour** — the `accent.critical.outline` content and hover fill.
-2. **A glyph.** A danger item always renders an icon. If you gave one (`trash`)
+2. **A glyph.** A critical item always renders an icon. If you gave one (`trash`)
    it is used; if you gave none, it falls back to `warning`. Shape distinguishes
    the row from its neighbours whether or not colour is perceived.
 3. **Words, in the accessible name.** The item's name ends with a visually
@@ -192,7 +204,7 @@ three signals, only one of which is colour:
    actually reaches a non-sighted user, and it is the one the source export had
    no way of providing.
 
-Put danger items last, behind a divider, and pair genuinely irreversible ones
+Put critical items last, behind a divider, and pair genuinely irreversible ones
 with a `Modal` confirmation — a menu item is one keystroke away from being
 activated by accident.
 
@@ -233,10 +245,10 @@ stories also pass `axe-core` at WCAG 2.1 AA with the menus open.
 - Don't put a form, a text field or a paragraph in it. Once a row is not a verb,
   you want a `Popover`.
 - Don't use it for navigation between pages.
-- Don't rely on `tone: 'danger'` alone to warn someone. Colour is one of three
+- Don't rely on `tone: 'critical'` alone to warn someone. Colour is one of three
   signals here for a reason, and an irreversible action still needs a
   confirmation.
-- Don't use more than one danger item in a menu.
+- Don't use more than one critical item in a menu.
 - Don't hide the primary action of a screen behind an ellipsis. A menu is for the
   overflow, not the point.
 - Don't pass a `<div>` or a bare string as the `trigger` — it has to be a real
@@ -245,6 +257,5 @@ stories also pass `axe-core` at WCAG 2.1 AA with the menus open.
   the user; Menu does not keep it for you.
 - Don't disable an item with no way for the user to find out why. Disable it and
   explain the condition nearby, or leave it enabled and fail with a message.
-- Don't nest menus. There is no submenu contract here, and a `role="menu"` inside
-  a `role="menu"` without one is worse than a flat list.
+- Don't nest menus more than one level, and don't nest them by hand: a submenu is an item's `items` (see Submenus), which carries the contract. A `role="menu"` inside a `role="menu"` built any other way is worse than a flat list.
 - Don't put it inside a scrolling container and expect it to escape. It cannot.

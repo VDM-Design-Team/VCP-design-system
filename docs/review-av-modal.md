@@ -65,7 +65,7 @@ dialog's focus trap answered for both: Escape closed the *review* and left the
 rejection dialog orphaned, and Tab died. See `docs/modal.md`, and the
 `NestedDialog` story there.
 
-**The inner Reject is `danger` and disabled until a reason is chosen.** Both
+**The inner Reject is `critical-primary` and disabled until a reason is chosen.** Both
 are the design's. Note that `RejectPendingAVModal`'s Reject is `primary` —
 rejecting work that was never started is a decision; rejecting work that was
 done and handed off is heavier, and the design draws it red.

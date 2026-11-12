@@ -157,7 +157,7 @@ export const DomainItem = React.forwardRef<HTMLDivElement, DomainItemProps>(
               {onDelete && (
                 <IconButton
                   icon="trash-simple"
-                  variant="critical"
+                  variant="critical-tertiary"
                   label={`Delete ${label}`}
                   onClick={onDelete}
                 />

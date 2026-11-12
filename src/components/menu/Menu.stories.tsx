@@ -87,17 +87,17 @@ export const WithDivider: Story = {
 };
 
 /**
- * Danger items carry the critical tone, a glyph, and a screen-reader qualifier —
+ * Critical items carry the critical tone, a glyph, and a screen-reader qualifier —
  * colour is never the only signal. Keep them last, behind a divider.
  */
-export const WithDangerItem: Story = {
-  name: 'With a danger item',
+export const WithCriticalItem: Story = {
+  name: 'With a critical item',
   args: {
     items: [
       { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { divider: true },
-      { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'danger' },
+      { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'critical' },
     ],
   },
 };
@@ -192,7 +192,7 @@ export const LightAndDark: Story = {
             { key: 'share', label: 'Share with team', icon: 'users' },
             { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
             { divider: true },
-            { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'danger' },
+            { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'critical' },
           ]}
         />
       </div>
@@ -331,6 +331,187 @@ export const SelectCloses: Story = {
     await expect(args.onSelect).toHaveBeenLastCalledWith('share');
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
     await expect(trigger).toHaveFocus();
+  },
+};
+
+/** A heading over the items, in the library's category style (small bold type in the quiet grey, a rule beneath) without its caret. It names the menu. */
+export const WithAHeading: Story = {
+  args: { heading: 'Urgency', items: [{ key: 'low', label: 'Low' }, { key: 'normal', label: 'Normal' }, { key: 'high', label: 'High' }] },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Urgency</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Urgency' }));
+    const menu = await screen.findByRole('menu', { name: 'Urgency' });
+    /* The heading is not an item. */
+    await expect(within(menu).getAllByRole('menuitem')).toHaveLength(3);
+    await expect(within(menu).getByText('Urgency')).toBeVisible();
+  },
+};
+
+/**
+ * A submenu: an item with `items` shows a right caret and opens its choices beside it — on hover, on click or with ArrowRight. The parent keeps the highlight (brand blue, bold)
+ * while it is open, and the submenu has its own heading. Only the submenu's items are choices. ArrowLeft or Escape closes just the submenu and returns focus to its parent.
+ */
+export const WithASubmenu: Story = {
+  args: {
+    heading: 'Move to Status',
+    items: [
+      { key: 'draft', label: 'Save as Draft' },
+      {
+        key: 'pending',
+        label: 'Pending Review',
+        items: [
+          { key: 'pending-accept', label: 'Accept' },
+          { key: 'pending-reject', label: 'Reject' },
+        ],
+      },
+      { key: 'progress', label: 'In Progress' },
+    ],
+    onSelect: fn(),
+  },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />,
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const menu = await screen.findByRole('menu', { name: 'Move to Status' });
+    const parent = within(menu).getByRole('menuitem', { name: 'Pending Review' });
+    await expect(parent).toHaveAttribute('aria-haspopup', 'menu');
+    await expect(parent).toHaveAttribute('aria-expanded', 'false');
+    /* Opening it by keyboard: ArrowRight, with focus going into the submenu. */
+    parent.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    await expect(parent).toHaveAttribute('aria-expanded', 'true');
+    await waitFor(() => expect(within(sub).getByRole('menuitem', { name: 'Accept' })).toHaveFocus());
+    /* ArrowLeft closes only the submenu, and focus goes back to its parent. */
+    await userEvent.keyboard('{ArrowLeft}');
+    await waitFor(() => expect(screen.queryByRole('menu', { name: 'Pending Review' })).toBeNull());
+    await expect(parent).toHaveFocus();
+    await expect(screen.getByRole('menu', { name: 'Move to Status' })).toBeVisible();
+    /* Choosing from it asks with the submenu item's own key, and closes everything. */
+    await userEvent.click(parent);
+    await userEvent.click(await within(await screen.findByRole('menu', { name: 'Pending Review' })).findByRole('menuitem', { name: 'Reject' }));
+    await expect(args.onSelect).toHaveBeenCalledWith('pending-reject');
+    await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  },
+};
+
+const SUB_ITEMS = [
+  { key: 'draft', label: 'Save as Draft' },
+  {
+    key: 'pending',
+    label: 'Pending Review',
+    items: [
+      { key: 'pending-accept', label: 'Accept' },
+      { key: 'pending-reject', label: 'Reject' },
+    ],
+  },
+  { key: 'progress', label: 'In Progress' },
+];
+
+/** The submenu's first choice lines up with its parent item, and it sits beside it. How far above the item the panel starts is measured, not a constant. */
+export const SubmenuAlignsWithItsParent: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    const first = within(sub).getByRole('menuitem', { name: 'Accept' });
+    await waitFor(() => expect(Math.abs(first.getBoundingClientRect().top - parent.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
+    await expect(Math.abs(sub.getBoundingClientRect().left - parent.getBoundingClientRect().right)).toBeLessThanOrEqual(1);
+  },
+};
+
+/** The open submenu's parent keeps its highlight in the dark theme too, at a contrast that clears 4.5:1 (it was the medium blue on the faint fill, 3.5:1). The accessibility check runs on the open state. */
+export const SubmenuOpenInDark: Story = {
+  globals: { theme: 'dark' },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    await screen.findByRole('menu', { name: 'Pending Review' });
+    await expect(parent).toHaveAttribute('aria-expanded', 'true');
+  },
+};
+
+/** With no room on the right the submenu flips to the left of its parent, and stays on screen. */
+export const SubmenuFlipsLeft: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => (
+    <div className="fixed right-2 top-24">
+      <Menu {...args} align="right" trigger={<Button variant="secondary">Status</Button>} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    await waitFor(() => expect(sub.getBoundingClientRect().right).toBeLessThanOrEqual(parent.getBoundingClientRect().left + 1));
+    await expect(sub.getBoundingClientRect().left).toBeGreaterThanOrEqual(0);
+    await expect(sub.getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth);
+  },
+};
+
+/** The submenu follows its parent item when something scrolls under it, as `Popover` does for the menu itself. */
+export const SubmenuFollowsScroll: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { heading: 'Move to Status', items: SUB_ITEMS },
+  render: (args) => (
+    <div data-testid="scroller" className="h-64 overflow-auto">
+      <div className="h-24" />
+      <Menu {...args} trigger={<Button variant="secondary">Status</Button>} />
+      <div className="h-96" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }));
+    const parent = within(await screen.findByRole('menu', { name: 'Move to Status' })).getByRole('menuitem', { name: 'Pending Review' });
+    await userEvent.click(parent);
+    const sub = await screen.findByRole('menu', { name: 'Pending Review' });
+    const first = within(sub).getByRole('menuitem', { name: 'Accept' });
+    const before = parent.getBoundingClientRect().top;
+    const scroller = within(canvasElement).getByTestId('scroller');
+    scroller.scrollTop = 16;
+    scroller.dispatchEvent(new Event('scroll'));
+    await waitFor(() => expect(parent.getBoundingClientRect().top).not.toBe(before));
+    await waitFor(() => expect(Math.abs(first.getBoundingClientRect().top - parent.getBoundingClientRect().top)).toBeLessThanOrEqual(1));
+  },
+};
+
+/**
+ * `searchable` puts Figma's search item at the top (the Cycle menu): focus starts in the box, typing narrows the list, ArrowDown goes into it, ArrowUp from the first item comes back,
+ * and Enter chooses the first match.
+ */
+export const Searchable: Story = {
+  args: {
+    items: ['C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39'].map((code) => ({ key: code, label: `${code} (May 25, 2026 - Jun 08, 2026)` })),
+    onSelect: fn(),
+  },
+  render: (args) => <Menu {...args} searchable trigger={<Button variant="secondary">Cycle</Button>} />,
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Cycle' }));
+    const search = await screen.findByRole('searchbox', { name: 'Search...' });
+    await waitFor(() => expect(search).toHaveFocus());
+    await userEvent.type(search, 'c3');
+    await userEvent.clear(search);
+    await userEvent.type(search, '37');
+    const menu = screen.getByRole('menu');
+    await expect(within(menu).getAllByRole('menuitem')).toHaveLength(1);
+    await userEvent.clear(search);
+    await userEvent.type(search, 'zzz');
+    await expect(within(menu).getByText('No results')).toBeVisible();
+    await userEvent.clear(search);
+    await userEvent.type(search, '38');
+    await userEvent.keyboard('{Enter}');
+    await expect(args.onSelect).toHaveBeenCalledWith('C38');
   },
 };
 

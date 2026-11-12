@@ -135,13 +135,13 @@ export const LongName: Story = {
 };
 
 /** Admin and regular views differ only by the `items` the page passes. */
-export const WithDividerAndDanger: Story = {
+export const WithDividerAndCritical: Story = {
   args: {
     items: [
       { key: 'values', label: 'My Added Values' },
       { key: 'settings', label: 'Settings' },
       { divider: true },
-      { key: 'logout', label: 'Logout', tone: 'danger' },
+      { key: 'logout', label: 'Logout', tone: 'critical' },
     ],
   },
   tags: ['!dev', '!autodocs'],
@@ -150,7 +150,7 @@ export const WithDividerAndDanger: Story = {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole('button', { name: 'Francis M., account menu' }));
     await expect(canvas.getByRole('separator')).toBeVisible();
-    /* A danger row carries a screen-reader qualifier in its name, so match the label loosely. */
+    /* A critical row carries a screen-reader qualifier in its name, so match the label loosely. */
     await expect(canvas.getByRole('menuitem', { name: /Logout/ })).toBeVisible();
   },
 };
