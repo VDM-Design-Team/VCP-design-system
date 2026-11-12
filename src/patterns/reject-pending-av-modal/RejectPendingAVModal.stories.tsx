@@ -18,7 +18,7 @@ const meta = {
           'Rejecting an Added Value that is still `Pending`, before anyone has worked on it. One ' +
           'question: why. **The design draws its validation** — Reject is faded until a reason is ' +
           'chosen — so the dialog refuses by what it lets you press rather than by an error after ' +
-          'the fact. Reject is the `primary` button, not `danger`: rejecting is a decision, not a ' +
+          'the fact. Reject is the `primary` button, not `critical-primary`: rejecting is a decision, not a ' +
           'destruction.',
       },
     },

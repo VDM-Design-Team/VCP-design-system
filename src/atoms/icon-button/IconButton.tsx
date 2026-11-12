@@ -99,14 +99,21 @@ const iconButton = cva(
         ],
         /* accent.critical.outline — textual, like `tertiary` but red: only the
            glyph colour changes, never a fill. The quiet destructive control (a
-           row's bin). `danger` is the loud filled one. */
-        critical: [
+           row's bin). `critical-primary` is the loud filled one. */
+        'critical-tertiary': [
           'bg-transparent text-accent-critical-outline-content-default',
           'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
           'disabled:text-accent-critical-outline-content-disabled aria-disabled:text-accent-critical-outline-content-disabled',
         ],
+        /* accent.critical.tonal — a red disc with a dark red glyph, as `tonal` is a grey one: a row's delete beside its edit, in every state (hover and pressed fill, content, disabled). */
+        'critical-tonal': [
+          'bg-accent-critical-tonal-surface-default text-accent-critical-tonal-content-default',
+          'hover:bg-accent-critical-tonal-surface-hover hover:text-accent-critical-tonal-content-hover',
+          'active:bg-accent-critical-tonal-surface-pressed active:text-accent-critical-tonal-content-pressed',
+          'disabled:bg-accent-critical-tonal-surface-disabled disabled:text-accent-critical-tonal-content-disabled aria-disabled:bg-accent-critical-tonal-surface-disabled aria-disabled:text-accent-critical-tonal-content-disabled',
+        ],
         /* accent.critical.filled — destructive */
-        danger: [
+        'critical-primary': [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
           'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
           'disabled:bg-accent-critical-filled-surface-disabled aria-disabled:bg-accent-critical-filled-surface-disabled',

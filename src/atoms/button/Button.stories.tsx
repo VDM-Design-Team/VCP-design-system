@@ -12,7 +12,7 @@ const meta = {
         component:
           'The primary interactive control. Use `primary` for the single most important action ' +
           'on a screen, `secondary` for supporting actions, `tertiary` inside dense toolbars, and ' +
-          '`danger` only for destructive, irreversible actions.',
+          '`critical-primary` only for destructive, irreversible actions.',
       },
     },
   },
@@ -20,7 +20,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger', 'link'],
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'critical-primary', 'critical-tertiary', 'link'],
     },
     size: { control: 'radio', options: ['sm', 'md', 'lg'] },
   },
@@ -34,7 +34,16 @@ export const Secondary: Story = { args: { variant: 'secondary' } };
 export const Tertiary: Story = { args: { variant: 'tertiary' } };
 /** Outlined, but grey — the Cancel beside a destructive answer. */
 export const Neutral: Story = { args: { variant: 'neutral', children: 'Cancel' } };
-export const Danger: Story = { args: { variant: 'danger', children: 'Delete account' } };
+export const CriticalPrimary: Story = { args: { variant: 'critical-primary', children: 'Delete account' } };
+/** Red text, no fill: a destructive answer beside quieter ones (Figma's AV edit page: Discard, Save as Draft, Submit). */
+export const CriticalTertiary: Story = {
+  args: { variant: 'critical-tertiary', children: 'Discard' },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Discard' });
+    /* The label clears 4.5:1 on the page: red-700 on white is about 6.5:1. */
+    await expect(button.className).toContain('text-accent-critical-outline-content-hover');
+  },
+};
 export const Link: Story = { args: { variant: 'link', children: 'Learn more' } };
 
 export const Sizes: Story = {
@@ -127,7 +136,7 @@ export const FilledTextContrast: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined} data-theme-case={isDark ? 'dark' : 'light'}>
           <div className="flex h-full flex-wrap items-center gap-2 bg-surface-canvas p-8">
-            {(['primary', 'danger'] as const).map((variant) => (
+            {(['primary', 'critical-primary'] as const).map((variant) => (
               <Button key={variant} variant={variant} data-case={variant}>
                 {variant}
               </Button>

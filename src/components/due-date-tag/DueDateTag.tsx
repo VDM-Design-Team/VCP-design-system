@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Tag, type TagProps } from '../../atoms/tag';
+import { useDateFormat } from '../../lib/format-date';
 
 /**
  * DueDateTag — an Added Value's due date, worn as a tag that changes colour
@@ -11,12 +12,13 @@ import { Tag, type TagProps } from '../../atoms/tag';
  * Overdue — in two styles and two sizes; this renders the tonal style, which
  * is the one every VCP screen uses.
  *
- * **The date text is the caller's.** This takes an already-formatted string,
- * because how a date reads — "October 1, 2025", "1 Oct", "in 3 days" — is a
- * locale and product decision that a design-system tag has no business
- * making. What it owns is the colour.
+ * **It shows the date the system's one way.** Give it `date` (ISO `yyyy-mm-dd`) and it reads dd/mm/yyyy, or the
+ * person's locale when the product sets one (`DateFormatProvider`), inside a `<time>` that carries the ISO date —
+ * the same formatter every other date in the system goes through (decided with design, 6 Nov 2026), so a due date
+ * never reads one way in a table and another on the page it opens. Do not hand it a date you formatted yourself.
+ * `children` is still taken, for the rare text that is not a date ("-").
  *
- * **The threshold is the caller's too, and deliberately so.** `dueDateTone`
+ * **The threshold is the caller's, and deliberately so.** `dueDateTone`
  * below does the comparing, but it will not guess what "due soon" means:
  * `soonWithinDays` has no default. How many days ahead counts as soon is a
  * product rule that differs by domain, and a design system that invents one
@@ -45,16 +47,22 @@ const PROXIMITY: Record<DueDateProximity, NonNullable<TagProps['tone']>> = {
 export interface DueDateTagProps extends Omit<TagProps, 'tone' | 'variant' | 'children'> {
   /** How near the date is. Compute it with `dueDateTone` if you have a `Date`. */
   proximity?: DueDateProximity;
-  /** The date, already formatted. "October 1, 2025". */
-  children: React.ReactNode;
+  /** The due date, ISO `yyyy-mm-dd`. Shown dd/mm/yyyy (or the person's locale) inside a `<time>`. */
+  date?: string;
+  /** Text in place of `date`, for what is not a date ("-"). A date belongs in `date`: do not format one yourself. */
+  children?: React.ReactNode;
 }
 
 export const DueDateTag = React.forwardRef<HTMLSpanElement, DueDateTagProps>(
-  ({ proximity = 'default', children, size = 'sm', ...props }, ref) => (
-    <Tag ref={ref} tone={PROXIMITY[proximity]} size={size} {...props}>
-      {children}
-    </Tag>
-  ),
+  ({ proximity = 'default', date, children, size = 'sm', ...props }, ref) => {
+    /* dd/mm/yyyy, or the person's locale when the product sets one (`DateFormatProvider`). */
+    const dates = useDateFormat();
+    return (
+      <Tag ref={ref} tone={PROXIMITY[proximity]} size={size} {...props}>
+        {children ?? (date ? <time dateTime={date}>{dates.format(date)}</time> : null)}
+      </Tag>
+    );
+  },
 );
 DueDateTag.displayName = 'DueDateTag';
 

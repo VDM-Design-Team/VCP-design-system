@@ -101,6 +101,43 @@ export const Default: Story = {
   },
 };
 
+/** By day (decided 9 Nov 2026): a heading per day, each day its own list, named by its heading. An empty day is left out. */
+export const ByDay: Story = {
+  render: (args) => {
+    const row = (r: (typeof ROWS)[number], i: number) => (
+      <NotificationItem
+        key={i}
+        kind={r.kind}
+        actor={{ name: 'John Smith' }}
+        subject="Some Added Value Title Goes Here"
+        status={r.status}
+        time={r.time}
+        unread={r.unread}
+        href={`#av-${i}`}
+        onToggleRead={() => {}}
+      />
+    );
+    return (
+      <NotificationInbox
+        {...args}
+        groups={[
+          { label: 'Today', children: ROWS.slice(0, 2).map(row) },
+          { label: 'Yesterday', children: [] },
+          { label: '3 November', children: ROWS.slice(2).map((r, i) => row(r, i + 2)) },
+        ]}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('heading', { name: 'Today' })).toBeInTheDocument();
+    await expect(canvas.queryByRole('heading', { name: 'Yesterday' })).not.toBeInTheDocument();
+    const today = canvas.getByRole('list', { name: 'Today' });
+    await expect(within(today).getAllByRole('listitem')).toHaveLength(2);
+    await expect(within(canvas.getByRole('list', { name: '3 November' })).getAllByRole('listitem')).toHaveLength(4);
+  },
+};
+
 /** One page of results: the pager stays, so the page size can be changed back. */
 export const SinglePage: Story = {
   render: (args) => (

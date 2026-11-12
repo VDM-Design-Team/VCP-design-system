@@ -7,13 +7,12 @@ delete button on every row and the pages beneath. Built to Figma's `Contact_List
 
 | Piece | Tier |
 |---|---|
-| `Icon` | atom |
 | `IconButton` | atom |
 | `Pagination` | atom |
 | `Skeleton` | atom |
 | `DataTable` | component |
-| `EmptyState` | component |
 | `TableCard` | component |
+| `TableEmpty` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -44,7 +43,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `page` / `pageCount` / `onPageChange` | | required | `Pagination`'s |
 | `itemCount` / `pageSize` / `pageSizeOptions` / `onPageSizeChange` | | — | The range readout ("1-8 of 20") and the Items select |
 | `loading` | `boolean` | — | Placeholder rows; the headers stay; one status says "Loading messages" |
-| `empty` | `ReactNode` | `EmptyState`, “No messages yet.” | What no rows say |
+| `empty` | `ReactNode` | `TableEmpty`, “No messages yet.” | What no rows say |
 | `caption` | `string` | `Contact messages` | The table's accessible name |
 
 ## It is controlled, and does nothing itself

@@ -82,7 +82,7 @@ export interface AVTransition {
   /** What the button says. */
   label: string;
   /** Which `Button` treatment the design gives it. */
-  variant: 'primary' | 'secondary' | 'danger';
+  variant: 'primary' | 'secondary' | 'critical-primary';
 }
 
 const move = (to: string, label: string): AVTransition => ({
@@ -103,11 +103,12 @@ const accept: AVTransition = { kind: 'accept', label: 'Accept', variant: 'primar
 /**
  * Two different Reject buttons, same `kind`, different `variant` — the
  * design draws them differently depending on lifecycle stage, not role.
- * `reject` (solid, danger) is `Pending`: an initiator's first submission.
+ * `reject` (solid, critical-primary) is `Pending`: an initiator's first submission.
  * `rejectSoft` (outline, secondary) is `Review`: a decision made after the
  * assignee has already handed the AV off. Named in issue #60, 7 Sep 2026.
+ * `Backlog` uses `rejectSoft` too, as Figma's admin Backlog page draws it.
  */
-const reject: AVTransition = { kind: 'reject', label: 'Reject', variant: 'danger' };
+const reject: AVTransition = { kind: 'reject', label: 'Reject', variant: 'critical-primary' };
 const rejectSoft: AVTransition = { kind: 'reject', label: 'Reject', variant: 'secondary' };
 const handoff = (label: string): AVTransition => ({ kind: 'handoff', label, variant: 'primary' });
 const deploy: AVTransition = { kind: 'deploy', label: 'Deploy', variant: 'primary' };
@@ -153,6 +154,11 @@ export function avTransitions(options: {
     /* The spine. Every domain shares these, so they stay here. */
     if (status === 'Draft') return CAN_START.includes(role) ? [saveDraft, submit] : [];
     if (status === 'Pending') return role === 'admin' ? [reject, accept] : [];
+    /* An admin decides a backlogged AV straight from the Backlog, as Figma's
+       admin Backlog page draws it (1094:97734): the outline Reject, as on
+       `Review`, and Accept. Moving it back to Pending or Draft is
+       `DetailCardMenu`'s. Decided 9 Nov 2026. */
+    if (status === 'Backlog') return role === 'admin' ? [rejectSoft, accept] : [];
     /* `Accepted` starts the work; `In Progress` is the last shared step
        before the domain's own chain takes over. Both are spine — the Figma
        `Status_Tag_General` set draws them, and every domain passes through

@@ -28,7 +28,7 @@ Compare `HandoffAVModal`, which validates on submit with a message: there the
 required field sits among five others and disabling the button would leave the
 user hunting for which one. Here there is exactly one field.
 
-## Reject is `primary`, not `danger`
+## Reject is `primary`, not `critical-primary`
 
 Rejecting a pending value is a decision, not a destruction — nothing is lost,
 and the submitter is told why. The design draws it in brand blue.
@@ -75,7 +75,7 @@ rejection is that second dialog, so it is close.
 
 ## Don't
 
-- **Don't make Reject `danger`.** Nothing is destroyed here. The red button is
+- **Don't make Reject `critical-primary`.** Nothing is destroyed here. The red button is
   for `ConfirmDeleteAVModal`.
 - **Don't add an error message for the missing reason.** The disabled button is
   the design's answer, and two mechanisms for one rule is one too many.

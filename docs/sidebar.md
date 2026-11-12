@@ -64,13 +64,22 @@ starts being used routinely, the vocabulary has moved and this should follow.
 
 | User type | Rows |
 |---|---|
-| `user` | Dashboard, My Values, Assigned, Drafts, Task Log Trail, Archive▾ |
-| `admin` | + Manage |
+| `user` | Dashboard, My Values, Assigned, Drafts, Task Log Trail, Holiday Registry, Archive▾ |
+| `admin` | Dashboard, My Values, Manage, Assigned, Drafts, Task Log Trail, Archive▾ |
 | `admin-dev` | + Planning▾ |
-| `super-admin` | Dashboard, Accounts, Domains, Contact List |
+| `super-admin` | Dashboard, Accounts, Domains, Domain Budget, Contact List |
 
 ▾ = has sub-items. `Archive` opens Completed / Rejected / Backlogs;
 `Planning` opens Planning List / Gantt Chart / Holiday Registry.
+
+**A user's Holiday Registry is a top-level row** (decided 9 Nov 2026). A user reads the registry but has no
+Planning group, so the row stands on its own, after Task Log Trail, with the `calendar-dots` glyph. Its key is
+the Planning sub-row's, `planning/holiday-registry`: one page and one route for everyone, and `active` marks
+whichever row the rail has. (Figma's user rail drew the entry twice and no Planning group; this is the
+resolved version.)
+
+**A super admin's Domain Budget** (`domain-budget`, the `wallet` glyph) is where every domain's points for a quarter
+are set, as Figma's super admin rail draws it (Domain Budget Edit, `696:54963`).
 
 ## Sub-rows are destinations
 
@@ -128,7 +137,7 @@ draws.
 The switcher is Figma's `_Domain_Selection_Dropdown`: a filled
 trigger (`surface.neutral.subtle` with a 1px `neutral.outline.border` stroke, radius 8,
 12 horizontal padding and a 40 height, the minimum target, 14 medium in `text.secondary`) with a 20 up-down caret that follows the border's colour through every state, opening the
-system's `Menu` flush to the trigger's width. The stroke is an addition to the design (design review): it takes the neutral outline family's states, so the border steps darker on hover and holds the pressed step while the menu is open; it is disabled when there are no domains. It is not the native `Select`,
+system's `Menu` flush to the trigger's width (placed `absolute` inside the rail, so its `w-full` is the trigger's; a `fixed` panel's would be the screen's). The stroke is an addition to the design (design review): it takes the neutral outline family's states, so the border steps darker on hover and holds the pressed step while the menu is open; it is disabled when there are no domains. It is not the native `Select`,
 whose popup the platform draws and a design cannot style. The trigger is named
 "Domain: Design. Change domain" so the current value is announced. The open list marks
 the current domain too: each item passes `selected`, so it is a `menuitemradio`

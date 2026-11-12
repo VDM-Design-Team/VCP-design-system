@@ -6,7 +6,7 @@ import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { AccountStatusTag } from '../../components/account-status-tag';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
-import { EmptyState } from '../../components/empty-state';
+import { TableEmpty } from '../../components/table-empty';
 import { TableCard } from '../../components/table-card';
 import { UserLabel } from '../../components/user-label';
 
@@ -157,6 +157,7 @@ export function UsersTable({
       filters={
         <Input
           type="search"
+          edge="neutral"
           aria-label="Search users"
           placeholder={searchPlaceholder}
           leadingIcon={<Icon name="magnifying-glass" size="sm" />}
@@ -192,15 +193,7 @@ export function UsersTable({
         onSortChange={onSortChange}
         empty={
           empty ??
-          (search.trim() ? (
-            <EmptyState
-              icon={<Icon name="magnifying-glass" size="lg" />}
-              title={`No users match “${search.trim()}”.`}
-              description="Try a different name, email or role."
-            />
-          ) : (
-            <EmptyState icon={<Icon name="users" size="lg" />} title="No users yet." />
-          ))
+          <TableEmpty noun="users" icon="users" search={search} hint="Try a different name, email or role." />
         }
       />
     </TableCard>

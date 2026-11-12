@@ -10,14 +10,15 @@ The primary interactive control.
 | `secondary` | Supporting actions next to a primary | no limit |
 | `neutral` | The way *out* — Cancel beside a destructive answer, Dismiss beside a confirm | no limit |
 | `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
-| `danger` | Destructive, irreversible actions only | 1 |
+| `critical-primary` | Destructive, irreversible actions only (it was `danger` before November 2026) | 1 |
+| `critical-tertiary` | A destructive answer that sits quietly beside others: red text, no fill (Figma's Style=Text, red: the AV edit page's **Discard**). It asks first (a confirm), like `critical-primary` | 1 |
 | `link` | Inline navigation that reads as text | no limit |
 
 ## Props
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| neutral \| tertiary \| danger \| link` | `primary` | |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| critical-primary \| critical-tertiary \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Swaps the left icon for a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`) |
@@ -49,7 +50,7 @@ holding and the border needs a stronger token.
   Small button, design audit 3 Sep 2026) — still under 40, so only use it
   where a pointer is guaranteed.
 - Focus ring is `outline-stroke-focused` at 2px with 2px offset. Never remove it.
-- The filled variants (`primary`, `danger`) keep their label at 4.5:1 at rest,
+- The filled variants (`primary`, `critical-primary`) keep their label at 4.5:1 at rest,
   hovered and pressed, in both themes. In dark the label is dark, so the fill
   gets **lighter** on hover and press, never darker. The story **Filled text
   contrast, both themes** tests it.
@@ -60,4 +61,4 @@ holding and the border needs a stronger token.
 
 - Don't hardcode colors or spacing. `className="bg-[#336afa]"` is a bug — add a token instead.
 - Don't stack two `primary` buttons side by side.
-- Don't use `danger` for "Cancel".
+- Don't use `critical-primary` for "Cancel".

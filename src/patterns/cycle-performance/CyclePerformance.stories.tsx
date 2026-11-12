@@ -91,7 +91,7 @@ export const Narrow: Story = {
   args: { filters: FILTERS({ scope: 'All', quarter: 'Q1', year: '2026' }, () => {}) },
   decorators: [
     (Story) => (
-      <div className="w-96">
+      <div className="w-96 max-w-full">
         <Story />
       </div>
     ),

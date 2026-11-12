@@ -19,7 +19,7 @@ import { InfoHint } from '../info-hint';
  *   how many days are left; a past quarter shows when it started and ended, an upcoming one when it starts and ends. Viewing a quarter that is not
  *   the current one adds a "Go to Current Quarter" button beside the pickers.
  * - **The bar.** Usage is `consumed ÷ allocated`, capped at 100%. **This card owns the status once** (`budgetStatus`):
- *   under 75% is fine (brand blue), 75–99% is a warning, 100% and over is over budget. The caller never maps a number to a tone.
+ *   under 75% is fine (brand blue), 75–99% is a warning (Figma's bright yellow), 100% and over is over budget (Figma's bright red). The caller never maps a number to a tone.
  * - **It reflows with the card, not the screen.** Side by side when the card has room (Figma's 55 / 45 split); stacked
  *   with the quarter details beneath the points when it does not (Figma's narrow view).
  *
@@ -83,15 +83,25 @@ export interface DomainBudgetSummaryProps
   onGoToCurrent?: () => void;
   /** The card's heading. */
   title?: string;
+  /**
+   * The super admin's note on this domain's budget for the quarter (`BudgetTable`'s Optional Notes), shown under the
+   * bar (decided 9 Nov 2026: the admin sees it). Omit it, or pass an empty string, and nothing is drawn.
+   */
+  note?: string;
+  /** What the note is introduced with. */
+  noteLabel?: string;
 }
 
+/* Figma's tooltips, with "quarter" where they say "cycle": a budget is per quarter; a cycle is a planning fortnight. */
 const HINTS = {
-  allocated: 'Total development points assigned for the cycle. Unused points do not roll over.',
+  allocated: 'Total development points assigned for the selected quarter. Unused points do not roll over.',
   consumed: 'Development points used by planned AVs, calculated automatically from their points and active dates.',
-  remaining: 'Remaining = Allocated - Consumed points for the cycle. Negative values indicate overspend.',
+  remaining: 'Remaining = Allocated - Consumed points for the quarter. Negative values indicate overspend.',
 } as const;
 
-const TONE = { fine: 'brand', warning: 'warning', over: 'critical' } as const satisfies Record<
+/* Figma's fills (decided 9 Nov 2026: follow Figma): brand blue, its bright yellow (`caution`, the closest token to
+   Figma's yellow-500), its bright red (`alert`, accent.critical.outline.border). */
+const TONE = { fine: 'brand', warning: 'caution', over: 'alert' } as const satisfies Record<
   BudgetStatus,
   NonNullable<ProgressBarProps['tone']>
 >;
@@ -159,6 +169,8 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
       onYearChange,
       onGoToCurrent,
       title = 'Domain Budget',
+      note,
+      noteLabel = 'Note',
       ...props
     },
     ref,
@@ -169,11 +181,13 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
     const status = budgetStatus(consumed, allocated);
     const percent = budgetUsagePercent(consumed, allocated);
 
+    /* `relative`: the card scrolls sideways when it is too narrow, but a visually hidden span (`sr-only`, absolutely positioned) is not clipped by a scroller
+       that is not its containing block, and one that sits past the edge widens the whole page. The card being the containing block keeps it inside. */
     return (
       <section
         ref={ref}
         aria-labelledby={headingId}
-        className={cn('@container overflow-x-auto rounded-md bg-surface-elevated p-6 font-sans', className)}
+        className={cn('@container relative overflow-x-auto rounded-md bg-surface-elevated p-6 font-sans', className)}
         {...props}
       >
         {/* Never squeezed below what its figures need: narrower than this, the whole card scrolls sideways. */}
@@ -199,6 +213,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
                 )}
                 <Select
                   size="compact"
+                  edge="neutral"
                   ref={quarterRef}
                   aria-label="Quarter"
                   value={String(quarter)}
@@ -210,6 +225,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
                 />
                 <Select
                   size="compact"
+                  edge="neutral"
                   aria-label="Year"
                   value={String(year)}
                   options={years.map(String)}
@@ -286,6 +302,12 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
               tone={TONE[status]}
               value={budgetUsage(consumed, allocated)}
             />
+            {note?.trim() && (
+              /* One paragraph: the label reads first, so "Note: …" is heard as one thing. */
+              <p className="m-0 text-body-sm-regular text-text-secondary">
+                <span className="text-body-sm-semibold text-text-primary">{noteLabel}:</span> {note}
+              </p>
+            )}
           </div>
         </div>
       </section>
