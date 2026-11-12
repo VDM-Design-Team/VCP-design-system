@@ -1,6 +1,6 @@
 # DomainBudgetEditPage *(pattern)*
 
-The main content of the page where an admin sets each domain's development-point budget for a quarter: the title, the quarter and year controls, the budget table, and **Save Changes**. It goes inside `AppShell`,
+The main content of the page where an admin sets each domain's development-point budget for a quarter: the title with the quarter and year controls on its row, the budget table, and **Save Changes**. It goes inside `AppShell`,
 which draws the sidebar, the top bar and the footer.
 
 Built to Figma's `Domain Budget Edit` page in Pages & Flows (`Domain Budgeting`, with its saving and saved frames and the allocated-points input flow).
@@ -29,7 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Moment | What the page does for you |
 |---|---|
-| Always | The quarter control (Q1–Q4, `SegmentedControl` `lg`) and the year `Select` (`md`) are **both 40 high**, top right above the table, so they sit as one row. Never pair a 40 with a 32 |
+| Always | The quarter control (Q1–Q4, `SegmentedControl` `md`) and the year `Select` (`compact`) are **both 36 high**, the dashboard header's size, on the title's row at the right (as the dashboard's filters are), so they sit as one row. Never pair a 36 with a 32. The year takes the lighter `edge="neutral"`, as every filter outside a form does |
 | `saving` | **Save Changes** spins (`aria-busy`), and the table, the quarter and the year are all locked |
 | `dirty` | The browser asks before the page is left (`beforeunload`). The browser's own prompt: there is no dialog to build |
 | `table.loading` | The table shows placeholders, and Save is disabled: there is nothing to save |
@@ -72,7 +72,7 @@ The toasts are the page's because the app owns the toast viewport; the stories s
 
 ## Don't
 
-- **Don't pair the quarter control at 48 with the year select at 40.** The page draws both at 40.
+- **Don't pair the quarter control at its default 48 with the year select at 36.** The page draws both at 36, as the dashboard does.
 - **Don't clear the table when a save fails.** Keep what was typed (`dirty` stays on), say so in the toast, and let Save be tried again.
 - **Don't build a leave-page dialog.** Pass `dirty`; the browser asks.
 - **Don't put Save in the table.** One button for the whole page.

@@ -26,7 +26,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The main content of the page where an admin sets each domain’s point budget for a quarter: the title, the quarter and year controls (both 40 high), the budget table and Save Changes. ' +
+          'The main content of the page where an admin sets each domain’s point budget for a quarter: the title, the quarter and year controls (both 36 high, as the dashboard’s are), the budget table and Save Changes. ' +
           'It locks everything while saving and makes the browser ask before leaving with unsaved changes; the data, the save and the toasts are the page’s. It goes inside `AppShell`.',
       },
     },
@@ -119,9 +119,9 @@ export const SavingTheChanges: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('heading', { level: 1, name: 'Domain Budget' })).toBeVisible();
-    /* The quarter control and the year select are the same height: 40. */
-    await expect(Math.round(canvas.getByRole('radiogroup', { name: 'Quarter' }).getBoundingClientRect().height)).toBe(40);
-    await expect(Math.round(canvas.getByRole('combobox', { name: 'Year' }).parentElement!.getBoundingClientRect().height)).toBe(40);
+    /* The quarter control and the year select are the same height: 36, as on the dashboard. */
+    await expect(Math.round(canvas.getByRole('radiogroup', { name: 'Quarter' }).getBoundingClientRect().height)).toBe(36);
+    await expect(Math.round(canvas.getByRole('combobox', { name: 'Year' }).parentElement!.getBoundingClientRect().height)).toBe(36);
     /* Nothing changed: leaving is free. An edit: the browser is asked to confirm. */
     await expect(asksBeforeLeaving()).toBe(false);
     await userEvent.click(canvas.getByRole('button', { name: 'Increase Content allocated points' }));

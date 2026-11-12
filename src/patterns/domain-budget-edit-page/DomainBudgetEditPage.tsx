@@ -15,7 +15,7 @@ export const BUDGET_QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
  *
  * **It guarantees the parts a page is easy to get wrong:**
  *
- * - **The quarter and year controls are both 40 high** (the Q1–Q4 `SegmentedControl` at `lg`, the year `Select` at `md`), top right above the table, so they sit as one row.
+ * - **The quarter and year controls are both 36 high** (the Q1–Q4 `SegmentedControl` at `md`, the year `Select` at `compact`), the dashboard header's size, on the title's row, on the right (as the dashboard's filters are), so they sit as one row. The year takes the lighter `edge="neutral"`, as every filter outside a form does.
  * - **While saving** (`saving`) the Save button spins and everything is locked: the table, the quarter and the year.
  * - **Unsaved changes** (`dirty`) make the browser ask before the page is left (`beforeunload`). There is no custom dialog.
  * - **Save is not offered while the budgets load** (`table.loading`): there is nothing to save.
@@ -79,19 +79,24 @@ export function DomainBudgetEditPage({
 
   return (
     <div className={cn('flex min-w-0 flex-col font-sans', className)} {...props}>
-      <PageTitle title={title} />
+      <PageTitle
+        title={title}
+        /* The period controls sit on the title's row, on the right, as the dashboard's filters do (`DashboardHeader`). Both are 36 high, as the dashboard's are — the segmented control at `md` (its default is 48),
+           the select at `compact` — so they sit as one row. The year is a filter, so it takes the lighter edge. */
+        actions={
+          <>
+            <SegmentedControl
+              size="md"
+              aria-label="Quarter"
+              options={quarters.map((q) => ({ value: q, label: q, disabled: saving }))}
+              value={quarter}
+              onChange={onQuarterChange}
+            />
+            <Select size="compact" edge="neutral" aria-label="Year" value={year} options={[...years]} onChange={onYearChange} disabled={saving} />
+          </>
+        }
+      />
       <div className="flex min-w-0 flex-col gap-4 px-8 pb-8">
-        <div className="flex items-center justify-end gap-3">
-          {/* Both 40 high — the segmented control at `lg` (its default is 48), the select at `md` — so they sit as one row. */}
-          <SegmentedControl
-            size="lg"
-            aria-label="Quarter"
-            options={quarters.map((q) => ({ value: q, label: q, disabled: saving }))}
-            value={quarter}
-            onChange={onQuarterChange}
-          />
-          <Select size="md" aria-label="Year" value={year} options={[...years]} onChange={onYearChange} disabled={saving} />
-        </div>
         <BudgetTable {...table} disabled={saving} />
         <div className="flex justify-end">
           <Button loading={saving} disabled={table.loading} onClick={onSave}>
