@@ -49,13 +49,16 @@ Never show both. `error` wins whenever it is set.
 | `size` | `sm \| md \| lg` | `md` | Drives the label and message type ramp only — the control sizes itself |
 | `fullWidth` | `boolean` | `false` | Stretches the field to its container |
 | `loading` | `boolean` | `false` | Sets `aria-busy` on the field and disables the "+" |
-| `htmlFor` | `string` | generated | Only needed when you already own the control's id |
+| `htmlFor` | `string` | the control's own `id`, else generated | Only needed when the control is not a single element (see below). A single element's own `id` is used without it |
 | `children` | `ReactNode \| (props) => ReactNode` | — | See below |
 
 ### Wiring the control
 
 - **A single element** (`<Input />`, `<select>`, `<textarea>`) — Field clones it and
-  injects `id`, `aria-describedby` and `aria-invalid`. Anything you set yourself wins.
+  injects `id`, `aria-describedby` and `aria-invalid`. Anything you set yourself wins,
+  and Field works with it: an `id` of your own is the one the label points at, and an
+  `aria-describedby` of your own keeps its ids, with the helper's or error's added
+  after them. The `ControlWithItsOwnIds` story is the test.
 - **A function** — Field calls it with `{ id, 'aria-describedby', 'aria-invalid' }`
   so you can place them by hand. Use this when the control sits inside a wrapper,
   or when there is more than one element in the slot.
@@ -80,9 +83,11 @@ Never show both. `error` wins whenever it is set.
 
 - **A custom control** (a `contenteditable` field, which `<label for>` cannot name) receives the label's id as `aria-labelledby`, unless it already has `aria-labelledby` or `aria-label`; the function form gets it in its props. Clicking the label focuses such a control.
 
-- The label is a real `<label htmlFor>`. Clicking it focuses the control.
+- The label is a real `<label htmlFor>`, pointed at the control's own `id` when it
+  has one. Clicking it focuses the control.
 - `error` renders with `role="alert"`, so it is announced the moment it appears.
-  Both `helper` and `error` are referenced by the control's `aria-describedby`.
+  Both `helper` and `error` are referenced by the control's `aria-describedby`,
+  added to any description the control already has, never in place of it.
 - `aria-invalid` goes on the control, not the wrapper — validation state belongs
   to the thing being validated.
 - The required marker is `aria-hidden`; the announcement comes from the visually

@@ -37,7 +37,7 @@ vocabulary, it is halfway to being a pattern already; finish the thought.
 | `sort` | `{ key, direction: 'asc' \| 'desc' }` | — | What the caller sorted by; drawn as `aria-sort` + a sort glyph |
 | `onSortChange` | `(sort) => void` | — | Click asks for `asc`; clicking the sorted column flips it |
 | `selectable` | `boolean` | — | Leading checkbox column + select-all header (indeterminate when partial) |
-| `selected` / `onSelectedChange` | ids / `(ids) => void` | — | Ids are `row.id`, falling back to the row index — give rows real ids |
+| `selected` / `onSelectedChange` | ids / `(ids) => void` | — | Ids are `row.id`, falling back to the row index — give rows real ids. May hold rows not in `rows` (another page); select-all leaves those alone |
 | `selectLabel` | `(row) => string` | `Select row ${id}` | The per-row checkbox's accessible name — give it the row's real name |
 | `empty` | `ReactNode` | `<TableEmpty />` (“Nothing here yet.”) | What no rows say. Pass the table's own `<TableEmpty noun="…" icon="…" />` so it names what is missing; see `docs/table-empty.md` |
 | `dense` | `boolean` | — | 44 rows instead of 56 |
@@ -150,6 +150,10 @@ No new tokens.
   announced through `aria-sort`, not just the caret.
 - Selection: the select-all checkbox is named, `indeterminate` while partial;
   per-row checkboxes need `selectLabel` to announce distinctly.
+- Select-all speaks for the rows shown. `selected` may also hold rows another
+  page or a filter is hiding; the header is checked only when every row shown
+  is selected, and select-all adds or removes the rows shown, never the hidden
+  ones. So a selection made on page 1 survives page 2.
 - Row ids fall back to the index — fine until rows reorder. **If the table
   sorts or filters, real `id`s are required** or selection silently follows
   positions instead of records.

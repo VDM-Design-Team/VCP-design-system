@@ -130,7 +130,10 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
     ref,
   ) => {
     const generatedId = React.useId();
-    const controlId = htmlFor ?? `${generatedId}-control`;
+    /* A control that brings its own id keeps it, so the label must point at that id, not at one Field made up. */
+    const element = React.isValidElement(children) ? (children.props as Record<string, unknown>) : undefined;
+    const ownId = element?.id != null && element.id !== '' ? String(element.id) : undefined;
+    const controlId = htmlFor ?? ownId ?? `${generatedId}-control`;
     const messageId = `${generatedId}-message`;
     const labelId = `${generatedId}-label`;
 
@@ -154,7 +157,8 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
       const existing = children.props as Record<string, unknown>;
       control = React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         id: existing.id ?? controlProps.id,
-        'aria-describedby': existing['aria-describedby'] ?? controlProps['aria-describedby'],
+        /* Add the helper's or error's id to a describedby the control already has, never replace either. */
+        'aria-describedby': mergeIds(existing['aria-describedby'], controlProps['aria-describedby']),
         'aria-invalid': existing['aria-invalid'] ?? controlProps['aria-invalid'],
         /* Not over a name the control already has. */
         'aria-labelledby':
@@ -226,6 +230,12 @@ export const Field = React.forwardRef<HTMLDivElement, FieldProps>(
   },
 );
 Field.displayName = 'Field';
+
+/** Space-separated id lists joined, each id once, in order; `undefined` when there are none. */
+function mergeIds(...lists: unknown[]): string | undefined {
+  const ids = lists.flatMap((list) => (typeof list === 'string' ? list.split(/\s+/) : [])).filter(Boolean);
+  return ids.length ? Array.from(new Set(ids)).join(' ') : undefined;
+}
 
 /**
  * Icon-only "+" for repeatable groups. The visible dot stays small, but the
