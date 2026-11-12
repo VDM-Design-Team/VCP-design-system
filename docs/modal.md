@@ -24,7 +24,7 @@ A dialog's footer buttons are **`md` (40 high)**, and they take their colour fro
 | Button | Default tone | `critical` tone |
 |---|---|---|
 | **`ModalCancel`** (calls `onClose` unless given an `onClick`; `children` default "Cancel") | `secondary` | the grey `neutral` |
-| **`ModalConfirm`** (the answer; takes `type`, `form`, `loading`, `disabled`, `onClick`) | `primary` | the red `danger` |
+| **`ModalConfirm`** (the answer; takes `type`, `form`, `loading`, `disabled`, `onClick`) | `primary` | the red `critical-primary` |
 
 The `actions` row is these two buttons. A hand-built `footer` uses them too: `<ModalCancel /><ModalConfirm onClick={…}>Delete claim</ModalConfirm>`. **A grey Cancel goes beside a red answer** — a blue-outlined Cancel next to a red button is two competing colours. Extra buttons (a third action, a tertiary Cancel the design draws) can stay plain `Button`s at the
 default size. Buttons inside the *body* of a dialog (not the footer) are not affected.
@@ -43,7 +43,7 @@ The `Saving` story is the test: once Publish is loading, Escape and a backdrop c
 ## The critical tone
 
 A dialog whose answer destroys something takes `tone="critical"`. Its buttons are the system's
-critical pair — a **neutral** (grey outline) Cancel and a **danger** (red) answer — rather than
+critical pair — a **neutral** (grey outline) Cancel and a **critical** (red) answer — rather than
 the default `secondary` (blue outline) + `primary`. Two reasons for neutral: an outlined *brand*
 button beside a red one is two competing colours and reads as a second call to action, and
 Cancel is the way out, so it should be the quietest button. (Design note, Nov 2026: Figma's
@@ -90,7 +90,7 @@ Rules of thumb:
 | `description` | `ReactNode` | — | Caption under the title (`caption-md-medium`, 500), wired to `aria-describedby`. **With a caption the header has 16 below it** (8 without), so content never sits close against it. Left out, `false` or blank, nothing renders for it |
 | `footer` | `ReactNode` | — | Right-aligned action row at the bottom of the sheet. Usually two `Button`s. Left out, `false` or blank, no footer renders |
 | `size` | `sm \| md \| lg \| xl` | `md` | Max width: 384 / 512 / 640 / 800 |
-| `actions` | `{ cancelLabel?, confirm: { label, onClick?, type?, form?, loading?, disabled? } }` | — | The standard action row: Cancel (calls `onClose`) and the one answer. `secondary` + `primary`, or `neutral` + `danger` in the critical tone. Ignored when `footer` is set |
+| `actions` | `{ cancelLabel?, confirm: { label, onClick?, type?, form?, loading?, disabled? } }` | — | The standard action row: Cancel (calls `onClose`) and the one answer. `secondary` + `primary`, or `neutral` + `critical-primary` in the critical tone. Ignored when `footer` is set |
 | `tone` | `default \| critical` | `default` | `critical`: the answer destroys something. Swaps `actions` to grey Cancel + red answer, and defaults `role="alertdialog"`, `showClose={false}`, `dismissible={false}` (each overridable) |
 | `role` | `dialog \| alertdialog` | `dialog` | `alertdialog` for a destructive confirmation. Give it a `description` |
 | `dismissible` | `boolean` | `true` | `false` stops a backdrop click closing it. **Escape still works** — see Accessibility |

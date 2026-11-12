@@ -221,7 +221,7 @@ const ROW_ACTIONS: MenuItem[] = [
   { key: 'edit', label: 'Edit', icon: 'note-pencil' },
   { key: 'duplicate', label: 'Duplicate' },
   { divider: true },
-  { key: 'delete', label: 'Delete', icon: 'trash', tone: 'danger' },
+  { key: 'delete', label: 'Delete', icon: 'trash', tone: 'critical' },
 ];
 
 const asColumns = (cols: DataTableColumn<Claim>[]) => cols as DataTableColumn<unknown>[];

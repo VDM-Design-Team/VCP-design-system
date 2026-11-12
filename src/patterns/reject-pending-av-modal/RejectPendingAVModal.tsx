@@ -16,7 +16,7 @@ import { Button } from '../../atoms/button';
  * dialog says so by what it lets you press rather than by an error after the
  * fact, which is the better half of the two.
  *
- * **Reject is the `primary` button, not `danger`.** Rejecting a pending value
+ * **Reject is the `primary` button, not `critical-primary`.** Rejecting a pending value
  * is a decision, not a destruction — nothing is lost, and the submitter is
  * told why. `ConfirmDeleteAVModal` is where the red button lives.
  *

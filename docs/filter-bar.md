@@ -89,6 +89,8 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 - **The fields' edges are the neutral outline** (`neutral.outline.border.default`, slate-400: about 2.6:1 on white), lighter than the 3:1 `stroke.strong` every other field uses, because a whole row of dark outlines is noisy beside a table. This is a deliberate exception: each field here is also identified by its icon (the magnifier, the chevron, the calendar) and its placeholder, and an error, a warning and focus still draw their own stronger edge. If design wants the full 3:1 back, drop the `edge` prop on the fields in `FilterBar`.
 
+  **This is the rule for every filter, not only this bar's.** A search, select or date in any filter row (a `TableCard`'s `filters` slot, a toolbar, a card header: `UsersTable`, `AccountsTable`, `HolidayTable`, `PlanningFilters`, `GanttChart`, `CyclePerformance`, `DomainBudgetSummary`) takes `edge="neutral"`. Fields in a form or a dialog keep the default `strong` edge, and so do controls inside a table cell (a row's points select) or in a picker's popover.
+
 - Each field is named by its visible label (`<label for>`): "Priority", "Tags", "Status", and the people by
   theirs, with the value after it ("Assignee Amy Lee"). The period button's name starts with its label, then
   the range ("Date, 09/09/2026-15/09/2026"), so what is read starts with what is on screen. The search field is
