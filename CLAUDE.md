@@ -44,6 +44,10 @@ Claude Design project — those mirror this repo, not the other way round.
    - **A field's edge clears 3:1 in both themes** at rest, in error, with a
      warning and focused (`npm run check:field-contrast`). A token chosen for a
      banner's outline can be too faint for a field.
+   - **Filters use the lighter edge.** A search, select or date in a filter row (a toolbar, a `TableCard`'s
+     `filters`, a card header) takes `edge="neutral"`: a row of strong outlines beside a table is noise
+     (#328, #336). Fields in a form or a dialog keep the default edge. It is a documented exception to the
+     3:1 above (about 2.6:1; each filter is also named by its icon and placeholder), so check it in dark too.
    - **`decorators: []` on a story removes nothing**: a story's decorators add
      to the meta's. Make the meta's decorator skip the story instead
      (`npm run lint:stories`).

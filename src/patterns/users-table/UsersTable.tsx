@@ -157,6 +157,7 @@ export function UsersTable({
       filters={
         <Input
           type="search"
+          edge="neutral"
           aria-label="Search users"
           placeholder={searchPlaceholder}
           leadingIcon={<Icon name="magnifying-glass" size="sm" />}
