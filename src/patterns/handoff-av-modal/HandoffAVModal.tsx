@@ -1,13 +1,18 @@
 import * as React from 'react';
-import { Modal } from '../../components/modal';
-import { Banner } from '../../components/banner';
-import { Field } from '../../components/field';
-import { Dropzone } from '../../atoms/dropzone';
-import { FileAttachment } from '../../components/file-attachment';
 import { Button } from '../../atoms/button';
-import { Icon } from '../../atoms/icon';
-import { Input } from '../../atoms/input';
-import { Select } from '../../atoms/select';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
+import {
+  HandoffForm,
+  OVERDUE_REASONS,
+  blankHandoffEntry,
+  handoffLinksValid,
+  type HandoffAttachment,
+  type HandoffEntry,
+  type OverdueReasonOption,
+} from '../handoff-form';
+
+export { OVERDUE_REASONS };
+export type { OverdueReasonOption };
 
 /**
  * HandoffAVModal — what an assignee fills in to hand an Added Value on: the
@@ -17,21 +22,23 @@ import { Select } from '../../atoms/select';
  * Read off the Figma `Handoff_AV_Modal` (`5342:78539`, audit batch 4,
  * 11 September 2026), both of its variants.
  *
- * **`overdueDays` is what switches the dialog.** Pass it and the design's
- * second variant appears: a warning banner naming the delay, a required
- * overdue reason, and a notes field. Leave it out and none of that renders.
- * The reason is **required when overdue** — the design draws the error state
- * for exactly that, so this validates on submit rather than letting a late
- * handoff through unexplained.
+ * **The form is `HandoffForm`**, the same one `BulkActionHandoffModal` draws for
+ * each of several Added Values, so what a handoff asks for is decided in one
+ * place: a **Handoff Date**, chosen from the calendar, is **required**; a late
+ * value (`overdueDays`: the banner, the reason and the notes) must say **why**;
+ * links, files and notes are optional, and a link that is typed must be a valid
+ * `https://` address. This dialog **asks on submit**: an incomplete handoff is
+ * refused with the reason under the field, and focus goes to the first one.
  *
  * **The footer is the domain's.** Design and Governance hand off; Development
  * can hand off *and publish*, which is a third button and a different weight
  * on the other two. That is `_Handoff_AV_Modal_Buttons` in the design, and it
- * is the only thing the domain changes here.
+ * is the only thing the domain changes here. The answer is `ModalConfirm`
+ * (40 high); Cancel is `ModalCancel`.
  *
  * Uncontrolled, like `ReportProblemModal`: the draft lives here and leaves once
  * through `onHandoff`, because a handoff is composed and sent in one go. A
- * caller that needs the values as they change should compose `Modal` itself.
+ * caller that needs the values as they change should compose `HandoffForm`.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -41,43 +48,12 @@ import { Select } from '../../atoms/select';
 /** Which footer the dialog draws. The design gives these two their own set. */
 export type HandoffDomain = 'design-governance' | 'development';
 
-export interface OverdueReasonOption {
-  value: string;
-  /** The bold half of the design's "Label: description" line. */
-  label: string;
-  description: string;
-}
-
-/**
- * The six reasons a value can be late, straight from the Figma dropdown. Owned
- * here for the same reason `RejectionReason` owns its sets: they are drawn in
- * the design file, not configured per domain.
- */
-export const OVERDUE_REASONS: readonly OverdueReasonOption[] = [
-  { value: 'dependencies', label: 'Dependencies', description: 'Waiting on others (team or external)' },
-  { value: 'scope-changes', label: 'Scope Changes', description: 'Requirements unclear or changed' },
-  {
-    value: 'resourcing',
-    label: 'Resourcing',
-    description: 'Not enough time, people, or availability (incl. leave)',
-  },
-  { value: 'prioritization', label: 'Prioritization', description: 'Deprioritized due to other work' },
-  {
-    value: 'process-info-gaps',
-    label: 'Process / Info Gaps',
-    description: 'Missing information, approvals, or internal blockers',
-  },
-  {
-    value: 'technical-issues',
-    label: 'Technical Issues',
-    description: 'Bugs, systems, or technical constraints',
-  },
-];
-
 export interface HandoffDraft {
   date: string;
   links: string[];
   attachments: File[];
+  /** The ids (the names, when none was given) of the files already on the value that were removed here. */
+  removedAttachments: string[];
   /** Only present when the dialog was overdue. */
   overdueReason?: string;
   notes?: string;
@@ -95,9 +71,9 @@ export interface HandoffAVModalProps {
    * variant — the banner, the required reason, and the notes field.
    */
   overdueDays?: number;
-  /** Files already attached to the value. */
-  attachments?: Array<{ name: string; thumb?: string }>;
-  /** Prefills the date field. The caller owns what "today" means. */
+  /** Files already attached to the value: each a card that previews on click and can be removed. */
+  attachments?: readonly HandoffAttachment[];
+  /** Prefills the date (ISO `yyyy-mm-dd`). The caller owns what "today" means. It starts blank when left out: a handoff date is chosen, not assumed. */
   defaultDate?: string;
   loading?: boolean;
 }
@@ -114,61 +90,76 @@ export function HandoffAVModal({
 }: HandoffAVModalProps) {
   const formId = React.useId();
   const isOverdue = overdueDays != null;
-
-  const [date, setDate] = React.useState(defaultDate);
-  const [links, setLinks] = React.useState<string[]>(['']);
-  const [files, setFiles] = React.useState<File[]>([]);
-  const [overdueReason, setOverdueReason] = React.useState('');
-  const [notes, setNotes] = React.useState('');
-  const [reasonError, setReasonError] = React.useState<string>();
-  /* `publish` is decided by which button was pressed, and read by the one
-     submit handler the form has. */
+  const [entry, setEntry] = React.useState<HandoffEntry>(() => blankHandoffEntry(defaultDate));
+  const [errors, setErrors] = React.useState<{ date?: string; overdueReason?: string; links?: boolean }>({});
+  /* A fresh form every time it opens: a handoff abandoned half-filled should not come back on the next one. */
+  const [session, setSession] = React.useState(0);
+  /* `publish` is decided by which button was pressed, and read by the one submit handler the form has. */
   const publishRef = React.useRef(false);
 
-  /* A fresh dialog every time it opens: a handoff abandoned half-filled should
-     not come back on the next one. */
   React.useEffect(() => {
     if (open) return;
-    setDate(defaultDate);
-    setLinks(['']);
-    setFiles([]);
-    setOverdueReason('');
-    setNotes('');
-    setReasonError(undefined);
+    setEntry(blankHandoffEntry(defaultDate));
+    setErrors({});
+    setSession((n) => n + 1);
   }, [open, defaultDate]);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    /* The design draws an error state on this field and nothing else, which is
-       the whole validation rule: a late value has to say why. */
-    if (isOverdue && !overdueReason) {
-      setReasonError('Please select a reason before completing the AV');
-      return;
-    }
+    /* Asked on submit: a date, a reason when late, and a link that is typed must be an address. */
+    const next: typeof errors = {};
+    if (!entry.date) next.date = 'Select a handoff date.';
+    if (isOverdue && !entry.overdueReason) next.overdueReason = 'Please select a reason before completing the AV';
+    if (!handoffLinksValid(entry)) next.links = true;
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
     onHandoff(
       {
-        date,
-        links: links.filter((link) => link.trim() !== ''),
-        attachments: files,
-        ...(isOverdue ? { overdueReason, notes } : {}),
+        date: entry.date,
+        links: entry.links.filter((link) => link.trim() !== ''),
+        attachments: entry.files,
+        removedAttachments: entry.removed,
+        ...(isOverdue ? { overdueReason: entry.overdueReason, notes: entry.notes } : {}),
       },
       { publish: publishRef.current },
     );
   };
 
-  const handoffButton = (
-    <Button
-      type="submit"
-      form={formId}
-      variant={domain === 'development' ? 'secondary' : 'primary'}
-      loading={loading && !publishRef.current}
-      onClick={() => {
-        publishRef.current = false;
-      }}
-    >
-      Handoff
-    </Button>
-  );
+  /* A fixed error says what is wrong until it is put right, then goes. */
+  const change = (next: HandoffEntry) => {
+    setEntry(next);
+    setErrors((now) => ({
+      date: next.date ? undefined : now.date,
+      overdueReason: next.overdueReason ? undefined : now.overdueReason,
+      links: now.links && !handoffLinksValid(next) ? true : undefined,
+    }));
+  };
+
+  const handoffButton =
+    domain === 'development' ? (
+      <Button
+        type="submit"
+        form={formId}
+        variant="secondary"
+        loading={loading && !publishRef.current}
+        onClick={() => {
+          publishRef.current = false;
+        }}
+      >
+        Handoff
+      </Button>
+    ) : (
+      <ModalConfirm
+        type="submit"
+        form={formId}
+        loading={loading}
+        onClick={() => {
+          publishRef.current = false;
+        }}
+      >
+        Handoff
+      </ModalConfirm>
+    );
 
   return (
     <Modal
@@ -181,11 +172,12 @@ export function HandoffAVModal({
       footer={
         domain === 'development' ? (
           <>
-            <Button variant="tertiary" type="button" disabled={loading} onClick={onClose}>
+            {/* A step down in weight so the one primary is Handoff & Publish: a plain text `Button` at the footer's size. */}
+            <Button variant="tertiary" size="md" type="button" disabled={loading} onClick={onClose}>
               Cancel
             </Button>
             {handoffButton}
-            <Button
+            <ModalConfirm
               type="submit"
               form={formId}
               loading={loading && publishRef.current}
@@ -194,113 +186,18 @@ export function HandoffAVModal({
               }}
             >
               Handoff &amp; Publish
-            </Button>
+            </ModalConfirm>
           </>
         ) : (
           <>
-            <Button variant="secondary" type="button" disabled={loading} onClick={onClose}>
-              Cancel
-            </Button>
+            <ModalCancel disabled={loading} />
             {handoffButton}
           </>
         )
       }
     >
-      <form id={formId} className="flex flex-col gap-6" onSubmit={submit}>
-        {isOverdue && (
-          /* `live="off"`: the banner is present when the dialog opens rather
-             than arriving, so announcing it would interrupt the name. */
-          <Banner tone="warning">
-            This value is <strong>Overdue</strong> by{' '}
-            <strong>
-              {overdueDays} {overdueDays === 1 ? 'day' : 'days'}
-            </strong>
-            .
-          </Banner>
-        )}
-
-        <Field label="Handoff Date">
-          <Input
-            fullWidth
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            leadingIcon={<Icon name="calendar-blank" size="sm" />}
-            placeholder="DD-MM-YYYY"
-          />
-        </Field>
-
-        {isOverdue && (
-          <>
-            <Field label="Overdue Reason" error={reasonError}>
-              <Select
-                fullWidth
-                options={OVERDUE_REASONS.map((reason) => ({
-                  value: reason.value,
-                  label: `${reason.label}: ${reason.description}`,
-                }))}
-                value={overdueReason}
-                onChange={(value) => {
-                  setOverdueReason(value);
-                  setReasonError(undefined);
-                }}
-                placeholder="Select a reason"
-                invalid={Boolean(reasonError)}
-              />
-            </Field>
-
-            <Field label="Additional Notes (optional)">
-              <Input fullWidth value={notes} onChange={(event) => setNotes(event.target.value)} />
-            </Field>
-          </>
-        )}
-
-        <Field label="Demo Links">
-          {/* Repeatable, so the label names the group and each row names its
-              own position — "Demo link 2" rather than three identical boxes. */}
-          <div className="flex flex-col items-start gap-2">
-            {links.map((link, index) => (
-              <Input
-                key={index}
-                fullWidth
-                value={link}
-                aria-label={`Demo link ${index + 1}`}
-                onChange={(event) =>
-                  setLinks((current) =>
-                    current.map((value, i) => (i === index ? event.target.value : value)),
-                  )
-                }
-              />
-            ))}
-            <Button
-              type="button"
-              size="sm"
-              iconLeft={<Icon name="plus" size="sm" />}
-              onClick={() => setLinks((current) => [...current, ''])}
-            >
-              Add Another Link
-            </Button>
-          </div>
-        </Field>
-
-        <Field label="Attachments">
-          <div className="flex flex-col gap-3">
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-3">
-                {attachments.map((file) => (
-                  <FileAttachment
-                    key={file.name}
-                    name={file.name}
-                    thumb={file.thumb}
-                    kind="image"
-                  />
-                ))}
-              </div>
-            )}
-            <Dropzone
-              onFiles={(picked) => setFiles((current) => [...current, ...picked])}
-            />
-          </div>
-        </Field>
+      <form id={formId} noValidate onSubmit={submit}>
+        <HandoffForm key={session} overdueDays={overdueDays} attachments={attachments} defaultDate={defaultDate} errors={errors} onChange={change} />
       </form>
     </Modal>
   );

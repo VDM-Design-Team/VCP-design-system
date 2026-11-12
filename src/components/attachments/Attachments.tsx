@@ -15,6 +15,8 @@ import { FileAttachment } from '../file-attachment';
  * - **The ✕ shows when the caller can remove** (`onRemove`), on every card. Removing is the caller's to decide: a dialog that stages removals until Save simply stops passing the file in `items`.
  * - **The viewer is `AttachmentViewer`**, over whatever is on screen (a dialog included: the stack closes the preview first on Escape, and focus returns to the card that opened it). `onDownload` adds its button.
  * - **Focus never drops.** Removing a card takes its ✕ with it, so focus goes to the next card's ✕, else the previous one's, else the drop area. Do it for the keyboard, in one place.
+ * - **`disabled` locks the set**, for while an upload is in flight: the drop area takes nothing and **the ✕s are gone**, so what is staged cannot change after it was sent. The cards still open in the viewer.
+ *   The ✕ is hidden, not greyed: `FileAttachment` has a card with a ✕ and a card without, and no third. A ✕ that had focus hands it to its own card.
  *
  * It holds no files. `items` in, `onFiles` and `onRemove` out; `useAttachmentFiles` (`lib/attachment-files`) is the hook for a dialog or form that holds the files just picked, and `fileKind` the one place that
  * chooses a glyph for a `File`.
@@ -41,7 +43,7 @@ export interface AttachmentsProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   maxSize?: number;
   /** Called with every file the drop area refused, and why. */
   onReject?: DropzoneProps['onReject'];
-  /** Locks the drop area (an upload is in flight). */
+  /** Locks the set (an upload is in flight): the drop area takes no files and no card has a ✕, so nothing staged can change. Cards still open in the viewer. */
   disabled?: boolean;
   /** The list's accessible name. */
   label?: string;
@@ -65,6 +67,17 @@ export const Attachments = React.forwardRef<HTMLDivElement, AttachmentsProps>(
       (next ?? zone.current)?.focus();
     }, [items]);
 
+    /* `disabled` takes the ✕s away, one render after it arrives: first, while they are still there, a ✕ that has focus hands it to its own card (the button beside it),
+       so focus is never on a control that is about to go. Both renders land before the browser paints. */
+    const [locked, setLocked] = React.useState(!!disabled);
+    React.useLayoutEffect(() => {
+      const active = document.activeElement;
+      if (disabled && active instanceof HTMLElement && list.current?.contains(active) && active.matches('button[aria-label^="Remove "]')) {
+        active.closest('[data-attachment-id]')?.querySelector<HTMLElement>('button:not([aria-label^="Remove "])')?.focus();
+      }
+      setLocked(!!disabled);
+    }, [disabled]);
+
     /* A card went while the viewer was open on it (a caller that removes from elsewhere): close it rather than show another file. */
     React.useEffect(() => {
       if (viewing !== null && viewing >= items.length) setViewing(null);
@@ -83,7 +96,7 @@ export const Attachments = React.forwardRef<HTMLDivElement, AttachmentsProps>(
                   domain={item.domain}
                   onClick={() => setViewing(index)}
                   onRemove={
-                    onRemove
+                    onRemove && !locked
                       ? () => {
                           const neighbour = items[index + 1] ?? items[index - 1] ?? null;
                           afterRemove.current = { gone: item.id, to: neighbour?.id ?? null };

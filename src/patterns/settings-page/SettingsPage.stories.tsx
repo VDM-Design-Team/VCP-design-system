@@ -8,6 +8,9 @@ import { ChangePasswordForm } from '../change-password-form';
 import { ManualsTable, type ManualRow } from '../manuals-table';
 import { PersonalInfoForm } from '../personal-info-form';
 import { SystemChangelog } from '../system-changelog';
+import { AnnouncementsPanel } from '../announcements-panel';
+import { TagManagement, type TagManagementList } from '../tag-management';
+import type { Announcement } from '../../lib/announcement';
 import { UsersTable, type UserRow } from '../users-table';
 
 const USERS: UserRow[] = [
@@ -33,10 +36,45 @@ const MANUALS: ManualRow[] = [
   },
 ];
 
-/** Settings' body for a tab. The tabs with a pattern use it; the two that are not built yet say so. */
-const placeholder = (what: string) => (
-  <div className="rounded-md bg-surface-elevated p-6 text-body-md-regular text-text-secondary">{what}: not built yet.</div>
-);
+/** The admin's Admin Panel tab: Tag Management. The page owns the lists, so adding, renaming and deleting change them here. */
+const ADMIN_LISTS: TagManagementList[] = [
+  { id: 'domains', title: 'Domains', kind: 'domain', items: ['Design', 'BESA Content', 'BESA Partner'].map((label) => ({ id: label, label })) },
+  { id: 'global-tags', title: 'Global Tags', items: ['Bug', 'New Feature', 'Improvement'].map((label) => ({ id: label, label })) },
+  { id: 'domain-tags', title: 'Domain Tags', items: [{ id: 'General Design', label: 'General Design' }] },
+];
+function AdminPanel() {
+  const [lists, setLists] = React.useState(ADMIN_LISTS);
+  const change = (id: string, edit: (items: TagManagementList['items']) => TagManagementList['items']) =>
+    setLists((all) => all.map((l) => (l.id === id ? { ...l, items: edit(l.items) } : l)));
+  return (
+    <TagManagement
+      lists={lists}
+      onAdd={(list, name) => change(list.id, (items) => [...items, { id: name, label: name }])}
+      onRename={(list, item, name) => change(list.id, (items) => items.map((i) => (i.id === item.id ? { ...i, label: name } : i)))}
+      onDelete={(list, item) => change(list.id, (items) => items.filter((i) => i.id !== item.id))}
+    />
+  );
+}
+
+/** The admin's Announcements tab: the overview, the list and the dialogs. The page owns the list; View Changelog only asks. */
+const ANNOUNCEMENTS: Announcement[] = [
+  { id: 2, title: 'Faster search', version: 'v1.18.1', kind: 'update', date: '2026-05-20', description: 'Search answers as you type.', features: ['Instant results'] },
+  { id: 1, title: 'Domain budgets arrive in Settings', version: 'v1.18.0', kind: 'feature', date: '2026-05-04', features: ['Edit budget per domain'] },
+];
+function AnnouncementsTab() {
+  const [list, setList] = React.useState(ANNOUNCEMENTS);
+  return (
+    <AnnouncementsPanel
+      announcements={list}
+      overview={{ total: list.length, latestVersion: list[0]?.version ?? 'v0.0.0', lastUpdated: list[0]?.date ?? '2026-01-01' }}
+      onCreate={(draft) => setList((all) => [{ ...draft, id: Date.now(), date: '2026-05-21' }, ...all])}
+      onUpdate={(announcement, draft) => setList((all) => all.map((a) => (a.id === announcement.id ? { ...a, ...draft } : a)))}
+      onDelete={(announcement) => setList((all) => all.filter((a) => a.id !== announcement.id))}
+      onViewChangelog={fn()}
+      onRefresh={fn()}
+    />
+  );
+}
 
 /** What a page would pass. Only the audience's own tabs show, so one set of panels serves both. */
 const PANELS: Partial<Record<SettingsTabKey, React.ReactNode>> = {
@@ -52,8 +90,8 @@ const PANELS: Partial<Record<SettingsTabKey, React.ReactNode>> = {
     />
   ),
   users: <UsersTable rows={USERS} search="" onSearchChange={fn()} page={1} pageCount={1} onPageChange={fn()} onNewUser={fn()} onView={fn()} />,
-  'admin-panel': placeholder('Admin Panel'),
-  announcements: placeholder('Announcements'),
+  'admin-panel': <AdminPanel />,
+  announcements: <AnnouncementsTab />,
   manuals: <ManualsTable rows={MANUALS} page={1} pageCount={1} onPageChange={fn()} />,
 };
 
@@ -115,6 +153,16 @@ export const Admin: Story = {
     await expect(c.getByRole('button', { name: /New User/ })).toBeVisible();
     await userEvent.click(c.getByRole('tab', { name: 'Manuals' }));
     await expect(c.getByText('Getting started with VCP')).toBeVisible();
+    /* The Admin Panel is Tag Management: its lists, with their own Add New. */
+    await userEvent.click(c.getByRole('tab', { name: 'Admin Panel' }));
+    await expect(c.getByRole('heading', { name: 'Domains' })).toBeVisible();
+    await expect(c.getByRole('heading', { name: 'Global Tags' })).toBeVisible();
+    await expect(c.getAllByRole('button', { name: 'Add New' }).length).toBeGreaterThanOrEqual(3);
+    /* Announcements: the overview and the list, with New Announcement and View Changelog. */
+    await userEvent.click(c.getByRole('tab', { name: 'Announcements' }));
+    await expect(c.getByRole('button', { name: /New Announcement/ })).toBeVisible();
+    await expect(c.getByRole('button', { name: /View Changelog/ })).toBeVisible();
+    await expect(c.getByText('Faster search')).toBeVisible();
   },
 };
 

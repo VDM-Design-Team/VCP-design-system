@@ -1,8 +1,9 @@
+import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { IconButton } from './IconButton';
 import { Button } from '../button';
 import { Tooltip } from '../tooltip';
-import { expect, within } from 'storybook/test';
+import { expect, fireEvent, userEvent, within } from 'storybook/test';
 
 const meta = {
   title: 'Atoms/IconButton',
@@ -132,6 +133,46 @@ export const Loading: Story = {
       <IconButton {...args} variant="tertiary" size="lg" loading />
     </div>
   ),
+};
+
+/**
+ * **`aria-disabled` ignores presses too**, from the keyboard as well as the mouse, as in `Button`. A pager's arrow uses it
+ * instead of `disabled` so the arrow you pressed keeps focus at the last page. Here the arrow stops at page 3: pressing it
+ * again (Enter, Space or a click) does nothing, though its `onClick` does not check, and focus never leaves it.
+ */
+export const AriaDisabledIgnoresPresses: Story = {
+  render: function Render() {
+    const [page, setPage] = React.useState(1);
+    return (
+      <div className="flex items-center gap-3">
+        <span className="text-body-sm-medium text-text-primary">Page {page} of 3</span>
+        <IconButton
+          icon="caret-right"
+          label="Next page"
+          variant="neutral-tertiary"
+          aria-disabled={page >= 3 ? 'true' : undefined}
+          onClick={() => setPage((n) => n + 1)}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const next = canvas.getByRole('button', { name: 'Next page' });
+    next.focus();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    await expect(canvas.getByText('Page 3 of 3')).toBeInTheDocument();
+    await expect(next).toHaveAttribute('aria-disabled', 'true');
+    await expect(next).not.toBeDisabled();
+
+    /* Pressed again at the end: nothing happens. (`fireEvent`, because an `aria-disabled` button takes no pointer events.) */
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    fireEvent.click(next);
+    await expect(canvas.getByText('Page 3 of 3')).toBeInTheDocument();
+    await expect(next).toHaveFocus();
+  },
 };
 
 /** The reason this component exists: a dense row of actions with no room for words. */

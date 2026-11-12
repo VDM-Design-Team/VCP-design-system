@@ -145,6 +145,37 @@ export const RejectsWhatItDoesNotTake: Story = {
   },
 };
 
+/**
+ * At rest the zone is exactly its own size. The 16 drag hit area is not there until a file is dragged, so a box that scrolls and ends right at the zone
+ * (a dialog's body) has nothing more to scroll to and shows no scrollbar (hidden, tested).
+ */
+export const AddsNothingToScroll: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div data-testid="scroller" className="w-96 overflow-y-auto">
+      <Dropzone {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const box = within(canvasElement).getByTestId('scroller');
+    const zone = box.querySelector('label') as HTMLElement;
+    const hitArea = () => getComputedStyle(zone, '::before').content;
+    await expect(hitArea()).toBe('none');
+    await expect(box.scrollHeight).toBe(box.clientHeight);
+    await expect(box.scrollWidth).toBe(box.clientWidth);
+    /* A file is dragged somewhere on the page: the hit area is there for as long as it is. */
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['x'], 'evidence.pdf', { type: 'application/pdf' }));
+    const fire = (type: string) => window.dispatchEvent(new DragEvent(type, { bubbles: true, cancelable: true, dataTransfer: transfer }));
+    fire('dragenter');
+    await waitFor(() => expect(hitArea()).not.toBe('none'));
+    fire('dragend');
+    await waitFor(() => expect(hitArea()).toBe('none'));
+    await expect(box.scrollHeight).toBe(box.clientHeight);
+  },
+};
+
 export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => (

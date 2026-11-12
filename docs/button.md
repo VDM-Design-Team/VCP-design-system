@@ -10,15 +10,16 @@ The primary interactive control.
 | `secondary` | Supporting actions next to a primary | no limit |
 | `neutral` | The way *out* — Cancel beside a destructive answer, Dismiss beside a confirm | no limit |
 | `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
+| `neutral-tertiary` | A toolbar's actions, as text in the neutral palette (the bulk bar's Status, Urgency): controls, not calls to action | no limit |
 | `critical-primary` | Destructive, irreversible actions only (it was `danger` before November 2026) | 1 |
-| `critical-tertiary` | A destructive answer that sits quietly beside others: red text, no fill (Figma's Style=Text, red: the AV edit page's **Discard**). It asks first (a confirm), like `critical-primary` | 1 |
+| `critical-tertiary` | A destructive answer that sits quietly beside others: red text, no fill (Figma's Style=Text, red: the AV edit page's **Discard**, and the bulk bar's **Delete**). It asks first (a confirm), like `critical-primary` | 1 |
 | `link` | Inline navigation that reads as text | no limit |
 
 ## Props
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| neutral \| tertiary \| critical-primary \| critical-tertiary \| link` | `primary` | |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-tertiary \| critical-primary \| critical-tertiary \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Swaps the left icon for a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`) |
@@ -55,6 +56,7 @@ holding and the border needs a stronger token.
   gets **lighter** on hover and press, never darker. The story **Filled text
   contrast, both themes** tests it.
 - `loading` sets `aria-busy` and `aria-disabled` and ignores presses (click, Enter, Space, and the implicit submit of the form it submits), but **it is not `disabled`, so it keeps focus**. A disabled button drops focus to the page, and a keyboard or screen-reader user who just pressed Save is lost mid-save. It looks the same as a disabled button. Put the outcome in the label ("Saving…") if the wait exceeds ~1s. The `LoadingKeepsFocus` story is the test.
+- **`aria-disabled` ignores presses the same way.** Pass it instead of `disabled` when the button must keep focus as it stops applying (a pager's Next at the last step). It looks disabled, blocks the pointer, and Button swallows Enter, Space and the click they fire, so your `onClick` does not run (nor does a submit button's form submit). Only `true` or `"true"` counts. The `AriaDisabledIgnoresPresses` story is the test.
 - Icon-only buttons **must** have an `aria-label`.
 
 ## Don't
@@ -62,3 +64,4 @@ holding and the border needs a stronger token.
 - Don't hardcode colors or spacing. `className="bg-[#336afa]"` is a bug — add a token instead.
 - Don't stack two `primary` buttons side by side.
 - Don't use `critical-primary` for "Cancel".
+- Don't handle a press in `onClick` to explain why a button is `aria-disabled`. It never runs: put the reason in the button's description (`aria-describedby`) or beside it.

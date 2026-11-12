@@ -11,15 +11,9 @@ Read off the Figma `Handoff_AV_Modal` (`5342:78539`, audit batch 4,
 
 | Piece | Tier | Role here |
 |---|---|---|
-| `Modal` | component | The dialog — header, focus trap, Escape, inert background |
-| `Banner` | component | Names the delay, on the overdue variant |
-| `Field` | component | Labels every group, and carries the reason's error |
-| `Dropzone` | atom | The file picker |
-| `FileAttachment` | component | Files already on the value |
-| `Select` | atom | The overdue reason |
-| `Input` | atom | Date, links, notes |
-| `Button` | atom | The footer, and "Add Another Link" |
-| `Icon` | atom | The calendar and the plus |
+| `Modal` | component | The dialog — header, focus trap, Escape, inert background; `ModalCancel` and `ModalConfirm` are its footer |
+| `HandoffForm` | pattern | The form: the date, the links, the attachments and, when late, the banner, the reason and the notes. The same one `BulkActionHandoffModal` draws |
+| `Button` | atom | Development's two other footer buttons |
 
 The import rows are checked against the real imports — `npm test` fails if this
 list drifts, and fails a pattern composing fewer than two pieces.
@@ -30,10 +24,15 @@ Pass it and the design's second variant appears: a warning `Banner` naming the
 delay, a **required** overdue reason, and a notes field. Leave it out and none
 of that renders.
 
-**The reason is the only validation the design draws**, and it draws it as an
-error state on that one field — "Please select a reason before completing the
-AV". So the dialog validates on submit rather than letting a late handoff
-through unexplained. Nothing else is required, including the date.
+**The form is `HandoffForm`**, shared with the bulk handoff, so a single handoff
+and a bulk one ask for the same things. A **Handoff Date**, chosen from the
+calendar, is **required** (design's decision for the one form); a late value must say
+**why** ("Please select a reason before completing the AV", the design's own
+error message); links, files and notes are optional, and a link that is typed
+must be a valid `https://` address. The dialog **asks on submit**: an incomplete
+handoff is refused with the message under the field, and focus goes to the
+first one. (The bulk dialog waits instead: its Handoff is disabled until every
+Added Value is complete.)
 
 The six reasons are `OVERDUE_REASONS`, exported here and owned here for the
 same reason `RejectionReason` owns its sets: they are drawn in the design file,
@@ -64,11 +63,11 @@ was pressed.
 | `onHandoff` | `(draft, { publish }) => void` | required | The draft, once |
 | `domain` | `design-governance \| development` | `design-governance` | Which footer |
 | `overdueDays` | `number` | — | Switches to the overdue variant |
-| `attachments` | `{ name, thumb? }[]` | `[]` | Files already on the value |
-| `defaultDate` | `string` | `''` | Prefills the date. The caller owns what "today" is |
+| `attachments` | `{ id?, name, kind?, thumb?, src? }[]` | `[]` | Files already on the value: cards that preview on click and can be removed (staged: the ids come back in `removedAttachments`) |
+| `defaultDate` | `string` | `''` | Prefills the date (ISO `yyyy-mm-dd`). The caller owns what "today" is; it starts blank when left out |
 | `loading` | `boolean` | `false` | Spins whichever button was pressed |
 
-`HandoffDraft` is `{ date, links, attachments, overdueReason?, notes? }`. Empty
+`HandoffDraft` is `{ date, links, attachments, removedAttachments, overdueReason?, notes? }`. Empty
 link rows are dropped before it leaves.
 
 ## It is uncontrolled, like `ReportProblemModal`
@@ -76,7 +75,7 @@ link rows are dropped before it leaves.
 The draft lives in the pattern and leaves once through `onHandoff`, because a
 handoff is composed and sent in one go. It also clears itself when it closes,
 so an abandoned draft does not come back on the next one. A caller that needs
-the values as they change should compose `Modal` itself.
+the values as they change should compose `HandoffForm` itself.
 
 ## Accessibility
 
@@ -100,18 +99,18 @@ the values as they change should compose `Modal` itself.
 | The design | Ours | Why |
 |---|---|---|
 | The overdue reasons bold the label: **Dependencies:** Waiting on others | Plain text, `Dependencies: Waiting on others` | `Select` is a native `<select>` and an `<option>` cannot carry rich text. Bolding would mean replacing it with a listbox, which is a bigger decision than this dialog |
-| A compact "Attach Files" row with a paperclip | `Dropzone`, the system's only file input | The compact row is a control the system does not have. Inventing a second file input inside a pattern is what the repo forbids — flagged in the audit as a candidate `Dropzone` size |
-| The date field is a text input with a calendar glyph | The same — `Input` with a `calendar-blank` leading icon | Deliberately **not** wired to `DatePicker`: it portals a `Popover` to `body`, outside `Modal`'s focus trap, and that needs its own decision. Flagged in the audit |
+| A compact "Attach Files" row with a paperclip | `Attachments` (the cards, the `Dropzone` and the viewer), the system's only file input | The compact row is a control the system does not have. Inventing a second file input inside a pattern is what the repo forbids — flagged in the audit as a candidate `Dropzone` size |
+| The date field is a text input with a calendar glyph | `DateField`: the date is chosen from the calendar | Design's decision for the one handoff form (the bulk handoff already did): a date is required and picked, not typed |
 | Dialog width 564 | `size="md"` (512) | Widths ride the spacing scale |
 
 ## Don't
 
-- **Don't make the date required.** The design marks only the overdue reason,
-  and guessing at more validation is how a dialog becomes unusable.
+- **Don't make the date optional, or ask for more.** The date and (when late)
+  the reason are required, links, files and notes are not; that is
+  `HandoffForm`'s rule, and a dialog does not add its own.
 - **Don't close it yourself on handoff.** `onHandoff` reports the draft; the
   caller closes when the send succeeds, which is what lets `loading` mean
   anything.
 - **Don't add a fourth footer button.** The two domains are what the design
   draws; a third arrangement is a design decision, not a prop.
-- **Don't wire `DatePicker` into the date field** without settling how a
-  popover behaves inside a focus-trapped dialog.
+- **Don't build the form again.** Use `HandoffForm`.
