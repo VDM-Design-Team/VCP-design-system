@@ -35,8 +35,8 @@ export const Tertiary: Story = { args: { variant: 'tertiary' } };
 /** Outlined, but grey — the Cancel beside a destructive answer. */
 export const Neutral: Story = { args: { variant: 'neutral', children: 'Cancel' } };
 /** A toolbar's actions as text in the neutral palette: controls, not calls to action (the ghost `tertiary` is the brand blue). */
-export const NeutralText: Story = {
-  args: { variant: 'neutral-text', children: 'Status' },
+export const NeutralTertiary: Story = {
+  args: { variant: 'neutral-tertiary', children: 'Status' },
   play: async ({ canvasElement }) => {
     const button = within(canvasElement).getByRole('button', { name: 'Status' });
     await expect(button.className).toContain('neutral-textual-content');

@@ -42,7 +42,7 @@ it needs a visible label, not a better icon.
 |---|---|---|---|
 | `icon` | `IconName` | — | **Required.** A glyph name from the Icon library. Rendered decorative (`aria-hidden`) |
 | `label` | `string` | — | **Required.** The accessible name *and* the pointer tooltip. See below |
-| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-text \| tonal \| critical-tertiary \| critical-tonal \| critical-primary` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls — and `critical-tonal`, its red twin (`accent.critical.tonal`, with its own hover, pressed and disabled): a row's delete beside its edit |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-tertiary \| tonal \| critical-tertiary \| critical-tonal \| critical-primary` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls — and `critical-tonal`, its red twin (`accent.critical.tonal`, with its own hover, pressed and disabled): a row's delete beside its edit |
 | `size` | `xs \| sm \| md \| lg` | `md` | 24 / 36 / 40 / 48. `xs` and `sm` only in dense contexts. `xs` carries a 16 glyph |
 | `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, ignores presses and sets `aria-busy`, but **keeps focus** (`aria-disabled`, not `disabled`), like `Button` |

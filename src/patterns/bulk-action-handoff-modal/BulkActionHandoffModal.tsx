@@ -117,7 +117,7 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
               <IconButton
                 icon="caret-left"
                 label="Previous Added Value"
-                variant="neutral-text"
+                variant="neutral-tertiary"
                 aria-disabled={current <= 0 || undefined}
                 onClick={() => current > 0 && setPage(current - 1)}
               />
@@ -125,7 +125,7 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
               <IconButton
                 icon="caret-right"
                 label="Next Added Value"
-                variant="neutral-text"
+                variant="neutral-tertiary"
                 aria-disabled={current >= n - 1 || undefined}
                 onClick={() => current < n - 1 && setPage(current + 1)}
               />

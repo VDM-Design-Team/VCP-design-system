@@ -13,7 +13,7 @@ import { Menu, type MenuItem } from '../../components/menu';
  * - **Each action is a menu** that opens **upward** (the bar sits at the bottom of the window) with a category-style heading ("Urgency") and the choices the page gives it. A choice
  *   can have **its own submenu** (Status: Pending Review › Accept, Reject; shown with a right caret). Picking one
  *   only *asks*: `onSelect(key)` — the page then opens a confirmation (`BulkActionConfirmModal`) before anything changes.
- * - **The actions are `Button`'s `neutral-text`** (`neutral.textual.content`, with its hover and pressed), the same palette the date picker's carets use; **Delete** is its `critical-tertiary` (red text, no fill); it only asks too (`onDelete`).
+ * - **The actions are `Button`'s `neutral-tertiary`** (`neutral.textual.content`, with its hover and pressed), the same palette the date picker's carets use; **Delete** is its `critical-tertiary` (red text, no fill); it only asks too (`onDelete`).
  * - **It shows only while something is selected** (`count > 0`), and one selected looks the same as many ("1 Selected").
  *
  * **On a narrow screen it keeps its size**: nothing wraps or shrinks, and the bar scrolls sideways inside itself (it is `max-w-full`), **clipped to its rounded corners** so the scrollbar never pokes out of them. Its menus float over the bar's scrolling (`Menu`'s default `fixed` strategy), so it never clips them.
@@ -105,8 +105,8 @@ export function BulkActionBar({ className, count, onClear, actions, onDelete, re
             items={action.items}
             onSelect={action.onSelect}
             trigger={
-              /* `neutral-text`: the neutral palette, as the date picker's carets use, not the ghost button's brand blue, which would make every action read as a call to action. */
-              <Button variant="neutral-text" size="sm" className="shrink-0" iconLeft={<Icon name="caret-up" size="sm" aria-hidden="true" />}>
+              /* `neutral-tertiary`: the neutral palette, as the date picker's carets use, not the ghost button's brand blue, which would make every action read as a call to action. */
+              <Button variant="neutral-tertiary" size="sm" className="shrink-0" iconLeft={<Icon name="caret-up" size="sm" aria-hidden="true" />}>
                 {action.label}
               </Button>
             }

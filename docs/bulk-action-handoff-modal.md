@@ -44,7 +44,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Tokens
 
-`Modal` at the system's **`lg` (640)**, not Figma's 592; the footer is `ModalCancel` and `ModalConfirm` (40 high), the arrows are `IconButton`'s `neutral-text`. The line under the title is the reference in `text.link` or `text.tertiary` and the title in `text.primary`.
+`Modal` at the system's **`lg` (640)**, not Figma's 592; the footer is `ModalCancel` and `ModalConfirm` (40 high), the arrows are `IconButton`'s `neutral-tertiary`. The line under the title is the reference in `text.link` or `text.tertiary` and the title in `text.primary`.
 
 ## Accessibility
 

@@ -52,7 +52,7 @@ const button = cva(
         ],
         /* neutral.textual — a text button that is a control, not a call to action: the ghost button without its brand blue.
            A toolbar's actions (the bulk bar's Status, Urgency…), where blue on every one would read as a row of calls to action. */
-        'neutral-text': [
+        'neutral-tertiary': [
           'bg-transparent text-neutral-textual-content-default',
           'hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed',
           'disabled:text-neutral-textual-content-disabled aria-disabled:text-neutral-textual-content-disabled',

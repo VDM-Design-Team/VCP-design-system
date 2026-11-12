@@ -10,7 +10,7 @@ The primary interactive control.
 | `secondary` | Supporting actions next to a primary | no limit |
 | `neutral` | The way *out* — Cancel beside a destructive answer, Dismiss beside a confirm | no limit |
 | `tertiary` | Dense toolbars, icon-only actions, table rows | no limit |
-| `neutral-text` | A toolbar's actions, as text in the neutral palette (the bulk bar's Status, Urgency): controls, not calls to action | no limit |
+| `neutral-tertiary` | A toolbar's actions, as text in the neutral palette (the bulk bar's Status, Urgency): controls, not calls to action | no limit |
 | `critical-primary` | Destructive, irreversible actions only (it was `danger` before November 2026) | 1 |
 | `critical-tertiary` | A destructive answer that sits quietly beside others: red text, no fill (Figma's Style=Text, red: the AV edit page's **Discard**, and the bulk bar's **Delete**). It asks first (a confirm), like `critical-primary` | 1 |
 | `link` | Inline navigation that reads as text | no limit |
@@ -19,7 +19,7 @@ The primary interactive control.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-text \| critical-primary \| critical-tertiary \| link` | `primary` | |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-tertiary \| critical-primary \| critical-tertiary \| link` | `primary` | |
 | `size` | `sm \| md \| lg` | `md` | `sm` only in dense contexts (tables, toolbars) |
 | `fullWidth` | `boolean` | `false` | Mobile forms and modals footers |
 | `loading` | `boolean` | `false` | Swaps the left icon for a spinner and ignores presses, but **keeps focus** (`aria-disabled`, not `disabled`) |
