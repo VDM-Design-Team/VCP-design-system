@@ -27,7 +27,7 @@ const meta = {
     open: true,
     onClose: () => {},
     onHandoff: () => {},
-    defaultDate: '02-03-2026',
+    defaultDate: '2026-03-02',
   },
   argTypes: {
     domain: { control: 'inline-radio', options: ['design-governance', 'development'] },
@@ -41,10 +41,10 @@ type Story = StoryObj<typeof meta>;
 /** On time, Design or Governance: date, links, attachments, two buttons. */
 export const Default: Story = {};
 
-/** With files already on the value, shown as tiles above the picker. */
+/** With files already on the value, shown as cards above the picker: each previews on click and can be removed. */
 export const WithAttachments: Story = {
   args: {
-    attachments: [{ name: 'image.png' }],
+    attachments: [{ name: 'image.png', kind: 'image' }, { name: 'brief.pdf', kind: 'pdf' }],
   },
 };
 
@@ -171,7 +171,7 @@ export const OverdueNeedsAReason: Story = {
     await expect(error).toHaveTextContent('Please select a reason before completing the AV');
     await expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    const reason = screen.getByLabelText('Overdue Reason');
+    const reason = screen.getByLabelText(/Overdue Reason/);
     await expect(reason).toHaveAttribute('aria-invalid', 'true');
 
     /* Choosing one clears the error and lets it through. */
@@ -180,5 +180,50 @@ export const OverdueNeedsAReason: Story = {
     await userEvent.click(screen.getByRole('button', { name: 'Handoff' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await expect(canvas.getByText('Sent: resourcing')).toBeInTheDocument();
+  },
+};
+
+/** The date is required, and chosen from the calendar: a handoff with none is refused under the field, with focus on it. */
+export const DateIsRequired: Story = {
+  args: { open: false, defaultDate: '' },
+  render: function DateIsRequiredStory(args) {
+    const [open, setOpen] = React.useState(false);
+    const [sent, setSent] = React.useState('nothing yet');
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <Button variant="secondary" onClick={() => setOpen(true)}>
+          Handoff AV
+        </Button>
+        <p className="text-caption-md-regular text-text-tertiary">Sent: {sent}</p>
+        <HandoffAVModal {...args} open={open} onClose={() => setOpen(false)} onHandoff={(draft: HandoffDraft) => { setSent(draft.date); setOpen(false); }} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Handoff AV' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    await userEvent.click(dialog.getByRole('button', { name: 'Handoff' }));
+    await expect(await dialog.findByText('Select a handoff date.')).toBeVisible();
+    await waitFor(() => expect(dialog.getByRole('combobox', { name: /Handoff Date/ })).toHaveFocus());
+    /* Choosing one from the calendar clears it and lets the handoff through. */
+    await userEvent.click(dialog.getByRole('combobox', { name: /Handoff Date/ }));
+    await userEvent.click(await within(document.body).findByRole('button', { name: /^15\b/ }));
+    await waitFor(() => expect(dialog.queryByText('Select a handoff date.')).toBeNull());
+    await userEvent.click(dialog.getByRole('button', { name: 'Handoff' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await expect(canvas.getByText(/Sent: \d{4}-\d{2}-15/)).toBeInTheDocument();
+  },
+};
+
+/** A link that is typed must be a valid `https://` address: the handoff is refused under the box, with focus on it. Empty boxes are simply dropped. */
+export const LinkMustBeAnAddress: Story = {
+  args: { open: true },
+  play: async () => {
+    const dialog = within(await screen.findByRole('dialog'));
+    await userEvent.type(dialog.getByRole('textbox', { name: 'Demo link 1' }), 'not a link');
+    await userEvent.click(dialog.getByRole('button', { name: 'Handoff' }));
+    await expect(await dialog.findByText('Please enter a valid URL starting with https://')).toBeVisible();
+    await waitFor(() => expect(dialog.getByRole('textbox', { name: 'Demo link 1' })).toHaveFocus());
   },
 };
