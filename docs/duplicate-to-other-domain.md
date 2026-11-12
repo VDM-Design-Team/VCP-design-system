@@ -32,7 +32,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onChange` | `(value: string[], change: { value, checked }) => void` | — | Fires on every tick or untick with all ticked values (in the order of `options`) **and the one that changed**. Ticking a domain usually opens a section for it: read `change.checked`, or derive the section from `value` |
 | `defaultValue` | `string[]` | `[]` | Uncontrolled: ticked to begin with |
 | `title` | `ReactNode` | `Duplicate to other Domains` | The card's title |
-| `disabled` | `boolean` | — | Disables every option |
+| `disabled` | `boolean` | — | Disables every option, ticked or not. Use it for an Added Value that was handed off from another domain: the card is still there, but it cannot be initiated onward from here. Figma's component has no Disabled variant yet |
 | `className` | `string` | — | Merged via `cn()` |
 
 The sentence is the design's and is not a prop. Which domains exist, and which is current,

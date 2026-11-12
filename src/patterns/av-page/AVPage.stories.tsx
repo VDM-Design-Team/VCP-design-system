@@ -73,7 +73,6 @@ const EDIT: AVPageProps = {
   header: { title: 'Added Value Creation', type: 'new', backLabel: 'Back to Drafts', onBack: fn() },
   title: { value: '' },
   description: { problem: { ...edit('problem') }, solution: { ...edit('solution') }, deliverable: { ...edit('deliverable') }, 'desired-outcome': { ...edit('desired-outcome') } },
-  history: { count: 1 },
   duplicate: { options: [{ value: 'development', name: 'Development' }, { value: 'content', name: 'Content' }], onChange: fn() },
   details: { type: 'new', domain: 'design', value: EDITING, options: OPTIONS, onChange: fn() },
   actions: { onDiscard: fn(), progression: { role: 'assignee-initiator', status: 'Draft', onTransition: fn() } },
@@ -134,11 +133,17 @@ export const Editing: Story = {
   args: EDIT,
   render: function Render(args: AVPageProps) {
     const [value, setValue] = React.useState('');
-    return <AVPage {...args} title={{ value, onChange: setValue }} />;
+    /* `history` is given on purpose: an editing page never draws it. */
+    return <AVPage {...args} history={{ count: 1 }} title={{ value, onChange: setValue }} />;
   },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('heading', { level: 1, name: 'Added Value Creation' })).toBeVisible();
+    await expect(c.queryByText(/Status History/)).toBeNull();
+    /* The section's cards, passed in a Fragment, are each their own list item, 16 apart (they once shared one and touched). */
+    const items = Array.from(canvasElement.querySelectorAll('ol')[0]!.querySelectorAll(':scope > li'));
+    await expect(items).toHaveLength(2);
+    await expect(Math.round(items[1]!.getBoundingClientRect().top - items[0]!.getBoundingClientRect().bottom)).toBe(16);
     const title = c.getByRole('textbox', { name: 'Title' });
     await userEvent.type(title, 'A new Added Value');
     await expect(title).toHaveValue('A new Added Value');

@@ -18,8 +18,8 @@ import { MultipartSection, type MultipartSectionProps } from '../multipart-secti
  * the top bar and the footer. Built to Figma's `AV Page: Viewing AVs` and `AV Page: Editing AVs`.
  *
  * - **Left column, top to bottom:** the title (the reference and title to read, a **Title** field to edit), the four description blocks (**Problems**,
- *   **Solutions**, **Acceptance Criteria / Deliverables**, **Desired Outcome**), the **Multipart** card, **Status History**, then **Comments** (reading) or
- *   **Duplicate to other Domains** (editing).
+ *   **Solutions**, **Acceptance Criteria / Deliverables**, **Desired Outcome**), the **Multipart** card, then, reading, **Status History** and **Comments**, or, editing, **Duplicate to other Domains**.
+ *   **There is no Status History when editing**: it is for reading only, so it is left out of an editing page even if `history` is passed.
  * - **Right column:** the **Detail card**, and (reading) the **Deliverables card**.
  * - **The status buttons** are in the header when reading (`AVHeader`), and in a bar at the bottom right when editing, with **Discard** (red text) beside them.
  *
@@ -73,6 +73,7 @@ export interface AVPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   title?: AVPageTitle;
   description?: AVPageDescription;
   multipart?: MultipartSectionProps;
+  /** Reading: the Status History. Never drawn when editing, even if given. */
   history?: StatusHistoryProps;
   /** Reading: the comments, under the history. */
   comments?: CommentSectionProps;
@@ -132,7 +133,7 @@ export function AVPage({
             ))}
           {DESCRIPTION_ORDER.map((type) => description?.[type] && <DescriptionSection key={type} type={type} {...description[type]} />)}
           {multipart && <MultipartSection {...multipart} />}
-          {history && <StatusHistory {...history} />}
+          {!editing && history && <StatusHistory {...history} />}
           {!editing && comments && <CommentSection {...comments} />}
           {editing && duplicate && <DuplicateToOtherDomain {...duplicate} />}
         </div>
