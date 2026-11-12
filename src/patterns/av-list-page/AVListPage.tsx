@@ -9,14 +9,16 @@ import { FilterBar, type FilterBarProps } from '../filter-bar';
 /**
  * AVListPage — the main content of a page that lists Added Values: the title, an optional strip of totals, and the table with its filters. It goes inside
  * `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's list pages: **My Values**, **Assigned**, **Drafts**, **Manage Added Value** and the
- * three **Archive** tabs (Completed, Rejected, Backlog).
+ * three **Archive** tabs (Completed, Rejected, Backlogged).
  *
  * **One layout, and the pages differ by what they pass** (the same typed sections as `DashboardPage`):
  *
  * - **My Values** passes `stats` (the totals strip, `MyValuesStats`) and `table.actions` (the ⋯ column).
- * - **Assigned** and the **Archive** tabs pass a title and a table: the plain page. The Archive tabs differ only in the status their rows carry.
+ * - **Assigned** passes a title ("Assigned Values") and a table: the plain page.
+ * - **The Archive tabs** are titled "Archived Values: Completed", "…: Rejected" and "…: Backlogged", and filter by **Priority, Tags and Date** only: each tab holds one status, so there is no Status filter.
  * - **Drafts** passes `table.selectable` (the checkbox column).
  * - **Manage Added Value** passes a `filters` with the Assignee and Initiator fields.
+ * - **In the Development domain**, **Manage** and **Assigned** also pass a `cycle` filter, preselected to the current cycle so nobody has to pick it (it can still be changed).
  *
  * **The filters sit inside the table's card**, above the rows (`TableCard`'s rule, as `AccountsTable` and `TaskLogTrail` do): the search, **Reset** and **Filters** button, then the
  * field row the button opens. Figma draws them on the canvas above the card; the system puts them in it, so every table reads the same.

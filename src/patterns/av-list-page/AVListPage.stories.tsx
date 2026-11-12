@@ -44,6 +44,24 @@ const baseFilters = (extra: Partial<NonNullable<AVListPageProps['filters']>> = {
   ...extra,
 });
 
+/** The Archive tabs hold one status each, so there is no Status filter: just Priority, Tags and Date. */
+const archiveFilters = (): NonNullable<AVListPageProps['filters']> => ({
+  priority: { options: ['Urgent', 'High', 'Normal', 'Low'], placeholder: 'Search priority' },
+  tags: { options: ['Bug', 'Feature', 'Improvement'], placeholder: 'Select tags' },
+  period: { placeholder: 'Select period' },
+});
+
+/** In the Development domain, Manage and Assigned also filter by cycle, and the page starts on the current one so nobody has to pick it (they can still change it). */
+const CYCLES = [
+  { value: 'c36', code: 'C36', start: '2026-07-06', end: '2026-07-20' },
+  { value: 'c37', code: 'C37', start: '2026-07-20', end: '2026-08-03' },
+  { value: 'c38', code: 'C38', start: '2026-08-03', end: '2026-08-17' },
+];
+const withCurrentCycle = (filters: NonNullable<AVListPageProps['filters']>): NonNullable<AVListPageProps['filters']> => ({
+  ...filters,
+  cycle: { options: CYCLES, value: 'c37', placeholder: 'Select cycle' },
+});
+
 const pager = (count: number) => ({ page: 2, pageCount: 25, itemCount: 1250, pageSize: 50, pageSizeOptions: [25, 50, 100], onPageChange: fn(), onPageSizeChange: fn(), caption: `${count} Added Values` });
 
 /** A page owns what it lists: here the search narrows the rows. */
@@ -166,23 +184,76 @@ export const Manage: Story = {
   },
 };
 
-/** The Archive tabs: the plain page, and only the status the rows carry changes. */
+/** The Archive tabs: the plain page with Priority, Tags and Date filters (no Status: each tab holds one). Only the status the rows carry changes. */
 export const ArchiveCompleted: Story = {
-  args: { title: 'Completed' },
-  render: (args) => <Page {...args} all={rows(3, { status: 'Completed' })} filters={baseFilters()} table={{ rows: [], ...pager(3) }} />,
+  args: { title: 'Archived Values: Completed' },
+  render: (args) => <Page {...args} all={rows(3, { status: 'Completed' })} filters={archiveFilters()} table={{ rows: [], ...pager(3) }} />,
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getAllByText('Completed').length).toBeGreaterThanOrEqual(3);
+    const c = within(canvasElement);
+    await expect(c.getByRole('heading', { level: 1, name: 'Archived Values: Completed' })).toBeVisible();
+    await expect(c.getAllByText('Completed').length).toBeGreaterThanOrEqual(3);
+    /* Priority, Tags and Date; no Status. */
+    await expect(c.getByText('Priority')).toBeVisible();
+    await expect(c.getByText('Tags')).toBeVisible();
+    await expect(c.getByText('Date')).toBeVisible();
+    await expect(c.queryByText('Select status')).toBeNull();
   },
 };
 
 export const ArchiveRejected: Story = {
-  args: { title: 'Rejected' },
-  render: (args) => <Page {...args} all={rows(3, { status: 'Rejected' })} filters={baseFilters()} table={{ rows: [], ...pager(3) }} />,
+  args: { title: 'Archived Values: Rejected' },
+  render: (args) => <Page {...args} all={rows(3, { status: 'Rejected' })} filters={archiveFilters()} table={{ rows: [], ...pager(3) }} />,
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('heading', { level: 1, name: 'Archived Values: Rejected' })).toBeVisible();
+  },
 };
 
-export const ArchiveBacklog: Story = {
-  args: { title: 'Backlog' },
-  render: (args) => <Page {...args} all={rows(3, { status: 'Backlog' })} filters={baseFilters()} table={{ rows: [], ...pager(3) }} />,
+export const ArchiveBacklogged: Story = {
+  args: { title: 'Archived Values: Backlogged' },
+  render: (args) => <Page {...args} all={rows(3, { status: 'Backlog' })} filters={archiveFilters()} table={{ rows: [], ...pager(3) }} />,
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByRole('heading', { level: 1, name: 'Archived Values: Backlogged' })).toBeVisible();
+  },
+};
+
+/** The Development domain's Assigned: the cycle filter is there, already on the current cycle. */
+export const AssignedInDevelopment: Story = {
+  args: { title: 'Assigned Values' },
+  render: (args) => <Page {...args} all={rows(4)} filters={withCurrentCycle(baseFilters())} table={{ rows: [], ...pager(4) }} />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('Cycle')).toBeVisible();
+    /* The current cycle is picked without the person doing anything: the field shows it, not its placeholder. */
+    await expect(c.getAllByText(/C37/).length).toBeGreaterThanOrEqual(1);
+    await expect(c.queryByText('Select cycle')).toBeNull();
+  },
+};
+
+/** The Development domain's Manage: the cycle filter, on the current cycle, beside Assignee and Initiator. */
+export const ManageInDevelopment: Story = {
+  args: { title: 'Manage Added Value' },
+  render: (args) => (
+    <Page
+      {...args}
+      all={rows(4)}
+      filters={withCurrentCycle(
+        baseFilters({
+          users: [
+            { label: 'Assignee', options: PEOPLE, placeholder: 'Select User' },
+            { label: 'Initiator', options: PEOPLE, placeholder: 'Select User' },
+          ],
+        }),
+      )}
+      table={{ rows: [], ...pager(4) }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('Cycle')).toBeVisible();
+    await expect(c.getAllByText(/C37/).length).toBeGreaterThanOrEqual(1);
+    await expect(c.queryByText('Select cycle')).toBeNull();
+    await expect(c.getByText('Assignee')).toBeVisible();
+  },
 };
 
 /** A search that matches nothing: the table says so in the system's words, with Reset, and focus goes to the search box when Reset removes itself. */

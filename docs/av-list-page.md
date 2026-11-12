@@ -3,7 +3,7 @@
 The main content of a page that lists Added Values: the title, an optional strip of totals, and the table with its filters. It goes inside `AppShell`, which draws the
 sidebar, the top bar and the footer.
 
-Built to Figma's list pages in Pages & Flows: **My Values**, **Assigned**, **Drafts**, **Manage Added Value** and the **Archive** tabs (Completed, Rejected, Backlog).
+Built to Figma's list pages in Pages & Flows: **My Values**, **Assigned**, **Drafts**, **Manage Added Value** and the **Archive** tabs (Completed, Rejected, Backlogged).
 
 ## Composed of
 
@@ -30,12 +30,17 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Page | What the page passes |
 |---|---|
 | **My Values** | `stats` (the totals strip) and `table.actions` (the ⋯ column) |
-| **Assigned** | The title "Assigned Values" and the table |
+| **Assigned** | The title "Assigned Values" and the table. In the Development domain, also a `cycle` filter (below) |
 | **Drafts** | `table.selectable` (the checkbox column) |
-| **Manage Added Value** | `filters` with the Assignee and Initiator fields (`users`) |
-| **Archive** (Completed, Rejected, Backlog) | A title and the table; only the status the rows carry changes |
+| **Manage Added Value** | `filters` with the Assignee and Initiator fields (`users`). In the Development domain, also a `cycle` filter (below) |
+| **Archive** | The titles "Archived Values: Completed", "Archived Values: Rejected" and "Archived Values: Backlogged", and `filters` with **Priority, Tags and Date** only (each tab holds one status, so no Status filter). Only the status the rows carry changes |
 
-The page names itself in `title` ("My Values", "Assigned Values", "Completed"…): Figma's frames all say the placeholder "Page Title".
+The page names itself in `title` ("My Values", "Assigned Values", "Archived Values: Completed"…): Figma's frames all say the placeholder "Page Title".
+
+## The Development domain's cycle filter
+
+In the Development domain, **Manage** and **Assigned** also filter by cycle: pass `filters.cycle` (`FilterBar`'s own, a one-pick search of cycles) and set its `value` to the **current cycle**, so the page opens on it and nobody has to
+pick it. It stays a normal filter: the person can change it, and what **Reset** does is the page's (`onReset`), so it can put the cycle back on the current one. Other domains and the other pages do not pass it.
 
 ## The filters are inside the table's card
 
