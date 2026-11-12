@@ -57,12 +57,6 @@ const button = cva(
           'hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed',
           'disabled:text-neutral-textual-content-disabled aria-disabled:text-neutral-textual-content-disabled',
         ],
-        /* accent.critical.outline — destructive, as text: Delete in a toolbar, where a filled red button would shout. */
-        'critical-text': [
-          'bg-transparent text-accent-critical-outline-content-default',
-          'hover:text-accent-critical-outline-content-hover active:text-accent-critical-outline-content-pressed',
-          'disabled:text-accent-critical-outline-content-disabled aria-disabled:text-accent-critical-outline-content-disabled',
-        ],
         /* accent.critical.filled — destructive */
         danger: [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',

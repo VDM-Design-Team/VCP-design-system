@@ -44,16 +44,6 @@ export const NeutralText: Story = {
   },
 };
 
-/** A destructive action in a toolbar, as red text; the filled red is `danger`. */
-export const CriticalText: Story = {
-  args: { variant: 'critical-text', children: 'Delete' },
-  play: async ({ canvasElement }) => {
-    const button = within(canvasElement).getByRole('button', { name: 'Delete' });
-    await expect(button.className).toContain('accent-critical-outline-content');
-    await expect(button.className).not.toContain('bg-accent-critical-filled');
-  },
-};
-
 export const Danger: Story = { args: { variant: 'danger', children: 'Delete account' } };
 /** Red text, no fill: a destructive answer beside quieter ones (Figma's AV edit page: Discard, Save as Draft, Submit). */
 export const DangerTertiary: Story = {
