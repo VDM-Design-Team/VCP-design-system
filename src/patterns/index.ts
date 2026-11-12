@@ -49,6 +49,8 @@ export * from './team-capacity';
 export * from './user-capacity';
 export * from './value-cards';
 export * from './top-bar';
+export * from './announcements-overview';
+export * from './announcements-table';
 export * from './bulk-action-bar';
 export * from './bulk-action-confirm-modal';
 export * from './bulk-action-failed-modal';
