@@ -740,7 +740,7 @@ export const NestedDialog: Story = {
           title="Review claim"
           footer={
             <>
-              <Button variant="danger" onClick={() => setInner(true)}>
+              <Button variant="critical-primary" onClick={() => setInner(true)}>
                 Reject
               </Button>
               <ModalConfirm onClick={() => setOuter(false)}>Accept</ModalConfirm>

@@ -62,7 +62,7 @@ carry a label and an action cannot accidentally be a rule.
 | `label` | `ReactNode` | — | **Required on an action.** A string also enables type-ahead for that item |
 | `icon` | `IconName` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
-| `tone` | `default \| danger` | `default` | `danger` is for destructive, irreversible actions. See below |
+| `tone` | `default \| critical` | `default` | `critical` is for destructive, irreversible actions (it was `danger` before November 2026). See below |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
 | `disabled` | `boolean` | `false` | Stays visible and announced, but the keyboard steps over it |
 | `onClick` | `() => void` | — | Runs before `onSelect` |
@@ -73,7 +73,7 @@ carry a label and an action cannot accidentally be a rule.
 | | Source | Here | Why |
 |---|---|---|---|
 | `icon` | `string` | `IconName` | A glyph name that the library does not ship should not survive to runtime as an empty square. It is now a compile error |
-| `MenuItem` | one shape, everything optional | `MenuActionItem \| MenuDividerItem` | `{ divider: true, label: 'Delete', tone: 'danger' }` used to type-check and render nothing but a rule |
+| `MenuItem` | one shape, everything optional | `MenuActionItem \| MenuDividerItem` | `{ divider: true, label: 'Delete', tone: 'critical' }` used to type-check and render nothing but a rule |
 | `style` | `CSSProperties` | **removed** | Inline styles route around the token system. Use `className` / `panelClassName` |
 | keyboard | none at all | the full contract below | An action list that cannot be operated from the keyboard is a mouse feature |
 | focus | never moved | moves into the list on open, returns to the trigger on close | Required for `role="menu"` |
@@ -94,8 +94,8 @@ carry a label and an action cannot accidentally be a rule.
 | Item resting fill | `action.tertiary.surface.default` (transparent) | `bg-action-tertiary-surface-default` |
 | Item content | `text.secondary` → `text.primary` on hover / keyboard focus | `text-text-secondary`, `hover:text-text-primary`, `focus-visible:text-text-primary` |
 | Item highlight | `surface.brand.faint` | `hover:bg-surface-brand-faint`, `focus-visible:bg-surface-brand-faint` |
-| Danger content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
-| Danger highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover`, `focus-visible:bg-accent-critical-outline-surface-hover` |
+| Critical content | `accent.critical.outline.content.{default,hover}` | `text-accent-critical-outline-content-*` |
+| Critical highlight | `accent.critical.outline.surface.hover` | `hover:bg-accent-critical-outline-surface-hover`, `focus-visible:bg-accent-critical-outline-surface-hover` |
 | Disabled content | `text.disabled` | `disabled:text-text-disabled` |
 | Selected check | `text.primary` (`Icon`, `check`) | `text-text-primary` |
 | Shortcut | `type.caption-md-medium` + `text.subtle` | `text-caption-md-medium text-text-subtle` |
@@ -176,14 +176,14 @@ reopening never lands on a previously-chosen destructive item.
   true after a keyboard one: a mouse opens a clean menu, and a keyboard still sees
   where it is, with the 2px `stroke.focused` ring on top.
 
-### Danger items — the tone is not the only signal
+### Critical items — the tone is not the only signal
 
 Colour is invisible to a screen reader, unreliable for a colour-blind user, and
-gone entirely in high-contrast mode. A `tone: 'danger'` item therefore carries
+gone entirely in high-contrast mode. A `tone: 'critical'` item therefore carries
 three signals, only one of which is colour:
 
 1. **Colour** — the `accent.critical.outline` content and hover fill.
-2. **A glyph.** A danger item always renders an icon. If you gave one (`trash`)
+2. **A glyph.** A critical item always renders an icon. If you gave one (`trash`)
    it is used; if you gave none, it falls back to `warning`. Shape distinguishes
    the row from its neighbours whether or not colour is perceived.
 3. **Words, in the accessible name.** The item's name ends with a visually
@@ -192,7 +192,7 @@ three signals, only one of which is colour:
    actually reaches a non-sighted user, and it is the one the source export had
    no way of providing.
 
-Put danger items last, behind a divider, and pair genuinely irreversible ones
+Put critical items last, behind a divider, and pair genuinely irreversible ones
 with a `Modal` confirmation — a menu item is one keystroke away from being
 activated by accident.
 
@@ -233,10 +233,10 @@ stories also pass `axe-core` at WCAG 2.1 AA with the menus open.
 - Don't put a form, a text field or a paragraph in it. Once a row is not a verb,
   you want a `Popover`.
 - Don't use it for navigation between pages.
-- Don't rely on `tone: 'danger'` alone to warn someone. Colour is one of three
+- Don't rely on `tone: 'critical'` alone to warn someone. Colour is one of three
   signals here for a reason, and an irreversible action still needs a
   confirmation.
-- Don't use more than one danger item in a menu.
+- Don't use more than one critical item in a menu.
 - Don't hide the primary action of a screen behind an ellipsis. A menu is for the
   overflow, not the point.
 - Don't pass a `<div>` or a bare string as the `trigger` — it has to be a real

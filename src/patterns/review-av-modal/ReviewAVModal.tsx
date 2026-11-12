@@ -117,7 +117,7 @@ export function ReviewAVModal({
         showClose={false}
         footer={
           <>
-            <Button variant="danger" disabled={loading} onClick={() => setRejecting(true)}>
+            <Button variant="critical-primary" disabled={loading} onClick={() => setRejecting(true)}>
               Reject
             </Button>
             <Button loading={loading} onClick={() => onAccept({ domainOption })}>
@@ -206,7 +206,7 @@ export function ReviewAVModal({
               Cancel
             </Button>
             <Button
-              variant="danger"
+              variant="critical-primary"
               /* The design fades it until a reason is chosen. */
               disabled={!reason}
               loading={loading}

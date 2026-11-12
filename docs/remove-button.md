@@ -23,7 +23,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | `RemoveButton`, `tonal` | Removing a card or a file: `DescriptionCard` and `FileAttachment` |
 | `RemoveButton`, `plain` | A bare ✕ on a plain surface (`surface.base`, `elevated`, `canvas`), where the disc is too much |
-| `IconButton` `danger` | A destructive action that is not "take this item out of the list": delete a record, discard a draft |
+| `IconButton` `critical-primary` | A destructive action that is not "take this item out of the list": delete a record, discard a draft |
 | `Tag`'s `onRemove` | A value picked into a field, inside the tag |
 
 ## Props
@@ -71,7 +71,7 @@ The red ✕ is about **1.3:1** against the brand blue, far under the 3:1 WCAG 1.
 
 ## Don't
 
-- **Don't use it for a destructive action on a record.** That is `IconButton` `danger`, or a `Button`.
+- **Don't use it for a destructive action on a record.** That is `IconButton` `critical-primary`, or a `Button`.
 - **Don't put your own reveal logic in the atom.** The item decides when it shows.
 - **Don't use `plain` on a filled brand surface.** Red on brand blue is about 1.3:1; use `tonal`.
 - **Don't draw a red ✕ yourself.** Use this, so every remove looks and behaves the same.
