@@ -3,7 +3,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 import { DescriptionSection, type DescriptionSectionProps } from '../../components/description-section';
-import { DuplicateToOtherDomain, type DuplicateToOtherDomainProps } from '../../components/duplicate-to-other-domain';
+import { InitiateToOtherDomain, type InitiateToOtherDomainProps } from '../../components/initiate-to-other-domain';
 import { Field } from '../../components/field';
 import { StatusHistory, type StatusHistoryProps } from '../../components/status-history';
 import { StatusProgression, type StatusProgressionProps } from '../../components/status-progression';
@@ -18,7 +18,7 @@ import { MultipartSection, type MultipartSectionProps } from '../multipart-secti
  * the top bar and the footer. Built to Figma's `AV Page: Viewing AVs` and `AV Page: Editing AVs`.
  *
  * - **Left column, top to bottom:** the title (the reference and title to read, a **Title** field to edit), the four description blocks (**Problems**,
- *   **Solutions**, **Acceptance Criteria / Deliverables**, **Desired Outcome**), the **Multipart** card, then, reading, **Status History** and **Comments**, or, editing, **Duplicate to other Domains**.
+ *   **Solutions**, **Acceptance Criteria / Deliverables**, **Desired Outcome**), the **Multipart** card, then, reading, **Status History** and **Comments**, or, editing, **Initiate to other Domains**.
  *   **There is no Status History when editing**: it is for reading only, so it is left out of an editing page even if `history` is passed.
  * - **Right column:** the **Detail card**, and (reading) the **Deliverables card**.
  * - **The status buttons** are in the header when reading (`AVHeader`), and in a bar at the bottom right when editing, with **Discard** (red text) beside them.
@@ -77,8 +77,8 @@ export interface AVPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   history?: StatusHistoryProps;
   /** Reading: the comments, under the history. */
   comments?: CommentSectionProps;
-  /** Editing: "Duplicate to other Domains", at the foot of the left column. */
-  duplicate?: DuplicateToOtherDomainProps;
+  /** Editing: "Initiate to other Domains", at the foot of the left column. `disabled` for an Added Value handed off from another domain. */
+  initiate?: InitiateToOtherDomainProps;
   /** The right column's detail card. */
   details?: DetailCardProps;
   /** Reading: the deliverables, under the detail card. */
@@ -96,7 +96,7 @@ export function AVPage({
   multipart,
   history,
   comments,
-  duplicate,
+  initiate,
   details,
   deliverables,
   actions,
@@ -135,7 +135,7 @@ export function AVPage({
           {multipart && <MultipartSection {...multipart} />}
           {!editing && history && <StatusHistory {...history} />}
           {!editing && comments && <CommentSection {...comments} />}
-          {editing && duplicate && <DuplicateToOtherDomain {...duplicate} />}
+          {editing && initiate && <InitiateToOtherDomain {...initiate} />}
         </div>
         {(details || (!editing && deliverables)) && (
           <div className="flex min-w-0 flex-col gap-4">
