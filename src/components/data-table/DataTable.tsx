@@ -113,7 +113,10 @@ export interface DataTableProps<Row extends { id?: string | number }>
   bare?: boolean;
   /** Adds the leading checkbox column with a select-all header. */
   selectable?: boolean;
-  /** Selected row ids (`row.id`, falling back to the row index). */
+  /**
+   * Selected row ids (`row.id`, falling back to the row index). May hold rows that are not in `rows` (another page, a
+   * filter): the header checkbox reflects only the rows shown, and select-all adds or removes only those.
+   */
   selected?: ReadonlyArray<string | number>;
   onSelectedChange?: (ids: Array<string | number>) => void;
   /**
@@ -241,11 +244,19 @@ export function DataTable<Row extends { id?: string | number }>({
   }, [rows, columns]);
 
   const rowId = (row: Row, index: number) => row.id ?? index;
-  const allOn = rows.length > 0 && selected.length === rows.length;
-  const someOn = selected.length > 0 && !allOn;
+  /* The header speaks for the rows on screen, by which of them are selected, not by a count: `selected` may also
+     hold rows another page or filter is hiding, and those are never changed from here. */
+  const shownIds = rows.map((r, i) => rowId(r, i));
+  const shownOn = shownIds.filter((id) => selected.includes(id)).length;
+  const allOn = shownIds.length > 0 && shownOn === shownIds.length;
+  const someOn = shownOn > 0 && !allOn;
 
   const toggleAll = () =>
-    onSelectedChange?.(allOn ? [] : rows.map((r, i) => rowId(r, i)));
+    onSelectedChange?.(
+      allOn
+        ? selected.filter((id) => !shownIds.includes(id))
+        : [...selected, ...shownIds.filter((id) => !selected.includes(id))],
+    );
   const toggleOne = (id: string | number) =>
     onSelectedChange?.(
       selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id],

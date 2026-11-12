@@ -106,6 +106,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, fullWidth, loading, iconLeft, iconRight, children, disabled, onClick, ...props }, ref) => {
     /* Loading but not disabled: still a tab stop and still focused, just inert. A disabled button keeps `disabled`. */
     const busy = Boolean(loading) && !disabled;
+    /* A caller's `aria-disabled` (`true` or `"true"`) is inert the same way. `pointer-events-none` only stops the
+       mouse: Enter and Space on the focused button still fire a click, so the guard below swallows it too. */
+    const inert = busy || props['aria-disabled'] === true || props['aria-disabled'] === 'true';
     return (
       <button
         ref={ref}
@@ -116,7 +119,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading || undefined}
         onClick={(event) => {
           /* Swallowing the click also stops a submit button's form from submitting, implicit submission included. */
-          if (busy) {
+          if (inert) {
             event.preventDefault();
             return;
           }

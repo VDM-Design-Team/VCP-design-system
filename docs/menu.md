@@ -64,7 +64,7 @@ carry a label and an action cannot accidentally be a rule.
 |---|---|---|---|
 | `key` | `string` | — | What `onSelect` receives |
 | `label` | `ReactNode` | — | **Required on an action.** A string also enables type-ahead for that item |
-| `icon` | `IconName` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative |
+| `icon` | `IconName \| false` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative. `false` on a `critical` item leaves out its fallback `warning` glyph |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
 | `tone` | `default \| critical` | `default` | `critical` is for destructive, irreversible actions (it was `danger` before November 2026). See below |
 | `items` (on an item) | `MenuActionItem[]` | — | **A submenu.** The item shows a right caret (`caret-right`), opens its choices beside it on hover, click or ArrowRight, and keeps the brand-blue highlight while open. Only the submenu's items are choices; `onSelect` gets their own `key`. ArrowLeft or Escape closes just the submenu |
@@ -197,7 +197,9 @@ three signals, only one of which is colour:
 1. **Colour** — the `accent.critical.outline` content and hover fill.
 2. **A glyph.** A critical item always renders an icon. If you gave one (`trash`)
    it is used; if you gave none, it falls back to `warning`. Shape distinguishes
-   the row from its neighbours whether or not colour is perceived.
+   the row from its neighbours whether or not colour is perceived. Pass
+   `icon: false` to leave a critical item without one, when its label names the
+   act itself ("Delete"); colour and the hidden words still say it.
 3. **Words, in the accessible name.** The item's name ends with a visually
    hidden "destructive action", so a screen reader announces
    *"Delete deliverable, destructive action, menu item"*. This is the signal that

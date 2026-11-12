@@ -170,6 +170,9 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
     const scale = size ?? 'md';
     /* Loading but not disabled: still a tab stop and still focused, just inert. */
     const busy = Boolean(loading) && !disabled;
+    /* A caller's `aria-disabled` (`true` or `"true"`) is inert the same way, as in `Button`: `pointer-events-none` only
+       stops the mouse, and Enter or Space on the focused button would still fire a click. */
+    const inert = busy || props['aria-disabled'] === true || props['aria-disabled'] === 'true';
     /* `title` gives pointer users a hover hint — but a Tooltip wrapping this
        button already draws one, and marks it: with aria-describedby, or with
        data-tooltip when it shows without describing (`describe={false}`).
@@ -193,7 +196,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         aria-disabled={busy || props['aria-disabled'] || undefined}
         aria-busy={loading || undefined}
         onClick={(event) => {
-          if (busy) {
+          if (inert) {
             event.preventDefault();
             return;
           }
