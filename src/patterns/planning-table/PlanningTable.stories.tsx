@@ -77,10 +77,6 @@ type Story = StoryObj<typeof meta>;
 /** Cycle open, Backlog folded — the Planning page as it opens. */
 export const Default: Story = { args: { defaultCollapsed: ['backlog'] } };
 
-export const BothOpen: Story = {};
-
-export const BothFolded: Story = { args: { defaultCollapsed: ['cycle-27', 'backlog'] } };
-
 /** Each section is its own card with its own table; one with no rows says so. */
 export const EmptySection: Story = {
   args: {
@@ -263,19 +259,22 @@ export const MoveWithoutDragging: Story = {
   render: (args) => <Moving {...args} />,
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    const button = canvas.getByRole('button', { name: 'Move VCP-1232 to…' });
+    const button = canvas.getByRole('button', { name: 'Actions for VCP-1232' });
     button.focus();
     await userEvent.keyboard('{Enter}');
     const menu = await within(document.body).findByRole('menu');
+    /* Move to is a submenu (with the Backlog among the choices it says only "Move to"; with only Cycles, "Move to Cycle"): its choices open beside it. */
+    await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move to' }));
+    const submenu = (await within(document.body).findAllByRole('menu')).at(-1)!;
     /* Its own section is not a choice. */
-    await expect(within(menu).queryByRole('menuitem', { name: /Cycle 27/ })).not.toBeInTheDocument();
-    await userEvent.click(within(menu).getByRole('menuitem', { name: /Cycle 28/ }));
+    await expect(within(submenu).queryByRole('menuitem', { name: /Cycle 27/ })).not.toBeInTheDocument();
+    await userEvent.click(within(submenu).getByRole('menuitem', { name: /Cycle 28/ }));
     const [moved, from, to] = (args.onMoveRow as ReturnType<typeof fn>).mock.calls[0]!;
     await expect([moved.ref, from.id, to.id]).toEqual(['VCP-1232', 'cycle-27', 'cycle-28']);
     const cycle28 = canvas.getByRole('region', { name: /Cycle 28/ });
     await waitFor(() => expect(within(cycle28).getByText('VCP-1232')).toBeInTheDocument());
     await waitFor(() =>
-      expect(document.activeElement).toBe(within(cycle28).getByRole('button', { name: 'Move VCP-1232 to…' })),
+      expect(document.activeElement).toBe(within(cycle28).getByRole('button', { name: 'Actions for VCP-1232' })),
     );
   },
 };
@@ -290,29 +289,36 @@ export const EndedCycle: Story = {
   render: (args) => <Moving {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole('button', { name: 'Move VCP-1234 to…' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Actions for VCP-1234' }));
     const menu = await within(document.body).findByRole('menu');
-    await expect(within(menu).queryByRole('menuitem', { name: /Cycle 26/ })).not.toBeInTheDocument();
-    await userEvent.keyboard('{Escape}');
+    await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move to Cycle' }));
+    const submenu = (await within(document.body).findAllByRole('menu')).at(-1)!;
+    await expect(within(submenu).queryByRole('menuitem', { name: /Cycle 26/ })).not.toBeInTheDocument();
+    await userEvent.keyboard('{Escape}{Escape}');
     /* Its own row can still go. */
-    await expect(canvas.getByRole('button', { name: 'Move VCP-1237 to…' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'Actions for VCP-1237' })).toBeInTheDocument();
   },
 };
 
-/** The default, `to-cycle`: only Backlog rows move, and only onto a Cycle — so only they carry the button. */
+/** The default, `to-cycle`: only Backlog rows move, and only onto a Cycle — so only they carry the Actions menu (with no other actions given). */
 export const MoveToCycleOnly: Story = {
   args: { sections: THREE_SECTIONS, onMoveRow: fn() },
   render: (args) => <Moving {...args} />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.queryByRole('button', { name: 'Move VCP-1231 to…' })).not.toBeInTheDocument();
-    await userEvent.click(canvas.getByRole('button', { name: 'Move VCP-1234 to…' }));
+    await expect(canvas.queryByRole('button', { name: 'Actions for VCP-1231' })).not.toBeInTheDocument();
+    /* A Cycle where nothing can move has no Actions column, not a column of empty cells; the Backlog, where rows can, has one. */
+    await expect(within(canvas.getByRole('region', { name: /Cycle 27/ })).queryByRole('columnheader', { name: 'Actions' })).not.toBeInTheDocument();
+    await expect(within(canvas.getByRole('region', { name: /Backlog/ })).getByRole('columnheader', { name: 'Actions' })).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Actions for VCP-1234' }));
     const menu = await within(document.body).findByRole('menu');
-    await expect(within(menu).getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
+    await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move to Cycle' }));
+    const submenu = (await within(document.body).findAllByRole('menu')).at(-1)!;
+    await expect(within(submenu).getAllByRole('menuitem').map((i) => i.textContent)).toEqual([
       'Cycle 27(02/03/2026 - 16/03/2026)',
       'Cycle 28(16/03/2026 - 30/03/2026)',
     ]);
-    await userEvent.keyboard('{Escape}');
+    await userEvent.keyboard('{Escape}{Escape}');
   },
 };
 
@@ -412,13 +418,23 @@ export const AnimatedDatesBehaviour: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
     const playing = () =>
-      document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.getTiming().duration === 1600);
+      document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.getTiming().duration === 2500);
     /* Loaded with an old flag: nothing plays. */
     await expect(playing()).toHaveLength(0);
 
     await userEvent.click(canvas.getByRole('button', { name: /Auto-calculate/ }));
     await waitFor(() => expect(playing().length).toBeGreaterThan(0));
     await expect((playing()[0]!.effect as KeyframeEffect).getTiming().iterations).toBe(3);
+
+    /* The text changes colour too, not only its wrapper: 35% through a loop the date itself is white (the sweep's peak), where at rest it is ink. */
+    const loops = playing();
+    loops.forEach((a) => {
+      a.pause();
+      a.currentTime = 0.35 * 2500;
+    });
+    const dateText = canvasElement.querySelector('td.isolate span.whitespace-nowrap') as HTMLElement;
+    await expect(getComputedStyle(dateText).color).toBe('rgb(255, 255, 255)');
+    loops.forEach((a) => a.play());
 
     /* Entering a cell dismisses it, and only it. */
     const [sweepCell] = Array.from(canvasElement.querySelectorAll('td.isolate'));

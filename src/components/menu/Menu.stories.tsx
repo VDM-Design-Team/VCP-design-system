@@ -394,6 +394,31 @@ export const WithASubmenu: Story = {
   },
 };
 
+/**
+ * A submenu item with `caret: false` leaves out the right caret, where the design draws it without. It is still `aria-haspopup="menu"` and opens the same way, so it is announced as a submenu;
+ * only the glyph goes. Leave the caret unless the design says otherwise: it is how a sighted person knows the item opens something.
+ */
+export const SubmenuWithoutACaret: Story = {
+  args: {
+    items: [
+      { key: 'open', label: 'Open' },
+      { key: 'move', label: 'Move to', caret: false, items: [{ key: 'a', label: 'Cycle 27' }, { key: 'b', label: 'Cycle 28' }] },
+    ],
+    onSelect: fn(),
+  },
+  render: (args) => <Menu {...args} trigger={<Button variant="secondary">Actions</Button>} />,
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Actions' }));
+    const menu = await screen.findByRole('menu');
+    const parent = within(menu).getByRole('menuitem', { name: 'Move to' });
+    /* No caret, but still a submenu. */
+    await expect(parent.querySelector('svg')).toBeNull();
+    await expect(parent).toHaveAttribute('aria-haspopup', 'menu');
+    await userEvent.click(parent);
+    await expect(await screen.findByRole('menuitem', { name: 'Cycle 28' })).toBeVisible();
+  },
+};
+
 const SUB_ITEMS = [
   { key: 'draft', label: 'Save as Draft' },
   {

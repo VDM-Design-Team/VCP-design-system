@@ -125,12 +125,12 @@ export interface PlanningTableProps extends Omit<React.HTMLAttributes<HTMLDivEle
   defaultCollapsed?: readonly string[];
   onCollapsedChange?: (collapsed: string[]) => void;
   /**
-   * A row was moved — dropped on another section, or sent there from its "Move … to…" button. The
+   * A row was moved — dropped on another section, or sent there from its Actions menu's "Move to Cycle" submenu. The
    * table moves nothing: it tells you which row went from where to where — in the design a Backlog
    * row dropped on a Cycle opens the *Add Required Details* dialog, and the move happens when it is
-   * confirmed. Given, every row that can move also gets the button: a menu of the sections it can go
-   * to, the way to move a row **without dragging** (the keyboard, a switch, a screen reader). Movable
-   * rows are draggable either way (a drop with no handler does nothing).
+   * confirmed. Given, every row that can move also gets a **Move to Cycle** submenu in its Actions menu: the
+   * sections it can go to, the way to move a row **without dragging** (the keyboard, a switch, a screen
+   * reader). Movable rows are draggable either way (a drop with no handler does nothing).
    */
   onMoveRow?: (row: PlanningRow, from: PlanningSection, to: PlanningSection) => void;
   /**
@@ -237,7 +237,7 @@ function PointsCell({
 }
 
 /** One loop of the sweep and of the text flash — the design's animation, three times over. */
-const SWEEP_MS = 1600;
+const SWEEP_MS = 2500;
 const SWEEP_PLAYS = 3;
 
 /**
@@ -313,7 +313,8 @@ function AnimatedCell({
           className="pointer-events-none absolute -inset-1/3 -z-10 bg-linear-105 from-transparent from-10% via-action-tertiary-content-default/75 via-50% to-transparent to-90%"
         />
       )}
-      <span ref={text} className="relative">
+      {/* The date's own text sets its colour (`text-text-primary`), so the wrapper's animated `color` would never reach it: while live, everything inside inherits the wrapper's colour instead. */}
+      <span ref={text} className={cn('relative', live && '**:text-inherit')}>
         {children}
       </span>
     </>
@@ -397,7 +398,7 @@ export function PlanningTable({
     sent.current = null;
     /* After whatever closed (the menu, a dialog) has tried to hand focus back to the button that left. */
     const timer = window.setTimeout(() =>
-      rootRef.current?.querySelector<HTMLElement>(`[data-move-row="${CSS.escape(pending.rowId)}"]`)?.focus(),
+      rootRef.current?.querySelector<HTMLElement>(`[data-row-actions="${CSS.escape(pending.rowId)}"]`)?.focus(),
     );
     return () => window.clearTimeout(timer);
   });
@@ -614,35 +615,46 @@ export function PlanningTable({
     },
   ];
 
-  /* The way to move a row without dragging: a button per movable row, opening a menu of the sections
-     it can go to. Only with `onMoveRow`, as without it there is nothing to tell. */
-  const moveColumn = (section: PlanningSection): DataTableColumn<PlanningRow> => ({
-    key: 'move',
-    label: 'Move',
+  /* The Actions column: a ⋯ button per movable row, opening a menu whose one item is **Move to Cycle**, a submenu of the sections the row can go to
+     (the way to move a row without dragging). A section where no row can move (a Cycle, when only Backlog rows move) has no Actions column at all, rather than a column of empty cells. "Cycle" because that is what they are; with `moves="anywhere"` the Backlog is a choice too, and then it says only "Move to". */
+  const actionsColumn = (section: PlanningSection): DataTableColumn<PlanningRow> => ({
+    key: 'actions',
+    label: 'Actions',
     fit: true,
     width: '4%',
-    render: (row) =>
-      movable(row, section) ? (
+    render: (row) => {
+      const targets = movable(row, section) ? targetsFrom(section) : [];
+      if (targets.length === 0) return null;
+      const label = targets.every((to) => to.kind !== 'backlog') ? 'Move to Cycle' : 'Move to';
+      return (
         <Menu
           align="right"
-          trigger={<IconButton icon="arrows-down-up" label={`Move ${row.ref} to…`} data-move-row={row.id} />}
-          items={targetsFrom(section).map((to) => ({
-            key: to.id,
-            label: (
-              <span className="flex items-baseline gap-2">
-                <span>{to.title}</span>
-                {to.dates && <span className="text-body-sm-regular text-text-secondary">{to.dates}</span>}
-              </span>
-            ),
-          }))}
-          onSelect={(key) => {
-            const to = key ? sectionById.get(key) : undefined;
-            if (!to) return;
-            sent.current = { rowId: row.id, fromId: section.id };
-            onMoveRow?.(row, section, to);
-          }}
+          trigger={<IconButton icon="dots-three" label={`Actions for ${row.ref}`} data-row-actions={row.id} />}
+          items={[
+            {
+              key: 'move',
+              label,
+              heading: label,
+              /* The design draws this item without the caret. It is still announced as opening a submenu. */
+              caret: false,
+              items: targets.map((to) => ({
+                key: `move:${to.id}`,
+                label: (
+                  <span className="flex items-baseline gap-2">
+                    <span>{to.title}</span>
+                    {to.dates && <span className="text-body-sm-regular text-text-secondary">{to.dates}</span>}
+                  </span>
+                ),
+                onClick: () => {
+                  sent.current = { rowId: row.id, fromId: section.id };
+                  onMoveRow?.(row, section, to);
+                },
+              })),
+            },
+          ]}
         />
-      ) : null,
+      );
+    },
   });
 
   return (
@@ -732,13 +744,14 @@ export function PlanningTable({
                 </dl>
               )}
             </header>
-            <div id={bodyId} hidden={isFolded} className="border-t border-stroke-default">
+            <div id={bodyId} hidden={isFolded} className="px-6 pb-6">
               <DataTable
-                columns={onMoveRow ? [...columns, moveColumn(section)] : columns}
+                /* The card draws the border and fill, as in every `TableCard`; the table keeps its corners and the header band. */
+                bare
+                columns={onMoveRow && section.rows.some((r) => movable(r, section)) ? [...columns, actionsColumn(section)] : columns}
                 rows={section.rows}
                 sort={sort}
                 onSortChange={onSortChange}
-                className="rounded-none border-0"
                 rowProps={(row) =>
                   movable(row, section)
                     ? {

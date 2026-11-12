@@ -101,6 +101,11 @@ export interface MenuActionItem {
   items?: MenuActionItem[];
   /** The submenu's heading. Defaults to this item's label (when it is a string). */
   heading?: string;
+  /**
+   * `false` leaves out a submenu item's right caret. The item is still `aria-haspopup="menu"` and opens the same way, so it is announced as a submenu; only the glyph goes. The caret is what tells
+   * a sighted person the item opens something, so leave it unless the design draws the item without it.
+   */
+  caret?: false;
 }
 
 /** A rule between groups. Not focusable, not an item. */
@@ -572,7 +577,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             {item.selected && (
               <Icon name="check" size="sm" aria-hidden="true" className="shrink-0 text-text-primary" />
             )}
-            {submenu && <Icon name="caret-right" size="sm" aria-hidden="true" className="shrink-0" />}
+            {submenu && item.caret !== false && <Icon name="caret-right" size="sm" aria-hidden="true" className="shrink-0" />}
             {/* text.subtle is 4.76:1 on the panel but only 4.09:1 once the item is
                 highlighted with surface.brand.faint — the shortcut has to clear AA in
                 the focused state too, so it takes the next step darker. */}
