@@ -8,6 +8,7 @@ import { ChangePasswordForm } from '../change-password-form';
 import { ManualsTable, type ManualRow } from '../manuals-table';
 import { PersonalInfoForm } from '../personal-info-form';
 import { SystemChangelog } from '../system-changelog';
+import { TagManagement, type TagManagementList } from '../tag-management';
 import { UsersTable, type UserRow } from '../users-table';
 
 const USERS: UserRow[] = [
@@ -33,7 +34,27 @@ const MANUALS: ManualRow[] = [
   },
 ];
 
-/** Settings' body for a tab. The tabs with a pattern use it; the two that are not built yet say so. */
+/** The admin's Admin Panel tab: Tag Management. The page owns the lists, so adding, renaming and deleting change them here. */
+const ADMIN_LISTS: TagManagementList[] = [
+  { id: 'domains', title: 'Domains', kind: 'domain', items: ['Design', 'BESA Content', 'BESA Partner'].map((label) => ({ id: label, label })) },
+  { id: 'global-tags', title: 'Global Tags', items: ['Bug', 'New Feature', 'Improvement'].map((label) => ({ id: label, label })) },
+  { id: 'domain-tags', title: 'Domain Tags', items: [{ id: 'General Design', label: 'General Design' }] },
+];
+function AdminPanel() {
+  const [lists, setLists] = React.useState(ADMIN_LISTS);
+  const change = (id: string, edit: (items: TagManagementList['items']) => TagManagementList['items']) =>
+    setLists((all) => all.map((l) => (l.id === id ? { ...l, items: edit(l.items) } : l)));
+  return (
+    <TagManagement
+      lists={lists}
+      onAdd={(list, name) => change(list.id, (items) => [...items, { id: name, label: name }])}
+      onRename={(list, item, name) => change(list.id, (items) => items.map((i) => (i.id === item.id ? { ...i, label: name } : i)))}
+      onDelete={(list, item) => change(list.id, (items) => items.filter((i) => i.id !== item.id))}
+    />
+  );
+}
+
+/** Settings' body for a tab. The tabs with a pattern use it; the one that is not built yet (Announcements) says so. */
 const placeholder = (what: string) => (
   <div className="rounded-md bg-surface-elevated p-6 text-body-md-regular text-text-secondary">{what}: not built yet.</div>
 );
@@ -52,7 +73,7 @@ const PANELS: Partial<Record<SettingsTabKey, React.ReactNode>> = {
     />
   ),
   users: <UsersTable rows={USERS} search="" onSearchChange={fn()} page={1} pageCount={1} onPageChange={fn()} onNewUser={fn()} onView={fn()} />,
-  'admin-panel': placeholder('Admin Panel'),
+  'admin-panel': <AdminPanel />,
   announcements: placeholder('Announcements'),
   manuals: <ManualsTable rows={MANUALS} page={1} pageCount={1} onPageChange={fn()} />,
 };
@@ -115,6 +136,11 @@ export const Admin: Story = {
     await expect(c.getByRole('button', { name: /New User/ })).toBeVisible();
     await userEvent.click(c.getByRole('tab', { name: 'Manuals' }));
     await expect(c.getByText('Getting started with VCP')).toBeVisible();
+    /* The Admin Panel is Tag Management: its lists, with their own Add New. */
+    await userEvent.click(c.getByRole('tab', { name: 'Admin Panel' }));
+    await expect(c.getByRole('heading', { name: 'Domains' })).toBeVisible();
+    await expect(c.getByRole('heading', { name: 'Global Tags' })).toBeVisible();
+    await expect(c.getAllByRole('button', { name: 'Add New' }).length).toBeGreaterThanOrEqual(3);
   },
 };
 
