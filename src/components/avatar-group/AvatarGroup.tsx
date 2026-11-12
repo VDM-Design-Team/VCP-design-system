@@ -8,6 +8,11 @@ import { Tooltip } from '../../atoms/tooltip';
 export type AvatarGroupPerson = Pick<AvatarProps, 'name' | 'initials' | 'src' | 'tone'> & {
   /** What they are to this stack ("Assignee", "Reviewer"). Shown after the name in the hover tooltip and read after the name in the stack's announcement. */
   role?: string;
+  /**
+   * The domain they belong to ("Development"). Given, the tooltip reads as Figma's Manage table does,
+   * "Jack (Development) — Assignee", and the `+N` chip lists the people it hides one to a line.
+   */
+  domain?: string;
 };
 export type AvatarGroupEntry = string | AvatarGroupPerson;
 
@@ -95,8 +100,13 @@ function summarise(names: readonly string[], others: number): string {
 const toPerson = (entry: AvatarGroupEntry): AvatarGroupPerson =>
   typeof entry === 'string' ? { name: entry } : entry;
 
-/** "Ali Rahman (Assignee)", or just the name. */
-const withRole = (name: string, role?: string) => (role?.trim() ? `${name} (${role.trim()})` : name);
+/** "Ali Rahman (Assignee)", or just the name; with a domain, "Ali Rahman (Development) — Assignee". */
+const describe = (name: string, person: AvatarGroupPerson) => {
+  const role = person.role?.trim();
+  const domain = person.domain?.trim();
+  if (domain) return role ? `${name} (${domain}) — ${role}` : `${name} (${domain})`;
+  return role ? `${name} (${role})` : name;
+};
 const nameOf = (person: AvatarGroupPerson) => person.name?.trim() || person.initials?.trim() || '';
 
 export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
@@ -108,7 +118,7 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
 
     /* Someone with neither a name nor initials cannot be announced by name, so
        they are counted among the "others" rather than silently dropped. */
-    const named = shown.filter((person) => nameOf(person)).map((person) => withRole(nameOf(person), person.role));
+    const named = shown.filter((person) => nameOf(person)).map((person) => describe(nameOf(person), person));
     const others = collapsed + (shown.length - named.length);
 
     const summary = summarise(named, others);
@@ -142,7 +152,7 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
         {...props}
       >
         {shown.map((person, index) => {
-          const { role: _role, ...avatar } = person;
+          const { role: _role, domain: _domain, ...avatar } = person;
           const slot = (
             <span
               key={`${index}-${person.name ?? person.initials ?? ''}`}
@@ -159,7 +169,7 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
             <Tooltip
               key={`${index}-${person.name ?? person.initials ?? ''}`}
               describe={false}
-              content={withRole(text, person.role)}
+              content={describe(text, person)}
               className={cn(index > 0 && overlap({ size }))}
               style={{ zIndex: shown.length - index }}
             >
@@ -183,8 +193,19 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
               /* Furthest back — behind the last person shown. */
               <Tooltip
                 describe={false}
-                /* A run of names, with commas: "Priya Nair (Designer), Sofia Almeida". */
-                content={hidden.map((person) => withRole(nameOf(person), person.role)).join(', ')}
+                /* A run of names, with commas: "Priya Nair (Designer), Sofia Almeida". With domains, one to a
+                   line, as Figma's Manage table draws it. */
+                content={
+                  hidden.some((person) => person.domain?.trim()) ? (
+                    <span className="flex flex-col">
+                      {hidden.map((person, i) => (
+                        <span key={i}>{describe(nameOf(person), person)}</span>
+                      ))}
+                    </span>
+                  ) : (
+                    hidden.map((person) => describe(nameOf(person), person)).join(', ')
+                  )
+                }
                 className={overlap({ size })}
                 style={{ zIndex: 0 }}
               >

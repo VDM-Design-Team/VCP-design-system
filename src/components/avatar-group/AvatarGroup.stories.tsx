@@ -126,6 +126,47 @@ export const WithTooltips: Story = {
 };
 
 /**
+ * With each person's `domain`, the tooltips read as Figma's Manage table draws them (`2007:182516`): "Jack Morgan
+ * (Development) — Assignee", and the `+N` chip lists the people it hides one to a line. Someone can hold two roles:
+ * pass them as one string ("Initiator, Assignee").
+ */
+export const WithDomains: Story = {
+  args: {
+    label: 'Members',
+    tooltips: true,
+    max: 2,
+    people: [
+      { name: 'Jack Morgan', domain: 'Development', role: 'Assignee' },
+      { name: 'Ashley Reed', domain: 'Development', role: 'Assignee' },
+      { name: 'Frank Ito', domain: 'Design', role: 'Initiator, Assignee' },
+      { name: 'Lena Novak', domain: 'Development', role: 'Initiator' },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div className="px-8 pb-28 pt-12">
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvasElement }) => {
+    const stack = within(canvasElement).getByRole('img', {
+      name: 'Members: Jack Morgan (Development) — Assignee, Ashley Reed (Development) — Assignee and 2 others',
+    });
+    const body = within(document.body);
+    const avatars = stack.querySelectorAll('[data-tooltip]');
+    await userEvent.hover(avatars[0] as HTMLElement);
+    await waitFor(() => expect(body.getByText('Jack Morgan (Development) — Assignee')).toBeVisible());
+    await userEvent.unhover(avatars[0] as HTMLElement);
+    /* The chip: one person to a line. */
+    const chip = avatars[avatars.length - 1] as HTMLElement;
+    await userEvent.hover(chip);
+    await waitFor(() => expect(body.getByText('Frank Ito (Design) — Initiator, Assignee')).toBeVisible());
+    await expect(body.getByText('Lena Novak (Development) — Initiator')).toBeVisible();
+  },
+};
+
+/**
  * A `+1` would hide one person it could have shown, so the chip only appears for two or more. With `max={2}` (what a table uses, three slots in all): three people are all drawn, four are two faces and a `+2`.
  */
 export const NeverPlusOne: Story = {

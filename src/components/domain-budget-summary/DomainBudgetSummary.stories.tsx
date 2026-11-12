@@ -81,6 +81,15 @@ export const OverBudget: Story = {
   },
 };
 
+/** The super admin's note on the budget (decided 9 Nov 2026), under the bar. */
+export const WithNote: Story = {
+  args: { note: 'Holiday weeks in December: kept lower than the Q3 plan.' },
+  play: async ({ canvasElement }) => {
+    await expect(within(canvasElement).getByText(/Holiday weeks in December/)).toBeInTheDocument();
+    await expect(within(canvasElement).getByText('Note:')).toBeInTheDocument();
+  },
+};
+
 /** Nothing consumed yet — an empty bar and the full allocation remaining. */
 export const Untouched: Story = { args: { consumed: 0 } };
 
@@ -197,7 +206,7 @@ export const AllLevels: Story = {
 /** Narrower than the side-by-side layout needs (560, the narrowest it stays whole at): points on top, the quarter's details beneath. */
 export const Narrow: Story = {
   render: (args) => (
-    <div className="w-140">
+    <div className="w-140 max-w-full">
       <DomainBudgetSummary {...args} />
     </div>
   ),
@@ -210,7 +219,7 @@ export const Narrow: Story = {
 /** Narrower than that, nothing is squeezed further: the whole card scrolls sideways. */
 export const ScrollsWhenTooNarrow: Story = {
   render: (args) => (
-    <div className="w-96">
+    <div className="w-96 max-w-full">
       <DomainBudgetSummary {...args} />
     </div>
   ),

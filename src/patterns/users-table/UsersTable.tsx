@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
@@ -7,7 +6,8 @@ import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
 import { AccountStatusTag } from '../../components/account-status-tag';
 import { DataTable, type DataTableColumn, type DataTableSort } from '../../components/data-table';
-import { EmptyState } from '../../components/empty-state';
+import { TableEmpty } from '../../components/table-empty';
+import { TableCard } from '../../components/table-card';
 import { UserLabel } from '../../components/user-label';
 
 /**
@@ -150,49 +150,22 @@ export function UsersTable({
   }));
 
   return (
-    <div
-      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
+    <TableCard
+      className={className}
       aria-busy={loading || undefined}
       {...props}
-    >
-      <Input
-        type="search"
-        aria-label="Search users"
-        placeholder={searchPlaceholder}
-        leadingIcon={<Icon name="magnifying-glass" size="sm" />}
-        className="w-full max-w-108"
-        value={search}
-        onChange={(event) => onSearchChange(event.target.value)}
-      />
-
-      {loading && (
-        <span role="status" className="sr-only">
-          Loading users
-        </span>
-      )}
-      <DataTable
-        caption={caption}
-        className="rounded-none border-0"
-        /* Loading swaps each cell for a placeholder and leaves the header alone: + New User stays, so focus returning to it after a create has somewhere to land. */
-        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
-        rows={loading ? placeholders : rows}
-        sort={sort}
-        onSortChange={onSortChange}
-        empty={
-          empty ??
-          (search.trim() ? (
-            <EmptyState
-              icon={<Icon name="magnifying-glass" size="lg" />}
-              title={`No users match “${search.trim()}”.`}
-              description="Try a different name, email or role."
-            />
-          ) : (
-            <EmptyState icon={<Icon name="users" size="lg" />} title="No users yet." />
-          ))
-        }
-      />
-
-      <div className="flex justify-end">
+      filters={
+        <Input
+          type="search"
+          aria-label="Search users"
+          placeholder={searchPlaceholder}
+          leadingIcon={<Icon name="magnifying-glass" size="sm" />}
+          className="w-full max-w-108"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+        />
+      }
+      footer={
         <Pagination
           page={page}
           pageCount={pageCount}
@@ -202,8 +175,27 @@ export function UsersTable({
           pageSizeOptions={pageSizeOptions}
           onPageSizeChange={onPageSizeChange}
         />
-      </div>
-    </div>
+      }
+    >
+      {loading && (
+        <span role="status" className="sr-only">
+          Loading users
+        </span>
+      )}
+      <DataTable
+        bare
+        caption={caption}
+        /* Loading swaps each cell for a placeholder and leaves the header alone: + New User stays, so focus returning to it after a create has somewhere to land. */
+        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
+        rows={loading ? placeholders : rows}
+        sort={sort}
+        onSortChange={onSortChange}
+        empty={
+          empty ??
+          <TableEmpty noun="users" icon="users" search={search} hint="Try a different name, email or role." />
+        }
+      />
+    </TableCard>
   );
 }
 UsersTable.displayName = 'UsersTable';

@@ -87,8 +87,24 @@ export const SpineMoves: Story = {
     <div className="flex flex-col gap-3">
       <StatusProgression role="initiator" status="Draft" />
       <StatusProgression role="admin" status="Pending" />
+      <StatusProgression role="admin" status="Backlog" />
       <StatusProgression role="admin" status="Accepted" />
       <StatusProgression role="admin" status="In Progress" chain={DEVELOPMENT} />
+    </div>
+  ),
+};
+
+/**
+ * An admin on a backlogged AV decides it from the Backlog: the outline Reject
+ * and Accept (Figma 1094:97734). Nobody else gets moves here; Move to Pending
+ * and Move to Draft are in `DetailCardMenu`.
+ */
+export const BacklogAdmin: Story = {
+  name: 'Backlog (admin)',
+  render: () => (
+    <div className="flex flex-col gap-3">
+      <StatusProgression role="admin" status="Backlog" />
+      <p className="text-caption-md-regular text-text-tertiary">initiator, assignee: no moves on Backlog</p>
     </div>
   ),
 };
@@ -173,7 +189,7 @@ export const PendingDeploy: Story = {
 };
 
 const ROLES: AVProgressionRole[] = ['assignee', 'assignee-initiator', 'initiator', 'admin'];
-const SPINE: AVStatus[] = ['Draft', 'Pending', 'Accepted', 'In Progress', 'Review', 'Completed'];
+const SPINE: AVStatus[] = ['Draft', 'Pending', 'Backlog', 'Accepted', 'In Progress', 'Review', 'Completed'];
 
 /**
  * Every move the component defines, over the Development chain — the spine
