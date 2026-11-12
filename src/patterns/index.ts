@@ -60,3 +60,4 @@ export * from './child-part-modal';
 export * from './multipart-section';
 export * from './user-account-modal';
 export * from './users-table';
+export * from './settings-page';
