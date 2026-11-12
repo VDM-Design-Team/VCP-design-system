@@ -246,7 +246,7 @@ user can pause, extend, or dismiss it. All three are satisfied:
   ignores any `duration` under `MIN_ACTION_TOAST_DURATION` (15 seconds) once
   `actionLabel` is present. Making someone catch a "Retry" button within six seconds
   is not an accessible control. At 15 seconds or more, with the pause on hover and
-  focus, the extend, and the dismiss control above, it is: that is the "Undo" below.
+  focus, the extend, and the dismiss control above, it is: that is the "Undo" above.
 
 **Timing guidance.** `DEFAULT_TOAST_DURATION` is 6000ms. Five seconds is the
 usual floor; this adds a second because VCP toasts tend to carry a sentence
