@@ -220,6 +220,12 @@ export interface SearchSelectSingleProps extends SearchSelectBase {
   /** The picked `value`. `''` shows the placeholder. Uncontrolled when omitted. */
   value?: string;
   onChange?: (value: string) => void;
+  /**
+   * With a value picked, a ✕ before the caret empties the field (`onChange('')`) and gives focus back to
+   * it, as Figma's Manage filters draw it ("Filter by Assignee and Clear", `940:171256`). Its name is
+   * "Clear" and the field's label ("Clear Assignee"), or what you pass here.
+   */
+  clearable?: boolean | string;
   display?: never;
   confirm?: never;
   applyLabel?: never;
@@ -235,6 +241,7 @@ export interface SearchSelectMultipleProps extends SearchSelectBase {
   onChange?: (value: string[]) => void;
   /** How the field shows the picks. */
   display?: SearchSelectDisplay;
+  clearable?: never;
   /** Draft the ticks in the panel, with a Clear all / Apply footer. */
   confirm?: boolean;
   applyLabel?: string;
@@ -298,6 +305,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
       confirm,
       applyLabel = 'Apply',
       clearLabel = 'Clear all',
+      clearable,
       placeholder = 'Select…',
       searchable = true,
       searchPlaceholder = 'Search',
@@ -580,7 +588,14 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
        hears what was picked. An `aria-label` is named by the trigger itself; a `<label for>` (a Field)
        is found through the button's `labels`, and given an id if it has none. */
     const [labelIds, setLabelIds] = React.useState<string[]>([]);
+    const [labelText, setLabelText] = React.useState('');
     React.useLayoutEffect(() => {
+      /* The ✕'s name says which field it clears ("Clear Assignee"): from `aria-labelledby`, or the `<label for>`. */
+      const named = ariaLabelledBy
+        ? ariaLabelledBy.split(/\s+/).map((id) => document.getElementById(id)?.textContent?.trim() ?? '')
+        : Array.from(triggerRef.current?.labels ?? []).map((label) => label.textContent?.trim() ?? '');
+      const text = named.filter(Boolean).join(' ');
+      setLabelText((prev) => (prev === text ? prev : text));
       if (ariaLabel || ariaLabelledBy) return;
       const ids = Array.from(triggerRef.current?.labels ?? []).map((label, i) => {
         if (!label.id) label.id = `${listId}-label-${i}`;
@@ -603,6 +618,8 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
     const nameParts = ariaLabelledBy ? [ariaLabelledBy] : ariaLabel ? [triggerId] : labelIds;
     const triggerName = hasValue && nameParts.length > 0 ? [...nameParts, valueId].join(' ') : ariaLabelledBy;
     const showTags = !!multiple && display === 'tags' && committed.length > 0;
+    /* `clearable` with a value: the ✕, then the caret, both after the trigger (the caret moves out of it). */
+    const clearShown = !!clearable && !multiple && !disabled && !loading && committed.length > 0;
     const tagsKey = committed.join('\u0000');
     /* Without a search box the trigger is the combobox. */
     const triggerIsCombobox = !searchable;
@@ -928,7 +945,7 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                   {summary ?? placeholder}
                 </span>
               )}
-              {loading ? (
+              {clearShown ? null : loading ? (
                 <Spinner size="sm" decorative className="shrink-0 text-text-tertiary" />
               ) : (
                 <Icon
@@ -943,6 +960,40 @@ export const SearchSelect = React.forwardRef<HTMLDivElement, SearchSelectProps>(
                 />
               )}
             </button>
+            {clearShown && (
+              /* A sibling of the trigger, never inside it: a button may not hold another. Figma's 24 button
+                 with a 16 ✕ in `neutral.outline.content`, just before the caret. */
+              <button
+                type="button"
+                aria-label={
+                  typeof clearable === 'string'
+                    ? clearable
+                    : ariaLabel || labelText
+                      ? `Clear ${ariaLabel || labelText}`
+                      : 'Clear'
+                }
+                onClick={() => {
+                  commit([]);
+                  closePanel(true);
+                }}
+                className={cn(
+                  'relative -mr-1 grid size-6 shrink-0 place-items-center rounded-sm outline-none',
+                  'text-neutral-outline-content-hover hover:text-neutral-outline-content-pressed',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+                )}
+              >
+                <Icon name="x" size="sm" aria-hidden="true" />
+              </button>
+            )}
+            {clearShown && (
+              /* Drawing only: a click on it reaches the field, which opens the panel. */
+              <Icon
+                name="caret-down"
+                size="sm"
+                aria-hidden="true"
+                className={cn('pointer-events-none shrink-0 text-text-tertiary transition-transform motion-reduce:transition-none', open && 'rotate-180')}
+              />
+            )}
           </div>
 
           <div

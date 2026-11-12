@@ -155,6 +155,12 @@ export interface DetailCardProps
   options?: DetailCardOptions;
   /** Editing and new: a message under a field, which also marks it invalid. */
   errors?: Partial<Record<DetailCardField, string>>;
+  /**
+   * Editing and new: fields shown but locked, as Figma's multipart part edit
+   * page (`1404:132644`) greys the ones a part takes from its parent. Applies to
+   * the dropdowns and the dates; a locked field keeps its value and can't change.
+   */
+  readOnly?: readonly DetailCardField[];
   /** The viewers pill, a placeholder until Edit Viewers is built: shows the count and reports a press. */
   viewerCount?: number;
   onViewers?: () => void;
@@ -177,6 +183,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       onChange,
       options,
       errors,
+      readOnly,
       viewerCount,
       onViewers,
       dueSoonWithinDays = 3,
@@ -189,6 +196,8 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     const { format: showDate, range: showRange } = useDateFormat();
     const fields = FIELDS[type].filter((f) => !(domain === 'design' && f === 'cycle'));
     const set = (patch: Partial<DetailCardValue>) => onChange?.({ ...value, ...patch });
+    /** Shown, but it can't be changed. */
+    const locked = (field: DetailCardField) => editing && !!readOnly?.includes(field);
     const cycles = options?.cycles ?? [];
     const cycleOptions: SearchSelectOption[] = cycles.map((c) => ({
       value: c.value,
@@ -215,19 +224,14 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     body.assignees = <div className="flex flex-wrap gap-2">{people(value.assignees, 'Assignee')}</div>;
 
     body.startDate = editing ? (
-      <DateField label="Start Date" value={value.startDate} onChange={(v) => set({ startDate: v })} error={errors?.startDate} />
+      <DateField label="Start Date" value={value.startDate} onChange={(v) => set({ startDate: v })} error={errors?.startDate} disabled={locked('startDate')} />
     ) : value.startDate ? (
       <Tag size="md" tone="neutral">{showDate(value.startDate)}</Tag>
     ) : null;
     body.dueDate = editing ? (
-      <DateField label="Due Date" value={value.dueDate} onChange={(v) => set({ dueDate: v })} error={errors?.dueDate} />
+      <DateField label="Due Date" value={value.dueDate} onChange={(v) => set({ dueDate: v })} error={errors?.dueDate} disabled={locked('dueDate')} />
     ) : value.dueDate ? (
-      <DueDateTag
-        size="md"
-        proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })}
-      >
-        {showDate(value.dueDate)}
-      </DueDateTag>
+      <DueDateTag size="md" date={value.dueDate} proximity={dueDateTone({ due: toDate(value.dueDate), soonWithinDays: dueSoonWithinDays })} />
     ) : null;
 
     const cycle = cycles.find((c) => c.value === value.cycle);
@@ -241,6 +245,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={value.cycle ?? ''}
         onChange={(v: string) => set({ cycle: v })}
         error={errors?.cycle}
+        disabled={locked('cycle')}
       />
     ) : cycle ? (
       <CycleTag size="md" code={cycle.code} start={cycle.start} end={cycle.end} />
@@ -281,6 +286,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={value.urgency ?? ''}
         onChange={(v: string) => set({ urgency: v as AVUrgency })}
         error={errors?.urgency}
+        disabled={locked('urgency')}
       />
     ) : value.urgency ? (
       <UrgencyTag size="md" variant="tonal" urgency={value.urgency} />
@@ -295,6 +301,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={value.type ?? ''}
         onChange={(v: string) => set({ type: v as AVType })}
         error={errors?.type}
+        disabled={locked('type')}
       />
     ) : value.type ? (
       <TypeTag size="md" variant="faint" info type={value.type} />
@@ -321,6 +328,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={[...(value.projects ?? [])]}
         onChange={(v: string[]) => set({ projects: v })}
         error={errors?.projects}
+        disabled={locked('projects')}
       />
     ) : (
       tagList(value.projects, 'brand')
@@ -335,6 +343,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={value.category ?? ''}
         onChange={(v: string) => set({ category: v })}
         error={errors?.category}
+        disabled={locked('category')}
       />
     ) : value.category ? (
       <Tag size="md" tone="neutral">{value.category}</Tag>
@@ -351,6 +360,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={[...(value.tags ?? [])]}
         onChange={(v: string[]) => set({ tags: v })}
         error={errors?.tags}
+        disabled={locked('tags')}
       />
     ) : (
       tagList(value.tags, 'neutral')
@@ -365,6 +375,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         value={value.capacityPoints === undefined ? '' : String(value.capacityPoints)}
         onChange={(v: string) => set({ capacityPoints: Number(v) })}
         error={errors?.capacityPoints}
+        disabled={locked('capacityPoints')}
       />
     ) : value.capacityPoints !== undefined ? (
       <Badge size="lg" tone="neutral">{String(value.capacityPoints)}</Badge>
@@ -516,11 +527,14 @@ function DateField({
   value,
   onChange,
   error,
+  disabled,
 }: {
   label: string;
   value?: string;
   onChange: (iso: string) => void;
   error?: string;
+  /** Locked (DetailCard's `readOnly`): shown, never opens. */
+  disabled?: boolean;
 }) {
   const [open, setOpen] = React.useState(false);
   const errorId = React.useId();
@@ -529,8 +543,8 @@ function DateField({
   return (
     <div className="w-full">
       <Popover
-        open={open}
-        onOpenChange={setOpen}
+        open={open && !disabled}
+        onOpenChange={(next) => setOpen(next && !disabled)}
         align="left"
         className="w-full"
         /* As InlineDateEdit sets it: the panel is the picker, no wider and with no padding of its own. */
@@ -548,7 +562,8 @@ function DateField({
             leadingIcon={<Icon name="calendar-blank" size="sm" />}
             placeholder={dates.placeholder}
             value={value ? dates.format(value) : ''}
-            onClick={() => setOpen(true)}
+            disabled={disabled}
+            onClick={() => !disabled && setOpen(true)}
           />
         }
         content={

@@ -29,7 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `reactions` | `Array<{ emoji, count, mine?, people?, name? }>` | `[]` | The pills, in order. `mine` drives `aria-pressed` and the border/text colour; `people` adds the hover tooltip; `name` overrides the tooltip's `:emojiname:` |
 | `onToggle` | `(emoji) => void` | — | A pill click, **or the standalone thumbs-up button** — add or retract *your* reaction; the caller owns the math |
-| `maxVisible` | `number` | `5` | Reaction pills shown before the rest collapse into a trailing "+N" chip. Figma draws an overflow state but doesn't fix a specific cutoff — pick what fits |
+| `maxVisible` | `number` | `5` | Reaction pills shown before the rest collapse into a trailing "+N" button. Pressing it shows every pill in the row; "Show less" folds them again (decided 9 Nov 2026). Figma draws an overflow state but doesn't fix a specific cutoff — pick what fits |
 | `categories` | `Array<{ name, emoji }>` | `DEFAULT_EMOJI_CATEGORIES` — Hand Gestures, Smileys & People, Symbols | The palette in the popover, grouped under category names |
 | `emoji` | `string[]` | — | A flat, ungrouped palette. Wins over `categories` when given |
 | `onSelect` | `(emoji) => void` | — | A palette pick; the popover closes itself |
@@ -46,7 +46,9 @@ Pass `people` on a reaction and the pill gets the design's **Hover Tooltip**
 state — **Names** in bold, then "reacted with :emojiname:" — on the system
 `Tooltip`. The names are phrased like `AvatarGroup`'s summary: "**You**
 reacted with :thumbsup:", "**Eve and Marvin** reacted with :tada:", "**You,
-Marvin Ode and 1 other** reacted with :thumbsup:". The short name comes from a
+Marvin Ode and Ali** reacted with :thumbsup:", "**You, Marvin Ode, Ali and 2
+others** reacted with :thumbsup:": up to three names, then "and N others"
+(Figma's copy; decided 9 Nov 2026). The short name comes from a
 built-in map of the default palette; pass `name` for an emoji outside it (with
 no name at all the tooltip shows the glyph). Because it is the real `Tooltip`,
 it opens on **keyboard focus** as well as hover, so the names are not
@@ -130,6 +132,13 @@ fonts, so the bug did not show locally. The token names the colour emoji fonts f
 - Pills are toggle buttons: `aria-pressed` for "you reacted", with the name
   saying what a glance says — "3 reactions, 👍, you reacted". Emoji + count
   alone answer neither question a screen reader user has.
+- **Focus never drops.** Taking back the last reaction on a pill removes that pill, and the focus with it.
+  So when the pill pressed last is gone and nothing has focus, focus moves to the pill that took its place,
+  or to **Add reaction** when none is left. A toggle that adds, or a caller that answers later, leaves focus
+  where it is.
+- **The "+N" button** expands the row: it's named "Show N more reactions" (visually hidden text, not an
+  `aria-label` on a span) with `aria-expanded`, and once open it reads "Show less". It's the same button
+  both ways, so focus stays on it.
 - **The standalone thumbs-up button is a toggle too.** It looks up `👍` in
   `reactions` and mirrors that pill's `mine` state in its own
   `aria-pressed` and name ("React with thumbs up" / "Remove thumbs up

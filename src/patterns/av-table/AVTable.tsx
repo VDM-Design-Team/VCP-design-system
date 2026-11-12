@@ -17,6 +17,8 @@ import { Tag } from '../../atoms/tag';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
+import { MultipartParentChip } from '../../components/multipart-parent-chip';
+import { MultipartTableTag } from '../../components/multipart-table-tag';
 import { TableCard } from '../../components/table-card';
 
 /**
@@ -50,19 +52,44 @@ import { TableCard } from '../../components/table-card';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
+/**
+ * A multipart Added Value is split into parts. In the table, **a child** says which part it is and links to its parent, and **a parent** says how
+ * many of its parts are done. Figma's `_AV_Table_Item_AV_Title_Multipart` (`Multipart Parent=No` / `=Yes`).
+ */
+export type AVMultipart =
+  | {
+      kind: 'child';
+      /** Which part: 1 of `total`. */
+      position: number;
+      total: number;
+      /** The parent's reference, "VCP-4321". */
+      parentRef: string;
+      /** Where the parent is. Given, the **Parent** chip is a link that opens it in a new tab; without it (and without `onOpenParent`) the chip is plain text, since there is nowhere to go. */
+      parentHref?: string;
+    }
+  | { kind: 'parent'; /** How many parts are completed. */ completed: number; total: number };
+
 export interface AVTableRow {
   /** The row's identity — used for selection. Give it the AV's real id. */
   id: string;
   /** The human reference, "VCP-12345". Clickable when `onOpen` is given. */
   ref: string;
   title: string;
+  /**
+   * Makes it a multipart row, in Figma's two columns: a **28 tag under the reference** (the child's "1/3" or the parent's progress ring), the title with its **details starting under it**, a **Parent: VCP-4321**
+   * chip on a child, and a coloured edge at the far left of a parent's row. See `AVMultipart`.
+   */
+  multipart?: AVMultipart;
   /** The domain badge beside the title — "VCP", "Design". */
   domain?: string;
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
-  /** The date, already formatted, and how near it is. See `DueDateTag`. */
-  due?: { label: string; proximity?: DueDateProximity };
+  /**
+   * The due date and how near it is. `date` is ISO `yyyy-mm-dd`: `DueDateTag` shows it dd/mm/yyyy (or the person's locale). `label` is text in its
+   * place for what is not a date; do not pass a date you formatted yourself.
+   */
+  due?: { date?: string; label?: string; proximity?: DueDateProximity };
   urgency?: AVUrgency;
   type?: AVType;
   /** `{ status }` for a spine status, `{ custom }` for a domain step. */
@@ -102,6 +129,8 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   onSelectedChange?: (ids: string[]) => void;
   /** Opens an AV. Given, the reference becomes a button; omitted, it is text. */
   onOpen?: (row: AVTableRow) => void;
+  /** A child's **Parent: …** chip was pressed. Given, the chip is a button; the page opens the parent. */
+  onOpenParent?: (row: AVTableRow) => void;
   /** Adds the trailing Actions column. Figma's Action Column row variant. */
   actions?: (row: AVTableRow) => React.ReactNode;
   /**
@@ -116,6 +145,14 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   page?: number;
   pageCount?: number;
   onPageChange?: (page: number) => void;
+  /**
+   * Passed to `Pagination`: with `itemCount` and `pageSize` it shows the "1-50 of 1,250" range, and with
+   * `onPageSizeChange` the Items select (Figma's Manage table, `940:167946`). The rows stay the caller's to slice.
+   */
+  itemCount?: number;
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  onPageSizeChange?: (pageSize: number) => void;
   /** The info tooltips. Urgency, Type and Status default to the product's copy — see `AVTableHints`. */
   hints?: AVTableHints;
   empty?: React.ReactNode;
@@ -143,12 +180,17 @@ export function AVTable({
   selected = [],
   onSelectedChange,
   onOpen,
+  onOpenParent,
   actions,
   onDeleteSelected,
   deleteSelectedLabel = (count) => `Delete Selected (${count})`,
   page,
   pageCount,
   onPageChange,
+  itemCount,
+  pageSize,
+  pageSizeOptions,
+  onPageSizeChange,
   hints: hintOverrides,
   empty,
   caption = 'Added Values',
@@ -163,48 +205,82 @@ export function AVTable({
       sortable: true,
       grow: true,
       width: '34%',
-      render: (row) => (
-        /* 16 top and bottom, Figma's own cell padding. With the two-line title
-             block that makes an 81 row, which is what the canvas draws. */
-        <div className="flex flex-col gap-1 py-4">
-          <div className="flex items-center gap-2">
-            {/* The reference opens the AV. A button, not a whole-row click
-                target: `DataTable` refuses those, and rightly — a row-wide
-                target hides the real action from keyboards and screen readers. */}
-            {onOpen ? (
-              <button
-                type="button"
-                onClick={() => onOpen(row)}
-                className={cn(
-                  'shrink-0 rounded-sm text-body-sm-regular text-text-tertiary transition-colors',
-                  'hover:text-text-brand-medium hover:underline',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-                )}
-              >
-                {row.ref}
-                <span className="sr-only">: {row.title}</span>
-              </button>
-            ) : (
-              <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
+      /* The metadata (tag, domain, parent chip, counts) never shrinks or is cut, so a multipart row's cell cannot be narrower than that: the
+         column's floor rises to fit it, and below it the table scrolls sideways. (The parent's brand edge is the table's `rowEdge`, at the row's far left.) */
+      cellProps: (row) => (row.multipart ? { className: 'min-w-md' } : undefined),
+      render: (row) => {
+        const multipart = row.multipart;
+        const reference = onOpen ? (
+          /* The reference opens the AV. A button, not a whole-row click
+             target: `DataTable` refuses those, and rightly — a row-wide
+             target hides the real action from keyboards and screen readers. */
+          <button
+            type="button"
+            onClick={() => onOpen(row)}
+            className={cn(
+              'shrink-0 rounded-sm text-body-sm-regular text-text-tertiary transition-colors',
+              'hover:text-text-brand-medium hover:underline',
+              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             )}
-            <Divider orientation="vertical" className="h-4 shrink-0" />
-            {/* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */}
-            <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>
+          >
+            {row.ref}
+            <span className="sr-only">: {row.title}</span>
+          </button>
+        ) : (
+          <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
+        );
+        /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */
+        const title = <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>;
+        const tag = multipart && (
+          <MultipartTableTag
+            kind={multipart.kind}
+            total={multipart.total}
+            position={multipart.kind === 'child' ? multipart.position : undefined}
+            parentRef={multipart.kind === 'child' ? multipart.parentRef : undefined}
+            completed={multipart.kind === 'parent' ? multipart.completed : undefined}
+          />
+        );
+        const details = (row.domain || multipart?.kind === 'child' || row.attachments || row.comments) && (
+          <div className="flex w-max items-center gap-2">
+            {row.domain && (
+              <Tag tone="brand" size="sm">
+                {row.domain}
+              </Tag>
+            )}
+            {multipart?.kind === 'child' && (
+              <MultipartParentChip parentRef={multipart.parentRef} href={multipart.parentHref} onOpen={onOpenParent ? () => onOpenParent(row) : undefined} />
+            )}
+            <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
+            <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
           </div>
+        );
 
-          {(row.domain || row.attachments || row.comments) && (
-            <div className="flex items-center gap-2">
-              {row.domain && (
-                <Tag tone="brand" size="sm">
-                  {row.domain}
-                </Tag>
-              )}
-              <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
-              <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
+        /* A multipart row is Figma's grid: the reference, then the tag under it (28), a rule, and the title with its details starting under it. 16 top and bottom,
+           Figma's own cell padding: that makes the 85-high title cell the canvas draws. */
+        if (multipart) {
+          return (
+            <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 py-4">
+              <div className="col-start-1 row-start-1 flex items-center">{reference}</div>
+              <Divider orientation="vertical" className="col-start-2 row-start-1 h-4 shrink-0 self-center" />
+              <div className="col-start-3 row-start-1 min-w-0">{title}</div>
+              <div className="col-start-1 row-start-2 flex">{tag}</div>
+              <div className="col-start-3 row-start-2 min-w-0">{details}</div>
             </div>
-          )}
-        </div>
-      ),
+          );
+        }
+
+        /* Any other row: the reference, a rule and the title on top, the details under them. */
+        return (
+          <div className="flex flex-col gap-1 py-4">
+            <div className="flex items-center gap-2">
+              {reference}
+              <Divider orientation="vertical" className="h-4 shrink-0" />
+              {title}
+            </div>
+            {details}
+          </div>
+        );
+      },
     },
     {
       key: 'due',
@@ -214,7 +290,9 @@ export function AVTable({
       sortable: true,
       render: (row) =>
         row.due ? (
-          <DueDateTag proximity={row.due.proximity}>{row.due.label}</DueDateTag>
+          <DueDateTag proximity={row.due.proximity} date={row.due.date}>
+            {row.due.label}
+          </DueDateTag>
         ) : null,
     },
     {
@@ -286,6 +364,7 @@ export function AVTable({
       onSelectedChange={(ids) => onSelectedChange?.(ids as string[])}
       /* Every checkbox says which AV it selects, not "row 3". */
       selectLabel={(row) => `Select ${row.ref}: ${row.title}`}
+      rowEdge={(row) => row.multipart?.kind === 'parent'}
       empty={empty}
       caption={caption}
       bare={Boolean(filters)}
@@ -302,7 +381,17 @@ export function AVTable({
           {deleteSelectedLabel(selected.length)}
         </Button>
       )}
-      {paginated && <Pagination page={page} pageCount={pageCount} onChange={onPageChange} />}
+      {paginated && (
+        <Pagination
+          page={page}
+          pageCount={pageCount}
+          onChange={onPageChange}
+          itemCount={itemCount}
+          pageSize={pageSize}
+          pageSizeOptions={pageSizeOptions}
+          onPageSizeChange={onPageSizeChange}
+        />
+      )}
     </div>
   );
 

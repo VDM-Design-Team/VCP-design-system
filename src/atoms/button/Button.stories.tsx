@@ -20,7 +20,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger', 'link'],
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'danger', 'danger-tertiary', 'link'],
     },
     size: { control: 'radio', options: ['sm', 'md', 'lg'] },
   },
@@ -55,6 +55,15 @@ export const CriticalText: Story = {
 };
 
 export const Danger: Story = { args: { variant: 'danger', children: 'Delete account' } };
+/** Red text, no fill: a destructive answer beside quieter ones (Figma's AV edit page: Discard, Save as Draft, Submit). */
+export const DangerTertiary: Story = {
+  args: { variant: 'danger-tertiary', children: 'Discard' },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Discard' });
+    /* The label clears 4.5:1 on the page: red-700 on white is about 6.5:1. */
+    await expect(button.className).toContain('text-accent-critical-outline-content-hover');
+  },
+};
 export const Link: Story = { args: { variant: 'link', children: 'Learn more' } };
 
 export const Sizes: Story = {

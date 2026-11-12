@@ -69,6 +69,14 @@ const button = cva(
           'hover:bg-accent-critical-filled-surface-hover active:bg-accent-critical-filled-surface-pressed',
           'disabled:bg-accent-critical-filled-surface-disabled aria-disabled:bg-accent-critical-filled-surface-disabled',
         ],
+        /* accent.critical.outline.content — a destructive answer drawn as text (Figma's Style=Text with a red
+           label: the AV edit page's Discard, 1026:166776). Figma's label is the hover step at rest (red-700),
+           darker than the default, so it clears 4.5:1; hover and press go one step on. */
+        'danger-tertiary': [
+          'bg-action-tertiary-surface-default text-accent-critical-outline-content-hover',
+          'hover:text-accent-critical-outline-content-pressed active:text-accent-critical-outline-content-pressed',
+          'disabled:text-accent-critical-outline-content-disabled aria-disabled:text-accent-critical-outline-content-disabled',
+        ],
         /* text.link */
         link: [
           'bg-transparent text-text-link-default underline underline-offset-4',
