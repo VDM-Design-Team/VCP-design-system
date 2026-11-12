@@ -25,7 +25,7 @@ import { Tag } from '../../atoms/tag';
  *   Assignee, Start Date or Due Date**; an assignee is a person's name and a date is ISO, shown the system's way.
  * - **Source** — a `SourceTag`. **Changed At** is an ISO date and time, shown the system's way, **"10/06/2026 14:37"** (dd/mm/yyyy, or the person's locale's order, then a 24-hour time: `useDateFormat().dateTime`) in a `<time>`. **Changed By** is plain text.
  *
- * **It does nothing itself.** Filtering is the page's: pass the filter row as `filters` and it sits inside the card above the table (there is no filters pattern); paging is
+ * **It does nothing itself.** Filtering is the page's: pass the page's `FilterBar` as `filters` and it sits inside the card above the table; paging is
  * `page`, `pageCount` and `onPageChange`.
  * `loading` shows placeholder rows and one status says so; an empty trail is a `TableEmpty`.
  *
@@ -90,7 +90,7 @@ export interface TaskLogTrailProps
   /** Placeholder rows instead of `rows`, while the log loads. The headers stay. */
   loading?: boolean;
   /**
-   * The page's filters: pass a `FilterBar` (search, the period, a select for the kind of change, **Reset**), drawn **inside the card, above the table** — as `AccountsTable` and
+   * The page's filters: pass a `FilterBar` (search, the period, a labelled select for the kind of change, **Reset**), drawn **inside the card, above the table** — as `AccountsTable` and
    * `ContactsTable` carry their search.
    */
   filters?: React.ReactNode;

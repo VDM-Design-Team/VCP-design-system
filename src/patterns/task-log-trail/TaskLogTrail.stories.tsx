@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { TaskLogTrail, type TaskLogRow } from './TaskLogTrail';
 import { Select } from '../../atoms/select';
+import { Field } from '../../components/field';
 import { FilterBar } from '../filter-bar';
 
 const TASK = '[VCP] Automated Planning Workspace for VCP Planning List - DESIGN';
@@ -152,14 +153,17 @@ export const WithFilters: Story = {
             period={{ value: period, onChange: setPeriod, presets: PRESETS }}
             onReset={reset}
           >
-            <Select
-              aria-label="Changed"
-              emphasis="regular"
-              className="w-48"
-              options={[{ value: '', label: 'All Changes' }, 'Status', 'Workflow', 'Assignee', 'Start Date', 'Due Date']}
-              value={field}
-              onChange={setField}
-            />
+            {/* A field of the page's own: labelled above and on the lighter filter edge, as the bar's own fields are. */}
+            <Field label="Change" className="min-w-0">
+              <Select
+                edge="neutral"
+                emphasis="regular"
+                fullWidth
+                options={[{ value: '', label: 'All Changes' }, 'Status', 'Workflow', 'Assignee', 'Start Date', 'Due Date']}
+                value={field}
+                onChange={setField}
+              />
+            </Field>
           </FilterBar>
         }
       />
@@ -168,12 +172,12 @@ export const WithFilters: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getAllByRole('row')).toHaveLength(1 + 7);
-    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Changed' }), 'Workflow');
+    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), 'Workflow');
     await expect(c.getAllByRole('row')).toHaveLength(1 + 2);
-    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Changed' }), 'Assignee');
+    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), 'Assignee');
     await expect(c.getAllByRole('row')).toHaveLength(1 + 1);
     /* The date range: a preset fills it and narrows the log to those days. */
-    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Changed' }), '');
+    await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), '');
     await userEvent.click(c.getByRole('button', { name: 'Date' }));
     await userEvent.click(within(document.body).getByRole('button', { name: 'First week' }));
     await waitFor(() => expect(c.getAllByRole('row')).toHaveLength(1 + 4));

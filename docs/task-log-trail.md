@@ -53,7 +53,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## It does nothing itself
 
-It filters nothing and pages nothing: the page filters and passes the page's rows. **The filters are the system's `FilterBar`** (search, the period, **Reset**), with one `Select` beside them for which field changed (Status, Workflow, Assignee, Start Date or Due Date), inside the table's card, the way `AccountsTable` and `ContactsTable` carry their search; the `WithFilters` story shows it. Figma draws a separate "Filters" card with a heading, a caption and a dates-only **Clear dates**; the page has the bar in the table's card and one **Reset**, `FilterBar`'s, that clears every filter, like every other filter row in the system. **There is no Source filter**: every change is from VCP (no Jira), so it would have one option.
+It filters nothing and pages nothing: the page filters and passes the page's rows. **The filters are the system's `FilterBar`** (search, the period, **Reset**), with one `Select` among its fields for which field changed (Status, Workflow, Assignee, Start Date or Due Date), labelled **Change** above it and on the lighter filter edge like the bar's own fields (a `Field` around a `Select edge="neutral"`, passed as the bar's `children`), inside the table's card, the way `AccountsTable` and `ContactsTable` carry their search; the `WithFilters` story shows it. Figma draws a separate "Filters" card with a heading, a caption and a dates-only **Clear dates**; the page has the bar in the table's card and one **Reset**, `FilterBar`'s, that clears every filter, like every other filter row in the system. **There is no Source filter**: every change is from VCP (no Jira), so it would have one option.
 
 ## Tokens
 
