@@ -74,7 +74,7 @@ const meta = {
       },
     },
   },
-  args: { title: 'Assigned', table: { rows: [] } },
+  args: { title: 'Assigned Values', table: { rows: [] } },
   decorators: [
     (Story) => (
       <div className="min-h-screen bg-surface-canvas">
@@ -113,7 +113,7 @@ export const MyValues: Story = {
 
 /** Assigned: no strip, no extra columns. */
 export const Assigned: Story = {
-  args: { title: 'Assigned' },
+  args: { title: 'Assigned Values' },
   render: (args) => <Page {...args} all={rows(4)} filters={baseFilters()} table={{ rows: [], ...pager(4) }} />,
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
@@ -187,7 +187,7 @@ export const ArchiveBacklog: Story = {
 
 /** A search that matches nothing: the table says so in the system's words, with Reset, and focus goes to the search box when Reset removes itself. */
 export const NothingMatches: Story = {
-  args: { title: 'Assigned' },
+  args: { title: 'Assigned Values' },
   render: (args) => <Page {...args} all={rows(3)} filters={baseFilters()} table={{ rows: [], ...pager(0) }} />,
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);

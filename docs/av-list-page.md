@@ -30,12 +30,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Page | What the page passes |
 |---|---|
 | **My Values** | `stats` (the totals strip) and `table.actions` (the ⋯ column) |
-| **Assigned** | A title and the table |
+| **Assigned** | The title "Assigned Values" and the table |
 | **Drafts** | `table.selectable` (the checkbox column) |
 | **Manage Added Value** | `filters` with the Assignee and Initiator fields (`users`) |
 | **Archive** (Completed, Rejected, Backlog) | A title and the table; only the status the rows carry changes |
 
-The page names itself in `title` ("My Values", "Assigned", "Completed"…): Figma's frames all say the placeholder "Page Title".
+The page names itself in `title` ("My Values", "Assigned Values", "Completed"…): Figma's frames all say the placeholder "Page Title".
 
 ## The filters are inside the table's card
 

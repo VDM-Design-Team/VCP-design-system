@@ -30,7 +30,7 @@ import { FilterBar, type FilterBarProps } from '../filter-bar';
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 export interface AVListPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
-  /** The page's `h1`: "My Values", "Assigned", "Drafts"… */
+  /** The page's `h1`: "My Values", "Assigned Values", "Drafts"… */
   title: string;
   /** The totals strip above the table. Only My Values has one. */
   stats?: MyValuesStatsProps;
