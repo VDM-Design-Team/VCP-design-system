@@ -51,7 +51,7 @@ It is **controlled and saves nothing**. The page owns the save, and the stories 
 **The page must include the quarter and year controls**, as Figma's edit page draws them: a Q1–Q4 `SegmentedControl` and a year
 `Select`, top right above the table. **Both are 40 high** — the segmented control at `size="lg"` (its default is 48) and the
 `Select` at `size="md"` — so they sit as one row; do not pair a 40 with a 32 (`sm`). Lock both with `disabled` while saving. The
-`OnThePage` story composes them.
+`DomainBudgetEditPage` composes them (and the save flow above), so use that for the whole page.
 
 ## The columns
 
