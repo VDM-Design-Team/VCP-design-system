@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
 import { Icon } from '../../atoms/icon';
-import { Modal } from '../../components/modal';
+import { Modal, ModalConfirm } from '../../components/modal';
 
 /**
  * BulkActionFailedModal — when some of a bulk change did not go through: **"Added Values Failed to Update"**, "2 of 5 added values failed to update Urgency to High", then each
@@ -46,9 +45,7 @@ export function BulkActionFailedModal({ open, onClose, total, property, value, f
       description={`${failures.length} of ${total} added values failed to update ${property} to ${value}`}
       size="lg"
       footer={
-        <Button size="sm" type="button" onClick={onClose}>
-          Got it
-        </Button>
+        <ModalConfirm onClick={onClose}>Got it</ModalConfirm>
       }
     >
       <ul className="m-0 flex list-none flex-col gap-6 p-0 font-sans">

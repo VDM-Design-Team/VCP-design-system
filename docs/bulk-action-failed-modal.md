@@ -7,7 +7,6 @@ Built to Figma's `Bulk_Action_Failed_Update_Summary_Popup`.
 
 | Piece | Tier |
 |---|---|
-| `Button` | atom |
 | `Icon` | atom |
 | `Modal` | component |
 
@@ -33,7 +32,7 @@ It lists only the ones that failed; a toast already said how many worked.
 
 ## Tokens
 
-`Modal` (`lg`; Figma draws 592) with its ✕; the reason is `accent.critical.outline` text with a filled warning glyph.
+`Modal` (`lg`; Figma draws 592) with its ✕; **Got it** is the dialog's `ModalConfirm` (40 high, as every dialog's footer); the reason is `accent.critical.outline` text with a filled warning glyph.
 
 ## Accessibility
 
