@@ -122,6 +122,42 @@ export const LoadingKeepsFocus: Story = {
   },
 };
 
+/**
+ * **`aria-disabled` ignores presses too**, from the keyboard as well as the mouse. Pass it instead of `disabled` when the
+ * button must keep focus as it stops applying (a pager's Next at the last step). Here Next stops at step 3: pressing it
+ * again (Enter, Space or a click) does nothing, though its `onClick` does not check, and focus never leaves it.
+ */
+export const AriaDisabledIgnoresPresses: Story = {
+  render: function Render(args) {
+    const [step, setStep] = React.useState(1);
+    return (
+      <div className="flex items-center gap-4">
+        <Button {...args} aria-disabled={step >= 3 || undefined} onClick={() => setStep((n) => n + 1)}>
+          Next
+        </Button>
+        <span className="text-body-sm-medium text-text-primary">Step {step} of 3</span>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const next = canvas.getByRole('button', { name: 'Next' });
+    next.focus();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    await expect(canvas.getByText('Step 3 of 3')).toBeInTheDocument();
+    await expect(next).toHaveAttribute('aria-disabled', 'true');
+    await expect(next).not.toBeDisabled();
+
+    /* Pressed again at the end: nothing happens. (`fireEvent`, because an `aria-disabled` button takes no pointer events.) */
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    fireEvent.click(next);
+    await expect(canvas.getByText('Step 3 of 3')).toBeInTheDocument();
+    await expect(next).toHaveFocus();
+  },
+};
+
 const rgb = (value: string) => (value.match(/[\d.]+/g) ?? []).slice(0, 4).map(Number);
 const luminance = ([r, g, b]: number[]) => {
   const f = (c: number) => ((c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);

@@ -47,6 +47,11 @@ export interface TagManagementModalProps {
   mode?: 'add' | 'edit';
   /** The current name: what `mode="edit"` starts the field as, and what `delete-domain` shows so nobody deletes the wrong one. */
   initialName?: string;
+  /**
+   * The word for what is being added or renamed, when "Tag" or "Domain" is not it: "Role", "Project". It is used in the title ("Add a new Role",
+   * "Rename Role") and the field's label ("Role Name"). Left out, the `type`'s own word.
+   */
+  noun?: string;
 }
 
 const NOUN = { tag: 'Tag', domain: 'Domain' } as const;
@@ -60,6 +65,7 @@ export function TagManagementModal({
   loading,
   mode = 'add',
   initialName = '',
+  noun: nounProp,
 }: TagManagementModalProps) {
   const formId = React.useId();
   const [name, setName] = React.useState('');
@@ -84,7 +90,7 @@ export function TagManagementModal({
     );
   }
 
-  const noun = NOUN[type];
+  const noun = nounProp ?? NOUN[type];
   const trimmed = name.trim();
   const editing = mode === 'edit';
 
