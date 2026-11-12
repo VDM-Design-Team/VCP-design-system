@@ -25,7 +25,8 @@ import { Icon } from '../icon';
  *   over the zone *or the 16 around it* counts, so the target is generous: while
  *   a file is being dragged anywhere on the page, a hit area 16 wider than the
  *   zone on every side takes the drop. (Only while dragging — at rest it would
- *   swallow clicks meant for whatever sits beside the zone.)
+ *   swallow clicks meant for whatever sits beside the zone, and make whatever
+ *   scrolls around the zone 16 longer than what it shows.)
  * - **Error** — the same fill, with a `accent.critical.outline.border` stroke.
  *
  * The edge is an SVG rectangle, not a CSS border: a CSS dashed border cannot set its dash, and a 1
@@ -183,10 +184,12 @@ export const Dropzone = React.forwardRef<HTMLInputElement, DropzoneProps>(
         className={cn(
           'group/zone relative flex flex-col items-center gap-2 rounded-md p-6 text-center transition-colors',
           'focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-stroke-focused',
-          /* The drop's vicinity: a hit area 16 wider on every side, live only
-             while a file is being dragged (see the note above). */
-          'before:pointer-events-none before:absolute before:-inset-4',
-          dragging && !disabled && 'before:pointer-events-auto',
+          /* The drop's vicinity: a hit area 16 wider on every side, there only
+             while a file is being dragged (see the note above). At rest there is
+             no box at all, not one that ignores the pointer: a box 16 past the
+             zone's edge counts as content, so a dialog body that ends 4 under the
+             zone scrolled by the other 12 with nothing to scroll to. */
+          dragging && !disabled && 'before:absolute before:-inset-4',
           over ? 'bg-surface-brand-subtle' : 'bg-surface-neutral-faint',
           disabled ? 'cursor-not-allowed bg-surface-neutral-subtle' : 'cursor-pointer',
           className,

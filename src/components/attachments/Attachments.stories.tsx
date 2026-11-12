@@ -1,7 +1,8 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fireEvent, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { Attachments } from './Attachments';
+import { Button } from '../../atoms/button';
 import { fileKind, useAttachmentFiles, type AttachmentItem } from '../../lib/attachment-files';
 
 /* A tiny generated picture so the stories need no network. */
@@ -128,6 +129,60 @@ export const FocusAfterRemove: Story = {
     /* The only one left goes: the drop area. */
     await remove('screenshot.png');
     await waitFor(() => expect(canvasElement.querySelector('input[type="file"]')).toHaveFocus());
+  },
+};
+
+/**
+ * An upload is in flight (`disabled`): the set is locked. The drop area takes nothing and no card has a ✕, so what was sent cannot change behind it.
+ * The cards still open in the viewer.
+ */
+export const Disabled: Story = {
+  args: { onFiles: fn(), onRemove: fn(), disabled: true },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    await expect(c.getAllByRole('listitem')).toHaveLength(3);
+    await expect(c.queryByRole('button', { name: /^Remove/ })).toBeNull();
+    await expect(canvasElement.querySelector('input[type="file"]')).toBeDisabled();
+    /* The corner where the ✕ sits is the card now: a press there opens the file and removes nothing. */
+    const card = c.getByTitle('budget.csv').closest('button') as HTMLElement;
+    const { right, top } = card.getBoundingClientRect();
+    await userEvent.pointer({ keys: '[MouseLeft]', target: card, coords: { clientX: right - 12, clientY: top + 12 } });
+    await expect(await screen.findByRole('dialog')).toBeVisible();
+    await expect(args.onRemove).not.toHaveBeenCalled();
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  },
+};
+
+/** The upload starts and ends while the set is on screen. The ✕s go and come back, and a ✕ that had focus when they went hands it to its own card: focus never falls to the page. */
+function Upload() {
+  const [uploading, setUploading] = React.useState(false);
+  const [items, setItems] = React.useState(ITEMS);
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <Attachments items={items} onFiles={() => {}} onRemove={(item) => setItems((now) => now.filter((k) => k.id !== item.id))} disabled={uploading} />
+      <Button variant="secondary" onClick={() => setUploading((now) => !now)}>
+        {uploading ? 'Finish the upload' : 'Start an upload'}
+      </Button>
+    </div>
+  );
+}
+
+export const LocksDuringAnUpload: Story = {
+  render: () => <Upload />,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    c.getByRole('button', { name: 'Remove screenshot.png' }).focus();
+    /* The upload starts with focus still on the ✕: Enter in a field submits a form this way, and Safari leaves focus where it was when a button is clicked. */
+    await fireEvent.click(c.getByRole('button', { name: 'Start an upload' }));
+    await waitFor(() => expect(c.queryByRole('button', { name: /^Remove/ })).toBeNull());
+    await expect(c.getByTitle('screenshot.png').closest('button')).toHaveFocus();
+    await expect(c.getAllByRole('listitem')).toHaveLength(3);
+    /* It ends: the ✕s are back, and they remove again. */
+    await fireEvent.click(c.getByRole('button', { name: 'Finish the upload' }));
+    await expect(await c.findAllByRole('button', { name: /^Remove/ })).toHaveLength(3);
+    await userEvent.click(c.getByRole('button', { name: 'Remove budget.csv' }));
+    await waitFor(() => expect(c.getAllByRole('listitem')).toHaveLength(2));
   },
 };
 

@@ -3,6 +3,7 @@ import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { Field } from '../../components/field';
 import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
+import { Textarea } from '../../atoms/textarea';
 
 /**
  * ConfirmDeleteAVModal — the confirmation an Added Value has to pass before it
@@ -30,7 +31,12 @@ export interface ConfirmDeleteAVModalProps {
   /** The user answered yes. The dialog does not close itself — you own `open`. */
   onConfirm: () => void;
   /** The Added Value's title, shown so the user can see what they are deleting. */
-  avTitle: string;
+  avTitle?: string;
+  /**
+   * **Deleting several at once** (the bulk action bar's Delete): one line each — "VCP-12345 Added Value Title Here" — in a read-only field that grows to
+   * eight lines and then scrolls (and the dialog itself scrolls if the window is too short for even that). Used instead of `avTitle`.
+   */
+  avTitles?: readonly string[];
   /**
    * The question, and the dialog's accessible name — one string, so the
    * announced name and the visible heading cannot drift.
@@ -54,6 +60,7 @@ export function ConfirmDeleteAVModal({
   onClose,
   onConfirm,
   avTitle,
+  avTitles,
   title = 'Are you sure you want to delete?',
   description = 'This action cannot be undone. The item will be permanently removed.',
   confirmLabel = 'Delete',
@@ -104,7 +111,11 @@ export function ConfirmDeleteAVModal({
             anything. It stays a real field so the title can be selected and
             copied out before the AV disappears. */}
         <Field label="Added Value">
-          <Input readOnly fullWidth value={avTitle} />
+          {avTitles ? (
+            <Textarea readOnly rows={Math.min(Math.max(avTitles.length, 1), 8)} value={avTitles.join('\n')} />
+          ) : (
+            <Input readOnly fullWidth value={avTitle ?? ''} />
+          )}
         </Field>
       </div>
     </Modal>
