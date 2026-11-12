@@ -55,6 +55,7 @@ export * from './bulk-action-failed-modal';
 export * from './bulk-action-handoff-modal';
 export * from './announcements-overview';
 export * from './announcements-table';
+export * from './announcement-modal';
 export * from './task-log-trail';
 export * from './manuals-table';
 export * from './system-changelog';
