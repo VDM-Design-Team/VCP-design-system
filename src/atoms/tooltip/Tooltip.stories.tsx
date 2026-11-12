@@ -116,7 +116,7 @@ export const OnAnIconButton: Story = {
   render: (args) => (
     <div className="flex items-center gap-4 p-12">
       <Tooltip {...args} content="Delete — this cannot be undone">
-        <IconButton icon="trash" label="Delete deliverable" variant="danger" />
+        <IconButton icon="trash" label="Delete deliverable" variant="critical-primary" />
       </Tooltip>
       <Tooltip {...args} content="Filters apply to the current page only">
         <IconButton icon="funnel-simple" label="Filter results" variant="secondary" />
@@ -280,7 +280,7 @@ export const LightAndDark: Story = {
           <Button>Bottom</Button>
         </Tooltip>
         <Tooltip {...args} defaultOpen placement="right" content="Delete — cannot be undone">
-          <IconButton icon="trash" label="Delete deliverable" variant="danger" />
+          <IconButton icon="trash" label="Delete deliverable" variant="critical-primary" />
         </Tooltip>
       </div>
     );

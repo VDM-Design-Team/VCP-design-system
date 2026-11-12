@@ -305,7 +305,7 @@ export const ModalCancel = React.forwardRef<HTMLButtonElement, ModalButtonProps>
 });
 
 /**
- * The **answer** in a dialog's footer: `primary` in the default tone, the red `danger` in the `critical` one, always at the footer's size (`md`). Takes a button's own props (`type`, `form`, `loading`, `disabled`,
+ * The **answer** in a dialog's footer: `primary` in the default tone, the red `critical-primary` in the `critical` one, always at the footer's size (`md`). Takes a button's own props (`type`, `form`, `loading`, `disabled`,
  * `onClick`). Use it in a hand-built `footer`, so the colour follows the dialog's `tone` and nobody has to remember it.
  * While it is `loading` the dialog is busy: nothing closes it until the save finishes (see `Modal`'s `busy`).
  */
@@ -318,7 +318,7 @@ export const ModalConfirm = React.forwardRef<HTMLButtonElement, ModalButtonProps
     report(saving);
     return () => report(false);
   }, [report, saving]);
-  return <Button ref={ref} variant={dialog?.tone === 'critical' ? 'danger' : 'primary'} size="md" type={type} {...props} />;
+  return <Button ref={ref} variant={dialog?.tone === 'critical' ? 'critical-primary' : 'primary'} size="md" type={type} {...props} />;
 });
 
 interface ModalBaseProps
@@ -353,7 +353,7 @@ interface ModalBaseProps
   /**
    * The standard action row, so a dialog doesn't hand-build it: Cancel (calls
    * `onClose`) and the one answer. In the default tone they are `secondary` +
-   * `primary`; in the `critical` tone they swap to `neutral` + `danger`.
+   * `primary`; in the `critical` tone they swap to `neutral` + `critical-primary`.
    * Ignored when `footer` is set — that is the slot for anything else.
    */
   actions?: ModalActions;

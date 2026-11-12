@@ -47,7 +47,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
   characters; the form is reset each time it opens.
 - Delete: `ConfirmDeleteModal` — `role="alertdialog"` named by the question; no ✕ and a
   backdrop click does nothing, so a stray click cannot delete a domain. Escape and Cancel still close it.
-- Cancel is the system's **neutral** (grey outline) button and Delete is `danger` (red). Figma draws
+- Cancel is the system's **neutral** (grey outline) button and Delete is `critical-primary` (red). Figma draws
   a plain dark-text Cancel and a "Confirm" button; the system's one delete confirmation says Delete (see `docs/confirm-delete-modal.md`).
 
 ## Don't
