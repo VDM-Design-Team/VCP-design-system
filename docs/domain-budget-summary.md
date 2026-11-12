@@ -104,6 +104,7 @@ sit beside the written percentage, so the bar is never the only signal.
 - Each info glyph is a real, focusable `button` named "About Allocated" (and so on) wrapping the system `Tooltip` — the definition is
   reachable by keyboard, not only on hover. It is `InfoHint`: a 16 glyph with a 40 press area.
 - "Go to Current Quarter" goes away once the current quarter shows, so focus moves to the quarter picker instead of dropping to the page.
+- **Two heights in the row, as Figma draws it.** The Quarter and Year pickers are **32**, like every select in a card (Value Cards, Cycle Performance); the "Go to Current Quarter" button is a small `Button`, **36**. There is no 32 button, and the dashboard's header row (36) is a different row.
 - The bar is a `role="progressbar"` named "Budget Usage", with its value in percent, so what is announced is what is shown.
   The status is also in the numbers beside it (a negative Remaining, "142%"): colour is never the only signal.
 - The pickers are native selects named "Quarter" and "Year".
