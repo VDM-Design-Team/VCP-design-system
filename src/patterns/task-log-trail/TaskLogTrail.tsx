@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { cn } from '../../lib/cn';
 import { useDateFormat } from '../../lib/format-date';
 import { Icon } from '../../atoms/icon';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
 import { Skeleton } from '../../atoms/skeleton';
+import { TableCard } from '../../components/table-card';
 import { DataTable, type DataTableColumn } from '../../components/data-table';
 import { SourceTag } from '../../components/source-tag';
 import { StatusTag, type StatusTagProps } from '../../components/status-tag';
@@ -204,27 +204,12 @@ export function TaskLogTrail({
   }));
 
   return (
-    <div
-      className={cn('flex flex-col gap-4 rounded-md bg-surface-elevated p-4 font-sans', className)}
+    <TableCard
+      className={className}
       aria-busy={loading || undefined}
       {...props}
-    >
-      {filters}
-      {loading && (
-        <span role="status" className="sr-only">
-          Loading the task log trail
-        </span>
-      )}
-      <DataTable
-        caption={caption}
-        className="rounded-none border-0"
-        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
-        rows={loading ? placeholders : rows}
-        empty={
-          empty ?? <TableEmpty noun="changes" icon="list-bullets" filtered={filtered} hint="Try widening the dates, or reset the filters." />
-        }
-      />
-      <div className="flex justify-end">
+      filters={filters}
+      footer={
         <Pagination
           page={page}
           pageCount={pageCount}
@@ -234,8 +219,23 @@ export function TaskLogTrail({
           pageSizeOptions={pageSizeOptions}
           onPageSizeChange={onPageSizeChange}
         />
-      </div>
-    </div>
+      }
+    >
+      {loading && (
+        <span role="status" className="sr-only">
+          Loading the task log trail
+        </span>
+      )}
+      <DataTable
+        bare
+        caption={caption}
+        columns={loading ? columns.map((column) => ({ ...column, render: () => LOADING_CELL[column.key] })) : columns}
+        rows={loading ? placeholders : rows}
+        empty={
+          empty ?? <TableEmpty noun="changes" icon="list-bullets" filtered={filtered} hint="Try widening the dates, or reset the filters." />
+        }
+      />
+    </TableCard>
   );
 }
 TaskLogTrail.displayName = 'TaskLogTrail';

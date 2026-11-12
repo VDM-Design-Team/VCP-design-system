@@ -64,7 +64,7 @@ A choice with a submenu shows the right caret (`Menu`'s own, the same everywhere
 
 ## Tokens
 
-`surface.elevated`, a `stroke.strong` border, `radius.md`, `elevation-3`. The chip is a 28-high outlined pill (`label-sm-regular`). **The actions are in the neutral palette**: `Button`'s `neutral-text` variant (`neutral.textual.content`, default, hover, pressed, disabled — the same tokens the date picker's carets use), so they read as controls, not calls to action (the ghost button's own colour is the brand blue). Delete is `Button`'s `danger-tertiary` variant (red text, no fill: `accent.critical.outline` content, with its hover and pressed). No colour is set on the bar.
+`surface.elevated`, a `stroke.strong` border, `radius.md`, `elevation-3`. The chip is a 28-high outlined pill (`label-sm-regular`). **The actions are in the neutral palette**: `Button`'s `neutral-text` variant (`neutral.textual.content`, default, hover, pressed, disabled — the same tokens the date picker's carets use), so they read as controls, not calls to action (the ghost button's own colour is the brand blue). Delete is `Button`'s `critical-tertiary` variant (red text, no fill: `accent.critical.outline` content, with its hover and pressed). No colour is set on the bar.
 
 ## Accessibility
 

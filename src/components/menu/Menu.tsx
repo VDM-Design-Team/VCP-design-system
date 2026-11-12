@@ -54,7 +54,7 @@ const menuItem = cva(
         /* accent.critical.outline — critical content on a tinted hover fill.
            Colour is never the only signal here; see the icon and the
            screen-reader qualifier below. */
-        danger: [
+        critical: [
           'text-accent-critical-outline-content-default',
           'hover:bg-accent-critical-outline-surface-hover hover:text-accent-critical-outline-content-hover',
           'focus-visible:bg-accent-critical-outline-surface-hover focus-visible:text-accent-critical-outline-content-hover',
@@ -76,13 +76,13 @@ export interface MenuActionItem {
   /**
    * A glyph name from the Icon library — typed, so a name the system does not
    * ship is a compile error rather than an empty square at runtime. Rendered
-   * decorative; the label carries the meaning. A `danger` item gets a warning glyph when
+   * decorative; the label carries the meaning. A `critical` item gets a warning glyph when
    * it has none; `false` opts out of it (the tone and the screen-reader qualifier stay).
    */
   icon?: IconName | false;
   /** Shown right-aligned. Display only — Menu binds no shortcuts itself. */
   shortcut?: string;
-  tone?: 'default' | 'danger';
+  tone?: 'default' | 'critical';
   /**
    * Marks the item as the current choice in a list of options (a domain, a
    * sort order). Any item that sets it — `true` or `false` — renders as
@@ -527,12 +527,12 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
           );
         }
 
-        const danger = item.tone === 'danger';
-        /* Danger is never colour alone: a critical item always carries a glyph,
+        const critical = item.tone === 'critical';
+        /* Critical is never colour alone: a critical item always carries a glyph,
            and falls back to `warning` when the caller gave none. `icon: false` opts out:
            the accessible name still says "destructive action", and the colour stays. */
         const glyph: IconName | undefined =
-          item.icon === false ? undefined : (item.icon ?? (danger ? 'warning' : undefined));
+          item.icon === false ? undefined : (item.icon ?? (critical ? 'warning' : undefined));
         const isChoice = item.selected !== undefined;
         const submenu = item.items?.length ? item.items : null;
 
@@ -568,7 +568,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(function Menu(
             <span className="min-w-0 flex-1 truncate">{item.label}</span>
             {/* Colour and the glyph are both invisible to a screen reader, so the
                 tone is stated in the accessible name as well. */}
-            {danger && <span className="sr-only">destructive action</span>}
+            {critical && <span className="sr-only">destructive action</span>}
             {item.selected && (
               <Icon name="check" size="sm" aria-hidden="true" className="shrink-0 text-text-primary" />
             )}

@@ -213,6 +213,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
                 )}
                 <Select
                   size="compact"
+                  edge="neutral"
                   ref={quarterRef}
                   aria-label="Quarter"
                   value={String(quarter)}
@@ -224,6 +225,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
                 />
                 <Select
                   size="compact"
+                  edge="neutral"
                   aria-label="Year"
                   value={String(year)}
                   options={years.map(String)}

@@ -33,8 +33,8 @@ it needs a visible label, not a better icon.
 | `tertiary` | Toolbars, table rows, card affordances | **The default.** `docs/button.md` already assigns icon-only actions to the ghost treatment |
 | `secondary` | A bordered icon action that must read as a control on a busy surface | |
 | `primary` | The one filled icon action on a screen — a compose or add FAB | At most one |
-| `critical` | A quiet destructive control — a row's bin | Textual, like `tertiary` but red: only the glyph colour changes on hover and press. Many per screen is fine; pair with a confirmation |
-| `danger` | Destructive, irreversible actions only | At most one. Pair with a confirmation |
+| `critical-tertiary` | A quiet destructive control (it was `critical` before November 2026) — a row's bin | Textual, like `tertiary` but red: only the glyph colour changes on hover and press. Many per screen is fine; pair with a confirmation |
+| `critical-primary` | Destructive, irreversible actions only (it was `danger` before November 2026) | At most one. Pair with a confirmation |
 
 ## Props
 
@@ -42,7 +42,7 @@ it needs a visible label, not a better icon.
 |---|---|---|---|
 | `icon` | `IconName` | — | **Required.** A glyph name from the Icon library. Rendered decorative (`aria-hidden`) |
 | `label` | `string` | — | **Required.** The accessible name *and* the pointer tooltip. See below |
-| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-text \| tonal \| critical-tonal \| danger` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls — and `critical-tonal`, its red twin (`accent.critical.tonal`, with its own hover, pressed and disabled): a row's delete beside its edit. `neutral-text` is a bare glyph in the neutral palette (`neutral.textual`), for a control that is not an action: a pager's arrows |
+| `variant` | `primary \| secondary \| neutral \| tertiary \| neutral-text \| tonal \| critical-tertiary \| critical-tonal \| critical-primary` | `tertiary` | Same names and tokens as Button, plus `tonal` — a grey disc (`neutral.tonal`) for the table's inline-edit controls — and `critical-tonal`, its red twin (`accent.critical.tonal`, with its own hover, pressed and disabled): a row's delete beside its edit |
 | `size` | `xs \| sm \| md \| lg` | `md` | 24 / 36 / 40 / 48. `xs` and `sm` only in dense contexts. `xs` carries a 16 glyph |
 | `shape` | `round \| square` | `round` | `round` matches most icon-only controls across VCP. `square` is the explicit exception for a control flush inside a square-cornered row (e.g. `DetailRow`) |
 | `loading` | `boolean` | `false` | Swaps the glyph for a spinner, ignores presses and sets `aria-busy`, but **keeps focus** (`aria-disabled`, not `disabled`), like `Button` |
@@ -86,9 +86,9 @@ class.
 | `secondary` content | `action.secondary.content.{default,disabled}` | `text-action-secondary-content-*` |
 | `tertiary` surface | `action.tertiary.surface.default` | `bg-action-tertiary-surface-default` |
 | `tertiary` content | `action.tertiary.content.{default,hover,pressed,disabled}` | `text-action-tertiary-content-*` |
-| `critical` content | `accent.critical.outline.content.{default,hover,pressed,disabled}` | `text-accent-critical-outline-content-*` |
-| `danger` surface | `accent.critical.filled.surface.{default,hover,pressed,disabled}` | `bg-accent-critical-filled-surface-*` |
-| `danger` content | `accent.critical.filled.content.default` | `text-accent-critical-filled-content-default` |
+| `critical-tertiary` content | `accent.critical.outline.content.{default,hover,pressed,disabled}` | `text-accent-critical-outline-content-*` |
+| `critical-primary` surface | `accent.critical.filled.surface.{default,hover,pressed,disabled}` | `bg-accent-critical-filled-surface-*` |
+| `critical-primary` content | `accent.critical.filled.content.default` | `text-accent-critical-filled-content-default` |
 | Size | Tailwind numeric scale | `size-6` (24) / `size-9` (36) / `size-10` (40) / `size-12` (48) |
 
 The dark theme comes for free — every class above is a semantic token that

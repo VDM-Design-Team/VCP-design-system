@@ -76,7 +76,7 @@ export const DetailCardMenu = React.forwardRef<HTMLDivElement, DetailCardMenuPro
       ...moves.map((move) => ({ key: move, label: labels[move], onClick: handlers[move] })),
       ...(moves.length > 0 ? [{ divider: true as const, key: 'divider' }] : []),
       { key: 'edit', label: 'Edit', onClick: onEdit },
-      { key: 'delete', label: 'Delete', tone: 'danger' as const, icon: false as const, onClick: onDelete },
+      { key: 'delete', label: 'Delete', tone: 'critical' as const, icon: false as const, onClick: onDelete },
     ];
 
     return (

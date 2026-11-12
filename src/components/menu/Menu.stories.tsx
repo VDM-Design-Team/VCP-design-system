@@ -87,17 +87,17 @@ export const WithDivider: Story = {
 };
 
 /**
- * Danger items carry the critical tone, a glyph, and a screen-reader qualifier —
+ * Critical items carry the critical tone, a glyph, and a screen-reader qualifier —
  * colour is never the only signal. Keep them last, behind a divider.
  */
-export const WithDangerItem: Story = {
-  name: 'With a danger item',
+export const WithCriticalItem: Story = {
+  name: 'With a critical item',
   args: {
     items: [
       { key: 'edit', label: 'Edit deliverable', icon: 'note-pencil' },
       { key: 'duplicate', label: 'Duplicate', icon: 'plus-circle' },
       { divider: true },
-      { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'danger' },
+      { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'critical' },
     ],
   },
 };
@@ -192,7 +192,7 @@ export const LightAndDark: Story = {
             { key: 'share', label: 'Share with team', icon: 'users' },
             { key: 'publish', label: 'Publish', icon: 'rocket', disabled: true },
             { divider: true },
-            { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'danger' },
+            { key: 'delete', label: 'Delete deliverable', icon: 'trash', tone: 'critical' },
           ]}
         />
       </div>
