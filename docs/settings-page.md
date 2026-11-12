@@ -32,7 +32,7 @@ The user's and the admin's Settings are the same page with different tabs, so on
 | `admin` | Personal Info · Users · Admin Panel · Announcements · Manuals · Password |
 
 `SETTINGS_TABS` exports both lists. Changing `audience` on a mounted page swaps the bar; if the tab that was showing is not the new audience's
-(the admin's Users, after the page becomes the user's), the first tab shows instead of nothing. The `SwitchAudience` story flips between the two.
+(the admin's Users, after the page becomes the user's), the first tab shows instead of nothing. The `SwitchAudience` story flips between the two. Its Admin Panel tab is `TagManagement` and its Announcements tab is `AnnouncementsPanel`, so the stories fill every tab with a real pattern.
 
 ## Controlled and slot-based
 

@@ -137,6 +137,68 @@ export const Selectable: Story = {
   },
 };
 
+/**
+ * Selection across pages: `selected` keeps rows that another page (or a filter) is hiding. The header checkbox
+ * speaks only for the rows shown, and select-all adds or removes only those, so a selection made on page 1
+ * survives page 2.
+ */
+export const SelectionAcrossPages: Story = {
+  render: (args) => {
+    const pages = [CLAIMS.slice(0, 3), CLAIMS.slice(3)];
+    const [page, setPage] = React.useState(0);
+    const [selected, setSelected] = React.useState<Array<string | number>>([]);
+    return (
+      <div className="flex flex-col gap-3">
+        <DataTable
+          {...args}
+          rows={pages[page]}
+          selectable
+          selected={selected}
+          onSelectedChange={setSelected}
+          selectLabel={(r) => `Select ${(r as Claim).id}`}
+        />
+        <div className="flex items-center gap-2">
+          {pages.map((_, i) => (
+            <Button key={i} size="sm" variant={i === page ? 'secondary' : 'tertiary'} aria-pressed={i === page} onClick={() => setPage(i)}>
+              Page {i + 1}
+            </Button>
+          ))}
+          <span role="status" className="font-sans text-caption-md-regular text-text-tertiary">
+            {selected.length} selected
+          </span>
+        </div>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const all = () => canvas.getByRole('checkbox', { name: 'Select all rows' }) as HTMLInputElement;
+    const count = () => canvas.getByRole('status');
+
+    await userEvent.click(all());
+    await expect(count()).toHaveTextContent('3 selected');
+
+    /* Page 2 shows two rows, none selected: the header is clear, not "all" because 3 ≥ 2. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 2' }));
+    await expect(all().checked).toBe(false);
+    await expect(all().indeterminate).toBe(false);
+
+    /* Select-all here adds page 2's rows to page 1's. */
+    await userEvent.click(all());
+    await expect(count()).toHaveTextContent('5 selected');
+
+    /* Back on page 1 it is still all selected; clearing it clears only page 1. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Page 1' }));
+    await expect(all().checked).toBe(true);
+    await userEvent.click(all());
+    await expect(count()).toHaveTextContent('2 selected');
+
+    /* One of page 1's rows back: partial. */
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'Select AV-2041' }));
+    await expect(all().indeterminate).toBe(true);
+  },
+};
+
 /** 44 rows for audit-density screens. */
 export const Dense: Story = {
   args: { dense: true },

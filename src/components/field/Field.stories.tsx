@@ -5,7 +5,7 @@ import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 import { Select } from '../../atoms/select';
 import { Textarea } from '../../atoms/textarea';
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 
 /**
  * A plain control used only to demonstrate Field. Replace with the real
@@ -188,6 +188,40 @@ export const RenderPropControl: Story = {
         </Button>
       </div>
     ),
+  },
+};
+
+/**
+ * A control that brings its **own `id` or `aria-describedby`** keeps them, and Field works with them. The label points at
+ * the control's own id, so clicking it focuses the control, and the helper or error is added to the control's own
+ * description instead of dropped: both are read.
+ */
+export const ControlWithItsOwnIds: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <p id="field-own-ids-format" className="text-body-sm-regular text-text-tertiary">
+        Purchase orders look like PO-12345.
+      </p>
+      <Field label="Purchase order" helper="From the supplier's confirmation.">
+        <Input id="field-own-ids-po" aria-describedby="field-own-ids-format" fullWidth />
+      </Field>
+      <Field label="Invoice" error="Enter the invoice's PO number.">
+        <Input id="field-own-ids-invoice" aria-describedby="field-own-ids-format" fullWidth />
+      </Field>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const po = canvas.getByRole('textbox', { name: 'Purchase order' });
+    await expect(po).toHaveAttribute('id', 'field-own-ids-po');
+    await userEvent.click(canvas.getByText('Purchase order'));
+    await expect(po).toHaveFocus();
+    await expect(po).toHaveAccessibleDescription("Purchase orders look like PO-12345. From the supplier's confirmation.");
+
+    const invoice = canvas.getByRole('textbox', { name: 'Invoice' });
+    await userEvent.click(canvas.getByText('Invoice'));
+    await expect(invoice).toHaveFocus();
+    await expect(invoice).toHaveAccessibleDescription("Purchase orders look like PO-12345. Enter the invoice's PO number.");
   },
 };
 

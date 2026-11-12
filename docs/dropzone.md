@@ -72,7 +72,9 @@ The error message sits in `accent.critical.outline.content.default` in the hint'
 **Drag-over covers the vicinity.** A file dragged over the zone or within 16 of it
 counts. While a file is being dragged anywhere on the page, a hit area 16 wider than
 the zone on every side takes the drop; at rest that area does not exist, so it cannot
-swallow clicks meant for what sits beside the zone. The state resets on a drop, on
+swallow clicks meant for what sits beside the zone, and it adds nothing to what a box
+around the zone can scroll to (it used to be there and ignore the pointer, and a dialog
+whose body ended 4 under the zone scrolled by the other 12). The state resets on a drop, on
 `dragend`, and when the drag leaves the window.
 
 **The link, while dragging.** Link blue on `surface.brand.subtle` is 3.4:1 in light and

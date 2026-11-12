@@ -34,6 +34,16 @@ export const Secondary: Story = { args: { variant: 'secondary' } };
 export const Tertiary: Story = { args: { variant: 'tertiary' } };
 /** Outlined, but grey — the Cancel beside a destructive answer. */
 export const Neutral: Story = { args: { variant: 'neutral', children: 'Cancel' } };
+/** A toolbar's actions as text in the neutral palette: controls, not calls to action (the ghost `tertiary` is the brand blue). */
+export const NeutralTertiary: Story = {
+  args: { variant: 'neutral-tertiary', children: 'Status' },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Status' });
+    await expect(button.className).toContain('neutral-textual-content');
+    await expect(button.className).not.toContain('action-tertiary');
+  },
+};
+
 export const CriticalPrimary: Story = { args: { variant: 'critical-primary', children: 'Delete account' } };
 /** Red text, no fill: a destructive answer beside quieter ones (Figma's AV edit page: Discard, Save as Draft, Submit). */
 export const CriticalTertiary: Story = {
@@ -109,6 +119,42 @@ export const LoadingKeepsFocus: Story = {
     fireEvent.click(save);
     await expect(canvas.getByText('Saved 1 time')).toBeInTheDocument();
     await expect(save).toHaveFocus();
+  },
+};
+
+/**
+ * **`aria-disabled` ignores presses too**, from the keyboard as well as the mouse. Pass it instead of `disabled` when the
+ * button must keep focus as it stops applying (a pager's Next at the last step). Here Next stops at step 3: pressing it
+ * again (Enter, Space or a click) does nothing, though its `onClick` does not check, and focus never leaves it.
+ */
+export const AriaDisabledIgnoresPresses: Story = {
+  render: function Render(args) {
+    const [step, setStep] = React.useState(1);
+    return (
+      <div className="flex items-center gap-4">
+        <Button {...args} aria-disabled={step >= 3 || undefined} onClick={() => setStep((n) => n + 1)}>
+          Next
+        </Button>
+        <span className="text-body-sm-medium text-text-primary">Step {step} of 3</span>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const next = canvas.getByRole('button', { name: 'Next' });
+    next.focus();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    await expect(canvas.getByText('Step 3 of 3')).toBeInTheDocument();
+    await expect(next).toHaveAttribute('aria-disabled', 'true');
+    await expect(next).not.toBeDisabled();
+
+    /* Pressed again at the end: nothing happens. (`fireEvent`, because an `aria-disabled` button takes no pointer events.) */
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+    fireEvent.click(next);
+    await expect(canvas.getByText('Step 3 of 3')).toBeInTheDocument();
+    await expect(next).toHaveFocus();
   },
 };
 

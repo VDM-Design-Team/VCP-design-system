@@ -50,6 +50,13 @@ const button = cva(
           'hover:text-action-tertiary-content-hover active:text-action-tertiary-content-pressed',
           'disabled:text-action-tertiary-content-disabled aria-disabled:text-action-tertiary-content-disabled',
         ],
+        /* neutral.textual — a text button that is a control, not a call to action: the ghost button without its brand blue.
+           A toolbar's actions (the bulk bar's Status, Urgency…), where blue on every one would read as a row of calls to action. */
+        'neutral-tertiary': [
+          'bg-transparent text-neutral-textual-content-default',
+          'hover:text-neutral-textual-content-hover active:text-neutral-textual-content-pressed',
+          'disabled:text-neutral-textual-content-disabled aria-disabled:text-neutral-textual-content-disabled',
+        ],
         /* accent.critical.filled — destructive */
         'critical-primary': [
           'bg-accent-critical-filled-surface-default text-accent-critical-filled-content-default',
@@ -99,6 +106,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, fullWidth, loading, iconLeft, iconRight, children, disabled, onClick, ...props }, ref) => {
     /* Loading but not disabled: still a tab stop and still focused, just inert. A disabled button keeps `disabled`. */
     const busy = Boolean(loading) && !disabled;
+    /* A caller's `aria-disabled` (`true` or `"true"`) is inert the same way. `pointer-events-none` only stops the
+       mouse: Enter and Space on the focused button still fire a click, so the guard below swallows it too. */
+    const inert = busy || props['aria-disabled'] === true || props['aria-disabled'] === 'true';
     return (
       <button
         ref={ref}
@@ -109,7 +119,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading || undefined}
         onClick={(event) => {
           /* Swallowing the click also stops a submit button's form from submitting, implicit submission included. */
-          if (busy) {
+          if (inert) {
             event.preventDefault();
             return;
           }
