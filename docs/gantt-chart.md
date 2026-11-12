@@ -37,6 +37,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `ProgressBar` / `DonutChart` | How much of one known whole is used or done |
 | `AVTable` | A sortable list of Added Values, when *when* matters less than *what* |
 
+## On a page
+
+The Gantt Chart page is `AppShell` with `GanttChart` as its content. The chart draws **its own title** (with the (i) hint, from `title` and `infoText`), its filters and view menu, and its own white card, so the page adds no `PageTitle`. What the chart does not draw is the margin round its card: the page sets it **32 in from the sides** (`px-8`), as `AVListPage` does, as Figma's frame has it. There is no page pattern for it: it would only be the chart.
+
 ## The data
 
 ```ts
