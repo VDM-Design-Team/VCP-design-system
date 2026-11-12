@@ -8,7 +8,9 @@ import { ChangePasswordForm } from '../change-password-form';
 import { ManualsTable, type ManualRow } from '../manuals-table';
 import { PersonalInfoForm } from '../personal-info-form';
 import { SystemChangelog } from '../system-changelog';
+import { AnnouncementsPanel } from '../announcements-panel';
 import { TagManagement, type TagManagementList } from '../tag-management';
+import type { Announcement } from '../../lib/announcement';
 import { UsersTable, type UserRow } from '../users-table';
 
 const USERS: UserRow[] = [
@@ -54,10 +56,25 @@ function AdminPanel() {
   );
 }
 
-/** Settings' body for a tab. The tabs with a pattern use it; the one that is not built yet (Announcements) says so. */
-const placeholder = (what: string) => (
-  <div className="rounded-md bg-surface-elevated p-6 text-body-md-regular text-text-secondary">{what}: not built yet.</div>
-);
+/** The admin's Announcements tab: the overview, the list and the dialogs. The page owns the list; View Changelog only asks. */
+const ANNOUNCEMENTS: Announcement[] = [
+  { id: 2, title: 'Faster search', version: 'v1.18.1', kind: 'update', date: '2026-05-20', description: 'Search answers as you type.', features: ['Instant results'] },
+  { id: 1, title: 'Domain budgets arrive in Settings', version: 'v1.18.0', kind: 'feature', date: '2026-05-04', features: ['Edit budget per domain'] },
+];
+function AnnouncementsTab() {
+  const [list, setList] = React.useState(ANNOUNCEMENTS);
+  return (
+    <AnnouncementsPanel
+      announcements={list}
+      overview={{ total: list.length, latestVersion: list[0]?.version ?? 'v0.0.0', lastUpdated: list[0]?.date ?? '2026-01-01' }}
+      onCreate={(draft) => setList((all) => [{ ...draft, id: Date.now(), date: '2026-05-21' }, ...all])}
+      onUpdate={(announcement, draft) => setList((all) => all.map((a) => (a.id === announcement.id ? { ...a, ...draft } : a)))}
+      onDelete={(announcement) => setList((all) => all.filter((a) => a.id !== announcement.id))}
+      onViewChangelog={fn()}
+      onRefresh={fn()}
+    />
+  );
+}
 
 /** What a page would pass. Only the audience's own tabs show, so one set of panels serves both. */
 const PANELS: Partial<Record<SettingsTabKey, React.ReactNode>> = {
@@ -74,7 +91,7 @@ const PANELS: Partial<Record<SettingsTabKey, React.ReactNode>> = {
   ),
   users: <UsersTable rows={USERS} search="" onSearchChange={fn()} page={1} pageCount={1} onPageChange={fn()} onNewUser={fn()} onView={fn()} />,
   'admin-panel': <AdminPanel />,
-  announcements: placeholder('Announcements'),
+  announcements: <AnnouncementsTab />,
   manuals: <ManualsTable rows={MANUALS} page={1} pageCount={1} onPageChange={fn()} />,
 };
 
@@ -141,6 +158,11 @@ export const Admin: Story = {
     await expect(c.getByRole('heading', { name: 'Domains' })).toBeVisible();
     await expect(c.getByRole('heading', { name: 'Global Tags' })).toBeVisible();
     await expect(c.getAllByRole('button', { name: 'Add New' }).length).toBeGreaterThanOrEqual(3);
+    /* Announcements: the overview and the list, with New Announcement and View Changelog. */
+    await userEvent.click(c.getByRole('tab', { name: 'Announcements' }));
+    await expect(c.getByRole('button', { name: /New Announcement/ })).toBeVisible();
+    await expect(c.getByRole('button', { name: /View Changelog/ })).toBeVisible();
+    await expect(c.getByText('Faster search')).toBeVisible();
   },
 };
 
