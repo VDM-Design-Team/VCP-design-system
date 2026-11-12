@@ -66,3 +66,4 @@ export * from './users-table';
 export * from './tag-management';
 export * from './settings-page';
 export * from './announcements-panel';
+export * from './dashboard-page';
