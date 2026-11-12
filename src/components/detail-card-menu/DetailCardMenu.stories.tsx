@@ -40,7 +40,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/* A danger item carries a screen-reader qualifier ("destructive action") after its label. */
+/* A critical item carries a screen-reader qualifier ("destructive action") after its label. */
 const names = () =>
   screen.getAllByRole('menuitem').map((item) => item.textContent?.replace(/destructive action$/, ''));
 

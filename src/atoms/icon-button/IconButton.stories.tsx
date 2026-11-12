@@ -31,7 +31,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'critical', 'critical-tonal', 'danger'],
+      options: ['primary', 'secondary', 'neutral', 'tertiary', 'tonal', 'critical-tertiary', 'critical-tonal', 'critical-primary'],
     },
     size: { control: 'radio', options: ['xs', 'sm', 'md', 'lg'] },
     shape: { control: 'radio', options: ['round', 'square'] },
@@ -43,7 +43,7 @@ type Story = StoryObj<typeof meta>;
 
 /** The quiet destructive control — a row's bin. A red glyph; only its colour changes on hover and press, like `tertiary`. */
 export const Critical: Story = {
-  args: { variant: 'critical', icon: 'trash-simple', label: 'Delete tag' },
+  args: { variant: 'critical-tertiary', icon: 'trash-simple', label: 'Delete tag' },
 };
 
 /** The tonal destructive control — a red disc for a row's delete beside a `tonal` edit, as the Holiday Registry's rows draw it. The fill and the glyph both change on hover and press. */
@@ -61,7 +61,7 @@ export const Variants: Story = {
       <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" />
       <IconButton {...args} variant="tertiary" icon="note-pencil" label="Edit deliverable" />
       <IconButton {...args} variant="tonal" icon="note-pencil" label="Edit deliverable (tonal)" />
-      <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" />
+      <IconButton {...args} variant="critical-primary" icon="trash" label="Delete deliverable" />
     </div>
   ),
 };
@@ -96,7 +96,7 @@ export const Shape: Story = {
 export const Matrix: Story = {
   render: (args) => (
     <div className="flex flex-col gap-3">
-      {(['primary', 'secondary', 'neutral', 'tertiary', 'danger'] as const).map((variant) => (
+      {(['primary', 'secondary', 'neutral', 'tertiary', 'critical-primary'] as const).map((variant) => (
         <div key={variant} className="flex items-center gap-3">
           <span className="w-20 text-caption-md-medium text-text-subtle">{variant}</span>
           <IconButton {...args} variant={variant} size="sm" />
@@ -114,7 +114,7 @@ export const Disabled: Story = {
       <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" disabled />
       <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" disabled />
       <IconButton {...args} variant="tertiary" disabled />
-      <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" disabled />
+      <IconButton {...args} variant="critical-primary" icon="trash" label="Delete deliverable" disabled />
     </div>
   ),
 };
@@ -177,7 +177,7 @@ export const LightAndDark: Story = {
         <IconButton {...args} variant="secondary" icon="funnel-simple" label="Filter results" />
         <IconButton {...args} variant="tertiary" icon="note-pencil" label="Edit deliverable" />
       <IconButton {...args} variant="tonal" icon="note-pencil" label="Edit deliverable (tonal)" />
-        <IconButton {...args} variant="danger" icon="trash" label="Delete deliverable" />
+        <IconButton {...args} variant="critical-primary" icon="trash" label="Delete deliverable" />
         <IconButton {...args} variant="secondary" icon="x" label="Dismiss" disabled />
         <IconButton {...args} variant="primary" icon="plus" label="Add deliverable" loading />
       </div>

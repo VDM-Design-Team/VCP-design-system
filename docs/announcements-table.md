@@ -36,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Type** | A `Tag`: the kind's word (Experimental, Update, Feature) and tone (success, warning, info) from the one owner, `lib/changelog-kinds`. **This table maps nothing itself** |
 | **Date** | ISO, shown dd/mm/yyyy or the person's locale (`useDateFormat`), in a `<time>` |
 | **Features** | What shipped, joined with commas, cut with "…" |
-| **Actions** | A "More actions" menu named for the row ("Actions for Faster search"): **Edit**, **Delete** — no icons. Delete is a `danger` item (red) with `icon: false`, so `Menu` leaves out its fallback warning glyph; the word and the hidden "destructive action" still say it, and the confirmation dialog guards it |
+| **Actions** | A "More actions" menu named for the row ("Actions for Faster search"): **Edit**, **Delete** — no icons. Delete is a `critical` item (red) with `icon: false`, so `Menu` leaves out its fallback warning glyph; the word and the hidden "destructive action" still say it, and the confirmation dialog guards it |
 
 ## Props
 

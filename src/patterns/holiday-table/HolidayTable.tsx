@@ -307,6 +307,7 @@ export function HolidayTable({
               <SearchSelect
                 ref={typeFilterRef}
                 className="w-60"
+                edge="neutral"
                 emphasis="regular"
                 searchable={false}
                 placeholder="All Holiday Types"
@@ -319,6 +320,7 @@ export function HolidayTable({
               <DateField
                 className="w-60"
                 mode="month"
+                edge="neutral"
                 emphasis="regular"
                 placeholder="Select Period"
                 aria-label="Period"
@@ -331,6 +333,7 @@ export function HolidayTable({
               />
               <SearchSelect
                 className="w-60"
+                edge="neutral"
                 emphasis="regular"
                 rows="avatar"
                 placeholder="All Users"

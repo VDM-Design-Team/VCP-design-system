@@ -612,7 +612,7 @@ Each of these cost the team real time once. Most now have a check or a helper; t
 | Theme switch before hydration | The server can't know the theme | Render the switch as light until mounted (`useSyncExternalStore`) |
 | Package auth tokens | A `read:packages` token returns E403 on publish; CI can't install a private package by default | A `write:packages` token for publish; grant the consuming repo Actions access |
 | Handoff numbers go stale | A handoff doc was wrong about itself ninety seconds after it merged | Link to live views (commits, PR lists); put dated facts in prose |
-| Swapping in a third-party kit | shadcn was evaluated side by side and dropped on 4 Nov 2026 | Keep VCP's API (`variant="danger"`, not `destructive`); fix VCP's own bugs instead |
+| Swapping in a third-party kit | shadcn was evaluated side by side and dropped on 4 Nov 2026 | Keep VCP's API (`variant="critical-primary"`, not `destructive`); fix VCP's own bugs instead |
 
 ## Bootstrapping a new design system from this blueprint
 
