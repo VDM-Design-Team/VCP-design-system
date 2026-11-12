@@ -39,6 +39,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onConfirm` | `() => void` | — | `delete-domain` |
 | `loading` | `boolean` | `false` | Spins Submit / Confirm |
 | `mode` | `add \| edit` | `add` | `edit` renames: "Rename Tag", Save. **Not in Figma** — the add dialog, reused |
+| `noun` | `string` | the `type`'s (`Tag`, `Domain`) | The word for what is added or renamed when it is neither: "Role" gives "Add a new Role", "Rename Role" and a "Role Name" field |
 | `initialName` | `string` | `''` | The current name. `mode="edit"` starts the field as it (Save stays off until it changes); `delete-domain` shows it so nobody deletes the wrong domain |
 
 ## Accessibility
