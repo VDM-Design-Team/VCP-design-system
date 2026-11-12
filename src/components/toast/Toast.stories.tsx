@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fireEvent, fn, screen, userEvent, waitFor, within } from 'storybook/test';
-import { Toast, type ToastTone } from './Toast';
+import { MIN_ACTION_TOAST_DURATION, Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
@@ -117,10 +117,11 @@ export const Tones: Story = {
 };
 
 /**
- * A Toast with an action **never auto-dismisses**, whatever `duration` says.
- * Racing a countdown to reach a control fails WCAG 2.2.1, so the component
- * ignores the timer entirely once `actionLabel` is present — note the absence
- * of `data-duration` on the element.
+ * A Toast with an action **does not auto-dismiss** on the default or any short
+ * `duration`. Racing a countdown to reach a control fails WCAG 2.2.1, so the
+ * component ignores the timer once `actionLabel` is present — note the absence
+ * of `data-duration` on the element — unless the `duration` is at least
+ * `MIN_ACTION_TOAST_DURATION` (15s), the "Undo" snackbar: see `UndoSnackbar`.
  *
  * The action is a real `Button` rendered by the component, not a slot, so its
  * size and variant stay as the design draws them: small, outlined, top-aligned
@@ -559,8 +560,9 @@ export const PausesOnHoverAndFocus: Story = {
 };
 
 /**
- * **Flow:** a toast with an action never dismisses itself, whatever `duration`
- * says — the user is never made to race a timer to reach a control.
+ * **Flow:** a toast with an action does not dismiss itself on a short or default
+ * `duration` — the user is never made to race a timer to reach a control. (Only
+ * `MIN_ACTION_TOAST_DURATION` or more starts a countdown: see `UndoSnackbar`.)
  */
 export const ActionNeverAutoDismisses: Story = {
   parameters: { controls: { disable: true } },
@@ -584,6 +586,60 @@ export const ActionNeverAutoDismisses: Story = {
     await expect(canvas.getByText('Save failed')).toBeVisible();
     await userEvent.click(canvas.getByRole('button', { name: 'Retry' }));
     await expect(args.onAction).toHaveBeenCalledTimes(1);
+  },
+};
+
+/**
+ * **Flow:** the "Undo" snackbar. A toast with an action stays until dismissed, unless it is given a `duration` of at
+ * least `MIN_ACTION_TOAST_DURATION` (15 seconds): then it counts down like any other, with the timer bar, and still
+ * pauses on hover and focus and can be dismissed at once. (The 15 seconds are not waited out here; the story checks
+ * that the countdown is running, and that holding the pointer over it holds the timer.)
+ */
+export const UndoSnackbar: Story = {
+  parameters: { controls: { disable: true } },
+  args: { onDismiss: fn(), onAction: fn() },
+  render: (args) => (
+    <Dismissing
+      tone="info"
+      title="Problem card deleted"
+      duration={MIN_ACTION_TOAST_DURATION}
+      actionLabel="Undo"
+      onAction={args.onAction}
+      onDismiss={args.onDismiss}
+    />
+  ),
+  play: async ({ args, canvasElement }) => {
+    const canvas = within(canvasElement);
+    const toast = canvas.getByText('Problem card deleted').closest('[data-tone]') as HTMLElement;
+    /* Timed, though it carries an action: the countdown is on. */
+    await expect(toast).toHaveAttribute('data-duration', String(MIN_ACTION_TOAST_DURATION));
+    await expect(toast).toHaveAttribute('data-paused', 'false');
+    /* Not gone early. */
+    await sleep(500);
+    await expect(args.onDismiss).not.toHaveBeenCalled();
+    /* Held while the pointer is over it, so there is time to reach Undo. */
+    await userEvent.hover(canvas.getByRole('button', { name: 'Undo' }));
+    await expect(toast).toHaveAttribute('data-paused', 'true');
+    await userEvent.click(canvas.getByRole('button', { name: 'Undo' }));
+    await expect(args.onAction).toHaveBeenCalledTimes(1);
+    /* The X is there too (its close is covered by `Dismissible`); the story ends with the toast on screen. */
+    await expect(canvas.getByRole('button', { name: 'Dismiss: Problem card deleted' })).toBeVisible();
+  },
+};
+
+/**
+ * **Flow:** a `duration` shorter than the floor beside an action is ignored: no countdown starts, and the toast stays.
+ */
+export const ShortDurationWithActionIsIgnored: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { controls: { disable: true }, chromatic: { disableSnapshot: true } },
+  args: { onDismiss: fn() },
+  render: (args) => (
+    <Dismissing tone="info" title="Problem card deleted" duration={MIN_ACTION_TOAST_DURATION - 1} actionLabel="Undo" onDismiss={args.onDismiss} />
+  ),
+  play: async ({ canvasElement }) => {
+    const toast = within(canvasElement).getByText('Problem card deleted').closest('[data-tone]') as HTMLElement;
+    await expect(toast).not.toHaveAttribute('data-duration');
   },
 };
 

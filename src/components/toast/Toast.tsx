@@ -18,6 +18,17 @@ export type ToastTone = 'info' | 'success' | 'warning' | 'critical';
 export const DEFAULT_TOAST_DURATION = 6000;
 
 /**
+ * The shortest time a Toast that carries an action may wait before it dismisses itself.
+ *
+ * An action on a timer is only usable if there is time to reach it, so a toast with an action never
+ * times out on the default or on any shorter `duration`; it stays until it is dismissed. A caller
+ * that wants the "Undo" snackbar pattern (the design's: it goes after 15 seconds, or when dismissed)
+ * passes `duration={MIN_ACTION_TOAST_DURATION}` or more, and the usual pause, extend and dismiss
+ * controls still apply. See docs/toast.md, "Undo".
+ */
+export const MIN_ACTION_TOAST_DURATION = 15000;
+
+/**
  * Tone → glyph. Four different *shapes*, not four colours of the same shape:
  * a screenshot in greyscale, or a user with a colour vision deficiency, still
  * tells an error from a confirmation. See docs/toast.md, "Tone is never colour
@@ -81,8 +92,9 @@ const TONE_LABEL: Record<ToastTone, string> = {
  * control, the timer pauses whenever the pointer is over the toast, whenever
  * focus is inside it, and whenever the tab is in the background, and it resumes
  * from where it stopped rather than restarting. A Toast that carries an action
- * never auto-dismisses at all — a control the user cannot reach in time is not
- * a control.
+ * only times out when it is given at least `MIN_ACTION_TOAST_DURATION` (15s);
+ * with less, it never auto-dismisses — a control the user cannot reach in time
+ * is not a control.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -130,9 +142,11 @@ export interface ToastProps
    */
   toneLabel?: string;
   /**
-   * Label for a single inline action. **A Toast with an action never
-   * auto-dismisses**, whatever `duration` says: an action the user has to catch
-   * before it vanishes is not usable, and racing a timer fails WCAG 2.2.1.
+   * Label for a single inline action. **A Toast with an action does not
+   * auto-dismiss** unless `duration` is at least `MIN_ACTION_TOAST_DURATION`
+   * (15 seconds): an action the user has to catch before it vanishes is not usable,
+   * and racing a short timer fails WCAG 2.2.1. For an "Undo" that goes after a while,
+   * pass `duration={MIN_ACTION_TOAST_DURATION}`.
    */
   actionLabel?: string;
   /** Fired when the action is pressed. Ignored without `actionLabel`. */
@@ -197,10 +211,15 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
      the X visibly lower. Centre the row instead. */
   const hasBothLines = hasTitle && hasMessage;
 
-  /* A toast the user is asked to act on must wait for them. This is not a
-     suggestion the caller can override — passing both is a mistake, and the
-     safe reading of the mistake is "keep it on screen". */
-  const timed = !hasAction && typeof duration === 'number' && duration > 0 && Boolean(onDismiss);
+  /* A toast the user is asked to act on must wait for them. A short `duration`
+     beside an action is a mistake, and the safe reading of it is "keep it on
+     screen". Only a duration of at least `MIN_ACTION_TOAST_DURATION` is taken as
+     meant: the "Undo" that goes after 15 seconds, still pausable and dismissible. */
+  const timed =
+    typeof duration === 'number' &&
+    duration > 0 &&
+    Boolean(onDismiss) &&
+    (!hasAction || duration >= MIN_ACTION_TOAST_DURATION);
 
   const [hovered, setHovered] = React.useState(false);
   const [focusWithin, setFocusWithin] = React.useState(false);
@@ -328,11 +347,13 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(function Toast
       {hasAction && (
         /* Top-aligned and pulled back 2, exactly as the Banner's is, so the two
            components line up on the first row. */
+        /* `ml-2` on top of the row's `gap-2`: the action sits 16 from the text, not 8, so the
+           button does not crowd the message. Only this gap; glyph / text and action / close stay 8. */
         <Button
           type="button"
           variant="secondary"
           size="sm"
-          className="-my-0.5 shrink-0"
+          className="-my-0.5 ml-2 shrink-0"
           onClick={onAction}
         >
           {actionLabel}
