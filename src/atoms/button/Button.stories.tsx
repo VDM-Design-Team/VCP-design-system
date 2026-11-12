@@ -34,6 +34,16 @@ export const Secondary: Story = { args: { variant: 'secondary' } };
 export const Tertiary: Story = { args: { variant: 'tertiary' } };
 /** Outlined, but grey — the Cancel beside a destructive answer. */
 export const Neutral: Story = { args: { variant: 'neutral', children: 'Cancel' } };
+/** A toolbar's actions as text in the neutral palette: controls, not calls to action (the ghost `tertiary` is the brand blue). */
+export const NeutralTertiary: Story = {
+  args: { variant: 'neutral-tertiary', children: 'Status' },
+  play: async ({ canvasElement }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'Status' });
+    await expect(button.className).toContain('neutral-textual-content');
+    await expect(button.className).not.toContain('action-tertiary');
+  },
+};
+
 export const CriticalPrimary: Story = { args: { variant: 'critical-primary', children: 'Delete account' } };
 /** Red text, no fill: a destructive answer beside quieter ones (Figma's AV edit page: Discard, Save as Draft, Submit). */
 export const CriticalTertiary: Story = {

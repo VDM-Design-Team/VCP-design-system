@@ -114,3 +114,32 @@ export const AnsweringIt: Story = {
     await expect(canvas.getByText('Answered: deleted')).toBeInTheDocument();
   },
 };
+
+/** Deleting several at once (from the bulk action bar): one line each, in a read-only field that scrolls past four. */
+export const SeveralAtOnce: Story = {
+  args: {
+    avTitle: undefined,
+    avTitles: [
+      'VCP-12345 Added Value Title Here (if title is super long, just truncate it.)',
+      'VCP-12346 Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard',
+    ],
+  },
+  play: async () => {
+    const field = within(document.body).getByRole('textbox', { name: 'Added Value' });
+    await expect(field).toHaveAttribute('readonly');
+    await expect((field as HTMLTextAreaElement).value.split('\n')).toHaveLength(2);
+  },
+};
+
+/** Twelve at once: the field grows to eight lines, then scrolls. */
+export const ManyAtOnce: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { avTitle: undefined, avTitles: Array.from({ length: 12 }, (_, i) => `VCP-123${40 + i} Added Value Title Here (if title is super long, just truncate it.)`) },
+  play: async () => {
+    const field = within(document.body).getByRole('textbox', { name: 'Added Value' }) as HTMLTextAreaElement;
+    await expect(field.rows).toBe(8);
+    await expect(field.scrollHeight).toBeGreaterThan(field.clientHeight);
+  },
+};
+

@@ -51,7 +51,7 @@ picture of the file that sat in its place before, and nothing is held after the 
 | `error` | `ReactNode` | — | Said under the drop area: what only the caller knows, such as an upload that failed. A refused file's own message shows without it |
 | `hint` / `accept` / `maxSize` | | `Dropzone`'s | The accepted-types line, what the picker takes, and the limit in bytes |
 | `onReject` | `(rejections) => void` | — | Every file the drop area refused, and why |
-| `disabled` | `boolean` | — | Locks the drop area while an upload is in flight |
+| `disabled` | `boolean` | — | Locks the set while an upload is in flight: the drop area takes no files and no card has a ✕. Cards still open |
 | `label` | `string` | `Attachments` | The list's accessible name |
 
 ## Behaviour
@@ -59,6 +59,7 @@ picture of the file that sat in its place before, and nothing is held after the 
 - **Pressing a card opens it** in the viewer (not its ✕), in view and in edit. The viewer is a dialog over whatever is on screen, a dialog included: Escape closes the preview first, and focus returns to the card that opened it.
 - **A refused file never reaches `onFiles`.** `Dropzone` filters by type and size on a drop as well as in the picker, and says why ("That file is 24 MB; the limit is 10 MB").
 - **Focus never drops.** A removed card takes its ✕ with it, so focus goes to the **next card's ✕**, else the **previous** one's, else the **drop area**.
+- **`disabled` locks the set.** While an upload is in flight nothing staged can change: the drop area takes no files and **the ✕s are gone**, since a file removed after it was sent would be uploaded all the same. The ✕ is hidden, not greyed, because `FileAttachment` has a card with a ✕ and a card without. The cards still open in the viewer. A ✕ that had focus when the upload started hands it to its own card, and the ✕s return when `disabled` ends.
 
 ## Accessibility
 
@@ -72,3 +73,4 @@ picture of the file that sat in its place before, and nothing is held after the 
 - **Don't remove a card without letting `Attachments` move focus**: pass `onRemove` and drop the item from `items`; do not unmount the whole list.
 - **Don't validate type or size yourself.** The drop area does; show what it reports.
 - **Don't confirm a removal inside a dialog that stages it.** Removing is undone by Cancel.
+- **Don't guard `onRemove` yourself during an upload.** Pass `disabled`; the ✕s go and focus is looked after.

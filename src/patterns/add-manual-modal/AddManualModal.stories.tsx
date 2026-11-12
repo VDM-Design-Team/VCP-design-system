@@ -28,7 +28,16 @@ type Story = StoryObj<typeof meta>;
 const file = (name: string, type: string, size = 100) => new File([new Uint8Array(size)], name, { type });
 const input = () => document.querySelector('[role="dialog"] input[type="file"]') as HTMLInputElement;
 
-export const Default: Story = {};
+/** The dialog is as tall as what is in it: its body has nothing to scroll to, so no scrollbar shows where scrollbars always show. */
+export const Default: Story = {
+  play: async () => {
+    await screen.findByRole('dialog');
+    /* The body is the first box around the drop area that scrolls. */
+    let body = input().parentElement as HTMLElement;
+    while (getComputedStyle(body).overflowY !== 'auto') body = body.parentElement as HTMLElement;
+    await expect(body.scrollHeight).toBe(body.clientHeight);
+  },
+};
 
 /** Submit with nothing in it: both fields say what's missing, and nothing is handed over. */
 export const Required: Story = {

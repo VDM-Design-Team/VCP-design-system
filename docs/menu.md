@@ -14,6 +14,7 @@ component is still a component — see the tiering rules in `CLAUDE.md`.
 | `Divider` | atom |
 | `Icon` | atom |
 | `IconButton` | atom |
+| `Input` | atom |
 | `Popover` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -46,6 +47,9 @@ navigation pattern, not behind an ellipsis.
 | `defaultOpen` | `boolean` | `false` | Uncontrolled starting state |
 | `onOpenChange` | `(open: boolean) => void` | — | Fires on every open and close, including Escape, outside click, tabbing out and selecting |
 | `align` | `left \| right` | `right` | Which edge of the menu lines up with the trigger's |
+| `heading` | `string` | — | A heading over the items ("Move to Status", "Urgency"), in the library's **category** style without its caret: 40 high, small bold type in `text.tertiary`, a rule beneath. It names the menu (`aria-label`) and is not an item: arrows and type-ahead step over it |
+| `searchable` | `boolean` | `false` | A search box at the top (Figma's `_Menu_Item_Search`): typing narrows the items by label, it has focus on open, ArrowDown enters the list, ArrowUp from the first item comes back, Enter chooses the first match. `searchPlaceholder` ("Search...") and `emptyText` ("No results") |
+| `placement` | `top \| bottom` | `bottom` | Which side the menu prefers. It still flips when there is no room — set `top` for a trigger at the bottom of the window (the bulk action bar) |
 | `strategy` | `absolute \| fixed` | `fixed` | `Popover`'s: `fixed` floats the list above any `overflow` ancestor (a `DataTable`). `absolute` only under a CSS `transform`; see `docs/popover.md` |
 | `className` | `string` | — | Merged onto the wrapper via `cn()` |
 | `panelClassName` | `string` | — | Merged onto the `role="menu"` panel via `cn()` |
@@ -63,6 +67,8 @@ carry a label and an action cannot accidentally be a rule.
 | `icon` | `IconName \| false` | — | A glyph name from the Icon library — **typed**, so a name the system does not ship is a compile error. Rendered decorative. `false` on a `critical` item leaves out its fallback `warning` glyph |
 | `shortcut` | `string` | — | Display only. Menu binds no keyboard shortcuts itself; the surrounding feature does |
 | `tone` | `default \| critical` | `default` | `critical` is for destructive, irreversible actions (it was `danger` before November 2026). See below |
+| `items` (on an item) | `MenuActionItem[]` | — | **A submenu.** The item shows a right caret (`caret-right`), opens its choices beside it on hover, click or ArrowRight, and keeps the brand-blue highlight while open. Only the submenu's items are choices; `onSelect` gets their own `key`. ArrowLeft or Escape closes just the submenu |
+| `heading` (on an item) | `string` | the item's label | The submenu's own heading |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
 | `disabled` | `boolean` | `false` | Stays visible and announced, but the keyboard steps over it |
 | `onClick` | `() => void` | — | Runs before `onSelect` |
@@ -120,6 +126,12 @@ The dark theme comes for free — every colour above is a semantic token that
 - **`shadow.menu` has no dark-theme override**, so in dark the panel's edge is
   carried by `stroke.default` alone.
 - **No motion tokens** for the colour transition.
+
+## Submenus
+
+An item with `items` is a parent, not a choice: it shows a right caret, is `aria-haspopup="menu"`, and its `aria-expanded` follows the submenu. Hover opens it (without taking focus), a click or ArrowRight opens it **and moves
+into it**. The submenu hangs to the right of the parent with its first choice level with the parent (how far above the item it starts is measured, the category row and the padding, not a constant), is fixed to the screen so a scrolling menu cannot clip it, **follows its parent item when something scrolls or the window is resized, flips to the left when there is no room on the right, and stays on screen**, and has its own heading. ArrowUp and
+ArrowDown move inside it; **ArrowLeft or Escape closes only the submenu** and puts focus back on the parent; a choice closes everything. One level only.
 
 ## Accessibility
 
@@ -247,6 +259,5 @@ stories also pass `axe-core` at WCAG 2.1 AA with the menus open.
   the user; Menu does not keep it for you.
 - Don't disable an item with no way for the user to find out why. Disable it and
   explain the condition nearby, or leave it enabled and fail with a message.
-- Don't nest menus. There is no submenu contract here, and a `role="menu"` inside
-  a `role="menu"` without one is worse than a flat list.
+- Don't nest menus more than one level, and don't nest them by hand: a submenu is an item's `items` (see Submenus), which carries the contract. A `role="menu"` inside a `role="menu"` built any other way is worse than a flat list.
 - Don't put it inside a scrolling container and expect it to escape. It cannot.
