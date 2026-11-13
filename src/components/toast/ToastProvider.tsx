@@ -3,7 +3,20 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
 import { DEFAULT_TOAST_DURATION, Toast, type ToastTone } from './Toast';
 
-/** Where the stack sits. Corner-anchored is the default; centred reads as more urgent. */
+/* A layout effect that does not warn when the viewport is rendered on a server. */
+const useIsoLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
+/** How long a toast takes to arrive or leave. `duration-200` below must match. */
+const SLOT_MS = 200;
+/** The space between stacked toasts, carried by each slot as its top padding (`pt-2`). */
+const SLOT_GAP = 8;
+
+const noop = () => {};
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
+/** Where the stack sits. The top right is the default, as the design draws it; centred reads as more urgent. */
 export type ToastPosition = 'top-right' | 'top-center' | 'bottom-right' | 'bottom-center';
 
 /** Everything `toast()` accepts. Mirrors `ToastProps`, minus the DOM plumbing. */
@@ -104,8 +117,10 @@ export function useToast(): ToastContextValue {
 const viewport = cva(
   [
     /* Fixed, and click-through: the stack must never swallow a click meant for
-       the page. Each Toast turns pointer events back on for itself. */
-    'pointer-events-none fixed z-50 flex w-full max-w-sm flex-col gap-2 p-4',
+       the page. Each Toast turns pointer events back on for itself. The 24
+       from the screen's edges is Figma's (16 on a phone, to leave the toast
+       room); the column is as wide as a toast and its two paddings. */
+    'pointer-events-none fixed z-50 flex w-full max-w-md flex-col p-4 sm:p-6',
   ],
   {
     variants: {
@@ -116,7 +131,7 @@ const viewport = cva(
         'bottom-center': 'bottom-0 left-1/2 -translate-x-1/2',
       },
     },
-    defaultVariants: { position: 'bottom-right' },
+    defaultVariants: { position: 'top-right' },
   },
 );
 
@@ -146,39 +161,166 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
     },
     ref,
   ) {
-    const announced = toasts.filter((t) => t.announce !== false);
+    const rootRef = React.useRef<HTMLDivElement | null>(null);
+    const setRoot = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        rootRef.current = node;
+        if (typeof ref === 'function') ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref],
+    );
+
+    /* Every toast keeps one place in the order, from the first time it is seen
+       to the last, so a toast that is leaving does not jump when the ones after
+       it move up. Oldest first, newest last. */
+    const serials = React.useRef(new Map<string, number>());
+    const nextSerial = React.useRef(0);
+    const serialOf = (id: string) => {
+      let serial = serials.current.get(id);
+      if (serial === undefined) {
+        serial = nextSerial.current++;
+        serials.current.set(id, serial);
+      }
+      return serial;
+    };
+
+    /* How many of the queue fit on screen, oldest first. The rest wait, unmounted
+       — so their timers have not started and a screen reader has not met them —
+       until room is made. 0 until the first measurement, which happens before the
+       first paint. */
+    const [count, setCount] = React.useState(0);
+    const [ghosts, setGhosts] = React.useState<readonly ToastRecord[]>([]);
+    const [resizes, setResizes] = React.useState(0);
+
+    const nodes = React.useRef(new Map<string, HTMLElement>());
+    const track = (id: string) => (node: HTMLElement | null) => {
+      if (node) nodes.current.set(id, node);
+      else nodes.current.delete(id);
+    };
+    const shown = toasts.slice(0, count);
+    const waiting = toasts.slice(count);
+
+    const rendered = React.useRef<readonly ToastRecord[]>([]);
+    const blocked = React.useRef('');
+
+    useIsoLayoutEffect(() => {
+      const root = rootRef.current;
+      if (!root) return;
+      const liveIds = new Set(toasts.map((t) => t.id));
+
+      /* A toast that was on screen and is not in the queue any more leaves
+         through a slot of its own, which closes. One that never got on screen
+         just goes. */
+      if (!prefersReducedMotion()) {
+        const gone = rendered.current.filter(
+          (t) => !liveIds.has(t.id) && !ghosts.some((g) => g.id === t.id),
+        );
+        if (gone.length > 0) setGhosts((current) => [...current, ...gone]);
+      }
+      rendered.current = toasts.slice(0, count);
+
+      /* Fit: as many, oldest first, as the screen has room for, counting those
+         still leaving. Always at least one, so a toast taller than the screen
+         is still shown. */
+      const style = window.getComputedStyle(root);
+      const room =
+        window.innerHeight -
+        (parseFloat(style.paddingTop) || 0) -
+        (parseFloat(style.paddingBottom) || 0) +
+        SLOT_GAP;
+      let used = ghosts.reduce((sum, g) => sum + (nodes.current.get(g.id)?.offsetHeight ?? 0), 0);
+      let fit = 0;
+      for (const t of toasts) {
+        const height = nodes.current.get(t.id)?.offsetHeight ?? 0;
+        if (fit > 0 && used + height > room) break;
+        used += height;
+        fit += 1;
+      }
+
+      /* If showing one more made the stack too tall, it was taken back; do not
+         offer it again until something else changes. */
+      const key = `${toasts.map((t) => t.id).join(',')}|${ghosts.length}|${window.innerHeight}|${resizes}`;
+      if (fit > count && blocked.current === key) fit = count;
+      if (fit < count) blocked.current = key;
+      if (fit !== count) setCount(fit);
+    }, [toasts, ghosts, count, resizes]);
+
+    React.useEffect(() => {
+      const onResize = () => setResizes((n) => n + 1);
+      window.addEventListener('resize', onResize);
+      return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    const announced = shown.filter((t) => t.announce !== false);
     const polite = announced.filter((t) => (t.tone ?? 'info') !== 'critical');
     const assertive = announced.filter((t) => t.tone === 'critical');
-    const quiet = toasts.filter((t) => t.announce === false);
+    const quiet = shown.filter((t) => t.announce === false);
 
-    /* A toast hugs its content, so a short one is narrower than the 384 column
-       it stacks in. Pack the stack against the edge it is anchored to — the right
+    /* A toast hugs its content, so a short one is narrower than the column it
+       stacks in. Pack the stack against the edge it is anchored to — the right
        edge, or the middle for the centred positions — or short toasts sit at the
-       column's left and the stack looks ragged. The regions need it too, since
-       they are the toasts' parent. */
+       column's left and the stack looks ragged. */
     const align = position?.endsWith('center') ? 'items-center' : 'items-end';
 
+    const slot = (item: ToastRecord) => (
+      <ToastSlot key={item.id} order={serialOf(item.id)} innerRef={track(item.id)}>
+        {renderToast(item, onDismiss)}
+      </ToastSlot>
+    );
+
     return (
-      <div ref={ref} className={cn(viewport({ position }), align, className)} {...props}>
-        <ToastRegion
-          role="status"
-          align={align}
-          label={politeLabel}
-          toasts={polite}
-          onDismiss={onDismiss}
-        />
-        <ToastRegion
-          role="alert"
-          align={align}
-          label={assertiveLabel}
-          toasts={assertive}
-          onDismiss={onDismiss}
-        />
-        {quiet.length > 0 && (
-          /* Shown, not announced: no role, no aria-live, and so no name either —
-             a plain div may not carry an aria-label. */
-          <div className={cn('flex flex-col gap-2', align)}>
-            {quiet.map((item) => renderToast(item, onDismiss))}
+      <div ref={setRoot} className={cn(viewport({ position }), align, className)} {...props}>
+        {/* `-mt-2` takes back the first slot's top padding, so the 24 from the
+            screen's edge is to the toast itself. */}
+        <div className={cn('-mt-2 flex w-full flex-col', align)}>
+          <ToastRegion role="status" label={politeLabel} toasts={polite} slot={slot} />
+          <ToastRegion role="alert" label={assertiveLabel} toasts={assertive} slot={slot} />
+          {quiet.length > 0 && (
+            /* Shown, not announced: no role, no aria-live, and so no name either —
+               a plain div may not carry an aria-label. */
+            <div className="contents">{quiet.map(slot)}</div>
+          )}
+          {/* Leaving: a copy that fades and closes, so the toasts after it move up
+              smoothly. Not part of the page any more, so not read, not focusable. */}
+          {ghosts.length > 0 && (
+            <div aria-hidden="true" inert className="contents">
+              {ghosts.map((item) => (
+                <ToastSlot
+                  key={item.id}
+                  leaving
+                  order={serialOf(item.id)}
+                  innerRef={track(item.id)}
+                  onGone={() => setGhosts((current) => current.filter((g) => g.id !== item.id))}
+                >
+                  {renderToast(item, noop, true)}
+                </ToastSlot>
+              ))}
+            </div>
+          )}
+        </div>
+        {waiting.length > 0 && (
+          /* The ones waiting for room, drawn where nobody can see or reach them, only to
+             be measured: the same width as the real stack, so the height is the one
+             they will have. Hidden from assistive technology, so nothing is announced
+             early. */
+          <div
+            aria-hidden="true"
+            inert
+            className={cn(
+              viewport({ position }),
+              'invisible',
+              align,
+              className,
+            )}
+          >
+            <div className={cn('-mt-2 flex w-full flex-col', align)}>
+              {waiting.map((item) => (
+                <div key={item.id} ref={track(item.id)} className="max-sm:w-full pt-2">
+                  {renderToast(item, noop, true)}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -186,7 +328,7 @@ export const ToastViewport = React.forwardRef<HTMLDivElement, ToastViewportProps
   },
 );
 
-function renderToast(item: ToastRecord, onDismiss?: (id: string) => void) {
+function renderToast(item: ToastRecord, onDismiss?: (id: string) => void, still = false) {
   return (
     <Toast
       key={item.id}
@@ -196,7 +338,8 @@ function renderToast(item: ToastRecord, onDismiss?: (id: string) => void) {
       actionLabel={item.actionLabel}
       onAction={item.onAction}
       dismissLabel={item.dismissLabel}
-      duration={item.duration === undefined ? DEFAULT_TOAST_DURATION : item.duration}
+      /* A copy being measured, or leaving, runs no timer. */
+      duration={still ? null : item.duration === undefined ? DEFAULT_TOAST_DURATION : item.duration}
       onDismiss={() => onDismiss?.(item.id)}
     >
       {item.description}
@@ -204,18 +347,77 @@ function renderToast(item: ToastRecord, onDismiss?: (id: string) => void) {
   );
 }
 
+/**
+ * One toast's place in the stack. It opens when the toast arrives and closes
+ * when it leaves, and the toasts around it follow, since the slot's height is
+ * what changes: that is the smooth shift. With reduced motion it does not
+ * animate at all.
+ */
+function ToastSlot({
+  order,
+  leaving = false,
+  onGone,
+  innerRef,
+  children,
+}: {
+  order: number;
+  leaving?: boolean;
+  onGone?: () => void;
+  innerRef?: (node: HTMLElement | null) => void;
+  children: React.ReactNode;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  /* A new toast starts closed and opens; a leaving one starts open and closes. */
+  const [open, setOpen] = React.useState(leaving);
+  const [settled, setSettled] = React.useState(false);
+
+  useIsoLayoutEffect(() => {
+    /* Read the layout once so the starting state is drawn, and the change is
+       a transition rather than the first frame. */
+    ref.current?.getBoundingClientRect();
+    setOpen(!leaving);
+  }, [leaving]);
+
+  React.useEffect(() => {
+    const id = window.setTimeout(() => {
+      if (open) setSettled(true);
+      else onGone?.();
+    }, SLOT_MS + 20);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  return (
+    <div
+      ref={ref}
+      style={{ order }}
+      className={cn(
+        'grid max-sm:w-full',
+        'transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-none',
+        open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+        leaving && 'pointer-events-none',
+      )}
+    >
+      {/* Clipped only while it moves, so a settled toast's shadow and focus ring are whole. */}
+      <div className={cn('min-h-0', open && settled ? 'overflow-visible' : 'overflow-hidden')}>
+        <div ref={innerRef} className="pt-2">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ToastRegion({
   role,
-  align,
   label,
   toasts,
-  onDismiss,
+  slot,
 }: {
   role: 'status' | 'alert';
-  align: string;
   label: string;
   toasts: readonly ToastRecord[];
-  onDismiss?: (id: string) => void;
+  slot: (item: ToastRecord) => React.ReactNode;
 }) {
   return (
     <div
@@ -231,10 +433,12 @@ function ToastRegion({
       /* No `empty:hidden`, and no conditional render around this element. A
          region with `display: none` is not in the accessibility tree, so hiding
          it while empty would re-create the exact bug the viewport exists to
-         prevent. An empty flex column is zero pixels tall anyway. */
-      className={cn('flex flex-col gap-2', align)}
+         prevent. `contents` takes the box away, not the element: the region stays
+         in the tree, and its toasts are laid out in the one stack, in the order
+         they came, whichever region they are in. */
+      className="contents"
     >
-      {toasts.map((item) => renderToast(item, onDismiss))}
+      {toasts.map(slot)}
     </div>
   );
 }
@@ -243,7 +447,7 @@ let sequence = 0;
 
 export interface ToastProviderProps {
   children?: React.ReactNode;
-  /** Where the stack sits. Defaults to `bottom-right`. */
+  /** Where the stack sits. Defaults to `top-right`. */
   position?: ToastPosition;
   /** Merged onto the viewport, not onto the provider — the provider renders nothing of its own. */
   viewportClassName?: string;
@@ -265,7 +469,7 @@ export interface ToastProviderProps {
  */
 export function ToastProvider({
   children,
-  position = 'bottom-right',
+  position = 'top-right',
   viewportClassName,
 }: ToastProviderProps) {
   const [toasts, setToasts] = React.useState<readonly ToastRecord[]>([]);

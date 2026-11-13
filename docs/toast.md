@@ -52,7 +52,7 @@ blocking error in one place only: a blocked Submit, below.
 
 When Submit on an Added Value is blocked, VCP shows a toast for each problem
 **as well as** the error under its field. Figma draws it in *AV Page Missing
-Information Error Handling* (a "Missing Input" toast per missing field) and
+Information Error Handling* (a "Missing input" toast per missing field) and
 *Assignee Busy Warning* (the "Unavailable Assignee" toast). The product chose
 this on 5 November 2026, over the rule above. It holds only on these terms:
 
@@ -106,7 +106,7 @@ test can assert on the timer without reaching into React.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `position` | `top-right \| top-center \| bottom-right \| bottom-center` | `bottom-right` | |
+| `position` | `top-right \| top-center \| bottom-right \| bottom-center` | `top-right` | As the design draws it. See *Behaviour* |
 | `viewportClassName` | `string` | — | Provider only. Lands on the viewport, not on the provider |
 | `toasts` | `readonly ToastRecord[]` | `[]` | Viewport only. **Omitting it is valid** — you get two empty live regions, which is the point |
 | `onDismiss` | `(id: string) => void` | — | Viewport only |
@@ -137,6 +137,68 @@ toast({
 - Do the deletion for real **when the toast goes** (`onDismiss`, which the timer also calls), or do it now and
   restore on **Undo**; either way the page, not the toast, owns the state.
 - Anything under 15 seconds is ignored and the toast stays until dismissed.
+
+## Recipes
+
+The messages the product raises more than once are written once, as **recipes**:
+`toast(changesSaved())`. A recipe returns the options for `toast()`, so the tone, the
+title and the wording are the same on every page. Pass a second argument to override an
+option (`toast(changesSaved({ duration: 10000 }))`).
+
+| Recipe | Tone | Title | Message | Use for | Timing |
+|---|---|---|---|---|---|
+| `missingInput(field, kind?)` | critical | Missing input | `fill`: "{Field} can’t be empty. Please fill it in before submitting." · `select`: "Please select a {field} before submitting." · `select-any`: "Please select at least one {field} before submitting." | Submit blocked by a missing field. One per problem, beside the field's own error | Default. `announce: false` |
+| `unavailableAssignee()` | critical | Assignee unavailable | "A selected assignee is unavailable during the chosen dates. Please change the dates or remove this assignee before submitting." | Submit blocked by availability | Default. `announce: false` |
+| `changesSaved()` | success | Changes saved | "Your updates have been saved." | Edits were kept | Default |
+| `bulkUpdated({ property, value, count })` | success | Added Values updated | "{Property} changed to {value} for {count} Added Values." | Several records changed at once | Default |
+| `discarded(reference?)` | success | Draft discarded | "Added Value {reference} was discarded." (only when named) | A draft was thrown away on purpose | Default |
+| `undoDeletion(item, onUndo)` | info | "{Item} deleted" | — (an **Undo** action) | A deletion that can be brought back | `MIN_ACTION_TOAST_DURATION` (15s) |
+
+**Tone follows what happened.** `critical` when something was stopped (a blocked
+Submit), `success` when something was done, `warning` when the user can carry on but
+should know, `info` for neutral news and for a deletion they can still undo.
+
+**Titles name what happened, in sentence case**, and the message adds detail only when the
+title cannot carry it. No "!" and no "successfully": the glyph already says it worked.
+
+**A message said once is not a recipe.** If it appears in a second place, add it here
+with the table row; until then it is a plain `toast({ tone, title })` in its page.
+
+## Writing toast copy
+
+For anyone, or any AI run, writing a toast message. Follow this, and use a recipe whenever one fits.
+
+1. **Use a recipe first.** If the message is in the table above, call it: `toast(changesSaved())`. Do not retype its wording. If the same message is needed in a second place, add a recipe (and its row) rather than copying it.
+2. **Pick the tone from what happened:** `critical` something was stopped or failed, `success` something was done, `warning` the user can carry on but should know, `info` neutral news, or a deletion they can still undo. Never pick a tone for its colour.
+3. **The title says what happened**, in sentence case, in a few words: "Changes saved", "Draft discarded", "Assignee unavailable". The past tense for what was done, the noun first for what is blocked. No full stop, no "!" and no "successfully": the glyph already says it worked.
+4. **Add a message only when the title cannot carry it**, and then only for the one detail the user needs: which thing, how many, what to do next. One or two short sentences, with a full stop. A message that restates the title ("Changes saved" / "Your changes were saved") is noise: leave it out.
+5. **Name the thing, not the system.** "Status changed to Backlog for 2 Added Values.", not "The operation completed." Say Added Value, not "AV" or "item", as the rest of the product does.
+6. **Tell them what to do when something is blocked.** "Please select at least one Initiator before submitting." names the field and the way out. Do not blame: "can’t be empty", not "you forgot".
+7. **No technical wording.** No error codes, no "failed to", no "an error occurred". Say what the user could not do, and, if there is one, what to do next.
+8. **An action is a convenience, and says a verb.** "Undo", "Retry". One action only, and never the only way to do it (see *Undo*). With an action, the `duration` is `MIN_ACTION_TOAST_DURATION` or more.
+9. **A blocked Submit repeats an error that stays**, so it is `announce: false` and always has the matching field error beside the field. Anywhere else a toast is never the only place a message lives.
+10. **One thing per toast.** Do not stack five for one action (a blocked Submit is the one exception).
+
+## Behaviour
+
+How the stack acts is the system's, not each page's.
+
+- **Position.** Top right by default, **24 from the top and 24 from the right**, as
+  Figma draws it. `position` still places it elsewhere. On a phone (below 640) a toast
+  fills the width, 16 from each edge.
+- **Order.** The oldest is at the top and each new toast arrives **underneath**, 8 below
+  the one before. Toasts of every tone share the one stack, in the order they came.
+- **Leaving.** A toast that is dismissed, or whose timer runs out, fades and closes, and
+  the toasts after it **move up smoothly** to fill the room. With reduced motion nothing is
+  animated and they just move.
+- **When there are too many.** There is no fixed maximum. The stack takes as many as the
+  page has room for, oldest first, and **the newest wait** (not on screen, not announced,
+  their timers not started) until a toast is gone. Then the first one waiting arrives, and
+  its own timer starts. A toast taller than the screen is still shown.
+- **Timing is optional.** A toast with a `duration` dismisses itself when its bar runs
+  out; one with `duration: null` stays until the user dismisses it or the page does (a
+  route change calls `dismissAll`). The timer pauses while the pointer or focus is on a
+  toast, and while the tab is in the background (see *Auto-dismiss and WCAG 2.2.1*).
 
 ## The timer bar
 
@@ -184,7 +246,7 @@ cannot reach:
 
 The regions are never hidden while empty, either. `display: none` takes an
 element out of the accessibility tree, so an `empty:hidden` on the region would
-re-create the exact bug the viewport exists to prevent. An empty flex column is
+re-create the exact bug the viewport exists to prevent. Each region is `display: contents`, so it has no box of its own: the toasts are laid out in the one stack, in the order they came. An empty one is
 zero pixels tall anyway.
 
 ### Two regions: `status` for most of it, `alert` for errors
@@ -341,7 +403,8 @@ ever gets a stronger border step, both should move to it.
 | Gap, glyph / text / action / close | Tailwind numeric scale | `gap-2` (8), the Banner's |
 | Gap, text to action | Tailwind numeric scale | 16: `gap-2` plus `ml-2` on the action, so the button does not crowd the message |
 | Gap, title to message | — | none |
-| Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content. The viewport packs the stack to its anchored edge (`items-end`, or `items-center` for the centred positions) so mixed widths line up |
+| Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content, and `w-full` below 640 (a phone). The viewport packs the stack to its anchored edge (`items-end`, or `items-center` for the centred positions) so mixed widths line up. Figma's 420 is not used |
+| Offset from the screen's edges | Tailwind numeric scale | 24 (`p-6`) from the top and the right, as Figma draws it; 16 (`p-4`) below 640, to leave a phone's toast room |
 | Glyph and bar colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
 
 Dark comes for free: every colour above is a semantic token that

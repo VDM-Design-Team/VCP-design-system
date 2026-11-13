@@ -106,8 +106,9 @@ const toast = cva([
      which is what pauses the timer. */
   'pointer-events-auto',
   /* `relative` + clipping so the timer bar can sit flush on the bottom edge
-     and follow the rounded corner. It hugs its content up to `max-w-sm`. */
-  'relative flex w-fit max-w-sm gap-2 overflow-hidden',
+     and follow the rounded corner. It hugs its content up to `max-w-sm`, and fills the
+     width on a phone. */
+  'relative flex w-fit max-w-sm gap-2 overflow-hidden max-sm:w-full max-sm:max-w-none',
   /* A neutral card, as Figma draws it: the tone is the glyph and the bar, not
      a tint. Radius, padding and gaps are the Banner's. shape.radius.md,
      borderWidth.default. ds-lint-ignore */

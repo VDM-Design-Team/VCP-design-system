@@ -3,6 +3,14 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fireEvent, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { MIN_ACTION_TOAST_DURATION, Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
+import {
+  bulkUpdated,
+  changesSaved,
+  discarded,
+  missingInput,
+  undoDeletion,
+  unavailableAssignee,
+} from './recipes';
 import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 import { Field } from '../field';
@@ -239,17 +247,16 @@ export const AutoDismissPausesOnHover: Story = {
 };
 
 /**
- * Several at once. Note that the two live regions keep `critical` apart from the
- * rest: errors go to the assertive region, everything else to the polite one,
- * so a confirmation never interrupts and an error never waits its turn. The
- * cost is that a mixed batch is not in strict arrival order on screen.
+ * Several at once, top right, oldest at the top. The two live regions still keep `critical` apart from the
+ * rest for a screen reader: errors go to the assertive region, everything else to the polite one, so a
+ * confirmation never interrupts and an error never waits its turn. On screen they share one stack, in the
+ * order they arrived.
  */
 export const Stacked: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
     <div className="min-h-96 bg-surface-canvas p-8">
       <ToastViewport
-        position="bottom-right"
         toasts={[
           { id: '1', tone: 'info', title: 'Export queued', description: 'Two files.' },
           {
@@ -368,7 +375,7 @@ export const MixedWidthsAlign: Story = {
 export const WithProvider: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <ToastProvider position="bottom-right">
+    <ToastProvider>
       <div className="flex min-h-96 flex-col gap-4 bg-surface-canvas p-8">
         <p className="text-body-sm-regular text-text-secondary">
           The polite and assertive regions are already in the DOM, empty, below this
@@ -652,7 +659,7 @@ export const ShortDurationWithActionIsIgnored: Story = {
 export const ProviderRoutesToLiveRegions: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <ToastProvider position="bottom-right">
+    <ToastProvider>
       <div className="flex min-h-96 flex-col gap-4 bg-surface-canvas p-8">
         <ToastTriggers />
       </div>
@@ -703,12 +710,7 @@ function BlockedSubmitForm() {
           return;
         }
         setError(MISSING_TITLE);
-        toast({
-          tone: 'critical',
-          title: 'Missing Input',
-          description: "Title can't be empty, please fill it in before submitting.",
-          announce: false,
-        });
+        toast(missingInput('Title'));
       }}
     >
       <Field label="Title" required error={error}>
@@ -728,14 +730,14 @@ function BlockedSubmitForm() {
 /**
  * **Flow:** a blocked Submit on an Added Value, the one place a toast repeats an
  * error the user must fix (see the doc). The field's error is the message, and
- * `Field` announces it with `role="alert"`. The "Missing Input" toast shows the
+ * `Field` announces it with `role="alert"`. The "Missing input" toast shows the
  * same problem on screen, so it is raised with `announce: false`: it lands
  * outside both live regions, and the problem is said once.
  */
 export const BlockedSubmitIsSaidOnce: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <ToastProvider position="bottom-right">
+    <ToastProvider>
       <div className="min-h-96 bg-surface-canvas p-8">
         <BlockedSubmitForm />
       </div>
@@ -753,15 +755,145 @@ export const BlockedSubmitIsSaidOnce: Story = {
     await expect(fieldError.closest('[role="alert"]')).not.toBeNull();
 
     /* The toast is on screen, but in neither live region. */
-    const toastTitle = await screen.findByText('Missing Input');
-    await expect(toastTitle).toBeVisible();
+    const toastTitle = await screen.findByText('Missing input');
+    /* It fades in, so it is visible once that is done. */
+    await waitFor(() => expect(toastTitle).toBeVisible());
     await expect(toastTitle.closest('[aria-live]')).toBeNull();
     await expect(polite).toBeEmptyDOMElement();
     await expect(assertive).toBeEmptyDOMElement();
 
     /* It still closes like any toast. */
-    await userEvent.click(screen.getByRole('button', { name: 'Dismiss: Missing Input' }));
-    await waitFor(() => expect(screen.queryByText('Missing Input')).toBeNull());
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss: Missing input' }));
+    await waitFor(() => expect(screen.queryByText('Missing input')).toBeNull());
     await expect(fieldError).toBeVisible();
+  },
+};
+
+/** The recipes: each message the product raises more than once, written once. `toast(changesSaved())`. */
+function RecipeButtons() {
+  const { toast } = useToast();
+  return (
+    <div className="flex max-w-md flex-wrap gap-2">
+      <Button variant="secondary" size="sm" onClick={() => toast(missingInput('Initiator', 'select-any'))}>
+        Missing input
+      </Button>
+      <Button variant="secondary" size="sm" onClick={() => toast(unavailableAssignee())}>
+        Assignee unavailable
+      </Button>
+      <Button variant="secondary" size="sm" onClick={() => toast(changesSaved())}>
+        Changes saved
+      </Button>
+      <Button
+        variant="secondary"
+        size="sm"
+        onClick={() => toast(bulkUpdated({ property: 'Status', value: 'Backlog', count: 2 }))}
+      >
+        Bulk update
+      </Button>
+      <Button variant="secondary" size="sm" onClick={() => toast(discarded('VCP-1234'))}>
+        Discarded
+      </Button>
+      <Button variant="secondary" size="sm" onClick={() => toast(undoDeletion('Problem set', () => {}))}>
+        Undo deletion
+      </Button>
+    </div>
+  );
+}
+
+export const Recipes: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
+    <ToastProvider>
+      <div className="min-h-96 bg-surface-canvas p-8">
+        <RecipeButtons />
+      </div>
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Changes saved' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Bulk update' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Undo deletion' }));
+    const saved = await screen.findByText('Changes saved', { selector: 'p' });
+    const bulk = await screen.findByText('Status changed to Backlog for 2 Added Values.');
+    await expect(saved.closest('[data-tone]')).toHaveAttribute('data-tone', 'success');
+    await expect(bulk).toBeInTheDocument();
+    const undo = await screen.findByText('Problem set deleted');
+    await expect(undo.closest('[data-tone]')).toHaveAttribute('data-tone', 'info');
+    await expect(screen.getByRole('button', { name: 'Undo' })).toBeInTheDocument();
+  },
+};
+
+function StackButtons() {
+  const { toast, dismissAll } = useToast();
+  const n = React.useRef(0);
+  return (
+    <div className="flex gap-2">
+      <Button
+        size="sm"
+        onClick={() => {
+          n.current += 1;
+          toast({ tone: 'info', title: `Message ${n.current}`, description: 'Something happened, and this says what.', duration: null });
+        }}
+      >
+        Add a toast
+      </Button>
+      <Button size="sm" variant="tertiary" onClick={dismissAll}>
+        Clear
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * **Flow:** the stack. Toasts sit top right, 24 from the top and the right, oldest at the top and each new one
+ * beneath. Past what the page has room for, the newest wait, and show when a toast is dismissed; the rest
+ * move up smoothly as it goes.
+ */
+export const StackBehaviour: Story = {
+  parameters: { layout: 'fullscreen', controls: { disable: true } },
+  render: () => (
+    <ToastProvider>
+      <div className="min-h-96 bg-surface-canvas p-8">
+        <StackButtons />
+      </div>
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const add = canvas.getByRole('button', { name: 'Add a toast' });
+
+    await userEvent.click(add);
+    const first = await screen.findByText('Message 1');
+    const card = () => screen.getByText('Message 1').closest('[data-tone]') as HTMLElement;
+    await waitFor(() => expect(card().getBoundingClientRect().top).toBeCloseTo(24, 0));
+    await expect(window.innerWidth - card().getBoundingClientRect().right).toBeCloseTo(24, 0);
+
+    /* The oldest is at the top; the newest is beneath. */
+    await userEvent.click(add);
+    await userEvent.click(add);
+    await screen.findByText('Message 3');
+    const tops = ['Message 1', 'Message 2', 'Message 3'].map(
+      (t) => (screen.getByText(t).closest('[data-tone]') as HTMLElement).getBoundingClientRect().top,
+    );
+    await expect(tops[0] < tops[1] && tops[1] < tops[2]).toBe(true);
+
+    /* More than the page has room for: the stack never runs off the bottom, and the rest wait. */
+    for (let i = 0; i < 20; i += 1) await userEvent.click(add);
+    await waitFor(async () => {
+      const cards = Array.from(document.querySelectorAll<HTMLElement>('[role="status"] [data-tone]'));
+      await expect(cards.length).toBeLessThan(23);
+      await expect(cards.length).toBeGreaterThan(3);
+      const bottom = Math.max(...cards.map((c) => c.getBoundingClientRect().bottom));
+      await expect(bottom).toBeLessThanOrEqual(window.innerHeight - 24 + 1);
+    });
+    const before = document.querySelectorAll('[role="status"] [data-tone]').length;
+    await expect(screen.queryByText('Message 23', { selector: '[role="status"] p' })).toBeNull();
+
+    /* Dismiss the oldest: the first waiting toast takes its room. */
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss: Message 1' }));
+    await waitFor(() => expect(first).not.toBeVisible());
+    await waitFor(() => expect(document.querySelectorAll('[role="status"] [data-tone]').length).toBeGreaterThanOrEqual(before));
+    await userEvent.click(canvas.getByRole('button', { name: 'Clear' }));
   },
 };

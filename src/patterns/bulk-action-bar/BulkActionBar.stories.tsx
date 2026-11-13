@@ -361,7 +361,9 @@ export const OnTheTable: Story = {
     await userEvent.click(await screen.findByRole('menuitem', { name: 'High' }));
     const dialog = await screen.findByRole('dialog', { name: 'Change Urgency for 2 Added Values' });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
-    await expect(await screen.findByText('Added Values Updated')).toBeVisible();
+    /* The toast fades in, so it is visible once that is done. */
+    const updated = await screen.findByText('Added Values Updated');
+    await waitFor(() => expect(updated).toBeVisible());
     await waitFor(() => expect(c.queryByRole('toolbar')).toBeNull());
     /* The bar went with the selection, and so did the button that opened the dialog: focus did not fall to the page. */
     await waitFor(() => expect(c.getByRole('checkbox', { name: 'Select all rows' })).toHaveFocus());
@@ -437,7 +439,9 @@ export const ChangingStatusOnTheTable: Story = {
     const dialog = await screen.findByRole('dialog', { name: 'Accept 1 Pending Added Value' });
     await expect(within(dialog).getByRole('checkbox', { name: /Multipart Value/ })).toBeVisible();
     await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
-    await expect(await screen.findByText('Added Values Updated')).toBeVisible();
+    /* The toast fades in, so it is visible once that is done. */
+    const updated = await screen.findByText('Added Values Updated');
+    await waitFor(() => expect(updated).toBeVisible());
   },
 };
 
