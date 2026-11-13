@@ -31,7 +31,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## On a page
 
-The Accounts page is `PageTitle` (the page's one `h1`; Figma's frame says the placeholder "Page Title", write "Accounts") and then this table, in a column **16 apart and 32 in from the sides** (`px-8 pb-8`), as `AVListPage` lays it out. It goes inside `AppShell`. The search and the pagination are already inside the table's card. **Add Account** is not on the page: Figma draws it in the top bar, so it is `TopBar`'s `primaryAction`, and opening the user modal is the page's. There is no page pattern for it: it would only be these two pieces.
+The Accounts page is `PageTitle` (the page's one `h1`; Figma's frame says the placeholder "Page Title", write "Accounts") and then this table, in a column **16 apart and 32 in from the sides** (`px-8 pb-8`), as `AVListPage` lays it out. It goes inside `AppShell`. The search and the pagination are already inside the table's card. **Add Account** is not on the page: Figma draws it in the top bar, so it is `TopBar`'s `primaryAction`, and opening the user modal is the page's. The whole page, title and spacing included, is `AccountsPage`: use that rather than laying it out again.
 
 ## The columns
 
