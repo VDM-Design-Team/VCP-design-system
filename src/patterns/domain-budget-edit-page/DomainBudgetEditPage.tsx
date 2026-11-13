@@ -17,12 +17,12 @@ export const BUDGET_QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
  *
  * - **The quarter and year controls are both 36 high** (the Q1–Q4 `SegmentedControl` at `md`, the year `Select` at `compact`), the dashboard header's size, on the title's row, on the right (as the dashboard's filters are), so they sit as one row. The year takes the lighter `edge="neutral"`, as every filter outside a form does.
  * - **While saving** (`saving`) the Save button spins and everything is locked: the table, the quarter and the year.
- * - **Unsaved changes** (`dirty`) make the browser ask before the page is left (`beforeunload`). There is no custom dialog.
+ * - **Unsaved changes** (`dirty`) make the browser ask before the tab is closed or reloaded (`beforeunload`): the browser's own prompt.
  * - **Save is not offered while the budgets load** (`table.loading`): there is nothing to save.
  *
  * **What it leaves to the page:** the data and the save, **and the toasts**. On success show "Changes Saved"; on failure a `critical` toast ("Changes not saved …
- * your changes are still here — try again"), unlock, and **keep what was typed** (`dirty` stays true) so Save can be tried again. What happens to unsaved edits when the quarter or year
- * changes is also the page's: it may ask first, or carry them.
+ * your changes are still here — try again"), unlock, and **keep what was typed** (`dirty` stays true) so Save can be tried again. With unsaved edits, a change of quarter or year,
+ * or a move to another page in the app, is also the page's: it asks first ("Leave without saving?", Keep editing / Leave) and never carries the edits over (decided 10 Nov 2026).
  *
  * **It is controlled and holds no data.** The page owns the rows, the period, `saving` and `dirty`; this puts them in order, 16 apart and 32 in from the sides.
  *
@@ -45,7 +45,7 @@ export interface DomainBudgetEditPageProps extends Omit<React.HTMLAttributes<HTM
   table: Omit<BudgetTableProps, 'disabled'>;
   /** A save is in flight: Save spins, and the table, quarter and year are locked. */
   saving?: boolean;
-  /** There are edits that are not saved: the browser asks before the page is left. */
+  /** There are edits that are not saved: the browser asks before the tab is closed or reloaded. */
   dirty?: boolean;
   /** Save Changes was pressed. The page saves, then toasts the result. */
   onSave: () => void;
@@ -69,7 +69,7 @@ export function DomainBudgetEditPage({
   saveLabel = 'Save Changes',
   ...props
 }: DomainBudgetEditPageProps) {
-  /* Unsaved changes: ask the browser to confirm leaving. The browser's own prompt, so there is no dialog to build or to keep in step. */
+  /* Unsaved changes: ask the browser to confirm closing or reloading the tab. The browser's own prompt; a change of quarter, year or page inside the app is the page's to ask about. */
   React.useEffect(() => {
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();

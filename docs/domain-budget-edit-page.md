@@ -31,7 +31,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|
 | Always | The quarter control (Q1–Q4, `SegmentedControl` `md`) and the year `Select` (`compact`) are **both 36 high**, the dashboard header's size, on the title's row at the right (as the dashboard's filters are), so they sit as one row. Never pair a 36 with a 32. The year takes the lighter `edge="neutral"`, as every filter outside a form does |
 | `saving` | **Save Changes** spins (`aria-busy`), and the table, the quarter and the year are all locked |
-| `dirty` | The browser asks before the page is left (`beforeunload`). The browser's own prompt: there is no dialog to build |
+| `dirty` | The browser asks before the tab is closed or reloaded (`beforeunload`): the browser's own prompt. It does not cover a change of quarter or year, or a move to another page inside the app: those are the page's, below |
 | `table.loading` | The table shows placeholders, and Save is disabled: there is nothing to save |
 
 ## What the page does
@@ -43,7 +43,8 @@ It is **controlled and holds no data**. The page owns the rows, the quarter, the
 | Save Changes pressed | `onSave`: start the save and set `saving` |
 | **Saved** | Clear `dirty`, and show a success `Toast`: "Changes Saved" |
 | **The save fails** | Clear `saving`, **leave `dirty` on and keep what was typed**, and show a `critical` `Toast` ("Changes not saved … your changes are still here — try again"). Save stays available to try again |
-| The quarter or year changes | `onQuarterChange` / `onYearChange`. What happens to unsaved edits is the page's: ask first, or carry them. (The design doesn't say: see the question in the PR) |
+| The quarter or year changes | `onQuarterChange` / `onYearChange`. **With unsaved edits, ask first** (decided 10 Nov 2026; the design doesn't draw it): a `critical` `Modal`, "Leave without saving?", saying whose changes are lost ("Your changes to Q1 2026's budgets aren't saved. If you leave now, they're lost."), with **Keep editing** and **Leave**. Leave drops the edits and switches; Keep editing changes nothing. Never carry edits over to another quarter |
+| Another page in the app is opened | The same dialog. The browser's prompt only fires when the tab closes or reloads, so the app's own navigation has to ask |
 | The budgets load | `table.loading` while they do |
 
 The toasts are the page's because the app owns the toast viewport; the stories show the whole flow with `ToastProvider`.
@@ -74,6 +75,7 @@ The toasts are the page's because the app owns the toast viewport; the stories s
 
 - **Don't pair the quarter control at its default 48 with the year select at 36.** The page draws both at 36, as the dashboard does.
 - **Don't clear the table when a save fails.** Keep what was typed (`dirty` stays on), say so in the toast, and let Save be tried again.
-- **Don't build a leave-page dialog.** Pass `dirty`; the browser asks.
+- **Don't rely on the browser's prompt alone.** Pass `dirty` for a closed or reloaded tab, and ask with the "Leave without saving?" dialog before the quarter, the year or the page changes with unsaved edits.
+- **Don't carry unsaved edits to another quarter.** They belong to the quarter they were typed for.
 - **Don't put Save in the table.** One button for the whole page.
 - **Don't say "cycle" for the period.** A budget is per quarter; a cycle is a planning fortnight.
