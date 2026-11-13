@@ -141,7 +141,7 @@ you move it** (the design opens a dialog first, and the move happens on confirm)
 ## The Actions menu, and moving without dragging
 
 Dragging is pointer-only, so it can't be the only way (WCAG 2.5.7, and anyone on a keyboard, a switch or a screen
-reader). With `onMoveRow`, every movable row has an **Actions** column with a ⋯ button ("Actions for VCP-1234"), as `AVTable`
+reader). With `onMoveRow`, every movable row has an **Actions** column with a ⋯ button ("Actions for VCP-1234") in the neutral palette (`neutral-tertiary`: a row action is not the page's call to action, so no brand blue), as `AVTable`
 and `AnnouncementsTable` have. Its menu has one item, **Move to Cycle**, a **submenu** of the sections that row may go to — the
 same ones a drag allows, each with its dates — never its own. (With `moves="anywhere"` the Backlog is a choice too, and the item says only **Move to**.)
 Choosing one calls `onMoveRow` exactly as a drop does, so a page handles both in one place (and opens the same dialog). The item is drawn without
