@@ -629,7 +629,7 @@ export function PlanningTable({
       return (
         <Menu
           align="right"
-          trigger={<IconButton icon="dots-three" label={`Actions for ${row.ref}`} data-row-actions={row.id} />}
+          trigger={<IconButton variant="neutral-tertiary" icon="dots-three" label={`Actions for ${row.ref}`} data-row-actions={row.id} />}
           items={[
             {
               key: 'move',
