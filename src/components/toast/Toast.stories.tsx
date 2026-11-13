@@ -247,17 +247,16 @@ export const AutoDismissPausesOnHover: Story = {
 };
 
 /**
- * Several at once. Note that the two live regions keep `critical` apart from the
- * rest: errors go to the assertive region, everything else to the polite one,
- * so a confirmation never interrupts and an error never waits its turn. The
- * cost is that a mixed batch is not in strict arrival order on screen.
+ * Several at once, top right, oldest at the top. The two live regions still keep `critical` apart from the
+ * rest for a screen reader: errors go to the assertive region, everything else to the polite one, so a
+ * confirmation never interrupts and an error never waits its turn. On screen they share one stack, in the
+ * order they arrived.
  */
 export const Stacked: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
     <div className="min-h-96 bg-surface-canvas p-8">
       <ToastViewport
-        position="bottom-right"
         toasts={[
           { id: '1', tone: 'info', title: 'Export queued', description: 'Two files.' },
           {
@@ -376,7 +375,7 @@ export const MixedWidthsAlign: Story = {
 export const WithProvider: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <ToastProvider position="bottom-right">
+    <ToastProvider>
       <div className="flex min-h-96 flex-col gap-4 bg-surface-canvas p-8">
         <p className="text-body-sm-regular text-text-secondary">
           The polite and assertive regions are already in the DOM, empty, below this
@@ -660,7 +659,7 @@ export const ShortDurationWithActionIsIgnored: Story = {
 export const ProviderRoutesToLiveRegions: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <ToastProvider position="bottom-right">
+    <ToastProvider>
       <div className="flex min-h-96 flex-col gap-4 bg-surface-canvas p-8">
         <ToastTriggers />
       </div>
@@ -738,7 +737,7 @@ function BlockedSubmitForm() {
 export const BlockedSubmitIsSaidOnce: Story = {
   parameters: { layout: 'fullscreen', controls: { disable: true } },
   render: () => (
-    <ToastProvider position="bottom-right">
+    <ToastProvider>
       <div className="min-h-96 bg-surface-canvas p-8">
         <BlockedSubmitForm />
       </div>
