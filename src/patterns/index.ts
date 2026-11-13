@@ -70,3 +70,7 @@ export * from './dashboard-page';
 export * from './av-list-page';
 export * from './av-page';
 export * from './planning-page';
+export * from './accounts-page';
+export * from './contacts-page';
+export * from './holiday-registry-page';
+export * from './task-log-page';

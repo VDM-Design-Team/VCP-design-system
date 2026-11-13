@@ -27,6 +27,10 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `FilterBar` | The filter row, passed as `filters` (see the `WithFilters` story): search, the period and one **Reset** |
 | `DataTable` | Any other table |
 
+## On a page
+
+The whole Task Log Trail page, title and spacing included, is `TaskLogPage`: use that rather than laying it out again. The filters (a `FilterBar`, through `filters`) and the pagination are already inside the table's card.
+
 ## The columns
 
 | Column | What it is |
