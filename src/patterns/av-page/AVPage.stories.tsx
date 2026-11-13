@@ -121,6 +121,13 @@ export const Reading: Story = {
     await expect(c.getByText('VCP-1234')).toBeVisible();
     /* The left column's order. */
     await expect(inOrder(c, ['Some Title Here', 'Problems', 'Solutions', 'Acceptance', 'Desired outcome', 'Status History', 'Comments'])).toBe(true);
+    /* The Comments title and its sort chip are centred on each other, and Comments sits 32 below the Status History card. */
+    const heading = c.getByRole('heading', { name: 'Comments' });
+    const chip = within(heading.parentElement!).getByRole('button');
+    const mid = (el: Element) => el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2;
+    await expect(Math.abs(mid(heading) - mid(chip))).toBeLessThan(1);
+    const history = c.getByRole('heading', { name: /Status History/ }).closest('section, div[class*="rounded"]')!;
+    await expect(Math.round(heading.closest('section')!.getBoundingClientRect().top - history.getBoundingClientRect().bottom)).toBe(32);
     /* The status buttons are the header's when reading. */
     await userEvent.click(c.getByRole('button', { name: /Move to In progress/i }));
     await expect(args.header.onTransition).toHaveBeenCalled();
