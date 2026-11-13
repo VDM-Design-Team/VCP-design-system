@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { HandoffForm, blankHandoffEntry, isHandoffComplete, type HandoffEntry } from './HandoffForm';
+import { HandoffForm, blankHandoffEntry, handoffHasEvidence, isHandoffComplete, type HandoffEntry } from './HandoffForm';
 
 const meta = {
   title: 'Patterns/HandoffForm',
@@ -113,21 +113,30 @@ export const WithErrors: Story = {
   },
 };
 
-/** The one rule for "can this be handed off" (hidden, tested): a date; when late, a reason; every link typed valid. Links, files and notes are optional. */
+/** The one rule for "can this be handed off" (hidden, tested): a date; when late, a reason; every link typed valid; and something to review, a link or a file. Notes are optional. */
 export const CompleteRule: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
   render: () => <div />,
   play: async () => {
-    const entry = (change: Partial<HandoffEntry> = {}): HandoffEntry => ({ ...blankHandoffEntry('2026-03-02'), ...change });
+    /* A dated entry with one good link, so each line below changes one thing. */
+    const entry = (change: Partial<HandoffEntry> = {}): HandoffEntry => ({ ...blankHandoffEntry('2026-03-02'), links: ['https://a.example'], ...change });
     await expect(isHandoffComplete(false, entry())).toBe(true);
     await expect(isHandoffComplete(false, entry({ date: '' }))).toBe(false);
     await expect(isHandoffComplete(true, entry())).toBe(false);
     await expect(isHandoffComplete(true, entry({ overdueReason: 'resourcing' }))).toBe(true);
     await expect(isHandoffComplete(false, entry({ links: ['not a link'] }))).toBe(false);
     await expect(isHandoffComplete(false, entry({ links: ['', 'https://a.example'] }))).toBe(true);
-    /* Notes and files are optional. */
-    await expect(isHandoffComplete(false, entry({ notes: '', files: [] }))).toBe(true);
+    /* Notes are optional. */
+    await expect(isHandoffComplete(false, entry({ notes: '' }))).toBe(true);
+    /* Something to review: a link, a file just picked, or a file already on the value that was not removed. */
+    const file = new File(['x'], 'recording.pdf', { type: 'application/pdf' });
+    await expect(isHandoffComplete(false, entry({ links: [''] }))).toBe(false);
+    await expect(handoffHasEvidence(entry({ links: [''] }))).toBe(false);
+    await expect(isHandoffComplete(false, entry({ links: [''], files: [file] }))).toBe(true);
+    await expect(isHandoffComplete(false, entry({ links: [''] }), 1)).toBe(true);
+    await expect(isHandoffComplete(false, entry({ links: [''], removed: ['recording.pdf'] }), 1)).toBe(false);
+    await expect(isHandoffComplete(false, entry({ links: [''], removed: ['recording.pdf'], files: [file] }), 1)).toBe(true);
   },
 };
 

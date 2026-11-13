@@ -19,7 +19,7 @@ import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
  * | `action` | Title | What it shows | What `onConfirm` gets |
  * |---|---|---|---|
  * | `urgency`, `type`, `cycle`, `status` | "Change Urgency for 2 Added Values" | "Selected AVs will be updated to:" and the `value` as its own tag | nothing |
- * | `backlog` | "Move 2 Added Values to Backlog" | **Feedback** (optional) | `{ value, overrides }` — a reason, text |
+ * | `backlog` | "Move 2 Added Values to Backlog" | **Feedback**, required | `{ value, overrides }` — a reason, text |
  * | `accept-pending` | "Accept 2 Pending Added Values" | `domain="development"`: **Multipart Value** checkbox; otherwise nothing | `{ value, overrides }` (boolean), or `null` |
  * | `accept` | "Accept 2 Added Values" | `development`: **Require Cypress Test Script**; `design`: **Copy to Dev**; otherwise nothing | `{ value, overrides }` (boolean), or `null` |
  * | `reject-pending`, `reject` | "Reject 2 Pending Added Values" / "Reject 2 Added Values" | **Rejection Reason** (a select of your `reasons`), required; **both rejects are red**: a grey Cancel and a red Confirm (the dialog's `critical` tone) | `{ value, overrides, detail?, overrideDetails? }` — the chosen reason, and the note typed under Other |
@@ -28,6 +28,8 @@ import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
  *   starts as the bulk one and, once changed, **overrides** it. `onConfirm` gets `{ value, overrides }`: the bulk value, and `overrides[ref]` for each Added Value that differs.
  * - **A reason's `explanation` shows under the select once it is chosen; the reason marked `other` shows an optional note field there instead** (Figma's "Specify the rejection reason (optional)").
  * - **A reason is required to reject**: Confirm says so under the field ("Select a rejection reason, or one for each Added Value.") and does not go through until every Added Value has one.
+ * - **Feedback is required to move to the Backlog** (decided 13 Nov 2026, as the live product does, and as `MoveToBacklogModal` asks for one): the bulk feedback covers every Added Value that has none of
+ *   its own, so Confirm goes through once each has one or the other, and says so under the field otherwise ("Enter feedback, or some for each Added Value.").
  * - **It does nothing itself.** `onConfirm` is the page's cue to make the change, then close, and say so (a toast, or `BulkActionFailedModal` for the ones that failed).
  *   Handoff is not here: it is its own multi-step popup.
  * - **The list is collapsed until asked for** (`defaultExpanded`); each line is the reference and the title, cut with "…". **A reference with an `href` is a blue link that opens the Added Value in a new tab**; without one it is plain grey text. Everything resets each time it opens.
@@ -156,7 +158,7 @@ const specFor = (props: BulkActionConfirmModalProps): Spec | null => {
       return {
         kind: 'text',
         label: 'Feedback',
-        placeholder: 'Enter a reason (optional)',
+        placeholder: 'Enter a reason',
         itemPlaceholder: 'Uses bulk reason unless overridden',
       };
     case 'accept-pending':
@@ -195,6 +197,7 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
   const [details, setDetails] = React.useState<Record<string, string>>({});
   const listId = React.useId();
   const bulkRef = React.useRef<HTMLSelectElement>(null);
+  const bulkTextRef = React.useRef<HTMLInputElement>(null);
 
   /* Each time it opens, start again: list collapsed (or as asked), nothing chosen. */
   React.useEffect(() => {
@@ -240,6 +243,12 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
         overrideDetails,
       });
     } else if (props.action === 'backlog') {
+      /* Spaces alone say nothing: every Added Value needs feedback, the bulk one or its own. */
+      if (items.some((item) => String(effective(item.ref)).trim() === '')) {
+        setError('Enter feedback, or some for each Added Value.');
+        bulkTextRef.current?.focus();
+        return;
+      }
       props.onConfirm({
         value: bulk as string,
         overrides: overrides as Record<string, string>,
@@ -322,7 +331,17 @@ export function BulkActionConfirmModal(props: BulkActionConfirmModalProps) {
     <div className="flex flex-col gap-2">
       <Field label={spec.label} helper={HELPER} error={error ?? undefined}>
         {spec.kind === 'text' ? (
-          <Input fullWidth autoComplete="off" placeholder={spec.placeholder} value={bulk as string} onChange={(event) => setBulk(event.target.value)} />
+          <Input
+            ref={bulkTextRef}
+            fullWidth
+            autoComplete="off"
+            placeholder={spec.placeholder}
+            value={bulk as string}
+            onChange={(event) => {
+              setError(null);
+              setBulk(event.target.value);
+            }}
+          />
         ) : (
           <Select
             ref={bulkRef}
