@@ -151,6 +151,8 @@ const toDate = (iso: string) => {
 /** What a busy or unavailable assignee says under their field (Figma's `Assignee Busy Warning`). */
 const BUSY_NOTE = 'This assignee is busy during the selected dates, but can still be assigned.';
 const UNAVAILABLE_NOTE = 'This assignee is not available during the selected dates and cannot be assigned.';
+/* The card only knows availability with both dates or a cycle, so its notice asks for both (the dropdown's own default asks for a start date). */
+const UNKNOWN_NOTE = 'Assignee availability is unknown. Select a start and due date, or a cycle, first to view availability.';
 /** Why the + beside Assignee is disabled on an AV that was initiated to another domain. */
 const INITIATED_NOTE = "Assignees can't be added to an initiated Added Value. Assign them on its domain copy instead.";
 
@@ -815,6 +817,7 @@ function PersonForm({
           fullWidth
           placeholder="Select user"
           availabilityKnown={availabilityKnown}
+          unknownText={UNKNOWN_NOTE}
           people={directory.map((p) => ({ value: p.name, label: p.name, src: p.src, availability: p.availability ?? 'available', until: p.until }))}
           value={name}
           onChange={(v: string) => setName(v)}
