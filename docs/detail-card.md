@@ -62,7 +62,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 **Duplicates** is one grey-edged box per domain the AV was duplicated to, with the domain's name on the left and its
 current status on the right, in the order given. Duplicating to another domain adds another box under it. The domain
-names are the page's data (the same list `DuplicateToOtherDomain` takes: Design (BESA), Development, Content,
+names are the page's data (the same list `InitiateToOtherDomain` takes: Design (BESA), Development, Content,
 Governance, Partners, Quality Assurance), and a status is a spine status or a domain's own step.
 
 **`domain`** trims it: **Design has no Cycle**; Development has every field. A field with no value is

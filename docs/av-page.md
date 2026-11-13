@@ -11,7 +11,7 @@ Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`�
 | `Button` | atom |
 | `Input` | atom |
 | `DescriptionSection` | component |
-| `DuplicateToOtherDomain` | component |
+| `InitiateToOtherDomain` | component |
 | `Field` | component |
 | `StatusHistory` | component |
 | `StatusProgression` | component |
@@ -36,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | | Reading | Editing |
 |---|---|---|
 | **Header** | `AVHeader`: the back arrow and the reference, and the status buttons on the right | `AVHeader` `type="new"`: the back arrow and "Added Value Creation", no status buttons |
-| **Left column** | Title (the reference over the title) · Problems · Solutions · Acceptance Criteria / Deliverables · Desired outcome · Multipart · Status History · **Comments** | A **Title** field · the four blocks · Multipart · Status History · **Duplicate to other Domains** |
+| **Left column** | Title (the reference over the title) · Problems · Solutions · Acceptance Criteria / Deliverables · Desired outcome · Multipart · Status History · **Comments** | A **Title** field · the four blocks · Multipart · **Initiate to other Domains** (no Status History: it is for reading only) |
 | **Right column** | The **Detail card**, then the **Deliverables card** | The **Detail card** |
 | **Bottom** | — | **Discard** (red text), then the status buttons (**Save as Draft**, **Submit**), at the right |
 
@@ -75,9 +75,9 @@ It owns no state. The title, the cards, the comments and the status are the page
 | `header` | `AVHeaderProps` | required | `showStatusActions` is on when reading, off when editing |
 | `title` | `{ reference?, value, onChange?, label?, placeholder?, error? }` | — | Editing with no `onChange` is read-only |
 | `description` | `{ problem?, solution?, deliverable?, 'desired-outcome'? }` | — | Each is `DescriptionSection`'s props without `type` |
-| `multipart` / `history` | `MultipartSectionProps` / `StatusHistoryProps` | — | |
+| `multipart` / `history` | `MultipartSectionProps` / `StatusHistoryProps` | — | `history` is for reading: an editing page never draws it, even if it is passed |
 | `comments` | `CommentSectionProps` | — | Reading only |
-| `duplicate` | `DuplicateToOtherDomainProps` | — | Editing only |
+| `initiate` | `InitiateToOtherDomainProps` | — | Editing only. `disabled` for an Added Value handed off from another domain |
 | `details` | `DetailCardProps` | — | The right column |
 | `deliverables` | `DeliverablesCardProps` | — | Reading only, under the detail card |
 | `actions` | `{ onDiscard?, discardLabel?, progression? }` | — | Editing: Discard and `StatusProgression`'s props, at the bottom right |

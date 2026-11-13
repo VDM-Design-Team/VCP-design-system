@@ -74,6 +74,18 @@ export interface DescriptionSectionProps extends React.HTMLAttributes<HTMLElemen
   children?: React.ReactNode;
 }
 
+/**
+ * The cards as a flat list. A caller can pass them in a Fragment (`<><DescriptionCard … /><DescriptionCard … /></>`), which `React.Children.toArray` leaves as one child: the two cards then
+ * shared one list item, touching, and got neither the section's position nor their own remove label. Fragments are opened, so each card is its own item, 16 apart.
+ */
+const flattenFragments = (nodes: React.ReactNode, prefix = ''): React.ReactNode[] =>
+  React.Children.toArray(nodes).flatMap((node) => {
+    if (React.isValidElement<{ children?: React.ReactNode }>(node) && node.type === React.Fragment) {
+      return flattenFragments(node.props.children, `${prefix}${node.key ?? ''}/`);
+    }
+    return React.isValidElement(node) && prefix ? [React.cloneElement(node, { key: `${prefix}${node.key ?? ''}` })] : [node];
+  });
+
 export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSectionProps>(
   (
     {
@@ -119,7 +131,7 @@ export const DescriptionSection = React.forwardRef<HTMLElement, DescriptionSecti
     const canAttach = attachable && Boolean(onAttach);
     /* Each card gets the section's type and its place in the list, and a name for its remove
        button, unless it says otherwise. */
-    const cards = React.Children.toArray(children).map((card, i) =>
+    const cards = flattenFragments(children).map((card, i) =>
       React.isValidElement<DescriptionCardProps>(card)
         ? React.cloneElement(card, {
             type: card.props.type ?? type,
