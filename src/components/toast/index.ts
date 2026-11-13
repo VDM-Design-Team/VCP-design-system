@@ -1,4 +1,4 @@
-export { Toast, DEFAULT_TOAST_DURATION } from './Toast';
+export { Toast, DEFAULT_TOAST_DURATION, MIN_ACTION_TOAST_DURATION } from './Toast';
 export type { ToastProps, ToastTone } from './Toast';
 export { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 export type {

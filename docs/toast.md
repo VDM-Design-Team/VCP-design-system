@@ -40,7 +40,7 @@ leaves the screen on a timer is a control that some users cannot reach. If the
 message needs a decision, it is a Modal; if it needs an action they can take in
 their own time, it is a Banner. Toast supports an action for the narrow case
 where the action is a *convenience* ("Retry", "Undo") — and a Toast with an
-action never auto-dismisses.
+action does not auto-dismiss, unless it is given the long duration the "Undo" snackbar uses (see *Undo*).
 
 **Never use a Toast *instead of* an error the user must fix.** Errors that block
 a task belong next to the thing that is broken — a `Field` error, or a `Banner`
@@ -90,7 +90,7 @@ this on 5 November 2026, over the rule above. It holds only on these terms:
 | `title` | `ReactNode` | — | The headline. One clause. Left out, `false` or blank, nothing renders for it |
 | `children` | `ReactNode` | — | Supporting detail. Usually unnecessary. Left out, `false` or blank, no description renders and the row is centred |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
-| `actionLabel` | `string` | — | Renders one action; left out or blank, there is no button. **Suppresses auto-dismiss entirely** |
+| `actionLabel` | `string` | — | Renders one action; left out or blank, there is no button. **Suppresses auto-dismiss**, unless `duration` is at least `MIN_ACTION_TOAST_DURATION` (15000) |
 | `onAction` | `() => void` | — | Fired by the action |
 | `onDismiss` | `() => void` | — | Renders the close control, and is what the timer calls |
 | `dismissLabel` | `string` | `Dismiss: <title>` | The accessible name of the X button, which `onDismiss` renders. Falls back to `Dismiss notification` when `title` is not a string |
@@ -119,12 +119,31 @@ an id. `duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to
 shows the toast without reading it out, and is only for a toast that repeats
 a message announced somewhere else (see *Shown, not announced*).
 
+## Undo
+
+The design's undo snackbar (Figma `AV Undo/Redo`: "user deletes a card, the snackbar to undo appears, it goes
+after at least 15 seconds or when dismissed") is a Toast with an action and a long `duration`:
+
+```tsx
+toast({
+  title: 'Problem card deleted',
+  actionLabel: 'Undo',
+  onAction: restoreCard,
+  duration: MIN_ACTION_TOAST_DURATION, // 15000
+});
+```
+
+- The timer bar runs, the toast pauses while the pointer is over it or focus is in it, and the X closes it at once.
+- Do the deletion for real **when the toast goes** (`onDismiss`, which the timer also calls), or do it now and
+  restore on **Undo**; either way the page, not the toast, owns the state.
+- Anything under 15 seconds is ignored and the toast stays until dismissed.
+
 ## The timer bar
 
 The Figma toast draws a **4px bar** along the bottom edge running the
 auto-dismiss countdown (design audit, 3 Sep 2026). It appears whenever the
-toast is actually timed — so never on a toast carrying an action, which does
-not auto-dismiss at all.
+toast is actually timed — so not on a toast carrying an action, unless that toast
+was given `MIN_ACTION_TOAST_DURATION` or more.
 
 It is driven by a CSS transition rather than React state, so it stays smooth
 without a render per frame: pausing freezes it at its current width, and
@@ -223,10 +242,11 @@ user can pause, extend, or dismiss it. All three are satisfied:
   background is a toast that was never really shown.
 - **Extend.** Resuming spends *what was left* rather than restarting, so
   hovering banks time instead of resetting it.
-- **A Toast with an action never auto-dismisses at all**, whatever `duration`
-  says — the component ignores the timer once `actionLabel` is present. Making
-  someone catch a "Retry" button before it leaves is not an accessible control,
-  and no pause behaviour makes it one.
+- **A Toast with an action does not auto-dismiss on a short timer.** The component
+  ignores any `duration` under `MIN_ACTION_TOAST_DURATION` (15 seconds) once
+  `actionLabel` is present. Making someone catch a "Retry" button within six seconds
+  is not an accessible control. At 15 seconds or more, with the pause on hover and
+  focus, the extend, and the dismiss control above, it is: that is the "Undo" above.
 
 **Timing guidance.** `DEFAULT_TOAST_DURATION` is 6000ms. Five seconds is the
 usual floor; this adds a second because VCP toasts tend to carry a sentence
@@ -319,6 +339,7 @@ ever gets a stronger border step, both should move to it.
 | Padding | Tailwind numeric scale | `p-4` (16) |
 | Row alignment | — | `items-start` with a title and a message (the controls sit on the first line, as in Figma); `items-center` with only one, so a one-line toast has the glyph, text, action and X on one midline |
 | Gap, glyph / text / action / close | Tailwind numeric scale | `gap-2` (8), the Banner's |
+| Gap, text to action | Tailwind numeric scale | 16: `gap-2` plus `ml-2` on the action, so the button does not crowd the message |
 | Gap, title to message | — | none |
 | Width | Tailwind container scale | `w-fit max-w-sm` — hugs its content. The viewport packs the stack to its anchored edge (`items-end`, or `items-center` for the centred positions) so mixed widths line up |
 | Glyph and bar colour | `accent.<tone>.outline.border.default` | `text-accent-<tone>-outline-border-default` |
@@ -380,8 +401,9 @@ Dark comes for free: every colour above is a semantic token that
 - **Don't use `alert`/assertive for confirmations.** Interrupting someone to
   tell them a save worked trains them to ignore the one interruption that
   mattered.
-- **Don't auto-dismiss a toast that carries an action.** The component will
-  refuse, and the reason is worth knowing: a control on a timer is not a control.
+- **Don't put a short timer on a toast that carries an action.** The component
+  will ignore it, and the reason is worth knowing: a control on a short timer is
+  not a control. Use `MIN_ACTION_TOAST_DURATION` or more, or none.
 - **Don't move focus to a toast**, and don't make the toast itself focusable.
 - **Don't use `announce: false` on a toast that is the only place its message
   lives.** A screen reader user would never hear it. It is for a toast that

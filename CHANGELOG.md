@@ -1,5 +1,171 @@
 # Changelog
 
+## 1.0.0 — 2026-11-12
+
+### New `AnnouncementsPanel` (pattern): the Announcements tab of Settings (November 2026)
+
+The overview, the list and the dialogs behind it, built to Figma's `Announcements` tab: **New Announcement** opens "Create Announcement", a row's **Edit** opens it filled, **Delete** asks first (`ConfirmDeleteModal`, with the title), and **View Changelog** and **Refresh** ask the page. The page passes the announcements and answers `onCreate`, `onUpdate` and `onDelete`; a callback may return a promise, the dialog closes on success and **stays open if it rejects**.
+
+After a delete, focus goes to the next row's menu button, the previous one if it was the last, or New Announcement when the list is empty. All five callbacks are required (the table always draws its buttons). Controlled, no toasts of its own. Composed of `AnnouncementsOverview`, `AnnouncementsTable`, `AnnouncementModal` and `ConfirmDeleteModal`. **It builds on #269 and #270**, which add those pieces.
+
+### `Button` / `IconButton` / `Field` — `aria-disabled` ignores the keyboard, and Field works with a control's own ids (November 2026)
+
+Found in a code review of the design system and the prototype. Nothing calls them this way today, but the next caller could.
+
+- **`Button` and `IconButton`**: a caller's `aria-disabled` looked disabled and blocked the mouse, but Enter or Space on the focused button still ran `onClick`. It now ignores presses the way `loading` does, keyboard included, and keeps focus. Only `true` or `"true"` counts. `BulkActionHandoffModal`'s arrows, which guard themselves, behave as before.
+- **`Field`**: a control that brought its own `id` kept it, but the label pointed at the id Field generated, so clicking the label did nothing. The label now points at the control's own id (an explicit `htmlFor` still wins). A control that brought its own `aria-describedby` lost Field's helper or error from its description; Field now adds its id after the control's own.
+
+No API change.
+
+### `SettingsPage`: the stories' Admin Panel tab is `TagManagement` (November 2026)
+
+The Admin Panel tab in the `SettingsPage` stories was a "not built yet" placeholder. It is now the real `TagManagement` (the lists with their Add New, rename and delete dialogs, kept in the story's own state), so the admin's Settings shows its Admin Panel as it will look. Stories and docs only; `SettingsPage` itself does not change.
+
+The Announcements tab is the new `AnnouncementsPanel` (see its own change entry), so no tab in the stories is a placeholder any more.
+
+### `DataTable` — select-all speaks for the rows shown, and keeps the rest (November 2026)
+
+Found in a review of the prototype's Added Values list, which pages and filters its rows but keeps one selection. The header checkbox compared counts: with 3 rows selected on page 1, a page of 3 other rows showed as all selected though none of them was, and pressing it cleared every selection. Select-all on page 2 also replaced page 1's selection instead of adding to it.
+
+The header now looks at which of the rows shown are selected: checked when all of them are, partial when some are, clear when none are. Select-all adds the rows shown, or removes them, and never touches rows another page or filter is hiding. No API change: `AVTable` gets it through `DataTable`.
+
+### `DomainBudgetSummary`: the Quarter and Year pickers are 32 again (November 2026)
+
+The pickers in the card's header are the small select (32), like every select in a card, as Figma draws them (Domain Budget, Value Cards and Cycle Performance are all 32). A few days ago they were set to 36 to match the "Go to Current Quarter" button; there is no 32 button, so the row now has the two heights Figma draws: 32 pickers beside the 36 button, centred on one line. The dashboard's header row (title, switch, filters and Export) stays 36.
+
+### New `AVPage` (pattern): an Added Value's page, to read or to edit (November 2026)
+
+The main content of an Added Value's page, built to Figma's `AV Page: Viewing AVs` and `Editing AVs`: the header, then two columns. **Left:** the title, the four description blocks (Problems, Solutions, Acceptance Criteria / Deliverables, Desired outcome), Multipart, Status History, then Comments (reading) or Duplicate to other Domains (editing). **Right:** the detail card, and when reading the deliverables.
+
+The page passes each piece's own props (typed sections) and a section shows only when it is passed, so what differs by status, role or domain is what the page passes. `mode` (`view` or `edit`) picks the title (text, or a **Title** field), whether Comments or Duplicate shows, and where the status buttons are: in the header when reading, and in a bar at the bottom right with **Discard** (red text) when editing. The columns stack on a narrow page. Controlled and holds no state. Composed of `AVHeader`, `DetailCard`, `DeliverablesCard`, `DescriptionSection`, `MultipartSection`, `StatusHistory`, `CommentSection`, `DuplicateToOtherDomain`, `StatusProgression`, `Field`, `Input` and `Button`; nothing existing changes.
+
+Not covered: Undo / Redo, the more-options menu's contents, and the missing-information error flow.
+
+### New `AVListPage` (pattern): My Values, Assigned Values, Drafts, Manage and the Archived Values tabs (November 2026)
+
+The main content of a page that lists Added Values: the title, an optional totals strip (`MyValuesStats`), and `AVTable` with its `FilterBar` inside the table's card. Figma's six list pages are this one layout, and each passes what it has: My Values passes `stats` and `table.actions`, Drafts `table.selectable`, Manage a `filters` with Assignee and Initiator, Assigned and the Archive tabs only a title and the table.
+
+The filters sit in the card (`TableCard`'s rule), not on the canvas above it as Figma draws them. An empty table says why through `TableEmpty` ("No added values yet.", or "No added values match “…”." with a **Reset** that hands focus to the search box). Controlled and holds no data. Composed of `PageTitle`, `MyValuesStats`, `FilterBar`, `AVTable` and `TableEmpty`; nothing existing changes. 
+
+The Archive tabs are titled "Archived Values: Completed", "Archived Values: Rejected" and "Archived Values: Backlogged" and filter by Priority, Tags and Date only (each holds one status, so no Status filter). In the Development domain, Manage and Assigned also pass `FilterBar`'s `cycle`, preselected to the current cycle.
+
+On Drafts and Manage, `bulk` (`BulkActionBar`'s props) adds the bar stuck to the bottom of the table while rows are selected; when the selection empties, focus goes to the table's select-all checkbox, wired by the pattern. The table's own Delete Selected is left out.
+
+### New `DashboardPage` (pattern): the Cycle and Quarter dashboard, from `DashboardHeader` and the cards (November 2026)
+
+The main content of a dashboard, built to Figma's `Main Views: Cycle & Quarter`: the title band with the Cycle / Quarter switch and the filters, then the chosen view's cards in Figma's order. **Cycle:** Cycle Summary, Value Cards, In Case You Missed it, Team Capacity, User Capacity, Sprint Metrics, Cycle Burndown. **Quarter:** Domain Budget, Value Cards, Cycle Performance.
+
+The page passes each card's own props in `cycle` and `quarter` (typed sections), and a card shows only when it is passed, so a role is what the page passes. With one view there is no switch. The global `filters` sit on the title's right in the Cycle view only. It is controlled and holds no data: `view` / `onViewChange` (or `defaultView`) are the only state it owns. Composed of `DashboardHeader`, `DashboardFilters`, `CycleSummary`, `ValueCards`, `InCaseYouMissedIt`, `TeamCapacity`, `UserCapacity`, `SprintMetrics`, `CycleBurndown`, `DomainBudgetSummary` and `CyclePerformance`; nothing existing changes.
+
+Not covered: the Super admin's dashboard (no switch, its own `SuperAdminMetrics`) and Design admin (not designed yet).
+
+### `Button`, `IconButton`, `Menu`, `DetailCardMenu`, `StatusProgression`: `danger` is now `critical-primary`, and menu tones say `critical` (November 2026)
+
+The system's colours and its tones (`Banner`, `Toast`, `StatusTag`, the delete dialogs) already say **critical** (`accent.critical.*`). The variants and tones that said **danger** now say it too, so one idea has one word. Banner and Toast made the same move in October.
+
+The red buttons follow the brand ones: **`critical-primary`** is the red `primary` (filled), **`critical-tertiary`** the red `tertiary` (text or glyph only), and **`critical-tonal`** (`IconButton`) the red `tonal`, the same "the red version of X is `critical-X`" the system already used. There is no `critical-secondary` (a red outline) because Figma does not draw one. A menu row's `tone` is a tone, not a variant, so it says plain `critical`, as `Banner`, `Toast` and `Modal` do.
+
+| Component | Before | After |
+|---|---|---|
+| `Button` `variant` | `danger` | `critical-primary` (filled red) |
+| `Button` `variant` | `danger-tertiary` | `critical-tertiary` (red text, no fill) |
+| `IconButton` `variant` | `danger` | `critical-primary` (filled red) |
+| `IconButton` `variant` | `critical` | `critical-tertiary` (red glyph, no fill) |
+| `StatusProgression` transition `variant` | `danger` | `critical-primary` |
+| `Menu` item `tone` | `danger` | `critical` |
+| `DetailCardMenu`, `UserMenu` rows | `tone: 'danger'` | `tone: 'critical'` |
+
+`IconButton` and `Button` no longer have a bare `critical` variant, so code still passing `variant="critical"` or `variant="danger"` is now a type error, not a button that quietly changes. `critical-tonal` is unchanged.
+
+Migration: in your code, rename `variant="danger"` to `variant="critical-primary"` and `variant="danger-tertiary"` to `variant="critical-tertiary"` (on `Button`, `IconButton` and a `StatusProgression` transition), rename `IconButton variant="critical"` to `critical-tertiary`, and rename `tone: 'danger'` to `tone: 'critical'` on `Menu` items, `DetailCardMenu` and `UserMenu` rows. There is no alias for the old names, and the looks do not change. Nothing else is renamed.
+
+### `Attachments` / `Dropzone` — nothing changes mid-upload, and a short dialog does not scroll (November 2026)
+
+Two gaps found while reviewing the attachments dialog, both in the shared pieces, so every dialog and form that uses them is fixed at once.
+
+- **`Attachments`: `disabled` locks removal too.** It locked only the drop area, so a card's ✕ still worked while an upload was in flight and changed what was staged after it had been sent. While `disabled`, no card has a ✕ (hidden, not greyed: `FileAttachment` has a card with a ✕ and a card without). The cards still open in the viewer. A ✕ that had focus when the upload started hands it to its own card, and the ✕s return when `disabled` ends. No API change: `AddManualModal` (`submitting`) and `AttachmentsModal` (`loading`) get it through the prop they already pass.
+- **`Dropzone`: the 16 drag hit area is not there at rest.** It was always there and only ignored the pointer until a file was dragged, and a box 16 past the zone's edge counts as something to scroll to. A dialog's body ends 4 under its last control, so a dialog with a drop area scrolled by the other 12 although everything fitted, and showed a scrollbar where scrollbars always show. The hit area now exists only while a file is being dragged. Dropping within 16 of the zone works as before.
+
+### New `TagManagement` (pattern): the Admin Panel tab of Settings (November 2026)
+
+The grid of Tag Management lists (Domains, Global Tags, Domain Tags, Roles, Status, Assignee Types, Projects) as `DomainCard`s, and the dialogs behind them: **Add New** opens "Add a new Tag" (or Domain), a row's pencil renames it, a row's bin asks before deleting. Built to Figma's `Tag_Management` and its three states.
+
+The page passes the lists (which ones a person sees is the page's choice) and answers `onAdd`, `onRename`, `onDelete` and `onReorder`, which only ask. A callback may return a promise: the dialog's button spins, the dialog closes on success and **stays open if it rejects**. After a delete, focus goes to the card's Add New. A tag's delete uses the system's `ConfirmDeleteModal` with "Tag"; a domain's is `TagManagementModal`'s own. Composed of `DomainCard`, `TagManagementModal` and `ConfirmDeleteModal`.
+
+On purpose, against Figma: it draws only the domain's delete question, so a tag's is the same confirmation worded for a tag; and the rename dialog (not drawn) is the add form, reused.
+
+**Each list says its own word.** A list's `noun` ("Role", "Status", "Assignee Type", "Project") is what its dialogs say: "Add a new Role", "Role Name", "Rename Role", "Are you sure you want to delete this role?". Left out, a list is a tag list (or a domain list), as before. `TagManagementModal` takes the same `noun`. Figma draws only "Add New Tag" and "Add New Domain", which called a role a tag.
+
+### Every filter uses the lighter edge (November 2026)
+
+The lighter filter edge (`edge="neutral"`, #328 and #336) was only on `FilterBar`, `PlanningFilters`' selects, the Gantt toolbar and the dashboard filters, so a table's own search looked darker than the filters beside it. It now also covers the rest: the search in `UsersTable`, `AccountsTable` and `PlanningFilters`; the three filters in `HolidayTable`; the Quarter and Year selects in `DomainBudgetSummary`; and the filter selects in `CyclePerformance`. Fields in forms and dialogs keep the default edge. The rule is now in `CLAUDE.md` (rule 5) and `docs/filter-bar.md`.
+
+### New `SettingsPage` (pattern): the Settings page's content, for a user or an admin (November 2026)
+
+The title, the tabs and the tab that is showing, built to Figma's Settings pages. The user's and the admin's Settings are one layout with two tab lists, so one piece draws both and `audience` (`user`, `admin`) picks which: **Personal Info · Password · Changelog**, or **Personal Info · Users · Admin Panel · Announcements · Manuals · Password**. `SETTINGS_TABS` exports both.
+
+It is controlled and slot-based: the page passes each tab's body in `panels`, and a tab shows only when it has one, so a page can leave out a tab it has not built. Composed of `PageTitle` and `Tabs`; the bodies (`PersonalInfoForm`, `ChangePasswordForm`, `UsersTable`, `ManualsTable`, `SystemChangelog`) draw their own cards.
+
+On purpose, against Figma: both audiences are titled "Settings" (the admin frame's "Page Title" is a placeholder), and both inset 32 from the sides as `PageTitle` does (Figma has 24 for the user and 32 for the admin).
+
+### `TaskLogTrail` — drawn by `TableCard` (November 2026)
+
+The page's `filters`, the table and the pagination now sit in a `TableCard` and the table inside is `bare`, instead of the pattern drawing its own card. The card is now the one every table shares, so it is roomier: 24 of padding and 24 between the filters, the table and the pagination (the hand-built card had 16).
+
+### `AttachmentsModal` (November 2026)
+
+New **`AttachmentsModal`** (Figma's `Attachment_Modal`): the files already on an Added Value as cards (hover ✕ removes, clicking a card opens its preview over the dialog), a drop area, and **Upload**. The cards, drop area and preview are the shared `Attachments` piece, so a ✕ never drops focus (it goes to the next card's ✕, else the previous one's, else the drop area), a PDF is never drawn as an image, and a refused file never becomes a card.
+
+**Removing a file already attached is staged**: its card goes at once, but nothing is removed until **Upload** (or **Save**, when the only change is a removal); **Cancel** undoes it, with no confirm step. `onUpload({ files, removed })` hands over what was picked and what was removed. It is **not sent twice**: while `loading` Upload spins and the drop area locks, and once it settles without an `error` the picked files and removals are cleared; with an `error` (shown under the drop area) they stay for another try. The footer is `ModalCancel` and `ModalConfirm`.
+
+### Bulk actions in the AV table: `BulkActionBar`, `BulkActionConfirmModal`, `BulkActionFailedModal` (November 2026)
+
+New **`BulkActionBar`** (Figma's `Bulk_Action_Bar_AV_Table`): "4 Selected ✕", a menu each for Status, Urgency, Type and Cycle that opens upward, and Delete; every choice only asks. New **`BulkActionConfirmModal`**: one component for every bulk action. Pass the `action` (`urgency`, `type`, `cycle`, `status`, `backlog`, `accept-pending`, `accept`, `reject-pending`, `reject`) and the selected Added Values, and it draws the title, the field the action collects (Feedback, Multipart Value, Require Cypress Test Script, Copy to Dev, Rejection Reason) or the value it changes to, a collapsible list with a field per Added Value that can override the bulk one, and Cancel / Confirm (both rejects are red: a grey Cancel and a red Confirm). `onConfirm` hands back `{ value, overrides }`. New **`BulkActionFailedModal`**: which Added Values failed and why. The `OnTheTable` story shows select → choose → confirm → toast (or the failure summary) on a real `AVTable`.
+
+`ConfirmDeleteAVModal` takes `avTitles` for deleting several at once (one line each, growing to eight before it scrolls), 
+
+`Menu` gains `heading` (in the library's category style — small bold grey type over a rule, no caret — and it names the menu), `placement` (`top` to prefer opening upward) and **submenus**: an item with `items` shows a right caret and opens its choices beside it (hover, click or ArrowRight; ArrowLeft or Escape closes just the submenu). A submenu follows its parent item when something scrolls or the window resizes, flips left when there is no room on the right and stays on screen; how far above the item it starts is measured, not a constant. The stories fill the Status menu in for development (Figma's list, with submenus on Pending Review and Review) and design (built from the status progression, for design to confirm).
+
+Rejecting takes `reasons: { value, label, explanation?, other? }[]`: the chosen reason's explanation shows under the select, and the reason marked `other` shows an optional note instead (`onConfirm` adds `detail` / `overrideDetails`). A select-all checkbox (Multipart Value, Cypress, Copy to Dev) now reads the Added Values' own: all, none, or **indeterminate**. An Added Value's `href` makes its reference a blue link that opens in a new tab (no `href`, no blue); the lists have more space between items; the menus sit above tooltips; the bar clips its scrollbar.
+
+New **`BulkActionHandoffModal`** (Figma's `Bulk_Action_Handoff_Popup`): one page per Added Value, each the shared **`HandoffForm`**, overdue variant, Publish for Development, Handoff disabled until every Added Value is complete, and the pager pinned beside the buttons, stepping with `PaginationDots` between two `IconButton` arrows that keep focus at the ends. The popup is the system's `lg` (640).
+
+`Menu` also gains `searchable` (Figma's `_Menu_Item_Search`): a search box over the items, which the bar's Cycle menu uses.
+
+Not built yet: the Status flows beyond those above (design to confirm).
+
+**Review fixes (6 Nov).** `Button` gains a text variant, **`neutral-tertiary`** (`neutral.textual`, for a toolbar's actions), and the bar's Delete is the existing **`critical-tertiary`** (red text), so the bar sets no colours itself. `BulkActionBar` takes **`returnFocusRef`** (the table's select-all checkbox): when the selection empties and the bar goes with it, after a confirmed Delete or the chip, focus goes there instead of falling to the page. `BulkActionConfirmModal`: the footer is `ModalCancel` and `ModalConfirm`, `confirming` is now `loading` (and nothing closes the dialog mid-save), a status is a `StatusTag`, and a checkbox's name is no longer an `aria-label` on a plain span.
+
+**One handoff form** (design's decision on the review): new pattern **`HandoffForm`** (the Handoff Date, Demo Links, Attachments and, when late, the banner, Overdue Reason and Notes) is drawn by both `HandoffAVModal` and `BulkActionHandoffModal`, with one rule, `isHandoffComplete`: a **date is required** and chosen from the calendar, a late value must say why, links, files and notes are optional, and a link that is typed must be a valid `https://` address. **`HandoffAVModal` changes to match** (it is the one dialog here that already existed on main): the date is a `DateField` calendar and required, links are checked, files already on the value are real cards (a PDF is a document, not an image) that preview and can be removed, picked files show as cards, `defaultDate` is ISO, `HandoffDraft` gains `removedAttachments`, and the footer is `ModalCancel` and `ModalConfirm`. Both use the shared **`Attachments`** piece, so a removed file's ✕, a removed link and the pager arrows never drop focus. `IconButton` gains `neutral-tertiary`, as `Button` did.
+
+Migration: `HandoffAVModal`'s `defaultDate` is now an ISO date (`"2026-03-02"`); it was free text (`"02-03-2026"`). Pass ISO, or leave it out. A handoff date is now required and picked from the calendar, so **Handoff** stays disabled until one is chosen. `BulkActionFailedModal`'s **Got it** is the dialog's `ModalConfirm` (40 high), as every dialog's footer.
+
+### `TaskLogTrail` — the Task Log Trail page's list (November 2026)
+
+New pattern **`TaskLogTrail`**, built to Figma's `Task_Log_Trail`: ID, Task (**shown in full**: at least 40 characters wide, it wraps and nothing cuts it), Change ("In Progress → Design Review (Status)": **the new value is the coloured one** (a `StatusTag`, the owner of the status mapping) and **the old value is a quiet grey tag**, as `StatusHistory` draws it, with **Initial Creation** and **Handoff** standing in on the grey side when there was no value; the field in brackets is **Status, Workflow, Assignee, Start Date or Due Date**), Source (`SourceTag`, VCP only: the text inside it is the only thing that changes), Changed At and Changed By, with pagination; controlled, with loading and empty states. The filters above it are the system's **`FilterBar`** (search, the period, one **Reset**) with a select among its fields, labelled **Change**, for which field changed; there is no Source filter.
+
+`DateField` now treats an empty string as no date, as `undefined` is: opening the calendar on an empty field used to throw.
+
+**Changed At** takes an ISO date and time and shows it as "10/06/2026 14:37" (dd/mm/yyyy, or the person's locale's order, then 24-hour) through the system's one date-and-time formatter (`useDateFormat().dateTime`), in a `<time>`.
+
+An empty trail is the system's `TableEmpty`: **No changes yet.**, or with `filtered`, **No changes match these filters.** with the hint. It has no Reset of its own, because the `FilterBar` above it carries the page's one.
+
+### `AnnouncementModal` — create or edit an announcement (November 2026)
+
+New pattern, built to Figma's "Create Announcement" dialog: Title and Version (required), Description, Changelog Document URL, Announcement Type (the three kinds, from `CHANGELOG_KINDS`, as `kind`) and a Features list (add a line, remove a line with the minus-circle, blank lines dropped). `mode="edit"` titles it "Edit Announcement" with **Save**. It keeps its own draft and hands it to `onSubmit`; a missing Title, Version or Type, a non-semantic version and a non-`http(s)` URL are said under the field (Figma draws none; the words are ours), and `errors` carries server messages. Removing a feature line moves focus on.
+
+Its draft is an `Announcement`'s fields (`lib/announcement`); Version is read-only when editing, is handed over as "v1.18.1" whether or not the "v" was typed, and the "Latest version" hint stays visible beside a version error. The footer is `ModalCancel` and `ModalConfirm`.
+
+### Announcements tab: `AnnouncementsTable`, `AnnouncementsOverview`, `MetricTile` (November 2026)
+
+New **`MetricTile`** (a number with its name and a tinted icon tile — the quiet settings tile, not a dashboard `StatCard`), new **`AnnouncementsOverview`** (the title card and three facts: total, latest version, last updated), and new **`AnnouncementsTable`**: New Announcement, View Changelog and Refresh above, and Version / Title / Type / Date / Features with an Edit and Delete menu on every row. Controlled: every button only asks. "New Announcements" in Figma is **New Announcement**. Figma's purple Last Updated tile has no token; by design's decision it is an existing colour, `brand`, and no new token is added.
+
+**One record** (`Announcement`, `lib/announcement`): a row is its `id`, `title`, `version`, `kind`, `date` and `features`, and the overview takes its `version` and `date`, so a page hands the same object to the table, the dialog and the changelog. **Type** is a tag whose word (Experimental, Update, Feature) and tone come from the one owner of the kinds, `lib/changelog-kinds`; the table maps nothing itself. **Version** is plain text ("v1.18.1"), so a Feature row no longer has two identical blue tags. **Dates** are ISO, shown dd/mm/yyyy or the person's locale (`useDateFormat`) in a `<time>`, in the table and in Last Updated.
+
+**Refresh** (`refreshing`) shows its loading state and keeps the rows on screen: a reload is not a first load, so no placeholders replace the list (`loading` stays for the first load). **After a delete the page moves focus on** (the row's menu button goes with the row): the next row's menu, else the previous one's, else New Announcement; the `OnThePage` story and the doc's "Focus after a delete" say so. **`MetricTile` is an atom** (it composes only `Icon`), so it moved to `src/atoms/` (it is new in this PR, so nothing imports the old path).
+
+With no rows it says **No announcements yet.** through `TableEmpty`, the one empty-table look.
+
 ## 0.4.0 — 2026-11-12
 
 ### `DomainBudgetSummary`: a too-narrow card no longer widens the page (November 2026)
