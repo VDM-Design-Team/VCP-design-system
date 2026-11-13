@@ -13,7 +13,7 @@ export interface ToastOptions {
   /** Supporting detail. Named `description` here because `children` has no meaning in an options object. */
   description?: React.ReactNode;
   toneLabel?: string;
-  /** Adding an action switches auto-dismiss off — see `Toast`. */
+  /** Adding an action switches auto-dismiss off, unless `duration` is at least `MIN_ACTION_TOAST_DURATION` — see `Toast`. */
   actionLabel?: string;
   onAction?: () => void;
   dismissLabel?: string;
