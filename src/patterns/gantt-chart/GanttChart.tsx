@@ -308,7 +308,7 @@ function buildRows(
 const MINIMISED_SPAN = 1;
 
 const barShell =
-  'flex h-9 w-full min-w-0 items-center gap-2.5 rounded-md px-3 text-left font-sans text-caption-md-medium outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused';
+  'flex w-full min-w-0 items-center gap-2.5 rounded-md px-3 text-left font-sans text-caption-md-medium outline-offset-2 focus-visible:outline-2 focus-visible:outline-stroke-focused';
 
 const pointsPill =
   'shrink-0 rounded-pill bg-surface-elevated px-2 py-0.5 font-sans text-caption-md-semibold text-text-primary';
@@ -337,7 +337,7 @@ function TaskBar({
     ...(task.initiator ? [{ label: 'Initiator', value: task.initiator }] : []),
     { label: 'Est. Due Date', value: formatDate(task.end) },
   ];
-  const className = cn(barShell, STATUS[task.status].bar, minimised && 'justify-center px-1');
+  const className = cn(barShell, 'h-9', STATUS[task.status].bar, minimised && 'justify-center px-1');
   const content = (
     <>
       {!minimised && project && (
@@ -759,7 +759,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               <div className="relative grid auto-rows-min gap-y-1 py-0.5" style={{ gridTemplateColumns: gridColumns }}>
                 {summary && (
                   <div
-                    className={cn(barShell, STATUS.planned.bar, 'hover:bg-surface-brand-strong')}
+                    className={cn(barShell, 'h-10', STATUS.planned.bar, 'hover:bg-surface-brand-strong')}
                     style={{ gridColumn: `${summary.from + 1} / span ${summary.to - summary.from + 1}`, gridRow: 1 }}
                   >
                     {summary.to !== summary.from && (
@@ -834,7 +834,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {/* The filter bar's own Reset: the same ghost, brand-coloured button. */}
-            <Button variant="tertiary" disabled={loading} onClick={reset}>
+            <Button variant="tertiary" size="sm" disabled={loading} onClick={reset}>
               Reset Filters
             </Button>
             <SearchSelect
@@ -842,7 +842,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               multiple
               aria-label="Projects"
               disabled={loading}
-              className="w-52"
+              className="w-50.5"
               placeholder="Select Projects"
               options={projects.map((p) => ({ value: p.id, label: p.name }))}
               value={projectIds}
@@ -853,7 +853,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               multiple
               aria-label="Users"
               disabled={loading}
-              className="w-52"
+              className="w-43.5 min-w-0"
               rows="avatar"
               placeholder="Select Users"
               options={users.map((u) => ({ value: u.id, label: u.name }))}
@@ -866,7 +866,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               options={VIEW_OPTIONS}
               value={view}
               onChange={(v) => onViewChange(v as GanttView)}
-              className="w-40"
+              className="w-43.5"
             />
             <Button variant="secondary" size="sm" disabled={loading} onClick={goToday}>
               Today
@@ -880,7 +880,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             <div
               key={i}
               className={cn(
-                'flex h-9 items-center justify-center border border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
+                'flex h-10.25 items-center justify-center border border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
                 i === 0 && 'rounded-t-md',
               )}
             >
@@ -889,7 +889,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           ))}
           <div
             className={cn(
-              'relative flex h-9 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
+              'relative flex h-10.25 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
               period.heading.length === 0 && 'rounded-t-md',
             )}
           >
@@ -913,7 +913,11 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                     <div
                       key={`${g.label}-${i}`}
                       style={{ width: g.span * CELL }}
-                      className="flex h-11 items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary"
+                      className={cn(
+                        /* Figma: 41 over the days, 64 over the cycles (the months in a year). */
+                        'flex items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
+                        view === 'year' ? 'h-16' : 'h-10.25',
+                      )}
                     >
                       {g.label}
                     </div>
