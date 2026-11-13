@@ -108,7 +108,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Tokens
 
-Nothing of its own: the title is `type.body-md-regular` in `text.tertiary` and the rows are 16
+Nothing of its own: the title is `type.title-sm-semibold` in `text.primary`, like the other section titles (Figma draws it regular and quiet, `body-md-regular` in `text.tertiary`: a question for the design lead), centred on the sort chip, and the rows are 16
 apart, as the frame. Every part is a piece of the system.
 
 ## Accessibility
