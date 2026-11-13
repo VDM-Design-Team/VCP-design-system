@@ -34,6 +34,8 @@ moves it down a tier, per CLAUDE.md's composition rule.
 `variant` is `textual` (the default: the glyph and word alone), `tonal` (a pale fill in the glyph's hue family), `faint` (Figma's "Faint Fill": a white fill with a light grey edge, `stroke.default`, lighter than the neutral outline border because a tag is not a control; the Detail card uses it) or `outline` (a bordered pill, same hue): the Type_Tag set's four styles. The label stays neutral on a fill or a border; the glyph carries the colour. `size` takes `Tag`'s.
 `info` adds the ⓘ the design draws after the word on the filled and bordered looks; it is decorative, and the page provides the explanation.
 
+**The ⓘ is one step below the tag's glyph, and never below 16: 16 in the default 28 tag (beside its 20 glyph), 20 in the 32 (beside its 24), 16 in the smaller two. A deliberate exception to Figma, which draws it 20×20 in both its sizes.** Why: ⓘ is 16 everywhere else in the system (`InfoHint`, and the column hints in a table header), so the same glyph read two sizes depending on where it sat; at 20 it took a lot of the tag's width and weight for something decorative (the tag's tooltip carries the meaning); and it did not follow the tag's size like the leading caret does, so in a small tag (caret 16) the ⓘ was the larger of the two. In the default 28 tag the caret stays 20 beside the 16 ⓘ, and the largest tag steps the same way (24 and 20). If the design wants 20 back, it is the `INFO_SIZE` table in `TypeTag.tsx`.
+
 ## Props
 
 | Prop | Type | Default | Notes |
