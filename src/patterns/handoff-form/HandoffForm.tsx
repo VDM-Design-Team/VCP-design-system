@@ -18,7 +18,8 @@ import { Field } from '../../components/field';
  * `Handoff_AV_Modal` (`5342:78539`) and `Bulk_Action_Handoff_Popup`.
  *
  * - **A date is required**, chosen from the calendar (`DateField`); **a late value must say why** (`overdueDays` is what switches the overdue variant on: the warning banner, the required reason and the notes).
- *   **Links, files and notes are optional.** A link that is typed must be a valid `https://` address; one left empty is simply dropped.
+ *   **A handoff needs something to review: at least one demo link or one attachment** (decided 13 Nov 2026; the live product asks for a link, this accepts a file too, so work without a URL can be handed off).
+ *   A file already on the value counts while it is not removed. Notes are optional. A link that is typed must be a valid `https://` address; one left empty is simply dropped.
  * - **It keeps its own entry** and reports it as it changes (`onChange`), so a page that steps between several keeps every one it has mounted. `isHandoffComplete` is the one rule for "can this be handed off".
  *   Whether to wait (a disabled Handoff) or to ask on submit (`errors`) is the dialog's.
  * - **Attachments are the shared piece** (`Attachments`): the files already on the value and the ones just picked, each removable (a removal here is staged: it comes back in `removed` and the page applies it with the handoff), previewable on click, and a ✕ never drops focus.
@@ -69,8 +70,21 @@ export const blankHandoffEntry = (defaultDate = ''): HandoffEntry => ({ date: de
 /** A link may be left empty, but one that is typed must be a valid `https://` address. */
 export const handoffLinksValid = (entry: Pick<HandoffEntry, 'links'>) => entry.links.every((link) => link.trim() === '' || isValidLinkUrl(link));
 
-/** The one rule for "can this be handed off": a date, and (when late) why, and every link typed valid. Links, files and notes are optional. */
-export const isHandoffComplete = (overdue: boolean, entry: HandoffEntry) => entry.date !== '' && (!overdue || entry.overdueReason !== '') && handoffLinksValid(entry);
+/**
+ * Something to review: at least one demo link (a valid address) or one attachment. `attached` is how many files are already on the Added Value; the ones removed here no longer count, the ones just picked do.
+ */
+export const handoffHasEvidence = (entry: Pick<HandoffEntry, 'links' | 'files' | 'removed'>, attached = 0) =>
+  entry.links.some((link) => link.trim() !== '' && isValidLinkUrl(link)) || attached - entry.removed.length + entry.files.length > 0;
+
+/** What the form says when a handoff has neither a link nor a file. */
+export const HANDOFF_EVIDENCE_ERROR = 'Add a demo link or attach a file.';
+
+/**
+ * The one rule for "can this be handed off": a date, and (when late) why, every link typed valid, and something to review (`handoffHasEvidence`). Notes are optional.
+ * `attached` is how many files are already on the Added Value (the form's `attachments`).
+ */
+export const isHandoffComplete = (overdue: boolean, entry: HandoffEntry, attached = 0) =>
+  entry.date !== '' && (!overdue || entry.overdueReason !== '') && handoffLinksValid(entry) && handoffHasEvidence(entry, attached);
 
 export interface HandoffFormProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'children'> {
   /** How many days late it is. Given, the form is the overdue variant: the banner, the required reason and the notes. */
@@ -81,8 +95,11 @@ export interface HandoffFormProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   defaultDate?: string;
   /** The entry, whenever it changes. */
   onChange?: (entry: HandoffEntry) => void;
-  /** What to say under a field, for a dialog that asks on submit. Focus goes to the first that has one. `links: true` shows every link that is not a valid address and focuses the first. */
-  errors?: { date?: string; overdueReason?: string; links?: boolean };
+  /**
+   * What to say under a field, for a dialog that asks on submit. Focus goes to the first that has one. `links: true` shows every link that is not a valid address and focuses the first.
+   * `evidence` is the message for a handoff with neither a link nor a file (`HANDOFF_EVIDENCE_ERROR`): it shows under Demo Links and focus goes to the first link box.
+   */
+  errors?: { date?: string; overdueReason?: string; links?: boolean; evidence?: string };
 }
 
 export const HandoffForm = React.forwardRef<HTMLDivElement, HandoffFormProps>(function HandoffForm(
@@ -117,9 +134,9 @@ export const HandoffForm = React.forwardRef<HTMLDivElement, HandoffFormProps>(fu
     else if (errors?.links) {
       setTouched(Object.fromEntries(links.map((_, i) => [i, true])));
       linkRefs.current[links.findIndex((link) => link.trim() !== '' && !isValidLinkUrl(link))]?.focus();
-    }
+    } else if (errors?.evidence) linkRefs.current[0]?.focus();
     /* Only when the errors change: typing must not pull focus back. */
-  }, [errors?.date, errors?.overdueReason, errors?.links]); // eslint-disable-line
+  }, [errors?.date, errors?.overdueReason, errors?.links, errors?.evidence]); // eslint-disable-line
   const focusLink = React.useRef<number | null>(null);
   React.useEffect(() => {
     if (focusLink.current === null) return;
@@ -165,7 +182,8 @@ export const HandoffForm = React.forwardRef<HTMLDivElement, HandoffFormProps>(fu
         </>
       )}
 
-      <Field label="Demo Links">
+      {/* The rule is said before it is broken (a dialog that waits shows no error at all), and turns into the error for one that asks on submit. */}
+      <Field label="Demo Links" helper="A handoff needs at least one demo link or one attachment." error={errors?.evidence}>
         {/* Repeatable, so the label names the group and each row names its own position: "Demo link 2", not three identical boxes. */}
         <div className="flex flex-col items-start gap-2">
           {links.map((link, index) => {
