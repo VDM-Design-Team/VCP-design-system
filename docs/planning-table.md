@@ -90,8 +90,6 @@ Capacity Remaining in points, in the design's blue — `action.tertiary.content`
 the heading, the caret only its hinge. It is a real button inside the heading (`aria-expanded`,
 `aria-controls`); a folded section shows only its header.
 
-The table inside each card is inset 24 from the card's edges and has no outline of its own (`DataTable`'s `bare`), as in every `TableCard`: the card draws the box, the table keeps its rounded corners and header band.
-
 ## Filters: the one exception to `TableCard`
 
 Every other table draws one card with its filters above the table (`TableCard`, see `docs/table-card.md`). **`PlanningTable` is the exception, on purpose:** it is several tables, one card per section (Cycle, Backlog…), each with its own header, so there is no single card for the filters to sit in. The page's filter row goes **above all the sections**, outside every card, and filters what each of them shows. Don't copy the filters into each section, and don't wrap the sections in a `TableCard`: that would put a card inside a card.
@@ -144,8 +142,8 @@ Dragging is pointer-only, so it can't be the only way (WCAG 2.5.7, and anyone on
 reader). With `onMoveRow`, every movable row has an **Actions** column with a ⋯ button ("Actions for VCP-1234") in the neutral palette (`neutral-tertiary`: a row action is not the page's call to action, so no brand blue), as `AVTable`
 and `AnnouncementsTable` have. Its menu has one item, **Move to Cycle**, a **submenu** of the sections that row may go to — the
 same ones a drag allows, each with its dates — never its own. (With `moves="anywhere"` the Backlog is a choice too, and the item says only **Move to**.)
-Choosing one calls `onMoveRow` exactly as a drop does, so a page handles both in one place (and opens the same dialog). The item is drawn without
-a caret, as the design has it (`Menu`'s `caret: false`); it is still announced as a submenu. A row that can't move has no button; a section where **no** row can move (a Cycle, in the default `to-cycle` mode where only Backlog rows move) has no Actions column at all, not a column of empty cells; and without `onMoveRow` there is none anywhere.
+Choosing one calls `onMoveRow` exactly as a drop does, so a page handles both in one place (and opens the same dialog). The item shows the
+right caret every submenu item has. A row that can't move has no button; a section where **no** row can move (a Cycle, in the default `to-cycle` mode where only Backlog rows move) has no Actions column at all, not a column of empty cells; and without `onMoveRow` there is none anywhere.
 
 **Focus follows the row.** The button leaves with the row, so when the row next shows up in another section — at once,
 or after the caller's dialog is confirmed — focus goes to its button there. If it stays (the dialog was cancelled),
