@@ -25,6 +25,12 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `DataTable` | Any other table |
 | `ConfirmDeleteModal` | What the delete button should open |
 
+## On a page
+
+The Contact List page is `PageTitle` (the page's one `h1`; Figma's frame says the placeholder "Page Title", write "Contact List") and then this table, in a column **16 apart and 32 in from the sides** (`px-8 pb-8`), as `AVListPage` lays it out. It goes inside `AppShell`. The pagination is already inside the table's card. **Add Account** in Figma's top bar is `TopBar`'s `primaryAction`, the page's to pass. There is no page pattern for it: it would only be these two pieces.
+
+**Figma draws this table with no card around it** (the rows sit straight on the canvas), where `AccountsTable` is in one. The system keeps the card on purpose, so every table reads the same (decided 12 Nov 2026).
+
 ## The columns
 
 | Column | What it is |

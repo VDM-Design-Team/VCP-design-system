@@ -69,3 +69,4 @@ export * from './announcements-panel';
 export * from './dashboard-page';
 export * from './av-list-page';
 export * from './av-page';
+export * from './planning-page';
