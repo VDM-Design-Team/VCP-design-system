@@ -1,6 +1,6 @@
 # TagManagement *(pattern)*
 
-The Admin Panel tab of Settings: the lists an admin keeps (Domains, Global Tags, Domain Tags, Roles, Status, Assignee Types, Projects) as a grid of
+The Admin Panel tab of Settings (and, for the Super Admin, the content of the Domain page: see `DomainPage`): the lists an admin keeps (Domains, Global Tags, Domain Tags, Roles, Status, Assignee Types, Projects) as a grid of
 cards, and the dialogs behind them. Built to Figma's `Tag_Management` (`921:126353`, Pages & Flows) and its three states: Add New Tag, Add New Domain
 and Delete Domain.
 

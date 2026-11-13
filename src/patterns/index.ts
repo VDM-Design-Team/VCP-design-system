@@ -64,6 +64,7 @@ export * from './multipart-section';
 export * from './user-account-modal';
 export * from './users-table';
 export * from './tag-management';
+export * from './domain-page';
 export * from './settings-page';
 export * from './announcements-panel';
 export * from './dashboard-page';
