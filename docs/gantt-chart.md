@@ -160,6 +160,8 @@ and carets) and `text.brand.strong` (the Planned figure and the Today heading, w
 the stronger tone to keep 4.5:1 on the dark theme's cards). Column and name-column
 widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
 
+**Sizes, read off Figma's Cycle, Month and Year frames (13 Nov 2026).** The year, month and cycle heading rows are **41** high (the 40 of the scale plus the 1px line; `h-10.25`); the row of days is 64, and in the **Year** view the months over the cycles are 64 too. A person's **summary bar** (the closed row) is **40** high and a **task bar** is **36**. The filters are 40 high: Projects 202 wide, Users and the view 174 (`w-50.5`, `w-43.5`), and Reset Filters is a small button.
+
 **A long name says the whole of it.** A user's name in the row's expand button is cut with "…" when it does not fit ("John Mason S…") and, when it has been cut, says the whole name on hover and focus (the system tooltip, via `TruncatedText`'s `useIsTruncated`). **Points read "1 pt", "5 pts"** — never "1 pts".
 
 ## Accessibility

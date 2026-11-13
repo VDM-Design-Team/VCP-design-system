@@ -259,11 +259,31 @@ export const Cycle: Story = {
 /** October 2026, by the day, with each day's cycle named above it. */
 export const Month: Story = {
   render: () => <Demo initialView="month" />,
+  /* Figma's sizes: the year, month and cycle rows are 41 and the days 64; a person's summary bar is 40 and a task's 36. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (el: HTMLElement | null) => Math.round(el?.getBoundingClientRect().height ?? 0);
+    await expect(height(await c.findByText('2026'))).toBe(41);
+    await expect(height(c.getByText('October').closest('.h-10\\.25') as HTMLElement | null)).toBe(41);
+    await expect(height(c.getByText('Cycle 42'))).toBe(41);
+    await expect(height(c.getAllByText('1')[0].closest('.h-16') as HTMLElement | null)).toBe(64);
+    const shown = (els: HTMLElement[]) => els.find((el) => el.getBoundingClientRect().height > 0) ?? null;
+    await expect(height(shown(c.getAllByText(/Added Values/))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(40);
+    await expect(height(shown(c.getAllByText('Invoice export'))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(36);
+  },
 };
 
 /** 2026 by the cycle, with the months spanning them. Tasks inside one cycle keep only their points. */
 export const Year: Story = {
   render: () => <Demo initialView="year" />,
+  /* Figma's sizes: the year row is 41, then the months row and the cycles row are each 64. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (el: HTMLElement | null) => Math.round(el?.getBoundingClientRect().height ?? 0);
+    await expect(height((await c.findByText('2026')).closest('.h-10\\.25') as HTMLElement | null)).toBe(41);
+    await expect(height(c.getByText('January'))).toBe(64);
+    await expect(height(c.getByText('C23').closest('.h-16') as HTMLElement | null)).toBe(64);
+  },
 };
 
 /** Two projects selected: the chart groups by project, then person, and each person shows only that project's tasks. */
