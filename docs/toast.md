@@ -164,6 +164,21 @@ title cannot carry it. No "!" and no "successfully": the glyph already says it w
 **A message said once is not a recipe.** If it appears in a second place, add it here
 with the table row; until then it is a plain `toast({ tone, title })` in its page.
 
+## Writing toast copy
+
+For anyone, or any AI run, writing a toast message. Follow this, and use a recipe whenever one fits.
+
+1. **Use a recipe first.** If the message is in the table above, call it: `toast(changesSaved())`. Do not retype its wording. If the same message is needed in a second place, add a recipe (and its row) rather than copying it.
+2. **Pick the tone from what happened:** `critical` something was stopped or failed, `success` something was done, `warning` the user can carry on but should know, `info` neutral news, or a deletion they can still undo. Never pick a tone for its colour.
+3. **The title says what happened**, in sentence case, in a few words: "Changes saved", "Draft discarded", "Assignee unavailable". The past tense for what was done, the noun first for what is blocked. No full stop, no "!" and no "successfully": the glyph already says it worked.
+4. **Add a message only when the title cannot carry it**, and then only for the one detail the user needs: which thing, how many, what to do next. One or two short sentences, with a full stop. A message that restates the title ("Changes saved" / "Your changes were saved") is noise: leave it out.
+5. **Name the thing, not the system.** "Status changed to Backlog for 2 Added Values.", not "The operation completed." Say Added Value, not "AV" or "item", as the rest of the product does.
+6. **Tell them what to do when something is blocked.** "Please select at least one Initiator before submitting." names the field and the way out. Do not blame: "can’t be empty", not "you forgot".
+7. **No technical wording.** No error codes, no "failed to", no "an error occurred". Say what the user could not do, and, if there is one, what to do next.
+8. **An action is a convenience, and says a verb.** "Undo", "Retry". One action only, and never the only way to do it (see *Undo*). With an action, the `duration` is `MIN_ACTION_TOAST_DURATION` or more.
+9. **A blocked Submit repeats an error that stays**, so it is `announce: false` and always has the matching field error beside the field. Anywhere else a toast is never the only place a message lives.
+10. **One thing per toast.** Do not stack five for one action (a blocked Submit is the one exception).
+
 ## Behaviour
 
 How the stack acts is the system's, not each page's.
