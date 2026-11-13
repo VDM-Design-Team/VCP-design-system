@@ -8,3 +8,7 @@ The "Move … to…" column (an up-down arrows button, the glyph the sort uses) 
 ### `Menu` — a submenu item can leave out its caret (November 2026)
 
 New `caret: false` on a menu item that has `items` leaves out its right caret. The item is still `aria-haspopup="menu"` and opens the same way, so it is announced as a submenu; only the glyph goes. Nothing changes unless it is set. `PlanningTable`'s Move to Cycle uses it.
+
+### `AnnouncementsTable` — the Actions button is in the neutral palette (November 2026)
+
+The ⋯ button that opens a row's menu (Edit, Delete) is now `neutral-tertiary` instead of the default tertiary, so it matches `PlanningTable`'s Actions button: a row menu is not a call to action, so it takes no brand colour. Nothing else changes; the button's name ("Actions for …") and the menu are the same.
