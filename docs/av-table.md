@@ -19,6 +19,7 @@ page, audit batch 5, 11 September 2026.
 | `Divider` | atom |
 | `Icon` | sub-atomic |
 | `Tag` | atom |
+| `Tooltip` | atom |
 | `TypeTag` | atom |
 | `UrgencyTag` | atom |
 | `AvatarGroup` | component |
