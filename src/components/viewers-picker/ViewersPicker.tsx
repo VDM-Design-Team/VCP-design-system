@@ -162,7 +162,7 @@ export function ViewersPicker({ viewers, candidates = [], onAdd, onRemove, class
                       setQuery('');
                       backToSearch();
                     }}
-                    className="flex w-full items-center gap-2 rounded-sm px-1 py-1 text-left hover:bg-surface-neutral-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+                    className="flex w-full items-center gap-2 rounded-sm px-1 py-1 text-left hover:bg-surface-brand-faint active:bg-surface-brand-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
                   >
                     <Person person={person} />
                     <span className="sr-only">: add as a viewer</span>
@@ -179,7 +179,7 @@ export function ViewersPicker({ viewers, candidates = [], onAdd, onRemove, class
               <p className="text-label-sm-semibold text-text-secondary">{countText(viewers.length)}</p>
               <ul className="flex flex-col gap-1">
                 {viewers.map((person) => (
-                  <li key={person.id} className="group/row flex items-center gap-2 rounded-sm px-1 py-1 hover:bg-surface-neutral-faint">
+                  <li key={person.id} className="group/row flex items-center gap-2 rounded-sm px-1 py-1">
                     <Person person={person} />
                     {onRemove && (
                       <RemoveButton

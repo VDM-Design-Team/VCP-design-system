@@ -49,7 +49,7 @@ It holds no data. The page passes `viewers` and `candidates` and changes them in
 
 ## Tokens
 
-The pill is the neutral outline control (`neutral.outline.*`, the same as the placeholder it replaces), 24 high, `caption-md-medium`. The panel is `Popover`'s (`surface.elevated`, `shadow-menu`), `md` wide, scrolling at 300 high. People are `Avatar` `sm` (24) with `body-sm-regular` names; the headings are `label-sm-semibold` in `text.secondary`. The remove button is `RemoveButton` `tonal`; on a pointer it appears when the row is hovered or holds focus (Figma's hover state), and on a touch screen it is always shown.
+The pill is the neutral outline control (`neutral.outline.*`, the same as the placeholder it replaces), 24 high, `caption-md-medium`. The panel is `Popover`'s (`surface.elevated`, `shadow-menu`), `md` wide, scrolling at 300 high. People are `Avatar` `sm` (24) with `body-sm-regular` names; the headings are `label-sm-semibold` in `text.secondary`. A viewer's row has **no highlight**, as Figma's `Is Assigned Viewer=Yes` is `surface.elevated` in every state: only the remove button appears. A person to add is highlighted (`surface.brand.faint` on hover, `surface.brand.subtle` pressed), as `Menu`'s rows are. The remove button is `RemoveButton` `tonal`; on a pointer it appears when the row is hovered or holds focus (Figma's hover state), and on a touch screen it is always shown.
 
 ## Accessibility
 
