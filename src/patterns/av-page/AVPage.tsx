@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
+import { Banner, type BannerProps } from '../../components/banner';
 import { DescriptionCardTitle, type DescriptionCardTitleParent } from '../../components/description-card-title';
 import { DescriptionSection, type DescriptionSectionProps } from '../../components/description-section';
 import { DuplicateToOtherDomain, type DuplicateToOtherDomainProps } from '../../components/duplicate-to-other-domain';
@@ -73,6 +74,11 @@ export interface AVPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   mode?: AVPageMode;
   /** The header: the back arrow, the page's name and (when reading) the status buttons. `AVHeader`'s props. */
   header: AVHeaderProps;
+  /**
+   * A notice at the top of the left column, above the title, the width of the column: an Added Value that was rejected or sent back to the backlog says so,
+   * and why. `Banner`'s props; `rejectedBanner()` and `backloggedBanner()` write the two the design draws, copy included.
+   */
+  banner?: BannerProps;
   title?: AVPageTitle;
   description?: AVPageDescription;
   multipart?: MultipartSectionProps;
@@ -93,6 +99,7 @@ export function AVPage({
   className,
   mode = 'view',
   header,
+  banner,
   title,
   description,
   multipart,
@@ -111,6 +118,7 @@ export function AVPage({
       <AVHeader {...header} showStatusActions={header.showStatusActions ?? !editing} />
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 px-8 pb-8 @4xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-4">
+          {banner && <Banner {...banner} />}
           {title && (
             <DescriptionCardTitle
               reference={title.reference}

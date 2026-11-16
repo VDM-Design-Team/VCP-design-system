@@ -9,6 +9,7 @@ Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`�
 | Piece | Tier |
 |---|---|
 | `Button` | atom |
+| `Banner` | component |
 | `DescriptionCardTitle` | component |
 | `DescriptionSection` | component |
 | `DuplicateToOtherDomain` | component |
@@ -62,6 +63,17 @@ carry their own variants (the detail card's `type`, the header's `role` and `sta
 **`mode`** (`view` by default, or `edit`) decides three things and nothing else: the title (text, or a **Title** field), whether Comments or Duplicate shows, and where the status buttons are.
 Everything inside the cards follows what it is passed (`DescriptionSection` is read-only without `onAdd`, `DetailCard` edits with its `type`).
 
+## A rejected or backlogged AV says so, above the title
+
+Figma's `AV Was Rejected/Backlogged` page draws the page with a `Banner` the width of the left column, above the title card: a **critical** one, "This Task was rejected", with the reason under it, and a **warning** one, "Remarks", with the feedback under it. When the AV was turned down in another domain (one initiated across domains) the headline names it: "This Task was rejected in Development Domain", "Remarks from Development Domain".
+
+```tsx
+<AVPage banner={rejectedBanner({ message: reason })} … />
+<AVPage banner={backloggedBanner({ message: remarks, domain: 'Development' })} … />
+```
+
+`rejectedBanner()` and `backloggedBanner()` carry the headline copy and the tone (and `live: 'off'`, since a banner on a page is read in document order); the page passes the reason or feedback, which is whatever the person who turned it down wrote (for a backlog, the feedback `MoveToBacklogModal` collects). Which AVs get one, and where the text comes from, is the page's: the pattern holds no data. Any other `Banner` can go in the same slot.
+
 ## It is controlled and holds no data
 
 It owns no state. The title, the cards, the comments and the status are the page's; this puts them in order.
@@ -72,6 +84,7 @@ It owns no state. The title, the cards, the comments and the status are the page
 |---|---|---|---|
 | `mode` | `'view' \| 'edit'` | `view` | Reading or editing |
 | `header` | `AVHeaderProps` | required | `showStatusActions` is on when reading, off when editing |
+| `banner` | `BannerProps` | — | A notice above the title, the column's width: an AV that was rejected or backlogged says so, and why. `rejectedBanner()` and `backloggedBanner()` write the two the design draws |
 | `title` | `{ reference?, value, onChange?, label?, placeholder?, error?, disabled?, parent? }` | — | `DescriptionCardTitle`'s states: editing with no `onChange` is read-only; `disabled` greys the field; `parent` marks a multipart child |
 | `description` | `{ problem?, solution?, deliverable?, 'desired-outcome'? }` | — | Each is `DescriptionSection`'s props without `type` |
 | `multipart` / `history` | `MultipartSectionProps` / `StatusHistoryProps` | — | |
