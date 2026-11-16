@@ -60,7 +60,7 @@ The columns are 2 : 1 on a wide page and stack on a narrow one (it responds to i
 `details` is `DetailCard`'s props, `comments` is `CommentSection`'s, and so on. **A section shows only when the page gives it**, so what differs by status, role or domain is what the page passes: the pieces already
 carry their own variants (the detail card's `type`, the header's `role` and `status`). Leave out the right column's pieces and the column goes.
 
-**`mode`** (`view` by default, or `edit`) decides three things and nothing else: the title (text, or a **Title** field), whether Comments or Duplicate shows, and where the status buttons are.
+**`mode`** (`view` by default, or `edit`) decides three things and nothing else: the title (text, or a **Title** field), whether Comments or Initiate shows, and where the status buttons are.
 Everything inside the cards follows what it is passed (`DescriptionSection` is read-only without `onAdd`, `DetailCard` edits with its `type`).
 
 ## It is controlled and holds no data

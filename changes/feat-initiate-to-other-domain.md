@@ -1,10 +1,12 @@
 ---
 bump: major
 ---
-### `InitiateToOtherDomain` — "Duplicate" becomes "Initiate", a radio group with "Don't initiate" selected by default (November 2026)
+### `InitiateToOtherDomain`, `DetailCard` — "Duplicate" becomes "Initiate" (November 2026)
 
-`DuplicateToOtherDomain` is now `InitiateToOtherDomain`, and its title reads "Initiate to other Domains": the options already said "Initiate to Development assignment", Figma's frame is "AV Initiated (to other domain)" and the Detail Card says "Initiated". It is also a **radio group** now, one choice at a time, with a first option, **"Don't initiate to another domain"**, selected until a person picks a domain (it is the default for most Added Values, a new one included). Figma draws checkboxes; both changes are questions for the design lead, raised in the PR.
+`DuplicateToOtherDomain` is now `InitiateToOtherDomain`, and its title reads "Initiate to other Domains": the options already said "Initiate to Development assignment", Figma's frame is "AV Initiated (to other domain)" and the status is "Initiated". It is still a group of checkboxes, several at once, and `value` and `onChange` are unchanged. `AVPage`'s `duplicate` prop is now `initiate`.
 
-`disabled` is for an Added Value handed off from another domain: the card is there with "Don't initiate" selected and nothing can be changed. `AVPage`'s `duplicate` prop is now `initiate`.
+The Detail Card follows: its "Duplicates" row now reads **"Initiated to"**, the card type `duplicate` is `initiated`, the value's `duplicates` is `initiatedTo`, and the `DetailCardDuplicate` type is `DetailCardInitiatedDomain`.
 
-Migration: import `InitiateToOtherDomain` (and `InitiateToOtherDomainProps`, `InitiateDomainOption`) from `components/initiate-to-other-domain` instead of `DuplicateToOtherDomain`, `DuplicateToOtherDomainProps`, `DuplicateDomainOption`. `value` and `defaultValue` are now one string, the chosen domain's `value`, or `''` (`DONT_INITIATE`) for none, not a list of ticked values; `onChange(value: string)` replaces `onChange(values, { value, checked })`, so a section for a domain is derived from `value`. Rename `AVPage`'s `duplicate` prop to `initiate`. The Detail Card's "Duplicates" row and `duplicates` value are unchanged for now (its new wording is a question for the design lead).
+New on the card: a `disabled` card now says why. It is for an Added Value that came from another domain and is edited in the second, and it shows a line under the title, "This Added Value came from another domain, so it can't be initiated to others from here." (`disabledReason` to change it), which a screen reader hears as the group's description.
+
+Migration: import `InitiateToOtherDomain` (and `InitiateToOtherDomainProps`, `InitiateDomainOption`) instead of `DuplicateToOtherDomain`, `DuplicateToOtherDomainProps`, `DuplicateDomainOption`; its props are the same. Rename `AVPage`'s `duplicate` prop to `initiate`. On `DetailCard`, pass `type="initiated"` instead of `type="duplicate"`, `value.initiatedTo` instead of `value.duplicates`, and use `DetailCardInitiatedDomain` instead of `DetailCardDuplicate`.
