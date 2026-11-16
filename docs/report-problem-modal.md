@@ -14,7 +14,6 @@ Read off the Figma `Report_A_Problem_Modal` (`7218:77431`, audit batch 4,
 | `Field` | component | Labels each of the three inputs |
 | `Dropzone` | atom | The attachments area |
 | `Input` | atom | The problem and its description |
-| `Button` | atom | Cancel and Submit |
 
 The import rows are checked against the real imports — `npm test` fails if this
 list drifts, and fails a pattern composing fewer than two pieces.
@@ -59,6 +58,7 @@ ceremony.
   their heading in the body.
 - **Every field is labelled by `Field`**, which wires `id` and
   `aria-describedby` onto the control. No placeholder is doing a label's job.
+- **The footer is `Modal`'s own**: `ModalCancel` (secondary) and `ModalConfirm` (primary), both 40 high, as every dialog's. Figma draws this dialog's Cancel as a text button and both at the small size, from the old design; the dialogs in the system do not.
 - **Submit lives in the footer but belongs to the form**, via `form={formId}`,
   so Enter in any field submits and the footer still sits outside the scrolling
   body.
