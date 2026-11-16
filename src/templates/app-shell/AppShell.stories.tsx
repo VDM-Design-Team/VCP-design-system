@@ -167,7 +167,6 @@ interface PlaygroundArgs {
   modeSwitch: boolean;
   account: 'menu' | 'own-menu' | 'name' | 'none';
   titleBand: 'page-title' | 'av-header' | 'none';
-  titleSize: 'md' | 'sm';
   subtitle: boolean;
   back: boolean;
   titleActions: boolean;
@@ -263,7 +262,6 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     modeSwitch: true,
     account: 'own-menu',
     titleBand: 'page-title',
-    titleSize: 'md',
     subtitle: true,
     back: false,
     titleActions: false,
@@ -338,13 +336,6 @@ export const Playground: StoryObj<PlaygroundArgs> = {
       name: 'Title band',
       description: 'The `header` slot: `PageTitle`, `AVHeader`, or nothing.',
       ...select('Page header', { 'page-title': 'PageTitle', 'av-header': 'AVHeader', none: 'None' }),
-    },
-    titleSize: {
-      name: 'Size',
-      description: "PageTitle's `size`.",
-      options: ['md', 'sm'],
-      if: { arg: 'titleBand', eq: 'page-title' },
-      ...radio('Page header', { md: 'md — 18 semibold', sm: 'sm — 14 medium' }),
     },
     subtitle: {
       name: 'Subtitle',
@@ -449,7 +440,6 @@ export const Playground: StoryObj<PlaygroundArgs> = {
           args.titleBand === 'page-title' ? (
             <PageTitle
               title={title}
-              size={args.titleSize}
               subtitle={args.subtitle ? 'Everything you own, and everything waiting on you.' : undefined}
               backHref={args.back ? '#home' : undefined}
               backLabel={args.back ? 'Back to my Added Values' : undefined}
