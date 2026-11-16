@@ -6,6 +6,7 @@
  * See the "Atoms, components, patterns, templates" section of CLAUDE.md.
  */
 export * from './accept-pending-av-modal';
+export * from './already-reviewed-modal';
 export * from './accounts-table';
 export * from './move-av-to-cycle-modal';
 export * from './attachments-modal';

@@ -105,14 +105,14 @@ what `RejectionReason` was built for.
   inert, that Escape closes only the inner dialog and the review comes back
   live, and that the reason travels out.
 
-## ⚠️ `Review_Already_Reviewed_Popup` exists in the design and is used nowhere
+## `Review_Already_Reviewed_Popup` is `AlreadyReviewedModal`
 
 A small dialog — "Already Reviewed", "This Value has already been reviewed by
-the initiator.", one Close button. **A search of every page in the file finds
-zero instances of it**, the same as the five Accept-modal field molecules.
-
-Not ported. It is two lines of content in a `Modal` whenever design says where
-it belongs, and guessing its trigger is guessing at a flow.
+the initiator.", one Close button. The design draws it and puts it in no flow (a
+search of every page in the file finds zero instances of it), so it is its own
+pattern, `AlreadyReviewedModal` (`docs/already-reviewed-modal.md`), and **the page
+decides when to show it**, in place of this dialog, for an AV that has already been
+reviewed. This dialog does not show it itself.
 
 ## Don't
 
