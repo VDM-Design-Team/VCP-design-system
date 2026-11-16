@@ -54,7 +54,7 @@ Contrast is the label on its **own fill**, measured, in both themes. WCAG AA ask
 
 | Tone | Fill | Label | Light | Dark |
 |---|---|---|---|---|
-| `neutral` | `surface.neutral.subtle` | `text.secondary` | **9.45:1** | **8.40:1** |
+| `neutral` | `neutral.tonal.surface.default` | `neutral.tonal.content.default` | **8.40:1** | **8.40:1** |
 | `brand` | `surface.brand.faint` | `text.brand.strong` | **11.37:1** | **8.97:1** |
 | `info` | `accent.info.tonal.surface.default` | `accent.info.tonal.content.default` | **5.60:1** | **7.29:1** |
 | `success` | `accent.success.tonal.surface.default` | `accent.success.tonal.content.default` | **8.24:1** | **6.46:1** |
@@ -90,10 +90,11 @@ The dark theme comes for free — every colour class above is a semantic token t
 
 - **No `accent.brand.*` or `accent.neutral.*` triad.** Only `critical`, `info`,
   `success` and `warning` have `filled`/`outline`/`tonal`. `brand` and `neutral` are
-  therefore hand-composed here from `surface.brand.faint` + `text.brand.strong` and
-  `surface.neutral.subtle` + `text.secondary`. They look right and measure well, but
-  they are a convention this component invented rather than a pair the tokens declare.
-  Two more triads would make all six tones uniform.
+  therefore hand-composed here from `surface.brand.faint` + `text.brand.strong`. It
+  looks right and measures well, but it is a convention this component invented rather
+  than a pair the tokens declare. `neutral` is the `neutral.tonal.*` pair (since November
+  2026; it was `surface.neutral.subtle` + `text.secondary`), so only `brand` is left
+  hand-composed.
 - **`accent.{blue,green,red,yellow}`** exist but only as `base`/`faint`/`medium`/
   `strong`/`stronger`/`subtle` scales — no `tonal` treatment — so they cannot serve a
   Badge tone as-is.
