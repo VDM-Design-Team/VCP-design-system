@@ -7,9 +7,11 @@ import { Icon } from '../../atoms/icon';
 import { Input } from '../../atoms/input';
 import { Tag } from '../../atoms/tag';
 import { Chip } from '../../atoms/chip';
+import { Tooltip } from '../../atoms/tooltip';
 import { CycleTag } from '../../components/cycle-tag';
 import { DatePicker } from '../../components/date-picker';
 import { DueDateTag, dueDateTone } from '../../components/due-date-tag';
+import { AssigneeSelectionDropdown } from '../../components/assignee-selection-dropdown';
 import { Popover } from '../../components/popover';
 import { SearchSelect, type SearchSelectOption } from '../../components/search-select';
 import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
@@ -51,6 +53,10 @@ export interface DetailCardPerson {
   description?: string;
   /** Their capacity points, shown as the chip's count. */
   points?: number;
+  /** Whether they are free for the dates the AV has. Give it (on `options.people`, and on the assignees) and the Development domain's assignee picker shows availability; leave it out and the picker is the plain list. */
+  availability?: 'available' | 'busy' | 'unavailable';
+  /** When a busy or unavailable person is free again, as the pill reads it ("May 17"). */
+  until?: string;
 }
 
 export interface DetailCardDuplicate {
@@ -142,6 +148,14 @@ const toDate = (iso: string) => {
   return new Date(y, m - 1, d);
 };
 
+/** What a busy or unavailable assignee says under their field (Figma's `Assignee Busy Warning`). */
+const BUSY_NOTE = 'This assignee is busy during the selected dates, but can still be assigned.';
+const UNAVAILABLE_NOTE = 'This assignee is not available during the selected dates and cannot be assigned.';
+/* The card only knows availability with both dates or a cycle, so its notice asks for both (the dropdown's own default asks for a start date). */
+const UNKNOWN_NOTE = 'Assignee availability is unknown. Select a start and due date, or a cycle, first to view availability.';
+/** Why the + beside Assignee is disabled on an AV that was initiated to another domain. */
+const INITIATED_NOTE = "Assignees can't be added to an initiated Added Value. Assign them on its domain copy instead.";
+
 export interface DetailCardProps
   extends Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> {
   /** Which card. Fixes the fields; see the table in the docs. */
@@ -161,6 +175,11 @@ export interface DetailCardProps
    * the dropdowns and the dates; a locked field keeps its value and can't change.
    */
   readOnly?: readonly DetailCardField[];
+  /**
+   * Editing: the assignees can't be added to. The + beside Assignee is disabled and says why on hover and focus. Left out, it follows the AV: one that was initiated to another domain
+   * (it has `duplicates`) is locked, because its assignees are set on its domain copy.
+   */
+  lockAssignees?: boolean;
   /** The viewers pill, a placeholder until Edit Viewers is built: shows the count and reports a press. */
   viewerCount?: number;
   onViewers?: () => void;
@@ -184,6 +203,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       options,
       errors,
       readOnly,
+      lockAssignees,
       viewerCount,
       onViewers,
       dueSoonWithinDays = 3,
@@ -198,6 +218,9 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     const set = (patch: Partial<DetailCardValue>) => onChange?.({ ...value, ...patch });
     /** Shown, but it can't be changed. */
     const locked = (field: DetailCardField) => editing && !!readOnly?.includes(field);
+    /* Availability is only known once the AV has dates (or a cycle, which has them). Before that the picker says so. */
+    const availabilityKnown = Boolean((value.startDate && value.dueDate) || value.cycle);
+    const assigneesLocked = lockAssignees ?? (editing && (value.duplicates?.length ?? 0) > 0);
     const cycles = options?.cycles ?? [];
     const cycleOptions: SearchSelectOption[] = cycles.map((c) => ({
       value: c.value,
@@ -420,6 +443,9 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
                 people={(isInitiator ? value.initiators : value.assignees) ?? []}
                 directory={options?.people ?? []}
                 roles={options?.roles ?? ['QA', 'Design', 'Assignee']}
+                withAvailability={!isInitiator && domain === 'development'}
+                availabilityKnown={availabilityKnown}
+                lockedReason={!isInitiator && assigneesLocked ? INITIATED_NOTE : undefined}
                 onChange={(list) => (isInitiator ? set({ initiators: list }) : set({ assignees: list }))}
                 aside={isInitiator && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
               />
@@ -448,12 +474,15 @@ function Item({
   label,
   onAdd,
   addDisabled,
+  addLockedReason,
   addRef,
   aside,
   children,
 }: {
   label: string;
   onAdd?: () => void;
+  /** The + can't be used on this card, and this is why: it is dimmed, still reachable by keyboard, and says so on hover and focus. */
+  addLockedReason?: string;
   /** The + button, for a field that puts focus back on it. */
   addRef?: React.Ref<HTMLButtonElement>;
   /** The + is dimmed and does nothing while a form is open. */
@@ -468,23 +497,28 @@ function Item({
         <span id={id} className="text-title-sm-semibold text-text-primary">
           {label}
         </span>
-        {onAdd && (
-          <button
-            ref={addRef}
-            type="button"
-            aria-label={`Add ${label.toLowerCase()}`}
-            onClick={onAdd}
-            disabled={addDisabled}
-            className={cn(
-              'disabled:pointer-events-none disabled:bg-action-primary-surface-disabled',
-              'relative grid size-5 place-items-center rounded-full bg-action-primary-surface-default text-action-primary-content-default',
-              'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed before:absolute before:-inset-2.5',
-              'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-            )}
-          >
-            <Icon name="plus" size="sm" aria-hidden="true" />
-          </button>
-        )}
+        {onAdd && (() => {
+          const plus = (
+            <button
+              ref={addRef}
+              type="button"
+              aria-label={`Add ${label.toLowerCase()}`}
+              /* Locked: aria-disabled, not disabled, so it stays in the tab order and the tooltip can be read; it does nothing. */
+              aria-disabled={addLockedReason ? true : undefined}
+              onClick={addLockedReason ? undefined : onAdd}
+              disabled={addDisabled}
+              className={cn(
+                'disabled:pointer-events-none disabled:bg-action-primary-surface-disabled aria-disabled:bg-action-primary-surface-disabled aria-disabled:cursor-not-allowed',
+                'relative grid size-5 place-items-center rounded-full bg-action-primary-surface-default text-action-primary-content-default',
+                'hover:bg-action-primary-surface-hover active:bg-action-primary-surface-pressed aria-disabled:hover:bg-action-primary-surface-disabled before:absolute before:-inset-2.5',
+                'outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+              )}
+            >
+              <Icon name="plus" size="sm" aria-hidden="true" />
+            </button>
+          );
+          return addLockedReason ? <Tooltip content={addLockedReason}>{plus}</Tooltip> : plus;
+        })()}
         {aside && <span className="ml-auto">{aside}</span>}
       </div>
       {children}
@@ -598,6 +632,9 @@ function PeopleField({
   people,
   directory,
   roles,
+  withAvailability,
+  availabilityKnown,
+  lockedReason,
   onChange,
   aside,
 }: {
@@ -606,6 +643,11 @@ function PeopleField({
   people: readonly DetailCardPerson[];
   directory: readonly DetailCardPerson[];
   roles: readonly string[];
+  /** The Development domain's assignee form: the availability picker, when the people carry availability. */
+  withAvailability?: boolean;
+  availabilityKnown?: boolean;
+  /** The + is disabled, and this is why. */
+  lockedReason?: string;
   onChange: (people: DetailCardPerson[]) => void;
   aside?: React.ReactNode;
 }) {
@@ -638,6 +680,8 @@ function PeopleField({
       initial={initial}
       directory={directory}
       roles={roles}
+      withAvailability={withAvailability}
+      availabilityKnown={availabilityKnown}
       submitLabel={submitLabel}
       onCancel={() => {
         focusNext.current = mode?.type === 'edit' ? { to: 'chip', index: mode.index } : { to: 'add' };
@@ -656,6 +700,7 @@ function PeopleField({
       label={label}
       onAdd={() => setMode({ type: 'add' })}
       addDisabled={mode !== null}
+      addLockedReason={lockedReason}
       addRef={addButton}
       aside={aside}
     >
@@ -670,11 +715,21 @@ function PeopleField({
               )}
             </React.Fragment>
           ) : (
-            <Chip
-              key={p.name}
+            <div key={p.name} className="flex max-w-full flex-col items-start gap-1">
+              <Chip
               size="md"
               tone="brand"
               variant="outline"
+              /* The chip's edge takes the note's colour, so the note reads as belonging to it. */
+              className={
+                kind !== 'assignee'
+                  ? undefined
+                  : p.availability === 'busy'
+                    ? 'border-accent-warning-outline-border-default'
+                    : p.availability === 'unavailable'
+                      ? 'border-accent-critical-outline-border-default'
+                      : undefined
+              }
               actions="hover"
               avatar={<Avatar name={p.name} src={p.src} tone="brand" size="sm" />}
               label={p.name}
@@ -690,6 +745,13 @@ function PeopleField({
                 onChange(people.filter((_, i) => i !== index));
               }}
             />
+              {kind === 'assignee' && p.availability === 'busy' && (
+                <p className="text-caption-md-medium text-accent-warning-outline-content-default">{`${p.name} is busy during the selected dates, but can still be assigned.`}</p>
+              )}
+              {kind === 'assignee' && p.availability === 'unavailable' && (
+                <p className="text-caption-md-medium text-accent-critical-outline-content-default">{`${p.name} is not available during the selected dates and cannot be assigned.`}</p>
+              )}
+            </div>
           ),
         )}
         {mode?.type === 'add' &&
@@ -705,6 +767,8 @@ function PersonForm({
   initial,
   directory,
   roles,
+  withAvailability,
+  availabilityKnown,
   submitLabel,
   onCancel,
   onSubmit,
@@ -713,6 +777,8 @@ function PersonForm({
   initial?: DetailCardPerson;
   directory: readonly DetailCardPerson[];
   roles: readonly string[];
+  withAvailability?: boolean;
+  availabilityKnown?: boolean;
   submitLabel: string;
   onCancel: () => void;
   onSubmit: (person: DetailCardPerson) => void;
@@ -721,6 +787,9 @@ function PersonForm({
   const [role, setRole] = React.useState(initial?.description ?? (roles.includes('Assignee') ? 'Assignee' : roles[0]) ?? 'Assignee');
   const [points, setPoints] = React.useState(initial?.points !== undefined ? String(initial.points) : '');
   const known = directory.find((p) => p.name === name);
+  /* The availability picker, when the people say whether they are free. Busy can still be assigned (a warning); unavailable cannot (an error, and Add is off). */
+  const withPicker = Boolean(withAvailability && kind === 'assignee' && directory.some((p) => p.availability));
+  const unavailable = withPicker && known?.availability === 'unavailable';
   /* Opening the form disables the + that had focus, so focus goes into the form: the "Select user" field. */
   const formRef = React.useRef<HTMLFormElement>(null);
   React.useEffect(() => {
@@ -742,15 +811,30 @@ function PersonForm({
         });
       }}
     >
-      <SearchSelect
-        aria-label={kind === 'initiator' ? 'Initiator' : 'User'}
-        fullWidth
-        placeholder="Select user"
-        searchPlaceholder="Search by name"
-        options={directory.map((p) => ({ value: p.name, label: p.name }))}
-        value={name}
-        onChange={(v: string) => setName(v)}
-      />
+      {withPicker ? (
+        <AssigneeSelectionDropdown
+          aria-label="User"
+          fullWidth
+          placeholder="Select user"
+          availabilityKnown={availabilityKnown}
+          unknownText={UNKNOWN_NOTE}
+          people={directory.map((p) => ({ value: p.name, label: p.name, src: p.src, availability: p.availability ?? 'available', until: p.until }))}
+          value={name}
+          onChange={(v: string) => setName(v)}
+          warning={known?.availability === 'busy' ? BUSY_NOTE : undefined}
+          error={unavailable ? UNAVAILABLE_NOTE : undefined}
+        />
+      ) : (
+        <SearchSelect
+          aria-label={kind === 'initiator' ? 'Initiator' : 'User'}
+          fullWidth
+          placeholder="Select user"
+          searchPlaceholder="Search by name"
+          options={directory.map((p) => ({ value: p.name, label: p.name }))}
+          value={name}
+          onChange={(v: string) => setName(v)}
+        />
+      )}
       {kind === 'assignee' && (
         <div className="flex gap-2">
           <SearchSelect
@@ -777,7 +861,7 @@ function PersonForm({
         <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" size="sm" disabled={!name}>
+        <Button type="submit" size="sm" disabled={!name || unavailable}>
           {submitLabel}
         </Button>
       </div>

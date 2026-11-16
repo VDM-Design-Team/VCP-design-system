@@ -36,10 +36,13 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Handoff Date** | **Required.** Chosen from the calendar (`DateField`); it starts blank (`defaultDate`, ISO, is there for a caller that has one) |
 | **Overdue Reason** | **Required when the value is late** (`overdueDays` given). The six reasons are `OVERDUE_REASONS`, drawn in the design file, not configured per domain |
 | **Additional Notes** | Optional; late values only |
-| **Demo Links** | Optional. A link that is typed must be a valid `https://` address, said under the box once it is left; an empty one is dropped |
-| **Attachments** | Optional. `Attachments`: the files already on the value and the ones just picked, each previewable on click and removable |
+| **Demo Links** and **Attachments** | **At least one of the two: a demo link or an attachment.** A handoff needs something to review (decided 13 Nov 2026). The rule is said under Demo Links all the time ("A handoff needs at least one demo link or one attachment."), so a dialog that waits has told the person why |
+| **Demo Links** | A link that is typed must be a valid `https://` address, said under the box once it is left; an empty one is dropped |
+| **Attachments** | `Attachments`: the files already on the value and the ones just picked, each previewable on click and removable. A file already on the value counts as something to review until it is removed here |
 
-`isHandoffComplete(overdue, entry)` is the one rule for "can this be handed off". Whether to **wait** (a disabled Handoff) or to **ask on submit** is the dialog's: pass `errors` to show a message under a field.
+`isHandoffComplete(overdue, entry, attached)` is the one rule for "can this be handed off"; `attached` is how many files are already on the Added Value (the form's `attachments`), `0` when left out. `handoffHasEvidence(entry, attached)` is the link-or-file half on its own. Whether to **wait** (a disabled Handoff) or to **ask on submit** is the dialog's: pass `errors` to show a message under a field.
+
+**Why a link or a file, when the live product asks for a link:** the reviewer needs something to look at, and not all work has a URL (a document, a recording). Requiring a link would make people paste a placeholder.
 
 ## Props
 
@@ -49,7 +52,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `attachments` | `{ id?, name, kind?, thumb?, src? }[]` | `[]` | Files already on the Added Value. `id` defaults to the name. A PDF is `kind: 'pdf'` (the glyph is the caller's to know) |
 | `defaultDate` | `string` | `''` | ISO |
 | `onChange` | `(entry: HandoffEntry) => void` | — | Whenever the form changes: `{ date, links, files, removed, overdueReason, notes }` |
-| `errors` | `{ date?, overdueReason?, links? }` | — | A message under the field (for a dialog that asks on submit); focus goes to the first. `links: true` shows every link that is not an address |
+| `errors` | `{ date?, overdueReason?, links?, evidence? }` | — | A message under the field (for a dialog that asks on submit); focus goes to the first. `links: true` shows every link that is not an address. `evidence` (use `HANDOFF_EVIDENCE_ERROR`, "Add a demo link or attach a file.") replaces the hint under Demo Links and focuses the first link box |
 
 ## It keeps its own entry
 
@@ -68,5 +71,7 @@ The form holds what was typed and reports it (`onChange`), so a page that steps 
 ## Don't
 
 - **Don't make a second copy of this form.** A dialog that needs it composes `HandoffForm`.
-- **Don't make the date optional, or the reason optional for a late value.** That is the rule `isHandoffComplete` states.
+- **Don't make the date optional, or the reason optional for a late value, or let a handoff through with nothing to review.** That is the rule `isHandoffComplete` states.
+- **Don't require a link when there is a file**, or a file when there is a link. One of the two is the rule.
+- **Don't forget `attached`** when the Added Value already has files: without it `isHandoffComplete` cannot see them.
 - **Don't validate links yourself.** The form does, with `DeliverableLinkForm`'s rule.

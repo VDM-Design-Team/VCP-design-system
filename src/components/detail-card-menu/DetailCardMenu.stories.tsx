@@ -11,7 +11,8 @@ const meta = {
       description: {
         component:
           'The ⋮ button at the head of an Added Value page and its menu: Edit and Delete for everyone, with the ' +
-          'moves between Draft, Pending and Backlog that the role and the status allow. The component owns which ' +
+          'moves between Draft, Pending and Backlog that the role and the status allow (an admin can also reopen a ' +
+          'Rejected AV and park one that is in progress). The component owns which ' +
           'actions are offered; the handlers are the page\'s.',
       },
     },
@@ -26,7 +27,7 @@ const meta = {
   },
   argTypes: {
     role: { control: 'inline-radio', options: ['user', 'admin'] },
-    status: { control: 'select', options: ['Draft', 'Pending', 'Backlog', 'Accepted', 'In Progress', 'Review'] },
+    status: { control: 'select', options: ['Draft', 'Pending', 'Backlog', 'Rejected', 'Accepted', 'In Progress', 'Review', 'Completed'] },
   },
   decorators: [
     (Story) => (
@@ -85,13 +86,65 @@ export const Draft: Story = {
   },
 };
 
-/** An admin on an AV past Pending (a domain step, say) gets no moves. */
-export const AdminOtherStatus: Story = {
+/** An admin on a Rejected AV: Rejected is not final. It can be parked, reopened as Pending or sent back to Draft. */
+export const AdminRejected: Story = {
+  args: { role: 'admin', status: 'Rejected' },
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'AV options' }));
+    await expect(names()).toEqual(['Move to Backlog', 'Move to Pending', 'Move to Draft', 'Edit', 'Delete']);
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Move to Pending' }));
+    await expect(args.onMoveToPending).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** An admin on an AV that is accepted or in progress (a domain step, say): it can be parked or sent back to Draft. */
+export const AdminInProgress: Story = {
+  args: { role: 'admin', status: 'In Progress' },
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'AV options' }));
+    await expect(names()).toEqual(['Move to Backlog', 'Move to Draft', 'Edit', 'Delete']);
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Move to Backlog' }));
+    await expect(args.onMoveToBacklog).toHaveBeenCalledTimes(1);
+  },
+};
+
+/** Accepted and Review are in progress too. */
+export const AdminAcceptedAndReview: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
-  args: { role: 'admin', status: 'In Progress' },
+  args: { role: 'admin', status: 'Accepted' },
+  render: (args) => (
+    <div className="flex gap-4">
+      <DetailCardMenu {...args} label="Accepted AV options" />
+      <DetailCardMenu {...args} status="Review" label="Review AV options" />
+    </div>
+  ),
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole('button', { name: 'AV options' }));
-    await expect(names()).toEqual(['Edit', 'Delete']);
+    for (const name of ['Accepted AV options', 'Review AV options']) {
+      await userEvent.click(within(canvasElement).getByRole('button', { name }));
+      await expect(names()).toEqual(['Move to Backlog', 'Move to Draft', 'Edit', 'Delete']);
+      await userEvent.keyboard('{Escape}');
+    }
+  },
+};
+
+/** Nothing moves a Completed AV, and a user gets no moves past Draft, Rejected included. */
+export const NoMoves: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { role: 'admin', status: 'Completed' },
+  render: (args) => (
+    <div className="flex gap-4">
+      <DetailCardMenu {...args} label="Completed AV options" />
+      <DetailCardMenu {...args} role="user" status="Rejected" label="Rejected AV options" />
+      <DetailCardMenu {...args} role="user" status="In Progress" label="In progress AV options" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    for (const name of ['Completed AV options', 'Rejected AV options', 'In progress AV options']) {
+      await userEvent.click(within(canvasElement).getByRole('button', { name }));
+      await expect(names()).toEqual(['Edit', 'Delete']);
+      await userEvent.keyboard('{Escape}');
+    }
   },
 };
