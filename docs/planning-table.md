@@ -81,6 +81,35 @@ ID · Added Value Title (sortable) · Urgency · Type · Initiator · Assignee �
 Date · Status. The mappings live where they always did: `StatusTag`, `UrgencyTag`, `TypeTag`,
 `AssigneeWithStatus` (the green / amber / red dot and its tooltip).
 
+## How the dates are worked out *(from Figma's unfinished flow, 16 Nov 2026, to be confirmed)*
+
+The table does not calculate dates: the caller does, and passes `estimated` and `animated` on the result (above). These are the rules Figma draws for it in
+**Planning Page → "Incomplete! Start Date / Value Points / Due date change system"**. The designer has not finished that section, so each rule is marked
+unconfirmed until `creativedesignlead` has checked it.
+
+**Nothing is set yet.** When a Start Date and a Due Date are both empty, the Start Date is *estimated* from the assignee's workload and the AV's priority, and
+then the Due Date is *estimated* from that Start Date and the Value Points.
+
+**A person sets one date on an AV that is in a cycle** (including when it comes out of the Backlog into one). The date they add must be within the cycle's
+timeframe, and the other date is **auto-calculated**:
+
+| The person sets | Points | The other date becomes | Why |
+|---|---|---|---|
+| Start Date | none | Due Date = the **last day of the cycle** | Nothing to measure a length by |
+| Due Date | none | Start Date = the **first day of the cycle** | Same |
+| Start Date | set | Due Date, from the **Start Date and the Points** | The Points give the length |
+| Due Date | set | Start Date, from the **Due Date and the Points** | Same |
+
+**A person changes a date or the Points on an AV that is already in a cycle** (the example moves AVs from Cycle A to Cycle B). Changing the Start Date and the
+Points recalculates the Due Date from them; changing the Due Date and the Points recalculates the Start Date from them. With no Points the cycle's first or last
+day is used, as above.
+
+Every date worked out this way is the one the table animates (`animated`, above), and until the person edits it, it is `estimated`.
+
+**Not clear in Figma, so not written as a rule:** in the Cycle A → Cycle B part, the cards for "User changes Due Date" and "User changes Start Date" with no
+Points both label the result with the *same* date the person changed (Due Date → "Auto-calculated Due Date", Start Date → "Auto-calculated Start Date"), where
+the first section recalculates the *other* one. It reads like a label slip, but it needs the designer to say.
+
 ## Sections
 
 The header wraps on a narrow screen: the capacity lines drop under the title rather than running out of the card, and a long date range truncates.
