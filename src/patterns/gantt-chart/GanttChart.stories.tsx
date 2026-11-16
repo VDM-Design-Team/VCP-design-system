@@ -318,7 +318,8 @@ export const OnItsPage: Story = {
       sidebar={<Sidebar userType="admin-dev" active="planning/gantt-chart" />}
       topBar={<TopBar primaryAction={<Button size="sm">Create Added Value</Button>} notifications={0} user={{ name: 'Francis M.' }} />}
     >
-      <div className="pt-8 pb-8">
+      {/* 56 above the card: Figma leaves 54 under the bar (the empty title band), and the chart adds none of its own. */}
+      <div className="pt-14 pb-8">
         <Demo headingLevel={1} />
       </div>
     </AppShell>
