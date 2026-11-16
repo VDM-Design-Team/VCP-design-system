@@ -39,7 +39,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## On a page
 
-The Gantt Chart page is `AppShell` with `GanttChart` as its content. The chart draws **its own title** (with the (i) hint, from `title` and `infoText`), its filters and view menu, and its own white card, so the page adds no `PageTitle`. What the chart does not draw is the margin round its card: the page sets it **32 in from the sides** (`px-8`), as `AVListPage` does, as Figma's frame has it. There is no page pattern for it: it would only be the chart.
+The Gantt Chart page is `AppShell` with `GanttChart` as its content. The chart draws **its own title** (with the (i) hint, from `title` and `infoText`), its filters and view menu, and its own white card, so the page adds no `PageTitle`. Give the chart `headingLevel={1}` there, so its title is the page's one `h1` (it is an `h2` otherwise). What the chart does not draw is the margin round its card: the page sets it **32 in from the sides** (`px-8`), as `AVListPage` does, as Figma's frame has it. There is no page pattern for it: it would only be the chart.
 
 ## The data
 
@@ -85,6 +85,7 @@ A project with nothing in the period keeps its header.
 | `expandedIds`, `defaultExpandedIds`, `onExpandedChange` | `string[]` | Which user rows are open, controlled or not. A row's id is the user's id, or `projectId:userId` under a project |
 | `onTaskSelect` | `(task) => void` | A task without an `href` was activated |
 | `loading` | `boolean` | The data is on its way: the rows become placeholders and the filters switch off. See Loading below |
+| `headingLevel` | `1 \| 2` | The title's heading level, `2` by default. `1` when the chart is the page's whole content (see "On a page"); the look is the same |
 | `title`, `infoText` | `string` | The heading, and the (i) beside it with its tooltip. Use `infoText` to say how to read the chart: what a bar is, what a closed row shows, how project grouping works, what the hatched column is |
 
 **The filters** are `SearchSelect` with `multiple`, as the filter bar draws them: the
@@ -174,6 +175,7 @@ widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
   so it is reachable by keyboard, and its tooltip opens on focus as well as hover. A
   closed row's summary bar is not interactive: the row's own button opens it.
 - Rows open with a button that carries `aria-expanded`.
+- The title is a real heading: an `h2`, or the page's `h1` with `headingLevel={1}` when the chart is the page.
 - The scrolling area is a labelled, focusable region so the keyboard can scroll it.
 - Today's heading is `aria-current="date"`; the hatching and the column
   backgrounds are decoration.
@@ -192,3 +194,4 @@ widths (90 and 164) are measured chart geometry, like `DonutChart`'s size.
 - **Don't invent a status colour.** Add a status here, with its token.
 - **Don't put the only copy of a fact in the tooltip.** Touch users never see it.
 - **Don't use it for a handful of dates** — a list or a timeline is simpler.
+- **Don't add grips or dragging to the bars.** The chart is read-only: Figma draws grip handles at the ends of some bars, but dates are not changed here (decided 16 November 2026).
