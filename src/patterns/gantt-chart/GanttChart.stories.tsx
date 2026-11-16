@@ -269,6 +269,9 @@ export const Month: Story = {
     await expect(height(c.getAllByText('1')[0].closest('.h-16') as HTMLElement | null)).toBe(64);
     const shown = (els: HTMLElement[]) => els.find((el) => el.getBoundingClientRect().height > 0) ?? null;
     await expect(height(shown(c.getAllByText(/Added Values/))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(40);
+    /* The toolbar is one height: the buttons are as tall as the filters beside them. */
+    await expect(height(c.getByRole('button', { name: 'Reset Filters' }))).toBe(40);
+    await expect(height(c.getByRole('button', { name: 'Today' }))).toBe(40);
     await expect(height(shown(c.getAllByText('Invoice export'))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(36);
   },
 };

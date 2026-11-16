@@ -833,8 +833,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {/* The filter bar's own Reset: the same ghost, brand-coloured button. */}
-            <Button variant="tertiary" size="sm" disabled={loading} onClick={reset}>
+            {/* The filter bar's own Reset: the same ghost, brand-coloured button. Buttons in this row are `md` (40), the height of the fields beside them. */}
+            <Button variant="tertiary" disabled={loading} onClick={reset}>
               Reset Filters
             </Button>
             <SearchSelect
@@ -867,7 +867,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               value={view}
               onChange={(v) => onViewChange(v as GanttView)}
             />
-            <Button variant="secondary" size="sm" disabled={loading} onClick={goToday}>
+            <Button variant="secondary" disabled={loading} onClick={goToday}>
               Today
             </Button>
           </div>
