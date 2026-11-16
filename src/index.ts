@@ -37,6 +37,7 @@ export * from './atoms/toggle';
 /* Components — units assembled from atoms (and other components). */
 export * from './components/account-status-tag';
 export * from './components/accordion';
+export * from './components/already-reviewed-modal';
 export * from './components/attachment-preview';
 export * from './components/assignee-selection-dropdown';
 export * from './components/assignee-with-status';

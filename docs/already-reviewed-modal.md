@@ -1,4 +1,4 @@
-# AlreadyReviewedModal *(pattern)*
+# AlreadyReviewedModal *(component)*
 
 What a reviewer is told when the Added Value they came to review has already been reviewed: **"Already Reviewed"**, "This Value has already been reviewed.", and one **Close**.
 Built to Figma's `Review_Already_Reviewed_Popup` (VCP Design Library, the Review AV Modal page).
@@ -7,7 +7,6 @@ Built to Figma's `Review_Already_Reviewed_Popup` (VCP Design Library, the Review
 
 | Piece | Tier |
 |---|---|
-| `Button` | atom |
 | `Modal` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
@@ -34,7 +33,9 @@ The design draws this dialog and puts it in no flow, so **the page decides when 
 
 ## Tokens
 
-It is `Modal` at `md` (`surface.elevated`, `shadow-modal`, `md` radius), the title `title-md-semibold` in `text.primary`, the line `body-md-regular` in `text.secondary`. Close is a `primary` `Button`, `fullWidth`: Figma's button is the dialog's whole width.
+It is `Modal` at `md` (`surface.elevated`, `shadow-modal`, `md` radius), the title `title-md-semibold` in `text.primary`, the line `body-md-regular` in `text.secondary`. Close is `ModalConfirm` (`primary`, `md`), at the footer's right like every dialog's answer.
+
+**Close is not full width, though Figma draws it so.** Figma's popup comes from the old design, where its one button spanned the dialog. No other dialog in the system has a full-width footer button (`BulkActionFailedModal`'s single "Got it" is a `ModalConfirm` at the right), so this one follows them. It is a component, not a pattern, because it is a `Modal` and nothing else: there is a second piece for a pattern to compose.
 
 **The default line is shorter than Figma's.** Figma says "This Value has already been reviewed by the initiator."; the default drops "by the initiator" so it is true whoever reviewed it (the initiator, or a second admin), and a page that knows who passes it in `message`.
 

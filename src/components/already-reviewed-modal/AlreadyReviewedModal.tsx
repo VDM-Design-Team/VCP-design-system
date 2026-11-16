@@ -1,6 +1,5 @@
 import * as React from 'react';
-import { Button } from '../../atoms/button';
-import { Modal } from '../../components/modal';
+import { Modal, ModalConfirm } from '../modal';
 
 /**
  * AlreadyReviewedModal — what a reviewer is told when the Added Value they came to review has already been reviewed: **"Already Reviewed"**, "This Value has already
@@ -12,7 +11,8 @@ import { Modal } from '../../components/modal';
  * it shows (the AV was reviewed while the reviewer had it open, or they followed an old link to it): this pattern does not look at the AV. Where the page has the
  * reviewer's name it can say who, through `message`.
  *
- * Figma's Close is the dialog's whole width, so the button is `fullWidth` in the footer rather than `ModalConfirm` (which sits at the right).
+ * **Close is the footer's one answer, at the right**, like every dialog's (`ModalConfirm`, as `BulkActionFailedModal`'s "Got it"). Figma draws it the dialog's whole width, from
+ * the old design this popup was drawn in; no other dialog in the system has a full-width footer button, so this one follows them.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.
@@ -45,9 +45,7 @@ export function AlreadyReviewedModal({
       showClose={false}
       size="md"
       footer={
-        <Button variant="primary" fullWidth onClick={onClose}>
-          {closeLabel}
-        </Button>
+        <ModalConfirm onClick={onClose}>{closeLabel}</ModalConfirm>
       }
     >
       <p className="font-sans text-body-md-regular text-text-secondary">{message}</p>
