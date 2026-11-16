@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
-import { DetailCard, type DetailCardValue } from './DetailCard';
+import { DetailCard, type DetailCardPerson, type DetailCardValue } from './DetailCard';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 import { DateFormatProvider } from '../../lib/format-date';
 
@@ -215,6 +215,139 @@ export const InitiatedToOtherDomain: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('group', { name: 'Duplicates' })).toBeVisible();
     await expect(canvas.queryByRole('group', { name: 'Assignee' })).toBeNull();
+  },
+};
+
+/* People who carry an availability, so the Assignee form groups them and warns. */
+const AVAILABILITY_PEOPLE: DetailCardPerson[] = [
+  { name: 'John Kestrel', availability: 'available' },
+  { name: 'Amy Lee', availability: 'available' },
+  { name: 'Jane Doe', availability: 'busy', until: 'May 17' },
+  { name: 'Eli Ross', availability: 'unavailable', until: 'May 30' },
+];
+const AVAILABILITY_OPTIONS = { ...OPTIONS, people: AVAILABILITY_PEOPLE };
+const AVAILABILITY_BASE: DetailCardValue = {
+  initiators: [{ name: 'Marvin R' }],
+  projects: ['VCP'],
+  category: 'Improvement',
+  tags: ['Development'],
+  type: 'Type 1',
+  urgency: 'Low',
+};
+const AVAILABILITY_DATES = { startDate: '2026-03-02', dueDate: '2026-03-16', cycle: 'c19' };
+
+/** Opens the Assignee form: the + for a new person, or a chip's pencil to change one. */
+const openAssigneeForm = async (canvasElement: HTMLElement, chip?: string) => {
+  const assignees = within(within(canvasElement).getByRole('group', { name: 'Assignee' }));
+  await userEvent.click(assignees.getByRole('button', { name: chip ? `Edit ${chip}` : 'Add assignee' }));
+  return assignees;
+};
+
+/**
+ * Development only, for now. With no start date, due date or cycle there is nothing to check people against, so the
+ * Assignee list says so and shows everyone in one group.
+ */
+export const AssigneeAvailabilityUnknown: Story = {
+  args: { type: 'editing', viewerCount: undefined, options: AVAILABILITY_OPTIONS, value: { ...AVAILABILITY_BASE, assignees: [] } },
+  play: async ({ canvasElement }) => {
+    await openAssigneeForm(canvasElement);
+    await userEvent.click(canvasElement.querySelector('form button[aria-haspopup="listbox"]') as HTMLElement);
+    await expect(within(canvasElement).getByText(/availability is unknown/i)).toBeVisible();
+  },
+};
+
+/** Once the dates are set the list is grouped Available, Busy and Unavailable (folded), each with when they are free. */
+export const AssigneeAvailabilityKnown: Story = {
+  args: { type: 'editing', viewerCount: undefined, options: AVAILABILITY_OPTIONS, value: { ...AVAILABILITY_BASE, ...AVAILABILITY_DATES, assignees: [] } },
+  play: async ({ canvasElement }) => {
+    await openAssigneeForm(canvasElement);
+    await userEvent.click(canvasElement.querySelector('form button[aria-haspopup="listbox"]') as HTMLElement);
+    await expect(within(canvasElement).queryByText(/availability is unknown/i)).toBeNull();
+    /* Grouped by availability; the Unavailable group opens folded, so the list starts on people who can be assigned. */
+    await expect(within(canvasElement).getByRole('option', { name: /Jane Doe/ })).toBeVisible();
+    await expect(within(canvasElement).getByText('Unavailable')).toBeVisible();
+  },
+};
+
+/** A busy person: an amber edge and a warning, and they can still be added. */
+export const BusyAssignee: Story = {
+  args: {
+    type: 'editing',
+    viewerCount: undefined,
+    options: AVAILABILITY_OPTIONS,
+    value: { ...AVAILABILITY_BASE, ...AVAILABILITY_DATES, assignees: [{ name: 'Jane Doe', description: 'Assignee', points: 3, availability: 'busy', until: 'May 17' }] },
+  },
+  play: async ({ canvasElement }) => {
+    const assignees = await openAssigneeForm(canvasElement, 'Jane Doe');
+    await expect(assignees.getByText(/busy during the selected dates, but can still be assigned/i)).toBeVisible();
+    await expect(assignees.getByRole('button', { name: 'Save' })).toBeEnabled();
+  },
+};
+
+/** An unavailable person: a red edge and an error, and Add or Save stays off. */
+export const UnavailableAssignee: Story = {
+  args: {
+    type: 'editing',
+    viewerCount: undefined,
+    options: AVAILABILITY_OPTIONS,
+    value: { ...AVAILABILITY_BASE, ...AVAILABILITY_DATES, assignees: [{ name: 'Eli Ross', description: 'Assignee', points: 3, availability: 'unavailable', until: 'May 30' }] },
+  },
+  play: async ({ canvasElement }) => {
+    const assignees = await openAssigneeForm(canvasElement, 'Eli Ross');
+    await expect(assignees.getByText(/not available during the selected dates and cannot be assigned/i)).toBeVisible();
+    await expect(assignees.getByRole('button', { name: 'Save' })).toBeDisabled();
+  },
+};
+
+/**
+ * The dates changed after people were added. Each chip that is now busy or unavailable takes the warning's colour on
+ * its edge and says so under it, by name, so with many assignees it is clear whose note it is. The chip still hugs
+ * its content; the note sits under it.
+ */
+export const AssigneesFlaggedAfterDatesChange: Story = {
+  args: {
+    type: 'editing',
+    viewerCount: undefined,
+    options: AVAILABILITY_OPTIONS,
+    value: {
+      ...AVAILABILITY_BASE,
+      ...AVAILABILITY_DATES,
+      assignees: [
+        { name: 'Jane Doe', description: 'Assignee', points: 3, availability: 'busy', until: 'May 17' },
+        { name: 'Eli Ross', description: 'Assignee', points: 2, availability: 'unavailable', until: 'May 30' },
+        { name: 'John Kestrel', description: 'Assignee', points: 5, availability: 'available' },
+      ],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const assignees = within(within(canvasElement).getByRole('group', { name: 'Assignee' }));
+    await expect(assignees.getByText('Jane Doe is busy during the selected dates, but can still be assigned.')).toBeVisible();
+    await expect(assignees.getByText('Eli Ross is not available during the selected dates and cannot be assigned.')).toBeVisible();
+    /* Only the flagged chips carry a note. */
+    await expect(assignees.queryByText(/John Kestrel is/)).toBeNull();
+  },
+};
+
+/** An AV already initiated to another domain: no one can be added to it here, and the + says why. */
+export const InitiatedAssigneesLocked: Story = {
+  args: {
+    type: 'editing',
+    viewerCount: undefined,
+    options: AVAILABILITY_OPTIONS,
+    value: {
+      ...AVAILABILITY_BASE,
+      ...AVAILABILITY_DATES,
+      assignees: [{ name: 'John Kestrel', description: 'Assignee', points: 3, availability: 'available' }],
+      duplicates: [{ domain: 'Design', status: 'Initiated' }],
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const assignees = within(within(canvasElement).getByRole('group', { name: 'Assignee' }));
+    const add = assignees.getByRole('button', { name: 'Add assignee' });
+    await expect(add).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(add);
+    /* It does nothing: no form opened. */
+    await expect(assignees.queryByRole('button', { name: 'Cancel' })).toBeNull();
   },
 };
 

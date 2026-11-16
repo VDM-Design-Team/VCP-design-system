@@ -12,7 +12,7 @@ import type { HandoffDomain } from '../handoff-av-modal';
  * the banner, the **Overdue Reason** and **Additional Notes**), a **Publish** checkbox for Development, and `PaginationDots` between two arrow buttons to step between them. Built to Figma's
  * `Bulk_Action_Handoff_Popup` (both `Overdue` variants) and its `_Bulk_Action_Handoff_Popup_Footer`.
  *
- * - **The form is the one `HandoffAVModal` draws**, so a single handoff and a bulk one ask for the same things: a date, chosen from the calendar, is required; a late one must say why; links, files and notes are optional; a link that is typed must be a valid `https://` address.
+ * - **The form is the one `HandoffAVModal` draws**, so a single handoff and a bulk one ask for the same things: a date, chosen from the calendar, is required; a late one must say why; each needs something to review, at least one demo link or one attachment (decided 13 Nov 2026; a file already on it counts); notes are optional; a link that is typed must be a valid `https://` address.
  * - **Handoff waits until every Added Value is complete** ("All Handoff Details Filled = No" is the disabled button), by `isHandoffComplete`. The pager is pinned with the buttons, not in the scroll; stepping to an incomplete Added Value is how you finish it, and the button's description says how many are still missing.
  * - **What you filled in stays while you step**: every page stays mounted (the others are hidden), so going to the next and back loses nothing. Everything resets each time the popup opens.
  * - **The arrows never drop focus.** At the first or last Added Value the arrow you pressed is `aria-disabled`, not `disabled`, so it keeps focus instead of sending it to the page.
@@ -81,7 +81,7 @@ export function BulkActionHandoffModal({ open, onClose, items, domain = 'design-
   const n = items.length;
   const current = Math.min(page, Math.max(n - 1, 0));
   const entryOf = (each: BulkHandoffAV) => entries[each.ref] ?? blankHandoffEntry(each.defaultDate);
-  const missing = items.filter((each) => !isHandoffComplete(each.overdueDays != null, entryOf(each))).length;
+  const missing = items.filter((each) => !isHandoffComplete(each.overdueDays != null, entryOf(each), each.attachments?.length ?? 0)).length;
 
   const submit = () => {
     const drafts: Record<string, BulkHandoffDraft> = {};
