@@ -125,10 +125,10 @@ threshold is not a design-system decision.
 | Field | Draws | Where | Tooltip |
 |---|---|---|---|
 | `besaPassed: true` | a green seal (20) | right after the reference, before the rule | "BESA Passed" |
-| `rejected: { reason }` | a red warning glyph (16) | the end of the details, after the counts | the reason |
-| `backlogged: { reason }` | an info glyph (16, green as Figma draws it) | the end of the details, after the counts | the reason |
+| `rejected: { reason }` | a red warning glyph (16) | the end of the details, after the counts | "Rejected: " and the reason |
+| `backlogged: { reason }` | an info glyph (16, green as Figma draws it) | the end of the details, after the counts | "Backlogged: " and the reason |
 
-Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and `Backlogged_AV_Indicator`. Each is a button named "BESA Passed", "Rejected" or "Backlogged", so the keyboard reaches the tooltip (a tooltip needs a focusable trigger); the reason is read as its description, and "BESA Passed" is not read twice because the name is its whole tooltip. They show on any row, multipart or not. The table does not decide which AVs are rejected or backlogged, or where the reason comes from: pass what the AV carries.
+Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and `Backlogged_AV_Indicator`. Each tooltip says what the glyph is first, then the reason (Figma's tooltip is the reason alone; the lead word is added so a glyph never has to be guessed). Each is a button named by that same sentence, so the keyboard reaches the tooltip (a tooltip needs a focusable trigger), and it is not read twice. They show on any row, multipart or not. The table does not decide which AVs are rejected or backlogged, or where the reason comes from: pass what the AV carries.
 
 ### `hints`: three have copy, Members does not
 
