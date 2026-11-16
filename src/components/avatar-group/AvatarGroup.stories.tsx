@@ -205,6 +205,24 @@ export const Sizes: Story = {
 };
 
 /**
+ * Two people, as Figma's `Profile_Initials` "Multiple Users" draws them: the stack is 30 / 44 / 58 / 64 wide at 16 / 24 / 32 / 36, because each circle
+ * overlaps the next by 2 / 4 / 6 / 8 and keeps a 1 border inside its own box.
+ */
+export const TwoPeopleAsFigmaDrawsThem: Story = {
+  render: (args) => (
+    <div className="flex items-end gap-6">
+      {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
+        <AvatarGroup {...args} key={size} people={TEAM.slice(0, 2)} size={size} />
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const widths = Array.from(canvasElement.querySelectorAll<HTMLElement>('[role="img"]')).map((el) => Math.round(el.getBoundingClientRect().width));
+    await expect(widths).toEqual([30, 44, 58, 64]);
+  },
+};
+
+/**
  * Photos, initials and a failed URL in one stack — the fallback is per person.
  * The leftmost person is on top, each one after them tucked behind the one before.
  */
