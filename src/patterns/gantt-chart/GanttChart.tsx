@@ -866,7 +866,6 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
               options={VIEW_OPTIONS}
               value={view}
               onChange={(v) => onViewChange(v as GanttView)}
-              className="w-43.5"
             />
             <Button variant="secondary" size="sm" disabled={loading} onClick={goToday}>
               Today
@@ -880,7 +879,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
             <div
               key={i}
               className={cn(
-                'flex h-10.25 items-center justify-center border border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
+                'flex h-10 items-center justify-center border border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
                 i === 0 && 'rounded-t-md',
               )}
             >
@@ -889,7 +888,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
           ))}
           <div
             className={cn(
-              'relative flex h-10.25 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
+              'relative flex h-10 items-center justify-between border border-stroke-brand-medium bg-surface-brand-faint px-1',
               period.heading.length === 0 && 'rounded-t-md',
             )}
           >
@@ -914,9 +913,9 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
                       key={`${g.label}-${i}`}
                       style={{ width: g.span * CELL }}
                       className={cn(
-                        /* Figma: 41 over the days, 64 over the cycles (the months in a year). */
+                        /* Figma: 40 over the days, 64 over the cycles (the months in a year). */
                         'flex items-center justify-center border-b border-r border-stroke-subtle font-sans text-body-sm-semibold text-text-primary',
-                        view === 'year' ? 'h-16' : 'h-10.25',
+                        view === 'year' ? 'h-16' : 'h-10',
                       )}
                     >
                       {g.label}
