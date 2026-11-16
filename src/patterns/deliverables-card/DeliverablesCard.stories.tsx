@@ -81,6 +81,27 @@ export const EditingDesign: Story = {
   },
 };
 
+/** `confirmRemove`: removing a link or a file asks first ("Are you sure you want to remove this link?"); it is removed only on Confirm. */
+export const ConfirmsRemoval: Story = {
+  args: { mode: 'edit', confirmRemove: true, onRemoveLink: fn(), onRemoveFile: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Delete Link' })[0]!);
+    const dialog = await body.findByRole('alertdialog', { name: 'Are you sure you want to remove this link?' });
+    /* Cancel keeps it. */
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await expect(args.onRemoveLink).not.toHaveBeenCalled();
+    /* Confirm removes it. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Delete Link' })[0]!);
+    await userEvent.click(within(await body.findByRole('alertdialog')).getByRole('button', { name: 'Confirm' }));
+    await expect(args.onRemoveLink).toHaveBeenCalledWith('links', 'l1');
+    /* A file asks the same, for a file. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove image.png' }));
+    await expect(await body.findByRole('alertdialog', { name: 'Are you sure you want to remove this file?' })).toBeVisible();
+  },
+};
+
 /** Viewing (Development): Video Links, then Links, then Attachments. */
 export const ViewingDevelopment: Story = {
   args: { domain: 'development', videoLinks: VIDEOS },
