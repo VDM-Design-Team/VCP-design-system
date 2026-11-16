@@ -164,7 +164,7 @@ export function avTransitions(options: {
        `Status_Tag_General` set draws them, and every domain passes through
        them — so the handover lives here rather than in anyone's chain. */
     if (status === 'Accepted' && role !== 'initiator') {
-      return [move('In Progress', 'In progress')];
+      return [move('In Progress', 'In Progress')];
     }
     if (status === 'In Progress' && role !== 'initiator' && chain.length > 0) {
       return [move(chain[0].id, chain[0].label)];
@@ -198,7 +198,7 @@ export function avTransitions(options: {
     /* The first step returns to `In Progress`, the shared step it came from —
        not to `Accepted`, because accepting is the admin's decision and not
        the assignee's to undo. */
-    previous ? back(previous.id, previous.label) : back('In Progress', 'In progress'),
+    previous ? back(previous.id, previous.label) : back('In Progress', 'In Progress'),
     next ? move(next.id, next.label) : handoff(handoffLabel(role)),
   ];
 }

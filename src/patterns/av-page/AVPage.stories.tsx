@@ -121,7 +121,7 @@ export const Reading: Story = {
     /* The left column's order. */
     await expect(inOrder(c, ['Some Title Here', 'Problems', 'Solutions', 'Acceptance', 'Desired outcome', 'Status History', 'Comments'])).toBe(true);
     /* The status buttons are the header's when reading. */
-    await userEvent.click(c.getByRole('button', { name: /Move to In progress/i }));
+    await userEvent.click(c.getByRole('button', { name: 'Move to In Progress' }));
     await expect(args.header.onTransition).toHaveBeenCalled();
     await expect(c.getByRole('heading', { name: 'Deliverables' })).toBeVisible();
     await expect(c.queryByRole('button', { name: 'Discard' })).toBeNull();

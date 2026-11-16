@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import {
   StatusProgression,
   avTransitions,
@@ -9,18 +10,18 @@ import {
 import type { AVStatus } from '../status-tag';
 
 /* Two domains' chains, one for one with the Figma `Status_Tag_Design_Only`
-   and `Status_Tag_Development_Only` sets. `In Progress` is not in either —
+   and `Status_Tag_Development_Only` sets, spelt as Figma spells them (For Review, Ready for Deploy, Confirmed Prod). `In Progress` is not in either —
    it is spine, drawn in `Status_Tag_General`, and every domain passes through
    it before its own chain starts. */
 const DEVELOPMENT: AVChainStep[] = [
-  { id: 'for-review', label: 'For review' },
+  { id: 'for-review', label: 'For Review' },
   { id: 'for-qa', label: 'For QA' },
   { id: 'in-qa', label: 'In QA' },
-  { id: 'ready-for-deploy', label: 'Ready for deploy' },
-  { id: 'confirmed-prod', label: 'Confirmed prod' },
+  { id: 'ready-for-deploy', label: 'Ready for Deploy' },
+  { id: 'confirmed-prod', label: 'Confirmed Prod' },
 ];
 
-const DESIGN: AVChainStep[] = [{ id: 'design-review', label: 'Design review' }];
+const DESIGN: AVChainStep[] = [{ id: 'design-review', label: 'Design Review' }];
 
 /* A domain the repo has never heard of, to show that none of this is wired
    to Design and Development specifically. */
@@ -69,6 +70,10 @@ export const Default: Story = {
 /** The first step returns to `In Progress`, the shared step it came from. */
 export const FirstStep: Story = {
   render: () => <StatusProgression role="assignee" chain={DEVELOPMENT} step="for-review" />,
+  play: async ({ canvasElement }) => {
+    /* Figma's wording: `In Progress` is a proper name, capital P. */
+    await expect(within(canvasElement).getByRole('button', { name: 'Return to In Progress' })).toBeVisible();
+  },
 };
 
 /** The last step hands off instead of moving on. Admins get the short label. */
