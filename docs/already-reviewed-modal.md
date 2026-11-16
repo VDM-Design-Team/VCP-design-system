@@ -1,6 +1,6 @@
 # AlreadyReviewedModal *(pattern)*
 
-What a reviewer is told when the Added Value they came to review has already been reviewed: **"Already Reviewed"**, "This Value has already been reviewed by the initiator.", and one **Close**.
+What a reviewer is told when the Added Value they came to review has already been reviewed: **"Already Reviewed"**, "This Value has already been reviewed.", and one **Close**.
 Built to Figma's `Review_Already_Reviewed_Popup` (VCP Design Library, the Review AV Modal page).
 
 ## Composed of
@@ -29,12 +29,14 @@ The design draws this dialog and puts it in no flow, so **the page decides when 
 | `open` | `boolean` | required | |
 | `onClose` | `() => void` | required | Close, Escape or a click outside. Nothing is changed by closing |
 | `title` | `string` | "Already Reviewed" | The heading, and the dialog's name |
-| `message` | `ReactNode` | "This Value has already been reviewed by the initiator." | The line under it |
+| `message` | `ReactNode` | "This Value has already been reviewed." | The line under it |
 | `closeLabel` | `string` | "Close" | |
 
 ## Tokens
 
 It is `Modal` at `md` (`surface.elevated`, `shadow-modal`, `md` radius), the title `title-md-semibold` in `text.primary`, the line `body-md-regular` in `text.secondary`. Close is a `primary` `Button`, `fullWidth`: Figma's button is the dialog's whole width.
+
+**The default line is shorter than Figma's.** Figma says "This Value has already been reviewed by the initiator."; the default drops "by the initiator" so it is true whoever reviewed it (the initiator, or a second admin), and a page that knows who passes it in `message`.
 
 Figma sets the title at 24, the line at 18 and the dialog 554 wide; `Modal`'s own title and size steps are used so this dialog sits with every other one.
 
