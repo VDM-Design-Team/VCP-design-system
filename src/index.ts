@@ -132,4 +132,5 @@ export type { ChartSeries, ChartSeriesStyle } from './lib/chart-series';
 export { fileKind, useAttachmentFiles } from './lib/attachment-files';
 export { DateFormatProvider, useDateFormat, formatDate, formatDateTime, formatTime, formatDateRange, formatDayMonthYear, datePlaceholder } from './lib/format-date';
 /* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
+export { focusFirstInvalid } from './lib/focus-first-invalid';
 export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';

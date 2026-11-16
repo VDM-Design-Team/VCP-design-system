@@ -110,6 +110,12 @@ Never show both. `error` wins whenever it is set.
 
 An `error` turns the control's **edge critical as well as the message red**. `Field` puts `aria-invalid` on the control, and `Input`, `Select`, `Textarea`, `SearchSelect` and `DateField` read it, so a `Field` with an error needs nothing else (their own `invalid` prop still works on its own). The edge stays through focus.
 
+## Taking the person to the missing field
+
+When a submit is blocked, call `focusFirstInvalid(form)` once the errors have rendered. It finds the first control that is `aria-invalid` (the page order, which is what `Field` sets from its `error`), scrolls it into view only if it is not already fully visible, and focuses it. It scrolls smoothly, or jumps when the person prefers reduced motion. Pair it with the `missingInput()` toast, which says what is missing while the focus shows where. A group that is invalid as a whole gets its first enabled control focused. It returns the element it focused, or `null` when nothing is invalid.
+
+Call it after the failed submit only, not on every change: typing must not pull focus back to an old error.
+
 ## Don't
 
 - Don't hardcode colors or spacing. `className="text-[#e7000b]"` is a bug — use a token.
@@ -122,4 +128,5 @@ An `error` turns the control's **edge critical as well as the message red**. `Fi
   and nothing else; anything else belongs next to the control or in the form footer.
 - Don't nest a Field inside a Field. For a group of related controls use a
   `<fieldset>` with a `<legend>` and one Field per control.
+- Don't call `focusFirstInvalid` on every render or keystroke; only after a blocked submit.
 - Don't use `inline` on mobile. The label column doesn't wrap.
