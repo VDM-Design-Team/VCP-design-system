@@ -129,7 +129,7 @@ export function AnnouncementsTable({
       render: (row) => (
         <Menu
           align="right"
-          trigger={<IconButton icon="dots-three" label={`Actions for ${row.title}`} />}
+          trigger={<IconButton variant="neutral-tertiary" icon="dots-three" label={`Actions for ${row.title}`} />}
           items={[
             { key: 'edit', label: 'Edit', onClick: () => onEdit?.(row) },
             { key: 'delete', label: 'Delete', tone: 'critical', icon: false, onClick: () => onDelete?.(row) },
