@@ -41,7 +41,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `type` | `value` (`'Type 1'`…) | Change Type for 2 Added Values | …as a `TypeTag` | nothing |
 | `cycle` | `value` `{ code, start, end }` | Change Cycle for 2 Added Values | …as a `CycleTag` ("C18 (Sep 20, 2025 - Oct 02, 2026)") | nothing |
 | `status` | `value` (the status) | Change Status for 2 Added Values | …as a `StatusTag` (a spine status in its own colour, a domain step in the shared one). **Figma draws no popup for the other statuses** (In Progress, For QA…); this is the plain one | nothing |
-| `backlog` | — | Move 2 Added Values to Backlog | **Feedback** (optional), and per Added Value "Uses bulk reason unless overridden" | `{ value, overrides, detail?, overrideDetails? }` |
+| `backlog` | — | Move 2 Added Values to Backlog | **Feedback**, required (decided 13 Nov 2026): the bulk one or one per Added Value, and Confirm says so under the field while any has neither; per Added Value "Uses bulk reason unless overridden" | `{ value, overrides, detail?, overrideDetails? }` |
 | `accept-pending` | `domain` | Accept 2 Pending Added Values | `development`: a **Multipart Value** checkbox (with its description), bulk and per Added Value. Otherwise nothing | `{ value: boolean, overrides }`, or `null` |
 | `accept` | `domain` | Accept 2 Added Values | `development`: **Require Cypress Test Script**; `design`: **Copy to Dev**; otherwise nothing | `{ value: boolean, overrides }`, or `null` |
 | `reject-pending` | `reasons` | Reject 2 Pending Added Values | **Rejection Reason** (a select of your `reasons`: `{ value, label, explanation?, other? }`; the chosen reason's `explanation` shows under it, and the one marked `other` shows an optional note field instead), bulk and per Added Value. **Required** | `{ value, overrides, detail?, overrideDetails? }` |
@@ -55,6 +55,8 @@ The bulk field "will be applied to all selected Added Values unless overridden b
 **follows the bulk one until it is changed**, a select starts empty. `onConfirm` gets `{ value, overrides }`: the bulk value, and `overrides[ref]` for each Added Value that **differs** (an untouched one is not listed).
 
 **A reason is required to reject.** Confirm says "Select a rejection reason, or one for each Added Value." under the field, focuses it, and does not go through until every Added Value has one.
+
+**Feedback is required to move to the Backlog** (decided 13 Nov 2026, as the live product does, and as `MoveToBacklogModal` asks for one). Confirm says "Enter feedback, or some for each Added Value." under the field, focuses it, and does not go through until every Added Value has feedback: the bulk one, or its own. Spaces alone do not count.
 
 ## Props
 

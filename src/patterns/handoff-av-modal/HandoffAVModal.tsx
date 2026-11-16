@@ -3,8 +3,10 @@ import { Button } from '../../atoms/button';
 import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import {
   HandoffForm,
+  HANDOFF_EVIDENCE_ERROR,
   OVERDUE_REASONS,
   blankHandoffEntry,
+  handoffHasEvidence,
   handoffLinksValid,
   type HandoffAttachment,
   type HandoffEntry,
@@ -26,8 +28,9 @@ export type { OverdueReasonOption };
  * each of several Added Values, so what a handoff asks for is decided in one
  * place: a **Handoff Date**, chosen from the calendar, is **required**; a late
  * value (`overdueDays`: the banner, the reason and the notes) must say **why**;
- * links, files and notes are optional, and a link that is typed must be a valid
- * `https://` address. This dialog **asks on submit**: an incomplete handoff is
+ * there must be **something to review, at least one demo link or one
+ * attachment** (decided 13 Nov 2026); notes are optional, and a link that is
+ * typed must be a valid `https://` address. This dialog **asks on submit**: an incomplete handoff is
  * refused with the reason under the field, and focus goes to the first one.
  *
  * **The footer is the domain's.** Design and Governance hand off; Development
@@ -91,7 +94,7 @@ export function HandoffAVModal({
   const formId = React.useId();
   const isOverdue = overdueDays != null;
   const [entry, setEntry] = React.useState<HandoffEntry>(() => blankHandoffEntry(defaultDate));
-  const [errors, setErrors] = React.useState<{ date?: string; overdueReason?: string; links?: boolean }>({});
+  const [errors, setErrors] = React.useState<{ date?: string; overdueReason?: string; links?: boolean; evidence?: string }>({});
   /* A fresh form every time it opens: a handoff abandoned half-filled should not come back on the next one. */
   const [session, setSession] = React.useState(0);
   /* `publish` is decided by which button was pressed, and read by the one submit handler the form has. */
@@ -106,11 +109,13 @@ export function HandoffAVModal({
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    /* Asked on submit: a date, a reason when late, and a link that is typed must be an address. */
+    /* Asked on submit: a date, a reason when late, a link that is typed must be an address, and there is a link or a file to review. */
     const next: typeof errors = {};
     if (!entry.date) next.date = 'Select a handoff date.';
     if (isOverdue && !entry.overdueReason) next.overdueReason = 'Please select a reason before completing the AV';
     if (!handoffLinksValid(entry)) next.links = true;
+    /* A link that is typed wrong is already being asked about; "add a link" on top of it would be noise. */
+    else if (!handoffHasEvidence(entry, attachments.length)) next.evidence = HANDOFF_EVIDENCE_ERROR;
     setErrors(next);
     if (Object.keys(next).length > 0) return;
     onHandoff(
@@ -132,6 +137,7 @@ export function HandoffAVModal({
       date: next.date ? undefined : now.date,
       overdueReason: next.overdueReason ? undefined : now.overdueReason,
       links: now.links && !handoffLinksValid(next) ? true : undefined,
+      evidence: now.evidence && !handoffHasEvidence(next, attachments.length) ? now.evidence : undefined,
     }));
   };
 
