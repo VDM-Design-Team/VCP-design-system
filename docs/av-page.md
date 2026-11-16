@@ -9,10 +9,9 @@ Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`�
 | Piece | Tier |
 |---|---|
 | `Button` | atom |
-| `Input` | atom |
+| `DescriptionCardTitle` | component |
 | `DescriptionSection` | component |
 | `DuplicateToOtherDomain` | component |
-| `Field` | component |
 | `StatusHistory` | component |
 | `StatusProgression` | component |
 | `AvHeader` (exported as `AVHeader`) | pattern |
@@ -73,7 +72,7 @@ It owns no state. The title, the cards, the comments and the status are the page
 |---|---|---|---|
 | `mode` | `'view' \| 'edit'` | `view` | Reading or editing |
 | `header` | `AVHeaderProps` | required | `showStatusActions` is on when reading, off when editing |
-| `title` | `{ reference?, value, onChange?, label?, placeholder?, error? }` | — | Editing with no `onChange` is read-only |
+| `title` | `{ reference?, value, onChange?, label?, placeholder?, error?, disabled?, parent? }` | — | `DescriptionCardTitle`'s states: editing with no `onChange` is read-only; `disabled` greys the field; `parent` marks a multipart child |
 | `description` | `{ problem?, solution?, deliverable?, 'desired-outcome'? }` | — | Each is `DescriptionSection`'s props without `type` |
 | `multipart` / `history` | `MultipartSectionProps` / `StatusHistoryProps` | — | |
 | `comments` | `CommentSectionProps` | — | Reading only |

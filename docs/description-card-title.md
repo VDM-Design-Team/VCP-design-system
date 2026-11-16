@@ -1,11 +1,40 @@
-# DescriptionCardTitle *(atom)*
+# DescriptionCardTitle *(component)*
 
-The card at the top of an Added Value page that names it: the AV's reference
-over its title.
+The card at the top of an Added Value page that names it: to read, the AV's
+reference over its title; to edit, the **Title** field.
 
 Read off Figma's `Description_Card_Title` (VCP Pages - Flows, the left column of
 every AV page): an elevated card, 16 in, 8 radius; the reference 16 regular,
 the title 16 semibold, both `text.primary`.
+
+**It was an atom that only read, and the AV page built its own editing title
+beside it.** The editing card holds a `Field` and an `Input`, which an atom may
+not import, so it moved up a tier and the page now uses it in every state. Its
+import from the package root is unchanged.
+
+## Composed of
+
+| Piece | Tier |
+|---|---|
+| `Icon` | atom |
+| `Input` | atom |
+| `Field` | component |
+
+Generated from the real imports — `npm test` fails if this list drifts.
+
+## States
+
+Figma's `_Description_Card_Title_Base`:
+
+| Figma `State` | Here |
+|---|---|
+| Viewing | the default: the reference over the title, an `<h2>` |
+| Editing Placeholder | `editing` with an empty `title`: the **Title** label over the field, "Type in the title" as the prompt |
+| Editing Filled | `editing` with a `title` |
+| Disabled | `editing` and `disabled`: the value stays, greyed, and takes no focus |
+| `Multipart Child` switch | `parent={{ ref: 'VCP-4321' }}`: "Multipart Child of VCP-4321" beside the reference when reading; with an `href` the reference is a link that opens the parent in a new tab, with only `onOpen` a button, with neither plain text |
+
+An `error` shows under the field and sets `aria-invalid`, as every `Field` does.
 
 ## When to use
 
@@ -22,9 +51,15 @@ only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `reference` | `string` | required | "VCP-1234". Plain text above the title |
-| `title` | `string` | required | The AV's title. Wraps; never cut |
+| `reference` | `string` | — | "VCP-1234". Plain text above the title when reading |
+| `title` | `string` | required | The AV's title (the field's value when editing). Wraps; never cut |
 | `headingLevel` | `2 \| 3` | `2` | The title's heading level. `2` under `AVHeader`'s `<h1>` |
+| `editing` | `boolean` | `false` | The card is the **Title** field. With no `onChange` the field is read-only |
+| `onChange` | `(title: string) => void` | — | Editing: the title changed |
+| `label` / `placeholder` | `string` | "Title" / "Type in the title" | Editing: the field's label and prompt |
+| `error` | `string` | — | Editing: what is wrong |
+| `disabled` | `boolean` | — | Editing: cannot be changed |
+| `parent` | `{ ref, href?, onOpen? }` | — | Reading a multipart child: shows "Multipart Child of <ref>" |
 | `className` | `string` | — | Merged via `cn()`. Other `<div>` attributes pass through |
 
 ## Tokens
@@ -47,4 +82,5 @@ padding `4` (16). Type: `title-sm-regular` for the reference,
 - **Don't make it the `<h1>`.** `AVHeader` holds the page's one `<h1>`.
 - **Don't truncate the title.** Tables cut it (`TruncatedText`); this card shows it whole.
 - **Don't put actions in it.** The status buttons are `AVHeader`'s and the ⋮ menu is `DetailCardMenu`'s.
+- **Don't build an editing title beside it.** The Title field is this card's `editing` state.
 - **Don't use it outside an Added Value page.** Other pages use `PageTitle`.
