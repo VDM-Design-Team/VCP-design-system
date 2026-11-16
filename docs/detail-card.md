@@ -81,8 +81,8 @@ that shows a count and reports a press).
 | `value` | `DetailCardValue` | required | Every field optional; the card draws the ones its type has. Dates are ISO `yyyy-mm-dd` |
 | `onChange` | `(value) => void` | — | Editing and new: the whole value, changed |
 | `options` | `{ people, roles, cycles, projects, categories, tags }` | — | The dropdowns' choices. `people` and `roles` feed the add / edit form (roles default to QA, Design and Assignee). A cycle carries its code and dates, so the read card draws a `CycleTag` |
-| `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid |
-| `readOnly` | `DetailCardField[]` | — | Editing and new: fields shown but locked — the dropdowns and dates in the list can't be opened or changed. A multipart part's edit page locks Projects, AV Category, Type and Urgency, the fields it takes from its parent (Figma `1404:132644`) |
+| `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid. **Initiator** and **Assignee** (`errors.initiators`, `errors.assignees`) show it under their chips, announced, with the group described by it |
+| `readOnly` | `DetailCardField[]` | — | Editing and new: fields shown but locked — the dropdowns and dates in the list can't be opened or changed. A multipart part's edit page locks Projects, AV Category, Tags, Type and Urgency, the fields it takes from its parent (Figma `1404:132644`) |
 | `viewerCount`, `onViewers` | `number`, `() => void` | — | The viewers pill (placeholder) on the read cards |
 | `lockAssignees` | `boolean` | when `initiatedTo` is set | Editing: the Assignee **+** is dimmed and explains why (see *Assignee availability*). Defaults on for an AV with `initiatedTo` |
 | `dueSoonWithinDays` | `number` | `3` | Due dates this near or nearer read as due soon |
@@ -148,7 +148,7 @@ Everything else is the composed pieces' own. No new tokens.
 ## Read-only fields
 
 `readOnly` lists fields that show their value but can't change, as Figma greys them on a multipart part's edit page (the part takes
-them from its parent). It uses each control's own disabled state (`SearchSelect`, the date field), so a locked field is skipped by
+them from its parent: Projects, AV Category, Tags, Type and Urgency). It uses each control's own disabled state (`SearchSelect`, the date field), so a locked field is skipped by
 Tab and announced as unavailable, and its tokens are the system's disabled ones. People (Initiator, Assignee) aren't covered: no
 design locks them.
 

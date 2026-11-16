@@ -100,10 +100,9 @@ export interface AVTableRow {
 }
 
 /**
- * The four columns the design puts an info glyph on. Urgency, Type and Status default to the product's
- * copy — each piece owns its own (`URGENCY_COLUMN_HINT`, `TYPE_COLUMN_HINT`, `STATUS_COLUMN_HINT`).
- * **Members has none**: Figma draws the glyph and writes nothing, so it stays silent until you pass
- * a line. Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
+ * The four columns the design puts an info glyph on. All four default to the product's copy: Urgency, Type
+ * and Status from the piece that owns each (`URGENCY_COLUMN_HINT`, `TYPE_COLUMN_HINT`, `STATUS_COLUMN_HINT`),
+ * Members from `MEMBERS_COLUMN_HINT`. Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
  */
 export interface AVTableHints {
   urgency?: React.ReactNode;
@@ -112,10 +111,17 @@ export interface AVTableHints {
   members?: React.ReactNode;
 }
 
+/**
+ * The Members column's tooltip, Figma's own sentence (the Assigned page's Members header). Urgency, Type and Status keep theirs with the piece that owns
+ * the vocabulary; Members has no piece (`AvatarGroup` knows nothing about this column), so the sentence lives here.
+ */
+export const MEMBERS_COLUMN_HINT = 'Displays the people assigned to or responsible for the task';
+
 const DEFAULT_HINTS: AVTableHints = {
   urgency: URGENCY_COLUMN_HINT,
   type: TYPE_COLUMN_HINT,
   status: STATUS_COLUMN_HINT,
+  members: MEMBERS_COLUMN_HINT,
 };
 
 export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {

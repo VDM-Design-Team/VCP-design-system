@@ -446,6 +446,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
                 withAvailability={!isInitiator && domain === 'development'}
                 availabilityKnown={availabilityKnown}
                 lockedReason={!isInitiator && assigneesLocked ? INITIATED_NOTE : undefined}
+                error={isInitiator ? errors?.initiators : errors?.assignees}
                 onChange={(list) => (isInitiator ? set({ initiators: list }) : set({ assignees: list }))}
                 aside={isInitiator && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
               />
@@ -477,6 +478,7 @@ function Item({
   addLockedReason,
   addRef,
   aside,
+  describedBy,
   children,
 }: {
   label: string;
@@ -488,11 +490,13 @@ function Item({
   /** The + is dimmed and does nothing while a form is open. */
   addDisabled?: boolean;
   aside?: React.ReactNode;
+  /** The id of the error under the field, so the group is described by it. */
+  describedBy?: string;
   children: React.ReactNode;
 }) {
   const id = React.useId();
   return (
-    <div role="group" aria-labelledby={id} className="flex flex-col items-start gap-2">
+    <div role="group" aria-labelledby={id} aria-describedby={describedBy} className="flex flex-col items-start gap-2">
       <div className="flex w-full items-center gap-2">
         <span id={id} className="text-title-sm-semibold text-text-primary">
           {label}
@@ -635,6 +639,7 @@ function PeopleField({
   withAvailability,
   availabilityKnown,
   lockedReason,
+  error,
   onChange,
   aside,
 }: {
@@ -648,9 +653,12 @@ function PeopleField({
   availabilityKnown?: boolean;
   /** The + is disabled, and this is why. */
   lockedReason?: string;
+  /** What is wrong with the list (an Initiator is required): under the chips, in the critical colour, and announced. */
+  error?: string;
   onChange: (people: DetailCardPerson[]) => void;
   aside?: React.ReactNode;
 }) {
+  const errorId = React.useId();
   const [mode, setMode] = React.useState<{ type: 'add' } | { type: 'edit'; index: number } | null>(null);
   /* Focus never falls to the page when the control that had it goes: opening the form disables the + (and replaces a chip), closing it removes the form, and removing a chip removes its buttons. Each step
      says where focus belongs next; the effect below puts it there once that control is on screen. */
@@ -703,6 +711,7 @@ function PeopleField({
       addLockedReason={lockedReason}
       addRef={addButton}
       aside={aside}
+      describedBy={error ? errorId : undefined}
     >
       {/* One wrapping row. A chip being edited is replaced, in its own place among the others, by the form,
           which takes a whole row (`w-full`) so the chips before it stay above and the ones after it below. */}
@@ -757,6 +766,11 @@ function PeopleField({
         {mode?.type === 'add' &&
           form(undefined, 'Add', (person) => onChange([...people, person]))}
       </div>
+      {error && (
+        <p id={errorId} role="alert" className="text-caption-md-medium text-accent-critical-outline-content-default">
+          {error}
+        </p>
+      )}
     </Item>
   );
 }

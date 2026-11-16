@@ -125,20 +125,19 @@ export const Editing: Story = {
 
 /**
  * `readOnly`: a multipart part's edit page (Figma `1404:132644`) greys the fields it takes from its parent —
- * Projects, AV Category, Type and Urgency. They show their values but can't be opened or changed.
+ * Projects, AV Category, Tags, Type and Urgency. They show their values but can't be opened or changed.
  */
 export const EditingWithReadOnlyFields: Story = {
   name: 'Editing, some fields read-only',
-  args: { type: 'editing', viewerCount: undefined, onChange: fn(), readOnly: ['projects', 'category', 'type', 'urgency'] },
+  args: { type: 'editing', viewerCount: undefined, onChange: fn(), readOnly: ['projects', 'category', 'tags', 'type', 'urgency'] },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     /* Each field's control, by its name (a single select is a combobox; a multiple one, Projects and Tags, a button). */
     const control = (name: string) => canvas.getAllByLabelText(new RegExp(`^${name}`)).find((el) => el.matches('button, [role="combobox"]'))!;
-    for (const name of ['Projects', 'AV Category', 'Type', 'Urgency']) {
+    for (const name of ['Projects', 'AV Category', 'Tags', 'Type', 'Urgency']) {
       await expect(control(name)).toBeDisabled();
     }
     /* The rest still change. */
-    await expect(control('Tags')).toBeEnabled();
     await expect(canvas.getByRole('combobox', { name: /^Capacity Points/ })).toBeEnabled();
   },
 };
@@ -401,6 +400,20 @@ export const WithAnError: Story = {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Please select a project before submitting')).toBeVisible();
     await expect(canvas.getByRole('button', { name: /^Projects/ })).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+/** An Initiator is required: with none, `errors.initiators` shows under the (empty) chips, announced, and the field's group is described by it. The page words it. */
+export const WithoutAnInitiator: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { type: 'new', value: { initiators: [] }, errors: { initiators: 'Please select at least one initiator before submitting' } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const message = canvas.getByText('Please select at least one initiator before submitting');
+    await expect(message).toBeVisible();
+    await expect(message).toHaveAttribute('role', 'alert');
+    await expect(canvas.getByRole('group', { name: 'Initiator' })).toHaveAccessibleDescription('Please select at least one initiator before submitting');
   },
 };
 
