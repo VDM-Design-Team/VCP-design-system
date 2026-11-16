@@ -179,13 +179,14 @@ export function ViewersPicker({ viewers, candidates = [], onAdd, onRemove, class
               <p className="text-label-sm-semibold text-text-secondary">{countText(viewers.length)}</p>
               <ul className="flex flex-col gap-1">
                 {viewers.map((person) => (
-                  <li key={person.id} className="flex items-center gap-2 px-1 py-1">
+                  <li key={person.id} className="group/row flex items-center gap-2 rounded-sm px-1 py-1 hover:bg-surface-neutral-faint">
                     <Person person={person} />
                     {onRemove && (
                       <RemoveButton
                         tone="tonal"
                         label={`Remove ${person.name} as a viewer`}
-                        className="ml-auto"
+                        /* On a pointer, it shows when the row is hovered or has focus, as Figma draws it; on a touch screen there is no hover, so it is always there. */
+                        className="ml-auto opacity-0 transition-opacity motion-reduce:transition-none group-hover/row:opacity-100 group-focus-within/row:opacity-100 pointer-coarse:opacity-100"
                         onClick={() => {
                           onRemove(person);
                           backToSearch();

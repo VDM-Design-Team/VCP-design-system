@@ -30,7 +30,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | | Figma | Here |
 |---|---|---|
 | **Hover or focus the pill** | Hover | A list: "3 Viewers" over each person. With nobody, "No viewers yet", and, if it can be changed, "Click to manage viewers" |
-| **Press the pill** | Clicked (Empty Search) | A panel: the **Search by name** field, then "3 Viewers" with each person and a button to remove them |
+| **Press the pill** | Clicked (Empty Search) | A panel: the **Search by name** field, then "3 Viewers" with each person. Hover a row (or tab to it) for its remove button |
 | **Type in the search** | Filled Search | The people who match and are **not viewers yet** come first; press one to add them |
 | **Nobody is viewing** | No Viewers / No Viewers Search | "No viewers yet" |
 | **Nobody matches** | not drawn | "No one matches" (ours) |
@@ -49,7 +49,7 @@ It holds no data. The page passes `viewers` and `candidates` and changes them in
 
 ## Tokens
 
-The pill is the neutral outline control (`neutral.outline.*`, the same as the placeholder it replaces), 24 high, `caption-md-medium`. The panel is `Popover`'s (`surface.elevated`, `shadow-menu`), `md` wide, scrolling at 300 high. People are `Avatar` `sm` (24) with `body-sm-regular` names; the headings are `label-sm-semibold` in `text.secondary`. The remove button is `RemoveButton` `tonal`.
+The pill is the neutral outline control (`neutral.outline.*`, the same as the placeholder it replaces), 24 high, `caption-md-medium`. The panel is `Popover`'s (`surface.elevated`, `shadow-menu`), `md` wide, scrolling at 300 high. People are `Avatar` `sm` (24) with `body-sm-regular` names; the headings are `label-sm-semibold` in `text.secondary`. The remove button is `RemoveButton` `tonal`; on a pointer it appears when the row is hovered or holds focus (Figma's hover state), and on a touch screen it is always shown.
 
 ## Accessibility
 
@@ -62,5 +62,5 @@ The pill is the neutral outline control (`neutral.outline.*`, the same as the pl
 
 - Don't use it to show people with nothing to read or change: `AvatarGroup`.
 - Don't pass a `candidates` list that holds only the people who are not viewers yet: pass everyone; the picker leaves the viewers out.
-- Don't hide the remove button until hover: a touch screen has no hover.
+- Don't hide the remove button on a touch screen: it shows on hover or focus for a pointer, and always on touch (`pointer-coarse`), as `Chip` and the missed-it card do.
 - Don't keep the people in the picker. Pass them in, and change them in `onAdd` and `onRemove`.
