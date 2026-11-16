@@ -17,6 +17,7 @@ import { SearchSelect, type SearchSelectOption } from '../../components/search-s
 import { AV_STATUSES, StatusTag, type AVStatus } from '../../components/status-tag';
 import { AV_TYPES, TypeTag, type AVType } from '../../components/type-tag';
 import { AV_URGENCIES, UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
+import { ViewersPicker, type ViewersPickerProps } from '../../components/viewers-picker';
 import { useDateFormat } from '../../lib/format-date';
 
 /**
@@ -180,7 +181,12 @@ export interface DetailCardProps
    * (it has `duplicates`) is locked, because its assignees are set on its domain copy.
    */
   lockAssignees?: boolean;
-  /** The viewers pill, a placeholder until Edit Viewers is built: shows the count and reports a press. */
+  /**
+   * The viewers pill with its list and its picker (`ViewersPicker`): hover for who is viewing, press to search and add people or remove viewers. Shown on the read cards, never
+   * while editing.
+   */
+  viewers?: ViewersPickerProps;
+  /** Just a count and a press: the pill only, for a page that has no list yet. `viewers` wins when both are given. */
   viewerCount?: number;
   onViewers?: () => void;
   /** Due dates this many days away or fewer read as due soon. Default 3. */
@@ -204,6 +210,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       errors,
       readOnly,
       lockAssignees,
+      viewers,
       viewerCount,
       onViewers,
       dueSoonWithinDays = 3,
@@ -404,7 +411,8 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       <Badge size="lg" tone="neutral">{String(value.capacityPoints)}</Badge>
     ) : null;
 
-    const hasViewers = viewerCount !== undefined && !editing;
+    const hasViewers = (viewers !== undefined || viewerCount !== undefined) && !editing;
+    const viewersNode = viewers ? <ViewersPicker {...viewers} /> : <Viewers count={viewerCount ?? 0} onPress={onViewers} />;
 
     return (
       <section
@@ -447,7 +455,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
                 availabilityKnown={availabilityKnown}
                 lockedReason={!isInitiator && assigneesLocked ? INITIATED_NOTE : undefined}
                 onChange={(list) => (isInitiator ? set({ initiators: list }) : set({ assignees: list }))}
-                aside={isInitiator && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
+                aside={isInitiator && hasViewers ? viewersNode : undefined}
               />
             );
           }
@@ -457,7 +465,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
             <Item
               key={field}
               label={LABEL[field] ?? field}
-              aside={field === 'initiators' && hasViewers ? <Viewers count={viewerCount} onPress={onViewers} /> : undefined}
+              aside={field === 'initiators' && hasViewers ? viewersNode : undefined}
             >
               {node}
             </Item>
@@ -535,7 +543,7 @@ function Muted({ label, date }: { label: string; date: string }) {
   );
 }
 
-/** The viewers pill: an eye and a count. A placeholder until Edit Viewers is built; it only reports a press. */
+/** The bare viewers pill: an eye and a count, for a page with no list yet (`viewerCount`); it only reports a press. With `viewers`, `ViewersPicker` is drawn instead. */
 function Viewers({ count, onPress }: { count: number; onPress?: () => void }) {
   return (
     <button
