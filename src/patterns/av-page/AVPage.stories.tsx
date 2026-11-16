@@ -132,7 +132,11 @@ export const Reading: Story = {
 
 /** A rejected AV: a critical banner above the title, the width of the left column: "This Task was rejected" and the reason. */
 export const Rejected: Story = {
-  args: { banner: rejectedBanner({ message: 'Out of scope for this cycle; resubmit with a narrower brief.' }) },
+  args: {
+    banner: rejectedBanner({ message: 'Out of scope for this cycle; resubmit with a narrower brief.' }),
+    header: { ...VIEW.header, status: 'Rejected' },
+    details: { ...VIEW.details!, value: { ...VIEWING, status: 'Rejected' } },
+  },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     const banner = c.getByText('This Task was rejected');
@@ -146,7 +150,11 @@ export const Rejected: Story = {
 
 /** An AV sent back to the backlog in another domain: a warning banner that names it, "Remarks from Development Domain", and the feedback. */
 export const BackloggedInAnotherDomain: Story = {
-  args: { banner: backloggedBanner({ domain: 'Development', message: 'Waiting on the new design tokens.' }) },
+  args: {
+    banner: backloggedBanner({ domain: 'Development', message: 'Waiting on the new design tokens.' }),
+    header: { ...VIEW.header, status: 'Backlog' },
+    details: { ...VIEW.details!, value: { ...VIEWING, status: 'Backlog' } },
+  },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByText('Remarks from Development Domain')).toBeVisible();
