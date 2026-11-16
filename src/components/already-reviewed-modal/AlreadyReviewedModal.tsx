@@ -12,7 +12,7 @@ import { Modal, ModalConfirm } from '../modal';
  * reviewer's name it can say who, through `message`.
  *
  * **Close is the footer's one answer, at the right**, like every dialog's (`ModalConfirm`, as `BulkActionFailedModal`'s "Got it"). Figma draws it the dialog's whole width, from
- * the old design this popup was drawn in; no other dialog in the system has a full-width footer button, so this one follows them.
+ * the old design this popup was drawn in; every standard dialog's footer is right-aligned (the Change Log carousel is the one exception), so this one follows them.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
  * token in `tokens/` first — never hardcode a hex, px value, or arbitrary Tailwind class.
