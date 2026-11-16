@@ -119,6 +119,16 @@ locale. Do not format it yourself (`due.label` is only for text that is not a da
 date maths and no relative time — see `docs/due-date-tag.md` for why the
 threshold is not a design-system decision.
 
+### The row's own state: BESA Passed, Rejected, Backlogged
+
+| Field | Draws | Where | Tooltip |
+|---|---|---|---|
+| `besaPassed: true` | a green seal (20) | right after the reference, before the rule | "BESA Passed" |
+| `rejected: { reason }` | a red warning glyph (16) | the end of the details, after the counts | the reason |
+| `backlogged: { reason }` | an info glyph (16, green as Figma draws it) | the end of the details, after the counts | the reason |
+
+Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and `Backlogged_AV_Indicator`. Each is a button named "BESA Passed", "Rejected" or "Backlogged", so the keyboard reaches the tooltip (a tooltip needs a focusable trigger); the reason is read as its description, and "BESA Passed" is not read twice because the name is its whole tooltip. They show on any row, multipart or not. The table does not decide which AVs are rejected or backlogged, or where the reason comes from: pass what the AV carries.
+
 ### `hints`: three have copy, Members does not
 
 Figma puts an info glyph on four headers — Urgency, Type, Status, Members. Three now have the product's

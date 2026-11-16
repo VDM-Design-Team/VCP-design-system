@@ -14,6 +14,7 @@ import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../component
 import { TruncatedText } from '../../components/truncated-text';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
+import { Tooltip } from '../../atoms/tooltip';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
@@ -82,6 +83,12 @@ export interface AVTableRow {
   multipart?: AVMultipart;
   /** The domain badge beside the title — "VCP", "Design". */
   domain?: string;
+  /** The AV has passed BESA: a green seal after the reference, "BESA Passed" in its tooltip. */
+  besaPassed?: boolean;
+  /** The AV was rejected: a red warning glyph at the end of the details, `reason` in its tooltip. */
+  rejected?: { reason: string };
+  /** The AV was sent back to the backlog: an info glyph at the end of the details, `reason` in its tooltip. */
+  backlogged?: { reason: string };
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
@@ -160,6 +167,29 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
 }
 
 /** A count under the title: glyph, number, and the word only for screen readers. */
+/**
+ * A glyph that says a thing about the AV, with the words in its tooltip. A button, because the tooltip needs a focusable trigger (`Tooltip`): focus
+ * it and the sentence is read as its description. `name` is the short word the control is called ("Rejected").
+ */
+function Flag({ name, reason, tone, size, icon }: { name: string; reason: string; tone: 'success' | 'critical'; size: 16 | 20; icon: 'seal-check' | 'warning' | 'info' }) {
+  return (
+    /* "BESA Passed" names the control and is its whole tooltip: say it once. */
+    <Tooltip content={reason} placement="top" describe={reason !== name}>
+      <button
+        type="button"
+        aria-label={name}
+        className={cn(
+          'grid shrink-0 place-items-center rounded-sm',
+          tone === 'success' ? 'text-accent-success-outline-border-default' : 'text-accent-critical-outline-content-default',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+        )}
+      >
+        <Icon name={icon} size={size} aria-hidden="true" />
+      </button>
+    </Tooltip>
+  );
+}
+
 function Count({ icon, value, noun }: { icon: 'paperclip' | 'chat-centered-text'; value: number; noun: string }) {
   if (!value) return null;
   return (
@@ -240,7 +270,9 @@ export function AVTable({
             completed={multipart.kind === 'parent' ? multipart.completed : undefined}
           />
         );
-        const details = (row.domain || multipart?.kind === 'child' || row.attachments || row.comments) && (
+        /* BESA Passed sits right after the reference, in Figma's `_AV_Table_ID`. */
+        const besa = row.besaPassed && <Flag name="BESA Passed" reason="BESA Passed" tone="success" size={20} icon="seal-check" />;
+        const details = (row.domain || multipart?.kind === 'child' || row.attachments || row.comments || row.rejected || row.backlogged) && (
           <div className="flex w-max items-center gap-2">
             {row.domain && (
               <Tag tone="brand" size="sm">
@@ -252,6 +284,8 @@ export function AVTable({
             )}
             <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
             <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
+            {row.rejected && <Flag name="Rejected" reason={row.rejected.reason} tone="critical" size={16} icon="warning" />}
+            {row.backlogged && <Flag name="Backlogged" reason={row.backlogged.reason} tone="success" size={16} icon="info" />}
           </div>
         );
 
@@ -260,7 +294,10 @@ export function AVTable({
         if (multipart) {
           return (
             <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 py-4">
-              <div className="col-start-1 row-start-1 flex items-center">{reference}</div>
+              <div className="col-start-1 row-start-1 flex items-center gap-2">
+                {reference}
+                {besa}
+              </div>
               <Divider orientation="vertical" className="col-start-2 row-start-1 h-4 shrink-0 self-center" />
               <div className="col-start-3 row-start-1 min-w-0">{title}</div>
               <div className="col-start-1 row-start-2 flex">{tag}</div>
@@ -274,6 +311,7 @@ export function AVTable({
           <div className="flex flex-col gap-1 py-4">
             <div className="flex items-center gap-2">
               {reference}
+              {besa}
               <Divider orientation="vertical" className="h-4 shrink-0" />
               {title}
             </div>
