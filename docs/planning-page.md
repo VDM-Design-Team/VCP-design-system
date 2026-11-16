@@ -46,6 +46,10 @@ It is **controlled and holds no data.** The page owns the sections and their row
 
 Everything the table does stays the table's: editing a date or points in place (and what that does to the other dates), the drag from the Backlog or the Actions menu's **Move to Cycle** submenu, the sort, folding the sections. In the design a Backlog row dropped on a Cycle opens *Add Required Details* (`MoveAVToCycleModal`); the move happens when that is confirmed, and is the page's. See `docs/planning-table.md`.
 
+## View Cycle
+
+The filter row's **View Cycle** button opens a calendar of the year's cycles in a dialog: the twelve months, each cycle's weeks as one row, a year stepper, Clear, Cancel and Apply. Figma draws the button but no frame for the dialog, and the design system has no piece for it yet, so the page reports the click through `filters.onViewCycle` and opening it is the app's.
+
 ## The animated cells
 
 Figma's `Animation of Cells Flow`: when a date is calculated for the person (a Backlog row dropped on a Cycle gets estimated dates), the cell highlights, up to **three** times, and stops sooner if the pointer enters it. It **does not return**, even after a refresh, leaving and coming back, or filtering.

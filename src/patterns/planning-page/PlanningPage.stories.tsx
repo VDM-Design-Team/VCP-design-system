@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fireEvent, fn, userEvent, waitFor, within } from 'storybook/test';
+import { expect, fireEvent, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { PlanningPage, type PlanningPageProps } from './PlanningPage';
 import { Button } from '../../atoms/button';
 import type { PlanningRow, PlanningSection } from '../planning-table';
@@ -73,7 +73,12 @@ function Page({ withFilters = true, withPagination = true, ...props }: Partial<P
   const q = filters.search.trim().toLowerCase();
   const shown = sections.map((s) => ({
     ...s,
-    rows: s.rows.filter((r) => (!q || `${r.ref} ${r.title}`.toLowerCase().includes(q)) && (!filters.priority || r.urgency === filters.priority)),
+    rows: s.rows.filter(
+      (r) =>
+        (!q || `${r.ref} ${r.title}`.toLowerCase().includes(q)) &&
+        (!filters.status || (r.status?.custom ?? r.status?.status) === filters.status) &&
+        (!filters.priority || r.urgency === filters.priority),
+    ),
   }));
   const patch = (id: string, change: Partial<PlanningRow>) =>
     setSections((now) => now.map((s) => ({ ...s, rows: s.rows.map((r) => (r.id === id ? { ...r, ...change } : r)) })));
@@ -120,6 +125,12 @@ export const Filtering: Story = {
     await userEvent.type(c.getByRole('searchbox', { name: 'Search by title or ID' }), 'Calendar');
     await expect(c.queryByText(/Billing export/)).toBeNull();
     await expect(c.getAllByText(/Calendar sync/).length).toBeGreaterThan(0);
+    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await expect(c.getAllByText(/Billing export/).length).toBeGreaterThan(0);
+    /* The status filter narrows them too: nothing in Cycle 27 is Completed. */
+    await userEvent.click(c.getByRole('combobox', { name: /Status/ }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Completed' }));
+    await expect(c.queryByText(/Billing export/)).toBeNull();
     await userEvent.click(c.getByRole('button', { name: 'Reset' }));
     await expect(c.getAllByText(/Billing export/).length).toBeGreaterThan(0);
   },
