@@ -95,12 +95,23 @@ export const Status: Story = {
   },
 };
 
-/** Backlog: a Feedback field for all (optional), and in the list each Added Value can take its own reason instead. `onConfirm` gets `{ value, overrides }`. */
+/**
+ * Backlog: a Feedback field for all, required, and in the list each Added Value can take its own reason instead. A Confirm while any Added Value has neither says so and goes nowhere.
+ * `onConfirm` gets `{ value, overrides }`.
+ */
 export const Backlog: Story = {
   render: () => <BulkActionConfirmModal open onClose={fn()} onConfirm={backlogConfirm} action="backlog" items={ITEMS} defaultExpanded />,
   play: async () => {
+    backlogConfirm.mockClear();
     const d = dialog('Move 2 Added Values to Backlog');
     await expect(d.getByText('This will be applied to all selected Added Values unless overridden below.')).toBeVisible();
+    /* One Added Value with its own reason is not enough: the other has none. */
+    await userEvent.type(d.getByRole('textbox', { name: 'Reason for VCP-12346' }), 'Waiting on design');
+    await userEvent.click(d.getByRole('button', { name: 'Confirm' }));
+    await expect(await d.findByText('Enter feedback, or some for each Added Value.')).toBeVisible();
+    await expect(backlogConfirm).not.toHaveBeenCalled();
+    await waitFor(() => expect(d.getByRole('textbox', { name: 'Feedback' })).toHaveFocus());
+    await userEvent.clear(d.getByRole('textbox', { name: 'Reason for VCP-12346' }));
     await userEvent.type(d.getByRole('textbox', { name: 'Feedback' }), 'Not this quarter');
     await userEvent.type(d.getByRole('textbox', { name: 'Reason for VCP-12346' }), 'Waiting on design');
     await expect(d.getByRole('textbox', { name: 'Reason for VCP-12345' })).toHaveAttribute('placeholder', 'Uses bulk reason unless overridden');

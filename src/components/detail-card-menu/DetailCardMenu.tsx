@@ -7,7 +7,8 @@ import { Menu, type MenuItem } from '../menu';
  * DetailCardMenu — the ⋮ button at the head of an Added Value page, and the menu it opens:
  * Edit and Delete for everyone, with the moves between Draft, Pending and Backlog that the
  * person's role and the AV's status allow. Read off Figma's `Detail_Card_Menu` (the button) and
- * `AV_Options_Dropdown` (the five menus).
+ * `AV_Options_Dropdown` (the five menus); the admin's moves on a Rejected AV and on one that is
+ * accepted or in progress are the live product's (decided 13 Nov 2026), which Figma does not draw.
  *
  * **The component owns which actions are offered**, the way `StatusTag` owns status → tone, so no
  * page decides it again:
@@ -19,7 +20,9 @@ import { Menu, type MenuItem } from '../menu';
  * | admin | Draft | Move to Backlog · Edit · Delete |
  * | admin | Pending | Move to Backlog, Move to Draft · Edit · Delete |
  * | admin | Backlog | Move to Pending, Move to Draft · Edit · Delete |
- * | admin | any other | Edit · Delete |
+ * | admin | Rejected | Move to Backlog, Move to Pending, Move to Draft · Edit · Delete |
+ * | admin | Completed | Edit · Delete |
+ * | admin | any other (Accepted, a domain step, Review) | Move to Backlog, Move to Draft · Edit · Delete |
  *
  * The moves sit above a divider, then Edit, then Delete in the critical colour. No icons: the design's menu is words only. It only reports:
  * each action's handler is the page's.
@@ -31,9 +34,9 @@ import { Menu, type MenuItem } from '../menu';
 export type DetailCardMenuRole = 'user' | 'admin';
 
 export interface DetailCardMenuProps {
-  /** Who is looking. Admins can move an AV between Draft, Pending and Backlog. */
+  /** Who is looking. Admins can move an AV between Draft, Pending and Backlog, reopen a Rejected one, and park one that is in progress. */
   role?: DetailCardMenuRole;
-  /** The AV's status. Only Draft, Pending and Backlog change the menu; any other (a domain step too) gets Edit and Delete. */
+  /** The AV's status. A user gets a move only on a Draft. An admin gets moves on everything but a Completed AV; a domain step (For QA, In QA…) counts as in progress. */
   status?: string;
   onMoveToBacklog?: () => void;
   onMoveToDraft?: () => void;
@@ -48,9 +51,15 @@ export interface DetailCardMenuProps {
 /** THE mapping — role and status → the moves on offer, in order. */
 function movesFor(role: DetailCardMenuRole, status?: string): Array<'backlog' | 'draft' | 'pending'> {
   if (status === 'Draft') return ['backlog'];
-  if (role === 'admin' && status === 'Pending') return ['backlog', 'draft'];
-  if (role === 'admin' && status === 'Backlog') return ['pending', 'draft'];
-  return [];
+  if (role !== 'admin') return [];
+  if (status === 'Pending') return ['backlog', 'draft'];
+  if (status === 'Backlog') return ['pending', 'draft'];
+  /* Rejected is not final for an admin: it can be reopened (Pending), parked or sent back to its initiator as a draft. */
+  if (status === 'Rejected') return ['backlog', 'pending', 'draft'];
+  /* Nothing moves a finished AV. No status at all is not a status to move from either. */
+  if (status === 'Completed' || !status) return [];
+  /* Accepted, a domain step, Review: work in progress can be parked or sent back to Draft. */
+  return ['backlog', 'draft'];
 }
 
 export const DetailCardMenu = React.forwardRef<HTMLDivElement, DetailCardMenuProps>(

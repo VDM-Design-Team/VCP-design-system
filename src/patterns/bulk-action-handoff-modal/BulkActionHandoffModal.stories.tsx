@@ -10,8 +10,8 @@ const ITEMS: BulkHandoffAV[] = [
   { ref: 'VCP-12348', href: '#/added-values/VCP-12348', title: 'Export the table to CSV' },
 ];
 
-/** Every date chosen. The popup itself starts with them blank. */
-const FILLED = ITEMS.map((item) => ({ ...item, defaultDate: '2026-03-02' }));
+/** Every date chosen and something to review on each (a file already on it). The popup itself starts with the dates blank. */
+const FILLED: BulkHandoffAV[] = ITEMS.map((item) => ({ attachments: [{ name: 'handoff-notes.pdf', kind: 'pdf' }], ...item, defaultDate: '2026-03-02' }));
 
 const meta = {
   title: 'Patterns/BulkActionHandoffModal',
@@ -90,6 +90,32 @@ export const InvalidLink: Story = {
     await userEvent.click(d.getByRole('button', { name: 'Add Another Link' }));
     await userEvent.click(d.getByRole('button', { name: 'Remove demo link 2' }));
     await expect(d.queryByRole('textbox', { name: 'Demo link 2' })).toBeNull();
+  },
+};
+
+/**
+ * A handoff needs something to review: with a date but neither a demo link nor a file, Handoff waits, and the form says what is needed under Demo Links. A link on one and a file already on the other
+ * are both enough; removing that file takes it away again.
+ */
+export const NeedsALinkOrAFile: Story = {
+  args: {
+    items: [
+      { ref: 'VCP-12346', title: 'Collapsible Sidebar for Improved Table Workspace in VCP Admin Dashboard', defaultDate: '2026-03-02' },
+      { ref: 'VCP-12347', title: 'Rework the notification bell so unread state survives a reload', defaultDate: '2026-03-02', attachments: [{ name: 'recording.pdf', kind: 'pdf' }] },
+    ],
+  },
+  play: async () => {
+    const d = within(within(document.body).getByRole('dialog', { name: 'Handoff 2 Added Values' }));
+    const handoff = d.getByRole('button', { name: 'Handoff' });
+    await expect(d.getAllByText('A handoff needs at least one demo link or one attachment.')[0]).toBeVisible();
+    await expect(handoff).toBeDisabled();
+    await expect(handoff).toHaveAccessibleDescription('1 of 2 Added Values still need their handoff details.');
+    await userEvent.type(d.getByRole('textbox', { name: 'Demo link 1' }), 'https://example.com/demo');
+    await expect(handoff).toBeEnabled();
+    /* The second one's file is its evidence: remove it and Handoff waits again. */
+    await userEvent.click(d.getByRole('button', { name: 'Next Added Value' }));
+    await userEvent.click(d.getByRole('button', { name: /Remove recording\.pdf/ }));
+    await expect(handoff).toBeDisabled();
   },
 };
 

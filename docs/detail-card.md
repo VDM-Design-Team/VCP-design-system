@@ -42,14 +42,14 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 **`type` picks the card, and the card is a fixed list of fields**, as the design draws them:
 
-| Field | `viewing` | `duplicate` | `editing` | `new` |
+| Field | `viewing` | `initiated` | `editing` | `new` |
 |---|---|---|---|---|
 | Initiator (one or several) | ✓ | ✓ | ✓ (+) | ✓ |
 | Assignee | ✓ | | ✓ (+) | |
 | Start Date | ✓ | | ✓ | |
 | Due Date | ✓ | | ✓ | |
 | Cycle (Development only) | ✓ | | ✓ | |
-| Duplicates | | ✓ | | |
+| Initiated to | | ✓ | | |
 | Status | ✓ | ✓ | | |
 | Urgency | ✓ | ✓ | ✓ | ✓ |
 | Type | ✓ | ✓ | ✓ | ✓ |
@@ -60,9 +60,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Deployment Date | ✓ | ✓ | | |
 | Date Initiated · Date Accepted | ✓ | ✓ | | |
 
-**Duplicates** is one grey-edged box per domain the AV was duplicated to, with the domain's name on the left and its
-current status on the right, in the order given. Duplicating to another domain adds another box under it. The domain
-names are the page's data (the same list `DuplicateToOtherDomain` takes: Design (BESA), Development, Content,
+**Initiated to** is one grey-edged box per domain the AV was initiated to, with the domain's name on the left and its
+current status on the right, in the order given. Initiating to another domain adds another box under it. The domain
+names are the page's data (the same list `InitiateToOtherDomain` takes: Design (BESA), Development, Content,
 Governance, Partners, Quality Assurance), and a status is a spine status or a domain's own step.
 
 **`domain`** trims it: **Design has no Cycle**; Development has every field. A field with no value is
@@ -76,7 +76,7 @@ that shows a count and reports a press).
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `type` | `'viewing' \| 'duplicate' \| 'editing' \| 'new'` | required | Which card; fixes the fields |
+| `type` | `'viewing' \| 'initiated' \| 'editing' \| 'new'` | required | Which card; fixes the fields |
 | `domain` | `'design' \| 'development'` | `development` | Design has no Cycle |
 | `value` | `DetailCardValue` | required | Every field optional; the card draws the ones its type has. Dates are ISO `yyyy-mm-dd` |
 | `onChange` | `(value) => void` | — | Editing and new: the whole value, changed |
@@ -84,7 +84,7 @@ that shows a count and reports a press).
 | `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid |
 | `readOnly` | `DetailCardField[]` | — | Editing and new: fields shown but locked — the dropdowns and dates in the list can't be opened or changed. A multipart part's edit page locks Projects, AV Category, Type and Urgency, the fields it takes from its parent (Figma `1404:132644`) |
 | `viewerCount`, `onViewers` | `number`, `() => void` | — | The viewers pill (placeholder) on the read cards |
-| `lockAssignees` | `boolean` | when `duplicates` is set | Editing: the Assignee **+** is dimmed and explains why (see *Assignee availability*). Defaults on for an AV with `duplicates` |
+| `lockAssignees` | `boolean` | when `initiatedTo` is set | Editing: the Assignee **+** is dimmed and explains why (see *Assignee availability*). Defaults on for an AV with `initiatedTo` |
 | `dueSoonWithinDays` | `number` | `3` | Due dates this near or nearer read as due soon |
 | `className`, `ref`, rest | | | On the `<section>` |
 
@@ -129,7 +129,7 @@ Give a person in `options.people` an `availability` (`'available' | 'busy' | 'un
 | **A busy person picked** | Amber edge and "This assignee is busy during the selected dates, but can still be assigned." Add or Save stays on |
 | **An unavailable person picked** | Red edge and "This assignee is not available during the selected dates and cannot be assigned." Add or Save is off |
 | **Dates change after people were added** | Each chip that is now busy or unavailable takes the warning's colour on its **edge** (amber or red) and says so under it, **by name**: "Jane Doe is busy during the selected dates, but can still be assigned." The chip still hugs its content; only the note sits under it |
-| **An initiated AV** (it has `duplicates`) | The Assignee **+** is dimmed (`aria-disabled`, still focusable) with a tooltip: "Assignees can't be added to an initiated Added Value. Assign them on its domain copy instead." Set `lockAssignees` to force it either way |
+| **An initiated AV** (it has `initiatedTo`) | The Assignee **+** is dimmed (`aria-disabled`, still focusable) with a tooltip: "Assignees can't be added to an initiated Added Value. Assign them on its domain copy instead." Set `lockAssignees` to force it either way |
 
 Submitting with an unavailable assignee still on the card is the page's to refuse: show its "Unavailable Assignee" toast. The card marks the chip; it does not block `onChange`.
 

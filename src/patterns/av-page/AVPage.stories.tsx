@@ -73,8 +73,7 @@ const EDIT: AVPageProps = {
   header: { title: 'Added Value Creation', type: 'new', backLabel: 'Back to Drafts', onBack: fn() },
   title: { value: '' },
   description: { problem: { ...edit('problem') }, solution: { ...edit('solution') }, deliverable: { ...edit('deliverable') }, 'desired-outcome': { ...edit('desired-outcome') } },
-  history: { count: 1 },
-  duplicate: { options: [{ value: 'development', name: 'Development' }, { value: 'content', name: 'Content' }], onChange: fn() },
+  initiate: { options: [{ value: 'development', name: 'Development' }, { value: 'content', name: 'Content' }], onChange: fn() },
   details: { type: 'new', domain: 'design', value: EDITING, options: OPTIONS, onChange: fn() },
   actions: { onDiscard: fn(), progression: { role: 'assignee-initiator', status: 'Draft', onTransition: fn() } },
 };
@@ -88,7 +87,7 @@ const meta = {
       description: {
         component:
           'The main content of an Added Value’s page, to read or to edit: the header, then the left column (title, the four description blocks, multipart, status history, ' +
-          'comments or duplicate) and the right (the detail card and the deliverables). The page passes each piece’s own props; a section shows only when it is passed.',
+          'comments or initiate) and the right (the detail card and the deliverables). The page passes each piece’s own props; a section shows only when it is passed.',
       },
     },
   },
@@ -134,11 +133,17 @@ export const Editing: Story = {
   args: EDIT,
   render: function Render(args: AVPageProps) {
     const [value, setValue] = React.useState('');
-    return <AVPage {...args} title={{ value, onChange: setValue }} />;
+    /* `history` is given on purpose: an editing page never draws it. */
+    return <AVPage {...args} history={{ count: 1 }} title={{ value, onChange: setValue }} />;
   },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('heading', { level: 1, name: 'Added Value Creation' })).toBeVisible();
+    await expect(c.queryByText(/Status History/)).toBeNull();
+    /* The section's cards, passed in a Fragment, are each their own list item, 16 apart (they once shared one and touched). */
+    const items = Array.from(canvasElement.querySelectorAll('ol')[0]!.querySelectorAll(':scope > li'));
+    await expect(items).toHaveLength(2);
+    await expect(Math.round(items[1]!.getBoundingClientRect().top - items[0]!.getBoundingClientRect().bottom)).toBe(16);
     const title = c.getByRole('textbox', { name: 'Title' });
     await userEvent.type(title, 'A new Added Value');
     await expect(title).toHaveValue('A new Added Value');
@@ -147,10 +152,10 @@ export const Editing: Story = {
     await expect(c.getByRole('button', { name: 'Submit' })).toBeVisible();
     await userEvent.click(c.getByRole('button', { name: 'Discard' }));
     await expect(args.actions?.onDiscard).toHaveBeenCalled();
-    /* Comments and deliverables are for reading; duplicating is for editing. */
+    /* Comments and deliverables are for reading; initiating is for editing. */
     await expect(c.queryByRole('heading', { name: 'Comments' })).toBeNull();
     await expect(c.queryByRole('heading', { name: 'Deliverables' })).toBeNull();
-    await expect(c.getByText('Duplicate to other Domains')).toBeVisible();
+    await expect(c.getByText('Initiate to other Domains')).toBeVisible();
   },
 };
 
