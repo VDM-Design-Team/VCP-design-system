@@ -49,8 +49,11 @@ import { Footer } from '../../atoms/footer';
  * never hardcode a hex, px value, or arbitrary Tailwind class.
  */
 export interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The navigation rail — a `Sidebar`. Full height, down the left. */
-  sidebar: React.ReactNode;
+  /**
+   * The navigation rail — a `Sidebar`. Full height, down the left. Left out, the page has no rail: Figma's notifications page is the top bar and the inbox
+   * alone (`NotificationInbox`'s `OnItsPage` story).
+   */
+  sidebar?: React.ReactNode;
   /** The app bar — a `TopBar`. Across the top of everything right of the rail. */
   topBar: React.ReactNode;
   /**

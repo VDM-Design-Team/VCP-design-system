@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
-import { Input } from '../../atoms/input';
+import { Banner, type BannerProps } from '../../components/banner';
+import { ConfirmModal, confirmations } from '../../components/confirm-modal';
+import { DescriptionCardTitle, type DescriptionCardTitleParent } from '../../components/description-card-title';
 import { DescriptionSection, type DescriptionSectionProps } from '../../components/description-section';
 import { InitiateToOtherDomain, type InitiateToOtherDomainProps } from '../../components/initiate-to-other-domain';
-import { Field } from '../../components/field';
 import { StatusHistory, type StatusHistoryProps } from '../../components/status-history';
 import { StatusProgression, type StatusProgressionProps } from '../../components/status-progression';
 import { AVHeader, type AVHeaderProps } from '../av-header';
@@ -48,6 +49,10 @@ export interface AVPageTitle {
   placeholder?: string;
   /** What is wrong with the title (a required field left empty). */
   error?: string;
+  /** Editing: the title cannot be changed (the field is greyed). */
+  disabled?: boolean;
+  /** Reading a part of a multipart set: "Multipart Child of VCP-4321" beside the reference. */
+  parent?: DescriptionCardTitleParent;
 }
 
 /** The four description blocks, by what each holds. Leave one out and it is not drawn. */
@@ -61,6 +66,11 @@ export interface AVPageActions {
   onDiscard?: () => void;
   /** Default "Discard". */
   discardLabel?: string;
+  /**
+   * Discard asks first, as Figma's flow draws it ("Are you sure you want to discard this Added Value? This action cannot be undone…", Cancel and Confirm), and
+   * `onDiscard` fires only on Confirm. Off by default: without it Discard fires at once, as before. What happens after (back to My Values, a toast) is the page's.
+   */
+  confirmDiscard?: boolean;
   /** The status buttons (Save as Draft, Submit…): `StatusProgression`'s props. */
   progression?: StatusProgressionProps;
 }
@@ -70,6 +80,11 @@ export interface AVPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   mode?: AVPageMode;
   /** The header: the back arrow, the page's name and (when reading) the status buttons. `AVHeader`'s props. */
   header: AVHeaderProps;
+  /**
+   * A notice at the top of the left column, above the title, the width of the column: an Added Value that was rejected or sent back to the backlog says so,
+   * and why. `Banner`'s props; `rejectedBanner()` and `backloggedBanner()` write the two the design draws, copy included.
+   */
+  banner?: BannerProps;
   title?: AVPageTitle;
   description?: AVPageDescription;
   multipart?: MultipartSectionProps;
@@ -91,6 +106,7 @@ export function AVPage({
   className,
   mode = 'view',
   header,
+  banner,
   title,
   description,
   multipart,
@@ -103,34 +119,27 @@ export function AVPage({
   ...props
 }: AVPageProps) {
   const editing = mode === 'edit';
-  const titleId = React.useId();
+  const [discarding, setDiscarding] = React.useState(false);
   return (
     <div className={cn('@container flex min-w-0 flex-col font-sans', className)} {...props}>
       {/* The status buttons are in the header to read, and in the bar at the bottom to edit. */}
       <AVHeader {...header} showStatusActions={header.showStatusActions ?? !editing} />
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 px-8 pb-8 @4xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-4">
-          {title &&
-            (editing ? (
-              <div className="rounded-md bg-surface-elevated p-4">
-                <Field label={title.label ?? 'Title'} error={title.error}>
-                  <Input
-                    fullWidth
-                    value={title.value}
-                    placeholder={title.placeholder ?? 'Type in the title'}
-                    readOnly={!title.onChange}
-                    onChange={(event) => title.onChange?.(event.target.value)}
-                  />
-                </Field>
-              </div>
-            ) : (
-              <section aria-labelledby={titleId} className="rounded-md bg-surface-elevated p-4">
-                {title.reference && <p className="text-body-md-regular text-text-secondary">{title.reference}</p>}
-                <h2 id={titleId} className="text-body-md-semibold text-text-primary">
-                  {title.value}
-                </h2>
-              </section>
-            ))}
+          {banner && <Banner {...banner} />}
+          {title && (
+            <DescriptionCardTitle
+              reference={title.reference}
+              title={title.value}
+              editing={editing}
+              onChange={title.onChange}
+              label={title.label}
+              placeholder={title.placeholder}
+              error={title.error}
+              disabled={title.disabled}
+              parent={title.parent}
+            />
+          )}
           {DESCRIPTION_ORDER.map((type) => description?.[type] && <DescriptionSection key={type} type={type} {...description[type]} />)}
           {multipart && <MultipartSection {...multipart} />}
           {!editing && history && <StatusHistory {...history} />}
@@ -148,12 +157,23 @@ export function AVPage({
       {editing && actions && (actions.onDiscard || actions.progression) && (
         <div className="flex flex-wrap items-center justify-end gap-3 px-8 pb-8">
           {actions.onDiscard && (
-            <Button variant="critical-tertiary" size="md" onClick={actions.onDiscard}>
+            <Button variant="critical-tertiary" size="md" onClick={() => (actions.confirmDiscard ? setDiscarding(true) : actions.onDiscard?.())}>
               {actions.discardLabel ?? 'Discard'}
             </Button>
           )}
           {actions.progression && <StatusProgression {...actions.progression} />}
         </div>
+      )}
+      {actions?.confirmDiscard && (
+        <ConfirmModal
+          open={discarding}
+          {...confirmations.discardAV()}
+          onClose={() => setDiscarding(false)}
+          onConfirm={() => {
+            setDiscarding(false);
+            actions.onDiscard?.();
+          }}
+        />
       )}
     </div>
   );

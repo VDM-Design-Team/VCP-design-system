@@ -93,7 +93,7 @@ themes when it was added.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `sidebar` | `ReactNode` | required | A `Sidebar`. Full height, down the left |
+| `sidebar` | `ReactNode` | — | A `Sidebar`. Full height, down the left. Left out, the page has no rail (Figma's notification inbox page: see `docs/notification-inbox.md`) |
 | `topBar` | `ReactNode` | required | A `TopBar`. Across the top of everything right of the rail |
 | `header` | `ReactNode` | — | The title band, inside `<main>` so its `h1` is the page's |
 | `children` | `ReactNode` | required | The page |

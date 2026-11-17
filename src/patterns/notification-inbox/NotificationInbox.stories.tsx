@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { NotificationInbox } from './NotificationInbox';
 import { NotificationItem, type NotificationKind } from '../../components/notification-item';
+import { AppShell } from '../../templates/app-shell';
+import { TopBar } from '../top-bar';
 
 const ROWS: { kind: NotificationKind; time: string; unread: boolean; status?: string }[] = [
   { kind: 'handoff', time: '2 days ago', unread: true },
@@ -174,5 +176,40 @@ export const WithoutMarkAllHandler: Story = {
     await expect(canvas.queryByRole('button', { name: 'Mark all as read' })).toBeNull();
     /* The switch stays: it is the caller's filter either way. */
     await expect(canvas.getByRole('switch', { name: 'Show unread only' })).toBeVisible();
+  },
+};
+
+/**
+ * The page the bell's "View notification inbox" link opens: no sidebar, the logo in the bar, and one card whose header is the title ("Notification Inbox", the `h1`) with the controls beside it.
+ * A departure from Figma, which draws no title (see `docs/notification-inbox.md`). There is no wrapper component: this is the recipe.
+ */
+export const OnItsPage: Story = {
+  parameters: { layout: 'fullscreen' },
+  render: (args) => (
+    <AppShell topBar={<TopBar homeHref="#" notifications={3} theme="light" onThemeChange={() => {}} user={{ name: 'Francis M.' }} />}>
+      <div className="py-10">
+        <NotificationInbox
+          {...args}
+          title="Notification Inbox"
+          headingLevel={1}
+          pagination={{ page: 1, pageCount: 4, itemCount: 80, pageSize: 25, pageSizeOptions: [10, 25, 50] }}
+        >
+          <Rows unreadOnly={false} />
+        </NotificationInbox>
+      </div>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    /* One h1, named for the page, drawn in the card on the same line as the controls. */
+    await expect(c.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    const heading = c.getByRole('heading', { level: 1, name: 'Notification Inbox' });
+    await expect(heading).toBeVisible();
+    const markAll = c.getByRole('button', { name: 'Mark all as read' });
+    const middle = (el: Element) => el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2;
+    await expect(Math.abs(middle(heading) - middle(markAll))).toBeLessThanOrEqual(2);
+    /* No sidebar: the bar's logo link is the way home, and there is no navigation rail. */
+    await expect(c.getByRole('link', { name: 'Value Chain Plus — home' })).toBeVisible();
+    await expect(c.queryByRole('navigation', { name: /sidebar|main/i })).toBeNull();
   },
 };
