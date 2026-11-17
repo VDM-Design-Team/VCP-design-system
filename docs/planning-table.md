@@ -75,6 +75,10 @@ is dismissed, the three loops start over — each calculation is its own signal.
 date is simply reported seen. Whether a date is `estimated`, and when it stops being (editing the Start Date makes it
 a real date), is the caller's.
 
+## On a page
+
+The whole Planning page, with its title, filter row and pagination, is `PlanningPage`; use that rather than laying them out again.
+
 ## Columns
 
 ID · Added Value Title (sortable) · Urgency · Type · Initiator · Assignee · Start Date · Points · Due

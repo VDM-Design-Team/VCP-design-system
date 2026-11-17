@@ -45,6 +45,19 @@ border is reinforcement. In dark the border is 3.07:1 and clears the bar
 outright. If a neutral button ever ships with no label, that reasoning stops
 holding and the border needs a stronger token.
 
+## Pairing with fields
+
+A button and a field in the same row are the same height (decided 17 November 2026, where Figma's Gantt toolbar drew 36 buttons beside 40 filters). The two scales do not share names, so pair by height:
+
+| Height | Button | Field (`Input`, `Select`, `SearchSelect`, `DateField`) |
+|---|---|---|
+| 32 | none | `sm` |
+| 36 | `sm` | `compact` |
+| 40 | `md` | `md` |
+| 48 | `lg` | none |
+
+Toolbars and filter rows use 40: `md` fields with `md` buttons (the filter bar and the Gantt toolbar). Use 36 only for a dense row, and then use `compact` fields and `sm` buttons together. Don't put an `sm` button (36) beside an `md` field (40).
+
 ## Accessibility
 
 - Minimum target size is 40×40 (size `md`). `sm` is 36px tall (the Figma
@@ -61,6 +74,7 @@ holding and the border needs a stronger token.
 
 ## Don't
 
+- Don't put a button next to a field of a different height. Pair them by height (above).
 - Don't hardcode colors or spacing. `className="bg-[#336afa]"` is a bug — add a token instead.
 - Don't stack two `primary` buttons side by side.
 - Don't use `critical-primary` for "Cancel".

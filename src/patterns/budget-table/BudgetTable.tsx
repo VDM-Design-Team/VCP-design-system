@@ -32,7 +32,7 @@ import type { ProgressBarProps } from '../../atoms/progress-bar';
  * - **Loading** (`loading`) keeps the headers and shows placeholder rows, announced once as "Loading domain budget".
  *
  * It is controlled and saves nothing: rows come in, `onAllocatedChange` and `onNotesChange` report an edit. The
- * "Save Changes" button, its loading state, the "Changes Saved" toast and the error toast for a save that fails belong
+ * "Save Changes" button, its loading state, the "Changes saved" toast (`changesSaved()`) and the error toast for a save that fails belong
  * to the page — compose them with `Button`'s `loading` and `Toast`, and lock the table with `disabled` while it saves
  * (the page stories show both outcomes). Leaving with unsaved changes is the browser's own prompt (`beforeunload`).
  *

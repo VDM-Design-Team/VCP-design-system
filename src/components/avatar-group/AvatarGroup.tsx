@@ -23,9 +23,10 @@ export type AvatarGroupEntry = string | AvatarGroupPerson;
  * It composes `Avatar`, and per CLAUDE.md that keeps it a component, not a
  * pattern: nothing here knows a thing about VCP.
  *
- * Sizes are `Avatar`'s own four steps and are passed straight down, so the
- * stack and a lone avatar next to it are never a pixel apart. The overlap is a
- * quarter of the avatar, expressed on Tailwind's numeric scale.
+ * Sizes are `Avatar`'s own steps and are passed straight down, so the
+ * stack and a lone avatar next to it are never a pixel apart. The overlap is
+ * Figma's (2 / 4 / 6 / 8 at 16 / 24 / 32 / 36) on Tailwind's numeric scale, and each
+ * circle has a 1 border inside its box.
  *
  * **The leftmost person is on top**, with each one after it tucked behind the
  * one before (design review, 5 Oct 2026) — the `+N` chip is furthest back. The
@@ -39,7 +40,7 @@ export type AvatarGroupEntry = string | AvatarGroupPerson;
  */
 const overlap = cva('', {
   variants: {
-    size: { xs: '-ml-1', sm: '-ml-1.5', md: '-ml-2', lg: '-ml-2.25' },
+    size: { xs: '-ml-0.5', sm: '-ml-1', md: '-ml-1.5', lg: '-ml-2', xl: '-ml-2', '2xl': '-ml-2.25', '3xl': '-ml-2.5' },
   },
   defaultVariants: { size: 'md' },
 });
@@ -53,7 +54,7 @@ const overflow = cva(
     'inline-grid shrink-0 place-items-center overflow-hidden rounded-pill',
     'select-none font-sans',
     'bg-surface-neutral-subtle text-text-secondary',
-    'ring-2 ring-surface-elevated',
+    'border border-surface-elevated',
   ],
   {
     variants: {
@@ -62,6 +63,9 @@ const overflow = cva(
         sm: 'size-6 text-caption-md-medium',
         md: 'size-8 text-caption-md-medium',
         lg: 'size-9 text-label-sm-medium',
+        xl: 'size-10 text-label-md-medium',
+        '2xl': 'size-11 text-label-md-medium',
+        '3xl': 'size-12 text-label-md-medium',
       },
     },
     defaultVariants: { size: 'md' },
