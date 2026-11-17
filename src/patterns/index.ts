@@ -69,6 +69,7 @@ export * from './announcements-panel';
 export * from './dashboard-page';
 export * from './av-list-page';
 export * from './av-page';
+export * from './domain-budget-edit-page';
 export * from './planning-page';
 export * from './accounts-page';
 export * from './contacts-page';

@@ -69,7 +69,6 @@ carry a label and an action cannot accidentally be a rule.
 | `tone` | `default \| critical` | `default` | `critical` is for destructive, irreversible actions (it was `danger` before November 2026). See below |
 | `items` (on an item) | `MenuActionItem[]` | — | **A submenu.** The item shows a right caret (`caret-right`), opens its choices beside it on hover, click or ArrowRight, and keeps the brand-blue highlight while open. Only the submenu's items are choices; `onSelect` gets their own `key`. ArrowLeft or Escape closes just the submenu |
 | `heading` (on an item) | `string` | the item's label | The submenu's own heading |
-| `caret` (on an item) | `false` | — | Leaves out a submenu item's right caret. The item is still `aria-haspopup="menu"` and opens the same way; only the glyph goes. The caret is how a sighted person knows the item opens something, so leave it unless the design draws the item without it |
 | `selected` | `boolean` | — | Marks the current choice in a list of options (a domain, a sort order). An item that sets it renders as `role="menuitemradio"` with `aria-checked`, and the chosen one shows a check, so the state is not colour alone. Give **every** option the flag. Leave it off for plain actions |
 | `disabled` | `boolean` | `false` | Stays visible and announced, but the keyboard steps over it |
 | `onClick` | `() => void` | — | Runs before `onSelect` |

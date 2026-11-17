@@ -132,7 +132,8 @@ export const HandingOff: Story = {
  * design's own message, and choosing one clears it.
  */
 export const OverdueNeedsAReason: Story = {
-  args: { open: false, overdueDays: 5 },
+  /* A file already on the value is its something-to-review, so the reason is the one thing missing. */
+  args: { open: false, overdueDays: 5, attachments: [{ name: 'recording.pdf', kind: 'pdf' }] },
   render: function OverdueNeedsAReasonStory(args) {
     const [open, setOpen] = React.useState(false);
     const [sent, setSent] = React.useState('nothing yet');
@@ -185,7 +186,8 @@ export const OverdueNeedsAReason: Story = {
 
 /** The date is required, and chosen from the calendar: a handoff with none is refused under the field, with focus on it. */
 export const DateIsRequired: Story = {
-  args: { open: false, defaultDate: '' },
+  /* A file already on the value is its something-to-review, so the date is the one thing missing. */
+  args: { open: false, defaultDate: '', attachments: [{ name: 'recording.pdf', kind: 'pdf' }] },
   render: function DateIsRequiredStory(args) {
     const [open, setOpen] = React.useState(false);
     const [sent, setSent] = React.useState('nothing yet');
@@ -213,6 +215,42 @@ export const DateIsRequired: Story = {
     await userEvent.click(dialog.getByRole('button', { name: 'Handoff' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     await expect(canvas.getByText(/Sent: \d{4}-\d{2}-15/)).toBeInTheDocument();
+  },
+};
+
+/**
+ * A handoff needs something to review: with neither a demo link nor a file it is refused under Demo Links, with focus in the first link box. A link (or a file) clears it and lets the handoff through.
+ */
+export const NeedsALinkOrAFile: Story = {
+  args: { open: false },
+  render: function NeedsALinkOrAFileStory(args) {
+    const [open, setOpen] = React.useState(false);
+    const [sent, setSent] = React.useState('nothing yet');
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <Button variant="secondary" onClick={() => setOpen(true)}>
+          Handoff AV
+        </Button>
+        <p className="text-caption-md-regular text-text-tertiary">Sent: {sent}</p>
+        <HandoffAVModal {...args} open={open} onClose={() => setOpen(false)} onHandoff={(draft: HandoffDraft) => { setSent(`${draft.links.length} link(s)`); setOpen(false); }} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: 'Handoff AV' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    /* The rule is said before it is broken. */
+    await expect(dialog.getByText('A handoff needs at least one demo link or one attachment.')).toBeVisible();
+    await userEvent.click(dialog.getByRole('button', { name: 'Handoff' }));
+    await expect(await dialog.findByText('Add a demo link or attach a file.')).toBeVisible();
+    await waitFor(() => expect(dialog.getByRole('textbox', { name: 'Demo link 1' })).toHaveFocus());
+    await expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await userEvent.keyboard('https://a.example');
+    await waitFor(() => expect(dialog.queryByText('Add a demo link or attach a file.')).toBeNull());
+    await userEvent.click(dialog.getByRole('button', { name: 'Handoff' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await expect(canvas.getByText('Sent: 1 link(s)')).toBeInTheDocument();
   },
 };
 

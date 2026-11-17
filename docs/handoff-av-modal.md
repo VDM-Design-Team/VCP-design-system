@@ -28,8 +28,11 @@ of that renders.
 and a bulk one ask for the same things. A **Handoff Date**, chosen from the
 calendar, is **required** (design's decision for the one form); a late value must say
 **why** ("Please select a reason before completing the AV", the design's own
-error message); links, files and notes are optional, and a link that is typed
-must be a valid `https://` address. The dialog **asks on submit**: an incomplete
+error message); there must be **something to review, at least one demo link or
+one attachment** (decided 13 Nov 2026; a file already on the value counts, and
+without either the dialog says "Add a demo link or attach a file." under Demo
+Links); notes are optional, and a link that is typed must be a valid `https://`
+address. The dialog **asks on submit**: an incomplete
 handoff is refused with the message under the field, and focus goes to the
 first one. (The bulk dialog waits instead: its Handoff is disabled until every
 Added Value is complete.)
@@ -105,8 +108,8 @@ the values as they change should compose `HandoffForm` itself.
 
 ## Don't
 
-- **Don't make the date optional, or ask for more.** The date and (when late)
-  the reason are required, links, files and notes are not; that is
+- **Don't make the date optional, or ask for more.** The date, (when late)
+  the reason and a link or a file are required, notes are not; that is
   `HandoffForm`'s rule, and a dialog does not add its own.
 - **Don't close it yourself on handoff.** `onHandoff` reports the draft; the
   caller closes when the send succeeds, which is what lets `loading` mean

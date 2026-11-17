@@ -5,7 +5,8 @@ everyone, with the moves between Draft, Pending and Backlog that the person's ro
 status allow.
 
 Read off Figma's `Detail_Card_Menu` (the button: default, hover, pressed) and `AV_Options_Dropdown`
-(five menus, by role and status).
+(five menus, by role and status). The admin's moves on a Rejected AV and on one that is accepted or
+in progress are the live product's, adopted on 13 Nov 2026; Figma does not draw them yet.
 
 ## Composed of
 
@@ -35,18 +36,29 @@ decides it again.
 | admin | Draft | Move to Backlog · Edit · Delete |
 | admin | Pending | Move to Backlog, Move to Draft · Edit · Delete |
 | admin | Backlog | Move to Pending, Move to Draft · Edit · Delete |
-| admin | any other | Edit · Delete |
+| admin | Rejected | Move to Backlog, Move to Pending, Move to Draft · Edit · Delete |
+| admin | Completed | Edit · Delete |
+| admin | any other (Accepted, a domain step, Review) | Move to Backlog, Move to Draft · Edit · Delete |
 
-The moves sit above a divider, then Edit, then Delete in the critical colour. The Figma draws
-these five menus; the "any other status" rows are the assumption that nothing else changes. A
-domain step (For QA, In QA…) is a status like any other.
+The moves sit above a divider, then Edit, then Delete in the critical colour. Figma draws the
+first five menus. The last three rows were decided on 13 Nov 2026 from what the live product
+offers an admin:
+
+- **Rejected is not final.** An admin can reopen a rejected AV (Move to Pending), park it or send
+  it back to its initiator as a draft. This replaces the 9 Nov 2026 rule that a rejection could
+  not be undone.
+- **Work in progress can be parked or sent back to Draft.** A domain step (For QA, In QA…) is in
+  progress like Accepted and Review.
+- **Completed gets no moves.** The live product was not checked for it, so nothing is assumed.
+
+A user's menu is unchanged: one move, on a Draft.
 
 ## Props
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `role` | `'user' \| 'admin'` | `user` | Admins can move an AV between Draft, Pending and Backlog |
-| `status` | `string` | — | Only Draft, Pending and Backlog change the menu |
+| `role` | `'user' \| 'admin'` | `user` | Admins can move an AV between Draft, Pending and Backlog, reopen a Rejected one and park one in progress |
+| `status` | `string` | — | A user gets a move only on a Draft; an admin on everything but Completed. Without a status there are no moves |
 | `onEdit`, `onDelete` | `() => void` | — | Edit and Delete. It only reports; the page opens the editor or the confirm dialog |
 | `onMoveToBacklog`, `onMoveToDraft`, `onMoveToPending` | `() => void` | — | The moves |
 | `label` | `string` | `AV options` | The button's accessible name |
@@ -72,4 +84,5 @@ no icons, as the design draws it; Delete turns its warning glyph off (`icon: fal
 
 - **Don't decide the menu's contents on the page.** Pass the role and the status.
 - **Don't make Delete act at once.** It reports; confirm in a dialog.
+- **Don't move to the Backlog without asking why.** Move to Backlog opens `MoveToBacklogModal`, whose feedback is required.
 - **Don't add a second menu to the same page header.** This is the one for the AV.

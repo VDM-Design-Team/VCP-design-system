@@ -635,8 +635,6 @@ export function PlanningTable({
               key: 'move',
               label,
               heading: label,
-              /* The design draws this item without the caret. It is still announced as opening a submenu. */
-              caret: false,
               items: targets.map((to) => ({
                 key: `move:${to.id}`,
                 label: (
@@ -744,14 +742,13 @@ export function PlanningTable({
                 </dl>
               )}
             </header>
-            <div id={bodyId} hidden={isFolded} className="px-6 pb-6">
+            <div id={bodyId} hidden={isFolded} className="border-t border-stroke-default">
               <DataTable
-                /* The card draws the border and fill, as in every `TableCard`; the table keeps its corners and the header band. */
-                bare
                 columns={onMoveRow && section.rows.some((r) => movable(r, section)) ? [...columns, actionsColumn(section)] : columns}
                 rows={section.rows}
                 sort={sort}
                 onSortChange={onSortChange}
+                className="rounded-none border-0"
                 rowProps={(row) =>
                   movable(row, section)
                     ? {
