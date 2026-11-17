@@ -20,6 +20,9 @@ import { Attachments, type AttachmentItem, type AttachmentsProps } from '../../c
  * The page owns the data. The card reports: `onAddLinks` with every link the form handed over,
  * `onEditLink`, `onRemoveLink`, `onFiles`, `onRemoveFile`.
  *
+ * **Focus never drops.** Removing a link takes its bin with it, so once the page has removed it focus goes to the bin of the link that took
+ * its place, else the one before it, else the section's +. Files do the same in `Attachments`.
+ *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -169,9 +172,34 @@ function LinkSection({
   onRemove: (id: string) => void;
 }) {
   const [adding, setAdding] = React.useState(false);
+  const root = React.useRef<HTMLDivElement>(null);
+  const add = React.useRef<HTMLButtonElement>(null);
+  /* The link whose bin was pressed, and the place it held in the list. Its bin goes with it, so once it has left `items` focus is moved on purpose (below). */
+  const afterRemove = React.useRef<{ gone: string; index: number } | null>(null);
+
+  React.useEffect(() => {
+    const pending = afterRemove.current;
+    if (!pending || items.some((item) => item.id === pending.gone)) return;
+    afterRemove.current = null;
+    /* Only when focus went with the row. If the person has moved on since (the page asked first, and they went elsewhere), leave them where they are. */
+    const active = document.activeElement;
+    if (active && active !== document.body && active.isConnected) return;
+    /* The link that took its place, else the one before it; a row that is being edited has no bin, so it is passed over. */
+    /* `DeliverableLink`'s bin is an `IconButton` named "Delete Link"; `IconButton` gives the name as its `title` (or an `aria-label`). */
+    const bin = (item: DeliverableLinkItem | undefined) =>
+      item
+        ? root.current?.querySelector<HTMLElement>(
+            `[data-link-id="${CSS.escape(item.id)}"] :is(button[title="Delete Link"], button[aria-label="Delete Link"])`,
+          )
+        : null;
+    /* No link left to land on: the +, or, while the add form is open and the + is disabled, the form's first field. */
+    const fallback = add.current && !add.current.disabled ? add.current : root.current?.querySelector<HTMLElement>('input');
+    (bin(items[pending.index]) ?? bin(items[pending.index - 1]) ?? fallback)?.focus();
+  }, [items]);
+
   if (!editing && items.length === 0) return null;
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={root} className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <h3 className="flex items-center gap-1 text-body-sm-medium text-text-primary">
           {title}
@@ -179,6 +207,7 @@ function LinkSection({
         </h3>
         {editing && (
           <IconButton
+            ref={add}
             icon="plus"
             variant="primary"
             size="xs"
@@ -201,15 +230,18 @@ function LinkSection({
       )}
       {items.length > 0 && (
         <ul className="flex flex-col divide-y divide-stroke-subtle">
-          {items.map((item) => (
-            <li key={item.id}>
+          {items.map((item, index) => (
+            <li key={item.id} data-link-id={item.id}>
               <DeliverableLink
                 title={item.title}
                 url={item.url}
                 domain={item.domain}
                 editable={editing}
                 onSave={(link) => onEdit(item.id, link)}
-                onRemove={() => onRemove(item.id)}
+                onRemove={() => {
+                  afterRemove.current = { gone: item.id, index };
+                  onRemove(item.id);
+                }}
               />
             </li>
           ))}
