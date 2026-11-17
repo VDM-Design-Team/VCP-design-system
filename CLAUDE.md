@@ -60,6 +60,11 @@ Claude Design project — those mirror this repo, not the other way round.
    `major` entry must carry a `Migration:` note. See `changes/README.md`.
 7. **Pick the tier before you write.** See the next section. Getting this
    wrong is expensive to undo once other things import it.
+8. **Toast messages come from the recipes.** To raise a toast, use a recipe from
+   `src/components/toast/recipes.ts` (`toast(changesSaved())`) rather than writing
+   the wording again. For a message that has no recipe, follow *Writing toast copy*
+   in `docs/toast.md`: tone from what happened, a sentence-case title, a message
+   only when the title cannot carry it, no "!" and no "successfully".
 
 ## Atoms, components, patterns, templates
 
