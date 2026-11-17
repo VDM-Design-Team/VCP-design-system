@@ -75,7 +75,7 @@ this on 5 November 2026, over the rule above. It holds only on these terms:
   tests it.
 - **The page goes to the first problem.** It scrolls to the highest missing field
   **and puts the keyboard focus in it** (decided 17 November 2026; Figma draws only the
-  scroll). Focus is never moved to the toast. Doing it is the page's.
+  scroll). Focus is never moved to the toast. Doing it is the page's, with one call: `focusFirstInvalid(form)` (see `docs/field.md`).
 
 ## Parts
 
