@@ -135,6 +135,22 @@ export const Reading: Story = {
   },
 };
 
+/** `actions.confirmDiscard`: Discard asks first ("Are you sure you want to discard this Added Value?"), and `onDiscard` fires only on Confirm. */
+export const DiscardAsksFirst: Story = {
+  args: { ...EDIT, actions: { ...EDIT.actions!, onDiscard: fn(), confirmDiscard: true } },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(c.getByRole('button', { name: 'Discard' }));
+    const dialog = await body.findByRole('alertdialog', { name: 'Are you sure you want to discard this Added Value?' });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await expect(args.actions!.onDiscard).not.toHaveBeenCalled();
+    await userEvent.click(c.getByRole('button', { name: 'Discard' }));
+    await userEvent.click(within(await body.findByRole('alertdialog')).getByRole('button', { name: 'Confirm' }));
+    await expect(args.actions!.onDiscard).toHaveBeenCalledTimes(1);
+  },
+};
+
 /** To edit: the Title is a field, the header has no status buttons, and Discard, Save as Draft and Submit are at the bottom. */
 export const Editing: Story = {
   args: EDIT,
