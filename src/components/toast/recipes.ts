@@ -1,4 +1,4 @@
-import { MIN_ACTION_TOAST_DURATION } from './Toast';
+import { DEFAULT_TOAST_DURATION, MIN_ACTION_TOAST_DURATION } from './Toast';
 import type { ToastOptions } from './ToastProvider';
 
 /**
@@ -25,7 +25,9 @@ const MISSING_INPUT: Record<MissingInputKind, (field: string) => string> = {
 /**
  * Submit was blocked by a field that is missing. One toast per problem, beside the
  * error under the field (see *The one exception: a blocked Submit*), so it is
- * `announce: false`: the field error already says it.
+ * `announce: false`: the field error already says it. It times out like any other
+ * toast, although it is critical: the error under the field stays, so nothing is lost
+ * when the toast goes, and several of these can show at once.
  */
 export const missingInput = (
   field: string,
@@ -36,16 +38,18 @@ export const missingInput = (
   title: 'Missing input',
   description: MISSING_INPUT[kind](field),
   announce: false,
+  duration: DEFAULT_TOAST_DURATION,
   ...overrides,
 });
 
-/** Submit was blocked because a chosen assignee is not available on the chosen dates. */
+/** Submit was blocked because a chosen assignee is not available on the chosen dates. Times out, as `missingInput` does. */
 export const unavailableAssignee = (overrides: Partial<ToastOptions> = {}): ToastOptions => ({
   tone: 'critical',
   title: 'Assignee unavailable',
   description:
     'A selected assignee is unavailable during the chosen dates. Please change the dates or remove this assignee before submitting.',
   announce: false,
+  duration: DEFAULT_TOAST_DURATION,
   ...overrides,
 });
 
@@ -54,6 +58,17 @@ export const changesSaved = (overrides: Partial<ToastOptions> = {}): ToastOption
   tone: 'success',
   title: 'Changes saved',
   description: 'Your updates have been saved.',
+  ...overrides,
+});
+
+/**
+ * A save failed and what was typed is still on the page. Critical with no `duration`, so it
+ * stays until it is dismissed: it is the only place the failure is said.
+ */
+export const changesNotSaved = (overrides: Partial<ToastOptions> = {}): ToastOptions => ({
+  tone: 'critical',
+  title: 'Changes not saved',
+  description: 'Something went wrong. Your changes are still here — try again.',
   ...overrides,
 });
 

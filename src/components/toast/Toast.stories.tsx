@@ -5,6 +5,7 @@ import { MIN_ACTION_TOAST_DURATION, Toast, type ToastTone } from './Toast';
 import { ToastProvider, ToastViewport, useToast } from './ToastProvider';
 import {
   bulkUpdated,
+  changesNotSaved,
   changesSaved,
   discarded,
   missingInput,
@@ -783,6 +784,9 @@ function RecipeButtons() {
       <Button variant="secondary" size="sm" onClick={() => toast(changesSaved())}>
         Changes saved
       </Button>
+      <Button variant="secondary" size="sm" onClick={() => toast(changesNotSaved())}>
+        Changes not saved
+      </Button>
       <Button
         variant="secondary"
         size="sm"
@@ -821,6 +825,17 @@ export const Recipes: Story = {
     const undo = await screen.findByText('Problem set deleted');
     await expect(undo.closest('[data-tone]')).toHaveAttribute('data-tone', 'info');
     await expect(screen.getByRole('button', { name: 'Undo' })).toBeInTheDocument();
+
+    /* A critical toast stays until it is dismissed: no timer. A blocked Submit is the one
+       critical toast that times out, because the error under the field stays. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Changes not saved' }));
+    const failed = (await screen.findByText('Changes not saved', { selector: 'p' })).closest('[data-tone]');
+    await expect(failed).toHaveAttribute('data-tone', 'critical');
+    await expect(failed).not.toHaveAttribute('data-duration');
+    await userEvent.click(canvas.getByRole('button', { name: 'Missing input' }));
+    const missing = (await screen.findByText('Missing input', { selector: 'p' })).closest('[data-tone]');
+    await expect(missing).toHaveAttribute('data-tone', 'critical');
+    await expect(missing).toHaveAttribute('data-duration', '6000');
   },
 };
 

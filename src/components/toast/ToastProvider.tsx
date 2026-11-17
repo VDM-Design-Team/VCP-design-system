@@ -30,7 +30,11 @@ export interface ToastOptions {
   actionLabel?: string;
   onAction?: () => void;
   dismissLabel?: string;
-  /** `null` keeps it up until dismissed. Defaults to `DEFAULT_TOAST_DURATION`. */
+  /**
+   * `null` keeps it up until dismissed. Defaults to `DEFAULT_TOAST_DURATION`, except for a
+   * `critical` toast, which stays until it is dismissed unless it is given a `duration`:
+   * it says something failed or was stopped, and is often the only place that is said.
+   */
   duration?: number | null;
   /**
    * `false` shows the toast without reading it out: it goes into a plain stack
@@ -338,8 +342,9 @@ function renderToast(item: ToastRecord, onDismiss?: (id: string) => void, still 
       actionLabel={item.actionLabel}
       onAction={item.onAction}
       dismissLabel={item.dismissLabel}
-      /* A copy being measured, or leaving, runs no timer. */
-      duration={still ? null : item.duration === undefined ? DEFAULT_TOAST_DURATION : item.duration}
+      /* A copy being measured, or leaving, runs no timer. A critical toast that was not
+         given a `duration` stays until it is dismissed (decided 17 November 2026). */
+      duration={still ? null : item.duration === undefined ? (item.tone === 'critical' ? null : DEFAULT_TOAST_DURATION) : item.duration}
       onDismiss={() => onDismiss?.(item.id)}
     >
       {item.description}

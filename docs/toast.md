@@ -64,14 +64,18 @@ this on 5 November 2026, over the rule above. It holds only on these terms:
   happened" (the *Don't* list) gives way: the design shows a toast for every
   missing field.
 - **`tone="critical"`, with a close control.** Pass `onDismiss`, as the design
-  draws an ✕. Normal timing is fine: when a toast goes, nothing is lost,
-  because the field error is still there.
+  draws an ✕. **It times out**, unlike other critical toasts (see *Behaviour*): when a
+  toast goes, nothing is lost, because the field error is still there. The
+  `missingInput` and `unavailableAssignee` recipes set the timing.
 - **`announce: false`, so it is said once.** `Field` already announces its
   error with `role="alert"`. A `critical` toast would go to the assertive
   region and say it a second time, which breaks *Say it once* (`CLAUDE.md`,
   rule 5). Raised with `announce: false`, the toast shows but is not read out
   (see *Shown, not announced* below). The story **Blocked submit is said once**
   tests it.
+- **The page goes to the first problem.** It scrolls to the highest missing field
+  **and puts the keyboard focus in it** (decided 17 November 2026; Figma draws only the
+  scroll). Focus is never moved to the toast. Doing it is the page's.
 
 ## Parts
 
@@ -115,7 +119,8 @@ test can assert on the timer without reaching into React.
 `toast(options)` takes `tone`, `title`, `description`, `toneLabel`,
 `actionLabel`, `onAction`, `dismissLabel`, `duration`, `announce`, and returns
 an id. `duration` defaults to `DEFAULT_TOAST_DURATION` (6000) there — not to
-`null` as it does on a bare `<Toast>`. `announce` defaults to `true`; `false`
+`null` as it does on a bare `<Toast>` — **except for a `critical` toast, which stays
+until it is dismissed** unless it is given a `duration`. `announce` defaults to `true`; `false`
 shows the toast without reading it out, and is only for a toast that repeats
 a message announced somewhere else (see *Shown, not announced*).
 
@@ -147,9 +152,10 @@ option (`toast(changesSaved({ duration: 10000 }))`).
 
 | Recipe | Tone | Title | Message | Use for | Timing |
 |---|---|---|---|---|---|
-| `missingInput(field, kind?)` | critical | Missing input | `fill`: "{Field} can’t be empty. Please fill it in before submitting." · `select`: "Please select a {field} before submitting." · `select-any`: "Please select at least one {field} before submitting." | Submit blocked by a missing field. One per problem, beside the field's own error | Default. `announce: false` |
-| `unavailableAssignee()` | critical | Assignee unavailable | "A selected assignee is unavailable during the chosen dates. Please change the dates or remove this assignee before submitting." | Submit blocked by availability | Default. `announce: false` |
+| `missingInput(field, kind?)` | critical | Missing input | `fill`: "{Field} can’t be empty. Please fill it in before submitting." · `select`: "Please select a {field} before submitting." · `select-any`: "Please select at least one {field} before submitting." | Submit blocked by a missing field. One per problem, beside the field's own error | Times out (6s), set by the recipe. `announce: false` |
+| `unavailableAssignee()` | critical | Assignee unavailable | "A selected assignee is unavailable during the chosen dates. Please change the dates or remove this assignee before submitting." | Submit blocked by availability | Times out (6s), set by the recipe. `announce: false` |
 | `changesSaved()` | success | Changes saved | "Your updates have been saved." | Edits were kept | Default |
+| `changesNotSaved()` | critical | Changes not saved | "Something went wrong. Your changes are still here — try again." | A save failed and what was typed is still on the page | Stays until dismissed |
 | `bulkUpdated({ property, value, count })` | success | Added Values updated | "{Property} changed to {value} for {count} Added Values." | Several records changed at once | Default |
 | `discarded(reference?)` | success | Draft discarded | "Added Value {reference} was discarded." (only when named) | A draft was thrown away on purpose | Default |
 | `undoDeletion(item, onUndo)` | info | "{Item} deleted" | — (an **Undo** action) | A deletion that can be brought back | `MIN_ACTION_TOAST_DURATION` (15s) |
@@ -176,7 +182,7 @@ For anyone, or any AI run, writing a toast message. Follow this, and use a recip
 6. **Tell them what to do when something is blocked.** "Please select at least one Initiator before submitting." names the field and the way out. Do not blame: "can’t be empty", not "you forgot".
 7. **No technical wording.** No error codes, no "failed to", no "an error occurred". Say what the user could not do, and, if there is one, what to do next.
 8. **An action is a convenience, and says a verb.** "Undo", "Retry". One action only, and never the only way to do it (see *Undo*). With an action, the `duration` is `MIN_ACTION_TOAST_DURATION` or more.
-9. **A blocked Submit repeats an error that stays**, so it is `announce: false` and always has the matching field error beside the field. Anywhere else a toast is never the only place a message lives.
+9. **A blocked Submit repeats an error that stays**, so it is `announce: false`, it times out, and it always has the matching field error beside the field. Any other `critical` toast stays until it is dismissed: do not give it a `duration`. Anywhere else a toast is never the only place a message lives.
 10. **One thing per toast.** Do not stack five for one action (a blocked Submit is the one exception).
 
 ## Behaviour
@@ -195,6 +201,11 @@ How the stack acts is the system's, not each page's.
   page has room for, oldest first, and **the newest wait** (not on screen, not announced,
   their timers not started) until a toast is gone. Then the first one waiting arrives, and
   its own timer starts. A toast taller than the screen is still shown.
+- **A critical toast stays.** Raised through `toast()`, a `critical` toast waits to be
+  dismissed: it says something failed or was stopped, and is often the only place that is
+  said. The one exception is a blocked Submit, whose toasts time out because the errors
+  under the fields stay (decided 17 November 2026). Every other tone times out after
+  `DEFAULT_TOAST_DURATION`.
 - **Timing is optional.** A toast with a `duration` dismisses itself when its bar runs
   out; one with `duration: null` stays until the user dismisses it or the page does (a
   route change calls `dismissAll`). The timer pauses while the pointer or focus is on a
