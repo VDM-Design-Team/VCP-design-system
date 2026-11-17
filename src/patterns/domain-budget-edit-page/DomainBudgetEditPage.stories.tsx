@@ -2,7 +2,7 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DomainBudgetEditPage } from './DomainBudgetEditPage';
-import { ToastProvider, ToastViewport, useToast } from '../../components/toast';
+import { ToastProvider, ToastViewport, changesNotSaved, changesSaved, useToast } from '../../components/toast';
 import type { BudgetRow } from '../budget-table';
 
 const LOREM =
@@ -75,11 +75,11 @@ function Page({ fail, loading }: { fail?: boolean; loading?: boolean }) {
       setSaving(false);
       if (fail) {
         /* Unlock and keep what was typed (`dirty` stays true), so Save can be tried again. */
-        toast({ tone: 'critical', title: 'Changes not saved', description: 'Something went wrong. Your changes are still here — try again.' });
+        toast(changesNotSaved());
         return;
       }
       setSaved(JSON.stringify(rows));
-      toast({ tone: 'success', title: 'Changes Saved', description: 'Your updates have been saved successfully!' });
+      toast(changesSaved());
     }, 300);
   };
 
@@ -133,7 +133,7 @@ export const SavingTheChanges: Story = {
     await expect(canvas.getByRole('textbox', { name: 'Development allocated points' })).toBeDisabled();
     await expect(canvas.getByRole('combobox', { name: 'Year' })).toBeDisabled();
     await expect(canvas.getByRole('radio', { name: 'Q2' })).toBeDisabled();
-    await waitFor(() => expect(within(document.body).getByText('Changes Saved')).toBeVisible(), { timeout: 3000 });
+    await waitFor(() => expect(within(document.body).getByText('Changes saved')).toBeVisible(), { timeout: 3000 });
     await expect(canvas.getByRole('textbox', { name: 'Development allocated points' })).toBeEnabled();
     /* Saved: nothing left to lose. */
     await waitFor(() => expect(asksBeforeLeaving()).toBe(false));
