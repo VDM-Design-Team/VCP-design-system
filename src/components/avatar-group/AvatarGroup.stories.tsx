@@ -23,7 +23,7 @@ const TEAM = [
   'Yuki Tanaka',
 ];
 
-const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
+const SIZES = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const;
 
 const meta = {
   title: 'Components/Display/AvatarGroup',

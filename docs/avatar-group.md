@@ -31,7 +31,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 |---|---|---|---|
 | `people` | `Array<string \| { name, initials, src, tone, role, domain }>` | — | In reading order. A bare string is shorthand for `{ name }`. `role` ("Assignee", "Reviewer") shows after the name in a tooltip and is read after it in the label. With `domain` ("Development"), both read as Figma's Manage table: "Jack Morgan (Development) — Assignee" |
 | `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N`. **The chip only appears for two or more people**: when `max` would leave exactly one out, that person is drawn too (so no `+1`) |
-| `size` | `xs \| sm \| md \| lg` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 |
+| `size` | `xs \| sm \| md \| lg \| xl \| 2xl \| 3xl` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 / 40 / 44 / 48 |
 | `label` | `string` | — | What the stack **is** — `"Assignees"`. Prefixed to the announced summary |
 | `tooltips` | `boolean` | — | Hover tooltips: each avatar says its name (and `role`), and the `+N` chip lists who it hides, separated by commas ("Priya Nair (Designer), Sofia Almeida"), or one to a line when they have a `domain`. **For the pointer only**: the stack stays one image with no extra tab stops (see Accessibility) |
 | `className` | `string` | — | Merged onto the row via `cn()` |
@@ -55,7 +55,7 @@ The group adds only these:
 | Ring on every avatar and the chip | `surface.elevated` | `ring-2 ring-surface-elevated` | — |
 | Chip radius | `shape.radius.pill` | `rounded-pill` | — |
 | Chip type, `sm` / `md` / `lg` | `type.caption-md-medium` / `-md` / `-lg` | `text-caption-md-medium` … | — |
-| Overlap, `sm` / `md` / `lg` | Tailwind numeric scale | `-ml-1.5` / `-ml-2` / `-ml-2.5` | — |
+| Overlap, `sm` / `md` / `lg` / `xl` / `2xl` / `3xl` | Tailwind numeric scale | `-ml-1.5` / `-ml-2` / `-ml-2.25` / `-ml-2.5` / `-ml-2.75` / `-ml-3` | About a quarter of the diameter |
 
 The chip is deliberately neutral rather than a fifth tone: it is a count, not a
 person, and a coloured chip reads as one more member of the stack.

@@ -39,7 +39,7 @@ export type AvatarGroupEntry = string | AvatarGroupPerson;
  */
 const overlap = cva('', {
   variants: {
-    size: { xs: '-ml-1', sm: '-ml-1.5', md: '-ml-2', lg: '-ml-2.25' },
+    size: { xs: '-ml-1', sm: '-ml-1.5', md: '-ml-2', lg: '-ml-2.25', xl: '-ml-2.5', '2xl': '-ml-2.75', '3xl': '-ml-3' },
   },
   defaultVariants: { size: 'md' },
 });
@@ -62,6 +62,9 @@ const overflow = cva(
         sm: 'size-6 text-caption-md-medium',
         md: 'size-8 text-caption-md-medium',
         lg: 'size-9 text-label-sm-medium',
+        xl: 'size-10 text-label-md-medium',
+        '2xl': 'size-11 text-label-md-medium',
+        '3xl': 'size-12 text-label-md-medium',
       },
     },
     defaultVariants: { size: 'md' },
