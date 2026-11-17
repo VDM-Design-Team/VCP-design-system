@@ -307,7 +307,7 @@ export const Empty: Story = {
 
 /**
  * What the row's own state adds: a green seal after the reference when the AV has **passed BESA**, and at the end of the details a red warning when it was
- * **rejected** and an info glyph when it was **sent back to the backlog**, each with the reason in its tooltip (Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and
+ * **rejected** and a grey info glyph when it was **sent back to the backlog**, each with the reason in its tooltip (Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and
  * `Backlogged_AV_Indicator`). Each tooltip says what the glyph is first ("BESA Passed", "Rejected: the reason", "Backlogged: the reason"). They are buttons so the keyboard reaches the tooltip.
  */
 export const Flags: Story = {

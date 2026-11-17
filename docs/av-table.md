@@ -126,9 +126,15 @@ threshold is not a design-system decision.
 |---|---|---|---|
 | `besaPassed: true` | a green seal (16, the same as the other flags) | right after the reference, before the rule | "BESA Passed" |
 | `rejected: { reason }` | a red warning glyph (16) | the end of the details, after the counts | "Rejected: " and the reason |
-| `backlogged: { reason }` | an info glyph (16, green as Figma draws it) | the end of the details, after the counts | "Backlogged: " and the reason |
+| `backlogged: { reason }` | an info glyph (16, grey: `text.tertiary`, as the header hints) | the end of the details, after the counts | "Backlogged: " and the reason |
 
-Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and `Backlogged_AV_Indicator`. Each tooltip says what the glyph is first, then the reason (Figma's tooltip is the reason alone; the lead word is added so a glyph never has to be guessed). Each is a button named by that same sentence, so the keyboard reaches the tooltip (a tooltip needs a focusable trigger), and it is not read twice. They show on any row, multipart or not. The table does not decide which AVs are rejected or backlogged, or where the reason comes from: pass what the AV carries.
+Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and `Backlogged_AV_Indicator`. Each tooltip says what the glyph is first, then the reason (Figma's tooltip is the reason alone; the lead word is added so a glyph never has to be guessed). Each is a button named by that same sentence, so the keyboard reaches the tooltip (a tooltip needs a focusable trigger), and it is not read twice. They show on any row, multipart or not.
+
+Two colour decisions (17 November 2026):
+
+- **Backlogged is grey, not Figma's green.** Figma draws the Backlogged glyph in the seal's green. Here it takes the grey of the Backlog status tag and of the header hints, so green in a row means BESA Passed and nothing else. A recorded difference from Figma; Figma's `Backlogged_AV_Indicator` follows the code.
+- **The seal keeps Figma's green.** It is the green of the toast and banner glyphs (`accent.success.outline.border`), 2.2:1 on white in the light theme, under the 3:1 a glyph that stands alone should clear. Kept as a known exception: the tooltip and the control's name both say "BESA Passed". Dark is 4.5:1.
+ The table does not decide which AVs are rejected or backlogged, or where the reason comes from: pass what the AV carries.
 
 ### `hints`: three have copy, Members does not
 

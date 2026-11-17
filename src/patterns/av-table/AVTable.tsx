@@ -87,7 +87,7 @@ export interface AVTableRow {
   besaPassed?: boolean;
   /** The AV was rejected: a red warning glyph at the end of the details, `reason` in its tooltip. */
   rejected?: { reason: string };
-  /** The AV was sent back to the backlog: an info glyph at the end of the details, `reason` in its tooltip. */
+  /** The AV was sent back to the backlog: a grey info glyph at the end of the details, `reason` in its tooltip. */
   backlogged?: { reason: string };
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
@@ -166,12 +166,11 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   caption?: string;
 }
 
-/** A count under the title: glyph, number, and the word only for screen readers. */
 /**
  * A glyph that says a thing about the AV, with the words in its tooltip. A button, because the tooltip needs a focusable trigger (`Tooltip`): focus
  * it and the sentence is read. `text` is both the tooltip and the control's name, so it says what the glyph is first: "BESA Passed", "Rejected: the reason".
  */
-function Flag({ text, tone, icon }: { text: string; tone: 'success' | 'critical'; icon: 'seal-check' | 'warning' | 'info' }) {
+function Flag({ text, tone, icon }: { text: string; tone: 'success' | 'critical' | 'neutral'; icon: 'seal-check' | 'warning' | 'info' }) {
   return (
     /* The tooltip says what the glyph is ("BESA Passed", "Rejected: the reason") and is also the control's name: say it once. */
     <Tooltip content={text} placement="top" describe={false}>
@@ -180,7 +179,12 @@ function Flag({ text, tone, icon }: { text: string; tone: 'success' | 'critical'
         aria-label={text}
         className={cn(
           'grid shrink-0 place-items-center rounded-sm',
-          tone === 'success' ? 'text-accent-success-outline-border-default' : 'text-accent-critical-outline-content-default',
+          /* The seal's green is Figma's, the green of the toast and banner glyphs. It is 2.2:1 on white, under the 3:1 a glyph that stands alone
+             should clear: kept as a known exception (decided 17 November 2026). Backlogged is the quiet grey of the header hints and of the
+             Backlog status tag, not Figma's green, so green in a row means BESA Passed and nothing else (decided the same day). */
+          tone === 'success' && 'text-accent-success-outline-border-default',
+          tone === 'critical' && 'text-accent-critical-outline-content-default',
+          tone === 'neutral' && 'text-text-tertiary hover:text-text-secondary',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
         )}
       >
@@ -190,6 +194,7 @@ function Flag({ text, tone, icon }: { text: string; tone: 'success' | 'critical'
   );
 }
 
+/** A count under the title: glyph, number, and the word only for screen readers. */
 function Count({ icon, value, noun }: { icon: 'paperclip' | 'chat-centered-text'; value: number; noun: string }) {
   if (!value) return null;
   return (
@@ -285,7 +290,7 @@ export function AVTable({
             <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
             <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
             {row.rejected && <Flag text={`Rejected: ${row.rejected.reason}`} tone="critical" icon="warning" />}
-            {row.backlogged && <Flag text={`Backlogged: ${row.backlogged.reason}`} tone="success" icon="info" />}
+            {row.backlogged && <Flag text={`Backlogged: ${row.backlogged.reason}`} tone="neutral" icon="info" />}
           </div>
         );
 
