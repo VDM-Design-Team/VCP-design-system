@@ -69,7 +69,7 @@ Governance, Partners, Quality Assurance), and a status is a spine status or a do
 **`domain`** trims it: **Design has no Cycle**; Development has every field. A field with no value is
 left out of a read card.
 
-Not built here: **UI Changes** (the Modify / New UI / No UI section) is not wanted (design, 16 Nov 2026), and
+Not built here: **UI Changes** (the Modify / New UI / No UI section) is not wanted in an AV's detail card any more (design, 16 Nov 2026; confirmed 17 November 2026), and
 **Estimated Duration** (drawn, but placed in no card) is undecided: do not build it until design says it is wanted.
 
 ## Props

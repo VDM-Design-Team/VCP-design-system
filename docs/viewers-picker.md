@@ -33,7 +33,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Press the pill** | Clicked (Empty Search) | A panel: the **Search by name** field, then "3 Viewers" with each person. Hover a row (or tab to it) for its remove button |
 | **Type in the search** | Filled Search | The people who match and are **not viewers yet** come first; press one to add them |
 | **Nobody is viewing** | No Viewers / No Viewers Search | "No viewers yet" |
-| **Nobody matches** | not drawn | "No one matches" (ours) |
+| **Nobody matches** | not drawn | "No one matches" (ours; decided 17 November 2026, for Figma to add) |
+
+**People to add show only once a name is typed** (decided 17 November 2026): the panel opens with the search field and the viewers, as Figma draws it, and does not suggest anyone before that.
 
 It holds no data. The page passes `viewers` and `candidates` and changes them in `onAdd` and `onRemove`. After an add or a remove the search clears (an add) and **focus returns to the search field**, so it never lands on a row that has gone.
 
