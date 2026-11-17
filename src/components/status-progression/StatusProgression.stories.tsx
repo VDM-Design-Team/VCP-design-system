@@ -76,7 +76,7 @@ export const FirstStep: Story = {
   },
 };
 
-/** The last step hands off instead of moving on. Admins get the short label. */
+/** The last step hands off instead of moving on. The label is the same for an assignee and an admin: "Move to Handoff". */
 export const LastStep: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
@@ -84,6 +84,11 @@ export const LastStep: Story = {
       <StatusProgression role="admin" chain={DEVELOPMENT} step="confirmed-prod" />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getAllByRole('button', { name: 'Move to Handoff' })).toHaveLength(2);
+    await expect(c.queryByRole('button', { name: 'Handoff' })).toBeNull();
+  },
 };
 
 /** The spine. `Draft` and `Pending` never leave this component. */
