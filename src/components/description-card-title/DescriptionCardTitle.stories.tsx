@@ -116,6 +116,20 @@ export const MultipartChild: Story = {
   },
 };
 
+/** With only `onOpen` the parent's reference is a real button: the keyboard reaches it and Enter presses it. */
+export const MultipartChildAsAButton: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: { parent: { ref: 'VCP-4321', onOpen: fn() } },
+  play: async ({ canvasElement, args }) => {
+    const button = within(canvasElement).getByRole('button', { name: 'VCP-4321' });
+    await userEvent.tab();
+    await expect(button).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    await expect(args.parent?.onOpen).toHaveBeenCalledTimes(1);
+  },
+};
+
 /** Every colour is a token, so dark comes free. */
 export const LightAndDark: Story = {
   parameters: { controls: { disable: true }, ...SIDE_BY_SIDE },
