@@ -36,6 +36,7 @@ export * from './atoms/toggle';
 /* Components — units assembled from atoms (and other components). */
 export * from './components/account-status-tag';
 export * from './components/accordion';
+export * from './components/already-reviewed-modal';
 export * from './components/attachment-preview';
 export * from './components/assignee-selection-dropdown';
 export * from './components/assignee-with-status';
@@ -75,7 +76,7 @@ export * from './components/deliverable-link-form';
 export * from './components/password-field';
 export * from './components/password-strength';
 export * from './components/due-date-tag';
-export * from './components/duplicate-to-other-domain';
+export * from './components/initiate-to-other-domain';
 export * from './components/emoji-reaction-picker';
 export * from './components/empty-state';
 export * from './components/table-empty';
@@ -131,5 +132,7 @@ export { CHART_SERIES, CHART_SERIES_ORDER, seriesIn } from './lib/chart-series';
 export type { ChartSeries, ChartSeriesStyle } from './lib/chart-series';
 export { fileKind, useAttachmentFiles } from './lib/attachment-files';
 export { DateFormatProvider, useDateFormat, formatDate, formatDateTime, formatTime, formatDateRange, formatDayMonthYear, datePlaceholder } from './lib/format-date';
+/* After a blocked submit: scroll to the first `aria-invalid` field and focus it (docs/field.md). */
+export { focusFirstInvalid } from './lib/focus-first-invalid';
 /* VCP's password score and its one hard rule, so a page uses the same ones as `ChangePasswordForm`. */
 export { MIN_PASSWORD_LENGTH, scorePassword } from './lib/password-strength';

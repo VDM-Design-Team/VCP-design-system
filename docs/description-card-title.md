@@ -32,7 +32,7 @@ Figma's `_Description_Card_Title_Base`:
 | Editing Placeholder | `editing` with an empty `title`: the **Title** label over the field, "Type in the title" as the prompt |
 | Editing Filled | `editing` with a `title` |
 | Disabled | `editing` and `disabled`: the value stays, greyed, and takes no focus |
-| `Multipart Child` switch | `parent={{ ref: 'VCP-4321' }}`: "Multipart Child of VCP-4321" beside the reference when reading; with an `href` the reference is a link that opens the parent in a new tab, with only `onOpen` a button, with neither plain text |
+| `Multipart Child` switch | `parent={{ ref: 'VCP-4321' }}`: "Multipart Child of VCP-4321" at the card's right edge when reading, in secondary text; with an `href` the reference is a link that opens the parent in a new tab, with only `onOpen` a button, with neither plain text |
 
 An `error` shows under the field and sets `aria-invalid`, as every `Field` does.
 
