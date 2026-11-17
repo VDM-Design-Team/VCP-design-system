@@ -158,12 +158,14 @@ function Demo({
   initialProjects = [],
   initialUsers = [],
   tasks = TASKS,
+  headingLevel,
 }: {
   initialView?: GanttView;
   initialDate?: string;
   initialProjects?: string[];
   initialUsers?: string[];
   tasks?: GanttTask[];
+  headingLevel?: 1 | 2;
 }) {
   const [view, setView] = React.useState<GanttView>(initialView);
   const [date, setDate] = React.useState(initialDate);
@@ -174,6 +176,7 @@ function Demo({
     <div className="flex flex-col gap-3">
       <GanttChart
         infoText="Each bar is an Added Value, from start to due date. Open a row to see its bars."
+        headingLevel={headingLevel}
         view={view}
         onViewChange={setView}
         date={date}
@@ -259,11 +262,34 @@ export const Cycle: Story = {
 /** October 2026, by the day, with each day's cycle named above it. */
 export const Month: Story = {
   render: () => <Demo initialView="month" />,
+  /* Figma's sizes: the year, month and cycle rows are 40 and the days 64; a person's summary bar is 40 and a task's 36. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (el: HTMLElement | null) => Math.round(el?.getBoundingClientRect().height ?? 0);
+    await expect(height(await c.findByText('2026'))).toBe(40);
+    await expect(height(c.getByText('October').closest('.h-10') as HTMLElement | null)).toBe(40);
+    await expect(height(c.getByText('Cycle 42'))).toBe(40);
+    await expect(height(c.getAllByText('1')[0].closest('.h-16') as HTMLElement | null)).toBe(64);
+    const shown = (els: HTMLElement[]) => els.find((el) => el.getBoundingClientRect().height > 0) ?? null;
+    await expect(height(shown(c.getAllByText(/Added Values/))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(40);
+    /* The toolbar is one height: the buttons are as tall as the filters beside them. */
+    await expect(height(c.getByRole('button', { name: 'Reset Filters' }))).toBe(40);
+    await expect(height(c.getByRole('button', { name: 'Today' }))).toBe(40);
+    await expect(height(shown(c.getAllByText('Invoice export'))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(36);
+  },
 };
 
 /** 2026 by the cycle, with the months spanning them. Tasks inside one cycle keep only their points. */
 export const Year: Story = {
   render: () => <Demo initialView="year" />,
+  /* Figma's sizes: the year row is 40, then the months row and the cycles row are each 64. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (el: HTMLElement | null) => Math.round(el?.getBoundingClientRect().height ?? 0);
+    await expect(height((await c.findByText('2026')).closest('.h-10') as HTMLElement | null)).toBe(40);
+    await expect(height(c.getByText('January'))).toBe(64);
+    await expect(height(c.getByText('C23').closest('.h-16') as HTMLElement | null)).toBe(64);
+  },
 };
 
 /** Two projects selected: the chart groups by project, then person, and each person shows only that project's tasks. */
@@ -296,6 +322,24 @@ export const Loading: Story = {
     /* No rows, no empty message, and the filters are off. */
     await expect(canvas.queryByText('Nothing matches these filters.')).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeDisabled();
+  },
+};
+
+/**
+ * The title is an `h2` by default, for a chart that sits under a page's own title. On the Gantt page the chart is the whole content and draws its own title, so the page gives
+ * `headingLevel={1}` and the title is the page's one `h1`. Same look, tested (hidden).
+ */
+export const AsThePageHeading: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <Demo headingLevel={1} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const h1 = canvas.getByRole('heading', { level: 1, name: 'Gantt Chart' });
+    await expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    await expect(canvas.queryByRole('heading', { level: 2, name: 'Gantt Chart' })).toBeNull();
+    /* The same type style as the default h2. */
+    await expect(h1).toHaveClass('text-title-sm-bold');
   },
 };
 

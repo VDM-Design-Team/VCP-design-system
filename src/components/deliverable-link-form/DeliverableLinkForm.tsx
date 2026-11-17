@@ -16,6 +16,9 @@ import { Input } from '../../atoms/input';
  * "Please enter a link title", and "Please enter a valid URL starting with https://" for a URL that
  * is empty or does not begin `https://`.
  *
+ * **Disabled** (`_Deliverables_Paste_Link`'s Disabled): the URL and title fields grey out, and Add, Save and "Add another link" are off, for a form that cannot take a link now
+ * (the card is saving one, or the person may not add). Cancel stays: a person can always back out.
+ *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
@@ -48,12 +51,14 @@ export interface DeliverableLinkFormProps
   /** Fires with every valid pair, once all of them pass. */
   onSubmit: (links: DeliverableLinkDraft[]) => void;
   onCancel: () => void;
+  /** The form cannot take a link now: the fields grey out and Add / Save are off. Cancel still works. */
+  disabled?: boolean;
 }
 
 const BLANK: DeliverableLinkDraft = { url: '', title: '' };
 
 export const DeliverableLinkForm = React.forwardRef<HTMLFormElement, DeliverableLinkFormProps>(
-  ({ className, mode = 'add', initial, onSubmit, onCancel, ...props }, ref) => {
+  ({ className, mode = 'add', initial, onSubmit, onCancel, disabled, ...props }, ref) => {
     const [rows, setRows] = React.useState<DeliverableLinkDraft[]>([initial ?? BLANK]);
     const [errors, setErrors] = React.useState<Array<{ url?: string; title?: string }>>([]);
     const baseId = React.useId();
@@ -63,6 +68,7 @@ export const DeliverableLinkForm = React.forwardRef<HTMLFormElement, Deliverable
 
     const submit = (event: React.FormEvent) => {
       event.preventDefault();
+      if (disabled) return;
       const next = rows.map((row) => ({
         url: isValidLinkUrl(row.url) ? undefined : LINK_URL_ERROR,
         title: row.title.trim() ? undefined : LINK_TITLE_ERROR,
@@ -92,6 +98,7 @@ export const DeliverableLinkForm = React.forwardRef<HTMLFormElement, Deliverable
                   placeholder="Paste Link Here"
                   leadingIcon={<Icon name="link" size="sm" />}
                   value={row.url}
+                  disabled={disabled}
                   onChange={(e) => change(index, { url: e.target.value })}
                   invalid={!!urlError}
                   aria-describedby={urlError ? `${baseId}-url-${index}` : undefined}
@@ -108,6 +115,7 @@ export const DeliverableLinkForm = React.forwardRef<HTMLFormElement, Deliverable
                   aria-label={rows.length > 1 ? `Link title ${index + 1}` : 'Link title'}
                   placeholder="Link Title"
                   value={row.title}
+                  disabled={disabled}
                   onChange={(e) => change(index, { title: e.target.value })}
                   invalid={!!titleError}
                   aria-describedby={titleError ? `${baseId}-title-${index}` : undefined}
@@ -127,6 +135,7 @@ export const DeliverableLinkForm = React.forwardRef<HTMLFormElement, Deliverable
               type="button"
               variant="tertiary"
               size="sm"
+              disabled={disabled}
               onClick={() => setRows((current) => [...current, BLANK])}
             >
               <Icon name="plus" size="sm" aria-hidden="true" />
@@ -138,7 +147,7 @@ export const DeliverableLinkForm = React.forwardRef<HTMLFormElement, Deliverable
           <Button type="button" variant="tertiary" size="sm" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" variant="secondary" size="sm">
+          <Button type="submit" variant="secondary" size="sm" disabled={disabled}>
             {mode === 'edit' ? 'Save' : 'Add'}
           </Button>
         </div>

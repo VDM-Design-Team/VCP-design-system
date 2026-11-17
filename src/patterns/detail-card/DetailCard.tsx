@@ -27,8 +27,8 @@ import { useDateFormat } from '../../lib/format-date';
  * rows.
  *
  * **`type` picks which of the four cards it is**, and each is a fixed list of fields, as the design
- * draws them (the table is in `docs/detail-card.md`): `viewing` (everything), `duplicate` (an AV
- * initiated to another domain: a Duplicates row, no people or dates), `editing` (the fields that can
+ * draws them (the table is in `docs/detail-card.md`): `viewing` (everything), `initiated` (an AV
+ * initiated to another domain: an "Initiated to" row, no people or dates), `editing` (the fields that can
  * be changed, so no Status) and `new` (an AV being created: Initiator, Projects, Category, Tags,
  * Type, Urgency). `domain` then trims it: **Design has no Cycle**; Development has every field.
  *
@@ -43,7 +43,7 @@ import { useDateFormat } from '../../lib/format-date';
  * If you need a value that isn't here, add the token in `tokens/` first —
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
-export type DetailCardType = 'viewing' | 'duplicate' | 'editing' | 'new';
+export type DetailCardType = 'viewing' | 'initiated' | 'editing' | 'new';
 export type DetailCardDomain = 'design' | 'development';
 
 export interface DetailCardPerson {
@@ -60,7 +60,7 @@ export interface DetailCardPerson {
   until?: string;
 }
 
-export interface DetailCardDuplicate {
+export interface DetailCardInitiatedDomain {
   /** The domain it was initiated to: "Design". */
   domain: string;
   /** Its status there: "Initiated". */
@@ -83,7 +83,7 @@ export interface DetailCardValue {
   category?: string;
   tags?: readonly string[];
   capacityPoints?: number;
-  duplicates?: readonly DetailCardDuplicate[];
+  initiatedTo?: readonly DetailCardInitiatedDomain[];
   deploymentDate?: string;
   dateInitiated?: string;
   dateAccepted?: string;
@@ -116,8 +116,8 @@ const FIELDS: Record<DetailCardType, readonly DetailCardField[]> = {
     'initiators', 'assignees', 'startDate', 'dueDate', 'cycle', 'status', 'urgency', 'type',
     'projects', 'category', 'tags', 'capacityPoints', 'deploymentDate', 'dateInitiated',
   ],
-  duplicate: [
-    'initiators', 'duplicates', 'status', 'urgency', 'type', 'projects', 'category', 'tags',
+  initiated: [
+    'initiators', 'initiatedTo', 'status', 'urgency', 'type', 'projects', 'category', 'tags',
     'deploymentDate', 'dateInitiated',
   ],
   editing: [
@@ -133,7 +133,7 @@ const LABEL: Partial<Record<DetailCardField, string>> = {
   startDate: 'Start Date',
   dueDate: 'Due Date',
   cycle: 'Cycle',
-  duplicates: 'Duplicates',
+  initiatedTo: 'Initiated to',
   status: 'Status',
   urgency: 'Urgency',
   type: 'Type',
@@ -178,7 +178,7 @@ export interface DetailCardProps
   readOnly?: readonly DetailCardField[];
   /**
    * Editing: the assignees can't be added to. The + beside Assignee is disabled and says why on hover and focus. Left out, it follows the AV: one that was initiated to another domain
-   * (it has `duplicates`) is locked, because its assignees are set on its domain copy.
+   * (it has `initiatedTo`) is locked, because its assignees are set on its domain copy.
    */
   lockAssignees?: boolean;
   /**
@@ -227,7 +227,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
     const locked = (field: DetailCardField) => editing && !!readOnly?.includes(field);
     /* Availability is only known once the AV has dates (or a cycle, which has them). Before that the picker says so. */
     const availabilityKnown = Boolean((value.startDate && value.dueDate) || value.cycle);
-    const assigneesLocked = lockAssignees ?? (editing && (value.duplicates?.length ?? 0) > 0);
+    const assigneesLocked = lockAssignees ?? (editing && (value.initiatedTo?.length ?? 0) > 0);
     const cycles = options?.cycles ?? [];
     const cycleOptions: SearchSelectOption[] = cycles.map((c) => ({
       value: c.value,
@@ -288,9 +288,9 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
         <StatusTag size="md" custom={value.status} />
       )
     ) : null;
-    body.duplicates = (
+    body.initiatedTo = (
       <ul className="flex w-full flex-col gap-2">
-        {(value.duplicates ?? []).map((d) => (
+        {(value.initiatedTo ?? []).map((d) => (
           <li
             key={d.domain}
             className="flex min-h-14 items-center justify-between gap-2 rounded-md border border-stroke-default px-3 text-body-sm-regular text-text-primary"

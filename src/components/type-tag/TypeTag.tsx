@@ -66,6 +66,9 @@ const TYPE_TONE: Record<AVType, NonNullable<TagProps['tone']>> = {
 /* The glyph follows the tag's size, as the tag docs' table sets it: 20 in the 28 (the default), 16 in the 24, 24 in the 32. */
 const GLYPH_SIZE = { xs: 'sm', sm: 'sm', md: 'md', lg: 'lg' } as const;
 
+/* The ⓘ is one step below the glyph, and never below 16: 16 in the 28 default (beside its 20 glyph), 20 in the 32, 16 in the smaller two. A deliberate exception to Figma's 20: ⓘ is 16 everywhere else, and at 20 it took a lot of the tag. See docs/type-tag.md. */
+const INFO_SIZE = { xs: 'sm', sm: 'sm', md: 'sm', lg: 'md' } as const;
+
 /** What each type means — the one place this copy lives (Figma's tag tooltips and the column's ⓘ). */
 export const AV_TYPE_MEANING: Record<AVType, string> = {
   'Type 1': 'Direct KPI impact with clear ROI',
@@ -91,7 +94,7 @@ export interface TypeTagProps extends Omit<TagProps, 'tone' | 'variant' | 'icon'
   type: AVType;
   /** `textual` (default), `tonal` (a pale fill), `faint` (a white fill with a light grey edge: Figma's "Faint Fill", as the Detail card draws it) or `outline` (a bordered pill in the type's hue). */
   variant?: TypeTagVariant;
-  /** The ⓘ after the word, which the design draws on the filled and bordered looks. Decorative: it marks that the type has an explanation, which the page provides. */
+  /** The ⓘ after the word, which the design draws on the filled and bordered looks. Decorative: it marks that the type has an explanation, which the page provides. One step below the tag's glyph (16 in the default, 20 in the largest), never below 16: an exception to Figma's 20 (docs/type-tag.md). */
   info?: boolean;
   /**
    * Say what the type means on hover ("Type 3: Non-critical, no meaningful KPI impact"), as the
@@ -114,7 +117,7 @@ export const TypeTag = React.forwardRef<HTMLSpanElement, TypeTagProps>(
         tone={variant === 'textual' || variant === 'faint' ? 'neutral' : TYPE_TONE[type]}
         /* Decorative: the word beside it already says which type this is. */
         icon={<Icon name={icon} size={glyphSize} className={cn('shrink-0', tone)} />}
-        trailingIcon={info ? <Icon name="info" size="md" className="shrink-0 text-text-tertiary" /> : undefined}
+        trailingIcon={info ? <Icon name="info" size={INFO_SIZE[size ?? 'md']} className="shrink-0 text-text-tertiary" /> : undefined}
         /* The label stays neutral on a fill or a border; the glyph carries the colour. */
         className={cn(
           variant !== 'textual' && 'text-text-secondary',

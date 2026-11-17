@@ -49,14 +49,14 @@ const meta = {
       description: {
         component:
           'The facts about one Added Value, down the right of its page. `type` picks which of the four cards it is ' +
-          '(`viewing`, `duplicate`, `editing`, `new`), each a fixed list of fields; `domain` trims it (Design has no Cycle). ' +
+          '(`viewing`, `initiated`, `editing`, `new`), each a fixed list of fields; `domain` trims it (Design has no Cycle). ' +
           'Values in as `value`, changes out through `onChange`, dropdown choices as `options`.',
       },
     },
   },
   args: { type: 'viewing', value: VIEWING, options: OPTIONS, viewerCount: 3, onViewers: fn() },
   argTypes: {
-    type: { control: 'inline-radio', options: ['viewing', 'duplicate', 'editing', 'new'] },
+    type: { control: 'inline-radio', options: ['viewing', 'initiated', 'editing', 'new'] },
     domain: { control: 'inline-radio', options: ['design', 'development'] },
   },
   decorators: [
@@ -241,12 +241,12 @@ export const NewAV: Story = {
   },
 };
 
-/** An AV initiated to another domain: a Duplicates row, and no people or dates to plan. */
+/** An AV initiated to another domain: an "Initiated to" row, and no people or dates to plan. */
 export const InitiatedToOtherDomain: Story = {
-  args: { type: 'duplicate', value: { ...VIEWING, status: 'Initiated', duplicates: [{ domain: 'Design', status: 'Initiated' }] } },
+  args: { type: 'initiated', value: { ...VIEWING, status: 'Initiated', initiatedTo: [{ domain: 'Design', status: 'Initiated' }] } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('group', { name: 'Duplicates' })).toBeVisible();
+    await expect(canvas.getByRole('group', { name: 'Initiated to' })).toBeVisible();
     await expect(canvas.queryByRole('group', { name: 'Assignee' })).toBeNull();
   },
 };
@@ -371,7 +371,7 @@ export const InitiatedAssigneesLocked: Story = {
       ...AVAILABILITY_BASE,
       ...AVAILABILITY_DATES,
       assignees: [{ name: 'John Kestrel', description: 'Assignee', points: 3, availability: 'available' }],
-      duplicates: [{ domain: 'Design', status: 'Initiated' }],
+      initiatedTo: [{ domain: 'Design', status: 'Initiated' }],
     },
   },
   play: async ({ canvasElement }) => {
@@ -385,18 +385,18 @@ export const InitiatedAssigneesLocked: Story = {
 };
 
 /**
- * One box per domain the AV was duplicated to, each with the domain's name on the left and its current status on
- * the right, in the order given. Another duplication adds another box under Duplicates.
+ * One box per domain the AV was initiated to, each with the domain's name on the left and its current status on
+ * the right, in the order given. Initiating to another domain adds another box under "Initiated to".
  */
-export const DuplicatedToSeveralDomains: Story = {
+export const InitiatedToSeveralDomains: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
   args: {
-    type: 'duplicate',
+    type: 'initiated',
     value: {
       ...VIEWING,
       status: 'Initiated',
-      duplicates: [
+      initiatedTo: [
         { domain: 'Design (BESA)', status: 'Initiated' },
         { domain: 'Development', status: 'In Progress' },
         { domain: 'Content', status: 'Draft' },
@@ -407,7 +407,7 @@ export const DuplicatedToSeveralDomains: Story = {
     },
   },
   play: async ({ canvasElement }) => {
-    const group = within(within(canvasElement).getByRole('group', { name: 'Duplicates' }));
+    const group = within(within(canvasElement).getByRole('group', { name: 'Initiated to' }));
     await expect(group.getAllByRole('listitem')).toHaveLength(6);
     await expect(group.getByText('Quality Assurance')).toBeVisible();
   },

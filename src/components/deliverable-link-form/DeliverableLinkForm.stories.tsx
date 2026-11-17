@@ -69,6 +69,20 @@ export const AddAnotherLink: Story = {
   },
 };
 
+/** Cannot take a link now: the fields grey out and Add is off. Cancel still works. */
+export const Disabled: Story = {
+  args: { disabled: true, initial: { url: 'https://www.example.com', title: 'Prototype' } },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    await expect(c.getByRole('textbox', { name: 'Link URL' })).toBeDisabled();
+    await expect(c.getByRole('textbox', { name: 'Link title' })).toBeDisabled();
+    await expect(c.getByRole('button', { name: 'Add' })).toBeDisabled();
+    await expect(c.getByRole('button', { name: 'Add another link' })).toBeDisabled();
+    await userEvent.click(c.getByRole('button', { name: 'Cancel' }));
+    await expect(args.onCancel).toHaveBeenCalled();
+  },
+};
+
 /** Editing a link already added: one pair, filled in, and Save. */
 export const Editing: Story = {
   args: { mode: 'edit', initial: { url: 'https://www.example.com', title: 'Some Link Name Here' } },
