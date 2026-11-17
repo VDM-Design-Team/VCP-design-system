@@ -112,7 +112,7 @@ An `error` turns the control's **edge critical as well as the message red**. `Fi
 
 ## Taking the person to the missing field
 
-When a submit is blocked, call `focusFirstInvalid(form)` once the errors have rendered. It finds the first control that is `aria-invalid` (the page order, which is what `Field` sets from its `error`), scrolls it into view only if it is not already fully visible, and focuses it. It scrolls smoothly, or jumps when the person prefers reduced motion. Pair it with the `missingInput()` toast, which says what is missing while the focus shows where. A group that is invalid as a whole gets its first enabled control focused. It returns the element it focused, or `null` when nothing is invalid.
+When a submit is blocked, call `focusFirstInvalid(form)` once the errors have rendered. It finds the first control that is `aria-invalid` (the page order, which is what `Field` sets from its `error`), scrolls it into view only if it is not already fully visible, and focuses it. Fully visible means inside the window and inside every box that scrolls round it, so it also works in a dialog's body or a page's main area, where a field can be within the window and still be scrolled out of its box. It scrolls smoothly, or jumps when the person prefers reduced motion. Pair it with the `missingInput()` toast, which says what is missing while the focus shows where. A group that is invalid as a whole gets its first enabled control focused. It returns the element it focused, or `null` when nothing is invalid.
 
 Call it after the failed submit only, not on every change: typing must not pull focus back to an old error.
 

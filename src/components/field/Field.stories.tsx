@@ -327,3 +327,56 @@ export const FocusesTheFirstInvalidField: Story = {
     await waitFor(() => expect(c.getByRole('textbox', { name: /Name/ })).toHaveFocus());
   },
 };
+
+/**
+ * The same inside a box that scrolls (a dialog's body, a page's main area): the missing field can be inside the window but scrolled out of the
+ * box, so `focusFirstInvalid` checks every scrolling box round the field, not only the window, and scrolls the field into view before focusing it.
+ */
+export const FocusScrollsInsideAScrollingBox: Story = {
+  render: function Render() {
+    const form = React.useRef<HTMLFormElement>(null);
+    const [errors, setErrors] = React.useState(false);
+    React.useEffect(() => {
+      if (errors) focusFirstInvalid(form.current);
+    }, [errors]);
+    return (
+      <form
+        ref={form}
+        noValidate
+        className="flex w-96 flex-col gap-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          setErrors(true);
+        }}
+      >
+        {/* Short on purpose: only the first field shows until the box is scrolled. */}
+        <div data-testid="scrolling-box" className="flex h-24 flex-col gap-6 overflow-y-auto pr-2">
+          <Field label="Title">
+            <Input />
+          </Field>
+          <Field label="Summary">
+            <Input />
+          </Field>
+          <Field label="Name" required error={errors ? 'Enter a name.' : undefined}>
+            <Input />
+          </Field>
+        </div>
+        <Button type="submit">Save</Button>
+      </form>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const box = c.getByTestId('scrolling-box');
+    const name = c.getByRole('textbox', { name: /Name/ });
+    const shown = () => {
+      const f = name.getBoundingClientRect();
+      const b = box.getBoundingClientRect();
+      return f.top >= b.top - 1 && f.bottom <= b.bottom + 1;
+    };
+    await expect(shown()).toBe(false);
+    await userEvent.click(c.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(name).toHaveFocus());
+    await waitFor(() => expect(shown()).toBe(true), { timeout: 3000 });
+  },
+};

@@ -1,3 +1,15 @@
+/** Whether the whole of `el` shows: inside the window, and not cut off by any ancestor that scrolls or clips. */
+function fullyInView(el: HTMLElement): boolean {
+  const rect = el.getBoundingClientRect();
+  if (rect.top < 0 || rect.bottom > window.innerHeight) return false;
+  for (let box = el.parentElement; box; box = box.parentElement) {
+    if (getComputedStyle(box).overflowY === 'visible') continue;
+    const edge = box.getBoundingClientRect();
+    if (rect.top < edge.top || rect.bottom > edge.bottom) return false;
+  }
+  return true;
+}
+
 const FOCUSABLE = 'input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), button:not(:disabled), [tabindex]:not([tabindex="-1"])';
 
 /**
@@ -14,15 +26,15 @@ const FOCUSABLE = 'input:not([type="hidden"]):not(:disabled), select:not(:disabl
  *
  * It scrolls smoothly and centres the field, unless the person asks for less
  * motion, when it jumps. The field is not scrolled when it is already fully in
- * view.
+ * view: inside the window and inside every box that scrolls round it (a
+ * dialog's body, a page's main area), since a field can be within the window
+ * and still be scrolled out of its box.
  */
 export function focusFirstInvalid(root: ParentNode | null | undefined): HTMLElement | null {
   const invalid = root?.querySelector<HTMLElement>('[aria-invalid="true"]');
   if (!invalid) return null;
   const target = invalid.matches(FOCUSABLE) ? invalid : (invalid.querySelector<HTMLElement>(FOCUSABLE) ?? invalid);
-  const rect = target.getBoundingClientRect();
-  const inView = rect.top >= 0 && rect.bottom <= window.innerHeight;
-  if (!inView) {
+  if (!fullyInView(target)) {
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     target.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
   }
