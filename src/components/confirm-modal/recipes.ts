@@ -22,7 +22,7 @@ const deleteProblemSet = (): ConfirmCopy => ({
   description: 'Removing this problem set will also remove the associated multipart child permanently.',
 });
 
-/** Discarding an Added Value that is being created or edited. After the answer: back to My Values, and a toast ("Added Value … has been discarded successfully."). */
+/** Discarding an Added Value that is being created or edited. After the answer: back to My Values, and the `discarded()` toast recipe. */
 const discardAV = (): ConfirmCopy => ({
   title: 'Are you sure you want to discard this Added Value?',
   description: 'This action cannot be undone. The item will be permanently removed.',
