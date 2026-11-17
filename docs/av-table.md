@@ -136,10 +136,10 @@ Two colour decisions (17 November 2026):
 - **The seal keeps Figma's green.** It is the green of the toast and banner glyphs (`accent.success.outline.border`), 2.2:1 on white in the light theme, under the 3:1 a glyph that stands alone should clear. Kept as a known exception: the tooltip and the control's name both say "BESA Passed". Dark is 4.5:1.
  The table does not decide which AVs are rejected or backlogged, or where the reason comes from: pass what the AV carries.
 
-### `hints`: three have copy, Members does not
+### `hints`: all four have copy
 
-Figma puts an info glyph on four headers — Urgency, Type, Status, Members. Three now have the product's
-copy, owned by the piece each describes (`URGENCY_COLUMN_HINT`, `TYPE_COLUMN_HINT`, `STATUS_COLUMN_HINT`), so
+Figma puts an info glyph on four headers — Urgency, Type, Status, Members. All four have the product's
+copy, three owned by the piece each describes (`URGENCY_COLUMN_HINT`, `TYPE_COLUMN_HINT`, `STATUS_COLUMN_HINT`), so
 every table says the same thing:
 
 | Column | Says |
@@ -147,8 +147,9 @@ every table says the same thing:
 | Urgency | "Indicates how urgent or important a task is compared to others" |
 | Type | **Type 1:** Direct KPI impact with clear ROI / **Type 2:** Indirect impact, enablement/optimization / **Type 3:** Non-critical, no meaningful KPI impact (one a line, the type in bold) |
 | Status | "Reflects the current stage of the task (e.g., in progress, completed)." |
+| Members | "Displays the people assigned to or responsible for the Added Value" |
 
-**Members has no copy** — Figma draws the glyph and writes nothing — so it renders only for a hint you supply.
+`MEMBERS_COLUMN_HINT` lives with the table, because no piece owns the Members vocabulary; the sentence is Figma's, from the Assigned page, with "Added Value" where Figma writes "task" (decided 17 November 2026: the column tooltips say "Added Value"; Urgency's and Status's follow in their own change).
 Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
 
 ## Multipart rows
@@ -226,8 +227,6 @@ the canvas**: 81, 16 and 32 respectively, all exact.
 
 ## Still open
 
-1. **The Members tooltip has no copy.** Design drew the glyph; nobody wrote the sentence. Until
-   it exists, the glyph does not render.
-2. **What "due soon" means** — carried over from `docs/due-date-tag.md`.
-3. **`Pagination`'s three missing affordances**, listed above. They belong on
+1. **What "due soon" means** — carried over from `docs/due-date-tag.md`.
+2. **`Pagination`'s three missing affordances**, listed above. They belong on
    that component, not here.

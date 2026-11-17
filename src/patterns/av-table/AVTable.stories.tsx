@@ -63,7 +63,7 @@ const ROWS: AVTableRow[] = [
   },
 ];
 
-/* Urgency, Type and Status default to their pieces' own copy; Members has none in Figma. */
+/* All four headers have default copy; this overrides Members' to show a custom line. */
 const HINTS = {
   members: 'Everyone assigned to this Added Value.',
 };
@@ -303,6 +303,17 @@ export const Empty: Story = {
       <AVTable {...args} rows={[]} empty="No Added Values match these filters." />
     </div>
   ),
+};
+
+/** The four info glyphs have copy by default, Members' too: hover or focus it and the sentence is there. */
+export const MembersHeaderSaysWhoTheyAre: Story = {
+  args: { hints: undefined },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.hover(canvas.getByRole('button', { name: 'About members' }));
+    const tip = await within(canvasElement.ownerDocument.body).findByText('Displays the people assigned to or responsible for the Added Value');
+    await waitFor(() => expect(tip).toBeVisible());
+  },
 };
 
 /**
