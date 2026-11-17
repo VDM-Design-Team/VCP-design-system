@@ -14,6 +14,7 @@ Read off Figma's `Deliverables_Card` (`3234:10776`): View and Edit, for the Desi
 | `DeliverableLinkForm` | component |
 | `DomainLabel` | component |
 | `Attachments` | component |
+| `ConfirmModal` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -54,6 +55,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onRemoveLink` | `(section, id) => void` | — | |
 | `onFiles`, `onRemoveFile`, `onDownloadFile` | | — | Files chosen or dropped, a ✕, and the viewer's download. The page uploads and downloads |
 | `fileError`, `fileHint`, `fileAccept` | | — | The drop area's rejection message, types line and filter |
+| `confirmRemove` | `boolean` | `false` | Editing: removing a link or a file asks first (`ConfirmModal`, "Are you sure you want to remove this link?"), and `onRemoveLink` / `onRemoveFile` fire only on Confirm. Off, they fire at once |
 | `headingLevel` | `'h2' \| 'h3' \| 'h4'` | `h2` | The title's level |
 | `className`, `ref`, rest | | | On the `<section>` |
 

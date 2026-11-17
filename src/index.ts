@@ -53,6 +53,7 @@ export * from './components/comment-form-actions';
 export * from './components/comment-reply';
 export * from './components/comment-reply-thread';
 export * from './components/comment-sort-chip';
+export * from './components/confirm-modal';
 export * from './components/connection-card';
 export * from './components/cycle-tag';
 export * from './components/data-table';

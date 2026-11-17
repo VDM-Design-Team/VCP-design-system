@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../../atoms/icon';
 import { IconButton } from '../../atoms/icon-button';
+import { ConfirmModal, confirmations, type ConfirmCopy } from '../../components/confirm-modal';
 import { DeliverableLink } from '../../components/deliverable-link';
 import { DeliverableLinkForm, type DeliverableLinkDraft } from '../../components/deliverable-link-form';
 import type { DomainKey } from '../../components/domain-label';
@@ -73,6 +74,11 @@ export interface DeliverablesCardProps extends Omit<React.HTMLAttributes<HTMLEle
   /** The drop area's accepted-types line. */
   fileHint?: string;
   fileAccept?: string;
+  /**
+   * Edit: removing a link or a file asks first, as Figma's flow draws it ("Are you sure you want to remove this link?", Cancel and Confirm), and `onRemoveLink` /
+   * `onRemoveFile` fire only on Confirm. Off by default: without it they fire at once, as before.
+   */
+  confirmRemove?: boolean;
 }
 
 export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardProps>(
@@ -94,12 +100,16 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
       fileError,
       fileHint,
       fileAccept,
+      confirmRemove,
       ...props
     },
     ref,
   ) => {
     const editing = mode === 'edit';
     const headingId = React.useId();
+    /* With `confirmRemove`, a removal waits here for the answer. */
+    const [asking, setAsking] = React.useState<{ remove: () => void; copy: ConfirmCopy } | null>(null);
+    const ask = (copy: ConfirmCopy, remove: () => void) => (confirmRemove ? setAsking({ remove, copy }) : remove());
 
     return (
       <section
@@ -120,7 +130,7 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
             editing={editing}
             onAdd={(drafts) => onAddLinks?.('video', drafts)}
             onEdit={(id, link) => onEditLink?.('video', id, link)}
-            onRemove={(id) => onRemoveLink?.('video', id)}
+            onRemove={(id) => ask(confirmations.removeLink(), () => onRemoveLink?.('video', id))}
           />
         )}
         <LinkSection
@@ -129,7 +139,7 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
           editing={editing}
           onAdd={(drafts) => onAddLinks?.('links', drafts)}
           onEdit={(id, link) => onEditLink?.('links', id, link)}
-          onRemove={(id) => onRemoveLink?.('links', id)}
+          onRemove={(id) => ask(confirmations.removeLink(), () => onRemoveLink?.('links', id))}
         />
 
         {(files.length > 0 || editing) && (
@@ -138,13 +148,24 @@ export const DeliverablesCard = React.forwardRef<HTMLElement, DeliverablesCardPr
             <Attachments
               items={files}
               onFiles={editing ? onFiles : undefined}
-              onRemove={editing ? (file) => onRemoveFile?.(file.id) : undefined}
+              onRemove={editing ? (file) => ask(confirmations.removeFile(), () => onRemoveFile?.(file.id)) : undefined}
               onDownload={onDownloadFile ? (file) => onDownloadFile(file.id) : undefined}
               error={fileError}
               hint={fileHint}
               accept={fileAccept}
             />
           </div>
+        )}
+        {asking && (
+          <ConfirmModal
+            open
+            {...asking.copy}
+            onClose={() => setAsking(null)}
+            onConfirm={() => {
+              asking.remove();
+              setAsking(null);
+            }}
+          />
         )}
       </section>
     );

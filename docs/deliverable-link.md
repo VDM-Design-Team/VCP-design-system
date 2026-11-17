@@ -61,5 +61,5 @@ pressed, `body-sm-regular`. Pencil and bin are `IconButton` `tertiary` `xs` (24)
 
 ## Don't
 
-- **Don't remove at once without the page deciding.** `onRemove` reports; confirm if it matters.
+- **Don't remove at once without the page deciding.** `onRemove` reports; on the Deliverables card, `confirmRemove` asks first (`ConfirmModal`).
 - **Don't open the link in this tab.** It is a deliverable, not navigation.
