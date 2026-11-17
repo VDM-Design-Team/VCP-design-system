@@ -7,7 +7,7 @@ import { AVTable, type AVTableRow } from '../av-table';
 import { BulkActionConfirmModal } from '../bulk-action-confirm-modal';
 import { BulkActionFailedModal, type BulkActionFailure } from '../bulk-action-failed-modal';
 import { ConfirmDeleteAVModal } from '../confirm-delete-av-modal';
-import { ToastProvider, ToastViewport, useToast } from '../../components/toast';
+import { ToastProvider, ToastViewport, bulkUpdated, useToast } from '../../components/toast';
 import { UrgencyTag, type AVUrgency } from '../../components/urgency-tag';
 import type { AVType } from '../../components/type-tag';
 
@@ -288,7 +288,7 @@ function TablePage({ failSome }: { failSome?: boolean }) {
       }),
     );
     if (worked > 0) {
-      toast({ tone: 'success', title: 'Added Values Updated', description: `${pending.property} changed to ${pending.label} for ${worked} Added Values.` });
+      toast(bulkUpdated({ property: pending.property, value: pending.label, count: worked }));
     }
     if (failed.length) setFailures(failed);
     setChanged(pending);
@@ -361,7 +361,9 @@ export const OnTheTable: Story = {
     await userEvent.click(await screen.findByRole('menuitem', { name: 'High' }));
     const dialog = await screen.findByRole('dialog', { name: 'Change Urgency for 2 Added Values' });
     await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
-    await expect(await screen.findByText('Added Values Updated')).toBeVisible();
+    /* The toast fades in, so it is visible once that is done. */
+    const updated = await screen.findByText('Added Values updated');
+    await waitFor(() => expect(updated).toBeVisible());
     await waitFor(() => expect(c.queryByRole('toolbar')).toBeNull());
     /* The bar went with the selection, and so did the button that opened the dialog: focus did not fall to the page. */
     await waitFor(() => expect(c.getByRole('checkbox', { name: 'Select all rows' })).toHaveFocus());
@@ -437,7 +439,9 @@ export const ChangingStatusOnTheTable: Story = {
     const dialog = await screen.findByRole('dialog', { name: 'Accept 1 Pending Added Value' });
     await expect(within(dialog).getByRole('checkbox', { name: /Multipart Value/ })).toBeVisible();
     await userEvent.click(within(dialog).getByRole('button', { name: 'Confirm' }));
-    await expect(await screen.findByText('Added Values Updated')).toBeVisible();
+    /* The toast fades in, so it is visible once that is done. */
+    const updated = await screen.findByText('Added Values updated');
+    await waitFor(() => expect(updated).toBeVisible());
   },
 };
 
