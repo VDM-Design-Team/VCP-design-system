@@ -110,7 +110,7 @@ what `RejectionReason` was built for.
 A small dialog — "Already Reviewed", "This Value has already been reviewed by
 the initiator.", one Close button. The design draws it and puts it in no flow (a
 search of every page in the file finds zero instances of it), so it is its own
-pattern, `AlreadyReviewedModal` (`docs/already-reviewed-modal.md`), and **the page
+component, `AlreadyReviewedModal` (`docs/already-reviewed-modal.md`), and **the page
 decides when to show it**, in place of this dialog, for an AV that has already been
 reviewed. This dialog does not show it itself.
 

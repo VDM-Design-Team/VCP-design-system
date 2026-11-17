@@ -8,7 +8,7 @@ import { Modal, ModalConfirm } from '../modal';
  * through `message`.
  *
  * **It tells and does nothing else.** There is no review to do any more, so the one button closes it, and `onClose` is Close, Escape and a click outside. The page decides when
- * it shows (the AV was reviewed while the reviewer had it open, or they followed an old link to it): this pattern does not look at the AV. Where the page has the
+ * it shows (the AV was reviewed while the reviewer had it open, or they followed an old link to it): this component does not look at the AV. Where the page has the
  * reviewer's name it can say who, through `message`.
  *
  * **Close is the footer's one answer, at the right**, like every dialog's (`ModalConfirm`, as `BulkActionFailedModal`'s "Got it"). Figma draws it the dialog's whole width, from

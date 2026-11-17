@@ -19,7 +19,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `ReviewAVModal` | The review itself, while the AV is still waiting for one |
 | `Toast` | A quiet "saved" that needs no answer |
 
-The design draws this dialog and puts it in no flow, so **the page decides when it shows**: the pattern does not look at the AV. Pass the reviewer's name in `message` where the page has it.
+The design draws this dialog and puts it in no flow, so **the page decides when it shows**: the component does not look at the AV. Pass the reviewer's name in `message` where the page has it.
 
 ## Props
 
@@ -35,9 +35,9 @@ The design draws this dialog and puts it in no flow, so **the page decides when 
 
 It is `Modal` at `md` (`surface.elevated`, `shadow-modal`, `md` radius), the title `title-md-semibold` in `text.primary`, the line `body-md-regular` in `text.secondary`. Close is `ModalConfirm` (`primary`, `md`), at the footer's right like every dialog's answer.
 
-**Close is not full width, though Figma draws it so.** Figma's popup comes from the old design, where its one button spanned the dialog. Every standard dialog's footer is right-aligned (`BulkActionFailedModal`'s single "Got it" is a `ModalConfirm` at the right), so this one follows them. The one exception is `ChangeLogModal`, a carousel whose footer is two stretched buttons with the dots beneath, which is its own design. It is a component, not a pattern, because it is a `Modal` and nothing else: there is a second piece for a pattern to compose.
+**Close is not full width, though Figma draws it so (decided 17 November 2026).** Figma's popup comes from the old design, where its one button spanned the dialog. Every standard dialog's footer is right-aligned (`BulkActionFailedModal`'s single "Got it" is a `ModalConfirm` at the right), so this one follows them. The one exception is `ChangeLogModal`, a carousel whose footer is two stretched buttons with the dots beneath, which is its own design. It is a component, not a pattern, because it is a `Modal` and nothing else: there is no second piece for a pattern to compose.
 
-**The default line is shorter than Figma's.** Figma says "This Value has already been reviewed by the initiator."; the default drops "by the initiator" so it is true whoever reviewed it (the initiator, or a second admin), and a page that knows who passes it in `message`.
+**The default line is shorter than Figma's (decided 17 November 2026).** Figma says "This Value has already been reviewed by the initiator."; the default drops "by the initiator" so it is true whoever reviewed it (the initiator, or a second admin), and a page that knows who passes it in `message`.
 
 Figma sets the title at 24, the line at 18 and the dialog 554 wide; `Modal`'s own title and size steps are used so this dialog sits with every other one.
 
