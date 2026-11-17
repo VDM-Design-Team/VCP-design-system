@@ -20,7 +20,7 @@ export const BUDGET_QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
  * - **Unsaved changes** (`dirty`) make the browser ask before the tab is closed or reloaded (`beforeunload`): the browser's own prompt.
  * - **Save is not offered while the budgets load** (`table.loading`): there is nothing to save.
  *
- * **What it leaves to the page:** the data and the save, **and the toasts**. On success show "Changes Saved"; on failure a `critical` toast ("Changes not saved …
+ * **What it leaves to the page:** the data and the save, **and the toasts**. On success show `toast(changesSaved())`, "Changes saved"; on failure a `critical` toast ("Changes not saved …
  * your changes are still here — try again"), unlock, and **keep what was typed** (`dirty` stays true) so Save can be tried again. With unsaved edits, a change of quarter or year,
  * or a move to another page in the app, is also the page's: it asks first ("Leave without saving?", Keep editing / Leave) and never carries the edits over (decided 10 Nov 2026).
  *

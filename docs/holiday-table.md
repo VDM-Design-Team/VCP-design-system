@@ -37,7 +37,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## On a page
 
-The Holiday Registry page is `PageTitle` ("Holiday Registry", the page's one `h1`) and then this table, in a column **16 apart and 32 in from the sides** (`px-8 pb-8`), as `AVListPage` lays it out. It goes inside `AppShell`. The filters, **Add Holiday**, **Import from Hubstaff** and the pagination are already inside the table's card, so the page adds nothing else. There is no page pattern for it: it would only be these two pieces.
+The Holiday Registry page is `PageTitle` ("Holiday Registry", the page's one `h1`) and then this table, in a column **16 apart and 32 in from the sides** (`px-8 pb-8`), as `AVListPage` lays it out. It goes inside `AppShell`. The filters, **Add Holiday**, **Import from Hubstaff** and the pagination are already inside the table's card, so the page adds nothing else. The whole page, title and spacing included, is `HolidayRegistryPage`: use that rather than laying it out again.
 
 ## The row
 
