@@ -35,7 +35,7 @@ import type { AVStatus } from '../status-tag';
  * the same status offers different moves depending on who is looking.
  *
  * Button wording is still the design's own where the design has an opinion —
- * "Move to Handoff" for an assignee, plain "Handoff" for an admin. Wording
+ * "Move to Handoff", the same for every role. Wording
  * that names a step ("Return to In QA") is built from the step's label,
  * because the label is the only thing that knows what the step is called
  * today.
@@ -117,12 +117,12 @@ const deploy: AVTransition = { kind: 'deploy', label: 'Deploy', variant: 'primar
 const CAN_START: readonly AVProgressionRole[] = ['initiator', 'assignee-initiator', 'admin'];
 
 /**
- * The admin's forward button at the end of the chain says just "Handoff";
- * every other role's says "Move to Handoff". Straight from the design — the
- * admin variant is 301 wide against the assignee's 360.
+ * The forward button at the end of the chain says "Move to Handoff" for every
+ * role (decided 17 November 2026). Figma disagreed with itself: its Design
+ * admin set drew a plain "Handoff", its Development admin set and every
+ * non-admin set "Move to Handoff"; one action gets one label.
  */
-const handoffLabel = (role: AVProgressionRole) =>
-  role === 'admin' ? 'Handoff' : 'Move to Handoff';
+const HANDOFF_LABEL = 'Move to Handoff';
 
 /**
  * The moves a viewer has, for callers that need the list without the buttons
@@ -164,7 +164,7 @@ export function avTransitions(options: {
        `Status_Tag_General` set draws them, and every domain passes through
        them — so the handover lives here rather than in anyone's chain. */
     if (status === 'Accepted' && role !== 'initiator') {
-      return [move('In Progress', 'In progress')];
+      return [move('In Progress', 'In Progress')];
     }
     if (status === 'In Progress' && role !== 'initiator' && chain.length > 0) {
       return [move(chain[0].id, chain[0].label)];
@@ -198,8 +198,8 @@ export function avTransitions(options: {
     /* The first step returns to `In Progress`, the shared step it came from —
        not to `Accepted`, because accepting is the admin's decision and not
        the assignee's to undo. */
-    previous ? back(previous.id, previous.label) : back('In Progress', 'In progress'),
-    next ? move(next.id, next.label) : handoff(handoffLabel(role)),
+    previous ? back(previous.id, previous.label) : back('In Progress', 'In Progress'),
+    next ? move(next.id, next.label) : handoff(HANDOFF_LABEL),
   ];
 }
 
