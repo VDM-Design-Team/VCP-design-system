@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Title, Subtitle, Description, Primary, Controls, Stories } from '@storybook/addon-docs/blocks';
+import { expect, within } from 'storybook/test';
 import tokens from '../../dist/tokens.json';
 
 /**
@@ -203,6 +204,33 @@ export const Type: StoryObj = {
       ))}
     </div>
   ),
+};
+
+/**
+ * In the dark theme the browser's own scrollbars, form controls and native menus go dark too: the dark tokens carry `color-scheme: dark`. Scroll the box below
+ * (and open the select) with the theme on Dark.
+ */
+export const DarkNativeControls: StoryObj = {
+  globals: { theme: 'dark' },
+  render: () => (
+    <div className="flex flex-wrap items-start gap-8 bg-surface-canvas p-8">
+      <div tabIndex={0} aria-label="A scrolling box" className="h-32 w-56 overflow-y-auto rounded-md border border-stroke-default bg-surface-elevated p-3 text-body-sm-regular text-text-primary">
+        {Array.from({ length: 12 }, (_, i) => (
+          <p key={i} className="py-1">Row {i + 1}</p>
+        ))}
+      </div>
+      <select aria-label="A native select" className="h-10 rounded-md border border-stroke-default bg-surface-elevated px-3 text-body-sm-regular text-text-primary">
+        <option>One</option>
+        <option>Two</option>
+      </select>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    /* The dark tokens set it on `.dark` (the <html> class the toolbar toggles), so the page's own scrollbar follows too. */
+    await expect(getComputedStyle(canvasElement.ownerDocument.documentElement).colorScheme).toBe('dark');
+    const box = within(canvasElement).getByLabelText('A scrolling box');
+    await expect(getComputedStyle(box).colorScheme).toBe('dark');
+  },
 };
 
 export const Spacing: StoryObj = {

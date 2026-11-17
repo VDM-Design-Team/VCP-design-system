@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Button } from '../../atoms/button';
 import { Banner, type BannerProps } from '../../components/banner';
+import { ConfirmModal, confirmations } from '../../components/confirm-modal';
 import { DescriptionCardTitle, type DescriptionCardTitleParent } from '../../components/description-card-title';
 import { DescriptionSection, type DescriptionSectionProps } from '../../components/description-section';
 import { InitiateToOtherDomain, type InitiateToOtherDomainProps } from '../../components/initiate-to-other-domain';
@@ -65,6 +66,11 @@ export interface AVPageActions {
   onDiscard?: () => void;
   /** Default "Discard". */
   discardLabel?: string;
+  /**
+   * Discard asks first, as Figma's flow draws it ("Are you sure you want to discard this Added Value? This action cannot be undone…", Cancel and Confirm), and
+   * `onDiscard` fires only on Confirm. Off by default: without it Discard fires at once, as before. What happens after (back to My Values, a toast) is the page's.
+   */
+  confirmDiscard?: boolean;
   /** The status buttons (Save as Draft, Submit…): `StatusProgression`'s props. */
   progression?: StatusProgressionProps;
 }
@@ -113,6 +119,7 @@ export function AVPage({
   ...props
 }: AVPageProps) {
   const editing = mode === 'edit';
+  const [discarding, setDiscarding] = React.useState(false);
   return (
     <div className={cn('@container flex min-w-0 flex-col font-sans', className)} {...props}>
       {/* The status buttons are in the header to read, and in the bar at the bottom to edit. */}
@@ -150,12 +157,23 @@ export function AVPage({
       {editing && actions && (actions.onDiscard || actions.progression) && (
         <div className="flex flex-wrap items-center justify-end gap-3 px-8 pb-8">
           {actions.onDiscard && (
-            <Button variant="critical-tertiary" size="md" onClick={actions.onDiscard}>
+            <Button variant="critical-tertiary" size="md" onClick={() => (actions.confirmDiscard ? setDiscarding(true) : actions.onDiscard?.())}>
               {actions.discardLabel ?? 'Discard'}
             </Button>
           )}
           {actions.progression && <StatusProgression {...actions.progression} />}
         </div>
+      )}
+      {actions?.confirmDiscard && (
+        <ConfirmModal
+          open={discarding}
+          {...confirmations.discardAV()}
+          onClose={() => setDiscarding(false)}
+          onConfirm={() => {
+            setDiscarding(false);
+            actions.onDiscard?.();
+          }}
+        />
       )}
     </div>
   );

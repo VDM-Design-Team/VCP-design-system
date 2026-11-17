@@ -10,6 +10,7 @@ Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`�
 |---|---|
 | `Button` | atom |
 | `Banner` | component |
+| `ConfirmModal` | component |
 | `DescriptionCardTitle` | component |
 | `DescriptionSection` | component |
 | `InitiateToOtherDomain` | component |
@@ -92,7 +93,7 @@ It owns no state. The title, the cards, the comments and the status are the page
 | `initiate` | `InitiateToOtherDomainProps` | — | Editing only. `disabled` for an Added Value handed off from another domain |
 | `details` | `DetailCardProps` | — | The right column |
 | `deliverables` | `DeliverablesCardProps` | — | Reading only, under the detail card |
-| `actions` | `{ onDiscard?, discardLabel?, progression? }` | — | Editing: Discard and `StatusProgression`'s props, at the bottom right |
+| `actions` | `{ onDiscard?, discardLabel?, confirmDiscard?, progression? }` | — | Editing: Discard and `StatusProgression`'s props, at the bottom right. `confirmDiscard` makes Discard ask first ("Are you sure you want to discard this Added Value?"), and `onDiscard` fire only on Confirm; what happens after (back to My Values, a toast) is the page's |
 
 ## Not here, on purpose
 

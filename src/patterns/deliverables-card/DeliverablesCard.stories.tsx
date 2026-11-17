@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, screen, userEvent, within } from 'storybook/test';
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
 import { DeliverablesCard, type DeliverableFile, type DeliverableLinkItem } from './DeliverablesCard';
 
@@ -78,6 +78,64 @@ export const EditingDesign: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Remove image.png' }));
     await expect(args.onRemoveFile).toHaveBeenCalledWith('f2');
     await expect(canvas.getByText(/Upload a file/)).toBeVisible();
+  },
+};
+
+/** `confirmRemove`: removing a link or a file asks first ("Are you sure you want to remove this link?"); it is removed only on Confirm. */
+export const ConfirmsRemoval: Story = {
+  args: { mode: 'edit', confirmRemove: true, onRemoveLink: fn(), onRemoveFile: fn() },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Delete Link' })[0]!);
+    const dialog = await body.findByRole('alertdialog', { name: 'Are you sure you want to remove this link?' });
+    /* Cancel keeps it. */
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await expect(args.onRemoveLink).not.toHaveBeenCalled();
+    /* Confirm removes it. */
+    await userEvent.click(canvas.getAllByRole('button', { name: 'Delete Link' })[0]!);
+    await userEvent.click(within(await body.findByRole('alertdialog')).getByRole('button', { name: 'Confirm' }));
+    await expect(args.onRemoveLink).toHaveBeenCalledWith('links', 'l1');
+    /* A file asks the same, for a file. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Remove image.png' }));
+    await expect(await body.findByRole('alertdialog', { name: 'Are you sure you want to remove this file?' })).toBeVisible();
+  },
+};
+
+/**
+ * Removing a link never drops focus. Its bin goes with it, so focus moves to the bin of the link that took its place, else the one before it,
+ * else the section's +. The page really removes the link here, as an app does.
+ */
+export const RemovingALinkKeepsFocus: Story = {
+  args: { mode: 'edit', files: [] },
+  render: function Render(args) {
+    const [links, setLinks] = React.useState<DeliverableLinkItem[]>([
+      { id: 'a', title: 'First link', url: 'https://www.example.com/a', domain: 'design' },
+      { id: 'b', title: 'Second link', url: 'https://www.example.com/b', domain: 'design' },
+      { id: 'c', title: 'Third link', url: 'https://www.example.com/c', domain: 'design' },
+    ]);
+    return <DeliverablesCard {...args} links={links} onRemoveLink={(_section, id) => setLinks((list) => list.filter((link) => link.id !== id))} />;
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bins = () => canvas.queryAllByRole('button', { name: 'Delete Link' });
+    const focusedRow = () => canvasElement.ownerDocument.activeElement?.closest('li')?.textContent ?? '';
+    /* The first of three goes: focus is on the bin of the link that took its place. */
+    bins()[0]!.focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(bins()).toHaveLength(2));
+    await waitFor(() => expect(bins()[0]).toHaveFocus());
+    await expect(focusedRow()).toContain('Second link');
+    /* The last in the list goes: the one before it. */
+    bins()[1]!.focus();
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(bins()).toHaveLength(1));
+    await waitFor(() => expect(bins()[0]).toHaveFocus());
+    await expect(focusedRow()).toContain('Second link');
+    /* The only one left goes: the +. */
+    await userEvent.keyboard('{Enter}');
+    await waitFor(() => expect(bins()).toHaveLength(0));
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Add link' })).toHaveFocus());
   },
 };
 

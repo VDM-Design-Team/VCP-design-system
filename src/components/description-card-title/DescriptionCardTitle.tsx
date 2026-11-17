@@ -12,7 +12,8 @@ import { Field } from '../field';
  * Read off Figma's `Description_Card_Title` and its `_Description_Card_Title_Base`
  * (`State`: Viewing / Editing Placeholder / Editing Filled / Disabled, plus the
  * `Multipart Child` switch): an elevated card, 16 in, 8 radius; the reference 16
- * regular, the title 16 semibold, both `text.primary`.
+ * regular, the title 16 semibold `text.primary`. **The reference is `text.secondary`**, not Figma's
+ * `text.primary`, so the title stands out (decided 17 November 2026; a recorded difference from Figma).
  *
  * **It is a component, not an atom, because it holds a `Field` with an `Input`.**
  * It was an atom that only read, and the AV page built its own editing title
@@ -82,20 +83,19 @@ export const DescriptionCardTitle = React.forwardRef<HTMLDivElement, Description
     ref,
   ) => {
     const Heading = headingLevel === 3 ? 'h3' : 'h2';
-    const parentLink = parent && (parent.href || parent.onOpen) ? (
-      <a
-        href={parent.href}
-        target={parent.href ? '_blank' : undefined}
-        rel={parent.href ? 'noreferrer' : undefined}
-        onClick={(event) => {
-          if (!parent.href) event.preventDefault();
-          parent.onOpen?.();
-        }}
-        className="rounded-sm text-text-link-default underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
-      >
+    /* A link with an address, a real button with only `onOpen` (an `<a>` without `href` takes no Tab and has no role), plain text with neither.
+       No ↗ after it, as Figma draws it (decided 17 November 2026), unlike the table's Parent chip; a screen reader is still told it opens a new tab. */
+    const parentClass =
+      'rounded-sm text-text-link-default underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused';
+    const parentLink = parent?.href ? (
+      <a href={parent.href} target="_blank" rel="noreferrer" onClick={parent.onOpen} className={parentClass}>
         {parent.ref}
-        {parent.href && <span className="sr-only"> (opens in a new tab)</span>}
+        <span className="sr-only"> (opens in a new tab)</span>
       </a>
+    ) : parent?.onOpen ? (
+      <button type="button" onClick={parent.onOpen} className={parentClass}>
+        {parent.ref}
+      </button>
     ) : (
       parent && <span>{parent.ref}</span>
     );
@@ -117,7 +117,7 @@ export const DescriptionCardTitle = React.forwardRef<HTMLDivElement, Description
           <>
             {(reference || parent) && (
               <div className="flex flex-wrap items-center justify-between gap-x-4">
-                {reference && <p className="text-title-sm-regular">{reference}</p>}
+                {reference && <p className="text-title-sm-regular text-text-secondary">{reference}</p>}
                 {parent && (
                   <span className="ml-auto inline-flex items-center gap-1 text-title-sm-regular text-text-secondary">
                     <Icon name="arrows-split" size={20} aria-hidden="true" />

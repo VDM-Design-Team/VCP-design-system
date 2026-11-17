@@ -27,6 +27,7 @@ Read off Figma's `Detail_Card` (`6499:48858`: four types) and its `_Detail_Card_
 | `StatusTag` | component |
 | `TypeTag` | component |
 | `UrgencyTag` | component |
+| `ViewersPicker` | component |
 
 Generated from the real imports — `npm test` fails if this list drifts.
 
@@ -68,9 +69,8 @@ Governance, Partners, Quality Assurance), and a status is a spine status or a do
 **`domain`** trims it: **Design has no Cycle**; Development has every field. A field with no value is
 left out of a read card.
 
-Not built here, and tracked for later PRs:  **UI Changes** (the Modify / New UI / No UI section),
-**Estimated Duration** (drawn, but placed in no card), and **Edit Viewers** (the pill is a placeholder
-that shows a count and reports a press).
+Not built here: **UI Changes** (the Modify / New UI / No UI section) is not wanted in an AV's detail card any more (design, 16 Nov 2026; confirmed 17 November 2026), and
+**Estimated Duration** (drawn, but placed in no card) is undecided: do not build it until design says it is wanted.
 
 ## Props
 
@@ -83,7 +83,8 @@ that shows a count and reports a press).
 | `options` | `{ people, roles, cycles, projects, categories, tags }` | — | The dropdowns' choices. `people` and `roles` feed the add / edit form (roles default to QA, Design and Assignee). A cycle carries its code and dates, so the read card draws a `CycleTag` |
 | `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid |
 | `readOnly` | `DetailCardField[]` | — | Editing and new: fields shown but locked — the dropdowns and dates in the list can't be opened or changed. A multipart part's edit page locks Projects, AV Category, Type and Urgency, the fields it takes from its parent (Figma `1404:132644`) |
-| `viewerCount`, `onViewers` | `number`, `() => void` | — | The viewers pill (placeholder) on the read cards |
+| `viewers` | `ViewersPickerProps` | — | The viewers pill on the read cards, with its hover list and its picker to add and remove people (see `docs/viewers-picker.md`) |
+| `viewerCount`, `onViewers` | `number`, `() => void` | — | Just the bare pill and a press, for a page with no list yet. `viewers` wins when both are given |
 | `lockAssignees` | `boolean` | when `initiatedTo` is set | Editing: the Assignee **+** is dimmed and explains why (see *Assignee availability*). Defaults on for an AV with `initiatedTo` |
 | `dueSoonWithinDays` | `number` | `3` | Due dates this near or nearer read as due soon |
 | `className`, `ref`, rest | | | On the `<section>` |
