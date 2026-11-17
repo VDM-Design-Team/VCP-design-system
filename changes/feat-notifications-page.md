@@ -7,4 +7,4 @@ bump: minor
 
 **A deliberate departure from Figma: the page has a title, in the card.** Figma's inbox card has none. Here "Notification Inbox" is the card's own heading and the page's `h1`, as the Gantt chart's title is its card's. Don't add a `PageTitle` band above it.
 
-**Wording:** the popover's footer link, `NotificationPopover`'s default `inboxLabel`, is now "View notification inbox" (was "View notifications inbox"): the standard singular form, and the same name as the page and the component. Anything that sets `inboxLabel` itself is unaffected.
+**Wording:** the popover's footer link, `NotificationPopover`'s default `inboxLabel`, is now "View notification inbox" (was "View notifications inbox", which is what Figma writes): the same name as the page and the component (decided 17 November 2026; a recorded difference from Figma). Anything that sets `inboxLabel` itself is unaffected.

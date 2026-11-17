@@ -59,7 +59,7 @@ export interface NotificationInboxProps extends React.HTMLAttributes<HTMLDivElem
    */
   groups?: ReadonlyArray<{ label: string; children: React.ReactNode }>;
   /**
-   * A title for the card, at the left of the controls row ("Notifications"). Figma draws none; it is here so a page whose whole content is the inbox has its heading in the
+   * A title for the card, at the left of the controls row ("Notification Inbox"). Figma draws none; it is here so a page whose whole content is the inbox has its heading in the
    * card, as the Gantt chart does. Without it the card is as Figma draws it.
    */
   title?: string;
