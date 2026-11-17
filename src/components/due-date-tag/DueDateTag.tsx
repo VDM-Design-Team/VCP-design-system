@@ -33,9 +33,11 @@ export type DueDateProximity = 'default' | 'due-soon' | 'overdue';
 
 /* THE mapping — the three rows of the Figma `Due_Date_Tag` set, tonal style.
 
-   Figma's Default row is `neutral.tonal.*` (slate-200 on slate-700), which is
-   exactly what `Tag`'s neutral tonal is now (it was one step lighter, slate-100,
-   until November 2026), so every neutral tag in the system is one colour. */
+   Figma's Default row is `neutral.tonal.*` (slate-200 on slate-700); `Tag`'s
+   own neutral tonal is `surface.neutral.subtle` on `text.secondary` —
+   slate-100 on slate-700. One step of slate apart on the fill, same text. The
+   Tag tone is used rather than adding a near-duplicate token family, so
+   every neutral tag in the system stays one colour. Noted in the doc. */
 const PROXIMITY: Record<DueDateProximity, NonNullable<TagProps['tone']>> = {
   default: 'neutral',
   'due-soon': 'warning',

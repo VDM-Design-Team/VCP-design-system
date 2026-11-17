@@ -36,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Proximity | Tag tone | Resolves to |
 |---|---|---|
-| `default` | `neutral` | `neutral.tonal.surface.default` on `neutral.tonal.content.default` |
+| `default` | `neutral` | `surface.neutral.subtle` on `text.secondary` |
 | `due-soon` | `warning` | `accent.warning.tonal.*` |
 | `overdue` | `critical` | `accent.critical.tonal.*` |
 
@@ -58,11 +58,16 @@ quietly made a product decision on someone else's behalf.
 Both dates are floored to local midnight before comparing, so a task due today
 is never "overdue" at 4pm — whole days are the unit a due date is expressed in.
 
-Figma's Default row is `neutral.tonal.*` (slate-200 on slate-700), and `Tag`'s
-neutral tonal is now that pair, so the tag matches Figma and every neutral tag in
-the system is one colour. (It was one step lighter, `surface.neutral.subtle`
-slate-100, until November 2026: too close to the page's own grey, it nearly
-vanished on hover.)
+One Figma deviation: Figma's Default row is `neutral.tonal.*` (slate-200 on
+slate-700); `Tag`'s neutral tonal is `surface.neutral.subtle` on
+`text.secondary` — slate-100 on slate-700. One step of slate apart on the fill,
+identical text. The `Tag` tone is used rather than adding a near-duplicate
+token family, so every neutral tag in the system stays one colour. Modelling
+the full neutral families belongs with issue #103. **The lighter fill is kept
+on purpose** (decided 17 November 2026): it was looked at beside Figma's
+slate-200 on the status tags and the Task Log Trail, and the lighter grey
+stays for every neutral tag and badge. Its known cost: on a hovered table row
+the fill is close to the row's own grey.
 
 ## Accessibility
 

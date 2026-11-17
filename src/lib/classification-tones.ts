@@ -39,12 +39,10 @@ export const CLASSIFICATION_STYLE: Record<ClassificationVariant, Record<Classifi
       critical:
         'border border-accent-critical-outline-border-default bg-accent-critical-outline-surface-default text-accent-critical-outline-content-default',
     },
-    /* No `accent.brand.*` triad, so brand is hand-composed — the same gap docs/badge.md
-       already documents. Neutral is `neutral.tonal.*` (slate-200 on slate-700), the pair Figma draws for
-       every neutral tonal tag; it was `surface.neutral.subtle` (slate-100) until November 2026, which sat too
-       close to the page's own grey and nearly vanished on hover. */
+    /* No `accent.brand.*`/`accent.neutral.*` triad, so those two are
+       hand-composed — the same gap docs/badge.md already documents. */
     tonal: {
-      neutral: 'bg-neutral-tonal-surface-default text-neutral-tonal-content-default',
+      neutral: 'bg-surface-neutral-subtle text-text-secondary',
       brand: 'bg-surface-brand-faint text-text-brand-strong',
       info: 'bg-accent-info-tonal-surface-default text-accent-info-tonal-content-default',
       success: 'bg-accent-success-tonal-surface-default text-accent-success-tonal-content-default',
