@@ -93,7 +93,9 @@ The dark theme comes for free — every colour class above is a semantic token t
   therefore hand-composed here from `surface.brand.faint` + `text.brand.strong` and
   `surface.neutral.subtle` + `text.secondary`. They look right and measure well, but
   they are a convention this component invented rather than a pair the tokens declare.
-  Two more triads would make all six tones uniform.
+  Two more triads would make all six tones uniform. For `neutral`, Figma draws
+  `neutral.tonal.*` (slate-200), one step darker; the lighter pair here is kept on
+  purpose (decided 17 November 2026; see `docs/due-date-tag.md`).
 - **`accent.{blue,green,red,yellow}`** exist but only as `base`/`faint`/`medium`/
   `strong`/`stronger`/`subtle` scales — no `tonal` treatment — so they cannot serve a
   Badge tone as-is.
