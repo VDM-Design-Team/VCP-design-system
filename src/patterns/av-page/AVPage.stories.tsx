@@ -4,6 +4,7 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { AVPage, type AVPageProps } from './AVPage';
 import { DescriptionCard } from '../../components/description-card';
 import type { DetailCardValue } from '../detail-card';
+import { backloggedBanner, rejectedBanner } from './avBanners';
 
 const PEOPLE = [{ name: 'Marvin R' }, { name: 'John Kestrel' }, { name: 'Jane Doe' }, { name: 'Amy Lee' }];
 const OPTIONS = {
@@ -132,6 +133,38 @@ export const Reading: Story = {
     await expect(args.header.onTransition).toHaveBeenCalled();
     await expect(c.getByRole('heading', { name: 'Deliverables' })).toBeVisible();
     await expect(c.queryByRole('button', { name: 'Discard' })).toBeNull();
+  },
+};
+
+/** A rejected AV: a critical banner above the title, the width of the left column: "This Added Value was rejected" and the reason. */
+export const Rejected: Story = {
+  args: {
+    banner: rejectedBanner({ message: 'Out of scope for this cycle; resubmit with a narrower brief.' }),
+    header: { ...VIEW.header, status: 'Rejected' },
+    details: { ...VIEW.details!, value: { ...VIEWING, status: 'Rejected' } },
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const banner = c.getByText('This Added Value was rejected');
+    await expect(banner).toBeVisible();
+    await expect(c.getByText('Out of scope for this cycle; resubmit with a narrower brief.')).toBeVisible();
+    /* Above the title card, in the same column. */
+    const title = c.getByRole('heading', { name: 'Some Title Here' });
+    await expect(banner.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  },
+};
+
+/** An AV sent back to the backlog in another domain: a warning banner that names it, "This Added Value was moved to the backlog in Development Domain", and the feedback. */
+export const BackloggedInAnotherDomain: Story = {
+  args: {
+    banner: backloggedBanner({ domain: 'Development', message: 'Waiting on the new design tokens.' }),
+    header: { ...VIEW.header, status: 'Backlog' },
+    details: { ...VIEW.details!, value: { ...VIEWING, status: 'Backlog' } },
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getByText('This Added Value was moved to the backlog in Development Domain')).toBeVisible();
+    await expect(c.getByText('Waiting on the new design tokens.')).toBeVisible();
   },
 };
 
