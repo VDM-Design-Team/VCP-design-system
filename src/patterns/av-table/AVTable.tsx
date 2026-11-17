@@ -14,6 +14,7 @@ import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../component
 import { TruncatedText } from '../../components/truncated-text';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
+import { Tooltip } from '../../atoms/tooltip';
 import { Button } from '../../atoms/button';
 import { Divider } from '../../atoms/divider';
 import { Icon } from '../../atoms/icon';
@@ -82,6 +83,12 @@ export interface AVTableRow {
   multipart?: AVMultipart;
   /** The domain badge beside the title — "VCP", "Design". */
   domain?: string;
+  /** The AV has passed BESA: a green seal after the reference, "BESA Passed" in its tooltip. */
+  besaPassed?: boolean;
+  /** The AV was rejected: a red warning glyph at the end of the details, `reason` in its tooltip. */
+  rejected?: { reason: string };
+  /** The AV was sent back to the backlog: a grey info glyph at the end of the details, `reason` in its tooltip. */
+  backlogged?: { reason: string };
   /** Counts under the title. Omit or pass 0 and the glyph disappears. */
   attachments?: number;
   comments?: number;
@@ -159,6 +166,34 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   caption?: string;
 }
 
+/**
+ * A glyph that says a thing about the AV, with the words in its tooltip. A button, because the tooltip needs a focusable trigger (`Tooltip`): focus
+ * it and the sentence is read. `text` is both the tooltip and the control's name, so it says what the glyph is first: "BESA Passed", "Rejected: the reason".
+ */
+function Flag({ text, tone, icon }: { text: string; tone: 'success' | 'critical' | 'neutral'; icon: 'seal-check' | 'warning' | 'info' }) {
+  return (
+    /* The tooltip says what the glyph is ("BESA Passed", "Rejected: the reason") and is also the control's name: say it once. */
+    <Tooltip content={text} placement="top" describe={false}>
+      <button
+        type="button"
+        aria-label={text}
+        className={cn(
+          'grid shrink-0 place-items-center rounded-sm',
+          /* The seal's green is Figma's, the green of the toast and banner glyphs. It is 2.2:1 on white, under the 3:1 a glyph that stands alone
+             should clear: kept as a known exception (decided 17 November 2026). Backlogged is the quiet grey of the header hints and of the
+             Backlog status tag, not Figma's green, so green in a row means BESA Passed and nothing else (decided the same day). */
+          tone === 'success' && 'text-accent-success-outline-border-default',
+          tone === 'critical' && 'text-accent-critical-outline-content-default',
+          tone === 'neutral' && 'text-text-tertiary hover:text-text-secondary',
+          'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+        )}
+      >
+        <Icon name={icon} size={16} aria-hidden="true" />
+      </button>
+    </Tooltip>
+  );
+}
+
 /** A count under the title: glyph, number, and the word only for screen readers. */
 function Count({ icon, value, noun }: { icon: 'paperclip' | 'chat-centered-text'; value: number; noun: string }) {
   if (!value) return null;
@@ -231,7 +266,9 @@ export function AVTable({
         );
         /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */
         const title = <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>;
-        const details = (multipart || row.domain || row.attachments || row.comments) && (
+        /* BESA Passed sits right after the reference, in Figma's `_AV_Table_ID`. */
+        const besa = row.besaPassed && <Flag text="BESA Passed" tone="success" icon="seal-check" />;
+        const details = (multipart || row.domain || row.attachments || row.comments || row.rejected || row.backlogged) && (
           <div className="flex w-max items-center gap-2">
             {multipart && (
               <MultipartTableTag
@@ -252,6 +289,8 @@ export function AVTable({
             )}
             <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
             <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
+            {row.rejected && <Flag text={`Rejected: ${row.rejected.reason}`} tone="critical" icon="warning" />}
+            {row.backlogged && <Flag text={`Backlogged: ${row.backlogged.reason}`} tone="neutral" icon="info" />}
           </div>
         );
 
@@ -262,6 +301,7 @@ export function AVTable({
           <div className="flex flex-col gap-1 py-4">
             <div className="flex items-center gap-2">
               {reference}
+              {besa}
               <Divider orientation="vertical" className="h-4 shrink-0" />
               {title}
             </div>

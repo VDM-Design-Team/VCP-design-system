@@ -114,6 +114,7 @@ export * from './components/tag-editor';
 export * from './components/timeline';
 export * from './components/toast';
 export * from './components/user-menu';
+export * from './components/viewers-picker';
 export * from './components/type-tag';
 export * from './components/holiday-type-tag';
 export * from './components/holiday-source-badge';
