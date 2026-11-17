@@ -41,10 +41,29 @@ StyleDictionary.registerFormat({
   },
 });
 
+/* The dark file is GDL's `.dark { … }` of overrides. A browser draws its own scrollbars, form controls, date and
+ * colour pickers and native select menus from `color-scheme`, not from our tokens, so under `.dark` they stayed
+ * light: a white scrollbar on a dark panel. VCP's wrapper adds `color-scheme: dark` to that block, so everything
+ * the browser draws follows the theme. (On the `<html>` element it also darkens the page's own scrollbar; on a
+ * wrapper it darkens every scroll container and control inside it.) */
+const gdlModes = StyleDictionary.hooks.formats['gdl/mode-overrides'];
+StyleDictionary.registerFormat({
+  name: 'vcp/mode-overrides',
+  format: async (args) => {
+    const css = await gdlModes(args);
+    if (args.file.destination !== 'tokens.dark.css') return css;
+    const themed = css.replace('.dark {\n', '.dark {\n  color-scheme: dark; /* native scrollbars and controls follow the theme */\n');
+    if (themed === css) throw new Error('vcp/mode-overrides: GDL\'s dark file no longer opens with ".dark {" — update this wrapper.');
+    return themed;
+  },
+});
+
 const platforms = gdlPlatforms();
-platforms.tailwind.files = platforms.tailwind.files.map((f) =>
-  f.destination === 'theme.css' ? { ...f, format: 'vcp/tailwind-theme' } : f,
-);
+platforms.tailwind.files = platforms.tailwind.files.map((f) => {
+  if (f.destination === 'theme.css') return { ...f, format: 'vcp/tailwind-theme' };
+  if (f.destination === 'tokens.dark.css') return { ...f, format: 'vcp/mode-overrides' };
+  return f;
+});
 
 export default {
   include: gdlIncludes(),        // GDL tokens; VCP's win on a collision (font.family.sans)

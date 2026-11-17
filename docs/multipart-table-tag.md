@@ -39,7 +39,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Tokens
 
-A white pill: `surface.neutral.base`, a `stroke.subtle` hairline, `radius.sm`, **28 high**, 8 across, 4 between; 20 glyphs and `label-sm-medium` (14) `text.secondary`, as Figma draws it. (A 24-high one-line version was tried, and design compared the two side by side and chose Figma's.) The progress ring is a 20 `DonutChart`, 3 thick.
+A white pill: `surface.neutral.base`, a `stroke.subtle` hairline, `radius.sm`, **28 high**, 8 across, 4 between; 20 glyphs and `label-sm-medium` (14) `text.secondary`, as Figma draws it. (A 24-high one-line version was tried, and design compared the two side by side and chose Figma's; proposed again in #424 and looked at again on 17 November 2026, the 28 stays.) The progress ring is a 20 `DonutChart`, 3 thick.
 
 **It never shrinks or truncates**: it hugs its content however narrow the table gets (the table scrolls sideways instead).
 

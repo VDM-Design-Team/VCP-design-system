@@ -16,7 +16,7 @@ const photo = (hue: number) =>
       `</svg>`,
   )}`;
 
-const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
+const SIZES = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const;
 
 /** A spread wide enough to land on all four tones several times over. */
 const NAMES = [
@@ -62,7 +62,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 /**
- * 24 / 32 / 40 on Tailwind's numeric scale, each with its own type-ramp step.
+ * 16 / 24 / 32 / 36 / 40 / 44 / 48 on Tailwind's numeric scale, each with its own type-ramp step: Figma's `Profile_Image` steps XXS to XXL.
  * The export's `size: number` is gone — see the note in `Avatar.tsx`.
  */
 export const Sizes: Story = {
@@ -76,6 +76,10 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const widths = Array.from(canvasElement.querySelectorAll<HTMLElement>('span.rounded-pill')).map((el) => Math.round(el.getBoundingClientRect().width));
+    await expect(widths).toEqual([16, 24, 32, 36, 40, 44, 48]);
+  },
 };
 
 /** With a photo, the image fills the circle and the tone never shows. */
@@ -128,7 +132,7 @@ export const BrokenImage: Story = {
 };
 
 /**
- * `ring` draws a `surface.elevated` ring outside the box, which is what separates
+ * `ring` draws a 1 `surface.elevated` border inside the box (the circle stays its size), which is what separates
  * one avatar from the one it overlaps. `AvatarGroup` sets it for you.
  */
 export const Ring: Story = {

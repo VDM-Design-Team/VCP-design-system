@@ -10,6 +10,10 @@ import {
   type GanttUser,
   type GanttView,
 } from './GanttChart';
+import { AppShell } from '../../templates/app-shell';
+import { Sidebar } from '../sidebar';
+import { TopBar } from '../top-bar';
+import { Button } from '../../atoms/button';
 
 /* ---- Fixtures: the payload a backend would send --------------------------
    A fortnightly cycle count that puts today (Thursday 29 October 2026) in
@@ -262,11 +266,34 @@ export const Cycle: Story = {
 /** October 2026, by the day, with each day's cycle named above it. */
 export const Month: Story = {
   render: () => <Demo initialView="month" />,
+  /* Figma's sizes: the year, month and cycle rows are 40 and the days 64; a person's summary bar is 40 and a task's 36. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (el: HTMLElement | null) => Math.round(el?.getBoundingClientRect().height ?? 0);
+    await expect(height(await c.findByText('2026'))).toBe(40);
+    await expect(height(c.getByText('October').closest('.h-10') as HTMLElement | null)).toBe(40);
+    await expect(height(c.getByText('Cycle 42'))).toBe(40);
+    await expect(height(c.getAllByText('1')[0].closest('.h-16') as HTMLElement | null)).toBe(64);
+    const shown = (els: HTMLElement[]) => els.find((el) => el.getBoundingClientRect().height > 0) ?? null;
+    await expect(height(shown(c.getAllByText(/Added Values/))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(40);
+    /* The toolbar is one height: the buttons are as tall as the filters beside them. */
+    await expect(height(c.getByRole('button', { name: 'Reset Filters' }))).toBe(40);
+    await expect(height(c.getByRole('button', { name: 'Today' }))).toBe(40);
+    await expect(height(shown(c.getAllByText('Invoice export'))?.closest<HTMLElement>('.rounded-md') ?? null)).toBe(36);
+  },
 };
 
 /** 2026 by the cycle, with the months spanning them. Tasks inside one cycle keep only their points. */
 export const Year: Story = {
   render: () => <Demo initialView="year" />,
+  /* Figma's sizes: the year row is 40, then the months row and the cycles row are each 64. */
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const height = (el: HTMLElement | null) => Math.round(el?.getBoundingClientRect().height ?? 0);
+    await expect(height((await c.findByText('2026')).closest('.h-10') as HTMLElement | null)).toBe(40);
+    await expect(height(c.getByText('January'))).toBe(64);
+    await expect(height(c.getByText('C23').closest('.h-16') as HTMLElement | null)).toBe(64);
+  },
 };
 
 /** Two projects selected: the chart groups by project, then person, and each person shows only that project's tasks. */
@@ -299,6 +326,35 @@ export const Loading: Story = {
     /* No rows, no empty message, and the filters are off. */
     await expect(canvas.queryByText('Nothing matches these filters.')).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeDisabled();
+  },
+};
+
+/**
+ * The Gantt Chart is one of **Planning's three sub-pages** (Planning List, Gantt Chart, Holiday Registry): the rail opens the Planning group and marks Gantt Chart as the current page, and
+ * the page is `AppShell` with the chart as its content (it draws its own title, which is the page's `h1`, and its own card).
+ */
+export const OnItsPage: Story = {
+  /* In the sidebar, so the whole page can be opened (decided 17 November 2026); off the docs page, where a full-screen shell does not fit. */
+  tags: ['!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true } },
+  render: () => (
+    <AppShell
+      sidebar={<Sidebar userType="admin-dev" active="planning/gantt-chart" />}
+      topBar={<TopBar primaryAction={<Button size="sm">Create Added Value</Button>} notifications={0} user={{ name: 'Francis M.' }} />}
+    >
+      {/* 40 above and below, as Figma's template for a page with no title band has it (`Page_Template_Content_With_Padding_Spacing`); the chart adds none of its own. */}
+      <div className="py-10">
+        <Demo headingLevel={1} />
+      </div>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    /* The Planning group is open, and Gantt Chart is the current page among its sub-rows. */
+    await expect(canvas.getByRole('button', { name: 'Gantt Chart' })).toHaveAttribute('aria-current', 'page');
+    await expect(canvas.getByRole('button', { name: 'Planning List' })).not.toHaveAttribute('aria-current');
+    await expect(canvas.getByRole('button', { name: 'Holiday Registry' })).not.toHaveAttribute('aria-current');
   },
 };
 

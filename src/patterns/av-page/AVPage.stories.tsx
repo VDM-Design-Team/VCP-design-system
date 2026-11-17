@@ -120,11 +120,34 @@ export const Reading: Story = {
     await expect(c.getByText('VCP-1234')).toBeVisible();
     /* The left column's order. */
     await expect(inOrder(c, ['Some Title Here', 'Problems', 'Solutions', 'Acceptance', 'Desired outcome', 'Status History', 'Comments'])).toBe(true);
+    /* The Comments title and its sort chip are centred on each other, and Comments sits 32 below the Status History card. */
+    const heading = c.getByRole('heading', { name: 'Comments' });
+    const chip = within(heading.parentElement!).getByRole('button');
+    const mid = (el: Element) => el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2;
+    await expect(Math.abs(mid(heading) - mid(chip))).toBeLessThan(1);
+    const history = c.getByRole('heading', { name: /Status History/ }).closest('section, div[class*="rounded"]')!;
+    await expect(Math.round(heading.closest('section')!.getBoundingClientRect().top - history.getBoundingClientRect().bottom)).toBe(32);
     /* The status buttons are the header's when reading. */
-    await userEvent.click(c.getByRole('button', { name: /Move to In progress/i }));
+    await userEvent.click(c.getByRole('button', { name: 'Move to In Progress' }));
     await expect(args.header.onTransition).toHaveBeenCalled();
     await expect(c.getByRole('heading', { name: 'Deliverables' })).toBeVisible();
     await expect(c.queryByRole('button', { name: 'Discard' })).toBeNull();
+  },
+};
+
+/** `actions.confirmDiscard`: Discard asks first ("Are you sure you want to discard this Added Value?"), and `onDiscard` fires only on Confirm. */
+export const DiscardAsksFirst: Story = {
+  args: { ...EDIT, actions: { ...EDIT.actions!, onDiscard: fn(), confirmDiscard: true } },
+  play: async ({ canvasElement, args }) => {
+    const c = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(c.getByRole('button', { name: 'Discard' }));
+    const dialog = await body.findByRole('alertdialog', { name: 'Are you sure you want to discard this Added Value?' });
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await expect(args.actions!.onDiscard).not.toHaveBeenCalled();
+    await userEvent.click(c.getByRole('button', { name: 'Discard' }));
+    await userEvent.click(within(await body.findByRole('alertdialog')).getByRole('button', { name: 'Confirm' }));
+    await expect(args.actions!.onDiscard).toHaveBeenCalledTimes(1);
   },
 };
 
