@@ -128,7 +128,7 @@ export const Reading: Story = {
     const history = c.getByRole('heading', { name: /Status History/ }).closest('section, div[class*="rounded"]')!;
     await expect(Math.round(heading.closest('section')!.getBoundingClientRect().top - history.getBoundingClientRect().bottom)).toBe(32);
     /* The status buttons are the header's when reading. */
-    await userEvent.click(c.getByRole('button', { name: /Move to In progress/i }));
+    await userEvent.click(c.getByRole('button', { name: 'Move to In Progress' }));
     await expect(args.header.onTransition).toHaveBeenCalled();
     await expect(c.getByRole('heading', { name: 'Deliverables' })).toBeVisible();
     await expect(c.queryByRole('button', { name: 'Discard' })).toBeNull();
