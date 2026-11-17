@@ -60,10 +60,10 @@ export function initialsForName(name: string): string {
  *    applied unless asked for.
  * 2. **`size` is a variant, not a number.** The export took `size?: number` and
  *    derived the font size from it (`size * 0.38`), which cannot be tokenised —
- *    every value it produces is an off-ramp number. The four steps here sit on
+ *    every value it produces is an off-ramp number. The steps here sit on
  *    Tailwind's numeric scale and carry a type-ramp step each (design review,
  *    5 Oct 2026): `xs` is 16 with 10 type, `sm` 24 with 12, `md` 32 with 12 (the
- *    export's own default size) and `lg` 36 with 14. The export's AvatarGroup
+ *    export's own default size) and `lg` 36 with 14, then `xl` 40, `2xl` 44 and `3xl` 48 with 16 (the larger profile pictures Figma's `Profile_Image` draws). The export's AvatarGroup
  *    default of 28 has no step here; that row uses `sm` or `md`.
  * 3. **No `title` tooltip.** The export set `title={name}`. A `title` is a
  *    hover-only, keyboard-unreachable, touch-invisible accessible name. If the
@@ -93,6 +93,12 @@ const avatar = cva(
         /* 36, 14 type — profile headers, account menus. Below the 40 minimum
            target, so a control wrapping it adds its own padding to reach 40. */
         lg: 'size-9 text-label-sm-medium',
+        /* 40, 16 type — Figma's `Profile_Image` L: a larger profile picture, and the first step that is a full 40 target. */
+        xl: 'size-10 text-label-md-medium',
+        /* 44, 16 type — `Profile_Image` XL. */
+        '2xl': 'size-11 text-label-md-medium',
+        /* 48, 16 type — `Profile_Image` XXL, the account page's portrait. */
+        '3xl': 'size-12 text-label-md-medium',
       },
       tone: {
         /* surface.neutral + text.secondary — the default every avatar starts
@@ -115,6 +121,9 @@ const avatar = cva(
     defaultVariants: { size: 'md', tone: 'neutral', ring: false },
   },
 );
+
+/* The unknown-person glyph fills the circle in Figma's `Profile_Empty`: the icon is the avatar's size, on Icon's own scale (10, 12, 16, 20, 24, 28, 32, 40, 48). */
+const PLACEHOLDER_ICON = { xs: 10, sm: 'sm', md: 'md', lg: 'lg', xl: 40, '2xl': 40, '3xl': 48 } as const;
 
 export interface AvatarProps
   extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'children'>,
@@ -195,7 +204,7 @@ export const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
           <Icon
             name="user"
             /* The 16 `xs` avatar takes Icon's smallest size, 10. */
-            size={size === 'xs' ? 10 : (size ?? undefined)}
+            size={PLACEHOLDER_ICON[size ?? 'md']}
           />
         )}
       </span>

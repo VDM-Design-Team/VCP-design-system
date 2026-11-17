@@ -40,7 +40,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | **Right column** | The **Detail card**, then the **Deliverables card** | The **Detail card** |
 | **Bottom** | — | **Discard** (red text), then the status buttons (**Save as Draft**, **Submit**), at the right |
 
-The columns are 2 : 1 on a wide page and stack on a narrow one (it responds to its own width, not the screen's). 16 between them and between the cards, 32 in from the sides.
+The columns are 2 : 1 on a wide page and stack on a narrow one (it responds to its own width, not the screen's). 16 between them and between the cards, 32 in from the sides. **Comments** sits 32 below the Status History card, not 16: it is not a card, so the cards' gap left it crowded (decided 17 November 2026).
 **Multipart** sits after the four blocks in both modes: Figma's frames do not show a Multipart card, so that place is a reading of the pieces' docs, not a drawing.
 
 ## Typed sections: the page passes each piece's own props
