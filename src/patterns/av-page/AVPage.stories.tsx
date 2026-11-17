@@ -136,7 +136,7 @@ export const Reading: Story = {
   },
 };
 
-/** A rejected AV: a critical banner above the title, the width of the left column: "This Task was rejected" and the reason. */
+/** A rejected AV: a critical banner above the title, the width of the left column: "This Added Value was rejected" and the reason. */
 export const Rejected: Story = {
   args: {
     banner: rejectedBanner({ message: 'Out of scope for this cycle; resubmit with a narrower brief.' }),
@@ -145,7 +145,7 @@ export const Rejected: Story = {
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    const banner = c.getByText('This Task was rejected');
+    const banner = c.getByText('This Added Value was rejected');
     await expect(banner).toBeVisible();
     await expect(c.getByText('Out of scope for this cycle; resubmit with a narrower brief.')).toBeVisible();
     /* Above the title card, in the same column. */
@@ -154,7 +154,7 @@ export const Rejected: Story = {
   },
 };
 
-/** An AV sent back to the backlog in another domain: a warning banner that names it, "Remarks from Development Domain", and the feedback. */
+/** An AV sent back to the backlog in another domain: a warning banner that names it, "This Added Value was moved to the backlog in Development Domain", and the feedback. */
 export const BackloggedInAnotherDomain: Story = {
   args: {
     banner: backloggedBanner({ domain: 'Development', message: 'Waiting on the new design tokens.' }),
@@ -163,7 +163,7 @@ export const BackloggedInAnotherDomain: Story = {
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await expect(c.getByText('Remarks from Development Domain')).toBeVisible();
+    await expect(c.getByText('This Added Value was moved to the backlog in Development Domain')).toBeVisible();
     await expect(c.getByText('Waiting on the new design tokens.')).toBeVisible();
   },
 };

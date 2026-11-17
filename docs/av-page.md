@@ -66,7 +66,14 @@ Everything inside the cards follows what it is passed (`DescriptionSection` is r
 
 ## A rejected or backlogged AV says so, above the title
 
-Figma's `AV Was Rejected/Backlogged` page draws the page with a `Banner` the width of the left column, above the title card: a **critical** one, "This Task was rejected", with the reason under it, and a **warning** one, "Remarks", with the feedback under it. When the AV was turned down in another domain (one initiated across domains) the headline names it: "This Task was rejected in Development Domain", "Remarks from Development Domain".
+Figma's `AV Was Rejected/Backlogged` page draws the page with a `Banner` the width of the left column, above the title card: a **critical** one with the reason under it, and a **warning** one with the feedback under it. When the AV was turned down in another domain (one initiated across domains) the headline names it.
+
+| | Headline here | Figma's |
+|---|---|---|
+| Rejected | "This Added Value was rejected" / "This Added Value was rejected in Development Domain" | "This Task was rejected" / "This Task was rejected in Development Domain" |
+| Backlogged | "This Added Value was moved to the backlog" / "This Added Value was moved to the backlog in Development Domain" | "Remarks" / "Remarks from Development Domain" |
+
+**The headlines are deliberately not Figma's** (decided 17 November 2026): both say what happened, and both say "Added Value", as the dialogs and toasts do. Figma's two banners should be updated to match.
 
 ```tsx
 <AVPage banner={rejectedBanner({ message: reason })} … />
