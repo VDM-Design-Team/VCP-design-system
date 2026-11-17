@@ -159,6 +159,8 @@ export interface GanttChartProps extends Omit<React.HTMLAttributes<HTMLElement>,
   title?: string;
   /** Adds the (i) beside the title, with this as its tooltip. */
   infoText?: string;
+  /** Heading level of the title. Default `2`. Give `1` when the chart is the page's whole content: it draws its own title, so there is no `PageTitle` to be the page's `h1`. The look is the same. */
+  headingLevel?: 1 | 2;
   view: GanttView;
   onViewChange: (view: GanttView) => void;
   /** Any day inside the period on screen. */
@@ -444,6 +446,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       className,
       title = 'Gantt Chart',
       infoText,
+      headingLevel = 2,
       view,
       onViewChange,
       date,
@@ -804,6 +807,8 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
       else blocks.push({ id: row.id, users: [node] });
     }
 
+    const Heading = `h${headingLevel}` as const;
+
     return (
       <section
         ref={ref}
@@ -820,7 +825,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-1">
-            <h2 className="font-sans text-title-sm-bold text-text-primary">{title}</h2>
+            <Heading className="font-sans text-title-sm-bold text-text-primary">{title}</Heading>
             {infoText && (
               <Tooltip content={infoText} placement="bottom">
                 <IconButton

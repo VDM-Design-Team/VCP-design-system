@@ -248,7 +248,7 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
         {...props}
       >
         <div className="flex min-h-8 items-center justify-between gap-2">
-          <Heading id={headingId} className="m-0 text-body-md-regular text-text-tertiary">
+          <Heading id={headingId} className="m-0 text-title-sm-semibold text-text-primary">
             {title}
           </Heading>
           <CommentSortChip

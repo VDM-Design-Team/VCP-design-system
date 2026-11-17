@@ -44,7 +44,7 @@ It is **controlled and saves nothing**. The page owns the save, and the stories 
 | Moment | What the page does |
 |---|---|
 | Saving | `Button` `loading` on "Save Changes", and `disabled` on the table and on the quarter and year controls |
-| Saved | A success `Toast` — "Changes Saved" |
+| Saved | A success `Toast` — `toast(changesSaved())`, "Changes saved" |
 | **The save fails** | A `critical` `Toast` ("Changes not saved … your changes are still here — try again"); unlock the table and **keep what was typed**, so Save can be tried again (`SaveFails`) |
 | Leaving with unsaved changes | The browser's own prompt: while there are edits, call `preventDefault()` on `beforeunload`, and stop once saved. The table has no prompt of its own |
 

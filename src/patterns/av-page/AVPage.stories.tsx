@@ -73,8 +73,7 @@ const EDIT: AVPageProps = {
   header: { title: 'Added Value Creation', type: 'new', backLabel: 'Back to Drafts', onBack: fn() },
   title: { value: '' },
   description: { problem: { ...edit('problem') }, solution: { ...edit('solution') }, deliverable: { ...edit('deliverable') }, 'desired-outcome': { ...edit('desired-outcome') } },
-  history: { count: 1 },
-  duplicate: { options: [{ value: 'development', name: 'Development' }, { value: 'content', name: 'Content' }], onChange: fn() },
+  initiate: { options: [{ value: 'development', name: 'Development' }, { value: 'content', name: 'Content' }], onChange: fn() },
   details: { type: 'new', domain: 'design', value: EDITING, options: OPTIONS, onChange: fn() },
   actions: { onDiscard: fn(), progression: { role: 'assignee-initiator', status: 'Draft', onTransition: fn() } },
 };
@@ -88,7 +87,7 @@ const meta = {
       description: {
         component:
           'The main content of an Added Value’s page, to read or to edit: the header, then the left column (title, the four description blocks, multipart, status history, ' +
-          'comments or duplicate) and the right (the detail card and the deliverables). The page passes each piece’s own props; a section shows only when it is passed.',
+          'comments or initiate) and the right (the detail card and the deliverables). The page passes each piece’s own props; a section shows only when it is passed.',
       },
     },
   },
@@ -121,6 +120,13 @@ export const Reading: Story = {
     await expect(c.getByText('VCP-1234')).toBeVisible();
     /* The left column's order. */
     await expect(inOrder(c, ['Some Title Here', 'Problems', 'Solutions', 'Acceptance', 'Desired outcome', 'Status History', 'Comments'])).toBe(true);
+    /* The Comments title and its sort chip are centred on each other, and Comments sits 32 below the Status History card. */
+    const heading = c.getByRole('heading', { name: 'Comments' });
+    const chip = within(heading.parentElement!).getByRole('button');
+    const mid = (el: Element) => el.getBoundingClientRect().top + el.getBoundingClientRect().height / 2;
+    await expect(Math.abs(mid(heading) - mid(chip))).toBeLessThan(1);
+    const history = c.getByRole('heading', { name: /Status History/ }).closest('section, div[class*="rounded"]')!;
+    await expect(Math.round(heading.closest('section')!.getBoundingClientRect().top - history.getBoundingClientRect().bottom)).toBe(32);
     /* The status buttons are the header's when reading. */
     await userEvent.click(c.getByRole('button', { name: /Move to In progress/i }));
     await expect(args.header.onTransition).toHaveBeenCalled();
@@ -134,11 +140,17 @@ export const Editing: Story = {
   args: EDIT,
   render: function Render(args: AVPageProps) {
     const [value, setValue] = React.useState('');
-    return <AVPage {...args} title={{ value, onChange: setValue }} />;
+    /* `history` is given on purpose: an editing page never draws it. */
+    return <AVPage {...args} history={{ count: 1 }} title={{ value, onChange: setValue }} />;
   },
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('heading', { level: 1, name: 'Added Value Creation' })).toBeVisible();
+    await expect(c.queryByText(/Status History/)).toBeNull();
+    /* The section's cards, passed in a Fragment, are each their own list item, 16 apart (they once shared one and touched). */
+    const items = Array.from(canvasElement.querySelectorAll('ol')[0]!.querySelectorAll(':scope > li'));
+    await expect(items).toHaveLength(2);
+    await expect(Math.round(items[1]!.getBoundingClientRect().top - items[0]!.getBoundingClientRect().bottom)).toBe(16);
     const title = c.getByRole('textbox', { name: 'Title' });
     await userEvent.type(title, 'A new Added Value');
     await expect(title).toHaveValue('A new Added Value');
@@ -147,10 +159,10 @@ export const Editing: Story = {
     await expect(c.getByRole('button', { name: 'Submit' })).toBeVisible();
     await userEvent.click(c.getByRole('button', { name: 'Discard' }));
     await expect(args.actions?.onDiscard).toHaveBeenCalled();
-    /* Comments and deliverables are for reading; duplicating is for editing. */
+    /* Comments and deliverables are for reading; initiating is for editing. */
     await expect(c.queryByRole('heading', { name: 'Comments' })).toBeNull();
     await expect(c.queryByRole('heading', { name: 'Deliverables' })).toBeNull();
-    await expect(c.getByText('Duplicate to other Domains')).toBeVisible();
+    await expect(c.getByText('Initiate to other Domains')).toBeVisible();
   },
 };
 
