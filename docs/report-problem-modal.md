@@ -58,7 +58,7 @@ ceremony.
   their heading in the body.
 - **Every field is labelled by `Field`**, which wires `id` and
   `aria-describedby` onto the control. No placeholder is doing a label's job.
-- **The footer is `Modal`'s own**: `ModalCancel` (secondary) and `ModalConfirm` (primary), both 40 high, as every dialog's. Figma draws this dialog's Cancel as a text button and both at the small size, from the old design; the dialogs in the system do not.
+- **The footer is `Modal`'s own**: `ModalCancel` (secondary) and `ModalConfirm` (primary), both 40 high, as every dialog's. Figma draws this dialog's Cancel as a text button and both at the small size, from the old design; the dialogs in the system do not, and this one follows them (decided 17 November 2026).
 - **Submit lives in the footer but belongs to the form**, via `form={formId}`,
   so Enter in any field submits and the footer still sits outside the scrolling
   body.
