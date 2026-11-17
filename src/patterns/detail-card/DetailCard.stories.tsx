@@ -91,6 +91,39 @@ export const Viewing: Story = {
   },
 };
 
+/** With `viewers`, the pill is the picker: hover for the list, press to search, add and remove. */
+export const ManagingViewers: Story = {
+  render: function Render(args) {
+    const people = [
+      { id: 'maya', name: 'Maya Bennett' },
+      { id: 'liam', name: 'Liam Carter' },
+      { id: 'adam', name: 'Adam Reyes' },
+    ];
+    const [viewing, setViewing] = React.useState(people.slice(0, 2));
+    return (
+      <div className="h-[28rem]">
+        <DetailCard
+          {...args}
+          viewerCount={undefined}
+          viewers={{
+            viewers: viewing,
+            candidates: people,
+            onAdd: (person) => setViewing((list) => [...list, person]),
+            onRemove: (person) => setViewing((list) => list.filter((item) => item.id !== person.id)),
+          }}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: '2 viewers' }));
+    await userEvent.type(await canvas.findByRole('textbox', { name: 'Search people by name' }), 'Ad');
+    await userEvent.click(canvas.getByRole('button', { name: /Adam Reyes/ }));
+    await expect(canvas.getByRole('button', { name: '3 viewers' })).toBeInTheDocument();
+  },
+};
+
 /** Give the app the person's locale (`DateFormatProvider`) and the card's dates follow it: here en-US, month first. */
 export const InThePersonsLocale: Story = {
   render: (args) => (
