@@ -4,7 +4,7 @@ import { expect, screen, userEvent, within } from 'storybook/test';
 import { OVERLAY_DOCS_STORY } from '../../lib/story-docs';
 import type { DomainCardItem } from '../domain-card';
 import type { TagManagementList } from '../tag-management';
-import { DomainPage, type DomainPageProps } from './DomainPage';
+import { DomainsPage, type DomainsPageProps } from './DomainsPage';
 
 const rows = (...labels: string[]): DomainCardItem[] => labels.map((label) => ({ id: label, label }));
 
@@ -15,12 +15,12 @@ const LISTS: TagManagementList[] = [
 ];
 
 /** What the app does: it owns the lists, and changes them when it is asked. */
-function Page(props: Omit<DomainPageProps, 'management'>) {
+function Page(props: Omit<DomainsPageProps, 'management'>) {
   const [lists, setLists] = React.useState(LISTS);
   const change = (id: string, fn: (items: DomainCardItem[]) => DomainCardItem[]) =>
     setLists((all) => all.map((l) => (l.id === id ? { ...l, items: fn(l.items) } : l)));
   return (
-    <DomainPage
+    <DomainsPage
       {...props}
       management={{
         lists,
@@ -33,15 +33,15 @@ function Page(props: Omit<DomainPageProps, 'management'>) {
 }
 
 const meta = {
-  title: 'Patterns/DomainPage',
-  component: DomainPage,
+  title: 'Patterns/DomainsPage',
+  component: DomainsPage,
   parameters: {
     layout: 'fullscreen',
     docs: {
       story: OVERLAY_DOCS_STORY,
       description: {
         component:
-          'The main content of the Super Admin’s Domain page: the title, then the Domains and Global Tags cards with their dialogs, laid out once. It goes inside `AppShell`; the app only passes the lists.',
+          'The main content of the Super Admin’s Domains page: the title, then the Domains and Global Tags cards with their dialogs, laid out once. It goes inside `AppShell`; the app only passes the lists.',
       },
     },
   },
@@ -53,7 +53,7 @@ const meta = {
     ),
   ],
   render: () => <Page />,
-} satisfies Meta<typeof DomainPage>;
+} satisfies Meta<typeof DomainsPage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
