@@ -6,7 +6,7 @@ export type {
   DetailCardValue,
   DetailCardField,
   DetailCardPerson,
-  DetailCardDuplicate,
+  DetailCardInitiatedDomain,
   DetailCardCycle,
   DetailCardOptions,
 } from './DetailCard';

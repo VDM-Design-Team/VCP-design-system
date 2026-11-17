@@ -104,7 +104,7 @@ Tokens are DTCG JSON in two layers, built by Style Dictionary into a Tailwind v4
 | Core, shared | GDL package | Colour families (`slate`, `blue`, `red`…), spacing, fonts, elevation, the type ramp `type.*` | `color.red.600` | Change it in GDL, then bump the exact pin |
 | Core, VCP's own | `tokens/core/*.json` | Only what is VCP's: the `vcp-blue` ramp, the navy logo mark, the UI face | `color.vcp-blue.500` = `#1a56db` | The only place a colour hex may appear |
 | Semantic | `tokens/semantic/color.json`, `shape.json`, `border.json` | Intent | `action.primary.surface.hover` → `{color.vcp-blue.600}` | Colours reference core tokens only. `shape.json` and `border.json` still hold their raw radii, widths and shadow values, a known gap with `CLAUDE.md` rule 2 |
-| Dark | `tokens/semantic/color.dark.json` | The same names, pointing at other core values | built to `dist/tokens.dark.css` as `.dark` overrides | Components never branch on theme |
+| Dark | `tokens/semantic/color.dark.json` | The same names, pointing at other core values | built to `dist/tokens.dark.css` as `.dark` overrides, with `color-scheme: dark` so the browser's own scrollbars, form controls and native menus go dark too (set `.dark` on `<html>` to darken the page's own scrollbar) | Components never branch on theme |
 
 ### Naming
 
