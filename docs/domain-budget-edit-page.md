@@ -41,7 +41,7 @@ It is **controlled and holds no data**. The page owns the rows, the quarter, the
 | Moment | What the page passes and does |
 |---|---|
 | Save Changes pressed | `onSave`: start the save and set `saving` |
-| **Saved** | Clear `dirty`, and show a success `Toast`: "Changes Saved" |
+| **Saved** | Clear `dirty`, and show a success `Toast`: `toast(changesSaved())`, "Changes saved" |
 | **The save fails** | Clear `saving`, **leave `dirty` on and keep what was typed**, and show a `critical` `Toast` ("Changes not saved … your changes are still here — try again"). Save stays available to try again |
 | The quarter or year changes | `onQuarterChange` / `onYearChange`. **With unsaved edits, ask first** (decided 10 Nov 2026; the design doesn't draw it): a `critical` `Modal`, "Leave without saving?", saying whose changes are lost ("Your changes to Q1 2026's budgets aren't saved. If you leave now, they're lost."), with **Keep editing** and **Leave**. Leave drops the edits and switches; Keep editing changes nothing. Never carry edits over to another quarter |
 | Another page in the app is opened | The same dialog. The browser's prompt only fires when the tab closes or reloads, so the app's own navigation has to ask |

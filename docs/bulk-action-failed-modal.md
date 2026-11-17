@@ -17,7 +17,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `BulkActionFailedModal` | Naming the Added Values that failed, and why |
-| `Toast` | Saying the rest worked ("Added Values Updated") |
+| `Toast` | Saying the rest worked ("Added Values updated") |
 
 ## Props
 

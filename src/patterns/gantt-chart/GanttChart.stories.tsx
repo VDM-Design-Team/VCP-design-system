@@ -158,12 +158,14 @@ function Demo({
   initialProjects = [],
   initialUsers = [],
   tasks = TASKS,
+  headingLevel,
 }: {
   initialView?: GanttView;
   initialDate?: string;
   initialProjects?: string[];
   initialUsers?: string[];
   tasks?: GanttTask[];
+  headingLevel?: 1 | 2;
 }) {
   const [view, setView] = React.useState<GanttView>(initialView);
   const [date, setDate] = React.useState(initialDate);
@@ -174,6 +176,7 @@ function Demo({
     <div className="flex flex-col gap-3">
       <GanttChart
         infoText="Each bar is an Added Value, from start to due date. Open a row to see its bars."
+        headingLevel={headingLevel}
         view={view}
         onViewChange={setView}
         date={date}
@@ -296,6 +299,24 @@ export const Loading: Story = {
     /* No rows, no empty message, and the filters are off. */
     await expect(canvas.queryByText('Nothing matches these filters.')).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeDisabled();
+  },
+};
+
+/**
+ * The title is an `h2` by default, for a chart that sits under a page's own title. On the Gantt page the chart is the whole content and draws its own title, so the page gives
+ * `headingLevel={1}` and the title is the page's one `h1`. Same look, tested (hidden).
+ */
+export const AsThePageHeading: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => <Demo headingLevel={1} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const h1 = canvas.getByRole('heading', { level: 1, name: 'Gantt Chart' });
+    await expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    await expect(canvas.queryByRole('heading', { level: 2, name: 'Gantt Chart' })).toBeNull();
+    /* The same type style as the default h2. */
+    await expect(h1).toHaveClass('text-title-sm-bold');
   },
 };
 
