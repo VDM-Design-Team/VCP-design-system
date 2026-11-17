@@ -69,7 +69,6 @@ export const AddAnotherLink: Story = {
   },
 };
 
-/** Editing a link already added: one pair, filled in, and Save. */
 /** Cannot take a link now: the fields grey out and Add is off. Cancel still works. */
 export const Disabled: Story = {
   args: { disabled: true, initial: { url: 'https://www.example.com', title: 'Prototype' } },
@@ -84,6 +83,7 @@ export const Disabled: Story = {
   },
 };
 
+/** Editing a link already added: one pair, filled in, and Save. */
 export const Editing: Story = {
   args: { mode: 'edit', initial: { url: 'https://www.example.com', title: 'Some Link Name Here' } },
   play: async ({ canvasElement }) => {

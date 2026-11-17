@@ -39,7 +39,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `initial` | `{ url, title }` | — | Edit: the link being changed |
 | `onSubmit` | `(links) => void` | required | Every pair, once all pass |
 | `onCancel` | `() => void` | required | |
-| `disabled` | `boolean` | — | The form cannot take a link now (Figma's `_Deliverables_Paste_Link` Disabled): both fields grey out, and Add / Save and "Add another link" are off. Cancel still works |
+| `disabled` | `boolean` | — | The form cannot take a link now (Figma's `_Deliverables_Paste_Link` Disabled): both fields grey out, and Add / Save and "Add another link" are off. Cancel still works. It shows no line saying why: it is off only briefly, while a link is saving, and a person who may not add links is not shown the form at all (decided 17 November 2026) |
 | `className`, `ref`, rest | | | On the `<form>` |
 
 ## Tokens
