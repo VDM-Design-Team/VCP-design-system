@@ -33,7 +33,6 @@ export * from './comment-section';
 export * from './planning-filters';
 export * from './report-problem-modal';
 export * from './notification-inbox';
-export * from './notifications-page';
 export * from './notification-popover';
 export * from './personal-info-form';
 export * from './budget-table';

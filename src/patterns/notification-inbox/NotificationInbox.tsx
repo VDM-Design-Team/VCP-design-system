@@ -11,7 +11,7 @@ import { Pagination, type PaginationProps } from '../../atoms/pagination';
  * Read off Figma's `Notification_Inbox_Content` (`7709:99303`): a `surface.elevated`
  * card, 32 / 16 padding, the controls row on top, right-aligned, the rows, then `VCP_Pagination`
  * (the mid size, with the Items select), right-aligned.
- * The popover's "View notifications inbox" link goes here. The rows are the same
+ * The popover's "View notification inbox" link goes here. The rows are the same
  * `NotificationItem` the popover uses: Figma draws an inbox row of its own
  * (`_Notification_Inbox_Item`), but it is the same thing in a wider list, so the
  * system has one.
@@ -58,6 +58,13 @@ export interface NotificationInboxProps extends React.HTMLAttributes<HTMLDivElem
    * inbox draws it. A group with no rows is left out.
    */
   groups?: ReadonlyArray<{ label: string; children: React.ReactNode }>;
+  /**
+   * A title for the card, at the left of the controls row ("Notifications"). Figma draws none; it is here so a page whose whole content is the inbox has its heading in the
+   * card, as the Gantt chart does. Without it the card is as Figma draws it.
+   */
+  title?: string;
+  /** The title's heading level. `2` by default; give `1` when the inbox is the page's whole content (the `OnItsPage` story). The look is the same. */
+  headingLevel?: 1 | 2;
   /** The groups' heading level. `2` by default: under the page's own title. */
   groupHeadingLevel?: 2 | 3 | 4;
   /** What an empty list says. Defaults to "No notifications". */
@@ -76,6 +83,8 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
       pagination,
       children,
       groups,
+      title,
+      headingLevel = 2,
       groupHeadingLevel = 2,
       emptyLabel = 'No notifications',
       listLabel = 'Notifications',
@@ -91,6 +100,7 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
       .map((g) => ({ label: g.label, items: React.Children.toArray(g.children) }))
       .filter((g) => g.items.length > 0);
     const Heading = `h${groupHeadingLevel}` as 'h2' | 'h3' | 'h4';
+    const Title = `h${headingLevel}` as 'h1' | 'h2';
     const list = (rows: React.ReactNode[], label: { aria?: string; by?: string }) => (
       <ul aria-label={label.aria} aria-labelledby={label.by}>
         {rows.map((child, index) => (
@@ -108,20 +118,23 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
         )}
         {...props}
       >
-        <div className="flex items-center justify-end gap-4">
-          {onMarkAllRead && (
-            <Button variant="tertiary" size="sm" onClick={onMarkAllRead}>
-              Mark all as read
-            </Button>
-          )}
-          <Toggle
-            label="Show unread only"
-            checked={onlyUnread}
-            onChange={(next) => {
-              setUnreadState(next);
-              onUnreadOnlyChange?.(next);
-            }}
-          />
+        <div className={cn('flex flex-wrap items-center gap-4', title ? 'justify-between' : 'justify-end')}>
+          {title && <Title className="m-0 font-sans text-title-sm-bold text-text-primary">{title}</Title>}
+          <div className="flex items-center gap-4">
+            {onMarkAllRead && (
+              <Button variant="tertiary" size="sm" onClick={onMarkAllRead}>
+                Mark all as read
+              </Button>
+            )}
+            <Toggle
+              label="Show unread only"
+              checked={onlyUnread}
+              onChange={(next) => {
+                setUnreadState(next);
+                onUnreadOnlyChange?.(next);
+              }}
+            />
+          </div>
         </div>
 
         {groups ? (

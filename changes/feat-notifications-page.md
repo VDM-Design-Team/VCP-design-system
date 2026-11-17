@@ -1,6 +1,10 @@
 ---
 bump: minor
 ---
-### `NotificationsPage` — the notifications page, and an optional `sidebar` on `AppShell` (November 2026)
+### `NotificationInbox` — a title in the card, the notification inbox page as a story, an optional `sidebar` on `AppShell`, and "View notification inbox" (November 2026)
 
-New `NotificationsPage`: `NotificationInbox` in the page's content area, as Figma's `Notification Inbox` page draws it: no title band (the `h1` is for screen readers; `showTitle` draws it as a `PageTitle`), 40 above and below the inbox. `NotificationInbox`'s props pass straight through. Figma's page also has no sidebar and the logo in the top bar, so `AppShell`'s `sidebar` is now optional (a `TopBar` with no `primaryAction` is the logo version already). Two stories (the page, and with a title); the docs say how each of Figma's differences is carried.
+`NotificationInbox` takes an optional `title` and `headingLevel`: a heading at the left of the controls row. Without them the card is as before. The page the bell's link opens (Figma's `Notification Inbox` page) is the inbox in `AppShell` with no sidebar, the logo in the top bar and `py-10` around it, shown by the new `OnItsPage` story and set out in `docs/notification-inbox.md`; like the Gantt chart's page it has no wrapper component. `AppShell`'s `sidebar` is now optional (a `TopBar` with no `primaryAction` is the logo version already).
+
+**A deliberate departure from Figma: the page has a title, in the card.** Figma's inbox card has none. Here "Notification Inbox" is the card's own heading and the page's `h1`, as the Gantt chart's title is its card's. Don't add a `PageTitle` band above it.
+
+**Wording:** the popover's footer link, `NotificationPopover`'s default `inboxLabel`, is now "View notification inbox" (was "View notifications inbox"): the standard singular form, and the same name as the page and the component. Anything that sets `inboxLabel` itself is unaffected.

@@ -51,7 +51,7 @@ import { Footer } from '../../atoms/footer';
 export interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
   /**
    * The navigation rail — a `Sidebar`. Full height, down the left. Left out, the page has no rail: Figma's notifications page is the top bar and the inbox
-   * alone (`NotificationsPage`).
+   * alone (`NotificationInbox`'s `OnItsPage` story).
    */
   sidebar?: React.ReactNode;
   /** The app bar — a `TopBar`. Across the top of everything right of the rail. */
