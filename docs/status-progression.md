@@ -97,15 +97,17 @@ Development, all roles that see the middle of the lifecycle:
 | `In Progress` (spine) | — | Move to *first chain step* |
 | first chain step | Return to In Progress | Move to *next* |
 | any middle step | Return to *previous* | Move to *next* |
-| last chain step | Return to *previous* | Move to Handoff / **Handoff** (admin) |
+| last chain step | Return to *previous* | Move to Handoff |
 | `Review` (spine) ‡ | Reject *(outline)* | Accept |
 | `Completed` (spine), Development only, `pendingDeploy` | — | Deploy *(admin only)* |
 
 Names in italics come from the chain's own labels, so "Return to In QA" is
 built at render time from whatever that step is called today. The wording the
-design has an opinion about — "Move to Handoff" for an assignee, plain
-"Handoff" for an admin — stays hard-coded, because the design does not
-generate it either.
+design has an opinion about — "Move to Handoff" — stays hard-coded, because
+the design does not generate it either. It is the same for every role (decided
+17 November 2026): Figma's Design admin set drew a plain "Handoff" where its
+Development admin set and every non-admin set say "Move to Handoff", and one
+action gets one label.
 
 The first chain step returns to `In Progress`, the shared step it came from —
 not to `Accepted`, because accepting is the admin's decision and not the

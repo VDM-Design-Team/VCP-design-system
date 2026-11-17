@@ -63,7 +63,11 @@ slate-700); `Tag`'s neutral tonal is `surface.neutral.subtle` on
 `text.secondary` — slate-100 on slate-700. One step of slate apart on the fill,
 identical text. The `Tag` tone is used rather than adding a near-duplicate
 token family, so every neutral tag in the system stays one colour. Modelling
-the full neutral families belongs with issue #103.
+the full neutral families belongs with issue #103. **The lighter fill is kept
+on purpose** (decided 17 November 2026): it was looked at beside Figma's
+slate-200 on the status tags and the Task Log Trail, and the lighter grey
+stays for every neutral tag and badge. Its known cost: on a hovered table row
+the fill is close to the row's own grey.
 
 ## Accessibility
 
