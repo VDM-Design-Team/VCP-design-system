@@ -112,11 +112,13 @@ const avatar = cva(
         red: 'bg-accent-red-faint text-accent-red-stronger',
         yellow: 'bg-accent-yellow-faint text-accent-yellow-stronger',
       },
-      /* Separates one avatar from the one it overlaps in a stack. Drawn outside
-         the box as a ring so it never eats into the 16/24/32/36 the size promises,
-         and coloured `surface.elevated` so it reads as the page showing through
-         in both themes. */
-      ring: { true: 'ring-2 ring-surface-elevated', false: '' },
+      /* Separates one avatar from the one it overlaps in a stack: a 1 border drawn
+         *inside* the box, as Figma's `Profile_Initials` draws its stroke, so the
+         circle is still exactly 16/24/32/36 across (a photo shrinks to fit inside
+         it, over which the border shows). Coloured `surface.elevated` so it reads
+         as the page showing through in both themes. It was a 2 ring outside the
+         box until November 2026. */
+      ring: { true: 'border border-surface-elevated', false: '' },
     },
     defaultVariants: { size: 'md', tone: 'neutral', ring: false },
   },

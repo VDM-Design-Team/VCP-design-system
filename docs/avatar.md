@@ -32,7 +32,7 @@ Reach for something else when:
 | `src` | `string` | — | Photo URL. On a load failure the initials are drawn instead |
 | `size` | `xs \| sm \| md \| lg \| xl \| 2xl \| 3xl` | `md` | 16 / 24 / 32 / 36 / 40 / 44 / 48. **Not a number** — see "Deviations" |
 | `tone` | `neutral \| brand \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing. `brand` is `surface.brand.subtle` with `text.brand.strong` initials (8.97:1 light / 6.14:1 dark), the people chips' avatar; a name never hashes onto it, a caller asks for it |
-| `ring` | `boolean` | `false` | `surface.elevated` ring, for overlapping stacks. `AvatarGroup` sets it |
+| `ring` | `boolean` | `false` | A 1 `surface.elevated` border inside the box, for overlapping stacks (Figma's stroke on `Profile_Initials`). `AvatarGroup` sets it |
 | `standalone` | `boolean` | `false` | The avatar is the only identification of this person — give it a real accessible name |
 | `label` | `string` | — | Overrides what is announced, and implies `standalone` |
 | `className` | `string` | — | Merged onto the circle via `cn()` |
@@ -72,7 +72,7 @@ The rest:
 
 | Part | Token | Utility |
 |---|---|---|
-| Ring, in a stack | `surface.elevated` | `ring-2 ring-surface-elevated` |
+| Ring, in a stack | `surface.elevated` | `border border-surface-elevated` |
 | Radius | `shape.radius.pill` | `rounded-pill` |
 | Initials, `sm` | `type.caption-md-medium` | `text-caption-md-medium` |
 | Initials, `md` | `type.label-sm-medium` | `text-label-sm-medium` |

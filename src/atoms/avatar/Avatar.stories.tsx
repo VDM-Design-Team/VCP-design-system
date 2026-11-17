@@ -132,7 +132,7 @@ export const BrokenImage: Story = {
 };
 
 /**
- * `ring` draws a `surface.elevated` ring outside the box, which is what separates
+ * `ring` draws a 1 `surface.elevated` border inside the box (the circle stays its size), which is what separates
  * one avatar from the one it overlaps. `AvatarGroup` sets it for you.
  */
 export const Ring: Story = {
