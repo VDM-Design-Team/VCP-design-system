@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { Modal } from '../../components/modal';
+import { Modal, ModalCancel, ModalConfirm } from '../../components/modal';
 import { Field } from '../../components/field';
 import { Dropzone } from '../../atoms/dropzone';
-import { Button } from '../../atoms/button';
 import { Input } from '../../atoms/input';
 
 /**
@@ -69,12 +68,11 @@ export function ReportProblemModal({
       size="md"
       footer={
         <>
-          <Button variant="tertiary" type="button" disabled={loading} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit" form={formId} loading={loading}>
+          {/* The dialog's own footer buttons, as every dialog uses them: Cancel secondary, Submit primary, both 40 high. Cancel is off while the report is being sent (`busy`). */}
+          <ModalCancel />
+          <ModalConfirm type="submit" form={formId} loading={loading}>
             Submit
-          </Button>
+          </ModalConfirm>
         </>
       }
     >

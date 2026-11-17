@@ -141,7 +141,8 @@ export function AVPage({
           {DESCRIPTION_ORDER.map((type) => description?.[type] && <DescriptionSection key={type} type={type} {...description[type]} />)}
           {multipart && <MultipartSection {...multipart} />}
           {!editing && history && <StatusHistory {...history} />}
-          {!editing && comments && <CommentSection {...comments} />}
+          {/* Comments are not a card, so they get room above them: 32 from the Status History, not the cards' 16. */}
+          {!editing && comments && <CommentSection className="mt-4" {...comments} />}
           {editing && initiate && <InitiateToOtherDomain {...initiate} />}
         </div>
         {(details || (!editing && deliverables)) && (

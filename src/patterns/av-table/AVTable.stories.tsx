@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { AVTable, type AVTableRow } from './AVTable';
 import { IconButton } from '../../atoms/icon-button';
 import { FilterBar } from '../filter-bar';
@@ -303,6 +303,41 @@ export const Empty: Story = {
       <AVTable {...args} rows={[]} empty="No Added Values match these filters." />
     </div>
   ),
+};
+
+/**
+ * What the row's own state adds: a green seal after the reference when the AV has **passed BESA**, and at the end of the details a red warning when it was
+ * **rejected** and a grey info glyph when it was **sent back to the backlog**, each with the reason in its tooltip (Figma's `BESA_Passed_AV`, `Rejected_AV_Indicator` and
+ * `Backlogged_AV_Indicator`). Each tooltip says what the glyph is first ("BESA Passed", "Rejected: the reason", "Backlogged: the reason"). They are buttons so the keyboard reaches the tooltip.
+ */
+export const Flags: Story = {
+  args: {
+    rows: [
+      { ...ROWS[0], id: 'f-1', ref: 'VCP-12511', besaPassed: true },
+      { ...ROWS[1], id: 'f-2', ref: 'VCP-12408', rejected: { reason: 'Out of scope for this cycle; resubmit with a narrower brief.' } },
+      { ...ROWS[2], id: 'f-3', ref: 'VCP-12519', backlogged: { reason: 'Waiting on the new design tokens.' } },
+    ],
+  },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.hover(canvas.getByRole('button', { name: /^Rejected/ }));
+    /* The tooltip is drawn outside the table, in the document's body. */
+    const reason = await within(canvasElement.ownerDocument.body).findByText('Rejected: Out of scope for this cycle; resubmit with a narrower brief.');
+    await waitFor(() => expect(reason).toBeVisible());
+    await userEvent.unhover(canvas.getByRole('button', { name: /^Rejected/ }));
+    await userEvent.tab();
+    await expect(canvas.getByRole('button', { name: 'BESA Passed' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: /^Backlogged/ })).toBeInTheDocument();
+    /* The seal comes straight after its own reference, in the same cell. */
+    const reference = canvas.getByRole('button', { name: /VCP-12511/ });
+    const seal = canvas.getByRole('button', { name: 'BESA Passed' });
+    await expect(reference.parentElement).toBe(seal.parentElement?.parentElement ?? seal.parentElement);
+  },
 };
 
 /**

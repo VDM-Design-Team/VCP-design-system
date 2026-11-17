@@ -68,7 +68,7 @@ themselves.**
 | `pending` | Admin(s) | Yes | Draft | An Added Value in Pending is waiting to be accepted or rejected |
 | `accepted` | Initiator(s) | Yes | Pending | Their Added Value is accepted and ready to be designed |
 | `rejected` (from Pending) | Initiator(s) | Yes | Pending | Their pending Added Value was rejected. A reason is required; it shows as a banner at the top of the Added Value page or as a tooltip there |
-| `moved` (In progress, Design Review) | Initiator(s), Assignee(s) | No | Accepted → In progress; In progress → Design Review | The status moved. Design Review usually coincides with the Design Review meeting |
+| `moved` (In Progress, Design Review) | Initiator(s), Assignee(s) | No | Accepted → In Progress; In Progress → Design Review | The status moved. Design Review usually coincides with the Design Review meeting |
 | `handoff` (Ready for Review) | Initiator(s), Assignee(s), Admin(s) | Yes | Design Review | Moved to Review: the Initiator(s) (who is not also an assignee) or an Admin can accept or reject. Assignees who did not cause the change are informed but cannot accept or reject |
 | `completed` | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Completed. It is copied over to the Dev domain |
 | `rejected` (from Review) | Initiator(s), Assignee(s), Admin(s) | Yes, except Admin(s) | Review | Rejected; the reason shows as a banner on the Added Value page or a tooltip in the table |

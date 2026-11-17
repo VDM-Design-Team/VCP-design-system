@@ -10,7 +10,7 @@ count, a state, a category.
 | `Badge` | Classifying something in place: `Beta`, `Read-only`, `2 failures` | Pill (`shape.radius.pill`) | No — takes no focus, fires no events | Generic tones only |
 | `Tag` | The same job as Badge, when the rounded-rectangle shape or one of `textual`/`outline` is what's wanted | Rounded-rectangle (`shape.radius.sm`) | No | Generic tones only |
 | `Chip` | A value the user can act on: a selected filter, a removable tag, a toggleable option | Whatever the caller builds | Yes — focusable, clickable, often dismissible | Whatever the caller supplies |
-| `StatusTag` *(component)* | A VCP status: `Accepted`, `In progress`, `For QA`, `Confirmed prod`, `Rejected`, `Backlog` | `Tag`'s rounded-rectangle | No | VCP's status vocabulary |
+| `StatusTag` *(component)* | A VCP status: `Accepted`, `In Progress`, `For QA`, `Confirmed Prod`, `Rejected`, `Backlog` | `Tag`'s rounded-rectangle | No | VCP's status vocabulary |
 
 **`Badge` and `Tag` are separate Figma components with separate shapes** —
 General Design Library's `Badge` (pill) and `Tag` (rounded-rectangle) — not
@@ -93,7 +93,9 @@ The dark theme comes for free — every colour class above is a semantic token t
   therefore hand-composed here from `surface.brand.faint` + `text.brand.strong` and
   `surface.neutral.subtle` + `text.secondary`. They look right and measure well, but
   they are a convention this component invented rather than a pair the tokens declare.
-  Two more triads would make all six tones uniform.
+  Two more triads would make all six tones uniform. For `neutral`, Figma draws
+  `neutral.tonal.*` (slate-200), one step darker; the lighter pair here is kept on
+  purpose (decided 17 November 2026; see `docs/due-date-tag.md`).
 - **`accent.{blue,green,red,yellow}`** exist but only as `base`/`faint`/`medium`/
   `strong`/`stronger`/`subtle` scales — no `tonal` treatment — so they cannot serve a
   Badge tone as-is.
