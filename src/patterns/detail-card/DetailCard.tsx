@@ -661,7 +661,7 @@ function PeopleField({
   availabilityKnown?: boolean;
   /** The + is disabled, and this is why. */
   lockedReason?: string;
-  /** What is wrong with the list (an Initiator is required): under the chips, in the critical colour, and announced. */
+  /** What is wrong with the list (an Initiator is required): under the chips, in the critical colour. Like every other field's error it is the group's description, not an alert: the page's toast already announces it once. */
   error?: string;
   onChange: (people: DetailCardPerson[]) => void;
   aside?: React.ReactNode;
@@ -775,7 +775,7 @@ function PeopleField({
           form(undefined, 'Add', (person) => onChange([...people, person]))}
       </div>
       {error && (
-        <p id={errorId} role="alert" className="text-caption-md-medium text-accent-critical-outline-content-default">
+        <p id={errorId} className="text-caption-md-medium text-accent-critical-outline-content-default">
           {error}
         </p>
       )}

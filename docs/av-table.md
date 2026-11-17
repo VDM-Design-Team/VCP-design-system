@@ -147,9 +147,9 @@ every table says the same thing:
 | Urgency | "Indicates how urgent or important a task is compared to others" |
 | Type | **Type 1:** Direct KPI impact with clear ROI / **Type 2:** Indirect impact, enablement/optimization / **Type 3:** Non-critical, no meaningful KPI impact (one a line, the type in bold) |
 | Status | "Reflects the current stage of the task (e.g., in progress, completed)." |
-| Members | "Displays the people assigned to or responsible for the task" |
+| Members | "Displays the people assigned to or responsible for the Added Value" |
 
-`MEMBERS_COLUMN_HINT` lives with the table, because no piece owns the Members vocabulary; the sentence is Figma's, from the Assigned page.
+`MEMBERS_COLUMN_HINT` lives with the table, because no piece owns the Members vocabulary; the sentence is Figma's, from the Assigned page, with "Added Value" where Figma writes "task" (decided 17 November 2026: the column tooltips say "Added Value"; Urgency's and Status's follow in their own change).
 Pass a string (or node) to change a column's copy, or `''` to drop its glyph.
 
 ## Multipart rows

@@ -119,10 +119,11 @@ export interface AVTableHints {
 }
 
 /**
- * The Members column's tooltip, Figma's own sentence (the Assigned page's Members header). Urgency, Type and Status keep theirs with the piece that owns
- * the vocabulary; Members has no piece (`AvatarGroup` knows nothing about this column), so the sentence lives here.
+ * The Members column's tooltip: Figma's sentence (the Assigned page's Members header) with "Added Value" for Figma's "task", as the product names it
+ * (decided 17 November 2026). Urgency, Type and Status keep theirs with the piece that owns the vocabulary; Members has no piece (`AvatarGroup` knows
+ * nothing about this column), so the sentence lives here.
  */
-export const MEMBERS_COLUMN_HINT = 'Displays the people assigned to or responsible for the task';
+export const MEMBERS_COLUMN_HINT = 'Displays the people assigned to or responsible for the Added Value';
 
 const DEFAULT_HINTS: AVTableHints = {
   urgency: URGENCY_COLUMN_HINT,

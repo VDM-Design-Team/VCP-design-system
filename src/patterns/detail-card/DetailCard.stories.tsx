@@ -436,7 +436,7 @@ export const WithAnError: Story = {
   },
 };
 
-/** An Initiator is required: with none, `errors.initiators` shows under the (empty) chips, announced, and the field's group is described by it. The page words it. */
+/** An Initiator is required: with none, `errors.initiators` shows under the (empty) chips, and the field's group is described by it, as every other field's error is (no alert: the page's toast announces it). The page words it. */
 export const WithoutAnInitiator: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
@@ -445,7 +445,7 @@ export const WithoutAnInitiator: Story = {
     const canvas = within(canvasElement);
     const message = canvas.getByText('Please select at least one initiator before submitting');
     await expect(message).toBeVisible();
-    await expect(message).toHaveAttribute('role', 'alert');
+    await expect(message).not.toHaveAttribute('role');
     await expect(canvas.getByRole('group', { name: 'Initiator' })).toHaveAccessibleDescription('Please select at least one initiator before submitting');
   },
 };

@@ -311,7 +311,7 @@ export const MembersHeaderSaysWhoTheyAre: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.hover(canvas.getByRole('button', { name: 'About members' }));
-    const tip = await within(canvasElement.ownerDocument.body).findByText('Displays the people assigned to or responsible for the task');
+    const tip = await within(canvasElement.ownerDocument.body).findByText('Displays the people assigned to or responsible for the Added Value');
     await waitFor(() => expect(tip).toBeVisible());
   },
 };

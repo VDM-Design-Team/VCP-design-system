@@ -81,7 +81,7 @@ Not built here: **UI Changes** (the Modify / New UI / No UI section) is not want
 | `value` | `DetailCardValue` | required | Every field optional; the card draws the ones its type has. Dates are ISO `yyyy-mm-dd` |
 | `onChange` | `(value) => void` | — | Editing and new: the whole value, changed |
 | `options` | `{ people, roles, cycles, projects, categories, tags }` | — | The dropdowns' choices. `people` and `roles` feed the add / edit form (roles default to QA, Design and Assignee). A cycle carries its code and dates, so the read card draws a `CycleTag` |
-| `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid. **Initiator** and **Assignee** (`errors.initiators`, `errors.assignees`) show it under their chips, announced, with the group described by it |
+| `errors` | `{ [field]: string }` | — | Editing and new: a message under the field, which marks it invalid. **Initiator** and **Assignee** (`errors.initiators`, `errors.assignees`) show it under their chips, with the group described by it (not an alert, like the other fields' errors: the page's toast announces it once) |
 | `readOnly` | `DetailCardField[]` | — | Editing and new: fields shown but locked — the dropdowns and dates in the list can't be opened or changed. A multipart part's edit page locks Projects, AV Category, Tags, Type and Urgency, the fields it takes from its parent (Figma `1404:132644`) |
 | `viewers` | `ViewersPickerProps` | — | The viewers pill on the read cards, with its hover list and its picker to add and remove people (see `docs/viewers-picker.md`) |
 | `viewerCount`, `onViewers` | `number`, `() => void` | — | Just the bare pill and a press, for a page with no list yet. `viewers` wins when both are given |
