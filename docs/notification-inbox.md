@@ -5,7 +5,28 @@ The full notifications page's content: the controls ("Mark all as read" and
 
 Read off Figma's `Notification_Inbox_Content` (`7709:99303`): a `surface.elevated`
 card, `radius.md`, 32 / 16 padding, the controls row, the rows, then the pagination.
-The popover's "View notifications inbox" link goes here.
+The popover's "View notification inbox" link goes here.
+
+## On its own page
+
+The page the bell's "View notification inbox" link opens is this inbox in `AppShell`. It has no wrapper component of its own (as the Gantt chart has none): the `OnItsPage` story is the recipe.
+
+```tsx
+<AppShell topBar={<TopBar homeHref="/" notifications={3} user={user} />}>
+  <div className="py-10">
+    <NotificationInbox title="Notification Inbox" headingLevel={1} onMarkAllRead={markAll} pagination={pager}>
+      {rows}
+    </NotificationInbox>
+  </div>
+</AppShell>
+```
+
+| Figma (`Notification Inbox` page, `1030:173232`) | Here |
+|---|---|
+| **No sidebar**: the page is the top bar and the inbox | Give `AppShell` no `sidebar` (it is optional for this) |
+| The top bar is the logo version (`Top_NavBar` `Type=Notification Inbox`) | A `TopBar` with no `primaryAction`: the logo is on the left, linked home with `homeHref` |
+| **No title** | **A deliberate departure.** "Notification Inbox" is the card's own heading, at the left of the controls row, and the page's `h1` (`title`, `headingLevel={1}`). The page is one card, so, like the Gantt chart, it has no `PageTitle` band above it (decided 17 Nov 2026). Don't add a band: that would make a second title |
+| 40 above and below the content, 32 in from the sides (`Page_Template_Content_With_Padding_Spacing`) | `py-10` around the inbox, with `AppShell`'s 32 at the sides |
 
 ## Composed of
 
@@ -37,6 +58,8 @@ the two lists cannot drift apart.
 | `pagination` | `{ page, pageCount, onChange?, itemCount?, pageSize?, pageSizeOptions?, onPageSizeChange?, variant? }` | — | The large pager: numbers, range and Items select. Shown whenever given, even on one page |
 | `children` | `ReactNode` | — | The `NotificationItem`s. Each is wrapped in a `<li>` |
 | `groups` | `{ label, children }[]` | — | The rows in groups, by day ("Today", "Yesterday", "3 November"; decided 9 Nov 2026). Each group is a heading and its own list, named by the heading, so a screen reader can move by day. Given, it is used instead of `children`; a group with no rows is left out. The grouping is yours |
+| `title` | `string` | — | A heading for the card, at the left of the controls row. Figma draws none; the page uses it so its whole-content card carries the title, as the Gantt chart does |
+| `headingLevel` | `1 \| 2` | `2` | The title's level. `1` when the inbox is the page's whole content |
 | `groupHeadingLevel` | `2 \| 3 \| 4` | `2` | The groups' heading level, under the page's own title |
 | `emptyLabel` | `string` | `No notifications` | What an empty list says |
 | `listLabel` | `string` | `Notifications` | Names the list for assistive tech |

@@ -41,7 +41,7 @@ The list is passed through **children**: `NotificationItem`s, which the story sh
 | `children` | `ReactNode` | — | The `NotificationItem`s. Each is wrapped in a `<li>` |
 | `emptyLabel` | `string` | `No notifications` | What an empty list says |
 | `title` | `string` | `Notifications` | The heading and the panel's accessible name |
-| `inboxLabel` | `string` | `View notifications inbox` | The footer link's text |
+| `inboxLabel` | `string` | `View notification inbox` | The footer link's text. Figma writes "View notifications inbox"; ours uses the page's own name, "Notification Inbox" (decided 17 November 2026; a recorded difference from Figma) |
 | `className` | `string` | — | On the wrapper that holds the bell |
 
 ## The list is yours

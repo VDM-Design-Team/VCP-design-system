@@ -145,7 +145,7 @@ export const Open: Story = {
     await expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
 
     /* The footer goes to the inbox. */
-    await expect(inPanel.getByRole('link', { name: 'View notifications inbox' })).toHaveAttribute(
+    await expect(inPanel.getByRole('link', { name: 'View notification inbox' })).toHaveAttribute(
       'href',
       '#inbox',
     );
@@ -249,7 +249,7 @@ export const ShortWindow: Story = {
   ),
   play: async () => {
     const panel = await screen.findByRole('dialog', { name: 'Notifications' });
-    const link = within(panel).getByRole('link', { name: 'View notifications inbox' });
+    const link = within(panel).getByRole('link', { name: 'View notification inbox' });
 
     /* Ten frames at one height: shortened once, and settled. */
     const heights = await new Promise<number[]>((resolve) => {

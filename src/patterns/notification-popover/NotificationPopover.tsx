@@ -45,7 +45,7 @@ export interface NotificationPopoverProps {
   onUnreadOnlyChange?: (unreadOnly: boolean) => void;
   /** Renders the "Mark all as read" menu item and fires when it is chosen. */
   onMarkAllRead?: () => void;
-  /** Where "View notifications inbox" goes. */
+  /** Where "View notification inbox" goes. */
   inboxHref: string;
   /** The notifications — `NotificationItem`s. Each is wrapped in a `<li>`. */
   children?: React.ReactNode;
@@ -53,7 +53,7 @@ export interface NotificationPopoverProps {
   emptyLabel?: string;
   /** The panel's title and accessible name. Defaults to "Notifications". */
   title?: string;
-  /** The footer link's text. Defaults to "View notifications inbox". */
+  /** The footer link's text. Defaults to "View notification inbox". */
   inboxLabel?: string;
   /** Merged onto the wrapper that holds the bell. */
   className?: string;
@@ -78,7 +78,7 @@ export function NotificationPopover({
   children,
   emptyLabel = 'No notifications',
   title = 'Notifications',
-  inboxLabel = 'View notifications inbox',
+  inboxLabel = 'View notification inbox',
   className,
 }: NotificationPopoverProps) {
   const [filterState, setFilterState] = React.useState<NotificationFilter>('all');
