@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 import { TaskLogPage } from './TaskLogPage';
+import { FilterBar } from '../filter-bar';
 import type { TaskLogRow } from '../task-log-trail';
 
 const ROWS: TaskLogRow[] = [
   { id: 1, ref: 'VCP-1234', task: '[VCP] Collapsible Sidebar for Improved Table Workspace', change: { from: { status: 'In Progress' }, to: { custom: 'Design Review' }, field: 'Status' }, source: 'VCP', changedAt: '2026-06-10T14:37:00', changedBy: 'User’s Name' },
   { id: 2, ref: 'VCP-1235', task: 'Rework the notification bell so unread state survives a reload', change: { from: { event: 'Initial Creation' }, to: { status: 'Draft' }, field: 'Status' }, source: 'VCP', changedAt: '2026-06-09T11:02:00', changedBy: 'Eve Chen' },
 ];
-
-
 
 const meta = {
   title: 'Patterns/TaskLogPage',
@@ -22,7 +21,17 @@ const meta = {
       },
     },
   },
-  args: { table: { rows: ROWS, page: 1, pageCount: 25, itemCount: 1250, pageSize: 50 } },
+  args: {
+    table: {
+      rows: ROWS,
+      /* The page's filters go in the table's card: search, the period and one Reset (`docs/task-log-trail.md`). */
+      filters: <FilterBar search="" onSearchChange={fn()} period={{ value: {}, onChange: fn() }} onReset={fn()} />,
+      page: 1,
+      pageCount: 25,
+      itemCount: 1250,
+      pageSize: 50,
+    },
+  },
   decorators: [
     (Story) => (
       <div className="min-h-screen bg-surface-canvas">
@@ -35,11 +44,14 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The page: its title, then the table. */
+/** The page: its title, then the table with its filters. */
 export const Default: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByRole('heading', { level: 1, name: 'Task Log Trail' })).toBeVisible();
     await expect(c.getByRole('table', { name: /.+/ })).toBeVisible();
+    await expect(c.getByRole('searchbox')).toBeVisible();
   },
 };
+
+export const DarkTheme: Story = { globals: { theme: 'dark' } };

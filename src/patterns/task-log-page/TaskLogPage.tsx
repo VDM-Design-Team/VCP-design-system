@@ -9,7 +9,7 @@ import { TaskLogTrail, type TaskLogTrailProps } from '../task-log-trail';
  * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data: **`<AppShell><TaskLogPage table={{…}} /></AppShell>`**.
  * The filters (a `FilterBar`, through `table.filters`) and the pagination are inside the table's card.
  *
- * **It is controlled and holds no data.** The page owns the rows, the sort, the page and the search, and what the table's buttons do (open a dialog, confirm a delete, move focus on afterwards): see
+ * **It is controlled and holds no data.** The app owns the rows, the page and the filters. The log is read-only, so there is nothing to open or confirm: see
  * `docs/task-log-trail.md`.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the

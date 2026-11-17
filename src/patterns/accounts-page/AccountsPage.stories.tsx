@@ -42,3 +42,5 @@ export const Default: Story = {
     await expect(c.getByRole('table', { name: /.+/ })).toBeVisible();
   },
 };
+
+export const DarkTheme: Story = { globals: { theme: 'dark' } };

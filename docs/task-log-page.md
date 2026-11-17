@@ -24,7 +24,7 @@ The title (the page's one `h1`; Figma's frames say the placeholder "Page Title")
 
 ## It is controlled and holds no data
 
-The app owns the rows, the sort, the page and the search, and what the table's buttons do (open a dialog, confirm a delete, move focus on afterwards): see `docs/task-log-trail.md`, which also describes the flow its `OnThePage` story shows.
+The app owns the rows, the page and the filters. The log is read-only, so there is nothing to open or confirm: see `docs/task-log-trail.md`, whose `WithFilters` story shows the filters working.
 
 ## Props
 

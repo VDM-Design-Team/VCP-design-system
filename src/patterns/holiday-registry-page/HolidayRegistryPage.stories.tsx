@@ -29,6 +29,7 @@ const meta = {
       users: PEOPLE.map((p) => ({ value: p.name, label: p.name })),
       admin: true,
       page: 1,
+      onPageChange: fn(),
       pageCount: 25,
       itemCount: 1250,
       pageSize: 50,
@@ -52,5 +53,9 @@ export const Default: Story = {
     const c = within(canvasElement);
     await expect(c.getByRole('heading', { level: 1, name: 'Holiday Registry' })).toBeVisible();
     await expect(c.getByRole('button', { name: 'Import from Hubstaff' })).toBeVisible();
+    /* The pages are in the table's card (they only show when the app passes `onPageChange`). */
+    await expect(c.getByRole('navigation', { name: /.+/ })).toBeVisible();
   },
 };
+
+export const DarkTheme: Story = { globals: { theme: 'dark' } };

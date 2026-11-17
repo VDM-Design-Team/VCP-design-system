@@ -9,7 +9,7 @@ import { ContactsTable, type ContactsTableProps } from '../contacts-table';
  * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data: **`<AppShell><ContactsPage table={{…}} /></AppShell>`**.
  * The pagination is inside the table's card. **Add Account** in Figma's top bar is `TopBar`'s `primaryAction`, the page's to pass.
  *
- * **It is controlled and holds no data.** The page owns the rows, the sort, the page and the search, and what the table's buttons do (open a dialog, confirm a delete, move focus on afterwards): see
+ * **It is controlled and holds no data.** The app owns the rows and the page, and what Delete does (confirm it, then move focus on): see
  * `docs/contacts-table.md`.
  *
  * Every class below resolves to a design token from the VCP Figma variables. If you need a value that isn't here, add the
