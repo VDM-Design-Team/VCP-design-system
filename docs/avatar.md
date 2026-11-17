@@ -10,6 +10,9 @@ A person, as a photo or as their initials, on the neutral tone by default.
 | `sm` | 24 | Dense table rows, inline beside body text, a `sm` `AvatarGroup` | Type 12 (`caption-md-medium`). Never a control at this size |
 | `md` | 32 | The default — comment threads, list rows, card headers | Type 12 (`caption-md-medium`). The export's own default size |
 | `lg` | 36 | Profile headers, account menus | Type 14 (`label-sm-medium`). Under the 40 minimum target — see *Target size* |
+| `xl` | 40 | A larger profile picture | Type 16 (`label-md-medium`). Figma's `Profile_Image` L |
+| `2xl` | 44 | The same, a step up | Type 16. Figma's `Profile_Image` XL |
+| `3xl` | 48 | The account page's portrait | Type 16. Figma's `Profile_Image` XXL |
 
 Reach for something else when:
 
@@ -27,7 +30,7 @@ Reach for something else when:
 | `name` | `string` | `''` | Drives the initials. Not rendered as text |
 | `initials` | `string` | — | Overrides the derived initials — mononyms, team codes |
 | `src` | `string` | — | Photo URL. On a load failure the initials are drawn instead |
-| `size` | `xs \| sm \| md \| lg` | `md` | 16 / 24 / 32 / 36. **Not a number** — see "Deviations" |
+| `size` | `xs \| sm \| md \| lg \| xl \| 2xl \| 3xl` | `md` | 16 / 24 / 32 / 36 / 40 / 44 / 48. **Not a number** — see "Deviations" |
 | `tone` | `neutral \| brand \| blue \| green \| red \| yellow` | `neutral` | Pass `toneForName(name)` to opt into colour-hashing. `brand` is `surface.brand.subtle` with `text.brand.strong` initials (8.97:1 light / 6.14:1 dark), the people chips' avatar; a name never hashes onto it, a caller asks for it |
 | `ring` | `boolean` | `false` | `surface.elevated` ring, for overlapping stacks. `AvatarGroup` sets it |
 | `standalone` | `boolean` | `false` | The avatar is the only identification of this person — give it a real accessible name |
@@ -74,6 +77,7 @@ The rest:
 | Initials, `sm` | `type.caption-md-medium` | `text-caption-md-medium` |
 | Initials, `md` | `type.label-sm-medium` | `text-label-sm-medium` |
 | Initials, `lg` | `type.label-sm-medium` | `text-label-sm-medium` |
+| Initials, `xl` / `2xl` / `3xl` | `type.label-md-medium` | `text-label-md-medium` |
 | Placeholder glyph | inherits the tone's content token | `Icon name="user"` on `currentColor` |
 
 **Token gaps.** The export hashed onto six pastels; this system has four accent
@@ -106,7 +110,7 @@ Nothing was invented here.
   dark. The `ring` is decoration between two avatars, not a boundary that carries
   meaning, so 1.4.11's 3:1 does not apply to it.
 - **Target size.** Avatar is not a control and takes no focus, so the 40 minimum
-  does not apply. **No size is 40 any more** (`lg` is 36): if you wrap one in a
+  does not apply. `lg` is 36 and below; from `xl` (40) up the circle itself reaches 40. If you wrap a smaller one in a
   `Button` or an `<a>`, give the control its own padding so the hit area reaches 40.
 
 ## Don't

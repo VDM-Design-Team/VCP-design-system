@@ -34,7 +34,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 ## Every choice only asks
 
 `onSelect(key)` and `onDelete` do not change anything. The page opens `BulkActionConfirmModal` (or a delete confirmation), and only its **Confirm** makes the change; then a toast says
-so (`Added Values Updated`), or, if some failed, `BulkActionFailedModal` names them. The `OnTheTable` story shows the whole flow on a real `AVTable`.
+so (`toast(bulkUpdated(…))`, "Added Values updated"), or, if some failed, `BulkActionFailedModal` names them. The `OnTheTable` story shows the whole flow on a real `AVTable`.
 
 ## Narrow screens
 
