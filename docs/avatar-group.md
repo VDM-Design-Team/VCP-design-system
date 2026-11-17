@@ -52,10 +52,10 @@ The group adds only these:
 |---|---|---|---|
 | Overflow chip surface | `surface.neutral.subtle` | `bg-surface-neutral-subtle` | — |
 | Overflow chip text | `text.secondary` | `text-text-secondary` | **9.45:1** light, **8.40:1** dark |
-| Ring on every avatar and the chip | `surface.elevated` | `ring-2 ring-surface-elevated` | — |
+| Ring on every avatar and the chip | `surface.elevated` | `border border-surface-elevated` | A 1 border inside the circle, as Figma draws it |
 | Chip radius | `shape.radius.pill` | `rounded-pill` | — |
 | Chip type, `sm` / `md` / `lg` | `type.caption-md-medium` / `-md` / `-lg` | `text-caption-md-medium` … | — |
-| Overlap, `sm` / `md` / `lg` / `xl` / `2xl` / `3xl` | Tailwind numeric scale | `-ml-1.5` / `-ml-2` / `-ml-2.25` / `-ml-2.5` / `-ml-2.75` / `-ml-3` | About a quarter of the diameter |
+| Overlap, `xs` / `sm` / `md` / `lg` / `xl` / `2xl` / `3xl` | Tailwind numeric scale | `-ml-0.5` / `-ml-1` / `-ml-1.5` / `-ml-2` / `-ml-2` / `-ml-2.25` / `-ml-2.5` | 2 / 4 / 6 / 8 at 16 / 24 / 32 / 36, measured off Figma's `Profile_Initials` Multiple Users; the three larger sizes follow the same trend, about a fifth of the diameter (Figma draws no stack there) |
 
 The chip is deliberately neutral rather than a fifth tone: it is a count, not a
 person, and a coloured chip reads as one more member of the stack.
@@ -66,7 +66,7 @@ of the DOM's paint order, so it is set with `z-index` (the group is `isolate`d s
 it can't leak above anything else) rather than by reversing the markup, which would
 also reverse the reading order.
 
-**Token gap.** The overlap is about a quarter of the avatar at each size and comes
+**Token gap.** The overlap is Figma's own (2 / 4 / 6 / 8 at 16 / 24 / 32 / 36) and comes
 from the numeric scale directly. There is no `spacing.overlap` token and none is
 proposed — inventing one for a single component would be a token nobody else can
 use.
