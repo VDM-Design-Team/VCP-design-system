@@ -5,7 +5,7 @@ import { BudgetTable, type BudgetRow } from './BudgetTable';
 import { Button } from '../../atoms/button';
 import { Select } from '../../atoms/select';
 import { SegmentedControl } from '../../atoms/segmented-control';
-import { ToastProvider, ToastViewport, useToast } from '../../components/toast';
+import { ToastProvider, ToastViewport, changesNotSaved, changesSaved, useToast } from '../../components/toast';
 
 const LOREM =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id lobortis nibh. Pellentesque euismod ' +
@@ -220,15 +220,11 @@ function SavePage({ fail, ...args }: React.ComponentProps<typeof BudgetTable> & 
     window.setTimeout(() => {
       setSaving(false);
       if (fail) {
-        toast({
-          tone: 'critical',
-          title: 'Changes not saved',
-          description: 'Something went wrong. Your changes are still here — try again.',
-        });
+        toast(changesNotSaved());
         return;
       }
       setSaved(JSON.stringify(state.rows));
-      toast({ tone: 'success', title: 'Changes Saved', description: 'Your updates have been saved successfully!' });
+      toast(changesSaved());
     }, 300);
   };
   return (
@@ -287,7 +283,7 @@ export const OnThePage: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Save Changes' }));
     await expect(canvas.getByRole('button', { name: 'Save Changes' })).toHaveAttribute('aria-busy', 'true');
     await expect(canvas.getByRole('textbox', { name: 'Development allocated points' })).toBeDisabled();
-    await waitFor(() => expect(within(document.body).getByText('Changes Saved')).toBeVisible(), { timeout: 3000 });
+    await waitFor(() => expect(within(document.body).getByText('Changes saved')).toBeVisible(), { timeout: 3000 });
     await expect(canvas.getByRole('textbox', { name: 'Development allocated points' })).toBeEnabled();
     /* Saved: nothing left to lose. */
     await waitFor(() => expect(asksBeforeLeaving()).toBe(false));

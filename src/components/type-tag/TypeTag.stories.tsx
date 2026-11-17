@@ -33,8 +33,19 @@ export const AllTypes: Story = {
       {AV_TYPES.map((type) => (
         <TypeTag key={type} type={type} />
       ))}
+      {/* With the ⓘ the design draws on the filled and bordered looks: one step below the glyph, 16 in the default and 20 in the largest (an exception to Figma's 20: see docs/type-tag.md). */}
+      {AV_TYPES.map((type) => (
+        <TypeTag key={`${type}-info`} type={type} variant="tonal" info />
+      ))}
+      <TypeTag type="Type 1" variant="tonal" size="lg" info />
     </div>
   ),
+  play: async ({ canvasElement }) => {
+    const glyphs = Array.from(canvasElement.querySelectorAll('svg.text-text-tertiary'));
+    await expect(glyphs).toHaveLength(4);
+    /* 16 beside the default tag's 20 glyph; 20 beside the largest tag's 24. */
+    await expect(glyphs.map((glyph) => Math.round(glyph.getBoundingClientRect().width))).toEqual([16, 16, 16, 20]);
+  },
 };
 
 /** Stacked, as a table column shows them. */
