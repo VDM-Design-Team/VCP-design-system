@@ -77,8 +77,8 @@ export interface AVTableRow {
   ref: string;
   title: string;
   /**
-   * Makes it a multipart row: a **24 tag as the first item of the metadata line** (the child's "1/3" or the parent's progress ring), a **Parent: VCP-4321**
-   * chip on a child, and a coloured edge at the far left of a parent's row. See `AVMultipart`. Deliberately not Figma's two-column cell: see `docs/av-table.md`.
+   * Makes it a multipart row, in Figma's two columns: a **28 tag under the reference** (the child's "1/3" or the parent's progress ring), the title with its **details starting under it**, a **Parent: VCP-4321**
+   * chip on a child, and a coloured edge at the far left of a parent's row. See `AVMultipart`.
    */
   multipart?: AVMultipart;
   /** The domain badge beside the title — "VCP", "Design". */
@@ -266,19 +266,19 @@ export function AVTable({
         );
         /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */
         const title = <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>;
+        const tag = multipart && (
+          <MultipartTableTag
+            kind={multipart.kind}
+            total={multipart.total}
+            position={multipart.kind === 'child' ? multipart.position : undefined}
+            parentRef={multipart.kind === 'child' ? multipart.parentRef : undefined}
+            completed={multipart.kind === 'parent' ? multipart.completed : undefined}
+          />
+        );
         /* BESA Passed sits right after the reference, in Figma's `_AV_Table_ID`. */
         const besa = row.besaPassed && <Flag text="BESA Passed" tone="success" icon="seal-check" />;
-        const details = (multipart || row.domain || row.attachments || row.comments || row.rejected || row.backlogged) && (
+        const details = (row.domain || multipart?.kind === 'child' || row.attachments || row.comments || row.rejected || row.backlogged) && (
           <div className="flex w-max items-center gap-2">
-            {multipart && (
-              <MultipartTableTag
-                kind={multipart.kind}
-                total={multipart.total}
-                position={multipart.kind === 'child' ? multipart.position : undefined}
-                parentRef={multipart.kind === 'child' ? multipart.parentRef : undefined}
-                completed={multipart.kind === 'parent' ? multipart.completed : undefined}
-              />
-            )}
             {row.domain && (
               <Tag tone="brand" size="sm">
                 {row.domain}
@@ -294,9 +294,24 @@ export function AVTable({
           </div>
         );
 
-        /* Multipart or not, the row is the same: the reference, a rule and the title on top, and **one line of metadata under it**, starting at the cell's left edge.
-           The multipart tag is the first thing on that line, 24 high like the domain tag beside it. (Figma draws the tag under the reference in a column of its own,
-           with the details starting under the title; we deliberately do not. See "The layout is deliberately not Figma's" in `docs/av-table.md`.) */
+        /* A multipart row is Figma's grid: the reference, then the tag under it (28), a rule, and the title with its details starting under it. 16 top and bottom,
+           Figma's own cell padding: that makes the 85-high title cell the canvas draws. */
+        if (multipart) {
+          return (
+            <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-x-2 gap-y-1 py-4">
+              <div className="col-start-1 row-start-1 flex items-center gap-2">
+                {reference}
+                {besa}
+              </div>
+              <Divider orientation="vertical" className="col-start-2 row-start-1 h-4 shrink-0 self-center" />
+              <div className="col-start-3 row-start-1 min-w-0">{title}</div>
+              <div className="col-start-1 row-start-2 flex">{tag}</div>
+              <div className="col-start-3 row-start-2 min-w-0">{details}</div>
+            </div>
+          );
+        }
+
+        /* Any other row: the reference, a rule and the title on top, the details under them. */
         return (
           <div className="flex flex-col gap-1 py-4">
             <div className="flex items-center gap-2">

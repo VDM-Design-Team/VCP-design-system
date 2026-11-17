@@ -431,8 +431,7 @@ export const Multipart: Story = {
 
 
 /**
- * A multipart row is one line of metadata, not Figma's two columns: the **24 tag is the first item under the reference**, left-aligned with it, on the same line as the domain tag and
- * the Parent chip. Deliberate (see `docs/av-table.md`): a long reference cannot push the metadata away from the cell's left edge.
+ * Figma's multipart title cell is two columns: the reference with **the 28 tag under it**, a rule, and the title with **the details starting under it** (domain, the Parent chip, the counts).
  */
 export const MultipartLayout: Story = {
   tags: ['!dev', '!autodocs'],
@@ -450,14 +449,12 @@ export const MultipartLayout: Story = {
     const tag = within(child).getByText('2/3').closest('[tabindex]') as HTMLElement;
     const parentChip = within(child).getByText(/^Parent:/);
     const rect = (el: Element) => el.getBoundingClientRect();
-    const middle = (el: Element) => rect(el).top + rect(el).height / 2;
-    /* The tag is 24 high and sits under the reference, left-aligned with it. */
-    await expect(Math.round(rect(tag).height)).toBe(24);
+    /* The tag is 28 high and sits under the reference, left-aligned with it. */
+    await expect(Math.round(rect(tag).height)).toBe(28);
     await expect(rect(tag).top).toBeGreaterThan(rect(ref).bottom - 1);
     await expect(Math.abs(rect(tag).left - rect(ref).left)).toBeLessThanOrEqual(1);
-    /* One line: the Parent chip is beside the tag, on the same centre line. */
+    /* The details start under the title, not under the reference: the Parent chip is to the right of the tag. */
     await expect(rect(parentChip).left).toBeGreaterThan(rect(tag).right);
-    await expect(Math.abs(middle(parentChip) - middle(tag))).toBeLessThanOrEqual(1);
   },
 };
 

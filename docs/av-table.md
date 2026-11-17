@@ -157,19 +157,10 @@ An Added Value split into parts shows in the table (Figma's `Multipart in AV Tab
 
 | `multipart` | What the row shows |
 |---|---|
-| `{ kind: 'parent', completed, total }` | **The parent.** A `MultipartTableTag` first on the metadata line, with a progress ring of how many parts are done, and **a 6 brand edge at the row's far left** (`surface.brand.medium`) |
+| `{ kind: 'parent', completed, total }` | **The parent.** A `MultipartTableTag` under its reference with a progress ring of how many parts are done, and **a 6 brand edge at the row's far left** (`surface.brand.medium`) |
 | `{ kind: 'child', position, total, parentRef, parentHref? }` | **A part.** A `MultipartTableTag` with its place ("2/3"), and a **Parent: VCP-4321** chip (`MultipartParentChip`) among the details. With `parentHref` the chip is a link that **opens the parent in a new tab**; with only `onOpenParent` it is a button that asks; with neither it is plain text (nowhere to go) |
 
-### The layout is deliberately not Figma's (read this before "fixing" it)
-
-Figma's `_AV_Table_Item_AV_Title_Multipart` is **two columns**: the reference with a **28-high tag under it**, a rule, and the title with the **other metadata starting under the title**. **We do not build that, on purpose, and a reviewer should not ask for it.** A multipart row is the same shape as every other row: reference, rule and title on the top line, and **one line of metadata under it** starting at the cell's left edge. The **tag is 24 high** (12 type, 16 glyphs), the same height as the domain tag beside it, and is the first item on that line, then the domain tag, the Parent chip, the attachments and the comments, 8 apart.
-
-**Why:**
-1. **One height, one line.** A 24 tag lines up with the 24 domain tag and the counts. Figma's 28 pill is taller than everything it sits with, which is why Figma has to stack it in a column of its own.
-2. **No gap after a long reference.** In Figma's two columns the details start *under the title*, so their left edge is wherever the title starts. A long reference ("VCP-12511") pushes the title right and drags the whole metadata line with it, leaving a wide empty gap under the reference. On one line the metadata always starts at the left edge, whatever the reference is.
-3. **The same row for every row.** Multipart and ordinary rows keep one structure and a matching height, so a table with a few multipart rows does not jump in row height.
-
-Decided by design on 17 Nov 2026, **reversing the 10 Nov decision on #275** (which had chosen Figma's two columns after a side-by-side). The tooltip still opens above, the parent's edge is still at the row's far left, and the Parent chip still opens in a new tab: those were separate decisions and stand. **This is a known departure from Figma; Figma's multipart frame should be updated to match, not the code.**
+**The layout is Figma's two columns** (`_AV_Table_Item_AV_Title_Multipart`): the reference with **the 28 tag under it**, a rule, and the title with **the details starting under it** (the domain tag, the Parent chip, the attachments and the comments, 8 apart). The tag is Figma's own size, 28 high with 14 type and 20 glyphs, and its tooltip opens above; design compared this with a 24-high one-line version side by side and chose Figma's (10 November 2026). **Looked at again on 17 November 2026, and it stays** (#424 proposed the one-line version again: one shared row shape, and details that start at the cell's left edge whatever the reference's length). Do not rebuild the one-line version without a new decision. A row without `multipart` is unchanged.
 
 **The metadata never shrinks or is cut** (the tag, domain tag, parent chip, counts): it hugs its content. So a multipart row's title column has a floor of 28rem, and below it the table scrolls sideways; only the title itself gives way, ending in "…" (and says the whole of it on hover and focus: `TruncatedText`).
 
