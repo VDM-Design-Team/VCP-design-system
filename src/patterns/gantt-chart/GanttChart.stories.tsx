@@ -10,6 +10,10 @@ import {
   type GanttUser,
   type GanttView,
 } from './GanttChart';
+import { AppShell } from '../../templates/app-shell';
+import { Sidebar } from '../sidebar';
+import { TopBar } from '../top-bar';
+import { Button } from '../../atoms/button';
 
 /* ---- Fixtures: the payload a backend would send --------------------------
    A fortnightly cycle count that puts today (Thursday 29 October 2026) in
@@ -322,6 +326,35 @@ export const Loading: Story = {
     /* No rows, no empty message, and the filters are off. */
     await expect(canvas.queryByText('Nothing matches these filters.')).toBeNull();
     await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeDisabled();
+  },
+};
+
+/**
+ * The Gantt Chart is one of **Planning's three sub-pages** (Planning List, Gantt Chart, Holiday Registry): the rail opens the Planning group and marks Gantt Chart as the current page, and
+ * the page is `AppShell` with the chart as its content (it draws its own title, which is the page's `h1`, and its own card).
+ */
+export const OnItsPage: Story = {
+  /* In the sidebar, so the whole page can be opened (decided 17 November 2026); off the docs page, where a full-screen shell does not fit. */
+  tags: ['!autodocs'],
+  parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true } },
+  render: () => (
+    <AppShell
+      sidebar={<Sidebar userType="admin-dev" active="planning/gantt-chart" />}
+      topBar={<TopBar primaryAction={<Button size="sm">Create Added Value</Button>} notifications={0} user={{ name: 'Francis M.' }} />}
+    >
+      {/* 40 above and below, as Figma's template for a page with no title band has it (`Page_Template_Content_With_Padding_Spacing`); the chart adds none of its own. */}
+      <div className="py-10">
+        <Demo headingLevel={1} />
+      </div>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    /* The Planning group is open, and Gantt Chart is the current page among its sub-rows. */
+    await expect(canvas.getByRole('button', { name: 'Gantt Chart' })).toHaveAttribute('aria-current', 'page');
+    await expect(canvas.getByRole('button', { name: 'Planning List' })).not.toHaveAttribute('aria-current');
+    await expect(canvas.getByRole('button', { name: 'Holiday Registry' })).not.toHaveAttribute('aria-current');
   },
 };
 
