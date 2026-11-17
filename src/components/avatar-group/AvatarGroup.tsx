@@ -23,7 +23,7 @@ export type AvatarGroupEntry = string | AvatarGroupPerson;
  * It composes `Avatar`, and per CLAUDE.md that keeps it a component, not a
  * pattern: nothing here knows a thing about VCP.
  *
- * Sizes are `Avatar`'s own four steps and are passed straight down, so the
+ * Sizes are `Avatar`'s own steps and are passed straight down, so the
  * stack and a lone avatar next to it are never a pixel apart. The overlap is
  * Figma's (2 / 4 / 6 / 8 at 16 / 24 / 32 / 36) on Tailwind's numeric scale, and each
  * circle has a 1 border inside its box.
