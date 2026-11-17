@@ -47,7 +47,7 @@ holding and the border needs a stronger token.
 
 ## Pairing with fields
 
-A button and a field in the same row are the same height. The two scales do not share names, so pair by height:
+A button and a field in the same row are the same height (decided 17 November 2026, where Figma's Gantt toolbar drew 36 buttons beside 40 filters). The two scales do not share names, so pair by height:
 
 | Height | Button | Field (`Input`, `Select`, `SearchSelect`, `DateField`) |
 |---|---|---|
