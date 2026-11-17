@@ -60,7 +60,9 @@ domain's own configuration, which this repo does not own.
 **Ten spine statuses** — the Figma `Status_Tag_General` set, less the
 `Review No Action` variant, which is not a state but `Review`'s second
 treatment (confirmed 7 Sep 2026) and is being renamed in Figma — every fill below is the design's, matched to the
-token that already carried that exact hex.
+token that already carried that exact hex. **One exception: Draft and Backlog.** Figma fills them `#e2e8f0` (slate-200); the system draws
+every neutral tonal tag one step lighter, `#f1f5f9` (`surface.neutral.subtle`, slate-100), on the same `#334155` text. The lighter grey
+was looked at beside Figma's and kept on purpose (decided 17 November 2026; see `docs/due-date-tag.md`).
 
 | Status | Treatment | Figma fill / text |
 |---|---|---|

@@ -38,7 +38,7 @@ list drifts, and fails a pattern composing fewer than two pieces.
 | `onConfirm` | `({ multipart, titles? }) => void` | required | Accepted, **carrying the decision**. `titles` (one per part, trimmed, `''` for "use the default") comes with `parts` and multipart ticked |
 | `multipart` | `boolean` | `false` | Controlled |
 | `onMultipartChange` | `(multipart: boolean) => void` | — | The tick |
-| `showMultipart` | `boolean` | `true` | The design's own boolean — it draws the dialog both ways |
+| `showMultipart` | `boolean` | `true` | The design's own boolean — it draws the dialog both ways. **This is Figma's `Domain` variant**: `Development` is the dialog with the Multipart card (`showMultipart`), `Non-Development` is the question and the two buttons alone (`showMultipart={false}`). The page knows the domain and passes the boolean, so there is no `domain` prop to keep in step with it |
 | `parts` | `{ label, preview? }[]` | — | The parts a multipart value would become, one per problem set ("Problem Set 1"). Ticking multipart then shows **Rename Individual parts**. Fewer than two: multipart is disabled, with a hint |
 | `title` / `confirmLabel` / `cancelLabel` | `string` | the design's wording | |
 | `loading` | `boolean` | `false` | Spins Confirm while the accept is in flight |

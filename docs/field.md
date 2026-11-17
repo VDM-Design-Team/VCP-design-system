@@ -106,9 +106,19 @@ Never show both. `error` wins whenever it is set.
   dark. It clears 4.5:1 on those two, but **not** on `surface.neutral.subtle`
   (4.35:1) — don't put a field's error message on that surface.
 
+## Beside a button
+
+In a row with buttons, the field and the button share a height. Field `md` is 40 and goes with button `md`; `compact` is 36 and goes with button `sm`. Field `sm` (32) has no button to match. The table is in `docs/button.md` ("Pairing with fields").
+
 ## The error edge
 
 An `error` turns the control's **edge critical as well as the message red**. `Field` puts `aria-invalid` on the control, and `Input`, `Select`, `Textarea`, `SearchSelect` and `DateField` read it, so a `Field` with an error needs nothing else (their own `invalid` prop still works on its own). The edge stays through focus.
+
+## Taking the person to the missing field
+
+When a submit is blocked, call `focusFirstInvalid(form)` once the errors have rendered. It finds the first control that is `aria-invalid` (the page order, which is what `Field` sets from its `error`), scrolls it into view only if it is not already fully visible, and focuses it. Fully visible means inside the window and inside every box that scrolls round it, so it also works in a dialog's body or a page's main area, where a field can be within the window and still be scrolled out of its box. It scrolls smoothly, or jumps when the person prefers reduced motion. Pair it with the `missingInput()` toast, which says what is missing while the focus shows where. A group that is invalid as a whole gets its first enabled control focused. It returns the element it focused, or `null` when nothing is invalid.
+
+Call it after the failed submit only, not on every change: typing must not pull focus back to an old error.
 
 ## Don't
 
@@ -122,4 +132,5 @@ An `error` turns the control's **edge critical as well as the message red**. `Fi
   and nothing else; anything else belongs next to the control or in the form footer.
 - Don't nest a Field inside a Field. For a group of related controls use a
   `<fieldset>` with a `<legend>` and one Field per control.
+- Don't call `focusFirstInvalid` on every render or keystroke; only after a blocked submit.
 - Don't use `inline` on mobile. The label column doesn't wrap.
