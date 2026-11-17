@@ -11,7 +11,7 @@ Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`�
 | `Button` | atom |
 | `DescriptionCardTitle` | component |
 | `DescriptionSection` | component |
-| `DuplicateToOtherDomain` | component |
+| `InitiateToOtherDomain` | component |
 | `StatusHistory` | component |
 | `StatusProgression` | component |
 | `AvHeader` (exported as `AVHeader`) | pattern |
@@ -35,11 +35,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | | Reading | Editing |
 |---|---|---|
 | **Header** | `AVHeader`: the back arrow and the reference, and the status buttons on the right | `AVHeader` `type="new"`: the back arrow and "Added Value Creation", no status buttons |
-| **Left column** | Title (the reference over the title) · Problems · Solutions · Acceptance Criteria / Deliverables · Desired outcome · Multipart · Status History · **Comments** | A **Title** field · the four blocks · Multipart · Status History · **Duplicate to other Domains** |
+| **Left column** | Title (the reference over the title) · Problems · Solutions · Acceptance Criteria / Deliverables · Desired outcome · Multipart · Status History · **Comments** | A **Title** field · the four blocks · Multipart · **Initiate to other Domains** (no Status History: it is for reading only) |
 | **Right column** | The **Detail card**, then the **Deliverables card** | The **Detail card** |
 | **Bottom** | — | **Discard** (red text), then the status buttons (**Save as Draft**, **Submit**), at the right |
 
-The columns are 2 : 1 on a wide page and stack on a narrow one (it responds to its own width, not the screen's). 16 between them and between the cards, 32 in from the sides.
+The columns are 2 : 1 on a wide page and stack on a narrow one (it responds to its own width, not the screen's). 16 between them and between the cards, 32 in from the sides. **Comments** sits 32 below the Status History card, not 16: it is not a card, so the cards' gap left it crowded (decided 17 November 2026).
 **Multipart** sits after the four blocks in both modes: Figma's frames do not show a Multipart card, so that place is a reading of the pieces' docs, not a drawing.
 
 ## Typed sections: the page passes each piece's own props
@@ -59,7 +59,7 @@ The columns are 2 : 1 on a wide page and stack on a narrow one (it responds to i
 `details` is `DetailCard`'s props, `comments` is `CommentSection`'s, and so on. **A section shows only when the page gives it**, so what differs by status, role or domain is what the page passes: the pieces already
 carry their own variants (the detail card's `type`, the header's `role` and `status`). Leave out the right column's pieces and the column goes.
 
-**`mode`** (`view` by default, or `edit`) decides three things and nothing else: the title (text, or a **Title** field), whether Comments or Duplicate shows, and where the status buttons are.
+**`mode`** (`view` by default, or `edit`) decides three things and nothing else: the title (text, or a **Title** field), whether Comments or Initiate shows, and where the status buttons are.
 Everything inside the cards follows what it is passed (`DescriptionSection` is read-only without `onAdd`, `DetailCard` edits with its `type`).
 
 ## It is controlled and holds no data
@@ -74,9 +74,9 @@ It owns no state. The title, the cards, the comments and the status are the page
 | `header` | `AVHeaderProps` | required | `showStatusActions` is on when reading, off when editing |
 | `title` | `{ reference?, value, onChange?, label?, placeholder?, error?, disabled?, parent? }` | — | `DescriptionCardTitle`'s states: editing with no `onChange` is read-only; `disabled` greys the field; `parent` marks a multipart child |
 | `description` | `{ problem?, solution?, deliverable?, 'desired-outcome'? }` | — | Each is `DescriptionSection`'s props without `type` |
-| `multipart` / `history` | `MultipartSectionProps` / `StatusHistoryProps` | — | |
+| `multipart` / `history` | `MultipartSectionProps` / `StatusHistoryProps` | — | `history` is for reading: an editing page never draws it, even if it is passed |
 | `comments` | `CommentSectionProps` | — | Reading only |
-| `duplicate` | `DuplicateToOtherDomainProps` | — | Editing only |
+| `initiate` | `InitiateToOtherDomainProps` | — | Editing only. `disabled` for an Added Value handed off from another domain |
 | `details` | `DetailCardProps` | — | The right column |
 | `deliverables` | `DeliverablesCardProps` | — | Reading only, under the detail card |
 | `actions` | `{ onDiscard?, discardLabel?, progression? }` | — | Editing: Discard and `StatusProgression`'s props, at the bottom right |

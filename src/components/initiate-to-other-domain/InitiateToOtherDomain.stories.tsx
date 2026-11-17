@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
-import { DuplicateToOtherDomain } from './DuplicateToOtherDomain';
+import { InitiateToOtherDomain } from './InitiateToOtherDomain';
 
 const DOMAINS = [
   { value: 'design', name: 'Design (BESA)' },
@@ -16,13 +16,13 @@ const DOMAINS = [
 const without = (current: string) => DOMAINS.filter((d) => d.value !== current);
 
 const meta = {
-  title: 'Components/Forms/DuplicateToOtherDomain',
-  component: DuplicateToOtherDomain,
+  title: 'Components/Forms/InitiateToOtherDomain',
+  component: InitiateToOtherDomain,
   parameters: {
     docs: {
       description: {
         component:
-          'The card on an Added Value that offers to copy it into the other domains: a title and one ' +
+          'The card on an Added Value that offers to initiate it into the other domains: a title and one ' +
           'checkbox per domain, “Initiate to Development assignment”. The domains are the caller’s ' +
           'and never include the current one. A `fieldset`, titled by its `legend`.',
       },
@@ -30,7 +30,7 @@ const meta = {
   },
   args: { options: without('design'), onChange: fn() },
   decorators: [(Story) => <div className="max-w-2xl bg-surface-canvas p-4"><Story /></div>],
-} satisfies Meta<typeof DuplicateToOtherDomain>;
+} satisfies Meta<typeof InitiateToOtherDomain>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -39,7 +39,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole('group', { name: 'Duplicate to other Domains' })).toBeVisible();
+    await expect(canvas.getByRole('group', { name: 'Initiate to other Domains' })).toBeVisible();
     await expect(canvas.getAllByRole('checkbox')).toHaveLength(5);
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Initiate to Content assignment' }));
     await userEvent.click(canvas.getByRole('checkbox', { name: 'Initiate to Partners assignment' }));
@@ -53,7 +53,7 @@ export const ForEachDomain: Story = {
   render: (args) => (
     <div className="flex flex-col gap-4">
       {DOMAINS.map((d) => (
-        <DuplicateToOtherDomain key={d.value} {...args} options={without(d.value)} />
+        <InitiateToOtherDomain key={d.value} {...args} options={without(d.value)} />
       ))}
     </div>
   ),
@@ -65,7 +65,7 @@ export const Controlled: Story = {
     const [value, setValue] = React.useState<readonly string[]>(['development']);
     return (
       <div className="flex flex-col gap-3">
-        <DuplicateToOtherDomain {...args} value={value} onChange={setValue} />
+        <InitiateToOtherDomain {...args} value={value} onChange={setValue} />
         <p className="m-0 text-body-sm-regular text-text-secondary">Chosen: {value.join(', ') || 'none'}</p>
       </div>
     );
@@ -78,7 +78,7 @@ export const OpensASection: Story = {
     const [open, setOpen] = React.useState<string[]>([]);
     return (
       <div className="flex flex-col gap-3">
-        <DuplicateToOtherDomain
+        <InitiateToOtherDomain
           {...args}
           onChange={(_, { value, checked }) =>
             setOpen((cur) => (checked ? [...cur, value] : cur.filter((v) => v !== value)))
@@ -101,17 +101,30 @@ export const OpensASection: Story = {
   },
 };
 
-/** One domain it cannot be copied to, and a disabled card. */
-export const Disabled: Story = {
-  render: (args) => (
-    <div className="flex flex-col gap-4">
-      <DuplicateToOtherDomain
-        {...args}
-        options={without('design').map((o) => (o.value === 'qa' ? { ...o, disabled: true } : o))}
-      />
-      <DuplicateToOtherDomain {...args} disabled />
-    </div>
-  ),
+/** One domain it cannot be initiated to: only that option is dimmed, and the card says nothing more. */
+export const OneOptionDisabled: Story = {
+  args: { options: without('design').map((o) => (o.value === 'qa' ? { ...o, disabled: true } : o)) },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('checkbox', { name: 'Initiate to Quality Assurance assignment' })).toBeDisabled();
+    await expect(canvas.getByRole('checkbox', { name: 'Initiate to Content assignment' })).toBeEnabled();
+    await expect(canvas.queryByText(/came from another domain/)).toBeNull();
+  },
+};
+
+/** An Added Value that came from another domain, edited in the second: the card is there, nothing can be ticked, and a line says why. */
+export const HandedOff: Story = {
+  args: { disabled: true },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const group = canvas.getByRole('group', { name: 'Initiate to other Domains' });
+    /* The line is the group's description, so it is heard with the group, not only seen. */
+    await expect(group).toHaveAccessibleDescription("This Added Value came from another domain, so it can't be initiated to others from here.");
+    for (const box of canvas.getAllByRole('checkbox')) {
+      await expect(box).toBeDisabled();
+      await expect(box).not.toBeChecked();
+    }
+  },
 };
 
 /** Card, text and boxes are tokens, so dark is free. */
@@ -122,7 +135,7 @@ export const LightAndDark: Story = {
       {[false, true].map((isDark) => (
         <div key={String(isDark)} className={isDark ? 'dark' : undefined}>
           <div className="bg-surface-canvas p-8">
-            <DuplicateToOtherDomain {...args} defaultValue={['content']} />
+            <InitiateToOtherDomain {...args} defaultValue={['content']} />
           </div>
         </div>
       ))}
