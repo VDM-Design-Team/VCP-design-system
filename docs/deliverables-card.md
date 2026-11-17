@@ -68,6 +68,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 - A `<section>` named by its heading; each links section and Attachments has its own heading.
 - The + is named "Add link" or "Add video link", 24 to look at and 40 to press.
+- **Focus never drops when a link is removed.** The bin goes with its link, so once the page has removed it, focus moves to the bin of the link that took its place, else the one before it, else the section's + (or the add form's first field while the form is open). If the person has already moved somewhere else, they are left there. Files do the same in `Attachments`.
 - Everything else is the composed pieces': real inputs with messages, real links, real buttons.
 
 ## Don't
