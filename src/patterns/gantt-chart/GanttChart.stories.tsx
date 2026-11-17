@@ -334,14 +334,15 @@ export const Loading: Story = {
  * the page is `AppShell` with the chart as its content (it draws its own title, which is the page's `h1`, and its own card).
  */
 export const OnItsPage: Story = {
-  tags: ['!dev', '!autodocs'],
+  /* In the sidebar, so the whole page can be opened (decided 17 November 2026); off the docs page, where a full-screen shell does not fit. */
+  tags: ['!autodocs'],
   parameters: { layout: 'fullscreen', chromatic: { disableSnapshot: true } },
   render: () => (
     <AppShell
       sidebar={<Sidebar userType="admin-dev" active="planning/gantt-chart" />}
       topBar={<TopBar primaryAction={<Button size="sm">Create Added Value</Button>} notifications={0} user={{ name: 'Francis M.' }} />}
     >
-      {/* 40 above and below, as every page with no title band has it (Figma's `Page_Template_Content_With_Padding_Spacing`, and `NotificationsPage`); the chart adds none of its own. */}
+      {/* 40 above and below, as Figma's template for a page with no title band has it (`Page_Template_Content_With_Padding_Spacing`); the chart adds none of its own. */}
       <div className="py-10">
         <Demo headingLevel={1} />
       </div>
