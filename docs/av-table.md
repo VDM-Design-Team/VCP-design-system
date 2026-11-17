@@ -124,7 +124,7 @@ threshold is not a design-system decision.
 
 | Field | Draws | Where | Tooltip |
 |---|---|---|---|
-| `besaPassed: true` | a green seal (20) | right after the reference, before the rule | "BESA Passed" |
+| `besaPassed: true` | a green seal (16, the same as the other flags) | right after the reference, before the rule | "BESA Passed" |
 | `rejected: { reason }` | a red warning glyph (16) | the end of the details, after the counts | "Rejected: " and the reason |
 | `backlogged: { reason }` | an info glyph (16, green as Figma draws it) | the end of the details, after the counts | "Backlogged: " and the reason |
 

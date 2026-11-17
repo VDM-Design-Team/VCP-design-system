@@ -171,7 +171,7 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
  * A glyph that says a thing about the AV, with the words in its tooltip. A button, because the tooltip needs a focusable trigger (`Tooltip`): focus
  * it and the sentence is read. `text` is both the tooltip and the control's name, so it says what the glyph is first: "BESA Passed", "Rejected: the reason".
  */
-function Flag({ text, tone, size, icon }: { text: string; tone: 'success' | 'critical'; size: 16 | 20; icon: 'seal-check' | 'warning' | 'info' }) {
+function Flag({ text, tone, icon }: { text: string; tone: 'success' | 'critical'; icon: 'seal-check' | 'warning' | 'info' }) {
   return (
     /* The tooltip says what the glyph is ("BESA Passed", "Rejected: the reason") and is also the control's name: say it once. */
     <Tooltip content={text} placement="top" describe={false}>
@@ -184,7 +184,7 @@ function Flag({ text, tone, size, icon }: { text: string; tone: 'success' | 'cri
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
         )}
       >
-        <Icon name={icon} size={size} aria-hidden="true" />
+        <Icon name={icon} size={16} aria-hidden="true" />
       </button>
     </Tooltip>
   );
@@ -271,7 +271,7 @@ export function AVTable({
           />
         );
         /* BESA Passed sits right after the reference, in Figma's `_AV_Table_ID`. */
-        const besa = row.besaPassed && <Flag text="BESA Passed" tone="success" size={20} icon="seal-check" />;
+        const besa = row.besaPassed && <Flag text="BESA Passed" tone="success" icon="seal-check" />;
         const details = (row.domain || multipart?.kind === 'child' || row.attachments || row.comments || row.rejected || row.backlogged) && (
           <div className="flex w-max items-center gap-2">
             {row.domain && (
@@ -284,8 +284,8 @@ export function AVTable({
             )}
             <Count icon="paperclip" value={row.attachments ?? 0} noun="attachment" />
             <Count icon="chat-centered-text" value={row.comments ?? 0} noun="comment" />
-            {row.rejected && <Flag text={`Rejected: ${row.rejected.reason}`} tone="critical" size={16} icon="warning" />}
-            {row.backlogged && <Flag text={`Backlogged: ${row.backlogged.reason}`} tone="success" size={16} icon="info" />}
+            {row.rejected && <Flag text={`Rejected: ${row.rejected.reason}`} tone="critical" icon="warning" />}
+            {row.backlogged && <Flag text={`Backlogged: ${row.backlogged.reason}`} tone="success" icon="info" />}
           </div>
         );
 
