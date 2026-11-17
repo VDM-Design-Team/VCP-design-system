@@ -59,7 +59,7 @@ export interface DescriptionCardTitleProps extends Omit<React.HTMLAttributes<HTM
   error?: string;
   /** Editing: the title cannot be changed (Figma's Disabled state): the field is greyed and takes no focus. */
   disabled?: boolean;
-  /** Reading, a part of a multipart set: "Multipart Child of VCP-4321" beside the reference. */
+  /** Reading, a part of a multipart set: "Multipart Child of VCP-4321" at the card's right edge, in secondary text, the parent's code underlined (Figma `_Child_Multipart_Title_Tag`). */
   parent?: DescriptionCardTitleParent;
 }
 
@@ -91,7 +91,7 @@ export const DescriptionCardTitle = React.forwardRef<HTMLDivElement, Description
           if (!parent.href) event.preventDefault();
           parent.onOpen?.();
         }}
-        className="rounded-sm text-text-link-default hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+        className="rounded-sm text-text-link-default underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
       >
         {parent.ref}
         {parent.href && <span className="sr-only"> (opens in a new tab)</span>}
@@ -116,10 +116,10 @@ export const DescriptionCardTitle = React.forwardRef<HTMLDivElement, Description
         ) : (
           <>
             {(reference || parent) && (
-              <div className="flex flex-wrap items-center gap-x-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-x-4">
                 {reference && <p className="text-title-sm-regular">{reference}</p>}
                 {parent && (
-                  <span className="inline-flex items-center gap-1 text-title-sm-regular">
+                  <span className="ml-auto inline-flex items-center gap-1 text-title-sm-regular text-text-secondary">
                     <Icon name="arrows-split" size={20} aria-hidden="true" />
                     <span>Multipart Child of</span>
                     {parentLink}
