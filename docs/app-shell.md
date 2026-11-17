@@ -70,7 +70,7 @@ page would.
 | | Mode switch | `theme`. Flipping it changes the story's theme |
 | | Account | `onUserMenuSelect` (the built-in account menu), `onUserMenu` (a button for the app's own menu), a `user` alone, or no user |
 | Page header | Title band | The `header` slot: `PageTitle`, `AVHeader`, or nothing |
-| | Subtitle, Back link, Actions | `PageTitle`'s `subtitle`, `backHref`, `actions` (shown when the band is `PageTitle`) |
+| | Size, Subtitle, Back link, Actions | `PageTitle`'s `size`, `subtitle`, `backHref`, `actions` (shown when the band is `PageTitle`) |
 | | AV type, Role, Status, Status buttons | `AVHeader`'s `type`, `role`, `status` (or a `step` on the Development chain), `showStatusActions` (shown when the band is `AVHeader`) |
 | Page | Content | `children`: the dashboard, a page long enough to scroll, or an empty page |
 | | Footer | The `footer` slot: the default, a `Footer` with a pinned year, or `null` |

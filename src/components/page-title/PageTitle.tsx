@@ -38,6 +38,11 @@ export interface PageTitleProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   beside?: React.ReactNode;
   /** The page's actions, on the right. */
   actions?: React.ReactNode;
+  /**
+   * The title's size: `md` is 18 semibold, `sm` is 14 medium. Both are
+   * `text.secondary`. Default `md`.
+   */
+  size?: 'sm' | 'md';
 }
 
 /* The back control hugs its 20 glyph — no padding either side — in the neutral
@@ -50,8 +55,13 @@ const BACK_CONTROL = cn(
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
 );
 
+const TITLE_TYPE = {
+  md: 'text-body-lg-semibold',
+  sm: 'text-label-sm-medium',
+} as const;
+
 export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
-  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', beside, actions, ...props }, ref) => (
+  ({ className, title, subtitle, backHref, onBack, backLabel = 'Back', beside, actions, size = 'md', ...props }, ref) => (
     /* 32 above, 16 below, 32 each side — the design's own frame. */
     <header
       ref={ref}
@@ -87,7 +97,7 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
         )}
         <div className="min-w-0">
           {/* The page's one h1 — TopBar deliberately has none so this can. */}
-          <h1 className={'min-w-0 truncate text-body-lg-semibold text-text-secondary'}>{title}</h1>
+          <h1 className={cn('min-w-0 truncate text-text-secondary', TITLE_TYPE[size])}>{title}</h1>
           {subtitle && <p className="mt-1 truncate text-body-sm-regular text-text-secondary">{subtitle}</p>}
         </div>
         {beside}

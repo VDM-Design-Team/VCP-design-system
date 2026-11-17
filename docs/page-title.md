@@ -34,6 +34,7 @@ list drifts.
 | `backLabel` | `string` | `'Back'` | Say where it goes — "Back to my Added Values" |
 | `beside` | `ReactNode` | — | Something beside the title, on its left: a view switch (the dashboard's Cycle / Quarter). With it set, the left group wraps, so the switch drops under the title in a narrow page instead of squeezing it, and the band has no column gap between its two sides (the actions already stand clear, and the room goes to them) |
 | `actions` | `ReactNode` | — | The page's actions, right-aligned, on the title's centre line (at the top when there is a `subtitle`). The slot wraps and is capped to the band's width, so a row of filters breaks onto a second line instead of overflowing |
+| `size` | `sm \| md` | `md` | The title's size: `md` is 18 semibold, `sm` is 14 medium. Both `text.secondary`. No page passes `sm` today; it stays for a quieter band (decided 17 November 2026: do not remove it as unused) |
 
 ## Measurements
 
@@ -51,7 +52,7 @@ one-step difference `Button`'s `sm` carries against the design's 37.
 side, and 8 between it and the title. It is in the neutral palette —
 `neutral.outline.content` default, hover and pressed — not the action blue, which was
 only the ghost button's default and is not in Figma (Figma's arrow is a dark grey, the
-title `text/primary`). The title is `text.secondary`, 18 semibold. Because the arrow
+title `text/primary`). The title is `text.secondary` in both sizes. Because the arrow
 is smaller than the 40 touch-target minimum, a `::after` stretches the pointer target
 to 40 × 40 (10 each way) without taking layout room, so nothing beside it moves. The band with a
 back arrow is therefore the same height as without (74): the arrow is shorter than

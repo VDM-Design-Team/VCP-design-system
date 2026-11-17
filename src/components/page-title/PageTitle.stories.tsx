@@ -25,6 +25,7 @@ const meta = {
   argTypes: {
     title: { control: 'text' },
     subtitle: { control: 'text' },
+    size: { control: 'inline-radio', options: ['md', 'sm'] },
   },
 } satisfies Meta<typeof PageTitle>;
 
@@ -84,6 +85,24 @@ export const WithBack: Story = {
       <PageTitle {...args} />
     </Page>
   ),
+};
+
+/**
+ * The small title: 14 medium, for pages that want a quieter band. The default
+ * is 18 semibold. Both are `text.secondary`.
+ */
+export const SmallTitle: Story = {
+  args: { title: 'VCP-12345', backHref: '#values', backLabel: 'Back to my Added Values', size: 'sm' },
+  render: (args) => (
+    <Page>
+      <PageTitle {...args} />
+    </Page>
+  ),
+  play: async ({ canvasElement }) => {
+    const title = within(canvasElement).getByRole('heading', { level: 1 });
+    await expect(getComputedStyle(title).fontSize).toBe('14px');
+    await expect(getComputedStyle(title).fontWeight).toBe('500');
+  },
 };
 
 /** Back as history, for the cases where there is genuinely no URL. */
