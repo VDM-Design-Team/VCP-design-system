@@ -83,6 +83,31 @@ Button have?") run Storybook and add its MCP server:
 npx storybook add @storybook/addon-mcp   # exposes localhost:6006/mcp to your agent
 ```
 
+### Releasing
+
+1. On a branch from a fresh `main`, run `npm run changelog`. It folds `changes/`
+   into `CHANGELOG.md` and sets the next version in `package.json`. Open that as
+   the release PR.
+2. **Merge the release PR; the Publish workflow publishes it.**
+   `.github/workflows/publish.yml` runs on every push to `main`, builds the
+   package and runs `npm publish` with the repository's own token, but only when
+   `package.json`'s version isn't on GitHub Packages yet. Any other merge stops
+   after that check. The run is under **Actions → Publish**.
+
+To publish a version that is on `main` but not on the registry (a failed run, or
+one merged before the workflow existed), open **Actions → Publish → Run
+workflow** on `main`.
+
+**Fallback, by hand.** Only if the workflow can't run. It needs a personal token
+with `write:packages`, and `main` pulled first, so the build is the released
+version:
+
+```bash
+git switch main && git pull
+npm ci && npm run build
+npm publish
+```
+
 ## For design
 
 You never open a terminal. In Claude, ask for what you want:

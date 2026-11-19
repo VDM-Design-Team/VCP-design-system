@@ -46,8 +46,3 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Story tests (every story renders; play functions run)
         run: npm run test:flows
-
-  # NOTE: npm publishing is intentionally not wired up yet. The name is in the
-  # org scope GitHub Packages requires (@vdm-design-team/vcp-design-system) and
-  # `npm run build` produces the package; what's left is a release workflow
-  # that runs `npm publish` — see README "For engineering".
