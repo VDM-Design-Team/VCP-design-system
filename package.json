@@ -1,6 +1,6 @@
 {
   "name": "@vdm-design-team/vcp-design-system",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "VCP Design System — tokens, React components, and docs. Single source of truth for design and engineering.",
   "type": "module",
   "repository": {
