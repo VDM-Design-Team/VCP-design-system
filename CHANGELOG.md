@@ -1,5 +1,177 @@
 # Changelog
 
+## 2.0.0 — 2026-11-19
+
+### `UrgencyTag`, `StatusTag` — the column tooltips say "Added Value", not "task" (November 2026)
+
+`URGENCY_COLUMN_HINT` is now "Indicates how urgent or important an Added Value is compared to others" and `STATUS_COLUMN_HINT` is "Reflects the current stage of the Added Value (e.g., in progress, completed).", so the AV table's and the planning table's header tooltips name the thing as the rest of the product does. Figma writes "task" in both (decided 17 November 2026; a recorded difference from Figma). The Members tooltip changed the same way in #420; the Type tooltip never used the word.
+
+### `DeliverablesCard` — removing a link no longer drops focus (November 2026)
+
+Removing a link took its bin away and left keyboard focus on the page. Once the page has removed the link, focus now moves to the bin of the link that took its place, else the one before it, else the section's + (or the add form's first field while the form is open), as `Attachments` already does for files. A new story removes links for real and checks each landing place.
+
+### `GanttChart` — a story and a doc line for the page it is (November 2026)
+
+The Gantt Chart is one of Planning's three sub-pages (Planning List, Gantt Chart, Holiday Registry in the rail's Planning group). The docs already said the page is `AppShell` with `GanttChart` as its content; a new `OnItsPage` story now draws exactly that (the admin-dev rail with Planning open and Gantt Chart the current page, the chart's title as the page's one `h1`) and checks it, and `docs/gantt-chart.md` names the sub-page relationship. No component changes; there is still no separate page pattern, since it would only be the chart.
+
+### `NotificationInbox` — a title in the card, the notification inbox page as a story, an optional `sidebar` on `AppShell`, and "View notification inbox" (November 2026)
+
+`NotificationInbox` takes an optional `title` and `headingLevel`: a heading at the left of the controls row. Without them the card is as before. The page the bell's link opens (Figma's `Notification Inbox` page) is the inbox in `AppShell` with no sidebar, the logo in the top bar and `py-10` around it, shown by the new `OnItsPage` story and set out in `docs/notification-inbox.md`; like the Gantt chart's page it has no wrapper component. `AppShell`'s `sidebar` is now optional (a `TopBar` with no `primaryAction` is the logo version already).
+
+**A deliberate departure from Figma: the page has a title, in the card.** Figma's inbox card has none. Here "Notification Inbox" is the card's own heading and the page's `h1`, as the Gantt chart's title is its card's. Don't add a `PageTitle` band above it.
+
+**Wording:** the popover's footer link, `NotificationPopover`'s default `inboxLabel`, is now "View notification inbox" (was "View notifications inbox", which is what Figma writes): the same name as the page and the component (decided 17 November 2026; a recorded difference from Figma). Anything that sets `inboxLabel` itself is unaffected.
+
+### `ConfirmModal`, and the confirmations the Added Value pages ask (November 2026)
+
+New `ConfirmModal`: `Modal` in its critical tone (an alert dialog, no ✕, no click-outside, a grey Cancel and a red **Confirm**) for the step that loses something and needs one more answer. The copy of the dialogs Figma draws is in `confirmations`: `deleteProblemSet`, `discardAV`, `removeLink`, `removeFile` and `leavePage`; spread one in. Two are built in, opt-in (off, nothing changes): `DeliverablesCard` gets `confirmRemove` (removing a link or file asks first) and `AVPage`'s `actions` gets `confirmDiscard` (Discard asks first). The problem set's remove and the unsaved-changes prompt stay the page's to show, since the second needs the app's router. Stories cover each; the docs say when to use it against `ConfirmDeleteModal` and a toast with Undo.
+
+### `DetailCard`, `AVTable` — three gaps from the Pages & Flows audit (November 2026)
+
+- **`DetailCard`: the Initiator (and Assignee) error now shows.** `errors.initiators` and `errors.assignees` were accepted and never drawn, so a page that told a person to "select at least one Initiator" had no field error behind it. The message is now under the chips, in the critical colour, and the field's group is described by it (no `role="alert"`, like the other fields' errors: the page's toast announces it once). A new story checks it.
+- **`DetailCard`: a multipart part's edit page locks Tags too.** Figma greys Projects, AV Category, Tags, Type and Urgency there (`1404:132644`); the docs and the story locked four and asserted Tags stayed editable. `readOnly` already worked for Tags, so only the documented set and the story change.
+- **`AVTable`: the Members header's tooltip has its copy.** Figma's Assigned page writes "Displays the people assigned to or responsible for the task"; the table had no default, so the glyph never showed. Ours says "…responsible for the Added Value" (decided 17 November 2026: the column tooltips say "Added Value", not "task"). New `MEMBERS_COLUMN_HINT` is the default for `hints.members` (pass your own, or `''` to drop it). The "Still open" note in `docs/av-table.md` is gone. A story checks it.
+
+### `AVPage` — a banner for a rejected or backlogged AV (November 2026)
+
+New `banner` prop: a `Banner`, the width of the left column, above the title. Figma's `AV Was Rejected/Backlogged` page draws a critical one with the reason under it and a warning one with the feedback under it; the initiated page names the domain. New `rejectedBanner()` and `backloggedBanner()` write those two (tone, headline copy, `live: 'off'`); the page passes the reason or feedback. The headlines are "This Added Value was rejected" and "This Added Value was moved to the backlog" (with "in Development Domain" when another domain did it), not Figma's "This Task was rejected" and "Remarks" (decided 17 November 2026). Two stories cover them. Until now the page had nowhere to put a notice, so the design's banner could not be placed.
+
+### `ReportProblemModal` — the footer is `Modal`'s own buttons (November 2026)
+
+The Report a Problem dialog built its footer by hand: a `tertiary` (text) Cancel and a plain Submit. It now uses `ModalCancel` (secondary) and `ModalConfirm` (primary) like every other dialog, both 40 high, and Cancel is off while the report is being sent (`busy`). Figma draws Cancel as a text button and both at the small size, from the old design; the rest of the dialogs do not.
+
+### Dark theme — native scrollbars and controls follow it (November 2026)
+
+The browser draws its own scrollbars, form controls, date and colour pickers and native select menus from `color-scheme`, not from our tokens, so under `.dark` they stayed light: a white scrollbar on a dark panel. The dark tokens (`dist/tokens.dark.css`, imported by `theme.css`) now open with `color-scheme: dark`. With `.dark` on `<html>` (as Storybook's toolbar and the usual setup do) the page's own scrollbar goes dark too; on a wrapper element it darkens every scroll container and control inside it. Added in the token build (`style-dictionary.config.mjs`, a wrapper around GDL's mode-overrides format), since `dist/` is generated. A Foundations story checks it. Nothing changes in the light theme.
+
+### `AvatarGroup`, `Avatar` — Figma's overlap and a 1 border inside the circle (November 2026)
+
+A stack's circles overlapped by 4 / 6 / 8 / 9 at 16 / 24 / 32 / 36 and each wore a 2 `surface.elevated` ring outside its box. Figma's `Profile_Initials` "Multiple Users" (the pill the AV table's Members column uses) overlaps them by 2 / 4 / 6 / 8 and draws a 1 white stroke *inside* each circle. The overlap is now Figma's, and `Avatar`'s `ring` is a 1 `border` inside the box (so the circle is still exactly its size, and a photo shrinks to fit inside the border); the `+N` chip has the same border. A two-person stack is now 30 / 44 / 58 / 64 wide, as Figma's are, and a story checks it. The three larger sizes (`xl`, `2xl`, `3xl`) take about a fifth of the diameter; Figma draws no stack there. In every stack the gap between circles is narrower and the border thinner than before.
+
+### `StatusProgression` — "Move to In Progress", "Return to In Progress" (November 2026)
+
+The shared `In Progress` step's buttons read "Move to In progress" and "Return to In progress", with a lower-case p; Figma's `Status_Progression_*` sets (all eight) draw "Move to In Progress" and "Return to In Progress", and `In Progress` is a proper name everywhere else (the status tag, the chain). The label is now `In Progress`. A story assertion that matched the old text case-insensitively now matches the exact label. The stories' demo chains now spell the steps as Figma does (For Review, Ready for Deploy, Confirmed Prod, Design Review), and a story checks the exact "Return to In Progress".
+
+### `StatusProgression` — an admin's last step says "Move to Handoff" too (November 2026)
+
+At the last step of a chain an admin's button said plain "Handoff" while every other role's said "Move to Handoff". Figma disagreed with itself (its Design admin set drew "Handoff", its Development admin set "Move to Handoff"), so one action now has one label: "Move to Handoff" for every role (decided 17 November 2026). A page that looked the admin's button up by the name "Handoff" looks for "Move to Handoff".
+
+### `AlreadyReviewedModal` — the "Already Reviewed" popup (November 2026)
+
+New component, built to Figma's `Review_Already_Reviewed_Popup`: **"Already Reviewed"**, "This Value has already been reviewed." (Figma's line, without "by the initiator", so it holds whoever reviewed it) and one **Close** at the footer's right, like every dialog's (Figma draws it the dialog's whole width, from the old design; every standard dialog's footer is right-aligned, the Change Log carousel being the one exception). It tells and does nothing else; the page decides when it shows (the design puts it in no flow). `title`, `message` and `closeLabel` can be changed, so the page can name the reviewer. Docs in `docs/already-reviewed-modal.md`; `docs/review-av-modal.md` and `docs/figma-audit.md` no longer say it is not ported.
+
+### `DeliverableLinkForm` — `disabled` (November 2026)
+
+New `disabled`: the URL and title fields grey out and Add, Save and "Add another link" are off (Figma's `_Deliverables_Paste_Link` Disabled state); Cancel still works. A story checks it. Nothing else changes.
+
+Docs only, alongside: `docs/accept-pending-av-modal.md` now says its `showMultipart` is Figma's `Domain` variant (Development / Non-Development), so no `domain` prop is needed.
+
+### `ViewersPicker` — the Edit Viewers picker, and `DetailCard`'s `viewers` (November 2026)
+
+New `ViewersPicker`: the viewers pill (an eye and a count) with the list on hover or focus ("3 Viewers", or "No viewers yet"), and, when the page gives `onAdd` or `onRemove`, a picker on press: a **Search by name** field, the matches who are not viewers yet (press one to add), and the viewers each with a remove button (shown on hover or focus for a pointer, always on a touch screen). Built to Figma's `Detail_Card_Edit_Viewers`, its dropdown and its menu item. `DetailCard` gains `viewers`, which draws it in place of the placeholder pill; `viewerCount` and `onViewers` still work and `viewers` wins when both are given. Stories cover the read-only list, nobody viewing, adding and removing (with focus back in the search), and no match. The detail card's docs no longer list Edit Viewers as unbuilt, and now say UI Changes is not wanted and Estimated Duration is undecided.
+
+### `AVTable` — BESA Passed, Rejected and Backlogged indicators (November 2026)
+
+A row can now carry `besaPassed` (a green seal after the reference, "BESA Passed"), `rejected: { reason }` (a red warning glyph at the end of the details) and `backlogged: { reason }` (a grey info glyph), each with its tooltip, after Figma's `_AV_Table_ID`, `Rejected_AV_Indicator` and `Backlogged_AV_Indicator`. Backlogged is grey where Figma draws it green, so green in a row means BESA Passed alone; the seal keeps Figma's green, a known exception to the 3:1 rule in the light theme (both decided 17 November 2026). Each tooltip says what the glyph is first ("BESA Passed", "Rejected: the reason", "Backlogged: the reason"); they are buttons named by that sentence so the keyboard reaches it. A new Flags story hovers one and checks the reason and the seal's place.
+
+### `DescriptionCardTitle` — editing, disabled and multipart-child states; moved from atoms to components (November 2026)
+
+The title card of an Added Value page now has Figma's other states: **Editing** (the Title field, empty with "Type in the title" or filled, with an `error`), **Disabled**, and a **Multipart Child** line ("Multipart Child of VCP-4321", the parent a link). The AV page built its own editing title next to the card and did not use the card to read either; it now uses the card in every state, so the page and the stories show one card.
+
+Because the editing card holds a `Field` and an `Input`, it moved from `src/atoms` to `src/components` (the import from the package root is unchanged; Storybook's id is now `Components/Forms/DescriptionCardTitle`). `reference` is optional now (the editing card has none). The reading card's reference stays `text.secondary`, as the AV page showed it (decided 17 November 2026; Figma draws it `text.primary`).
+
+Migration: nothing changes for code that imports `DescriptionCardTitle` from the package root. A deep import from `src/atoms/description-card-title` becomes `src/components/description-card-title`, and a Storybook link to `Atoms/DescriptionCardTitle` becomes `Components/Forms/DescriptionCardTitle`. `reference` is now optional.
+
+### `Avatar`, `AvatarGroup` — three larger sizes (November 2026)
+
+`size` gains `xl` (40), `2xl` (44) and `3xl` (48), with 16 type, the larger profile pictures Figma's `Profile_Image` draws (L, XL, XXL). The unknown-person glyph fills the circle at these sizes, as `Profile_Image_Empty` draws it, and `AvatarGroup` overlaps them by about a quarter of the diameter. The existing four sizes are unchanged. A story test checks the seven diameters.
+
+### `GanttChart` — the title can be the page's `h1` (November 2026)
+
+New `headingLevel` (`1 | 2`, default `2`). The chart draws its own title, so the Gantt page has no `PageTitle` to be its `h1`; the page now gives `headingLevel={1}` and the chart's title is the page's one `h1`. The look is the same, and nothing changes unless it is set. `docs/gantt-chart.md` has a new "On a page" note saying how the chart sits in `AppShell`.
+
+### `PlanningTable` docs — how the dates are worked out (November 2026)
+
+Added the date rules Figma's unfinished "Incomplete!" flow draws (nothing set, one date set with or without Points, moving between cycles) to `docs/planning-table.md`. The design lead confirmed them on 17 November 2026, with two additions: changing only the Points moves the Due Date, and Figma's Cycle A → Cycle B labels are a slip (the other date is the one recalculated). Docs only; no component changes.
+
+### `focusFirstInvalid` — take the person to the first missing field (November 2026)
+
+New helper in `src/lib`: after a blocked submit, `focusFirstInvalid(form)` scrolls to the first `aria-invalid` control (the page order) and focuses it, smoothly unless the person prefers reduced motion, and only scrolling when the field is not already fully in view (in the window and in every scrolling box round it, such as a dialog's body). It is the "go to the field" half of the Missing input behaviour. Described in `docs/field.md`, with two Field stories: one submits a form with two missing fields and checks the earlier one has focus, the other checks a field scrolled out of its box is brought into view.
+
+### `GanttChart` — sizes read off Figma's Cycle, Month and Year frames (November 2026)
+
+The year, month and cycle heading rows are 40 high (were 36, with the cycles row 44), and the months over the cycles in the Year view are 64 (were 44). A person's closed-row summary bar is 40 high (was 36); a task bar stays 36. The Projects filter is 202 wide, the Users filter 174 (were 208 and 192), and the Cycle/Monthly/Yearly select hugs its widest option instead of a fixed 160. Reset Filters and Today are medium (40) buttons, the height of the filters beside them. Nothing else changes: the Today button and the picker chevrons on the month and year are still there (Figma does not draw them).
+
+### `DomainsPage` — the Super Admin's Domains page (November 2026)
+
+New pattern: the main content of the Domains page, the page title and then `TagManagement` (Domains and Global Tags, with the Add New, rename and delete dialogs), laid out once (32 in from the sides, as `AVListPage` does), so the app only passes the lists and the callbacks inside `AppShell`. Controlled, holding no data. Built to Figma's `Domain Page` (the page, Add New Tag, Add New Domain and Delete Domain). `docs/tag-management.md` now says it is the page's content, as the Admin Panel tab of Settings is for a Design Admin.
+
+### `CommentSection` / `AVPage` — the Comments title is a section title, centred on its sort chip, with room above (November 2026)
+
+The Comments title is now `title-sm-semibold` in `text.primary`, like Problems and Status History, instead of a quiet regular line; it is centred on the "Newest First" chip beside it; and on a read page Comments sits 32 below the Status History card (it is not a card, so the cards' 16 left it looking crowded). Figma draws the title regular and tertiary; the section title is a deliberate difference (decided 17 November 2026).
+
+### `TypeTag` — the ⓘ is one step below the glyph, 16 in the default (November 2026)
+
+The trailing ⓘ (`info`) was 20 whatever the tag's size, so it took a lot of room and, in a small tag, was bigger than the 16 caret. It is now one step below the tag's glyph and never below 16: 16 in the default 28 tag (beside its 20 glyph) and 20 in the largest, as ⓘ is 16 everywhere else (`InfoHint`, the column hints). This is a deliberate exception to Figma, which draws it 20×20; the reasons are in `docs/type-tag.md`. The glyph is decorative, so nothing is lost; it is one table to put back.
+
+### `AccountsPage`, `ContactsPage`, `HolidayRegistryPage`, `TaskLogPage` — the table pages (November 2026)
+
+New patterns: the main content of the Accounts, Contact List, Holiday Registry and Task Log Trail pages, each the page title and then its table, laid out once (16 apart, 32 in from the sides, as `AVListPage` does), so the app only passes the data inside `AppShell`. Controlled, holding no data; the dialogs, the confirmations and the focus after a delete stay the app's, as each table's docs describe. The "On a page" notes on `AccountsTable`, `ContactsTable` and `HolidayTable` now point to them, and `TaskLogTrail` has one.
+
+### `HolidayTable` — Add Holiday and Import from Hubstaff wrap on a narrow screen (November 2026)
+
+The two admin buttons shared one row that could not wrap, so on a narrow screen it ran past the card and the page scrolled sideways. They now wrap.
+
+### `ToastProvider` / `ToastViewport` — top right by default, the stack waits when it is full (November 2026)
+
+**Breaking:** the default `position` is now `top-right` (it was `bottom-right`), and the viewport is 24 from the screen's edges (it was 16), as Figma draws it. A toast is full width below 640 (a phone). **Migration:** pass `position="bottom-right"` to `ToastProvider` (or `ToastViewport`) to keep the old place; nothing else needs to change. Padding is now 24 (16 on a phone).
+
+The stack behaves as one: oldest at the top and each new toast beneath, whatever its tone. A toast that leaves fades and closes and the others move up smoothly (not animated with reduced motion). When there are more toasts than the page has room for, the newest wait, unmounted (no timer, nothing announced), and arrive as room is made. There is no fixed maximum. A toast with `duration: null` stays until dismissed. The two live regions are now `display: contents`, so they stay in the page but the toasts are laid out together.
+
+**Breaking:** a `critical` toast raised through `toast()` now stays until it is dismissed, where it used to time out after 6 seconds like the rest: it says something failed or was stopped, and is often the only place that is said. **Migration:** nothing to do if that is what you want; pass a `duration` (`DEFAULT_TOAST_DURATION` for the old behaviour) to a critical toast that should still time out. The blocked-Submit recipes do, because the errors under the fields stay.
+
+### Toast recipes (November 2026)
+
+New named messages for `toast()`: `missingInput(field, kind?)`, `unavailableAssignee()`, `changesSaved()`, `changesNotSaved()`, `bulkUpdated({ property, value, count })`, `discarded(reference?)` and `undoDeletion(item, onUndo)`. Each returns the options for `toast()` (tone, title, wording, and timing), so `toast(changesSaved())` reads the same on every page. `docs/toast.md` has the table and the behaviour section.
+
+The "Missing input" title is now sentence case (it was "Missing Input" in the doc and the story). The budget and bulk-action stories and docs raise their toasts through the recipes, so they read "Changes saved" and "Added Values updated" (they said "Changes Saved" / "saved successfully!" and "Added Values Updated").
+
+### `InitiateToOtherDomain`, `DetailCard` — "Duplicate" becomes "Initiate" (November 2026)
+
+`DuplicateToOtherDomain` is now `InitiateToOtherDomain`, and its title reads "Initiate to other Domains": the options already said "Initiate to Development assignment", Figma's frame is "AV Initiated (to other domain)" and the status is "Initiated". It is still a group of checkboxes, several at once, and `value` and `onChange` are unchanged. `AVPage`'s `duplicate` prop is now `initiate`.
+
+The Detail Card follows: its "Duplicates" row now reads **"Initiated to"**, the card type `duplicate` is `initiated`, the value's `duplicates` is `initiatedTo`, and the `DetailCardDuplicate` type is `DetailCardInitiatedDomain`.
+
+New on the card: a `disabled` card now says why. It is for an Added Value that came from another domain and is edited in the second, and it shows a line under the title, "This Added Value came from another domain, so it can't be initiated to others from here." (`disabledReason` to change it), which a screen reader hears as the group's description.
+
+Migration: import `InitiateToOtherDomain` (and `InitiateToOtherDomainProps`, `InitiateDomainOption`) instead of `DuplicateToOtherDomain`, `DuplicateToOtherDomainProps`, `DuplicateDomainOption`; its props are the same. Rename `AVPage`'s `duplicate` prop to `initiate`. On `DetailCard`, pass `type="initiated"` instead of `type="duplicate"`, `value.initiatedTo` instead of `value.duplicates`, and use `DetailCardInitiatedDomain` instead of `DetailCardDuplicate`.
+
+### `AVPage` — no Status History when editing (November 2026)
+
+An editing page (a new Added Value, or one being edited) no longer draws Status History, even if `history` is passed: it is for reading only, like Comments. The left column when editing is now the Title, the four blocks, Multipart and Initiate to other Domains. Figma's editing frames draw a collapsed Status History row there; this follows the design lead's call that it should not be on an editing page.
+
+### `DescriptionSection` — cards passed in a Fragment are no longer stuck together (November 2026)
+
+Passing the cards as `<><DescriptionCard … /><DescriptionCard … /></>` left them as one child, so they shared one list item and sat touching, with no gap and without the section's position or remove labels (the `AVPage` editing story showed it under Problems, Solutions and the rest). Fragments are now opened, so each card is its own item, 16 apart, numbered and labelled by the section.
+
+### `PlanningPage` — the Planning page (November 2026)
+
+New pattern: the main content of the Planning page, built to Figma's `Planning Page`. It composes the title ("Planning List"), `PlanningFilters` on the canvas above the sections, `PlanningTable`'s Cycle and Backlog cards, and `Pagination` under them on the right, with typed sections (the filters and the pagination show only when passed). Editing in place, drag and move, and folding stay the table's; the page owns the data. It goes inside `AppShell`.
+
+Docs: a new "On a page" note on `HolidayTable`, `AccountsTable` and `ContactsTable` (title, then the table, 16 apart and 32 in from the sides; Add Account is the top bar's `primaryAction`), and a pointer from `PlanningTable`. No page patterns for those three: each would only be a title and a table.
+
+### `PlanningTable` — an Actions menu, with Move to Cycle as a submenu (November 2026)
+
+The "Move … to…" column (an up-down arrows button, the glyph the sort uses) is now an **Actions** column, as `AVTable` and `AnnouncementsTable` have: a ⋯ button (neutral palette, `neutral-tertiary`) named "Actions for VCP-1234" opening a menu with one item, **Move to Cycle**, a submenu of the sections the row can go to (with `moves="anywhere"` the Backlog is a choice too, and it says only "Move to"). Dragging, `moves`, `canMove` and the focus that follows a moved row are unchanged. The button's accessible name changes from "Move VCP-1234 to…" to "Actions for VCP-1234", so anything that finds it by the old name needs the new one and one more click (Move to Cycle).
+
+### `AnnouncementsTable` — the Actions button is in the neutral palette (November 2026)
+
+The ⋯ button that opens a row's menu (Edit, Delete) is now `neutral-tertiary` instead of the default tertiary, so it matches `PlanningTable`'s Actions button: a row menu is not a call to action, so it takes no brand colour. Nothing else changes; the button's name ("Actions for …") and the menu are the same.
+
+### `PlanningTable` — the animated date's text now changes colour (November 2026)
+
+The cell animation (a date calculated for the person) ran a colour animation on a wrapper around the date, but the date's own text sets its colour, so it never inherited it and stayed ink while the sweep crossed. While the animation is live the text inside the wrapper now inherits it, and the date runs black, blue, white, blue, black as Figma draws it. A story test pauses a loop at 35% and checks the date itself is white. The loop is now 2.5 seconds (it was 1.6), the updated design, still three loops.
+
 ## 1.2.0 — 2026-11-13
 
 ### Backlog, handoff and the AV menu follow the 13 November decisions (November 2026)
