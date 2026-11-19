@@ -40,7 +40,8 @@ The page the bell's "View notification inbox" link opens is this inbox in `AppSh
 The rows are passed through **children**: the same `NotificationItem` the popover uses.
 Figma draws an inbox row of its own (`_Notification_Inbox_Item`, a 40 avatar and 8
 padding), but it is the same thing in a wider list, so the system has one component, and
-the two lists cannot drift apart.
+the two lists cannot drift apart. The inbox does take Figma's 8 above and below each row,
+so messages are 16 apart rather than the popover's 32 (decided 19 Nov 2026).
 
 ## When to use
 
@@ -74,7 +75,8 @@ renders what it is given: the `Default` story filters its own list.
 ## Tokens
 
 Card `surface.elevated`, `radius.md`, `px-8 py-4` (32 / 16), `gap-2.5` (10). The
-controls are 16 apart, and both the controls and the pager are right-aligned. The pager sits 24 below the last row, as the design draws it.
+controls are 16 apart, and both the controls and the pager are right-aligned. Each row has 8
+above and below it (`py-2`, in place of the row's own 16), so messages are 16 apart. The pager sits 24 below the last row, as the design draws it.
 No new tokens.
 
 ## Accessibility
@@ -86,7 +88,7 @@ No new tokens.
 
 ## Differences from the design
 
-- **The rows are `NotificationItem`**, not a separate inbox row: 36 avatar and 16 padding rather than 40 and 8, with the mark-read button on hover. One component for one idea.
+- **The rows are `NotificationItem`**, not a separate inbox row: 36 avatar rather than 40, and 16 side padding rather than 8, with the mark-read button on hover. The 8 above and below is Figma's. One component for one idea.
 - **No empty state is drawn.** "No notifications" is a plain tertiary line.
 - **"Show unread only" is the system `Toggle`** (40 × 24), not Figma's 36 × 20 switch.
 - **The controls sit at the left**, as Figma draws them.

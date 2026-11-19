@@ -101,8 +101,10 @@ export const NotificationInbox = React.forwardRef<HTMLDivElement, NotificationIn
       .filter((g) => g.items.length > 0);
     const Heading = `h${groupHeadingLevel}` as 'h2' | 'h3' | 'h4';
     const Title = `h${headingLevel}` as 'h1' | 'h2';
+    /* The inbox's rows are tighter than the popover's: 8 above and below each (Figma's
+       `_Notification_Inbox_Item`), so 16 between messages rather than 32. */
     const list = (rows: React.ReactNode[], label: { aria?: string; by?: string }) => (
-      <ul aria-label={label.aria} aria-labelledby={label.by}>
+      <ul aria-label={label.aria} aria-labelledby={label.by} className="[&>li>*]:py-2">
         {rows.map((child, index) => (
           <li key={React.isValidElement(child) && child.key != null ? child.key : index}>{child}</li>
         ))}
