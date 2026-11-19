@@ -141,9 +141,9 @@ Every other table draws one card with its filters above the table (`TableCard`, 
 
 | Where | Says |
 |---|---|
-| Urgency ⓘ | "Indicates how urgent or important a task is compared to others" |
+| Urgency ⓘ | "Indicates how urgent or important an Added Value is compared to others" |
 | Type ⓘ | "Type 1: Direct KPI impact with clear ROI / Type 2: Indirect impact, enablement/optimization / Type 3: Non-critical, no meaningful KPI impact" (one line each) |
-| Status ⓘ | "Reflects the current stage of the task (e.g., in progress, completed)." |
+| Status ⓘ | "Reflects the current stage of the Added Value (e.g., in progress, completed)." |
 | A type tag | "Type 3: Non-critical, no meaningful KPI impact" |
 | The initiator's avatar | Their name |
 | Start Date ƒ | "This column is editable, changing Start Date affects Due Date." |
