@@ -77,8 +77,8 @@ export type AVStatus =
  * Domain steps are not here and cannot be — they live in the domain's own
  * configuration, which this repo does not own.
  */
-/** The Status column's header tooltip. Pass it as a `ColumnHint`'s `text`. */
-export const STATUS_COLUMN_HINT = 'Reflects the current stage of the task (e.g., in progress, completed).';
+/** The Status column's header tooltip: Figma's copy, with "Added Value" for Figma's "task" (decided 17 November 2026). Pass it as a `ColumnHint`'s `text`. */
+export const STATUS_COLUMN_HINT = 'Reflects the current stage of the Added Value (e.g., in progress, completed).';
 
 export const AV_STATUSES: readonly AVStatus[] = [
   'Draft',
