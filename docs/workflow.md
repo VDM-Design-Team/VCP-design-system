@@ -276,6 +276,27 @@ directly.
 - Tell Claude exactly which files a task may touch; no drive-by renames,
   reformatting, or reorganizing (see CLAUDE.md).
 
+## Releasing
+
+A release is a PR like any other, and merging it is what publishes.
+
+1. Branch from a fresh `main` (`release/<version>`) and run
+   `npm run changelog`. It folds `changes/` into `CHANGELOG.md` and sets the
+   next version in `package.json`. Open the result as the release PR.
+2. **Merge the release PR; the Publish workflow publishes it.** It runs on
+   every merge to `main`, and publishes only when the version in
+   `package.json` isn't on GitHub Packages yet, so ordinary merges do
+   nothing. It uses the repository's own token: no one's personal token is
+   involved. Watch it under **Actions → Publish**.
+
+If a version is on `main` but not on the registry (a run failed, or it was
+merged before the workflow existed), **Actions → Publish → Run workflow** on
+`main` publishes it.
+
+Fallback, only if the workflow can't run: on a freshly pulled `main`, with a
+personal `write:packages` token, `npm ci && npm run build && npm publish`.
+Pull first: building an old `main` publishes the wrong version.
+
 ## The Figma leg
 
 This repo is the source of truth; Figma mirrors it. **When a token PR merges,
