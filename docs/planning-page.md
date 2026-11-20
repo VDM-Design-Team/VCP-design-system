@@ -1,6 +1,6 @@
 # PlanningPage *(pattern)*
 
-The main content of the Planning page: the title, the filter row, the Cycle and Backlog sections, and the pages beneath. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer.
+The main content of the Planning page: the title, the filter row, an optional notice, the Cycle and Backlog sections, and the pages beneath. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer.
 
 Built to Figma's `Planning Page` in Pages & Flows (the `Planning List`, with its inline-editing and drag-from-Backlog flows).
 
@@ -9,6 +9,7 @@ Built to Figma's `Planning Page` in Pages & Flows (the `Planning List`, with its
 | Piece | Tier |
 |---|---|
 | `Pagination` | atom |
+| `Banner` | component |
 | `PageTitle` | component |
 | `PlanningFilters` | pattern |
 | `PlanningTable` | pattern |
@@ -31,12 +32,14 @@ A section shows only when it is passed (the same as `AVListPage` and `DashboardP
 |---|---|---|
 | Title | `title` | The `h1`. Defaults to "Planning List", Figma's |
 | Filters | `filters` | `PlanningFilters`' props: the search, status and priority, Reset and View Cycle. Leave it out and there are none |
+| Notice | `banner` | `Banner`'s props: something about the plan as a whole to act on, such as people over their capacity cap. Leave it out and there is none |
 | Sections | `table` (required) | `PlanningTable`'s props: the Cycle and Backlog sections |
 | Pages | `pagination` | `Pagination`'s props. Leave it out and there are none |
 
 ## Where things sit
 
 - **The filters are on the canvas above the sections**, not in a card, as Figma draws them: each Cycle and the Backlog is its own card, so there is no one card to put them in. (This differs from `AVListPage`, whose one table card holds its filters.)
+- **A notice sits between the filters and the sections**, the column's width. Figma draws none; it is for what the page knows about the plan as a whole (people booked past their capacity cap, say) and the person should act on. What it says, and when it shows, is the page's.
 - **The pagination is under the last section, on the right**, as Figma draws it.
 - The column is **16 apart and 32 in from the sides**.
 
@@ -67,6 +70,7 @@ Never keep the flag in anything that survives a reload (a stored filter, the URL
 |---|---|---|---|
 | `title` | `string` | `Planning List` | The `h1` |
 | `filters` | `PlanningFiltersProps` | — | See `docs/planning-filters.md` |
+| `banner` | `BannerProps` | — | A notice between the filters and the sections, the column's width. See `docs/banner.md` |
 | `table` | `PlanningTableProps` | required | See `docs/planning-table.md` |
 | `pagination` | `PaginationProps` | — | `page`, `pageCount`, `onChange`, and `itemCount`, `pageSize`, `pageSizeOptions`, `onPageSizeChange` for the range and the Items select |
 | `className`, rest | | | On the wrapping `div` |
