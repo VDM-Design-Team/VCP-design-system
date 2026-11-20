@@ -442,7 +442,8 @@ export const Multipart: Story = {
 
 
 /**
- * Figma's multipart title cell is two columns: the reference with **the 28 tag under it**, a rule, and the title with **the details starting under it** (domain, the Parent chip, the counts).
+ * A multipart row is one line of metadata, not Figma's two columns: the **24 tag is the first item under the reference**, left-aligned with it, on the same line as the domain tag and
+ * the Parent chip. Deliberate (see `docs/av-table.md`): a long reference cannot push the metadata away from the cell's left edge.
  */
 export const MultipartLayout: Story = {
   tags: ['!dev', '!autodocs'],
@@ -460,12 +461,56 @@ export const MultipartLayout: Story = {
     const tag = within(child).getByText('2/3').closest('[tabindex]') as HTMLElement;
     const parentChip = within(child).getByText(/^Parent:/);
     const rect = (el: Element) => el.getBoundingClientRect();
-    /* The tag is 28 high and sits under the reference, left-aligned with it. */
-    await expect(Math.round(rect(tag).height)).toBe(28);
+    const middle = (el: Element) => rect(el).top + rect(el).height / 2;
+    /* The tag is 24 high and sits under the reference, left-aligned with it. */
+    await expect(Math.round(rect(tag).height)).toBe(24);
     await expect(rect(tag).top).toBeGreaterThan(rect(ref).bottom - 1);
     await expect(Math.abs(rect(tag).left - rect(ref).left)).toBeLessThanOrEqual(1);
-    /* The details start under the title, not under the reference: the Parent chip is to the right of the tag. */
+    /* One line: the Parent chip is beside the tag, on the same centre line. */
     await expect(rect(parentChip).left).toBeGreaterThan(rect(tag).right);
+    await expect(Math.abs(middle(parentChip) - middle(tag))).toBeLessThanOrEqual(1);
+  },
+};
+
+/**
+ * Uneven reference lengths (four, five and six digits) change nothing about where the details start: the multipart tag and the domain tag begin at the cell's left edge in every row. This is why the
+ * metadata is on its own line under the title and not, as in Figma, under the *title*, where it would follow the width of the reference.
+ */
+export const MultipartUnevenIds: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    rows: ['4321', '54321', '654321'].map((digits): AVTableRow => ({
+      ...MULTIPART_ROWS[1]!,
+      id: `uneven-${digits}`,
+      ref: `VCP-${digits}-1`,
+      title: `Part of VCP-${digits}`,
+      multipart: { kind: 'child', position: 1, total: 3, parentRef: `VCP-${digits}` },
+    })),
+  },
+  render: (args) => (
+    <div className="bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const lefts = canvas.getAllByText('1/3').map((el) => {
+      const row = el.closest('tr') as HTMLElement;
+      const cell = row.querySelector('td') as HTMLElement;
+      const tag = el.closest('[tabindex]') as HTMLElement;
+      const domain = within(row).getByText('VCP');
+      return {
+        tagHeight: Math.round(tag.getBoundingClientRect().height),
+        tag: Math.round(tag.getBoundingClientRect().left - cell.getBoundingClientRect().left),
+        domain: Math.round(domain.getBoundingClientRect().left - cell.getBoundingClientRect().left),
+      };
+    });
+    await expect(lefts).toHaveLength(3);
+    for (const l of lefts) await expect(l.tagHeight).toBe(24);
+    /* The same place in every row, however long the reference. */
+    await expect(new Set(lefts.map((l) => l.tag)).size).toBe(1);
+    await expect(new Set(lefts.map((l) => l.domain)).size).toBe(1);
   },
 };
 

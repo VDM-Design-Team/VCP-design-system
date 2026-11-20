@@ -54,8 +54,8 @@ export const Parent: Story = {
   },
 };
 
-/** Figma's size: 28 high, with 14 type and 20 glyphs. The tooltip opens above, as Figma draws it (`Tooltip` flips and slides now, so the table's edge no longer cuts it off). */
-export const FigmasSize: Story = {
+/** Our size, not Figma's 28: 24 high, with 12 type and 16 glyphs, so it matches the domain tag beside it (see `docs/multipart-table-tag.md`). The tooltip opens above, as Figma draws it (`Tooltip` flips and slides now, so the table's edge no longer cuts it off). */
+export const OneLineSize: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => (
@@ -65,9 +65,9 @@ export const FigmasSize: Story = {
   ),
   play: async ({ canvasElement }) => {
     const tag = within(canvasElement).getByText('1/3').closest('[tabindex]') as HTMLElement;
-    await expect(Math.round(tag.getBoundingClientRect().height)).toBe(28);
-    await expect(getComputedStyle(within(canvasElement).getByText('1/3')).fontSize).toBe('14px');
-    await expect(Math.round(tag.querySelector('svg')!.getBoundingClientRect().width)).toBe(20);
+    await expect(Math.round(tag.getBoundingClientRect().height)).toBe(24);
+    await expect(getComputedStyle(within(canvasElement).getByText('1/3')).fontSize).toBe('12px');
+    await expect(Math.round(tag.querySelector('svg')!.getBoundingClientRect().width)).toBe(16);
     await userEvent.tab();
     const tip = await within(document.body).findByRole('tooltip');
     await waitFor(() => expect(tip).toBeVisible());
