@@ -67,7 +67,7 @@ A user's menu is unchanged: one move, on a Draft.
 ## Tokens
 
 The button is an `IconButton` `neutral` (the outlined grey) with `shape="square"` (`radius.sm`), a
-`dots-three-outline-vertical-fill` glyph (the filled dots), 32 to look at as Figma draws it (40 on a touch screen). The list has
+`dots-three-outline-vertical-fill` glyph (the filled dots), 36 to look at, the same height as the status buttons it sits beside (Figma draws it 32 beside 37-high buttons, so the two did not line up; 40 on a touch screen). The list has
 no icons, as the design draws it; Delete turns its warning glyph off (`icon: false`) and keeps the critical colour and the
 "destructive action" qualifier for a screen reader. The menu is `Menu`'s: `surface.elevated`,
 `shadow.menu`, rows `label-sm-medium`, Delete in `accent.critical.outline.content`. No new tokens.
@@ -78,7 +78,7 @@ no icons, as the design draws it; Delete turns its warning glyph off (`icon: fal
   menu is `Menu`'s, with its arrows, type-ahead and Escape.
 - Delete is in the critical colour and is last; `Menu` also gives it a screen-reader qualifier
   ("destructive action"), so colour is not the only thing that sets it apart. The page should still confirm it.
-- 32 is under the 40 touch minimum, so a touch screen gets 40.
+- 36 is under the 40 touch minimum, so a touch screen gets 40.
 
 ## Don't
 

@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
 import { PageTitle } from './PageTitle';
 import { Button } from '../../atoms/button';
+import { DetailCardMenu } from '../detail-card-menu';
+import { StatusProgression } from '../status-progression';
 import { SegmentedControl } from '../../atoms/segmented-control';
 import { Select } from '../../atoms/select';
 import { SIDE_BY_SIDE } from '../../lib/story-a11y';
@@ -88,20 +90,37 @@ export const WithBack: Story = {
 };
 
 /**
- * The small title: 14 medium, for pages that want a quieter band. The default
- * is 18 semibold. Both are `text.secondary`.
+ * An Added Value's page: Figma's `Viewing AV Page Title`, 14 regular in `text.primary`. The status
+ * buttons and then the ⋮ menu are in `actions`, the menu on their right; `AVPage` builds this
+ * band for you.
  */
-export const SmallTitle: Story = {
-  args: { title: 'VCP-12345', backHref: '#values', backLabel: 'Back to my Added Values', size: 'sm' },
+export const AnAddedValuesPage: Story = {
+  args: {
+    title: 'VCP-12345',
+    backHref: '#values',
+    backLabel: 'Back to my Added Values',
+    size: 'sm',
+    actions: (
+      <>
+        <StatusProgression role="assignee" status="Accepted" onTransition={() => {}} />
+        <DetailCardMenu role="user" status="Accepted" onEdit={() => {}} onDelete={() => {}} />
+      </>
+    ),
+  },
   render: (args) => (
     <Page>
       <PageTitle {...args} />
     </Page>
   ),
   play: async ({ canvasElement }) => {
-    const title = within(canvasElement).getByRole('heading', { level: 1 });
+    const c = within(canvasElement);
+    const title = c.getByRole('heading', { level: 1 });
     await expect(getComputedStyle(title).fontSize).toBe('14px');
-    await expect(getComputedStyle(title).fontWeight).toBe('500');
+    await expect(getComputedStyle(title).fontWeight).toBe('400');
+    /* The status button, then the ⋮ menu on its right, on the band's centre line. */
+    const move = c.getByRole('button', { name: 'Move to In Progress' });
+    const options = c.getByRole('button', { name: 'AV options' });
+    await expect(options.getBoundingClientRect().left).toBeGreaterThanOrEqual(move.getBoundingClientRect().right);
   },
 };
 
