@@ -49,6 +49,17 @@ export interface MyValuesStatsProps extends Omit<React.HTMLAttributes<HTMLElemen
   segments: readonly MyValuesStatsSegment[];
   totalLabel?: string;
   completedLabel?: string;
+  /**
+   * Which stat is the filter now: a segment's `id`, or `'completed'` for the Completed figure (so no segment can have the id `'completed'`). `null`, or leaving it out, selects none. The selected stat
+   * is tinted (`surface.brand.faint`, Figma's `State=Selected`) and reads as pressed.
+   */
+  selected?: string | number | null;
+  /**
+   * Turns the stats into filters. Pressing one reports its key; pressing the selected one again reports `null`, which clears it. **A stat whose count is 0 stays plain text**: it cannot be pressed
+   * (Figma's `State=Empty`). Total AVs is never a filter. Leave it off and the strip is display only. The strip only reports: what a key filters (and Active's "every status between Accepted and
+   * Completed", Overdue's date rule) is the page's.
+   */
+  onSelectedChange?: (next: string | number | null) => void;
 }
 
 /* The one place a tone becomes a colour: filled for a segment with a count, an outline for one with none. */
@@ -74,14 +85,18 @@ const OUTLINE: Record<StatsSegmentTone, string> = {
 const MEDIUM_24 = 'text-[24px] font-medium leading-9'; // ds-lint-ignore — no heading-lg-medium in the ramp
 
 /* A figure over its label. */
-function Figure({ label, children }: { label: string; children: React.ReactNode }) {
+function Figure({ label, bold, children }: { label: string; bold?: boolean; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-body-sm-medium text-text-tertiary">{label}</span>
-      <span className={cn('flex items-center gap-1.5 text-text-primary', MEDIUM_24)}>{children}</span>
+      {/* Selected, Figma draws the figure 24 bold (the ramp has it); at rest it is the 24 medium exception above. */}
+      <span className={cn('flex items-center gap-1.5 text-text-primary', bold ? 'text-heading-lg-bold' : MEDIUM_24)}>{children}</span>
     </div>
   );
 }
+
+const PRESSABLE =
+  'cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused';
 
 export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
   (
@@ -93,6 +108,8 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
       segments,
       totalLabel = 'Total AVs',
       completedLabel = 'Completed',
+      selected = null,
+      onSelectedChange,
       'aria-label': ariaLabel = 'My Values statistics',
       ...props
     },
@@ -120,6 +137,15 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
     /* Nothing yet: every count is 0, so every segment would sit at its 100 floor and bunch up on the left. Equal shares let the outlines span the strip. */
     const nothingYet = segments.every((segment) => segment.count <= 0);
 
+    /* Pressing the selected stat again clears it. */
+    const press = (key: string | number) => onSelectedChange?.(selected === key ? null : key);
+    const completedFigure = (
+      <Figure label={completedLabel} bold={selected === 'completed'}>
+        {completed}
+        <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
+      </Figure>
+    );
+
     return (
       <section
         ref={setRef}
@@ -141,23 +167,26 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
           <Divider orientation="vertical" className="self-stretch" />
           <div className="flex items-center gap-6">
             <Figure label={totalLabel}>{total}</Figure>
-            <Figure label={completedLabel}>
-              {completed}
-              <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
-            </Figure>
+            {onSelectedChange && completed > 0 ? (
+              <button
+                type="button"
+                aria-pressed={selected === 'completed'}
+                onClick={() => press('completed')}
+                className={cn('-mx-2 rounded-md px-2 text-left', PRESSABLE, selected === 'completed' && 'bg-surface-brand-faint')}
+              >
+                {completedFigure}
+              </button>
+            ) : (
+              completedFigure
+            )}
           </div>
         </div>
 
         <ul aria-label="Status breakdown" className="m-0 flex flex-1 list-none gap-1 p-0">
           {segments.map((segment) => {
             const filled = segment.count > 0;
-            return (
-              <li
-                key={segment.id}
-                /* As wide as its count, never narrower than 100 (all equal while every count is 0). The width is data, so it is the one inline style. */
-                style={{ flexGrow: nothingYet ? 1 : Math.max(segment.count, 0) }}
-                className="flex min-w-25 basis-0 flex-col gap-2"
-              >
+            const inner = (
+              <>
                 <span
                   aria-hidden="true"
                   className={cn('block h-2 rounded-pill', filled ? FILL[segment.tone] : cn('border', OUTLINE[segment.tone]))}
@@ -167,6 +196,27 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
                   <span className="text-body-lg-medium text-text-primary">{segment.count}</span>
                   <span className="text-body-sm-medium text-text-tertiary">{segment.label}</span>
                 </div>
+              </>
+            );
+            return (
+              <li
+                key={segment.id}
+                /* As wide as its count, never narrower than 100 (all equal while every count is 0). The width is data, so it is the one inline style. */
+                style={{ flexGrow: nothingYet ? 1 : Math.max(segment.count, 0) }}
+                className="flex min-w-25 basis-0 flex-col gap-2"
+              >
+                {onSelectedChange && filled ? (
+                  <button
+                    type="button"
+                    aria-pressed={selected === segment.id}
+                    onClick={() => press(segment.id)}
+                    className={cn('flex w-full flex-col gap-2 rounded-sm text-left', PRESSABLE, selected === segment.id && 'bg-surface-brand-faint')}
+                  >
+                    {inner}
+                  </button>
+                ) : (
+                  inner
+                )}
               </li>
             );
           })}
