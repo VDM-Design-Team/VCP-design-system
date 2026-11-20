@@ -27,6 +27,7 @@ a hint line to explain it, you want a card-style chooser, not this component.
 | `name` | `string` | `useId()` | Shared radio `name`. Generated so two groups on a page never bleed into each other |
 | `label` | `ReactNode` | — | Rendered as the `<legend>`. Always supply one |
 | `hideLabel` | `boolean` | `false` | Keeps the legend for screen readers, hides it visually (`sr-only`) |
+| `description` | `ReactNode` | — | A line under the legend about the whole group, such as why nothing can be picked. It is the group's description (`aria-describedby`), so it is heard with the legend |
 | `orientation` | `vertical \| horizontal` | `vertical` | `horizontal` only for short labels with no hints |
 | `disabled` | `boolean` | `false` | Disables the whole group via the `<fieldset>` |
 | `className` | `string` | — | Applied to the `<fieldset>` |

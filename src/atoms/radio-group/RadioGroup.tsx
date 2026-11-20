@@ -95,6 +95,8 @@ export interface RadioGroupProps
   label?: React.ReactNode;
   /** Keeps the legend for screen readers but hides it visually. */
   hideLabel?: boolean;
+  /** A line under the legend that says something about the whole group ("why nothing can be picked"). It is the group's description (`aria-describedby`), so a screen reader hears it with the legend. */
+  description?: React.ReactNode;
   /** Disables every option in the group. */
   disabled?: boolean;
 }
@@ -113,14 +115,17 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
       name,
       label,
       hideLabel,
+      description,
       orientation,
       disabled,
+      'aria-describedby': describedBy,
       ...props
     },
     ref,
   ) => {
     const uid = React.useId();
     const groupName = name ?? uid;
+    const descriptionId = description ? `${uid}-description` : undefined;
 
     const [internalValue, setInternalValue] = React.useState(defaultValue);
     const isControlled = value !== undefined;
@@ -135,6 +140,7 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
       <fieldset
         ref={ref}
         disabled={disabled}
+        aria-describedby={[describedBy, descriptionId].filter(Boolean).join(' ') || undefined}
         className={cn('m-0 min-w-0 border-0 p-0', className)}
         {...props}
       >
@@ -142,6 +148,11 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
           <legend className={cn('mb-2 p-0 font-sans text-label-sm-medium text-text-primary', hideLabel && 'sr-only')}>
             {label}
           </legend>
+        ) : null}
+        {description ? (
+          <p id={descriptionId} className="m-0 mb-2 font-sans text-body-sm-regular text-text-secondary">
+            {description}
+          </p>
         ) : null}
 
         <div className={cn(group({ orientation }))}>
