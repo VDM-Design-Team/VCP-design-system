@@ -35,11 +35,11 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | | Glyph | Then | Tooltip |
 |---|---|---|---|
 | **Child** | The split glyph | "1/3" | "Multipart Child: This part belongs to a multipart parent value and is completed independently. Parent ID: VCP-4321" |
-| **Parent** | VCP's own `arrows-split-source` | A progress ring (`DonutChart`, 20 across, 3 thick) | "Multipart Parent: This value was split into multiple parts, status is calculated from its parts. It currently has 3 child parts." |
+| **Parent** | VCP's own `arrows-split-source` | A progress ring (`DonutChart`, 16 across, 3 thick) | "Multipart Parent: This value was split into multiple parts, status is calculated from its parts. It currently has 3 child parts." |
 
 ## Tokens
 
-A white pill: `surface.neutral.base`, a `stroke.subtle` hairline, `radius.sm`, **28 high**, 8 across, 4 between; 20 glyphs and `label-sm-medium` (14) `text.secondary`, as Figma draws it. (A 24-high one-line version was tried, and design compared the two side by side and chose Figma's; proposed again in #424 and looked at again on 17 November 2026, the 28 stays.) The progress ring is a 20 `DonutChart`, 3 thick.
+A white pill: `surface.neutral.base`, a `stroke.subtle` hairline, `radius.sm`, **24 high**, 6 across, 4 between; 16 glyphs and `caption-md-medium` (12) `text.secondary`. **Figma draws it 28 high with 14 type and 20 glyphs; ours is 24 on purpose (decided 20 November 2026).** The 28 was a mistake in the first multipart design (the tag was drawn in a column of its own), and at 24 it sits level with the domain tag, the Parent chip and the counts on one line, starting at the cell's left edge however long the reference is: see "The layout is deliberately not Figma's" in `docs/av-table.md`. The progress ring is a 16 `DonutChart`, 3 thick.
 
 **It never shrinks or truncates**: it hugs its content however narrow the table gets (the table scrolls sideways instead).
 

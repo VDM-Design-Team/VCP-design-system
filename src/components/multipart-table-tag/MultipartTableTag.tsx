@@ -10,10 +10,15 @@ import { Tooltip } from '../../atoms/tooltip';
  *
  * - **A child** (`kind="child"`) shows the split glyph and **where it sits**: "1/3". Its tooltip: "Multipart Child: This part belongs to a
  *   multipart parent value and is completed independently. Parent ID: VCP-4321" (the ID when `parentRef` is given).
- * - **A parent** (`kind="parent"`) shows VCP's own parent glyph (`arrows-split-source`) and a **progress ring** (a 20 `DonutChart`, 3 thick) of how many of its parts are done. Its tooltip:
+ * - **A parent** (`kind="parent"`) shows VCP's own parent glyph (`arrows-split-source`) and a **progress ring** (a 16 `DonutChart`, 3 thick) of how many of its parts are done. Its tooltip:
  *   "Multipart Parent: This value was split into multiple parts, status is calculated from its parts. It currently has 3 child parts."
  *
- * A white pill with a hairline (`surface.neutral.base`, `stroke.subtle`), **28 high** with 14 type and 20 glyphs, as Figma draws it (design compared it side by side with a 24 one-line version and chose Figma's).
+ * A white pill with a hairline (`surface.neutral.base`, `stroke.subtle`), **24 high**, with 12 type and 16 glyphs. **This is deliberately smaller than Figma's 28 pill, and the AV table
+ * deliberately does not use Figma's two-column cell** (decided 20 November 2026, after the design lead raised it with CDL; it replaces the 10 and 17 November decisions to keep 28). The 28 was a
+ * mistake in the first multipart design, drawn in a column of its own: it is the only tag in the row taller than the 24 domain tag. At 24 the tag, the domain tag, the Parent chip and the counts
+ * all sit on **one line of metadata** under the title, starting at the cell's left edge. Figma's two columns start the other metadata under the *title*, whose left edge follows the width of
+ * the reference, so uneven ids (VCP-4321, VCP-54321, VCP-654321) move the domain tag, the Parent chip and the counts from row to row, and a longer id or Parent chip pushes them further out
+ * and widens the space between them and the tag. Keep it 24 and on that line; see `docs/av-table.md` before changing it.
  * **It is focusable, so the keyboard gets the tooltip too**, and it carries the same facts as words for a screen reader ("Multipart child, part 1 of 3" / "Multipart parent, 1 of 3 parts completed"): the
  * glyph and the ring are decoration. **Its tooltip opens above**, as Figma draws it: `Tooltip` flips and slides to stay on screen, so the table's edge no longer cuts it off.
  *
@@ -66,8 +71,8 @@ export const MultipartTableTag = React.forwardRef<HTMLSpanElement, MultipartTabl
           ref={ref}
           tabIndex={0}
           className={cn(
-            'inline-flex h-7 shrink-0 items-center gap-1 whitespace-nowrap rounded-sm border border-stroke-subtle bg-surface-neutral-base px-2 font-sans',
-            'text-label-sm-medium text-text-secondary',
+            'inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-sm border border-stroke-subtle bg-surface-neutral-base px-1.5 font-sans',
+            'text-caption-md-medium text-text-secondary',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
             className,
           )}
@@ -75,14 +80,14 @@ export const MultipartTableTag = React.forwardRef<HTMLSpanElement, MultipartTabl
         >
           <span className="sr-only">{spoken}</span>
           {/* The child's glyph is Phosphor's split; the parent's is VCP's own `arrows-split-source`. */}
-          <Icon name={child ? 'arrows-split' : 'arrows-split-source'} size="md" aria-hidden="true" className="shrink-0" />
+          <Icon name={child ? 'arrows-split' : 'arrows-split-source'} size="sm" aria-hidden="true" className="shrink-0" />
           {child ? (
             <span aria-hidden="true">
               {position}/{total}
             </span>
           ) : (
             <span aria-hidden="true" className="flex">
-              <DonutChart size={20} thickness={3} label="" value={completed} max={total} />
+              <DonutChart size={16} thickness={3} label="" value={completed} max={total} />
             </span>
           )}
         </span>
