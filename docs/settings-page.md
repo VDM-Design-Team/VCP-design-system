@@ -1,6 +1,6 @@
 # SettingsPage *(pattern)*
 
-The main content of the Settings page: the page title, a row of tabs, and the tab that is showing. It goes inside `AppShell`, which draws the
+The main content of the Settings page: the page title, a row of tabs, and the tab that is showing. It goes in `AppShell`'s `page` slot; the shell draws the
 sidebar, the top bar and the footer; this is what sits between them.
 
 Built to Figma's Settings pages (`Page_Template` → `Main Section`, user `80:3962` and admin `806:102049` in Pages & Flows).

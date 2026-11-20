@@ -5,11 +5,11 @@ import { TagManagement, type TagManagementProps } from '../tag-management';
 
 /**
  * DomainsPage — the main content of the Super Admin's Domains page: the title, then the lists the Super Admin keeps (Domains and Global Tags) as cards, with the
- * dialogs behind them. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Domain Page` in Pages & Flows (the
+ * dialogs behind them. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Domain Page` in Pages & Flows (the
  * page, Add New Tag, Add New Domain and Delete Domain).
  *
  * It is the one place the page's layout lives (the title, then the cards 32 in from the sides, as `AVListPage` lays it out), so the app only passes the lists
- * and what to do when one changes: **`<AppShell><DomainsPage management={{ lists, onAdd, … }} /></AppShell>`**.
+ * and what to do when one changes: **`<AppShell page={<DomainsPage management={{ lists, onAdd, … }} />} />`**.
  *
  * **It is controlled and holds no data.** The page owns the lists and changes them when `TagManagement` asks: see `docs/tag-management.md`.
  *

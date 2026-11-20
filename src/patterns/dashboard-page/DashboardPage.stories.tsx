@@ -109,7 +109,7 @@ const meta = {
       description: {
         component:
           'The main content of a dashboard: the title band with the Cycle / Quarter switch and the filters, then the chosen view’s cards in Figma’s order. ' +
-          'The page passes each card’s own props; a card shows only when it is passed, so a role is what the page passes. It goes inside `AppShell`.',
+          'The page passes each card’s own props; a card shows only when it is passed, so a role is what the page passes. It goes in `AppShell`’s `page` slot.',
       },
     },
   },

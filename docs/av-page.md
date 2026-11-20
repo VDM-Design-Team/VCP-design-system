@@ -1,6 +1,6 @@
 # AVPage *(pattern)*
 
-The main content of an Added Value's page, to read or to edit: the header, then two columns. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer.
+The main content of an Added Value's page, to read or to edit: the header, then two columns. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer.
 
 Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`…) and `AV Page: Editing AVs` (`Editing Existing AV`) in Pages & Flows.
 

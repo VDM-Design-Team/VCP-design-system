@@ -22,6 +22,20 @@ Page_Template
 Both `Content`s are Figma **slots**, so the design already draws this as a
 shell with a hole in it. That hole is `children`.
 
+**A whole page goes in `page`.** The page patterns (`AccountsPage`,
+`AVListPage`, `AVPage`, `ContactsPage`, `DashboardPage`,
+`DomainBudgetEditPage`, `DomainsPage`, `HolidayRegistryPage`, `PlanningPage`,
+`SettingsPage`, `TaskLogPage`) are the title band and the body together, and
+each brings its own 32 at the sides. `page` places one flush, in place of
+`header` and `children`:
+
+```tsx
+<AppShell sidebar={<Sidebar … />} topBar={<TopBar … />} page={<AccountsPage table={{…}} />} />
+```
+
+In `children` the same page would get the body's 32 as well and land 64 in.
+(Before this slot, the page patterns' docs said to do exactly that.)
+
 ## Composed of
 
 | Piece | Tier | Role here |
@@ -41,7 +55,8 @@ shell forwards:
 | `sidebar` | `Sidebar` | Four user types and a collapsed twin — its API is its own |
 | `topBar` | `TopBar` | Two variants (primary action or logo) — likewise |
 | `header` | `PageTitle` or `AVHeader` | Either fits; the shell does not decide which — see below |
-| `children` | The page | Inset 32 from each side, as the design's body slot is |
+| `children` | The page's body | Inset 32 from each side, as the design's body slot is |
+| `page` | A page pattern (`AccountsPage`, `PlanningPage`, …) | It is the title band and the body together, with its own 32, so it is placed flush in place of both |
 | `footer` | `Footer` | Defaults to the system one. Pass your own, or `null` for none |
 
 **Why slots.** The Claude Design export mirrored twenty of `Sidebar`'s and
@@ -85,7 +100,8 @@ themes when it was added.
 
 | Use | For |
 |---|---|
-| `AppShell` | Every signed-in page. Give it the rail, the bar and the title band; put the page in `children` |
+| `AppShell` | Every signed-in page. Give it the rail, the bar and the title band, and put the page's body in `children` |
+| `AppShell` with `page` | A page that has a page pattern: put the pattern in `page`, with no `header` or `children` |
 | `Sidebar` / `TopBar` alone | Nothing, once the shell exists — both assume the parent it provides |
 | `EmailLayout` | Mail, when it is built. Different chrome entirely |
 
@@ -96,7 +112,8 @@ themes when it was added.
 | `sidebar` | `ReactNode` | — | A `Sidebar`. Full height, down the left. Left out, the page has no rail (Figma's notification inbox page: see `docs/notification-inbox.md`) |
 | `topBar` | `ReactNode` | required | A `TopBar`. Across the top of everything right of the rail |
 | `header` | `ReactNode` | — | The title band, inside `<main>` so its `h1` is the page's |
-| `children` | `ReactNode` | required | The page |
+| `children` | `ReactNode` | — | The page's body, inset 32 from each side. Not drawn when `page` is given |
+| `page` | `ReactNode` | — | A whole page pattern, placed flush (it brings its own 32). Use it instead of `header` and `children`; when it is given, those two are not drawn |
 | `footer` | `ReactNode` | `<Footer />` | Your own, or `null` for none |
 
 Everything else spreads onto the root `<div>`. `className` merges, so
@@ -159,6 +176,8 @@ file draws one. It can be added when one does, as a second slot.
   one; pass `footer` to change it.
 - **Don't put the title band in `children`** to skip the slot. The body is
   already inset 32, and the band carries its own 32, so it lands 64 in.
+- **Don't put a page pattern in `children`** (or in `header`). It carries its
+  own title band and its own 32: it goes in `page`.
 - **Don't add the 390-wide detail column** until a page in the pages file
   draws one.
 - **Don't fix the top bar's height here.** If design settles on 60, that
