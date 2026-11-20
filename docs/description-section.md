@@ -33,7 +33,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `headingLevel` | `'h2' \| 'h3' \| 'h4'` | `h2` | The level to draw the title as. A screen reader user jumps between headings, so it has to fit the page's outline: `h2` directly under the page's `h1`, `h3` inside a modal whose title is an `h2` |
 | `open` / `onOpenChange` | `boolean` / `(open) => void` | — | Controlled: whether the cards and files are showing. Every section folds; this is the toggle's state |
 | `defaultOpen` | `boolean` | `true` | Uncontrolled: whether it starts open |
-| `onAdd` / `addLabel` | `() => void` / `string` | — / "Add problem" | Renders the round add button after the title. Leave it off for a view. Ignored on desired outcome |
+| `onAdd` / `addLabel` | `() => void` / `string` | — / "Add problem" | Renders the round add button after the title. **Problems only** (ignored on the other sections): adding a problem adds a whole set, see "A problem is a set" below. Leave it off for a view |
 | `onAttach` / `attachLabel` | `() => void` / `string` | — / `Attach files` | Renders the paperclip under the cards and reports the press. It does not open anything: the page opens the file picker, or the attachment modal with a `Dropzone`. Leave it off for a view. Ignored on desired outcome |
 | `attachments` | `ReactNode` | — | The attached files, as `FileAttachment`s (an image shows its own thumbnail through `thumb`), to the left of the paperclip. Opening one leads to `AttachmentPreview` |
 | `children` | `ReactNode` | — | The `DescriptionCard`s, with no `type` or `position` of their own: the section gives each its type (so its colour and prompt), its number, and a name for its remove button ("Remove problem 2"), unless the card sets its own. Each is drawn as an item of an ordered list, 16 apart |
@@ -44,9 +44,9 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `type` | Title | Cards | Add | Files |
 |---|---|---|---|---|
 | `problem` | Problems | red | yes | yes |
-| `solution` | Solutions | green | yes | yes |
-| `deliverable` | Acceptance Criteria / Deliverables | the deliverable colour | yes | yes |
-| `desired-outcome` | Desired outcome | dark | no (it is one card) | no |
+| `solution` | Solutions | green | no | yes |
+| `deliverable` | Acceptance Criteria / Deliverables | the deliverable colour | no | yes |
+| `desired-outcome` | Desired outcome | dark | no (one card per set, added by the problem) | no |
 
 The title is fixed, not a prop: a section is not a free-form container, and one name per
 type keeps the page consistent. This table is the one place the titles live.
@@ -67,9 +67,17 @@ new tokens.
 - A `<section>` named by its heading (`aria-labelledby`), so each is a region a screen reader can
   jump to. The cards are an `ol`, so "item 2 of 3" is announced; the number block is decorative.
 - **The fold button** is an icon button at the right of the header, named for what it does and to which section ("Collapse Problems" / "Expand Problems"), with `aria-controls` the body. Only it is the toggle; the title is plain text. The body is hidden, not unmounted, so typed text survives folding, and it slides (200, ease-out); folding also dissolves the content over 100 as it lifts a little, so it is not seen being squeezed. None of it under reduced motion.
-- The add button's default name is "Add problem" ("Add solution"…), so a page with several sections has
-  distinct buttons. The paperclip is "Attach files".
+- The add button is on the Problems section alone (default name "Add problem"). The paperclip is "Attach files".
 - The add button is 24 to look at and 40 to press (its target reaches 8 past the circle).
+
+### A problem is a set — the page's job
+
+An Added Value's description is a list of **sets**. A set is one problem with the solution, the acceptance criteria / deliverable and the desired outcome that belong to it, so problem 1 goes with solution 1, acceptance criteria 1 and outcome 1. The problem is the one in control:
+
+- **Add** (the Problems section's button) adds a whole set: a new card in each of the four sections, with the same number. Two problems mean two solutions, two acceptance criteria and two outcomes.
+- **Remove** (the problem card's button) deletes the whole set: the card in each of the four sections goes, and the cards after it are renumbered.
+
+The components only **report** the press (`onAdd`, `onRemove`); the page owns the sets and does both in one step, so the four lists never get out of step. That is why the other sections have no add or remove of their own, and why a solution's number is the problem's. After a delete, the page raises the `undoDeletion("Problem set")` toast (`toast/recipes.ts`), as Figma draws it, and the Undo puts the whole set back.
 
 ### Focus after a remove — the page's job
 
@@ -79,13 +87,14 @@ page and a keyboard or screen-reader user is sent back to the top (CLAUDE.md: "N
 | What is left | Focus goes to |
 |---|---|
 | A card in its place (the one that followed it) | That card's **field** |
-| It was the last card | The section's **Add** button ("Add problem", "Add solution"…) |
+| It was the last card | The section's **Add** button ("Add problem") |
 
 Do it once the removed card has left the DOM (an effect on the cards). The cards are renumbered as one goes, and their remove buttons' names follow ("Remove problem 2"), so find the next one by its place, not its old name. The `RemovingACard` story shows it and asserts
 `document.activeElement`.
 
 ## Don't
 
+- **Don't add or remove cards in the other sections.** The problem controls the set: only Problems has an add button, and only a problem card has a remove button. Passing `onAdd` to a solution or deliverable section, or `onRemove` to one of its cards, does nothing.
 - **Don't put the cards' logic here.** Whether a card is editing, its text and its remove are the
   card's and the caller's.
 - **Don't offer attachments on Desired Outcome.** It has none in the design: pass neither `onAttach` nor `attachments`.
