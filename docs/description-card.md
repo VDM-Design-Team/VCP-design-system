@@ -39,7 +39,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `invalid` | `boolean` | — | Editing: the critical border and `aria-invalid` |
 | `error` | `ReactNode` | — | Editing: a message under the card in the critical colour (`role="alert"`). Implies `invalid`; the field is described by it |
 | `label` | `string` | "Problem 1" … | Editing: the field's accessible name |
-| `onRemove` / `removeLabel` | `() => void` / `string` | — / `Remove` | Editing: a remove button inside the card's right edge. It appears on hover and while the card has focus (so while typing), and is always shown on a touch screen, which has no hover. It only reports; the list is yours. Say which: "Remove problem 2" |
+| `onRemove` / `removeLabel` | `() => void` / `string` | — / `Remove` | Editing, **problem cards only** (ignored on the other types; a problem owns its set, so removing it removes the solution, deliverable and outcome with the same number, which is the page's job): a remove button inside the card's right edge. It appears on hover and while the card has focus (so while typing), and is always shown on a touch screen, which has no hover. It only reports; the list is yours. Say which: "Remove problem 2" |
 | `className` | `string` | — | Merged via `cn()` |
 
 A card is one row. The list around it, the section's title, the add button and any
