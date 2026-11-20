@@ -1,7 +1,7 @@
 # DashboardPage *(pattern)*
 
 The main content of a dashboard: the title band (with the Cycle / Quarter switch and the filters) and the chosen view's cards in the order Figma draws them.
-It goes inside `AppShell`, which draws the sidebar, the top bar and the footer.
+It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer.
 
 Built to Figma's `Main Views: Cycle & Quarter` (the Development admin's dashboard, `Admin Dashboard Cycle overview` and `Quarterly overview` in Pages & Flows).
 

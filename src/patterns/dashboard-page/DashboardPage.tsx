@@ -14,7 +14,7 @@ import { ValueCards, type ValueCardsProps } from '../value-cards';
 
 /**
  * DashboardPage — the main content of a dashboard: the title band (with the Cycle / Quarter switch and the filters) and the chosen view's cards in the
- * order Figma draws them. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Main Views: Cycle & Quarter`
+ * order Figma draws them. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Main Views: Cycle & Quarter`
  * (the Development admin's dashboard).
  *
  * - **Cycle view**, top to bottom: **Cycle Summary**, **Value Cards**, **In Case You Missed It**, **Team Capacity**, **User Capacity**, **Sprint Metrics**,

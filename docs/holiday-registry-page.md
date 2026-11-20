@@ -1,6 +1,6 @@
 # HolidayRegistryPage *(pattern)*
 
-The main content of the Holiday Registry page: the title, then the table. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Holiday Registry` page in Pages & Flows (the admin and the normal-user views, and the empty state).
+The main content of the Holiday Registry page: the title, then the table. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Holiday Registry` page in Pages & Flows (the admin and the normal-user views, and the empty state).
 
 ## Composed of
 
@@ -15,7 +15,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `HolidayRegistryPage` | The whole page: **`<AppShell><HolidayRegistryPage table={{…}} /></AppShell>`** |
+| `HolidayRegistryPage` | The whole page: **`<AppShell page={<HolidayRegistryPage table={{…}} />} />`** |
 | `HolidayTable` on its own | The table inside something else |
 
 ## What it lays out

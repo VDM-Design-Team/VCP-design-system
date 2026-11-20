@@ -3,10 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 /* Storybook's own hook, not React's: the Playground's render writes its args
    back when the rail's toggle or the bar's mode switch is pressed. */
 import { useArgs } from 'storybook/preview-api';
+import { expect, within } from 'storybook/test';
 import { AppShell } from './AppShell';
 import { Sidebar, type SidebarUserType } from '../../patterns/sidebar';
 import { NAV_BY_USER_TYPE } from '../../patterns/sidebar/Sidebar';
 import { TopBar } from '../../patterns/top-bar';
+import { ContactsPage } from '../../patterns/contacts-page';
 import { AVHeader } from '../../patterns/av-header';
 import { PageTitle } from '../../components/page-title';
 import { AV_STATUSES, type AVStatus } from '../../components/status-tag';
@@ -128,6 +130,7 @@ const meta = {
     header: { control: false },
     footer: { control: false },
     children: { control: false },
+    page: { control: false },
   },
 } satisfies Meta<typeof AppShell>;
 
@@ -248,7 +251,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
       expanded: true,
       /* The shell's own slots take elements, which a control can't build;
          every control here builds one. Matched on the shown name. */
-      exclude: ['sidebar', 'topBar', 'header', 'children', 'footer'],
+      exclude: ['sidebar', 'topBar', 'header', 'children', 'page', 'footer'],
     },
   },
   /* As `Default` opens, plus the bar's mode switch, so the theme can be
@@ -515,6 +518,47 @@ export const WithAVHeader: Story = {
         Cut the onboarding form from nine fields to four and defer the rest to first use.
       </Panel>
     ),
+  },
+};
+
+/**
+ * A whole page pattern in the `page` slot. `ContactsPage` is the title band and the body together and
+ * brings its own 32 at the sides, so the shell places it flush: the title and the table both sit 32 in,
+ * as on every other page. In `children` it would land 64 in. `page` takes the place of `header` and
+ * `children`: this story keeps the meta's dashboard in both, and neither is drawn.
+ */
+export const WithAPagePattern: Story = {
+  args: {
+    sidebar: <Rail userType="super-admin" />,
+    page: (
+      <ContactsPage
+        table={{
+          rows: [
+            { id: 1, email: 'michael.ross@example.com', subject: 'Access to the Design domain', message: 'Could someone give me access to the Design domain?' },
+            { id: 2, email: 'sara.lind@example.com', subject: 'Capacity points look wrong', message: 'My capacity for Cycle 27 shows 0 points.' },
+          ],
+          page: 1,
+          pageCount: 1,
+          itemCount: 2,
+          pageSize: 10,
+        }}
+      />
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const main = canvasElement.querySelector('main')!;
+    const left = main.getBoundingClientRect().left;
+    const title = c.getByRole('heading', { level: 1, name: 'Contact List' });
+    /* The title and the table are both 32 in from the page's edge, not 64. */
+    await expect(Math.round(title.getBoundingClientRect().left - left)).toBe(32);
+    /* The table's card, inside the body column's 32 padding. */
+    const card = main.firstElementChild!.children[1]!.firstElementChild!;
+    await expect(Math.round(card.getBoundingClientRect().left - left)).toBe(32);
+    await expect(Math.round(main.getBoundingClientRect().right - card.getBoundingClientRect().right)).toBe(32);
+    /* `page` replaces `header` and `children`. */
+    await expect(c.queryByRole('heading', { level: 1, name: 'Dashboard' })).toBeNull();
+    await expect(c.queryByText('Recent activity')).toBeNull();
   },
 };
 

@@ -22,6 +22,13 @@ import { Footer } from '../../atoms/footer';
  * Both `Content`s are Figma **slots**, so the design already draws this as a
  * shell with a hole in it. That hole is `children`.
  *
+ * **A whole page goes in `page`.** The page patterns (`AccountsPage`,
+ * `PlanningPage`, `DashboardPage`, `AVPage` and the rest) are the title band
+ * and the body together, and each brings its own 32 at the sides. In
+ * `children` they would get the body's 32 as well and land 64 in, so `page`
+ * places them flush, in place of `header` and `children`:
+ * `<AppShell sidebar={…} topBar={…} page={<AccountsPage table={{…}} />} />`.
+ *
  * **The rail, the bar and the title band are slots too, and that is the
  * point.** The Claude Design export mirrored twenty of `Sidebar`'s and
  * `TopBar`'s props onto the shell so it could render them itself — one more
@@ -62,7 +69,13 @@ export interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
    */
   header?: React.ReactNode;
   /** The page itself. Inset 32 from each side, as the design's body slot is. */
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  /**
+   * A whole page pattern (`AccountsPage`, `PlanningPage`, `AVPage`, …): its title band and body
+   * together, placed flush because it brings its own 32 at the sides. Use it instead of `header` and
+   * `children`; when it is given, those two are not drawn.
+   */
+  page?: React.ReactNode;
   /**
    * What ends the page. Defaults to the system `Footer`; pass your own to
    * change it, or `null` to leave the page without one.
@@ -71,7 +84,7 @@ export interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(
-  ({ className, sidebar, topBar, header, children, footer, ...props }, ref) => (
+  ({ className, sidebar, topBar, header, children, page, footer, ...props }, ref) => (
     /* The viewport, as a row: rail beside everything else. */
     <div
       ref={ref}
@@ -100,10 +113,14 @@ export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(
           )}
         >
           <main className="flex min-w-0 flex-1 flex-col">
-            {header}
-            {/* The design's body slot: 32 each side. No vertical inset — the
-                title band's 16 below and the footer's own band supply it. */}
-            <div className="flex-1 px-8">{children}</div>
+            {page ?? (
+              <>
+                {header}
+                {/* The design's body slot: 32 each side. No vertical inset — the
+                    title band's 16 below and the footer's own band supply it. */}
+                <div className="flex-1 px-8">{children}</div>
+              </>
+            )}
           </main>
           {footer === undefined ? <Footer /> : footer}
         </div>

@@ -15,7 +15,7 @@ import { DetailCard, type DetailCardProps } from '../detail-card';
 import { MultipartSection, type MultipartSectionProps } from '../multipart-section';
 
 /**
- * AVPage — the main content of an Added Value's page, to read or to edit: the header, then two columns. It goes inside `AppShell`, which draws the sidebar,
+ * AVPage — the main content of an Added Value's page, to read or to edit: the header, then two columns. It goes in `AppShell`'s `page` slot; the shell draws the sidebar,
  * the top bar and the footer. Built to Figma's `AV Page: Viewing AVs` and `AV Page: Editing AVs`.
  *
  * - **Left column, top to bottom:** the title (the reference and title to read, a **Title** field to edit), the four description blocks (**Problems**,

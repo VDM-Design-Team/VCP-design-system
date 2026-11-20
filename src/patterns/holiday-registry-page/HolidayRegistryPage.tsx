@@ -4,11 +4,11 @@ import { PageTitle } from '../../components/page-title';
 import { HolidayTable, type HolidayTableProps } from '../holiday-table';
 
 /**
- * HolidayRegistryPage — the main content of the Holiday Registry page: the title, then the table. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's
+ * HolidayRegistryPage — the main content of the Holiday Registry page: the title, then the table. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's
  * `Holiday Registry` page (the admin and the normal-user views, and the empty state).
  *
  * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data:
- * **`<AppShell><HolidayRegistryPage table={{…}} /></AppShell>`**. The filters, **Add Holiday**, **Import from Hubstaff** and the pagination are inside the table's card.
+ * **`<AppShell page={<HolidayRegistryPage table={{…}} />} />`**. The filters, **Add Holiday**, **Import from Hubstaff** and the pagination are inside the table's card.
  *
  * **It is controlled and holds no data.** The page owns the rows, the filters, the sort and the page, and what the table's buttons do (open `HolidayModal`, confirm a removal, move focus on afterwards):
  * see `docs/holiday-table.md`. `table.admin` is what makes it the admin's page.

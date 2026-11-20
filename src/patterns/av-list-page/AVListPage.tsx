@@ -8,8 +8,8 @@ import { BulkActionBar, type BulkActionBarProps } from '../bulk-action-bar';
 import { FilterBar, type FilterBarProps } from '../filter-bar';
 
 /**
- * AVListPage — the main content of a page that lists Added Values: the title, an optional strip of totals, and the table with its filters. It goes inside
- * `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's list pages: **My Values**, **Assigned**, **Drafts**, **Manage Added Value** and the
+ * AVListPage — the main content of a page that lists Added Values: the title, an optional strip of totals, and the table with its filters. It goes in `AppShell`'s
+ * `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's list pages: **My Values**, **Assigned**, **Drafts**, **Manage Added Value** and the
  * three **Archive** tabs (Completed, Rejected, Backlogged).
  *
  * **One layout, and the pages differ by what they pass** (the same typed sections as `DashboardPage`):
