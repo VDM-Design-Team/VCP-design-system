@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
 import { Pagination, type PaginationProps } from '../../atoms/pagination';
+import { Banner, type BannerProps } from '../../components/banner';
 import { PageTitle } from '../../components/page-title';
 import { PlanningFilters, type PlanningFiltersProps } from '../planning-filters';
 import { PlanningTable, type PlanningTableProps } from '../planning-table';
 
 /**
- * PlanningPage — the main content of the Planning page: the title, the filter row, the Cycle and Backlog sections, and the pages beneath. It goes inside `AppShell`, which draws the
+ * PlanningPage — the main content of the Planning page: the title, the filter row, an optional notice, the Cycle and Backlog sections, and the pages beneath. It goes inside `AppShell`, which draws the
  * sidebar, the top bar and the footer. Built to Figma's `Planning Page` (the `Planning List`, with its inline-editing and drag-from-Backlog flows).
  *
  * **One layout, typed sections** (as `AVListPage` and `DashboardPage` are): a section shows only when it is passed. The filters and the pagination are optional; the table is not.
@@ -26,18 +27,24 @@ export interface PlanningPageProps extends Omit<React.HTMLAttributes<HTMLDivElem
   title?: string;
   /** The search, status and priority filters, Reset and View Cycle (`PlanningFilters`' props). Leave it out and the page has none. */
   filters?: PlanningFiltersProps;
+  /**
+   * A notice between the filters and the sections, the column's width: something about the plan as a whole that the person should act on,
+   * such as people booked past their capacity cap. `Banner`'s props. Leave it out and there is none.
+   */
+  banner?: BannerProps;
   /** The Cycle and Backlog sections: `PlanningTable`'s own props. */
   table: PlanningTableProps;
   /** The pages beneath the last section (`Pagination`'s props). Leave it out and there are none. */
   pagination?: PaginationProps;
 }
 
-export function PlanningPage({ className, title = 'Planning List', filters, table, pagination, ...props }: PlanningPageProps) {
+export function PlanningPage({ className, title = 'Planning List', filters, banner, table, pagination, ...props }: PlanningPageProps) {
   return (
     <div className={cn('flex min-w-0 flex-col font-sans', className)} {...props}>
       <PageTitle title={title} />
       <div className="flex min-w-0 flex-col gap-4 px-8 pb-8">
         {filters && <PlanningFilters {...filters} />}
+        {banner && <Banner {...banner} />}
         <PlanningTable {...table} />
         {pagination && (
           <div className="flex justify-end">

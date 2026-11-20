@@ -136,6 +136,29 @@ export const Filtering: Story = {
   },
 };
 
+/** A notice about the plan as a whole sits between the filters and the sections, the column's width: here, people booked past their capacity cap. */
+export const WithABanner: Story = {
+  render: () => (
+    <Page
+      banner={{
+        tone: 'warning',
+        title: '2 people are over their cap',
+        children: 'Jack Lee: 34 of 30 points in Cycle 27 · Mia Park: 22 of 20 points in Cycle 28. Move work to another cycle or person.',
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const banner = c.getByText('2 people are over their cap');
+    await expect(banner).toBeVisible();
+    /* It sits after the filters and before the first section. */
+    const search = c.getByRole('search', { name: 'Filter the planning list' });
+    const cycle = c.getByText('Cycle 27');
+    await expect(search.compareDocumentPosition(banner) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    await expect(banner.compareDocumentPosition(cycle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  },
+};
+
 /** Typed sections: leave out the filters and the pagination and the page is the title and the sections. */
 export const SectionsOnly: Story = {
   render: () => <Page withFilters={false} withPagination={false} />,
