@@ -76,6 +76,8 @@ rather than a `variant` prop.
 
 The reference ("VCP-12345") is a `CopyText`: it underlines on hover, **copies the reference on click** and says "Copied" for a moment, as Figma's `_AV_Table_ID` draws it (Default, and a Tooltip state with the bubble). It does not open the AV. With `onOpen`, **the title** is the button that opens it, as in the Planning table. Figma's prototype draws no click on the title, so the title is our choice of where opening lives; if design wants another, it is a change in this one place.
 
+**The title keeps room to be pressed.** It is the way into the AV, so it never gets narrower than **160** (`min-w-40`, about sixteen characters): in a squeezed table the whole table scrolls sideways before the title is cut to a sliver. **On hover the title turns brand blue and underlines**, as the Planning table's does, to show it is a button. Figma draws neither the hover nor a click on the title, so both are proposals: see the questions on the PR that added them.
+
 ## Props
 
 | Prop | Type | Default | Notes |

@@ -219,7 +219,8 @@ function TitleButton({ row, onOpen }: { row: AVTableRow; onOpen: (row: AVTableRo
   const ref = React.useRef<HTMLButtonElement>(null);
   const truncated = useIsTruncated(ref, [row.title]);
   return (
-    <Tooltip content={row.title} describe={false} disabled={!truncated} className="min-w-0 max-w-full">
+    /* `min-w-40` (160): the title is the way into the AV, so it keeps room to be pressed however narrow the cell gets; below it the table scrolls sideways instead of squeezing the title to a sliver. */
+    <Tooltip content={row.title} describe={false} disabled={!truncated} className="min-w-40 max-w-full">
       <button
         ref={ref}
         type="button"

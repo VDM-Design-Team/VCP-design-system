@@ -330,6 +330,22 @@ export const CopyingTheReference: Story = {
   },
 };
 
+/** In a narrow space the title keeps at least 160 to be pressed in (the table scrolls sideways instead): it is the way into the AV. */
+export const NarrowTitleStaysClickable: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div className="max-w-xl bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const title = canvas.getByRole('button', { name: /Audit every empty state/ });
+    await expect(Math.round(title.getBoundingClientRect().width)).toBeGreaterThanOrEqual(160);
+  },
+};
+
 /** Nothing to show. The copy is the caller's — `EmptyState` fits here. */
 export const Empty: Story = {
   render: (args) => (
