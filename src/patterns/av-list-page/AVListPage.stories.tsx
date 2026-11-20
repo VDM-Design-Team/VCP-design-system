@@ -135,6 +135,76 @@ export const MyValues: Story = {
   },
 };
 
+/**
+ * The stats are filters. Pressing one filters the table below; pressing it again clears it. **Active** is every custom status between Accepted and Completed, **Overdue** is by due date, and a
+ * stat with a count of 0 (Pending) cannot be pressed. The strip only reports which stat; what each one lists is this page's.
+ */
+export const MyValuesFilteredByStat: Story = {
+  args: { title: 'My Values' },
+  render: (args) => {
+    const all: AVTableRow[] = [
+      { ...row(1, { status: 'Draft' }), title: 'A draft' },
+      { ...row(2, { status: 'Draft' }), title: 'Another draft' },
+      { ...row(3, { status: 'Accepted' }), title: 'An accepted one' },
+      { ...row(4, { custom: 'In QA' }), title: 'In the middle of its chain' },
+      { ...row(5, { status: 'Completed' }), title: 'A finished one' },
+      { ...row(6, { custom: 'Ready for Deploy' }), title: 'Late', due: { date: '2025-01-01', proximity: 'overdue' } },
+    ];
+    const [selected, setSelected] = React.useState<string | number | null>(null);
+    const matches: Record<string, (r: AVTableRow) => boolean> = {
+      completed: (r) => r.status?.status === 'Completed',
+      draft: (r) => r.status?.status === 'Draft',
+      pending: (r) => r.status?.status === 'Pending',
+      accepted: (r) => r.status?.status === 'Accepted',
+      /* Every custom status between Accepted and Completed. */
+      active: (r) => Boolean(r.status?.custom),
+      overdue: (r) => r.due?.proximity === 'overdue',
+    };
+    const count = (key: string) => all.filter(matches[key]!).length;
+    const shown = selected === null ? all : all.filter(matches[String(selected)]!);
+    return (
+      <AVListPage
+        {...args}
+        stats={{
+          user: { name: 'Username' },
+          total: all.length,
+          completed: count('completed'),
+          segments: [
+            { id: 'draft', label: 'Draft', count: count('draft'), tone: 'neutral' },
+            { id: 'pending', label: 'Pending', count: count('pending'), tone: 'yellow' },
+            { id: 'accepted', label: 'Accepted', count: count('accepted'), tone: 'blue' },
+            { id: 'active', label: 'Active', count: count('active'), tone: 'brand' },
+            { id: 'overdue', label: 'Overdue', count: count('overdue'), tone: 'critical' },
+          ],
+          selected,
+          onSelectedChange: setSelected,
+        }}
+        table={{ rows: shown, caption: 'Added Values' }}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await expect(c.getAllByRole('row')).toHaveLength(1 + 6);
+    /* Draft filters the table to the drafts. */
+    await userEvent.click(c.getByRole('button', { name: /Draft/ }));
+    await expect(c.getByRole('button', { name: /Draft/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(c.getAllByRole('row')).toHaveLength(1 + 2);
+    /* Active is every custom status between Accepted and Completed. */
+    await userEvent.click(c.getByRole('button', { name: /Active/ }));
+    await expect(c.getAllByRole('row')).toHaveLength(1 + 2);
+    /* A second press clears it. */
+    await userEvent.click(c.getByRole('button', { name: /Active/ }));
+    await expect(c.getAllByRole('row')).toHaveLength(1 + 6);
+    /* Pending has none, so it is not a button. Overdue and Completed are. */
+    await expect(c.queryByRole('button', { name: /Pending/ })).toBeNull();
+    await userEvent.click(c.getByRole('button', { name: /Overdue/ }));
+    await expect(c.getAllByRole('row')).toHaveLength(1 + 1);
+    await userEvent.click(c.getByRole('button', { name: /Completed/ }));
+    await expect(c.getAllByRole('row')).toHaveLength(1 + 1);
+  },
+};
+
 /** Assigned: no strip, no extra columns. */
 export const Assigned: Story = {
   args: { title: 'Assigned Values' },
