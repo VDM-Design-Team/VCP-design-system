@@ -54,7 +54,7 @@ const MEMBERS = [{ id: 'me', name: 'John Smith' }, { id: 'amy', name: 'Amy Lee' 
 
 /** The page to read: an Added Value that has been accepted. */
 const VIEW: AVPageProps = {
-  header: { title: 'VCP-123', backLabel: 'Back to Assigned', onBack: fn(), role: 'assignee', status: 'Accepted', onTransition: fn() },
+  header: { title: 'VCP-123', backLabel: 'Back to Assigned', onBack: fn(), role: 'assignee', status: 'Accepted', onTransition: fn(), menu: { onEdit: fn(), onDelete: fn() } },
   title: { reference: 'VCP-1234', value: 'Some Title Here' },
   description: { problem: { ...read('problem') }, solution: { ...read('solution') }, deliverable: { ...read('deliverable') }, 'desired-outcome': { ...read('desired-outcome') } },
   history: { count: 3 },
@@ -131,6 +131,11 @@ export const Reading: Story = {
     /* The status buttons are the header's when reading. */
     await userEvent.click(c.getByRole('button', { name: 'Move to In Progress' }));
     await expect(args.header.onTransition).toHaveBeenCalled();
+    /* The ⋮ menu is on their right: after the status buttons, in the same band. */
+    const move = c.getByRole('button', { name: 'Move to In Progress' });
+    const options = c.getByRole('button', { name: 'AV options' });
+    await expect(options.getBoundingClientRect().left).toBeGreaterThanOrEqual(move.getBoundingClientRect().right);
+    await expect(Boolean(move.compareDocumentPosition(options) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
     await expect(c.getByRole('heading', { name: 'Deliverables' })).toBeVisible();
     await expect(c.queryByRole('button', { name: 'Discard' })).toBeNull();
   },
@@ -203,7 +208,8 @@ export const Editing: Story = {
     const title = c.getByRole('textbox', { name: 'Title' });
     await userEvent.type(title, 'A new Added Value');
     await expect(title).toHaveValue('A new Added Value');
-    /* Not in the header; in the bar below the columns. */
+    /* Not in the header; in the bar below the columns. The ⋮ menu is for reading too. */
+    await expect(c.queryByRole('button', { name: 'AV options' })).toBeNull();
     await expect(c.getByRole('button', { name: 'Save as Draft' })).toBeVisible();
     await expect(c.getByRole('button', { name: 'Submit' })).toBeVisible();
     await userEvent.click(c.getByRole('button', { name: 'Discard' }));
