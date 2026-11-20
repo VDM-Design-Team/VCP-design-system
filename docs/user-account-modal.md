@@ -86,8 +86,8 @@ None of its own: the fields are `Input`, `Select` and `Stepper`; the section hea
 
 The two selects are `emphasis="regular"`, like the inputs beside them: Figma draws all four fields regular.
 
-**Differences from Figma, on purpose.** The photo is 48 (the system's largest avatar is 36, stretched here); Capacity Points' Stepper and Save are
-both 40 high (Figma's Save is a 36 small button).
+**Differences from Figma, on purpose.** Capacity Points' Stepper and Save are both 40 high (Figma's Save is a 36 small button). The photo is 48, as Figma
+draws it: the avatar's `3xl` size (Figma's XXL).
 
 ## Accessibility
 
