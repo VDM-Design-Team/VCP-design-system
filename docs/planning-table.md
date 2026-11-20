@@ -113,7 +113,9 @@ Every date worked out this way is the one the table animates (`animated`, above)
 
 ### An estimated date is always a weekday *(from the design lead, 20 November 2026)*
 
-Saturday and Sunday are not working days. A task's length is a number of **working days**, and it stays that number however many weekends fall inside the range. So the caller adjusts every estimate before it is returned, so that **an estimated date never falls on a Saturday or a Sunday**:
+**These are rules for whoever calculates the dates, which is the backend, not the frontend.** The design system and the page do no date arithmetic: they show the dates they are given and mark them `estimated` (and `animated`). The rules are written here so design, the backend and QA agree on what an estimated date is.
+
+Saturday and Sunday are not working days. A task's length is a number of **working days**, and it stays that number however many weekends fall inside the range. So every estimate is adjusted before it reaches the page, so that **an estimated date never falls on a Saturday or a Sunday**:
 
 | What is estimated | The rule |
 |---|---|
