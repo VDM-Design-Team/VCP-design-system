@@ -85,12 +85,11 @@ const OUTLINE: Record<StatsSegmentTone, string> = {
 const MEDIUM_24 = 'text-[24px] font-medium leading-9'; // ds-lint-ignore — no heading-lg-medium in the ramp
 
 /* A figure over its label. */
-function Figure({ label, bold, children }: { label: string; bold?: boolean; children: React.ReactNode }) {
+function Figure({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
       <span className="text-body-sm-medium text-text-tertiary">{label}</span>
-      {/* Selected, Figma draws the figure 24 bold (the ramp has it); at rest it is the 24 medium exception above. */}
-      <span className={cn('flex items-center gap-1.5 text-text-primary', bold ? 'text-heading-lg-bold' : MEDIUM_24)}>{children}</span>
+      <span className={cn('flex items-center gap-1.5 text-text-primary', MEDIUM_24)}>{children}</span>
     </div>
   );
 }
@@ -140,7 +139,7 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
     /* Pressing the selected stat again clears it. */
     const press = (key: string | number) => onSelectedChange?.(selected === key ? null : key);
     const completedFigure = (
-      <Figure label={completedLabel} bold={selected === 'completed'}>
+      <Figure label={completedLabel}>
         {completed}
         <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
       </Figure>
@@ -164,7 +163,8 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
             <Avatar size="lg" name={user.name} src={user.src} />
             <span className="text-body-sm-regular text-text-primary">{user.name}</span>
           </div>
-          <Divider orientation="vertical" className="self-stretch" />
+          {/* Figma draws this line 2 thick in `stroke.subtle`, the same as the lines beside each status: the atom's own 1 in `stroke.default` read as a different line. */}
+          <Divider orientation="vertical" className="w-0.5 self-stretch bg-stroke-subtle" />
           <div className="flex items-center gap-6">
             <Figure label={totalLabel}>{total}</Figure>
             {onSelectedChange && completed > 0 ? (
