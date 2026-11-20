@@ -50,7 +50,7 @@ With `onSelectedChange`, the stats filter the table below (Figma's `My Values Pa
 - **Which stats.** Completed, Draft, Pending, Accepted, Active and Overdue. Total AVs never filters. (The brief's list leaves out Accepted, but Figma's prototype has it pressable, so it is.)
 - **A second press clears it.** Pressing the selected stat reports `null`; the page also clears the selection when it resets the filters.
 - **A stat whose count is 0 cannot be pressed.** It stays plain text, drawn as Figma's `State=Empty` (the outlined bar). Nothing to filter to.
-- **The selected stat** is tinted `surface.brand.faint` (Figma's `#e8eefb`) and nothing else changes. **Deliberately not Figma's bold:** Figma draws Completed's figure 24 bold when selected, but the other stats keep their weight, so the design lead asked for the tint to be the only cue on all of them.
+- **The selected stat** is tinted `surface.brand.faint` (Figma's `#e8eefb`) and nothing else changes. **The tint is the height of the row**: Completed's is a box 8 round its figure (8 radius) that runs from the strip's inner edge to the other; a status's runs from the top of its bar to the same bottom edge, with its bottom corners 8 round, and its 2 line gives way to the tint (the words do not move). **Deliberately not Figma's bold:** Figma draws Completed's figure 24 bold when selected, but the other stats keep their weight, so the design lead asked for the tint to be the only cue on all of them.
 - **The strip only reports which stat. What it lists is the page's.** **Active** is **every custom status between Accepted and Completed**; **Overdue** is by due date (a derived state, not a status); the others are the status of the same name. The `MyValuesFilteredByStat` story on `AVListPage` shows a page doing it.
 
 ## It owns one mapping
@@ -84,6 +84,8 @@ Contrast on the card: `text.primary` **20.17:1** light / **14.63:1** dark; `text
 - **"Total AVs"** is the default label; Figma's text reads "Total Avs".
 - **24 medium has no step** on the type ramp (`heading-lg` ships bold, semibold and regular), so it is the one marked exception,
   the same as `StatCard`'s and `DomainBudgetSummary`'s. A `heading-lg-medium` in GDL would remove it from all three.
+
+**Only the tips of the breakdown are rounded**: the left of the first bar and the right of the last (a lone bar is rounded both ends). The bars between, filled or outlined, are square, as Figma draws them.
 
 **The divider between the person and the figures is the same line**: 2 thick in `stroke.subtle`, as Figma draws it (the `Divider` atom's own 1 in `stroke.default` read as a different line beside the segments').
 

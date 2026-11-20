@@ -64,6 +64,26 @@ export const Default: Story = {
   },
 };
 
+/** Only the tips of the breakdown are rounded: the left of the first bar and the right of the last. The bars between are square. */
+export const RoundedOnlyAtTheTips: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const bars = within(c.getByRole('list', { name: 'Status breakdown' }))
+      .getAllByRole('listitem')
+      .map((item) => getComputedStyle(item.querySelector('span[aria-hidden="true"]') as HTMLElement));
+    await expect(bars).toHaveLength(5);
+    /* [top-left, top-right, bottom-right, bottom-left] */
+    const radii = bars.map((b) => [b.borderTopLeftRadius, b.borderTopRightRadius, b.borderBottomRightRadius, b.borderBottomLeftRadius].map((r) => parseFloat(r) > 0));
+    await expect(radii[0]).toEqual([true, false, false, true]);
+    await expect(radii[1]).toEqual([false, false, false, false]);
+    await expect(radii[2]).toEqual([false, false, false, false]);
+    await expect(radii[3]).toEqual([false, false, false, false]);
+    await expect(radii[4]).toEqual([false, true, true, false]);
+  },
+};
+
 /** Nothing in any status yet: every segment an empty outline, in equal shares that span the whole strip (not bunched up at their floor width on the left). */
 export const NothingYet: Story = {
   args: {
