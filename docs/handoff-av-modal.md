@@ -27,8 +27,9 @@ of that renders.
 **The form is `HandoffForm`**, shared with the bulk handoff, so a single handoff
 and a bulk one ask for the same things. A **Handoff Date**, chosen from the
 calendar, is **required** (design's decision for the one form); a late value must say
-**why** ("Please select a reason before completing the AV", the design's own
-error message); there must be **something to review, at least one demo link or
+**why** ("Please select a reason before handing off the AV"; Figma's own error says
+"completing the AV", from before the action was named Handoff, so the word is
+changed and the rest is Figma's: design lead, 20 November 2026); there must be **something to review, at least one demo link or
 one attachment** (decided 13 Nov 2026; a file already on the value counts, and
 without either the dialog says "Add a demo link or attach a file." under Demo
 Links); notes are optional, and a link that is typed must be a valid `https://`

@@ -169,7 +169,7 @@ export const OverdueNeedsAReason: Story = {
     /* Submitting with no reason is refused, and says why. */
     await userEvent.click(screen.getByRole('button', { name: 'Handoff' }));
     const error = await screen.findByRole('alert');
-    await expect(error).toHaveTextContent('Please select a reason before completing the AV');
+    await expect(error).toHaveTextContent('Please select a reason before handing off the AV');
     await expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     const reason = screen.getByLabelText(/Overdue Reason/);
