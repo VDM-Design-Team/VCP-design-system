@@ -912,3 +912,35 @@ export const StackBehaviour: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'Clear' }));
   },
 };
+
+const onUndoPressed = fn();
+
+function UndoTrigger() {
+  const { toast } = useToast();
+  return (
+    <Button variant="secondary" size="sm" onClick={() => toast(undoDeletion('Problem set', onUndoPressed))}>
+      Delete the set
+    </Button>
+  );
+}
+
+/** Pressing the action runs it and closes the toast: Figma's undo flow ends with "the snackbar disappears". */
+export const ActionClosesToast: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { layout: 'fullscreen', controls: { disable: true }, chromatic: { disableSnapshot: true } },
+  render: () => (
+    <ToastProvider>
+      <div className="min-h-96 bg-surface-canvas p-8">
+        <UndoTrigger />
+      </div>
+    </ToastProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    onUndoPressed.mockClear();
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Delete the set' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Undo' }));
+    await expect(onUndoPressed).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Undo' })).toBeNull());
+    await waitFor(() => expect(screen.queryByText('Problem set deleted')).toBeNull());
+  },
+};
