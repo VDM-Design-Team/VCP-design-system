@@ -111,6 +111,20 @@ from it and the new Points (more Points, a later finish).
 
 Every date worked out this way is the one the table animates (`animated`, above), and until the person edits it, it is `estimated`.
 
+### An estimated date is always a weekday *(from the design lead, 20 November 2026)*
+
+Saturday and Sunday are not working days. A task's length is a number of **working days**, and it stays that number however many weekends fall inside the range. So the caller adjusts every estimate before it is returned, so that **an estimated date never falls on a Saturday or a Sunday**:
+
+| What is estimated | The rule |
+|---|---|
+| **Both dates are estimated** (nothing was set) | **Start Date:** if the first estimate is a Saturday or Sunday, move it **forward** to the next weekday. When it moves, calculate the Due Date again from the new Start Date with the same number of working days (a Start Date that goes from Saturday to Monday counts its days from Monday). **Due Date:** if its estimate is a Saturday or Sunday, move it **forward** by the number of non-working days crossed, so the full length in working days is kept |
+| **The person set the Start Date; the Due Date is estimated** | **Due Date:** if the estimate is a Saturday or Sunday, move it **forward** by the non-working days crossed, so the full length in working days is kept |
+| **The person set the Due Date; the Start Date is estimated** | **Start Date:** if the estimate is a Saturday or Sunday, move it **backward** by the non-working days crossed. The Due Date the person set **does not change**, and the full length in working days is kept |
+
+**A range that crosses a weekend.** When a Start or Due Date is calculated from a length, Saturday and Sunday are not counted as days of it. If the range passes through a Saturday and/or a Sunday, the estimated date is extended by the weekend days crossed, so the length still means the same number of weekdays however many weekends are inside it. **This applies even when the date would already have been a weekday**: a weekend inside the range still pushes the date out by its two days, even when the plain count would have landed on a weekday.
+
+A date the person set is never moved. Only the dates the system worked out (`estimated`) follow these rules.
+
 **A label slip in Figma, not a different rule:** in the Cycle A → Cycle B part, the cards for "User changes Due Date" and "User changes Start Date" with no
 Points both label the result with the *same* date the person changed (Due Date → "Auto-calculated Due Date", Start Date → "Auto-calculated Start Date"). It is
 the **other** date that is recalculated there too, as in every other case (confirmed 17 November 2026); the two labels in Figma are to be corrected.
