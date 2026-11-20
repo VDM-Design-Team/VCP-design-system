@@ -89,6 +89,7 @@ goes to the table's select-all checkbox, found by the pattern, so the page does 
 
 - Figma's My Values frame draws an **ID** column; `AVTable` keeps the reference with the title, as on every other page.
 - The **Archive Backlog** frame draws the search, Reset and Filters mirrored left to right. That is a Figma slip and is not copied.
+- The reset button's words: the list pages (My Values, Assigned, Drafts, Manage, the Archive tabs) draw **Reset Filters**, and `FilterBar` says **Reset** (the Planning list's frame also says Reset). The label is `FilterBar`'s `resetLabel` (a page passes it inside `filters`), so "Reset Filters" is one prop away; the default stays Reset until design says which one the product uses.
 
 ## Accessibility
 
