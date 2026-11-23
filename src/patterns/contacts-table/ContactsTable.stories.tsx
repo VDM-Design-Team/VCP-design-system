@@ -220,7 +220,8 @@ export const OnThePage: Story = {
     await userEvent.click(c.getByRole('button', { name: 'Delete message from michael@vdm.technology' }));
     await userEvent.click(within(await screen.findByRole('alertdialog')).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(c.queryByText('michael@vdm.technology')).toBeNull());
-    await expect(await screen.findByText('Message deleted')).toBeVisible();
+    /* A toast fades in: wait until it is visible instead of checking once the moment it exists. */
+    await waitFor(() => expect(screen.getByText('Message deleted')).toBeVisible());
     /* Focus did not fall to the page: it is on the next message's Delete button (the one after Michael's). */
     const buttons = () => c.getAllByRole('button', { name: /^Delete message from/ });
     await waitFor(() => expect(buttons()[1]).toHaveFocus());
