@@ -64,8 +64,8 @@ export interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
   /** The app bar — a `TopBar`. Across the top of everything right of the rail. */
   topBar: React.ReactNode;
   /**
-   * The band that names the page — a `PageTitle`, or an `AVHeader` on an
-   * Added Value's page. Inside `<main>`, so its `h1` is the page's.
+   * The band that names the page — a `PageTitle` (an Added Value's page
+   * uses `size="sm"`, with the status buttons in `actions`). Inside `<main>`, so its `h1` is the page's.
    */
   header?: React.ReactNode;
   /** The page itself. Inset 32 from each side, as the design's body slot is. */

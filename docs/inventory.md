@@ -51,7 +51,7 @@ record of when each piece landed.
 | component | `StatusTag` | PR #54 |
 | pattern | `TopBar` | PR #55 |
 | component | `StatusProgression` | PR #58 |
-| pattern | `AVHeader` | PR #58 |
+| pattern | `AVHeader` | PR #58 (removed 20 November 2026: it is `PageTitle` `size="sm"`) |
 | component | `SidebarItem` | PR #76 |
 | pattern | `Sidebar` | PR #78 |
 | pattern | `ConfirmDeleteAVModal`, `ReportProblemModal` | PR #99 |
@@ -98,7 +98,7 @@ Dependency notes:
   need an indigo and a pink that have **no core ramp** — a token decision to
   settle before it is built, not during.
 - **`AppShell` shipped (PR #85)** as a frame with slots: `sidebar`, `topBar`,
-  `header` (`PageTitle` or `AVHeader`), `children`, and a `Footer` it places
+  `header` (`PageTitle`), `children`, and a `Footer` it places
   itself. The export's fixed 390-wide detail column is left out until a page in
   the pages file draws one; it would be a second slot.
 - **`StatusProgression` re-tiered down to component** when it was built

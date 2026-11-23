@@ -43,10 +43,9 @@ An `error` shows under the field and sets `aria-invalid`, as every `Field` does.
 | Use | For |
 |---|---|
 | `DescriptionCardTitle` | The top of an Added Value page's left column, above the description sections |
-| `AVHeader` | The ID row above the page: back arrow, the reference as the `<h1>`, the status buttons |
-| `PageTitle` | The title band of any page that is not an Added Value |
+| `PageTitle` `size="sm"` | The ID row above an Added Value's page: back arrow, the reference as the `<h1>`, the status buttons and the ⋮ menu |
 
-**The AV page has two headers.** `AVHeader` is the ID row and holds the page's
+**The AV page has two headers.** `PageTitle` (`sm`) is the ID row and holds the page's
 only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 
 ## Props
@@ -55,7 +54,7 @@ only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 |---|---|---|---|
 | `reference` | `string` | — | "VCP-1234". Plain text above the title when reading |
 | `title` | `string` | required | The AV's title (the field's value when editing). Wraps; never cut |
-| `headingLevel` | `2 \| 3` | `2` | The title's heading level. `2` under `AVHeader`'s `<h1>` |
+| `headingLevel` | `2 \| 3` | `2` | The title's heading level. `2` under `PageTitle`'s `<h1>` |
 | `editing` | `boolean` | `false` | The card is the **Title** field. With no `onChange` the field is read-only |
 | `onChange` | `(title: string) => void` | — | Editing: the title changed |
 | `label` / `placeholder` | `string` | "Title" / "Type in the title" | Editing: the field's label and prompt |
@@ -82,8 +81,8 @@ padding `4` (16). Type: `title-sm-regular` for the reference,
 
 ## Don't
 
-- **Don't make it the `<h1>`.** `AVHeader` holds the page's one `<h1>`.
+- **Don't make it the `<h1>`.** `PageTitle` holds the page's one `<h1>`.
 - **Don't truncate the title.** Tables cut it (`TruncatedText`); this card shows it whole.
-- **Don't put actions in it.** The status buttons are `AVHeader`'s and the ⋮ menu is `DetailCardMenu`'s.
+- **Don't put actions in it.** The status buttons are `StatusProgression`'s (in the page title) and the ⋮ menu is `DetailCardMenu`'s.
 - **Don't build an editing title beside it.** The Title field is this card's `editing` state.
 - **Don't use it outside an Added Value page.** Other pages use `PageTitle`.
