@@ -94,7 +94,7 @@ const meta = {
       description: {
         component:
           'The main content of a page that lists Added Values: the title, an optional totals strip, and the table with its filters inside its card. ' +
-          'My Values, Assigned, Drafts, Manage and the Archive tabs are this one layout; each passes what it has. It goes inside `AppShell`.',
+          'My Values, Assigned, Drafts, Manage and the Archive tabs are this one layout; each passes what it has. It goes in `AppShell`’s `page` slot.',
       },
     },
   },

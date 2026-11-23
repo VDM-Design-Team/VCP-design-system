@@ -13,7 +13,7 @@ four viewer roles over a spine the system owns and a chain the domain owns.
 | `StatusTag` | component | **Type only** — the spine half of `status` is its `AVStatus`. Nothing rendered |
 
 One atom, used twice — which is why this is a **component**, not a pattern:
-it presents as one control unit. `AVHeader` is the pattern that places it.
+it presents as one control unit. `AVPage` places it, in `PageTitle`'s `actions`.
 
 The import rows are checked against the real imports — `npm test` fails if
 this list drifts.
@@ -22,7 +22,7 @@ this list drifts.
 
 | Situation | Use |
 |---|---|
-| An AV page's header | This, via `AVHeader` |
+| An AV page's header | This, in `PageTitle`'s `actions` (`AVPage` does it) |
 | A row of AVs in a table | Not this — a table row offers a menu, not a toolbar |
 | Any "what can I do to this AV?" question in code | `avTransitions({ role, status })` or `avTransitions({ role, step, chain })` |
 

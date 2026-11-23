@@ -24,7 +24,7 @@ import { UserChip, UserMenu, UserMenuTrigger } from '../../components/user-menu'
  * `NotificationBell`, `Divider`, and `UserMenu` (which also draws the user chip when the
  * app opens its own menu or there is none), with the caller's `Button` slotting into
  * `primaryAction`. The page-level header (back, title, status actions) is a
- * different Figma component (`AV_Header`) and is its own pattern, `AVHeader`.
+ * different component, `PageTitle` (an Added Value's is `size="sm"`).
  *
  * The export drew a role badge under the user's name; design review (3 Sep
  * 2026) confirmed no design for it — roles are `RoleBadge`'s business.

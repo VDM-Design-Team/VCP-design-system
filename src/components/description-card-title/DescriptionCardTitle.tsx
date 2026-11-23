@@ -11,7 +11,8 @@ import { Field } from '../field';
  *
  * Read off Figma's `Description_Card_Title` and its `_Description_Card_Title_Base`
  * (`State`: Viewing / Editing Placeholder / Editing Filled / Disabled, plus the
- * `Multipart Child` switch): an elevated card, 16 in, 8 radius; the reference 16
+ * `Multipart Child` switch): an elevated card, 24 in (Figma draws 16; 24 matches the description sections and the
+ * Detail card beside it, decided 23 November 2026), 8 radius; the reference 16
  * regular, the title 16 semibold `text.primary`. **The reference is `text.secondary`**, not Figma's
  * `text.primary`, so the title stands out (decided 17 November 2026; a recorded difference from Figma).
  *
@@ -20,8 +21,8 @@ import { Field } from '../field';
  * beside it; the two are now one piece, so the page and the stories show the same
  * card in every state.
  *
- * **The AV page has two headers, and this is the second.** `AVHeader` is the ID
- * row — back arrow, the reference as the page's `<h1>`, the status buttons. This
+ * **The AV page has two headers, and this is the second.** `PageTitle` (`size="sm"`) is the ID
+ * row — back arrow, the reference as the page's `<h1>`, the status buttons and the ⋮ menu. This
  * card carries the *title*, so it is the page's first sub-heading: an `<h2>` by
  * default. The reference here is plain text, not a second heading.
  *
@@ -46,7 +47,7 @@ export interface DescriptionCardTitleProps extends Omit<React.HTMLAttributes<HTM
   reference?: string;
   /** The AV's title: the text to read, or the field's value. */
   title: string;
-  /** The title's heading level when reading. `2` under the page's `<h1>` (`AVHeader`); `3` if it sits deeper. */
+  /** The title's heading level when reading. `2` under the page's `<h1>` (`PageTitle`); `3` if it sits deeper. */
   headingLevel?: 2 | 3;
   /** Edit the title: the card is the **Title** field instead of the text. */
   editing?: boolean;
@@ -101,7 +102,7 @@ export const DescriptionCardTitle = React.forwardRef<HTMLDivElement, Description
     );
 
     return (
-      <div ref={ref} className={cn('flex flex-col rounded-md bg-surface-elevated p-4 font-sans text-text-primary', className)} {...props}>
+      <div ref={ref} className={cn('flex flex-col rounded-md bg-surface-elevated p-6 font-sans text-text-primary', className)} {...props}>
         {editing ? (
           <Field label={label} error={error}>
             <Input

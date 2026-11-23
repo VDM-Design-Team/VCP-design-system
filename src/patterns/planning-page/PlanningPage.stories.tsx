@@ -48,7 +48,7 @@ const meta = {
       description: {
         component:
           'The main content of the Planning page: the title, the filter row on the canvas, the Cycle and Backlog sections (each its own card) and the pages beneath. ' +
-          'The table keeps editing in place, drag and move, and folding; the page owns the data and lays them out. It goes inside `AppShell`.',
+          'The table keeps editing in place, drag and move, and folding; the page owns the data and lays them out. It goes in `AppShell`’s `page` slot.',
       },
     },
   },

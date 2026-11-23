@@ -462,7 +462,7 @@ VCP-prototype/
 ### How a screen is built
 
 - `src/app/<rail-key>/page.tsx`, where the route equals the Sidebar row's key (`my-values`, `assigned`, `drafts`, `task-log`); the Dashboard is `/`.
-- Every screen renders `<Screen active="<rail-key>" header={<PageTitle …/>}>`. `Screen` wraps the DS `AppShell` with `Sidebar` (navigates with `router.push`), `TopBar` (theme switch wired to next-themes, notifications, user) and the title band (`PageTitle` or `AVHeader`).
+- Every screen renders `<Screen active="<rail-key>" header={<PageTitle …/>}>`. `Screen` wraps the DS `AppShell` with `Sidebar` (navigates with `router.push`), `TopBar` (theme switch wired to next-themes, notifications, user) and the title band (`PageTitle`; an Added Value's is `size="sm"`).
 - When a rail row gets its screen, it is removed from `NOT_DESIGNED_YET` in `[screen]/page.tsx`, so no click ever goes nowhere.
 - Sample data sits in the screen file, or in `src/data/` once shared. Never real customer data.
 - The theme is set up once in `globals.css`: the two Google Fonts, `@import "tailwindcss"`, `@import "@vdm-design-team/vcp-design-system/theme.css"`, and `body { @apply bg-surface-canvas font-sans text-text-primary; }`.

@@ -27,7 +27,7 @@ const meta = {
       description: {
         component:
           'The main content of the page where an admin sets each domain’s point budget for a quarter: the title, the quarter and year controls (both 36 high, as the dashboard’s are), the budget table and Save Changes. ' +
-          'It locks everything while saving and makes the browser ask before leaving with unsaved changes; the data, the save and the toasts are the page’s. It goes inside `AppShell`.',
+          'It locks everything while saving and makes the browser ask before leaving with unsaved changes; the data, the save and the toasts are the page’s. It goes in `AppShell`’s `page` slot.',
       },
     },
   },
