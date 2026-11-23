@@ -11,7 +11,8 @@ import { Field } from '../field';
  *
  * Read off Figma's `Description_Card_Title` and its `_Description_Card_Title_Base`
  * (`State`: Viewing / Editing Placeholder / Editing Filled / Disabled, plus the
- * `Multipart Child` switch): an elevated card, 16 in, 8 radius; the reference 16
+ * `Multipart Child` switch): an elevated card, 24 in (Figma draws 16; 24 matches the description sections and the
+ * Detail card beside it, decided 23 November 2026), 8 radius; the reference 16
  * regular, the title 16 semibold `text.primary`. **The reference is `text.secondary`**, not Figma's
  * `text.primary`, so the title stands out (decided 17 November 2026; a recorded difference from Figma).
  *
@@ -101,7 +102,7 @@ export const DescriptionCardTitle = React.forwardRef<HTMLDivElement, Description
     );
 
     return (
-      <div ref={ref} className={cn('flex flex-col rounded-md bg-surface-elevated p-4 font-sans text-text-primary', className)} {...props}>
+      <div ref={ref} className={cn('flex flex-col rounded-md bg-surface-elevated p-6 font-sans text-text-primary', className)} {...props}>
         {editing ? (
           <Field label={label} error={error}>
             <Input

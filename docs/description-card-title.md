@@ -4,10 +4,13 @@ The card at the top of an Added Value page that names it: to read, the AV's
 reference over its title; to edit, the **Title** field.
 
 Read off Figma's `Description_Card_Title` (VCP Pages - Flows, the left column of
-every AV page): an elevated card, 16 in, 8 radius; the reference 16 regular,
+every AV page): an elevated card, **24 in**, 8 radius; the reference 16 regular,
 the title 16 semibold `text.primary`. **The reference is `text.secondary`**, as
 the AV page has always shown it, so the title stands out (decided 17 November
 2026; a recorded difference from Figma, which draws both `text.primary`).
+**The padding is 24, not Figma's 16** (decided 23 November 2026): the description
+sections under it (`DescriptionSection`) and the Detail card beside it are 24, so
+the title card matches them and the left column's edges line up.
 
 **It was an atom that only read, and the AV page built its own editing title
 beside it.** The editing card holds a `Field` and an `Input`, which an atom may
@@ -66,7 +69,7 @@ only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 ## Tokens
 
 `surface.elevated` (the card), `text.primary` (the title), `text.secondary` (the reference and the multipart line), radius `md` (8),
-padding `4` (16). Type: `title-sm-regular` for the reference,
+padding `6` (24; Figma's 16, see above). Type: `title-sm-regular` for the reference,
 `body-md-semibold` for the title.
 
 ## Accessibility
