@@ -11,13 +11,13 @@ import { Icon } from '../../atoms/icon';
  * content inset 32 from each side, 32 above the title and 16 below. The
  * subtitle is a real layer, hidden in the pages that do not use one.
  *
- * **This and `AVHeader` draw the same band, and that is not an accident.**
- * `Page_Title` carries a hidden `Status_Progression` instance, which is what
- * `AVHeader` renders. The two differ in one measurement — `AV_Header` insets
- * 16 from the sides where `Page_Title` insets 32 — so they are kept separate
- * rather than merged on a guess. See docs/page-title.md; if design confirms
- * they are one component, `AVHeader` should become this plus the progression
- * buttons.
+ * **It is the title band of an Added Value's page too (`size="sm"`).** Figma's
+ * `Page_Title` has a type, `Viewing AV Page Title`: the back arrow, the AV's
+ * reference at 14 regular in `text.primary`, and on the right the status buttons
+ * and the ⋮ menu. That is `size="sm"` with those two in `actions`; a page being
+ * created or edited is `md` ("Added Value Creation") with no buttons. There is
+ * no separate `AVHeader` any more (it was Figma's older `AV_Header`, inset 16 where
+ * the pages' `Page_Title` is inset 32): see docs/page-title.md.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
  * If you need a value that isn't here, add the token in `tokens/` first —
@@ -39,8 +39,8 @@ export interface PageTitleProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   /** The page's actions, on the right. */
   actions?: React.ReactNode;
   /**
-   * The title's size: `md` is 18 semibold, `sm` is 14 medium. Both are
-   * `text.secondary`. Default `md`.
+   * The title's size. `md` (default) is 18 semibold in `text.secondary`. `sm` is Figma's
+   * `Viewing AV Page Title`: 14 regular in `text.primary`, for an Added Value's reference.
    */
   size?: 'sm' | 'md';
 }
@@ -56,8 +56,8 @@ const BACK_CONTROL = cn(
 );
 
 const TITLE_TYPE = {
-  md: 'text-body-lg-semibold',
-  sm: 'text-label-sm-medium',
+  md: 'text-body-lg-semibold text-text-secondary',
+  sm: 'text-body-sm-regular text-text-primary',
 } as const;
 
 export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
@@ -97,7 +97,7 @@ export const PageTitle = React.forwardRef<HTMLElement, PageTitleProps>(
         )}
         <div className="min-w-0">
           {/* The page's one h1 — TopBar deliberately has none so this can. */}
-          <h1 className={cn('min-w-0 truncate text-text-secondary', TITLE_TYPE[size])}>{title}</h1>
+          <h1 className={cn('min-w-0 truncate', TITLE_TYPE[size])}>{title}</h1>
           {subtitle && <p className="mt-1 truncate text-body-sm-regular text-text-secondary">{subtitle}</p>}
         </div>
         {beside}

@@ -4,9 +4,9 @@ import { PageTitle } from '../../components/page-title';
 import { ContactsTable, type ContactsTableProps } from '../contacts-table';
 
 /**
- * ContactsPage — the main content of the Contact List page: the title, then the table. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Contact List Page`.
+ * ContactsPage — the main content of the Contact List page: the title, then the table. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Contact List Page`.
  *
- * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data: **`<AppShell><ContactsPage table={{…}} /></AppShell>`**.
+ * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data: **`<AppShell page={<ContactsPage table={{…}} />} />`**.
  * The pagination is inside the table's card. **Add Account** in Figma's top bar is `TopBar`'s `primaryAction`, the page's to pass.
  *
  * **It is controlled and holds no data.** The app owns the rows and the page, and what Delete does (confirm it, then move focus on): see

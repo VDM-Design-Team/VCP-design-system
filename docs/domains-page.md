@@ -1,6 +1,6 @@
 # DomainsPage *(pattern)*
 
-The main content of the Super Admin's Domains page: the title, then the lists the Super Admin keeps (Domains and Global Tags) as cards, with the dialogs behind them. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Domain Page` in Pages & Flows (the page, Add New Tag, Add New Domain and Delete Domain). It is `DomainsPage`, plural, as its title and the sidebar say "Domains" and as `AccountsPage` and `ContactsPage` are named, so it is not taken for the page of one domain (decided 17 November 2026).
+The main content of the Super Admin's Domains page: the title, then the lists the Super Admin keeps (Domains and Global Tags) as cards, with the dialogs behind them. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Domain Page` in Pages & Flows (the page, Add New Tag, Add New Domain and Delete Domain). It is `DomainsPage`, plural, as its title and the sidebar say "Domains" and as `AccountsPage` and `ContactsPage` are named, so it is not taken for the page of one domain (decided 17 November 2026).
 
 ## Composed of
 
@@ -15,7 +15,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `DomainsPage` | The whole page: **`<AppShell><DomainsPage management={{ lists, onAdd, … }} /></AppShell>`** |
+| `DomainsPage` | The whole page: **`<AppShell page={<DomainsPage management={{ lists, onAdd, … }} />} />`** |
 | `TagManagement` on its own | The same lists inside something else: the Admin Panel tab of Settings (`SettingsPage`) |
 
 ## What it lays out

@@ -11,7 +11,7 @@ export const BUDGET_QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
 
 /**
  * DomainBudgetEditPage — the main content of the page where an admin sets each domain's development-point budget for a quarter: the title, the quarter and year
- * controls, the table, and **Save Changes**. It goes inside `AppShell`. Built to Figma's `Domain Budget Edit` page (`Domain Budgeting`, and its saving and saved frames).
+ * controls, the table, and **Save Changes**. It goes in `AppShell`'s `page` slot. Built to Figma's `Domain Budget Edit` page (`Domain Budgeting`, and its saving and saved frames).
  *
  * **It guarantees the parts a page is easy to get wrong:**
  *

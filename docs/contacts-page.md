@@ -1,6 +1,6 @@
 # ContactsPage *(pattern)*
 
-The main content of the Contact List page: the title, then the table. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Contact List Page` in Pages & Flows.
+The main content of the Contact List page: the title, then the table. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Contact List Page` in Pages & Flows.
 
 ## Composed of
 
@@ -15,7 +15,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `ContactsPage` | The whole page: **`<AppShell><ContactsPage table={{…}} /></AppShell>`** |
+| `ContactsPage` | The whole page: **`<AppShell page={<ContactsPage table={{…}} />} />`** |
 | `ContactsTable` on its own | The table inside something else |
 
 ## What it lays out

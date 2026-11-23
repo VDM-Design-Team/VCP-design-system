@@ -17,7 +17,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The main content of the Task Log Trail page: the title, then the table, laid out once (16 apart, 32 in from the sides). It goes inside `AppShell`; the app only passes the data.',
+          'The main content of the Task Log Trail page: the title, then the table, laid out once (16 apart, 32 in from the sides). It goes in `AppShell`’s `page` slot; the app only passes the data.',
       },
     },
   },

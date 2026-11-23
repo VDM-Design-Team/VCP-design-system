@@ -4,10 +4,13 @@ The card at the top of an Added Value page that names it: to read, the AV's
 reference over its title; to edit, the **Title** field.
 
 Read off Figma's `Description_Card_Title` (VCP Pages - Flows, the left column of
-every AV page): an elevated card, 16 in, 8 radius; the reference 16 regular,
+every AV page): an elevated card, **24 in**, 8 radius; the reference 16 regular,
 the title 16 semibold `text.primary`. **The reference is `text.secondary`**, as
 the AV page has always shown it, so the title stands out (decided 17 November
 2026; a recorded difference from Figma, which draws both `text.primary`).
+**The padding is 24, not Figma's 16** (decided 23 November 2026): the description
+sections under it (`DescriptionSection`) and the Detail card beside it are 24, so
+the title card matches them and the left column's edges line up.
 
 **It was an atom that only read, and the AV page built its own editing title
 beside it.** The editing card holds a `Field` and an `Input`, which an atom may
@@ -43,10 +46,9 @@ An `error` shows under the field and sets `aria-invalid`, as every `Field` does.
 | Use | For |
 |---|---|
 | `DescriptionCardTitle` | The top of an Added Value page's left column, above the description sections |
-| `AVHeader` | The ID row above the page: back arrow, the reference as the `<h1>`, the status buttons |
-| `PageTitle` | The title band of any page that is not an Added Value |
+| `PageTitle` `size="sm"` | The ID row above an Added Value's page: back arrow, the reference as the `<h1>`, the status buttons and the ⋮ menu |
 
-**The AV page has two headers.** `AVHeader` is the ID row and holds the page's
+**The AV page has two headers.** `PageTitle` (`sm`) is the ID row and holds the page's
 only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 
 ## Props
@@ -55,7 +57,7 @@ only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 |---|---|---|---|
 | `reference` | `string` | — | "VCP-1234". Plain text above the title when reading |
 | `title` | `string` | required | The AV's title (the field's value when editing). Wraps; never cut |
-| `headingLevel` | `2 \| 3` | `2` | The title's heading level. `2` under `AVHeader`'s `<h1>` |
+| `headingLevel` | `2 \| 3` | `2` | The title's heading level. `2` under `PageTitle`'s `<h1>` |
 | `editing` | `boolean` | `false` | The card is the **Title** field. With no `onChange` the field is read-only |
 | `onChange` | `(title: string) => void` | — | Editing: the title changed |
 | `label` / `placeholder` | `string` | "Title" / "Type in the title" | Editing: the field's label and prompt |
@@ -67,7 +69,7 @@ only `<h1>`; this card carries the title, as the `<h2>` beneath it. Use both.
 ## Tokens
 
 `surface.elevated` (the card), `text.primary` (the title), `text.secondary` (the reference and the multipart line), radius `md` (8),
-padding `4` (16). Type: `title-sm-regular` for the reference,
+padding `6` (24; Figma's 16, see above). Type: `title-sm-regular` for the reference,
 `body-md-semibold` for the title.
 
 ## Accessibility
@@ -82,8 +84,8 @@ padding `4` (16). Type: `title-sm-regular` for the reference,
 
 ## Don't
 
-- **Don't make it the `<h1>`.** `AVHeader` holds the page's one `<h1>`.
+- **Don't make it the `<h1>`.** `PageTitle` holds the page's one `<h1>`.
 - **Don't truncate the title.** Tables cut it (`TruncatedText`); this card shows it whole.
-- **Don't put actions in it.** The status buttons are `AVHeader`'s and the ⋮ menu is `DetailCardMenu`'s.
+- **Don't put actions in it.** The status buttons are `StatusProgression`'s (in the page title) and the ⋮ menu is `DetailCardMenu`'s.
 - **Don't build an editing title beside it.** The Title field is this card's `editing` state.
 - **Don't use it outside an Added Value page.** Other pages use `PageTitle`.
