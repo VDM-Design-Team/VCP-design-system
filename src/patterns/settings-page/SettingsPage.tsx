@@ -4,8 +4,8 @@ import { PageTitle } from '../../components/page-title';
 import { Tabs, tabId, tabPanelId, type TabItem } from '../../components/tabs';
 
 /**
- * SettingsPage — the main content of the Settings page: the page title, a row of tabs, and the tab that is showing. It goes inside `AppShell`
- * (which draws the sidebar, the top bar and the footer); this is only what sits between them.
+ * SettingsPage — the main content of the Settings page: the page title, a row of tabs, and the tab that is showing. It goes in `AppShell`'s `page` slot
+ * (the shell draws the sidebar, the top bar and the footer); this is only what sits between them.
  *
  * Built to Figma's Settings pages (`Page_Template` → `Main Section`). **The user's and the admin's Settings are one layout with two tab lists**,
  * so one piece draws both and `audience` says which:

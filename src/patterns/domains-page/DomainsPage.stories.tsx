@@ -41,7 +41,7 @@ const meta = {
       story: OVERLAY_DOCS_STORY,
       description: {
         component:
-          'The main content of the Super Admin’s Domains page: the title, then the Domains and Global Tags cards with their dialogs, laid out once. It goes inside `AppShell`; the app only passes the lists.',
+          'The main content of the Super Admin’s Domains page: the title, then the Domains and Global Tags cards with their dialogs, laid out once. It goes in `AppShell`’s `page` slot; the app only passes the lists.',
       },
     },
   },

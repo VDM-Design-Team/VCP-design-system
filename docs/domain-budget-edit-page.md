@@ -1,7 +1,7 @@
 # DomainBudgetEditPage *(pattern)*
 
-The main content of the page where an admin sets each domain's development-point budget for a quarter: the title with the quarter and year controls on its row, the budget table, and **Save Changes**. It goes inside `AppShell`,
-which draws the sidebar, the top bar and the footer.
+The main content of the page where an admin sets each domain's development-point budget for a quarter: the title with the quarter and year controls on its row, the budget table, and **Save Changes**. It goes in `AppShell`'s `page` slot;
+the shell draws the sidebar, the top bar and the footer.
 
 Built to Figma's `Domain Budget Edit` page in Pages & Flows (`Domain Budgeting`, with its saving and saved frames and the allocated-points input flow).
 
