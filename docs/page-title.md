@@ -19,8 +19,7 @@ list drifts.
 
 | Use | For |
 |---|---|
-| `PageTitle` | Naming any page inside `AppShell` |
-| `AVHeader` | An Added Value's page — it adds the status-progression buttons |
+| `PageTitle` | Naming any page inside `AppShell`, an Added Value's page included (`size="sm"`, below) |
 | `Breadcrumb` | Where you are in a hierarchy. It sits *with* a title, not instead of one |
 
 ## Props
@@ -34,7 +33,7 @@ list drifts.
 | `backLabel` | `string` | `'Back'` | Say where it goes — "Back to my Added Values" |
 | `beside` | `ReactNode` | — | Something beside the title, on its left: a view switch (the dashboard's Cycle / Quarter). With it set, the left group wraps, so the switch drops under the title in a narrow page instead of squeezing it, and the band has no column gap between its two sides (the actions already stand clear, and the room goes to them) |
 | `actions` | `ReactNode` | — | The page's actions, right-aligned, on the title's centre line (at the top when there is a `subtitle`). The slot wraps and is capped to the band's width, so a row of filters breaks onto a second line instead of overflowing |
-| `size` | `sm \| md` | `md` | The title's size: `md` is 18 semibold, `sm` is 14 medium. Both `text.secondary`. No page passes `sm` today; it stays for a quieter band (decided 17 November 2026: do not remove it as unused) |
+| `size` | `sm \| md` | `md` | The title's size. `md` is 18 semibold in `text.secondary`. **`sm` is an Added Value's page: 14 regular in `text.primary`**, Figma's `Viewing AV Page Title` (below) |
 
 ## Measurements
 
@@ -62,19 +61,16 @@ the title row.
 `Back Nav` is (counter-axis centre). With a subtitle, the title and subtitle are
 centred as one block against the arrow.
 
-## Its relationship to AVHeader — unresolved
+## An Added Value's page is `size="sm"` (settled 20 November 2026)
 
-**They draw the same band.** `Page_Title` in Figma carries a hidden
-`Status_Progression` instance, which is exactly what `AVHeader` renders. On that
-reading they are one component and `AVHeader` should be this plus the buttons.
+Figma's `Page_Title` has four types: **Page Title**, **Creating New Added Value**, **Edit Added Value** and **Viewing AV Page Title**. The last one is an Added Value's page: the back arrow, the reference at **14 regular in `text.primary`** (`#020617`), and on the right the status buttons and the ⋮ menu. So the AV page uses this component, and there is **no separate `AVHeader`** (it was Figma's older, standalone `AV_Header` in the library's Navigation page, inset 16 on the sides where the real pages' `Page_Title` is inset 32, which is what we draw).
 
-They are kept separate because **one measurement disagrees**: `AV_Header` insets
-**16** from the sides, `Page_Title` insets **32**. Merging them on the assumption
-that one of those is a mistake would be guessing.
+| Page | `PageTitle` | `actions` |
+|---|---|---|
+| Viewing an Added Value | `size="sm"`, `title` = the reference, a back control | `StatusProgression`, then `DetailCardMenu` (the ⋮ menu) |
+| Creating or editing one | `md` ("Added Value Creation", "Edit Added Value"), a back control | nothing: the status buttons are in the bar at the bottom |
 
-⚠️ **For design:** are `AV_Header` and `Page_Title` the same component? If yes,
-`AVHeader` becomes `PageTitle` + `StatusProgression`, and one of the two
-paddings is wrong. Tracked in `docs/figma-audit.md`.
+`AVPage` composes it: its `header` prop takes `role`, `status` (or `step` and `chain`), `onTransition` and `menu`, and puts the status buttons and then the menu in `actions`. **The menu comes after the buttons, on their right.** What is in the ⋮ menu is `DetailCardMenu`'s (it owns the role and status rules, `docs/detail-card-menu.md`): the page passes only the handlers. A page that is not an Added Value's passes its own actions here.
 
 ## Accessibility
 
@@ -90,7 +86,6 @@ paddings is wrong. Tracked in `docs/figma-audit.md`.
 ## Don't
 
 - **Don't render two of them on a page.** It carries the `h1`.
-- **Don't use it on an AV page** — `AVHeader` is that, and it owns the status
-  buttons.
+- **Don't make a second title band for an Added Value.** `size="sm"` with the status buttons and the menu in `actions` is that page's, as Figma's `Viewing AV Page Title` draws it.
 - **Don't put the page's primary action here by reflex.** In `Page_Template` the
   primary CTA ("Create Added Value") lives in the **top bar**, not this band.
