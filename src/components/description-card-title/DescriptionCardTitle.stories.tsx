@@ -12,7 +12,7 @@ const meta = {
       description: {
         component:
           'The card at the top of an Added Value page that names it: to read, the reference over the title; to edit, the **Title** field ' +
-          '(empty, filled, with an error, or disabled). The page’s second header — `AVHeader` above it is the ID row and holds the `<h1>`; this ' +
+          '(empty, filled, with an error, or disabled). The page’s second header — `PageTitle` above it is the ID row and holds the `<h1>`; this ' +
           'card’s title is the `<h2>` under it.',
       },
     },

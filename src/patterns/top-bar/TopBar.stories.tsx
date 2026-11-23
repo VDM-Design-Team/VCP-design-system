@@ -19,7 +19,7 @@ const meta = {
           '“Create Added Value” Button in `primaryAction`, or with the linked Logo when ' +
           'there is none. Right side: bell (unread = the design’s red dot, count in the ' +
           'accessible name; neutral, with a pulsing 10px dot), a divider, the light/dark mode Toggle (sun and moon in its knob), and the user chip. `showLeftSide={false}` empties the left side for screens that show nothing there. The page-level ' +
-          'header (back, title, status actions) is `AVHeader` — a separate pattern.',
+          'header (back, title, status actions) is `PageTitle` — a separate component.',
       },
     },
   },

@@ -54,7 +54,7 @@ shell forwards:
 |---|---|---|
 | `sidebar` | `Sidebar` | Four user types and a collapsed twin — its API is its own |
 | `topBar` | `TopBar` | Two variants (primary action or logo) — likewise |
-| `header` | `PageTitle` or `AVHeader` | Either fits; the shell does not decide which — see below |
+| `header` | `PageTitle` | An Added Value's page is `PageTitle` `size="sm"`, with the status buttons in its `actions`; the shell does not decide |
 | `children` | The page's body | Inset 32 from each side, as the design's body slot is |
 | `page` | A page pattern (`AccountsPage`, `PlanningPage`, …) | It is the title band and the body together, with its own 32, so it is placed flush in place of both |
 | `footer` | `Footer` | Defaults to the system one. Pass your own, or `null` for none |
@@ -84,9 +84,9 @@ page would.
 | | Bell | `notifications`: 3 unread, 0, or left out (no bell) |
 | | Mode switch | `theme`. Flipping it changes the story's theme |
 | | Account | `onUserMenuSelect` (the built-in account menu), `onUserMenu` (a button for the app's own menu), a `user` alone, or no user |
-| Page header | Title band | The `header` slot: `PageTitle`, `AVHeader`, or nothing |
+| Page header | Title band | The `header` slot: `PageTitle`, or nothing |
 | | Size, Subtitle, Back link, Actions | `PageTitle`'s `size`, `subtitle`, `backHref`, `actions` (shown when the band is `PageTitle`) |
-| | AV type, Role, Status, Status buttons | `AVHeader`'s `type`, `role`, `status` (or a `step` on the Development chain), `showStatusActions` (shown when the band is `AVHeader`) |
+| | AV type, Role, Status, Status buttons | `PageTitle`'s `size` (`sm` for an AV, `md` for a new one) and, in its `actions`, `StatusProgression`'s `role`, `status` (or a `step` on the Development chain) |
 | Page | Content | `children`: the dashboard, a page long enough to scroll, or an empty page |
 | | Footer | The `footer` slot: the default, a `Footer` with a pinned year, or `null` |
 | Theme | Theme | Light or dark. Follows the toolbar until you pick one here; then this story's control wins |
@@ -124,8 +124,9 @@ Everything else spreads onto the root `<div>`. `className` merges, so
 The handoff asked this build to say which answer it took on each open design
 question. It takes neither, on purpose:
 
-- **Are `AV_Header` and `Page_Title` one component?** Both fit the `header`
-  slot. If design merges them, `AVHeader` changes and this file does not.
+- **Are `AV_Header` and `Page_Title` one component?** Yes: an Added Value's page
+  is `Page_Title`'s `Viewing AV Page Title` type, so it is `PageTitle` `size="sm"`
+  in the `header` slot (settled 20 November 2026).
 - **Is the top bar 60 or 64?** The shell adds no height of its own — the bar
   is whatever `TopBar` renders. That answer lands in one place.
 
@@ -154,7 +155,7 @@ file draws one. It can be added when one does, as a second slot.
   page's banner, `Sidebar` is `<aside>` around a named `<nav>`, the title band
   and body are inside `<main>`, and `Footer` is `<footer>`. A screen reader
   can jump between the four and skip the rail.
-- **The `h1` is inside `<main>`.** `PageTitle` and `AVHeader` both render it;
+- **The `h1` is inside `<main>`.** `PageTitle` renders it, for an Added Value's page too;
   `TopBar` deliberately has none.
 - **The title band's `<header>` is not a second banner.** Inside `<main>` it
   is plain sectioning content, which is why the slot lives there.

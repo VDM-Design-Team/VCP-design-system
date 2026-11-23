@@ -102,8 +102,8 @@ export const DetailCardMenu = React.forwardRef<HTMLDivElement, DetailCardMenuPro
             shape="square"
             size="sm"
             label={label}
-            /* 32 to look at, as Figma draws it; a touch screen gets 40. */
-            className="size-8 pointer-coarse:size-10"
+            /* 36, the same as the small `Button`s of the status buttons it sits beside (Figma draws it 32 beside 37-high buttons); a touch screen gets 40. */
+            className="size-9 pointer-coarse:size-10"
           />
         }
       />
