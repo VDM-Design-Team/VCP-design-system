@@ -3,14 +3,15 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 /* Storybook's own hook, not React's: the Playground's render writes its args
    back when the rail's toggle or the bar's mode switch is pressed. */
 import { useArgs } from 'storybook/preview-api';
+import { expect, within } from 'storybook/test';
 import { AppShell } from './AppShell';
 import { Sidebar, type SidebarUserType } from '../../patterns/sidebar';
 import { NAV_BY_USER_TYPE } from '../../patterns/sidebar/Sidebar';
 import { TopBar } from '../../patterns/top-bar';
-import { AVHeader } from '../../patterns/av-header';
+import { ContactsPage } from '../../patterns/contacts-page';
 import { PageTitle } from '../../components/page-title';
 import { AV_STATUSES, type AVStatus } from '../../components/status-tag';
-import type { AVProgressionRole } from '../../components/status-progression';
+import { StatusProgression, type AVProgressionRole } from '../../components/status-progression';
 import { StatCard } from '../../components/stat-card';
 import { EmptyState } from '../../components/empty-state';
 import { Button } from '../../atoms/button';
@@ -128,6 +129,7 @@ const meta = {
     header: { control: false },
     footer: { control: false },
     children: { control: false },
+    page: { control: false },
   },
 } satisfies Meta<typeof AppShell>;
 
@@ -141,7 +143,7 @@ type Story = StoryObj<typeof meta>;
  */
 export const Default: Story = {};
 
-/* The Development domain's chain, as AVHeader's own stories carry it: the one
+/* The Development domain's chain, as the AV page's own stories carry it: the one
    way to show an AV on a domain step rather than a spine status. */
 const DEVELOPMENT = [
   { id: 'for-review', label: 'For review' },
@@ -166,7 +168,7 @@ interface PlaygroundArgs {
   bell: 'unread' | 'read' | 'hidden';
   modeSwitch: boolean;
   account: 'menu' | 'own-menu' | 'name' | 'none';
-  titleBand: 'page-title' | 'av-header' | 'none';
+  titleBand: 'page-title' | 'av-title' | 'none';
   titleSize: 'md' | 'sm';
   subtitle: boolean;
   back: boolean;
@@ -248,7 +250,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
       expanded: true,
       /* The shell's own slots take elements, which a control can't build;
          every control here builds one. Matched on the shown name. */
-      exclude: ['sidebar', 'topBar', 'header', 'children', 'footer'],
+      exclude: ['sidebar', 'topBar', 'header', 'children', 'page', 'footer'],
     },
   },
   /* As `Default` opens, plus the bar's mode switch, so the theme can be
@@ -336,8 +338,8 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     },
     titleBand: {
       name: 'Title band',
-      description: 'The `header` slot: `PageTitle`, `AVHeader`, or nothing.',
-      ...select('Page header', { 'page-title': 'PageTitle', 'av-header': 'AVHeader', none: 'None' }),
+      description: 'The `header` slot: `PageTitle`, `PageTitle` as an Added Value\'s title (`size="sm"`, with the status buttons), or nothing.',
+      ...select('Page header', { 'page-title': 'PageTitle', 'av-title': 'PageTitle (an AV)', none: 'None' }),
     },
     titleSize: {
       name: 'Size',
@@ -365,15 +367,15 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     },
     avType: {
       name: 'AV type',
-      description: "AVHeader's `type`: an existing AV by id, or a new one in words.",
+      description: 'An existing AV by its reference (`sm`), or a new one in words (`md`).',
       options: ['default', 'new'],
-      if: { arg: 'titleBand', eq: 'av-header' },
+      if: { arg: 'titleBand', eq: 'av-title' },
       ...radio('Page header', { default: 'Default', new: 'New' }),
     },
     avRole: {
       name: 'Role',
       description: 'Who is looking — it decides the status buttons (`role`).',
-      if: { arg: 'titleBand', eq: 'av-header' },
+      if: { arg: 'titleBand', eq: 'av-title' },
       ...select('Page header', {
         assignee: 'Assignee',
         initiator: 'Initiator',
@@ -384,7 +386,7 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     avWhere: {
       name: 'Status',
       description: 'A spine `status`, or a domain `step` on the Development chain.',
-      if: { arg: 'titleBand', eq: 'av-header' },
+      if: { arg: 'titleBand', eq: 'av-title' },
       ...select('Page header', {
         ...Object.fromEntries(AV_STATUSES.map((s) => [s, s])),
         'for-review': 'Development step: For review',
@@ -392,8 +394,8 @@ export const Playground: StoryObj<PlaygroundArgs> = {
     },
     avStatusActions: {
       name: 'Status buttons',
-      description: "AVHeader's `showStatusActions`.",
-      if: { arg: 'titleBand', eq: 'av-header' },
+      description: 'Whether the status buttons are drawn.',
+      if: { arg: 'titleBand', eq: 'av-title' },
       ...radio('Page header'),
     },
     page: {
@@ -461,17 +463,23 @@ export const Playground: StoryObj<PlaygroundArgs> = {
                 ) : undefined
               }
             />
-          ) : args.titleBand === 'av-header' ? (
-            <AVHeader
-              type={args.avType}
+          ) : args.titleBand === 'av-title' ? (
+            <PageTitle
+              size={args.avType === 'new' ? 'md' : 'sm'}
               title={args.avType === 'new' ? 'Added Value Creation' : 'VCP-1234'}
               onBack={() => {}}
               backLabel="Back to my Added Values"
-              role={args.avRole}
-              showStatusActions={args.avStatusActions}
-              {...(args.avWhere === 'for-review'
-                ? { step: 'for-review', chain: DEVELOPMENT }
-                : { status: args.avWhere })}
+              actions={
+                args.avStatusActions ? (
+                  <StatusProgression
+                    role={args.avRole}
+                    onTransition={() => {}}
+                    {...(args.avWhere === 'for-review'
+                      ? { step: 'for-review', chain: DEVELOPMENT }
+                      : { status: args.avWhere })}
+                  />
+                ) : undefined
+              }
             />
           ) : undefined
         }
@@ -493,21 +501,21 @@ export const Playground: StoryObj<PlaygroundArgs> = {
 };
 
 /**
- * An Added Value's page: `AVHeader` in the `header` slot instead of
- * `PageTitle`. Either fits, which is why the band is a slot — whether the two
- * are one component is a question for design, not for the shell.
+ * An Added Value's page: `PageTitle` `size="sm"` in the `header` slot, with the
+ * status buttons in its `actions`. It is the same component as every other
+ * page's band (Figma's `Page_Title`, type `Viewing AV Page Title`).
  */
-export const WithAVHeader: Story = {
+export const WithAVPageTitle: Story = {
   args: {
     sidebar: <Rail userType="admin" />,
     topBar: <Bar />,
     header: (
-      <AVHeader
+      <PageTitle
+        size="sm"
         title="VCP-1234"
         onBack={() => {}}
         backLabel="Back to my Added Values"
-        role="assignee-initiator"
-        status="Draft"
+        actions={<StatusProgression role="assignee-initiator" status="Draft" onTransition={() => {}} />}
       />
     ),
     children: (
@@ -515,6 +523,47 @@ export const WithAVHeader: Story = {
         Cut the onboarding form from nine fields to four and defer the rest to first use.
       </Panel>
     ),
+  },
+};
+
+/**
+ * A whole page pattern in the `page` slot. `ContactsPage` is the title band and the body together and
+ * brings its own 32 at the sides, so the shell places it flush: the title and the table both sit 32 in,
+ * as on every other page. In `children` it would land 64 in. `page` takes the place of `header` and
+ * `children`: this story keeps the meta's dashboard in both, and neither is drawn.
+ */
+export const WithAPagePattern: Story = {
+  args: {
+    sidebar: <Rail userType="super-admin" />,
+    page: (
+      <ContactsPage
+        table={{
+          rows: [
+            { id: 1, email: 'michael.ross@example.com', subject: 'Access to the Design domain', message: 'Could someone give me access to the Design domain?' },
+            { id: 2, email: 'sara.lind@example.com', subject: 'Capacity points look wrong', message: 'My capacity for Cycle 27 shows 0 points.' },
+          ],
+          page: 1,
+          pageCount: 1,
+          itemCount: 2,
+          pageSize: 10,
+        }}
+      />
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const main = canvasElement.querySelector('main')!;
+    const left = main.getBoundingClientRect().left;
+    const title = c.getByRole('heading', { level: 1, name: 'Contact List' });
+    /* The title and the table are both 32 in from the page's edge, not 64. */
+    await expect(Math.round(title.getBoundingClientRect().left - left)).toBe(32);
+    /* The table's card, inside the body column's 32 padding. */
+    const card = main.firstElementChild!.children[1]!.firstElementChild!;
+    await expect(Math.round(card.getBoundingClientRect().left - left)).toBe(32);
+    await expect(Math.round(main.getBoundingClientRect().right - card.getBoundingClientRect().right)).toBe(32);
+    /* `page` replaces `header` and `children`. */
+    await expect(c.queryByRole('heading', { level: 1, name: 'Dashboard' })).toBeNull();
+    await expect(c.queryByText('Recent activity')).toBeNull();
   },
 };
 

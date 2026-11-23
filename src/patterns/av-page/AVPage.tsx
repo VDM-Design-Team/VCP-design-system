@@ -7,22 +7,30 @@ import { DescriptionCardTitle, type DescriptionCardTitleParent } from '../../com
 import { DescriptionSection, type DescriptionSectionProps } from '../../components/description-section';
 import { InitiateToOtherDomain, type InitiateToOtherDomainProps } from '../../components/initiate-to-other-domain';
 import { StatusHistory, type StatusHistoryProps } from '../../components/status-history';
-import { StatusProgression, type StatusProgressionProps } from '../../components/status-progression';
-import { AVHeader, type AVHeaderProps } from '../av-header';
+import { DetailCardMenu, type DetailCardMenuProps } from '../../components/detail-card-menu';
+import { PageTitle } from '../../components/page-title';
+import {
+  StatusProgression,
+  type AVChainStep,
+  type AVProgressionRole,
+  type AVTransition,
+  type StatusProgressionProps,
+} from '../../components/status-progression';
+import type { AVStatus } from '../../components/status-tag';
 import { CommentSection, type CommentSectionProps } from '../comment-section';
 import { DeliverablesCard, type DeliverablesCardProps } from '../deliverables-card';
 import { DetailCard, type DetailCardProps } from '../detail-card';
 import { MultipartSection, type MultipartSectionProps } from '../multipart-section';
 
 /**
- * AVPage — the main content of an Added Value's page, to read or to edit: the header, then two columns. It goes inside `AppShell`, which draws the sidebar,
+ * AVPage — the main content of an Added Value's page, to read or to edit: the header, then two columns. It goes in `AppShell`'s `page` slot; the shell draws the sidebar,
  * the top bar and the footer. Built to Figma's `AV Page: Viewing AVs` and `AV Page: Editing AVs`.
  *
  * - **Left column, top to bottom:** the title (the reference and title to read, a **Title** field to edit), the four description blocks (**Problems**,
  *   **Solutions**, **Acceptance Criteria / Deliverables**, **Desired Outcome**), the **Multipart** card, then, reading, **Status History** and **Comments**, or, editing, **Initiate to other Domains**.
  *   **There is no Status History when editing**: it is for reading only, so it is left out of an editing page even if `history` is passed.
  * - **Right column:** the **Detail card**, and (reading) the **Deliverables card**.
- * - **The status buttons** are in the header when reading (`AVHeader`), and in a bar at the bottom right when editing, with **Discard** (red text) beside them.
+ * - **The header** is `PageTitle` (`size="sm"` for an Added Value, `md` for "Added Value Creation"). Reading, **the status buttons and the ⋮ menu** (`DetailCardMenu`) are on its right, the menu beside the buttons; editing, the status buttons are in a bar at the bottom right with **Discard** (red text) beside them.
  *
  * **Typed sections.** The page passes each piece's own props (`details` is `DetailCard`'s, `comments` is `CommentSection`'s…) and this puts them in order, 16
  * apart, 32 in from the sides, and stacks the two columns on a narrow page. **A section shows only when the page gives it**, so what differs by status, role or
@@ -75,11 +83,47 @@ export interface AVPageActions {
   progression?: StatusProgressionProps;
 }
 
+/**
+ * The page's header. `title` is the reference to read ("VCP-123"), or words for a page being created ("Added Value Creation", with `type="new"`). Reading, the status
+ * buttons (`role` plus `status`, or a `step` on the domain's `chain`) and the ⋮ menu (`menu`) sit on the right, the menu last; editing, neither is drawn.
+ */
+export interface AVPageHeader {
+  /** The page's name: an AV's reference on `default`, words on `new`. */
+  title: React.ReactNode;
+  /** `default` is an existing AV (the title is its reference, `PageTitle` `sm`); `new` is a page being created (`md`). */
+  type?: 'default' | 'new';
+  /** Where back goes. Renders the arrow as a link. */
+  backHref?: string;
+  /** Back as a history action. Renders the arrow as a button. */
+  onBack?: () => void;
+  /** The back control's accessible name — say where it goes. */
+  backLabel?: string;
+  /** Show the status buttons and the menu. Default: when reading, not when editing. */
+  showStatusActions?: boolean;
+  /** Who is looking: it picks the moves and the menu's contents. */
+  role?: AVProgressionRole;
+  /** Where the AV is on the spine. Mutually exclusive with `step`. */
+  status?: AVStatus;
+  /** The `id` of the domain chain step the AV sits on. Needs `chain`. */
+  step?: string;
+  /** The domain's ordered middle. */
+  chain?: readonly AVChainStep[];
+  /** A status button was pressed, straight from `StatusProgression`. */
+  onTransition?: (transition: AVTransition) => void;
+  /**
+   * The ⋮ menu's handlers (`onEdit`, `onDelete`, the moves between Draft, Pending and Backlog). Give it and the menu is drawn when reading; **what is in it comes from `role` and `status`**
+   * (`DetailCardMenu` owns the mapping), so the page passes no list. Leave it out and there is no menu.
+   */
+  menu?: Omit<DetailCardMenuProps, 'role' | 'status'>;
+  /** Anything else for the right-hand side, before the status buttons. */
+  actions?: React.ReactNode;
+}
+
 export interface AVPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   /** Reading or editing. Default `view`. */
   mode?: AVPageMode;
-  /** The header: the back arrow, the page's name and (when reading) the status buttons. `AVHeader`'s props. */
-  header: AVHeaderProps;
+  /** The header: the back arrow, the page's name and (when reading) the status buttons and the ⋮ menu. */
+  header: AVPageHeader;
   /**
    * A notice at the top of the left column, above the title, the width of the column: an Added Value that was rejected or sent back to the backlog says so,
    * and why. `Banner`'s props; `rejectedBanner()` and `backloggedBanner()` write the two the design draws, copy included.
@@ -100,6 +144,55 @@ export interface AVPageProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   deliverables?: DeliverablesCardProps;
   /** Editing: Discard and the status buttons, at the bottom right. */
   actions?: AVPageActions;
+}
+
+/** The title band: `PageTitle`, with the status buttons and then the ⋮ menu on its right. */
+function AVPageHeaderBand({
+  title,
+  type = 'default',
+  backHref,
+  onBack,
+  backLabel,
+  showStatusActions = true,
+  role,
+  status,
+  step,
+  chain,
+  onTransition,
+  menu,
+  actions,
+}: AVPageHeader) {
+  const moves =
+    showStatusActions && role && (status || (step && chain)) ? (
+      status ? (
+        <StatusProgression role={role} status={status} chain={chain} onTransition={onTransition} />
+      ) : (
+        <StatusProgression role={role} step={step!} chain={chain!} onTransition={onTransition} />
+      )
+    ) : null;
+  /* The menu is a person's own options on this AV: an admin's, or a user's. Its contents follow the role and the status; a domain step counts as work in progress. */
+  const options =
+    showStatusActions && menu ? (
+      <DetailCardMenu {...menu} role={role === 'admin' ? 'admin' : 'user'} status={status ?? 'In Progress'} />
+    ) : null;
+  return (
+    <PageTitle
+      size={type === 'new' ? 'md' : 'sm'}
+      title={title}
+      backHref={backHref}
+      onBack={onBack}
+      backLabel={backLabel}
+      actions={
+        actions || moves || options ? (
+          <>
+            {actions}
+            {moves}
+            {options}
+          </>
+        ) : undefined
+      }
+    />
+  );
 }
 
 export function AVPage({
@@ -123,7 +216,7 @@ export function AVPage({
   return (
     <div className={cn('@container flex min-w-0 flex-col font-sans', className)} {...props}>
       {/* The status buttons are in the header to read, and in the bar at the bottom to edit. */}
-      <AVHeader {...header} showStatusActions={header.showStatusActions ?? !editing} />
+      <AVPageHeaderBand {...header} showStatusActions={header.showStatusActions ?? !editing} />
       <div className="grid min-w-0 grid-cols-1 items-start gap-4 px-8 pb-8 @4xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-4">
           {banner && <Banner {...banner} />}

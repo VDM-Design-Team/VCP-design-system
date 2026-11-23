@@ -7,7 +7,7 @@ import { PlanningFilters, type PlanningFiltersProps } from '../planning-filters'
 import { PlanningTable, type PlanningTableProps } from '../planning-table';
 
 /**
- * PlanningPage — the main content of the Planning page: the title, the filter row, an optional notice, the Cycle and Backlog sections, and the pages beneath. It goes inside `AppShell`, which draws the
+ * PlanningPage — the main content of the Planning page: the title, the filter row, an optional notice, the Cycle and Backlog sections, and the pages beneath. It goes in `AppShell`'s `page` slot; the shell draws the
  * sidebar, the top bar and the footer. Built to Figma's `Planning Page` (the `Planning List`, with its inline-editing and drag-from-Backlog flows).
  *
  * **One layout, typed sections** (as `AVListPage` and `DashboardPage` are): a section shows only when it is passed. The filters and the pagination are optional; the table is not.

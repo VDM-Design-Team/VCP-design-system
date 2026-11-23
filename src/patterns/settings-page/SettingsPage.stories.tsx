@@ -104,7 +104,7 @@ const meta = {
       description: {
         component:
           'The main content of Settings: the title, the tabs and the tab that is showing. The user’s and the admin’s Settings are one layout with two ' +
-          'tab lists, so `audience` picks which. It goes inside `AppShell`. Controlled and slot-based: the page passes each tab’s body.',
+          'tab lists, so `audience` picks which. It goes in `AppShell`’s `page` slot. Controlled and slot-based: the page passes each tab’s body.',
       },
     },
   },

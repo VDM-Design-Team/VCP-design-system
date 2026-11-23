@@ -211,7 +211,8 @@ export const OnThePage: Story = {
 
     /* Delete for real: the row goes, a toast says so, and focus did not fall to the page: it is on the next row's menu button. */
     await remove('Faster search');
-    await expect(await screen.findByText('Announcement deleted')).toBeVisible();
+    /* A toast fades in: wait until it is visible instead of checking once the moment it exists. */
+    await waitFor(() => expect(screen.getByText('Announcement deleted')).toBeVisible());
     await waitFor(() => expect(c.getByRole('button', { name: 'Actions for Fixes for the planning table' })).toHaveFocus());
 
     /* The last row goes: the one before it takes focus. */

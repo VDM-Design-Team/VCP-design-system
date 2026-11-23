@@ -1,6 +1,6 @@
 # AVPage *(pattern)*
 
-The main content of an Added Value's page, to read or to edit: the header, then two columns. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer.
+The main content of an Added Value's page, to read or to edit: the header, then two columns. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer.
 
 Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`…) and `AV Page: Editing AVs` (`Editing Existing AV`) in Pages & Flows.
 
@@ -16,7 +16,9 @@ Built to Figma's `AV Page: Viewing AVs` (`AV in Draft Status`, `AV in Accepted`�
 | `InitiateToOtherDomain` | component |
 | `StatusHistory` | component |
 | `StatusProgression` | component |
-| `AvHeader` (exported as `AVHeader`) | pattern |
+| `StatusTag` | component |
+| `PageTitle` | component |
+| `DetailCardMenu` | component |
 | `CommentSection` | pattern |
 | `DeliverablesCard` | pattern |
 | `DetailCard` | pattern |
@@ -36,7 +38,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | | Reading | Editing |
 |---|---|---|
-| **Header** | `AVHeader`: the back arrow and the reference, and the status buttons on the right | `AVHeader` `type="new"`: the back arrow and "Added Value Creation", no status buttons |
+| **Header** | `PageTitle` `size="sm"`: the back arrow and the reference, and on the right the status buttons and then the ⋮ menu (`DetailCardMenu`) | `PageTitle` `md`: the back arrow and "Added Value Creation", no buttons and no menu |
 | **Left column** | Title (the reference over the title) · Problems · Solutions · Acceptance Criteria / Deliverables · Desired outcome · Multipart · Status History · **Comments** | A **Title** field · the four blocks · Multipart · **Initiate to other Domains** (no Status History: it is for reading only) |
 | **Right column** | The **Detail card**, then the **Deliverables card** | The **Detail card** |
 | **Bottom** | — | **Discard** (red text), then the status buttons (**Save as Draft**, **Submit**), at the right |
@@ -91,7 +93,7 @@ It owns no state. The title, the cards, the comments and the status are the page
 | Prop | Type | Default | Notes |
 |---|---|---|---|
 | `mode` | `'view' \| 'edit'` | `view` | Reading or editing |
-| `header` | `AVHeaderProps` | required | `showStatusActions` is on when reading, off when editing |
+| `header` | `AVPageHeader` | required | `title`, `type` (`default` or `new`), the back control, `role` + `status` (or `step` + `chain`) for the status buttons, `onTransition`, and `menu` (the ⋮ menu's handlers: its contents come from `role` and `status`). The buttons and the menu show when reading, not when editing (`showStatusActions`) |
 | `banner` | `BannerProps` | — | A notice above the title, the column's width: an AV that was rejected or backlogged says so, and why. `rejectedBanner()` and `backloggedBanner()` write the two the design draws |
 | `title` | `{ reference?, value, onChange?, label?, placeholder?, error?, disabled?, parent? }` | — | `DescriptionCardTitle`'s states: editing with no `onChange` is read-only; `disabled` greys the field; `parent` marks a multipart child |
 | `description` | `{ problem?, solution?, deliverable?, 'desired-outcome'? }` | — | Each is `DescriptionSection`'s props without `type` |
@@ -109,7 +111,7 @@ It owns no state. The title, the cards, the comments and the status are the page
 
 ## Accessibility
 
-- One `h1`, from `AVHeader`. The reading title is an `h2`; every block and card keeps its own heading.
+- One `h1`, from `PageTitle`. The reading title is an `h2`; every block and card keeps its own heading.
 - The status buttons have one home at a time: the header when reading, the bottom bar when editing, so a screen reader never meets them twice.
 - Each piece keeps its own keyboard behaviour. Discard is a real button, in the tab order after the cards and before the status buttons.
 
