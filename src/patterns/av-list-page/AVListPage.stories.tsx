@@ -35,6 +35,9 @@ const STATS = {
 };
 
 const PEOPLE = ['Ali Rahman', 'Eve Lange', 'Ada Lovelace'].map((name) => ({ value: name, label: name }));
+/** The bar starts collapsed (as on the real pages); a story about the fields presses Filters first. */
+const openFilters = (c: ReturnType<typeof within>) => userEvent.click(c.getByRole('button', { name: 'Filters' }));
+
 /** The filter row of My Values, Assigned, Drafts and the Archive: search, Reset, Filters, then Priority, Tags, Status and Date. */
 const baseFilters = (extra: Partial<NonNullable<AVListPageProps['filters']>> = {}): NonNullable<AVListPageProps['filters']> => ({
   priority: { options: ['Urgent', 'High', 'Normal', 'Low'], placeholder: 'Search priority' },
@@ -74,7 +77,7 @@ const pager = (count: number) => ({ page: 2, pageCount: 25, itemCount: 1250, pag
 function Page(props: Omit<AVListPageProps, 'filters'> & { filters?: AVListPageProps['filters']; all: AVTableRow[] }) {
   const { all, filters, table, ...rest } = props;
   const [search, setSearch] = React.useState('');
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const shown = all.filter((r) => `${r.ref} ${r.title}`.toLowerCase().includes(search.toLowerCase()));
   return (
     <AVListPage
@@ -205,6 +208,7 @@ export const Manage: Story = {
   },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
+    await openFilters(c);
     await expect(c.getByText('Assignee')).toBeVisible();
     await expect(c.getByText('Initiator')).toBeVisible();
     await userEvent.click(c.getAllByRole('checkbox')[1]);
@@ -222,6 +226,7 @@ export const ArchiveCompleted: Story = {
     await expect(c.getByRole('heading', { level: 1, name: 'Archived Values: Completed' })).toBeVisible();
     await expect(c.getAllByText('Completed').length).toBeGreaterThanOrEqual(3);
     /* Priority, Tags and Date; no Status. */
+    await openFilters(c);
     await expect(c.getByText('Priority')).toBeVisible();
     await expect(c.getByText('Tags')).toBeVisible();
     await expect(c.getByText('Date')).toBeVisible();
@@ -251,6 +256,7 @@ export const AssignedInDevelopment: Story = {
   render: (args) => <Page {...args} all={rows(4)} filters={withCurrentCycle(baseFilters())} table={{ rows: [], ...pager(4) }} />,
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
+    await openFilters(c);
     await expect(c.getByText('Cycle')).toBeVisible();
     /* The current cycle is picked without the person doing anything: the field shows it, not its placeholder. */
     await expect(c.getAllByText(/C37/).length).toBeGreaterThanOrEqual(1);
@@ -278,6 +284,7 @@ export const ManageInDevelopment: Story = {
   ),
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
+    await openFilters(c);
     await expect(c.getByText('Cycle')).toBeVisible();
     await expect(c.getAllByText(/C37/).length).toBeGreaterThanOrEqual(1);
     await expect(c.queryByText('Select cycle')).toBeNull();
