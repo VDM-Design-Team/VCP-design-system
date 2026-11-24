@@ -29,8 +29,7 @@ this list drifts.
 | Without | The `Logo`, linked via `homeHref` — or standing alone, naming itself, when there is no `homeHref` | Everywhere else |
 
 Exactly the Figma variant pair — pass `primaryAction` or don't — plus the third arrangement screens like the AV editor need: `showLeftSide={false}` leaves the left side empty. The **page-level** header (back arrow, AV id/title,
-status-move buttons) is a different Figma component, `AV_Header`, and is its
-own pattern — [`AVHeader`](av-header.md). TopBar deliberately carries no
+status-move buttons) is a different component, [`PageTitle`](page-title.md) (an Added Value's is `size="sm"`). TopBar deliberately carries no
 title, no `h1`, no back.
 
 ## Props
@@ -63,7 +62,7 @@ component wearing its own.
 ## Accessibility
 
 - A `<header>` landmark. **No `h1`** — the app bar is chrome; the page title
-  belongs to `AVHeader`/the page itself.
+  belongs to `PageTitle`/the page itself.
 - The logo link is named "Value Chain Plus — home" with the `Logo` rendered
   `decorative` — one announcement (the InAHomeLink pattern from
   docs/logo.md). Without `homeHref` there is no link at all: an `<a>` with no
@@ -84,7 +83,7 @@ component wearing its own.
 - **Don't put both the action and the logo in** — the design shows one or
   the other; that is what the variant pair means.
 - **Don't stack page-title anatomy into this bar** — back/title/status
-  actions are `AVHeader`'s. Two bars, two patterns, as designed.
+  actions are `PageTitle`'s. Two bars, two pieces, as designed.
 - **Don't own theme state here** — `theme` is controlled; the app flips the
   `.dark` class, and everything (this bar included) re-themes by token.
 - **Don't add a role badge to the user chip** — the export drew one; the

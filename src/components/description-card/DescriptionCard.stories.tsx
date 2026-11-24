@@ -203,3 +203,22 @@ export const LightAndDark: Story = {
     </div>
   ),
 };
+
+/** Only a problem card can be removed: the other types ignore `onRemove`, whatever the page passes. */
+export const RemoveOnlyOnProblem: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <DescriptionCard type="problem" editing defaultValue="A problem" onRemove={fn()} removeLabel="Remove problem 1" />
+      <DescriptionCard type="solution" editing defaultValue="A solution" onRemove={fn()} removeLabel="Remove solution 1" />
+      <DescriptionCard type="deliverable" editing defaultValue="A deliverable" onRemove={fn()} removeLabel="Remove deliverable 1" />
+      <DescriptionCard type="desired-outcome" editing defaultValue="An outcome" onRemove={fn()} removeLabel="Remove desired outcome" />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getAllByRole('button', { name: /^Remove / })).toHaveLength(1);
+    await expect(canvas.getByRole('button', { name: 'Remove problem 1' })).toBeInTheDocument();
+  },
+};
