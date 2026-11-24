@@ -54,7 +54,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
    set is never overwritten.
 
 `estimate` is called on every change to the assignees, points or cycle; return the ISO dates you can work out. The calculation
-is the caller's — this dialog only shows it and keeps it out of dates a person owns.
+is the caller's — this dialog only shows it and keeps it out of dates a person owns. The dates come from the backend, not from the UI: an estimated date is always a weekday and a length counts working days only (see "An estimated date is always a weekday" in `docs/planning-table.md`), and that is the backend's rule to apply.
 
 ## Availability
 
