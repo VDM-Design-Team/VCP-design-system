@@ -172,6 +172,8 @@ export const WithFilters: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getAllByRole('row')).toHaveLength(1 + 7);
+    /* The fields start folded away; Filters opens them. */
+    await userEvent.click(c.getByRole('button', { name: 'Filters' }));
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), 'Workflow');
     await expect(c.getAllByRole('row')).toHaveLength(1 + 2);
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), 'Assignee');
