@@ -104,11 +104,11 @@ export const FocusInTheLinks: Story = {
 
 /** What a dialog that asks on submit passes in: the message under the field, and focus on the first one. */
 export const WithErrors: Story = {
-  args: { overdueDays: 2, errors: { date: 'Select a handoff date.', overdueReason: 'Please select a reason before completing the AV' } },
+  args: { overdueDays: 2, errors: { date: 'Select a handoff date.', overdueReason: 'Please select a reason before handing off the AV' } },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByText('Select a handoff date.')).toBeVisible();
-    await expect(c.getByText('Please select a reason before completing the AV')).toBeVisible();
+    await expect(c.getByText('Please select a reason before handing off the AV')).toBeVisible();
     await waitFor(() => expect(c.getByRole('combobox', { name: /Handoff Date/ })).toHaveFocus());
   },
 };

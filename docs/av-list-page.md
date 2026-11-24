@@ -1,6 +1,6 @@
 # AVListPage *(pattern)*
 
-The main content of a page that lists Added Values: the title, an optional strip of totals, and the table with its filters. It goes inside `AppShell`, which draws the
+The main content of a page that lists Added Values: the title, an optional strip of totals, and the table with its filters. It goes in `AppShell`'s `page` slot; the shell draws the
 sidebar, the top bar and the footer.
 
 Built to Figma's list pages in Pages & Flows: **My Values**, **Assigned**, **Drafts**, **Manage Added Value** and the **Archive** tabs (Completed, Rejected, Backlogged).

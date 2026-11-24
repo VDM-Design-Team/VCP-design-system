@@ -14,7 +14,7 @@ import { Textarea } from '../../atoms/textarea';
  * It has two modes. **Reading** shows the paragraph in a quiet panel. **Editing**
  * (`editing`) turns the panel into a text field that grows with what is typed,
  * can say it is invalid (the critical border) with a message under it (`error`), and
- * can offer a remove button inside the card's right edge (`onRemove`), which appears when
+ * can offer a remove button inside the card's right edge (`onRemove`, problem cards only), which appears when
  * the card is hovered or has focus in it, and stays while you are typing. The number block
  * and its colour are the same in both.
  *
@@ -96,9 +96,9 @@ export interface DescriptionCardProps
    */
   error?: React.ReactNode;
   /**
-   * Editing: shows a remove button inside the card's right edge. It appears on hover and
-   * while the card has focus (so while typing), and always on a touch screen, which has no
-   * hover. It only reports; the list is yours.
+   * Editing, **problem cards only**: shows a remove button inside the card's right edge. It
+   * appears on hover and while the card has focus (so while typing), and always on a touch
+   * screen, which has no hover. It only reports; the list is yours. On any other `type` it is ignored.
    */
   onRemove?: () => void;
   /** The remove button's accessible name. Default "Remove". Say which: "Remove problem 2". */
@@ -131,13 +131,15 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
     const field = React.useRef<HTMLTextAreaElement | null>(null);
     const errorId = React.useId();
     const isInvalid = !!invalid || !!error;
+    /* Only a problem can be removed (Figma draws the remove button on the Problem card alone). A solution, deliverable or desired outcome that is given `onRemove` ignores it. */
+    const removable = type === 'problem' && Boolean(onRemove);
 
     /* Whether another card's field has focus. While one does, hovering this card does not
        reveal its remove button: the one being written in is the only one that offers it. */
     const root = React.useRef<HTMLDivElement | null>(null);
     const [otherFocused, setOtherFocused] = React.useState(false);
     React.useEffect(() => {
-      if (!editing || !onRemove) return;
+      if (!editing || !removable) return;
       const update = () => {
         const active = document.activeElement;
         setOtherFocused(
@@ -154,7 +156,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
         document.removeEventListener('focusin', update);
         document.removeEventListener('focusout', update);
       };
-    }, [editing, onRemove]);
+    }, [editing, removable]);
 
     /* One row to begin with, growing to fit what is typed. */
     React.useLayoutEffect(() => {
@@ -207,7 +209,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
                 'focus-visible:outline-none',
                 !isInvalid && 'border-stroke-strong enabled:hover:border-stroke-strong focus:border-stroke-focused enabled:hover:focus:border-stroke-focused',
                 /* Room for the remove button, so the text never runs under it. */
-                onRemove && 'pr-12',
+                removable && 'pr-12',
               )}
             />
           ) : (
@@ -215,7 +217,7 @@ export const DescriptionCard = React.forwardRef<HTMLDivElement, DescriptionCardP
               {children}
             </div>
           )}
-          {editing && onRemove && (
+          {editing && removable && (
             /* Always in the page and the tab order, only unseen: hover and focus in the card
                reveal it, so a keyboard can reach it and typing keeps it on screen. A touch
                screen has no hover, so there it is always shown. The `before` is the 40 target. */

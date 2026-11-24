@@ -4,9 +4,9 @@ import { PageTitle } from '../../components/page-title';
 import { TaskLogTrail, type TaskLogTrailProps } from '../task-log-trail';
 
 /**
- * TaskLogPage — the main content of the Task Log Trail page: the title, then the table. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Task Log Trail` page.
+ * TaskLogPage — the main content of the Task Log Trail page: the title, then the table. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Task Log Trail` page.
  *
- * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data: **`<AppShell><TaskLogPage table={{…}} /></AppShell>`**.
+ * It is the one place the page's layout lives (the title, then the table 16 apart and 32 in from the sides, as `AVListPage` lays it out), so the app only passes the data: **`<AppShell page={<TaskLogPage table={{…}} />} />`**.
  * The filters (a `FilterBar`, through `table.filters`) and the pagination are inside the table's card.
  *
  * **It is controlled and holds no data.** The app owns the rows, the page and the filters. The log is read-only, so there is nothing to open or confirm: see

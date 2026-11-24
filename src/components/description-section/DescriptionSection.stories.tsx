@@ -133,6 +133,7 @@ export const Types: Story = {
       <DescriptionSection type="problem" onAdd={fn()} onAttach={fn()}>
         <DescriptionCard>Some paragraph here</DescriptionCard>
       </DescriptionSection>
+      {/* Given `onAdd` too, to show that only Problems takes it. */}
       <DescriptionSection type="solution" onAdd={fn()} onAttach={fn()}>
         <DescriptionCard>Some paragraph here</DescriptionCard>
       </DescriptionSection>
@@ -149,6 +150,11 @@ export const Types: Story = {
     for (const name of ['Problems', 'Solutions', 'Acceptance Criteria / Deliverables', 'Desired outcome']) {
       await expect(canvas.getByRole('region', { name })).toBeVisible();
     }
+    /* Only Problems can be added to: the solution and deliverable sections were given `onAdd` and ignore it. */
+    await expect(canvas.getAllByRole('button', { name: /^Add / })).toHaveLength(1);
+    await expect(canvas.getByRole('button', { name: 'Add problem' })).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: 'Add solution' })).toBeNull();
+    await expect(canvas.queryByRole('button', { name: 'Add deliverable' })).toBeNull();
   },
 };
 
@@ -188,13 +194,14 @@ export const WithAnError: Story = {
   },
 };
 
-/** Desired outcome is one card: even if asked, it has no add button and no attachments. */
+/** Desired outcome has one card per set (two problems, two outcomes): even if asked, it has no add button and no attachments. */
 export const DesiredOutcome: Story = {
   tags: ['!dev', '!autodocs'],
   parameters: { chromatic: { disableSnapshot: true } },
   args: { type: 'desired-outcome', onAdd: fn(), onAttach: fn(), attachments: files },
   render: (args) => (
     <DescriptionSection {...args}>
+      <DescriptionCard editing />
       <DescriptionCard editing />
     </DescriptionSection>
   ),
@@ -204,6 +211,7 @@ export const DesiredOutcome: Story = {
     await expect(canvas.queryByRole('button', { name: 'Attach files' })).toBeNull();
     await expect(canvas.queryByText('image.png')).toBeNull();
     await expect(canvas.getByRole('textbox', { name: 'Desired outcome 1' })).toBeVisible();
+    await expect(canvas.getByRole('textbox', { name: 'Desired outcome 2' })).toBeVisible();
   },
 };
 

@@ -1,6 +1,6 @@
 # AccountsPage *(pattern)*
 
-The main content of the Accounts page: the title, then the table. It goes inside `AppShell`, which draws the sidebar, the top bar and the footer. Built to Figma's `Accounts Page` in Pages & Flows.
+The main content of the Accounts page: the title, then the table. It goes in `AppShell`'s `page` slot; the shell draws the sidebar, the top bar and the footer. Built to Figma's `Accounts Page` in Pages & Flows.
 
 ## Composed of
 
@@ -15,7 +15,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Use | For |
 |---|---|
-| `AccountsPage` | The whole page: **`<AppShell><AccountsPage table={{…}} /></AppShell>`** |
+| `AccountsPage` | The whole page: **`<AppShell page={<AccountsPage table={{…}} />} />`** |
 | `AccountsTable` on its own | The table inside something else |
 | `UsersTable` | The Settings Users tab's list, not this one |
 

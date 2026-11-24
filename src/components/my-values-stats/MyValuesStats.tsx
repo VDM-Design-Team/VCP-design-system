@@ -49,6 +49,17 @@ export interface MyValuesStatsProps extends Omit<React.HTMLAttributes<HTMLElemen
   segments: readonly MyValuesStatsSegment[];
   totalLabel?: string;
   completedLabel?: string;
+  /**
+   * Which stat is the filter now: a segment's `id`, or `'completed'` for the Completed figure (so no segment can have the id `'completed'`). `null`, or leaving it out, selects none. The selected stat
+   * is tinted (`surface.brand.faint`, Figma's `State=Selected`) and reads as pressed.
+   */
+  selected?: string | number | null;
+  /**
+   * Turns the stats into filters. Pressing one reports its key; pressing the selected one again reports `null`, which clears it. **A stat whose count is 0 stays plain text**: it cannot be pressed
+   * (Figma's `State=Empty`). Total AVs is never a filter. Leave it off and the strip is display only. The strip only reports: what a key filters (and Active's "every status between Accepted and
+   * Completed", Overdue's date rule) is the page's.
+   */
+  onSelectedChange?: (next: string | number | null) => void;
 }
 
 /* The one place a tone becomes a colour: filled for a segment with a count, an outline for one with none. */
@@ -83,6 +94,9 @@ function Figure({ label, children }: { label: string; children: React.ReactNode 
   );
 }
 
+const PRESSABLE =
+  'cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused';
+
 export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
   (
     {
@@ -93,6 +107,8 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
       segments,
       totalLabel = 'Total AVs',
       completedLabel = 'Completed',
+      selected = null,
+      onSelectedChange,
       'aria-label': ariaLabel = 'My Values statistics',
       ...props
     },
@@ -120,6 +136,15 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
     /* Nothing yet: every count is 0, so every segment would sit at its 100 floor and bunch up on the left. Equal shares let the outlines span the strip. */
     const nothingYet = segments.every((segment) => segment.count <= 0);
 
+    /* Pressing the selected stat again clears it. */
+    const press = (key: string | number) => onSelectedChange?.(selected === key ? null : key);
+    const completedFigure = (
+      <Figure label={completedLabel}>
+        {completed}
+        <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
+      </Figure>
+    );
+
     return (
       <section
         ref={setRef}
@@ -138,19 +163,45 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
             <Avatar size="lg" name={user.name} src={user.src} />
             <span className="text-body-sm-regular text-text-primary">{user.name}</span>
           </div>
-          <Divider orientation="vertical" className="self-stretch" />
-          <div className="flex items-center gap-6">
+          {/* Figma draws this line 2 thick in `stroke.subtle`, the same as the lines beside each status: the atom's own 1 in `stroke.default` read as a different line. */}
+          <Divider orientation="vertical" className="w-0.5 self-stretch bg-stroke-subtle" />
+          <div className="flex items-center gap-6 self-stretch">
             <Figure label={totalLabel}>{total}</Figure>
-            <Figure label={completedLabel}>
-              {completed}
-              <span aria-hidden="true" className="size-3 rounded-pill bg-accent-success-outline-border-default" />
-            </Figure>
+            {onSelectedChange && completed > 0 ? (
+              <button
+                type="button"
+                aria-pressed={selected === 'completed'}
+                onClick={() => press('completed')}
+                /* Selected, the tint is the whole height of the row with 8 round the figure (Figma's `_My_AVs_Stats_Floating_Stat`: 87 high, 8 padding, 8 radius): it bleeds 8 into the strip's padding, and the figure stays centred like Total's. */
+                className={cn('-m-2 flex flex-col justify-center self-stretch rounded-md p-2 text-left', PRESSABLE, selected === 'completed' && 'bg-surface-brand-faint')}
+              >
+                {completedFigure}
+              </button>
+            ) : (
+              completedFigure
+            )}
           </div>
         </div>
 
-        <ul aria-label="Status breakdown" className="m-0 flex flex-1 list-none gap-1 p-0">
-          {segments.map((segment) => {
+        <ul aria-label="Status breakdown" className="m-0 flex flex-1 list-none gap-1 self-stretch p-0 pt-1">
+          {segments.map((segment, index) => {
             const filled = segment.count > 0;
+            const isSelected = selected === segment.id;
+            /* Only the tips of the breakdown are rounded: the left of the first bar and the right of the last, as Figma draws it. The bars between are square. */
+            const tip = segments.length === 1 ? 'rounded-pill' : index === 0 ? 'rounded-l-pill' : index === segments.length - 1 ? 'rounded-r-pill' : 'rounded-none';
+            const inner = (
+              <>
+                <span
+                  aria-hidden="true"
+                  className={cn('block h-2', tip, filled ? FILL[segment.tone] : cn('border', OUTLINE[segment.tone]))}
+                />
+                {/* A light 2 line down the left, 8 from the words, as Figma's status item draws it. Selected, the tint takes its place (the line keeps its room, so the words do not move). */}
+                <div className={cn('flex flex-col border-l-2 pl-2', isSelected ? 'border-transparent' : 'border-stroke-subtle')}>
+                  <span className="text-body-lg-medium text-text-primary">{segment.count}</span>
+                  <span className="text-body-sm-medium text-text-tertiary">{segment.label}</span>
+                </div>
+              </>
+            );
             return (
               <li
                 key={segment.id}
@@ -158,15 +209,19 @@ export const MyValuesStats = React.forwardRef<HTMLElement, MyValuesStatsProps>(
                 style={{ flexGrow: nothingYet ? 1 : Math.max(segment.count, 0) }}
                 className="flex min-w-25 basis-0 flex-col gap-2"
               >
-                <span
-                  aria-hidden="true"
-                  className={cn('block h-2 rounded-pill', filled ? FILL[segment.tone] : cn('border', OUTLINE[segment.tone]))}
-                />
-                {/* A light 2 line down the left, 8 from the words, as Figma's status item draws it. */}
-                <div className="flex flex-col border-l-2 border-stroke-subtle pl-2">
-                  <span className="text-body-lg-medium text-text-primary">{segment.count}</span>
-                  <span className="text-body-sm-medium text-text-tertiary">{segment.label}</span>
-                </div>
+                {onSelectedChange && filled ? (
+                  <button
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => press(segment.id)}
+                    /* The tint runs from the bar to 8 below the row, so it ends where Completed's does; its bottom corners are 8 round (Figma's selected status item). */
+                    className={cn('-mb-2 flex w-full flex-1 flex-col gap-2 rounded-b-md pb-2 text-left', PRESSABLE, isSelected && 'bg-surface-brand-faint')}
+                  >
+                    {inner}
+                  </button>
+                ) : (
+                  inner
+                )}
               </li>
             );
           })}
