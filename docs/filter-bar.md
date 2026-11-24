@@ -42,8 +42,16 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 | `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `SearchSelect` per entry (Assignee, Initiator…) with avatars and search, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array; a one-person field is `clearable`, so a picked person has a ✕ ("Clear Assignee"). `rows` defaults to `avatar` here. Options may carry `src` (a photo) or `unassigned` |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
 | `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset Filters" |
-| `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show. Uncontrolled (shown) when omitted |
+| `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show (controlled). Omit it and the bar keeps its own, starting from `defaultFiltersOpen` |
+| `defaultFiltersOpen` | `boolean` | Uncontrolled: whether the fields show at first. **Defaults to `false`**: the bar starts collapsed, so the table leads (see below) |
 | `className`, `ref`, rest | | On the root |
+
+## It starts collapsed
+
+On top of a table the fields start hidden: the search, Reset and Filters show, and Filters opens the
+rest (decided 23 November 2026; before that the bar started open). A page that wants the fields up
+front passes `defaultFiltersOpen`, or controls it with `filtersOpen`, for example to reopen the panel
+when someone comes back with filters set.
 
 ## Choosing which filters show
 
@@ -111,7 +119,9 @@ placeholder and `text.primary` once it has a value. No new tokens.
 - **Priority placeholder.** Figma reads "Search priority"; the field is a plain select, so it
   says "Select priority".
 - **Status is a draft until Apply**, as the status menu draws; tags apply on every tick.
-- **Active filters are not summarised on the Filters button** while the fields are hidden.
+- **Active filters are not summarised on the Filters button** while the fields are hidden. Now that the
+  bar starts collapsed this is more visible: a table can be filtered with the panel shut. Open question
+  for design: should the button carry a count ("Filters (2)")?
 
 ## Don't
 

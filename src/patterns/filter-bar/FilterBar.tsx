@@ -18,7 +18,7 @@ import { useDateFormat } from '../../lib/format-date';
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
  * filter fields (period, status, priority, tags), "Reset Filters" and a "Filters"
- * button that shows or hides the fields.
+ * button that shows or hides the fields. The fields start hidden (`defaultFiltersOpen`).
  *
  * Built to Figma's Manage table (`940:167946`, decided 10 Nov 2026 for every list): the search field
  * at the left with Reset and Filters at the right, then the fields under them, **each with its label
@@ -138,8 +138,10 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Fires when "Reset Filters" is pressed. The button is always shown. */
   onReset?: () => void;
   resetLabel?: string;
-  /** Whether the filter fields show. Uncontrolled (shown) when omitted. */
+  /** Whether the filter fields show. Controlled; omit it and the bar keeps its own, starting from `defaultFiltersOpen`. */
   filtersOpen?: boolean;
+  /** Uncontrolled: whether the fields show at first. Collapsed by default, so the table leads; pass `true` to start open. */
+  defaultFiltersOpen?: boolean;
   onFiltersOpenChange?: (open: boolean) => void;
   filtersLabel?: string;
   /** Extra fields, in the same row as the others. */
@@ -176,6 +178,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     onReset,
     resetLabel = 'Reset Filters',
     filtersOpen,
+    defaultFiltersOpen = false,
     onFiltersOpenChange,
     filtersLabel = 'Filters',
     children,
@@ -185,7 +188,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
 ) {
   const fieldsId = React.useId();
   const narrow = useNarrow();
-  const [openState, setOpenState] = React.useState(true);
+  const [openState, setOpenState] = React.useState(defaultFiltersOpen);
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
   /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */
