@@ -206,7 +206,7 @@ export function UserAccountModal({
       >
         <div className="flex items-center gap-4">
           {/* The name is a field right here, so the photo is decoration. */}
-          <Avatar size="lg" className="size-12" name={draft.name} src={shownPhoto} />
+          <Avatar size="3xl" name={draft.name} src={shownPhoto} />
           <input
             ref={fileInput}
             type="file"
