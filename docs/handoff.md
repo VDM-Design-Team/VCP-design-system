@@ -263,9 +263,9 @@ because guessing what triggers it is guessing at a flow.
 they are no longer blocking, but they are still unanswered:
 
 - **Are `AV_Header` and `Page_Title` the same component?** `Page_Title` carries
-  a *hidden* `Status_Progression` instance, which is what `AVHeader` renders.
-  If they are one thing, `AVHeader` becomes `PageTitle` plus the buttons — and
-  one of their two paddings is wrong, because `AV_Header` insets 16 where
+  a *hidden* `Status_Progression` instance, and an Added Value's page uses it
+  (its `Viewing AV Page Title` type). **Answered 20 November 2026: they are one
+  thing**, and `AVHeader` is gone: it is `PageTitle` `size="sm"` plus the buttons. One of their two paddings was wrong, because `AV_Header` insets 16 where
   `Page_Title` insets 32.
 - **Is the top bar 60 or 64?** Ours is 64, measured from the library. The pages
   file's `Top_NavBar` is 60. The shell adds no height of its own, so whichever

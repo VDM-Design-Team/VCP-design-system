@@ -340,7 +340,9 @@ function renderToast(item: ToastRecord, onDismiss?: (id: string) => void, still 
       title={item.title}
       toneLabel={item.toneLabel}
       actionLabel={item.actionLabel}
-      onAction={item.onAction}
+      /* Pressing the action closes the toast, after it has run: the Undo is done, or the Retry is on its way, so
+         the message is no longer true. Figma's undo flow: "user clicks undo, the snackbar disappears". */
+      onAction={item.onAction ? () => { item.onAction?.(); onDismiss?.(item.id); } : undefined}
       dismissLabel={item.dismissLabel}
       /* A copy being measured, or leaving, runs no timer. A critical toast that was not
          given a `duration` stays until it is dismissed (decided 17 November 2026). */

@@ -11,7 +11,8 @@ import { DueDateTag, type DueDateProximity } from '../../components/due-date-tag
 import { AvatarGroup, type AvatarGroupEntry } from '../../components/avatar-group';
 import { Pagination } from '../../atoms/pagination';
 import { UrgencyTag, URGENCY_COLUMN_HINT, type AVUrgency } from '../../components/urgency-tag';
-import { TruncatedText } from '../../components/truncated-text';
+import { TruncatedText, useIsTruncated } from '../../components/truncated-text';
+import { CopyText } from '../../atoms/copy-text';
 import { TypeTag, TYPE_COLUMN_HINT, type AVType } from '../../components/type-tag';
 import { Tag } from '../../atoms/tag';
 import { Tooltip } from '../../atoms/tooltip';
@@ -73,7 +74,7 @@ export type AVMultipart =
 export interface AVTableRow {
   /** The row's identity — used for selection. Give it the AV's real id. */
   id: string;
-  /** The human reference, "VCP-12345". Clickable when `onOpen` is given. */
+  /** The human reference, "VCP-12345". Click to copy it (a "Copied" bubble says so); opening the AV is the title's job. */
   ref: string;
   title: string;
   /**
@@ -141,7 +142,7 @@ export interface AVTableProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   selectable?: boolean;
   selected?: readonly string[];
   onSelectedChange?: (ids: string[]) => void;
-  /** Opens an AV. Given, the reference becomes a button; omitted, it is text. */
+  /** Opens an AV. Given, the title becomes a button; omitted, it is text. The reference is always click-to-copy. */
   onOpen?: (row: AVTableRow) => void;
   /** A child's **Parent: …** chip was pressed. Given, the chip is a button; the page opens the parent. */
   onOpenParent?: (row: AVTableRow) => void;
@@ -213,6 +214,25 @@ function Count({ icon, value, noun }: { icon: 'paperclip' | 'chat-centered-text'
   );
 }
 
+/** The title as the button that opens the AV: one line, ellipsed, with the whole title in a tooltip only while it is cut. */
+function TitleButton({ row, onOpen }: { row: AVTableRow; onOpen: (row: AVTableRow) => void }) {
+  const ref = React.useRef<HTMLButtonElement>(null);
+  const truncated = useIsTruncated(ref, [row.title]);
+  return (
+    /* `min-w-40` (160): the title is the way into the AV, so it keeps room to be pressed however narrow the cell gets; below it the table scrolls sideways instead of squeezing the title to a sliver. */
+    <Tooltip content={row.title} describe={false} disabled={!truncated} className="min-w-40 max-w-full">
+      <button
+        ref={ref}
+        type="button"
+        onClick={() => onOpen(row)}
+        className="block max-w-full truncate rounded-sm text-left text-label-sm-medium text-text-primary hover:text-text-brand-medium hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused"
+      >
+        {row.title}
+      </button>
+    </Tooltip>
+  );
+}
+
 export function AVTable({
   className,
   rows,
@@ -252,27 +272,20 @@ export function AVTable({
       cellProps: (row) => (row.multipart ? { className: 'min-w-md' } : undefined),
       render: (row) => {
         const multipart = row.multipart;
-        const reference = onOpen ? (
-          /* The reference opens the AV. A button, not a whole-row click
-             target: `DataTable` refuses those, and rightly — a row-wide
-             target hides the real action from keyboards and screen readers. */
-          <button
-            type="button"
-            onClick={() => onOpen(row)}
-            className={cn(
-              'shrink-0 rounded-sm text-body-sm-regular text-text-tertiary transition-colors',
-              'hover:text-text-brand-medium hover:underline',
-              'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-            )}
-          >
-            {row.ref}
-            <span className="sr-only">: {row.title}</span>
-          </button>
-        ) : (
-          <span className="shrink-0 text-body-sm-regular text-text-tertiary">{row.ref}</span>
+        /* Click to copy the reference ("Copied" says so), as Figma's `_AV_Table_ID` draws it; opening the AV is the title's job, as in the Planning table. */
+        /* `CopyText`'s own wrapper must not shrink either, or a narrow cell squeezes the reference under the title. */
+        const reference = (
+          <span className="flex shrink-0">
+            <CopyText text={row.ref} className="whitespace-nowrap text-body-sm-regular text-text-tertiary" />
+          </span>
         );
-        /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. */
-        const title = <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>;
+        /* One line, ellipsed. When it is cut, hovering or focusing it says the whole title. With `onOpen` it is the button that opens the AV: a button, not a whole-row click
+           target (`DataTable` refuses those, and rightly: a row-wide target hides the real action from keyboards and screen readers). */
+        const title = onOpen ? (
+          <TitleButton row={row} onOpen={onOpen} />
+        ) : (
+          <TruncatedText className="text-label-sm-medium text-text-primary">{row.title}</TruncatedText>
+        );
         /* BESA Passed sits right after the reference, in Figma's `_AV_Table_ID`. */
         const besa = row.besaPassed && <Flag text="BESA Passed" tone="success" icon="seal-check" />;
         const details = (multipart || row.domain || row.attachments || row.comments || row.rejected || row.backlogged) && (

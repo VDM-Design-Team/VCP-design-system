@@ -280,7 +280,8 @@ export const OnThePage: Story = {
     await userEvent.type(within(create).getByRole('textbox', { name: 'Email' }), 'wren@vdm.technology');
     await userEvent.click(within(create).getByRole('checkbox', { name: 'Product Designer' }));
     await userEvent.click(within(create).getByRole('button', { name: 'Submit' }));
-    await expect(await screen.findByText('User created')).toBeVisible();
+    /* A toast fades in: wait until it is visible instead of checking once the moment it exists. */
+    await waitFor(() => expect(screen.getByText('User created')).toBeVisible());
     await waitFor(() => expect(c.getByText('wren@vdm.technology')).toBeVisible());
   },
 };

@@ -14,6 +14,7 @@ page, audit batch 5, 11 September 2026.
 
 | Piece | Tier |
 |---|---|
+| `CopyText` | atom |
 | `TruncatedText` | component |
 | `Button` | atom |
 | `Divider` | atom |
@@ -71,6 +72,12 @@ variants. Default draws seven; `selectable` adds the leading checkbox;
 Selected and Action Column — the same two booleans, so they are booleans here
 rather than a `variant` prop.
 
+## The reference copies; the title opens
+
+The reference ("VCP-12345") is a `CopyText`: it underlines on hover, **copies the reference on click** and says "Copied" for a moment, as Figma's `_AV_Table_ID` draws it (Default, and a Tooltip state with the bubble). It does not open the AV. With `onOpen`, **the title** is the button that opens it, as in the Planning table. Figma's prototype draws no click on the title, so the title is our choice of where opening lives; if design wants another, it is a change in this one place.
+
+**The title keeps room to be pressed.** It is the way into the AV, so it never gets narrower than **160** (`min-w-40`, about sixteen characters): in a squeezed table the whole table scrolls sideways before the title is cut to a sliver. **On hover the title turns brand blue and underlines**, as the Planning table's does, to show it is a button. Figma draws neither the hover nor a click on the title, so both are proposals: see the questions on the PR that added them.
+
 ## Props
 
 | Prop | Type | Default | Notes |
@@ -80,7 +87,7 @@ rather than a `variant` prop.
 | `sort` / `onSortChange` | `DataTableSort` / `(sort) => void` | — | Keys: `title`, `due`, `lastUpdated` |
 | `selectable` | `boolean` | — | Adds the leading checkbox column |
 | `selected` / `onSelectedChange` | `string[]` / `(ids) => void` | `[]` | Ids are `row.id` |
-| `onOpen` | `(row) => void` | — | Given, the reference is a button; omitted, it is text |
+| `onOpen` | `(row) => void` | — | Given, the **title** is a button that opens the AV; omitted, it is text. The reference is always click-to-copy (below) |
 | `actions` | `(row) => ReactNode` | — | Adds the trailing Actions column |
 | `onDeleteSelected` | `(ids) => void` | — | The destructive button above the pagination |
 | `deleteSelectedLabel` | `(count) => string` | `Delete Selected (n)` | |
@@ -180,9 +187,11 @@ History: the 24 one-line version was built on #275, replaced by Figma's 28 on 10
 - A real `<table>` with `scope="col"` headers and `aria-sort` on the sorted
   one, inherited from `DataTable`. Cell-by-cell navigation is assistive tech's
   whole affordance for tabular data.
-- **No whole-row click target.** The reference is a button and its accessible
-  name carries the title too — "VCP-12511: Audit every empty state…" — so a
-  screen-reader user hears what they are opening rather than a bare code.
+- **No whole-row click target.** The title is the button that opens the AV, so
+  a screen-reader user hears the AV's name ("Audit every empty state…, button")
+  rather than a bare code. The reference is a separate button that copies it
+  (its name is the reference, "VCP-12511"; "Copied" arrives in a polite live
+  region).
 - **Every checkbox names its AV**, not "row 3", so two rows never announce
   alike.
 - **Counts announce their noun.** "3" beside a paperclip is "3 attachments" to
