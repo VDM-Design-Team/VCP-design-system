@@ -289,10 +289,60 @@ export const OpeningAnAV: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByText('Nothing opened yet')).toBeInTheDocument();
-    await userEvent.click(
-      canvas.getByRole('button', { name: /VCP-12511.*empty state/s }),
-    );
+    /* The title opens the AV (the reference copies: see `CopyingTheReference`). */
+    await userEvent.click(canvas.getByRole('button', { name: /Audit every empty state/ }));
     await expect(canvas.getByText('Opened VCP-12511')).toBeInTheDocument();
+  },
+};
+
+/**
+ * The reference is click-to-copy (Figma's `_AV_Table_ID`): it underlines on hover, copies on click and says "Copied" for a moment. It does **not** open the AV: that is the title's job.
+ */
+export const CopyingTheReference: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => {
+    const [opened, setOpened] = React.useState<string | null>(null);
+    return (
+      <div className="bg-surface-canvas p-6 pt-12">
+        <AVTable {...args} onOpen={(row) => setOpened(row.ref)} />
+        <p className="mt-4 font-sans text-body-sm-regular text-text-secondary">{opened ? `Opened ${opened}` : 'Nothing opened yet'}</p>
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* Stand in for the clipboard so the test does not depend on browser permissions. */
+    const written: string[] = [];
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: async (t: string) => void written.push(t) },
+    });
+    const reference = canvas.getByRole('button', { name: 'VCP-12511' });
+    await userEvent.click(reference);
+    await waitFor(() => expect(reference.parentElement!.querySelector('[role="status"]')).toHaveTextContent('Copied'));
+    await expect(written).toEqual(['VCP-12511']);
+    /* Copying did not open the AV. */
+    await expect(canvas.getByText('Nothing opened yet')).toBeInTheDocument();
+    /* The reference keeps its width: it is never squeezed under the title beside it. */
+    const title = canvas.getByRole('button', { name: /Audit every empty state/ });
+    await expect(reference.getBoundingClientRect().right).toBeLessThanOrEqual(title.getBoundingClientRect().left);
+  },
+};
+
+/** In a narrow space the title keeps at least 160 to be pressed in (the table scrolls sideways instead): it is the way into the AV. */
+export const NarrowTitleStaysClickable: Story = {
+  tags: ['!dev', '!autodocs'],
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => (
+    <div className="max-w-xl bg-surface-canvas p-6">
+      <AVTable {...args} onOpen={() => {}} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const title = canvas.getByRole('button', { name: /Audit every empty state/ });
+    await expect(Math.round(title.getBoundingClientRect().width)).toBeGreaterThanOrEqual(160);
   },
 };
 
@@ -345,9 +395,10 @@ export const Flags: Story = {
     await expect(canvas.getByRole('button', { name: 'BESA Passed' })).toBeInTheDocument();
     await expect(canvas.getByRole('button', { name: /^Backlogged/ })).toBeInTheDocument();
     /* The seal comes straight after its own reference, in the same cell. */
-    const reference = canvas.getByRole('button', { name: /VCP-12511/ });
+    const reference = canvas.getByRole('button', { name: 'VCP-12511' });
     const seal = canvas.getByRole('button', { name: 'BESA Passed' });
-    await expect(reference.parentElement).toBe(seal.parentElement?.parentElement ?? seal.parentElement);
+    await expect(reference.closest('td')).toBe(seal.closest('td'));
+    await expect(Boolean(reference.compareDocumentPosition(seal) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
   },
 };
 

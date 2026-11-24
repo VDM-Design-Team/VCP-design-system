@@ -112,7 +112,7 @@ export function HandoffAVModal({
     /* Asked on submit: a date, a reason when late, a link that is typed must be an address, and there is a link or a file to review. */
     const next: typeof errors = {};
     if (!entry.date) next.date = 'Select a handoff date.';
-    if (isOverdue && !entry.overdueReason) next.overdueReason = 'Please select a reason before completing the AV';
+    if (isOverdue && !entry.overdueReason) next.overdueReason = 'Please select a reason before handing off the AV';
     if (!handoffLinksValid(entry)) next.links = true;
     /* A link that is typed wrong is already being asked about; "add a link" on top of it would be noise. */
     else if (!handoffHasEvidence(entry, attachments.length)) next.evidence = HANDOFF_EVIDENCE_ERROR;

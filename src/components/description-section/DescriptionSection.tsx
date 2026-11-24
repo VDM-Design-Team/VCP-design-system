@@ -14,8 +14,8 @@ import type { DescriptionCardProps, DescriptionCardType } from '../description-c
  * Deliverables", "Desired outcome"), the colour of the cards inside it, and which controls it can
  * have. A section is not a free-form container, so the title is not a prop. The cards need no
  * `type` or `position` of their own: the section gives each its type and its number, and a
- * default "Remove problem 2" name, unless the card sets its own. Desired outcome is one card with
- * no add button and no attachments.
+ * default "Remove problem 2" name, unless the card sets its own. **Only Problems can be added to,
+ * and only a problem card can be removed.** Desired outcome has one card per set (two problems, two outcomes) and no attachments.
  *
  * **It always folds.** A caret button at the right of the header (down when folded, up when
  * open) hides the cards and the files, which are hidden, not unmounted, so what was typed is
@@ -33,17 +33,17 @@ import type { DescriptionCardProps, DescriptionCardType } from '../description-c
  * never hardcode a hex, px value, or arbitrary Tailwind class. ds-lint-ignore
  */
 /* THE mapping — section type → title, the noun in the controls' names, and which controls exist.
-   Desired outcome is one card: nothing to add, and no files. */
+   Only Problems can be added to (and only a problem card can be removed: `DescriptionCard`). Desired outcome has a card for each set, and no files. */
 const SECTION: Record<
   DescriptionCardType,
   { title: string; noun: string; addable: boolean; attachable: boolean }
 > = {
   problem: { title: 'Problems', noun: 'problem', addable: true, attachable: true },
-  solution: { title: 'Solutions', noun: 'solution', addable: true, attachable: true },
+  solution: { title: 'Solutions', noun: 'solution', addable: false, attachable: true },
   deliverable: {
     title: 'Acceptance Criteria / Deliverables',
     noun: 'deliverable',
-    addable: true,
+    addable: false,
     attachable: true,
   },
   'desired-outcome': { title: 'Desired outcome', noun: 'desired outcome', addable: false, attachable: false },
@@ -60,9 +60,9 @@ export interface DescriptionSectionProps extends React.HTMLAttributes<HTMLElemen
   defaultOpen?: boolean;
   /** Fires with the next state when the header is pressed. */
   onOpenChange?: (open: boolean) => void;
-  /** Renders the round add button after the title, and fires when it is pressed. Not on desired outcome. */
+  /** Renders the round add button after the title, and fires when it is pressed. **Problems only**: ignored on the other sections. */
   onAdd?: () => void;
-  /** The add button's accessible name. Default "Add problem", "Add solution". */
+  /** The add button's accessible name. Default "Add problem". */
   addLabel?: string;
   /** Renders the paperclip under the cards, and fires when it is pressed. Not on desired outcome. */
   onAttach?: () => void;

@@ -232,7 +232,7 @@ Contrast, measured (4.5:1 for text, 3:1 for graphics), light / dark:
   rows. Assigning watchers is a separate feature built on top of this one.
 - **The search box is the `Input` atom.** Figma fills it with an "elevated secondary" surface the
   system has no token for; the Input's `surface.elevated` is used.
-- **Group headings do not collapse.** Figma's tags menu draws a caret on them.
+- **Group headings fold only when asked.** Figma's tags menu draws a caret on them, and `collapsibleGroups` draws it too (off by default, so the headings of a short list stay plain text).
 - **The scrollbar is the browser's.** `Menu_Dropdown` in Figma draws a slim custom scrollbar; this panel scrolls with the platform's.
 - **The tags menu's blue highlighted row** (a single-pick look) is replaced by the checkbox,
   because the field now allows several tags.
