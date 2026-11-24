@@ -178,7 +178,7 @@ export const Default: Story = {
     await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveAccessibleName('Assignee Amy Lee');
 
     /* Reset clears every value the page holds. */
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();

@@ -27,9 +27,9 @@ Two cases, and only two:
 | Case | Icon | Title | Under it |
 |---|---|---|---|
 | **Nothing yet** | The table's own glyph (`icon`) | "No {noun} yet." | Nothing, or the page's `action` |
-| **Filtered** (`filtered`, or a `search`) | Magnifying glass, always | "No {noun} match these filters." or "No {noun} match “{search}”." | A sentence on what to try (`hint`), and **Reset** when the page gives `onReset` |
+| **Filtered** (`filtered`, or a `search`) | Magnifying glass, always | "No {noun} match these filters." or "No {noun} match “{search}”." | A sentence on what to try (`hint`), and **Reset Filters** when the page gives `onReset` |
 
-A table passes its **plural noun** and its **icon**, never its own sentences. **Reset** is the word `FilterBar` uses, so the recovery reads the same on every page. Say which fields the search covers in `hint` ("Try a different name, email or role.").
+A table passes its **plural noun** and its **icon**, never its own sentences. **Reset Filters** are the words `FilterBar` uses, so the recovery reads the same on every page. Say which fields the search covers in `hint` ("Try a different name, email or role.").
 
 ## Props
 
@@ -40,9 +40,9 @@ A table passes its **plural noun** and its **icon**, never its own sentences. **
 | `filtered` | `boolean` | — | The filters or the search are why there are no rows |
 | `search` | `string` | — | The search text: names the empty result, and means `filtered` |
 | `hint` | `ReactNode` | "Try a different search, or change the filters." | What to try, when filtered |
-| `onReset` | `() => void` | — | Shows **Reset** under a filtered result. **Optional**: leave it out (or pass `undefined`) and there is no Reset, for a page with nothing to put back |
+| `onReset` | `() => void` | — | Shows **Reset Filters** under a filtered result. **Optional**: leave it out (or pass `undefined`) and there is no Reset, for a page with nothing to put back |
 | `action` | `ReactNode` | — | The way forward when there is nothing yet. Leave it out when the table's header already has "New …" |
-| `title` | `ReactNode` | from `noun` | Replaces the title. For a table whose Figma draws other words (Holiday, Manuals); the icon, layout and **Reset** stay the system's |
+| `title` | `ReactNode` | from `noun` | Replaces the title. For a table whose Figma draws other words (Holiday, Manuals); the icon, layout and **Reset Filters** stay the system's |
 | `headingLevel`, `className`, `ref` | | | As `EmptyState` |
 
 ## Tokens
@@ -52,9 +52,9 @@ None of its own: `EmptyState`'s (tile `surface.brand.base`, glyph `text.brand.me
 ## Accessibility
 
 - The title is a real heading, as in `EmptyState`; the tile is decorative.
-- **Reset** is a real button named "Reset" (40 high targets follow `Button`'s `sm` rule inside the table card).
+- **Reset Filters** is a real button named "Reset Filters" (40 high targets follow `Button`'s `sm` rule inside the table card).
 - **Reset goes away when it works** (the filters clear, the rows return), so the focused button unmounts. The page must move focus on, to the first filter, instead of letting it fall to the page: `HolidayTable` does, and its `ResetKeepsFocus` story shows it. `TableEmpty` cannot do this itself, because the filters are the page's.
-- Tab reaches **Reset** in one stop, in reading order after the text, with `Button`'s 2px focus ring (checked: solid 2px, offset 2).
+- Tab reaches **Reset Filters** in one stop, in reading order after the text, with `Button`'s 2px focus ring (checked: solid 2px, offset 2).
 - When a search or filter *just* emptied the table, pair it with the live region of what did the searching; this piece owns no `aria-live`.
 
 ## Don't

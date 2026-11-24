@@ -52,7 +52,7 @@ export const Default: Story = {
     const group = c.getByRole('group', { name: 'Dashboard filters' });
     const heights = [...group.children].map((el) => Math.round(el.getBoundingClientRect().height));
     await expect(new Set(heights)).toEqual(new Set([36]));
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await userEvent.click(c.getByRole('button', { name: 'Export Cycle Report' }));
     await expect(args.onExport).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ export const Controlled: Story = {
     const c = within(canvasElement);
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Team' }), 'Platform');
     await expect(c.getByRole('combobox', { name: 'Team' })).toHaveValue('Platform');
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(c.getByRole('combobox', { name: 'Team' })).toHaveValue('All Teams');
   },
 };

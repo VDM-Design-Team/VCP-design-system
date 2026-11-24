@@ -8,12 +8,12 @@ import { SearchSelect } from '../../components/search-select';
 
 /**
  * DashboardFilters — the global filter bar at the top of a dashboard: the filters (the cycle, the year, the
- * team), then **Reset** and an **Export** button together at the end (as `FilterBar` ends with Reset and its button), in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export`
+ * team), then **Reset Filters** and an **Export** button together at the end (as `FilterBar` ends with Reset and its button), in one row on the right of the page title. Built to Figma's `Dashboard_Global_Filters_And_Export`
  * (`7577:107312`).
  *
  * - **It is data, not a layout.** Pass `filters` (each a `{ key, label, value, options, onChange }`, drawn as a quiet `Select`, or as a searchable `SearchSelect` when `searchable`: the cycle's list is long)
  *   and the bar lays them out. A dashboard with two filters passes two; the superadmin's has its own, so it has none of these.
- * - **Reset and Export are optional.** `onReset` shows the Reset button (tertiary, "Reset", next to Export); `exportLabel` shows the export button
+ * - **Reset and Export are optional.** `onReset` shows the Reset button (tertiary, "Reset Filters", next to Export); `exportLabel` shows the export button
  *   (secondary, with a caret). Give it `exportOptions` and the button opens a menu of them (the formats, or which report), reported
  *   to `onExport(key)`; without options it is one button, and `onExport()` hears the press.
  * - **It does no filtering.** It reports each choice, and the page changes what the charts and cards are given.
@@ -54,7 +54,7 @@ export interface DashboardFiltersProps extends Omit<React.HTMLAttributes<HTMLDiv
 }
 
 export const DashboardFilters = React.forwardRef<HTMLDivElement, DashboardFiltersProps>(
-  ({ className, filters, onReset, resetLabel = 'Reset', exportLabel, exportOptions, onExport, ...props }, ref) => {
+  ({ className, filters, onReset, resetLabel = 'Reset Filters', exportLabel, exportOptions, onExport, ...props }, ref) => {
     const exportButton = exportLabel ? (
       <Button
         variant="secondary"

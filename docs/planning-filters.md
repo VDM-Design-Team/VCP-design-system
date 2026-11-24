@@ -36,7 +36,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | `onReset` | `() => void` | required | The page clears its filters |
 | `onViewCycle` | `() => void` | — | Omit it and the button is not drawn. What it opens is the page's |
 | `statusPlaceholder` / `priorityPlaceholder` / `searchPlaceholder` | `string` | "Select status" / "Select priority" / "Search by title or ID" | A picker says *Select*, a search box says *Search* |
-| `resetLabel` / `viewCycleLabel` | `string` | "Reset" / "View Cycle" | |
+| `resetLabel` / `viewCycleLabel` | `string` | "Reset Filters" / "View Cycle" | |
 
 ## Layout
 

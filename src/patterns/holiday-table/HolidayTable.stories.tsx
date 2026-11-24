@@ -101,7 +101,7 @@ export const EmptyWhenFiltered: Story = {
     const c = within(canvasElement);
     await expect(c.getByText('No holidays match your filters.')).toBeVisible();
     await expect(c.queryByText('No holidays have been added yet.')).toBeNull();
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onResetFilters).toHaveBeenCalled();
   },
 };
@@ -256,7 +256,7 @@ function Filtering({ filters: initial, ...args }: React.ComponentProps<typeof Ho
 }
 
 /**
- * With the keyboard: the filter hides every row, so the table says "No holidays match your filters." with **Reset**. Enter on Reset puts the filters back, the rows return and the button
+ * With the keyboard: the filter hides every row, so the table says "No holidays match your filters." with **Reset Filters**. Enter on Reset puts the filters back, the rows return and the button
  * goes, so focus moves to the first filter (Holiday type) instead of falling to the page.
  */
 export const ResetKeepsFocus: Story = {
@@ -265,9 +265,9 @@ export const ResetKeepsFocus: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByText('No holidays match your filters.')).toBeVisible();
-    c.getByRole('button', { name: 'Reset' }).focus();
+    c.getByRole('button', { name: 'Reset Filters' }).focus();
     await userEvent.keyboard('{Enter}');
-    await waitFor(() => expect(c.queryByRole('button', { name: 'Reset' })).toBeNull());
+    await waitFor(() => expect(c.queryByRole('button', { name: 'Reset Filters' })).toBeNull());
     await expect(c.getByText('Labour Day')).toBeVisible();
     await expect(document.body).not.toHaveFocus();
     await expect(c.getByRole('combobox', { name: 'Holiday type' })).toHaveFocus();
