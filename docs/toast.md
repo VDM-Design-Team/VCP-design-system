@@ -95,7 +95,7 @@ this on 5 November 2026, over the rule above. It holds only on these terms:
 | `children` | `ReactNode` | — | Supporting detail. Usually unnecessary. Left out, `false` or blank, no description renders and the row is centred |
 | `toneLabel` | `string` | `Information` / `Success` / `Warning` / `Error` | The word the tone glyph is announced as. Set it to localise; never to `''` |
 | `actionLabel` | `string` | — | Renders one action; left out or blank, there is no button. **Suppresses auto-dismiss**, unless `duration` is at least `MIN_ACTION_TOAST_DURATION` (15000) |
-| `onAction` | `() => void` | — | Fired by the action |
+| `onAction` | `() => void` | — | Fired by the action. Raised through `toast()`, pressing it **also closes the toast**, after `onAction` has run (the Undo is done, so "deleted" is no longer true). A bare `<Toast>` does not close itself: it has no queue |
 | `onDismiss` | `() => void` | — | Renders the close control, and is what the timer calls |
 | `dismissLabel` | `string` | `Dismiss: <title>` | The accessible name of the X button, which `onDismiss` renders. Falls back to `Dismiss notification` when `title` is not a string |
 | `duration` | `number \| null` | `null` | Milliseconds, or `null` for never. Pauses on hover, focus and tab-hide |
@@ -138,7 +138,9 @@ toast({
 });
 ```
 
-- The timer bar runs, the toast pauses while the pointer is over it or focus is in it, and the X closes it at once.
+- The timer bar runs, the toast pauses while the pointer is over it or focus is in it, and the X closes it at once. **Pressing Undo closes it too**, as Figma draws it ("user clicks undo, the snackbar disappears"): the toast raised with `toast()` closes itself after `onAction` runs.
+- **Undo restores the deleted thing, and only that.** If the person did something else before pressing it (added a card, edited another), that stays. Do not reset the page to an earlier copy, which would erase it. Leave the toast up while they carry on: adding another card does not make "deleted" untrue. Close it yourself (`dismiss`) only when Undo is no longer possible, such as when the page is saved.
+- The Undo button had focus and is gone, so the page moves focus on purpose, to what it restored (CLAUDE.md: never drop focus).
 - Do the deletion for real **when the toast goes** (`onDismiss`, which the timer also calls), or do it now and
   restore on **Undo**; either way the page, not the toast, owns the state.
 - Anything under 15 seconds is ignored and the toast stays until dismissed.
