@@ -63,7 +63,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 ## Empty
 
-In a `TableEmpty` (`EmptyState`'s tile, title and **Reset**): "No users yet.", or while a search is typed, **No users match “…”.** with a hint.
+In a `TableEmpty` (`EmptyState`'s tile, title and **Reset Filters**): "No users yet.", or while a search is typed, **No users match “…”.** with a hint.
 
 ## Tokens
 

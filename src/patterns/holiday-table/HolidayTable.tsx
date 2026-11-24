@@ -31,7 +31,7 @@ import { useDateFormat } from '../../lib/format-date';
  * **Holiday Type**, **Applies to** (a stack of people, "+2" for the rest), **All Day** (or Partial Day), **Recurring** (Yearly / One-Time), **Added By** ("System", or the person) and **Source**.
  * An **admin** also has **Actions**: edit and delete. A holiday the system added can be deleted but not edited, as Figma draws it (no pencil on those rows).
  *
- * - **Two empty messages**, under the headers (the filters and the paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset** (`onResetFilters`) when a filter is on and nothing matches.
+ * - **Two empty messages**, under the headers (the filters and the paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset Filters** (`onResetFilters`) when a filter is on and nothing matches.
  * - **Dates read as every date does** (`useDateFormat`: dd/mm/yyyy, or the person's locale). A range reads "01/05/2026 – 03/05/2026" with an en dash.
  * - **The Date column carries the status too** when the caller says what today is (`today`, ISO): **Upcoming** (info), **Today** (success) or **Past** (neutral), beside the date and its day-count pill, as Figma's `Date Status` badge.
  * - **Edit and delete are 40** (`IconButton` `md`, the touch minimum), the delete `critical-tonal`; the table only *asks*: confirming a delete (`ConfirmDeleteModal`) is the page's.
@@ -89,7 +89,7 @@ export interface HolidayTableProps extends Omit<React.HTMLAttributes<HTMLDivElem
   onSortChange?: (sort: DataTableSort) => void;
   /** What today is (ISO `yyyy-mm-dd`): the caller owns it. Given, each Date cell wears Upcoming, Today or Past; left out, none does. */
   today?: string;
-  /** **Reset** in the "No holidays match your filters." message: put the filters back. */
+  /** **Reset Filters** in the "No holidays match your filters." message: put the filters back. */
   onResetFilters?: () => void;
   /** An admin sees Add Holiday, Import from Hubstaff and the Actions column. */
   admin?: boolean;

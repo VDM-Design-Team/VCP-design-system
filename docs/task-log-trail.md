@@ -24,7 +24,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 | Use | For |
 |---|---|
 | `TaskLogTrail` | The Task Log Trail page's list |
-| `FilterBar` | The filter row, passed as `filters` (see the `WithFilters` story): search, the period and one **Reset** |
+| `FilterBar` | The filter row, passed as `filters` (see the `WithFilters` story): search, the period and one **Reset Filters** |
 | `DataTable` | Any other table |
 
 ## On a page
@@ -57,7 +57,7 @@ The whole Task Log Trail page, title and spacing included, is `TaskLogPage`: use
 
 ## It does nothing itself
 
-It filters nothing and pages nothing: the page filters and passes the page's rows. **The filters are the system's `FilterBar`** (search, the period, **Reset**), with one `Select` among its fields for which field changed (Status, Workflow, Assignee, Start Date or Due Date), labelled **Change** above it and on the lighter filter edge like the bar's own fields (a `Field` around a `Select edge="neutral"`, passed as the bar's `children`), inside the table's card, the way `AccountsTable` and `ContactsTable` carry their search; the `WithFilters` story shows it. Figma draws a separate "Filters" card with a heading, a caption and a dates-only **Clear dates**; the page has the bar in the table's card and one **Reset**, `FilterBar`'s, that clears every filter, like every other filter row in the system. **There is no Source filter**: every change is from VCP (no Jira), so it would have one option. **There is no helper line either**: Figma's Filters card says "Search fetches logs. Filters narrow results." under its heading, but that describes how the page fetches its data (the backend's business), not something the person can act on, so it is left out (design lead, 20 November 2026).
+It filters nothing and pages nothing: the page filters and passes the page's rows. **The filters are the system's `FilterBar`** (search, the period, **Reset Filters**), with one `Select` among its fields for which field changed (Status, Workflow, Assignee, Start Date or Due Date), labelled **Change** above it and on the lighter filter edge like the bar's own fields (a `Field` around a `Select edge="neutral"`, passed as the bar's `children`), inside the table's card, the way `AccountsTable` and `ContactsTable` carry their search; the `WithFilters` story shows it. Figma draws a separate "Filters" card with a heading, a caption and a dates-only **Clear dates**; the page has the bar in the table's card and one **Reset Filters**, `FilterBar`'s, that clears every filter, like every other filter row in the system. **There is no Source filter**: every change is from VCP (no Jira), so it would have one option. **There is no helper line either**: Figma's Filters card says "Search fetches logs. Filters narrow results." under its heading, but that describes how the page fetches its data (the backend's business), not something the person can act on, so it is left out (design lead, 20 November 2026).
 
 ## Tokens
 

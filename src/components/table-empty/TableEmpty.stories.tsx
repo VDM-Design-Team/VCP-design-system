@@ -11,7 +11,7 @@ const meta = {
       description: {
         component:
           'What every table says when it has no rows: one look, one set of words. A table passes its ' +
-          'plural noun and its icon; the sentences, the search icon and **Reset** come from here, so tables ' +
+          'plural noun and its icon; the sentences, the search icon and **Reset Filters** come from here, so tables ' +
           'cannot drift apart. `DataTable` shows it when a page sets no `empty`.',
       },
     },
@@ -40,7 +40,7 @@ export const Filtered: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getByText('No accounts match these filters.')).toBeVisible();
-    await expect(c.queryByRole('button', { name: 'Reset' })).toBeNull();
+    await expect(c.queryByRole('button', { name: 'Reset Filters' })).toBeNull();
   },
 };
 
@@ -53,11 +53,11 @@ export const WithASearch: Story = {
   },
 };
 
-/** A page that can put the filters back says so with **Reset**, the word `FilterBar` uses. */
+/** A page that can put the filters back says so with **Reset Filters**, the words `FilterBar` uses. */
 export const WithReset: Story = {
   args: { filtered: true, onReset: fn() },
   play: async ({ canvasElement, args }) => {
-    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Reset' }));
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
   },
 };

@@ -179,7 +179,7 @@ export const Default: Story = {
     await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveAccessibleName('Assignee Amy Lee');
 
     /* Reset clears every value the page holds. */
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();
@@ -201,7 +201,7 @@ export const StartsCollapsed: Story = {
     const toggle = canvas.getByRole('button', { name: 'Filters' });
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(canvas.getByRole('searchbox')).toBeVisible();
-    await expect(canvas.getByRole('button', { name: 'Reset' })).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeVisible();
     await expect(canvas.getByRole('combobox', { name: /^Status/, hidden: true })).not.toBeVisible();
 
     await userEvent.click(toggle);

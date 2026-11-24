@@ -219,7 +219,7 @@ export const Assigned: Story = {
     /* The search narrows what the page lists; the page owns it. */
     await userEvent.type(c.getByRole('searchbox', { name: 'Search by title or ID' }), 'VCP-12341');
     await expect(c.getAllByRole('row')).toHaveLength(1 + 1);
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(c.getAllByRole('row')).toHaveLength(1 + 4);
   },
 };
@@ -372,7 +372,7 @@ export const NothingMatches: Story = {
     await userEvent.type(search, 'zzz');
     await expect(c.getByText('No added values match “zzz”.')).toBeVisible();
     /* Two Resets: the filter bar's, and the empty table's. The empty one is the second. */
-    const resets = c.getAllByRole('button', { name: 'Reset' });
+    const resets = c.getAllByRole('button', { name: 'Reset Filters' });
     await expect(resets).toHaveLength(2);
     await userEvent.click(resets[1]);
     await expect(c.getAllByRole('row')).toHaveLength(1 + 3);

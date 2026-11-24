@@ -12,7 +12,7 @@ import { EmptyState, type EmptyStateProps } from '../empty-state';
  * - **Nothing yet** (`filtered` off): "No accounts yet." with the table's own icon.
  * - **Filtered** (`filtered` on, or a `search`): "No accounts match “zzz”." with a
  *   magnifying glass, a sentence on what to try, and, when the page can put the
- *   filters back (`onReset`), **Reset**, the same word `FilterBar` uses.
+ *   filters back (`onReset`), **Reset Filters**, the same words `FilterBar` uses.
  *
  * A table passes its plural noun and its icon, never its own sentences. A table whose
  * Figma draws other words can pass `title`, and it is the one exception.
@@ -35,7 +35,7 @@ export interface TableEmptyProps
   title?: React.ReactNode;
   /** What to try when filtered. Defaults to a sentence that fits any table; say which fields the search covers when you can. */
   hint?: React.ReactNode;
-  /** Puts the filters back. Shows **Reset** under a filtered result. Optional: leave it out (or pass `undefined`) and there is no Reset. */
+  /** Puts the filters back. Shows **Reset Filters** under a filtered result. Optional: leave it out (or pass `undefined`) and there is no Reset. */
   onReset?: () => void;
   /** The way forward when there is nothing yet (usually a `Button`). Leave it out when the table's own header already has "New …". */
   action?: React.ReactNode;
@@ -66,7 +66,7 @@ export const TableEmpty = React.forwardRef<HTMLDivElement, TableEmptyProps>(
           isFiltered
             ? onReset && (
                 <Button size="sm" variant="secondary" onClick={onReset}>
-                  Reset
+                  Reset Filters
                 </Button>
               )
             : action

@@ -41,7 +41,7 @@ the bar draws the field and reports changes. It filters nothing and keeps no val
 | `tags` | `{ options, value?, onChange?, placeholder? }` | `SearchSelect` with a search box and removable tags in the field. Options may carry a `group`. `searchable`, `searchPlaceholder` and `rows` (`text`, `avatar`, `icon`, `tag`) can be set on `status` and `tags` |
 | `users` | `Array<{ label, options, value?, onChange?, placeholder?, multiple?, display? }>` | One `SearchSelect` per entry (Assignee, Initiator…) with avatars and search, named by its `label`; the placeholder defaults to "Select assignee". `multiple: true` takes and returns an array; a one-person field is `clearable`, so a picked person has a ✕ ("Clear Assignee"). `rows` defaults to `avatar` here. Options may carry `src` (a photo) or `unassigned` |
 | `children` | `ReactNode` | More fields, in the same row, shown and hidden with the others |
-| `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset" |
+| `onReset` / `resetLabel` | `() => void` / `string` | What Reset does. The button is always shown. Label defaults to "Reset Filters" |
 | `filtersOpen` / `onFiltersOpenChange` / `filtersLabel` | `boolean` / `(open) => void` / `string` | Whether the fields show (controlled). Omit it and the bar keeps its own, starting from `defaultFiltersOpen` |
 | `defaultFiltersOpen` | `boolean` | Uncontrolled: whether the fields show at first. **Defaults to `false`**: the bar starts collapsed, so the table leads (see below) |
 | `className`, `ref`, rest | | On the root |
@@ -73,7 +73,7 @@ leaving a prop out is already the switch, and role rules belong to the page that
 
 Built to Figma's Manage table (`940:167946`), decided 10 Nov 2026 for every list that uses the bar:
 
-- **The top row**: the search at the left (up to 20rem), **Reset** and **Filters** at the right.
+- **The top row**: the search at the left (up to 20rem), **Reset Filters** and **Filters** at the right.
 - **The fields**, under it, **each with its label above** (`text.primary`, label-sm medium, the same as
   `Field`'s), in Figma's order: **Priority, Tags, Status, Date** (the period), then Cycle, then the people
   (Assignee, Initiator…), then `children`. From `lg` six to a row, three from `md`, two below; each
@@ -127,6 +127,6 @@ placeholder and `text.primary` once it has a value. No new tokens.
 
 - **Don't keep filter values inside the bar** — the page owns them, so a URL, a saved view
   and Reset can all agree.
-- **Don't hide "Reset" when nothing is filtered** — it is a fixed control; `onReset` can do
+- **Don't hide "Reset Filters" when nothing is filtered** — it is a fixed control; `onReset` can do
   nothing.
 - **Don't put actions in `children`** — they are fields. Page actions live beside the bar.
