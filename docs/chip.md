@@ -83,7 +83,7 @@ The stories `Initiator` and `Assignee` draw every state side by side.
 | `selected` | `boolean` | — | Selected fill + `aria-pressed`. Only meaningful with `onClick` |
 | `onRemove` | `() => void` | — | Renders the ✕ — always its own button and tab stop. In an `outline` chip it is a critical tonal round button, as the design draws it |
 | `onEdit` / `editLabel` | `() => void` / `string` | — / `Edit ${label}` | Renders a pencil button before the ✕, its own control and tab stop. Name it with `editLabel` when `label` is not a string. In an `outline` chip both buttons are tonal round buttons, with 2 between them |
-| `actions` | `always \| hover` | `always` | `hover` hides the buttons until the pointer is over the chip or focus is inside it, and always shows them on a touch screen |
+| `actions` | `always \| hover \| overlay` | `always` | `hover` hides the buttons until the pointer is over the chip or focus is inside it, and always shows them on a touch screen. `overlay` shows them at the same moments but on top of the chip's end, on the card's surface, so the chip never widens (under review: see *Hovering a chip* in `docs/detail-card.md`) |
 | `disabled` | `boolean` | — | Grey border and disabled text; the buttons are not drawn and nothing is clickable |
 | `removeLabel` | `string` | `Remove ${label}` | The ✕'s accessible name. **Required in practice when `label` is not a string** — the fallback is a bare "Remove" |
 | `className` | `string` | — | Merged via `cn()` |

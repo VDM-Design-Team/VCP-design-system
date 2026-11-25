@@ -182,6 +182,13 @@ export interface DetailCardProps
    */
   lockAssignees?: boolean;
   /**
+   * Editing: how an Initiator or Assignee chip shows its edit and remove buttons on hover. **Under review**: today's
+   * `grow` widens the chip, and a chip at the end of a line wraps away from the pointer and back, over and over.
+   * `overlay` lays the buttons over the chip's end; `wrap-early` breaks the lines as if each chip were already
+   * widened, so it never has to wrap. Once one is chosen it becomes the only behaviour and this prop goes.
+   */
+  chipHover?: 'grow' | 'overlay' | 'wrap-early';
+  /**
    * The viewers pill with its list and its picker (`ViewersPicker`): hover for who is viewing, press to search and add people or remove viewers. Shown on the read cards, never
    * while editing.
    */
@@ -210,6 +217,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
       errors,
       readOnly,
       lockAssignees,
+      chipHover,
       viewers,
       viewerCount,
       onViewers,
@@ -457,6 +465,7 @@ export const DetailCard = React.forwardRef<HTMLElement, DetailCardProps>(
                 error={isInitiator ? errors?.initiators : errors?.assignees}
                 onChange={(list) => (isInitiator ? set({ initiators: list }) : set({ assignees: list }))}
                 aside={isInitiator && hasViewers ? viewersNode : undefined}
+                chipHover={chipHover}
               />
             );
           }
@@ -650,7 +659,9 @@ function PeopleField({
   error,
   onChange,
   aside,
+  chipHover = 'grow',
 }: {
+  chipHover?: 'grow' | 'overlay' | 'wrap-early';
   kind: 'initiator' | 'assignee';
   label: string;
   people: readonly DetailCardPerson[];
@@ -672,6 +683,41 @@ function PeopleField({
      says where focus belongs next; the effect below puts it there once that control is on screen. */
   const addButton = React.useRef<HTMLButtonElement>(null);
   const row = React.useRef<HTMLDivElement>(null);
+  /* `wrap-early`: the line breaks are worked out at rest, as if the widest-growing chip on each line were
+     already showing its buttons, then held with a full-width break. Hovering then only ever widens a chip
+     into room its line already has, so nothing changes line. Re-measured when the field resizes or the
+     list changes, never while a chip is hovered or focused (it would be measured wide). */
+  const [breaks, setBreaks] = React.useState<ReadonlySet<number>>(() => new Set());
+  React.useLayoutEffect(() => {
+    const el = row.current;
+    if (chipHover !== 'wrap-early' || !el) return;
+    const measure = () => {
+      if (el.querySelector('.group:hover, .group:focus-within')) return;
+      const width = el.clientWidth;
+      const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+      const next = new Set<number>();
+      let used = -1;
+      let grow = 0;
+      for (const item of el.querySelectorAll<HTMLElement>(':scope > [data-chip-index]')) {
+        const w = item.offsetWidth;
+        /* How far this chip widens: its clipped buttons' full width. */
+        const g = item.querySelector<HTMLElement>('[data-chip-actions]')?.scrollWidth ?? 0;
+        if (used >= 0 && used + gap + w + Math.max(grow, g) > width) {
+          next.add(Number(item.dataset.chipIndex));
+          used = w;
+          grow = g;
+        } else {
+          used = used < 0 ? w : used + gap + w;
+          grow = Math.max(grow, g);
+        }
+      }
+      setBreaks((prev) => (prev.size === next.size && [...next].every((n) => prev.has(n)) ? prev : next));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [chipHover, people, mode]);
   const focusNext = React.useRef<{ to: 'add' } | { to: 'chip'; index: number } | null>(null);
   const done = () => setMode(null);
   /* The first action on a chip: Edit (an assignee) or Remove (an initiator has no pencil). */
@@ -692,6 +738,7 @@ function PeopleField({
 
   const form = (initial: DetailCardPerson | undefined, submitLabel: string, commit: (p: DetailCardPerson) => void) => (
     <PersonForm
+      spaced={chipHover === 'wrap-early'}
       kind={kind}
       initial={initial}
       directory={directory}
@@ -723,7 +770,15 @@ function PeopleField({
     >
       {/* One wrapping row. A chip being edited is replaced, in its own place among the others, by the form,
           which takes a whole row (`w-full`) so the chips before it stay above and the ones after it below. */}
-      <div ref={row} className="flex w-full flex-wrap gap-2">
+      <div
+        ref={row}
+        className={cn(
+          'flex w-full flex-wrap',
+          /* A held break is a 0-high line of its own, and a row gap would put 8 above it and 8 below. So with
+             `wrap-early` the 8 between lines is each item's 4 above and below instead (`py-1`, on them below). */
+          chipHover === 'wrap-early' ? '-my-1 gap-x-2' : 'gap-2',
+        )}
+      >
         {people.map((p, index) =>
           mode?.type === 'edit' && mode.index === index ? (
             <React.Fragment key={p.name}>
@@ -732,7 +787,12 @@ function PeopleField({
               )}
             </React.Fragment>
           ) : (
-            <div key={p.name} className="flex max-w-full flex-col items-start gap-1">
+            <React.Fragment key={p.name}>
+            {chipHover === 'wrap-early' && breaks.has(index) && <div aria-hidden className="basis-full" />}
+            <div
+              data-chip-index={index}
+              className={cn('flex max-w-full flex-col items-start gap-1', chipHover === 'wrap-early' && 'py-1')}
+            >
               <Chip
               size="md"
               tone="brand"
@@ -747,7 +807,7 @@ function PeopleField({
                       ? 'border-accent-critical-outline-border-default'
                       : undefined
               }
-              actions="hover"
+              actions={chipHover === 'overlay' ? 'overlay' : 'hover'}
               avatar={<Avatar name={p.name} src={p.src} tone="brand" size="sm" />}
               label={p.name}
               description={kind === 'assignee' ? (p.description ?? 'Assignee') : undefined}
@@ -769,6 +829,7 @@ function PeopleField({
                 <p className="text-caption-md-medium text-accent-critical-outline-content-default">{`${p.name} is not available during the selected dates and cannot be assigned.`}</p>
               )}
             </div>
+            </React.Fragment>
           ),
         )}
         {mode?.type === 'add' &&
@@ -785,6 +846,7 @@ function PeopleField({
 
 /** The form under the chips: a user, for an assignee a role and capacity points, then Cancel and Add / Save. */
 function PersonForm({
+  spaced,
   kind,
   initial,
   directory,
@@ -795,6 +857,8 @@ function PersonForm({
   onCancel,
   onSubmit,
 }: {
+  /** In a `wrap-early` row: the 4 above and below that stand in for the row gap. */
+  spaced?: boolean;
   kind: 'initiator' | 'assignee';
   initial?: DetailCardPerson;
   directory: readonly DetailCardPerson[];
@@ -821,7 +885,7 @@ function PersonForm({
   return (
     <form
       ref={formRef}
-      className="flex w-full flex-col gap-2"
+      className={cn('flex w-full flex-col gap-2', spaced && 'py-1')}
       onSubmit={(e) => {
         e.preventDefault();
         if (!name) return;

@@ -86,6 +86,7 @@ Not built here: **UI Changes** (the Modify / New UI / No UI section) is not want
 | `viewers` | `ViewersPickerProps` | — | The viewers pill on the read cards, with its hover list and its picker to add and remove people (see `docs/viewers-picker.md`) |
 | `viewerCount`, `onViewers` | `number`, `() => void` | — | Just the bare pill and a press, for a page with no list yet. `viewers` wins when both are given |
 | `lockAssignees` | `boolean` | when `initiatedTo` is set | Editing: the Assignee **+** is dimmed and explains why (see *Assignee availability*). Defaults on for an AV with `initiatedTo` |
+| `chipHover` | `grow \| overlay \| wrap-early` | `grow` | Editing: how a people chip shows its edit and remove buttons on hover. **Under review**, see *Hovering a chip*; once one is chosen it is the only behaviour and the prop goes |
 | `dueSoonWithinDays` | `number` | `3` | Due dates this near or nearer read as due soon |
 | `className`, `ref`, rest | | | On the `<section>` |
 
@@ -116,6 +117,20 @@ Opening the form disables the **+** that had focus, closing it removes the form,
 | A chip's **✕** removes it | The **next chip's** pencil (or ✕), or the **+** when it was the last |
 
 The chips' buttons are named for the person ("Edit Jane Doe", "Remove Jane Doe"), so a row of chips is not a row of identical buttons. The `EditingPeople` story asserts `document.activeElement` at each step.
+
+## Hovering a chip (under review)
+
+Editing, a chip's edit and remove buttons appear on hover. Today (`grow`) they widen the chip by about 50. A chip
+that only just fits at the end of its line then no longer fits, so it wraps to the next line, away from the
+pointer; with no pointer over it, it narrows, fits again, jumps back under the pointer, and widens again. It
+keeps doing that for as long as the pointer stays still. It happens in the product too.
+
+| Option | What happens on hover | Cost |
+|---|---|---|
+| `overlay` | The buttons are laid over the chip's end. Nothing moves | They cover the points and the end of the name while shown |
+| `wrap-early` | Lines break at rest as if a chip were already widened, and hold. The chip widens into room its line already has | A chip can start a new line that it would have fitted at rest; about 25 lines that measure the row |
+
+Storybook: *Patterns/DetailCard → Assignee Hover Options*.
 
 ## Assignee availability
 
