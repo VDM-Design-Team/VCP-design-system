@@ -83,6 +83,10 @@ Built to Figma's Manage table (`940:167946`), decided 10 Nov 2026 for every list
 - **With the filters folded away** (Filters pressed, or a page that passes none) the fields and their labels
   go; the search and the buttons keep their row.
 - A filled people field holds just the name ("Amy Lee"): its label above says which person it is (Figma `940:171256`).
+- **A picked value reads regular** (`body-sm-regular`), in every field and the date, like every other filter row
+  (dashboard header, Planning, Holiday Registry, Task Log): filters read regular (`docs/select.md`), medium is a
+  form's chosen value (decided 25 November 2026; the bar read medium before). The labels above the fields and
+  the Reset Filters and Filters buttons keep their own weights.
 
 **Design target: 1440.** With the expanded sidebar (256) and 32 of padding either side, the bar has 1120:
 six fields of about 170 each, so Manage's six (Priority, Tags, Status, Date, Assignee, Initiator) fit on one row.
