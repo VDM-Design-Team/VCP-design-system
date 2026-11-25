@@ -97,6 +97,66 @@ export const ExpandableSelected: Story = {
 };
 
 /**
+ * The current page is a child the rail can't show. Closed, the parent takes the
+ * selected look and `aria-current="true"` (it holds the current page, it isn't it),
+ * so you still know where you are. Opened, the child shows it, with the selected
+ * row's fill, and the parent goes back to normal.
+ */
+export const HoldsCurrent: Story = {
+  render: () => (
+    <Rail>
+      <SidebarItem
+        label="Archive"
+        icon="archive"
+        items={[
+          { label: 'Completed', href: '#' },
+          { label: 'Backlogs', href: '#', selected: true },
+        ]}
+      />
+    </Rail>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const parent = canvas.getByRole('button', { name: 'Archive' });
+    await expect(parent).toHaveAttribute('aria-current', 'true');
+    await expect(parent).toHaveClass('bg-surface-brand-subtle');
+    await userEvent.click(parent);
+    await expect(parent).not.toHaveAttribute('aria-current');
+    await expect(parent).not.toHaveClass('bg-surface-brand-subtle');
+    const child = canvas.getByRole('link', { name: 'Backlogs' });
+    await expect(child).toHaveAttribute('aria-current', 'page');
+    await expect(child).toHaveClass('bg-surface-brand-subtle');
+  },
+};
+
+/**
+ * The collapsed rail: the children live in the flyout, so the parent shows that it
+ * holds the current page whether the flyout is open or not.
+ */
+export const CollapsedHoldsCurrent: Story = {
+  render: () => (
+    <Rail width="w-[76px]">
+      <SidebarItem
+        label="Archive"
+        icon="archive"
+        collapsed
+        items={[{ label: 'Completed' }, { label: 'Rejected' }, { label: 'Backlogs', selected: true }]}
+      />
+    </Rail>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const parent = canvas.getByRole('button', { name: 'Archive' });
+    await expect(parent).toHaveAttribute('aria-current', 'true');
+    await userEvent.click(parent);
+    await expect(parent).toHaveAttribute('aria-expanded', 'true');
+    await expect(parent).toHaveAttribute('aria-current', 'true');
+    await expect(parent).toHaveClass('bg-surface-brand-subtle');
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+/**
  * The 76px rail. The label is hidden but survives as the accessible name, so
  * a screen reader still reads "Dashboard". Sighted users get it back from a
  * `Tooltip` — which `Sidebar` adds, not this component, because a tooltip on

@@ -108,14 +108,17 @@ const row = (selected: boolean, collapsed: boolean) =>
   );
 
 /* Sub-rows are 32 against the design's 33, and carry no glyph — the indent is
-   what says they belong to the row above. Regular weight, selected or not
-   (design review, 5 Oct 2026): the current one is told apart by its brand
-   colour and `aria-current`, not by weight. */
+   what says they belong to the row above. Their states are the top-level
+   row's (design review, 25 Nov 2026): hover fills `surface.brand.faint`, and
+   the current one takes the same `surface.brand.subtle` fill, `text.brand.strong`
+   and medium weight, not a colour change alone. */
 const subRow = (selected: boolean) =>
   cn(
     'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans text-body-sm-regular transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    selected ? 'text-text-brand-strong' : 'text-text-secondary hover:bg-surface-brand-faint',
+    selected
+      ? 'bg-surface-brand-subtle font-medium text-text-brand-strong'
+      : 'text-text-secondary hover:bg-surface-brand-faint',
   );
 
 /* The collapsed flyout — drawn exactly like `Menu` (Figma's `Menu_Dropdown`):
@@ -226,6 +229,12 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
 
     if (expandable) {
       const toggle = () => setOpen(!isOpen);
+      /* The current page is one of the children, but they can't be seen: the group is
+         closed, or the rail is collapsed and they live in the flyout. The parent then
+         takes the selected look, so you can still tell where you are, and says so with
+         `aria-current="true"` (it holds the current page; it isn't it). Open inline, the
+         child itself shows it, so the parent stays as it was. */
+      const holdsCurrent = !selected && items.some((sub) => sub.selected) && (asFlyout || !isOpen);
       /* Choosing a flyout row closes the flyout, whatever the row does. */
       const picked = (go?: () => void) => () => {
         go?.();
@@ -250,8 +259,9 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
             aria-expanded={isOpen}
             aria-controls={listId}
             onClick={toggle}
-            className={row(!!selected, !!collapsed)}
+            className={row(!!selected || holdsCurrent, !!collapsed)}
             {...shared}
+            aria-current={selected ? 'page' : holdsCurrent ? 'true' : undefined}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >
             {/* The `Right Icon` axis. Collapsed, Figma shrinks the caret to 12

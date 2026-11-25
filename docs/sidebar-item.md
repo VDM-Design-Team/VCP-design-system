@@ -59,11 +59,22 @@ Open, the whole group lifts onto `surface.elevated` — the design's white card
 When the parent is *also* the current page it tints brand and the children
 stay on white, which is the design's third Planning variant.
 
+**A parent that hides the current page shows it.** When a sub-row is current but
+can't be seen (its group is closed, or the rail is collapsed and the sub-rows live in
+the flyout), the parent row takes the selected look: the `surface.brand.subtle` fill,
+`text.brand.strong` and medium weight. It carries **`aria-current="true"`**, not
+`"page"`: it holds the current page, it isn't it. Opened inline, the sub-row shows it
+and the parent goes back to normal; in the flyout the parent stays selected, open or
+not (design review, 25 Nov 2026). `Sidebar` already opens the current page's group on
+load; this covers closing it, and the collapsed rail.
+
 Sub-rows are **32 against the design's 33**, carry no glyph, and are indented
 instead. The indent is what says they belong to the row above. They are
-**regular weight** (`body-sm-regular`), the current one included (design review,
-5 Oct 2026): it is told apart by `text.brand.strong` and `aria-current`, not by
-weight. The parent row stays medium.
+**regular weight** (`body-sm-regular`). **Their hover and current states are the
+top-level row's** (design review, 25 Nov 2026): hover fills `surface.brand.faint`;
+the current one takes the `surface.brand.subtle` fill, `text.brand.strong` and
+medium weight, with `aria-current`. (Until then the current sub-row changed colour
+only, which read as a different control from the row above it.)
 
 ## A real control, not a clickable div
 
