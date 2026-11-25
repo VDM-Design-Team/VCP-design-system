@@ -1,5 +1,65 @@
 # Changelog
 
+## 3.0.0 — 2026-11-25
+
+### `DomainBudgetEditPage` — the leave question is the system's (November 2026)
+
+Docs only. With unsaved budget edits, a change of quarter, year or page asks the system's leave question, `ConfirmModal` with `confirmations.leavePage()` ("Are you sure you want to leave?", Cancel / Confirm), the same question every page uses (decided 25 November 2026). The docs and comments described an older "Leave without saving?" dialog with Keep editing / Leave.
+
+### `FilterBar` / `PlanningFilters` / `DashboardFilters` / `TableEmpty` — the reset button says "Reset Filters" (November 2026)
+
+Design decision: the button that clears the filters reads **Reset Filters**, as the list pages in Figma draw it, everywhere the system shows it: the filter rows (the list pages, Planning, the Task Log Trail, the dashboard) and the button under an empty, filtered table (`TableEmpty`, and so `HolidayTable`, the list pages and the user tables). `resetLabel` still changes it on the three bars. A page that finds the button by its name (a test that looks for "Reset") now looks for "Reset Filters".
+
+### `FilterBar` — starts collapsed (November 2026)
+
+On top of a table the filter fields are now hidden at first: the search, Reset and Filters show, and Filters opens the rest. A new `defaultFiltersOpen` prop (default `false`) sets where an uncontrolled bar starts; `filtersOpen` still controls it. A page that wants the fields shown on load passes `defaultFiltersOpen` (or `filtersOpen`).
+
+### `DescriptionCardTitle` — 24 padding, like the cards around it (November 2026)
+
+The title card at the top of an Added Value page (reading and editing) was 16 in, while the description sections under it and the Detail card beside it are 24, so its text sat 8 further out than theirs. It is now 24 too. Figma draws the title card (and the description sections) at 16; the sections went to 24 on 30 October to match the Detail card, and the title card now follows.
+
+### Story tests — the toast checks wait for the toast to be visible (November 2026)
+
+Four story tests (`UsersTable`, `AnnouncementsTable`, `AccountsTable`, `ContactsTable`) checked that a toast was visible the moment it appeared in the page, while it was still fading in, so they failed now and then on unrelated pull requests. They now wait until the toast is visible. Tests only: no component changes.
+
+### `AVHeader` is removed: an Added Value's page is `PageTitle` `size="sm"` (November 2026)
+
+`AVHeader` and `PageTitle` drew the same band twice. Figma's `Page_Title` has a type for an Added Value's page (`Viewing AV Page Title`: the back arrow, the reference at 14 regular in `text.primary`, the status buttons and the ⋮ menu), and `AVHeader` was the older, separate `AV_Header` (inset 16 where the pages' `Page_Title` is inset 32). They are one component now: **`PageTitle` `size="sm"`** is that title (14 regular in `text.primary`, where `sm` used to be 14 medium in `text.secondary`: nothing passed it), with the status buttons and then the ⋮ menu in `actions`. `AVPage` builds it from its `header` prop, which keeps `AVHeader`'s fields (`title`, `type`, `backHref`, `onBack`, `backLabel`, `showStatusActions`, `role`, `status`, `step`, `chain`, `onTransition`, `actions`) and gains **`menu`**: the ⋮ menu's handlers (`DetailCardMenu`), drawn on the right of the status buttons when reading, with its contents decided by `role` and `status`.
+
+Migration: `AVHeader` and `AVHeaderProps` no longer exist. Replace `<AVHeader title role status chain onTransition backHref|onBack backLabel />` with `<PageTitle size="sm" title backHref|onBack backLabel actions={<StatusProgression role status chain onTransition />} />` (and `type="new"` with `size="md"` and no actions). A page using `AVPage` changes nothing but the type name: `header: AVPageHeader` instead of `AVHeaderProps`, and passes `menu: { onEdit, onDelete, … }` to get the ⋮ menu. The back arrow is `PageTitle`'s neutral grey, not `AVHeader`'s near-black with a blue hover.
+
+`DetailCardMenu`'s button is now 36 (it was 32), the same height as the small status buttons it sits beside in the page title; a touch screen still gets 40.
+
+### `MultipartTableTag` / `AVTable` — the multipart tag is 24 high, on the same line as the other tags (November 2026)
+
+The multipart tag in the AV table is now 24 high (12 type, 16 glyphs, a 16 progress ring) instead of Figma's 28, and it is the first item of the metadata line under the title, with the domain tag, the Parent chip and the counts. The two-column cell (the 28 tag under the reference, the details starting under the title) is gone: every row, multipart or not, has the reference, a rule and the title on top and one line of metadata under it, starting at the cell's left edge. The 28 was a mistake in the first multipart design, and Figma's columns made the details start under the title, so uneven ids (four, five or six digits) moved them from row to row. This is a deliberate departure from Figma (decided 20 November 2026); the Figma multipart frame needs the same change.
+
+### `HandoffAVModal` — the missing-reason error says "handing off" (November 2026)
+
+The error under the Overdue Reason field read "Please select a reason before completing the AV". The action is called Handoff, so it now reads "Please select a reason before handing off the AV". Figma's own error says "completing" (and its flow note calls the button "Complete"), from before the action was renamed: the wording is changed here and nowhere else.
+
+### `UserAccountModal` — the photo uses the avatar's own 48 size (November 2026)
+
+The photo in the Add / Edit User dialog was the `lg` avatar (36) stretched to 48 with a `size-12` override. It now uses `Avatar size="3xl"`, the system's 48 (Figma's `Profile_Image` XXL), so nothing is overridden. It looks the same, apart from the initials: they are now the 3xl type step (16) instead of the stretched 36's (14).
+
+### `MyValuesStats` — the stats can filter the list (November 2026)
+
+New `selected` and `onSelectedChange` props turn the stats into filters, as Figma's My Values page draws them (`State=Selected`, `State=Empty` and the click). Completed, Draft, Pending, Accepted, Active and Overdue can be pressed; pressing the selected one again clears it; a stat whose count is 0 cannot be pressed; Total AVs never filters. The selected stat is tinted (`surface.brand.faint`) and nothing else changes (Figma also draws Completed's figure bold when selected; we keep the weight so all the stats behave the same). The divider between the person and the figures is now 2 thick in `stroke.subtle`, as Figma draws it, so it matches the lines beside each status. The strip only reports which stat: what each lists (Active is every custom status between Accepted and Completed; Overdue is by due date) is the page's, and the `MyValuesFilteredByStat` story on `AVListPage` shows it. Leave `onSelectedChange` off and nothing changes.
+
+### `AVTable` — the reference is click-to-copy, and the title opens the AV (November 2026)
+
+The Added Value reference in the table ("VCP-12345") is now a `CopyText`, as Figma's `_AV_Table_ID` draws it: it copies the reference on click and says "Copied" for a moment. Before, the reference was the button that opened the AV. With `onOpen`, the **title** is now the button that opens it, as in the Planning table. The `onOpen` prop is unchanged, but a page that taught people to click the reference to open an AV now has them click the title. The title keeps at least 160 wide so it can always be pressed, and turns brand blue and underlines on hover. A reference no longer has a sr-only title in its name: the reference button is named "VCP-12345", the title button by the title.
+
+### `DescriptionSection` / `DescriptionCard` — only Problems can be added to and removed (November 2026)
+
+Figma draws the add button on the Problems section alone, and the remove button on the problem card alone. The code now does the same, in the two pieces that own those controls: `DescriptionSection` shows its add button only for `type="problem"`, and `DescriptionCard` shows its remove button only when `type` is `problem` (the default). On a solution, a deliverable or the desired outcome, `onAdd` and `onRemove` are ignored. The reason is that the problem controls a set: adding a problem adds a card to all four sections, and deleting it deletes the set, so problem 1 goes with solution 1, acceptance criteria 1 and outcome 1. The page does both; the components only report the press. This is now written in `docs/description-section.md` ("A problem is a set"). The paperclip is unchanged.
+
+Migration: stop passing `onAdd` to `DescriptionSection` with `type` of `solution` or `deliverable`, and `onRemove` to the cards inside them, since they now do nothing. The page adds and removes whole sets from the problem's controls.
+
+### `Toast` — pressing the action closes it (November 2026)
+
+A toast raised with `toast()` that has an action (the **Undo** on "Problem set deleted", the **Retry** on a failed save) now closes itself once the action has run. Before, the action ran and the toast stayed, still saying "deleted" after the deletion was undone, until its timer ran out or someone pressed the X. Figma's undo flow ends with "the snackbar disappears". A bare `<Toast>` is unchanged, since it has no queue to leave. Pages that closed the toast themselves in `onAction` need no change; calling `dismiss` twice does nothing.
+
 ## 2.2.0 — 2026-11-20
 
 ### `AppShell` — a `page` slot for whole page patterns (November 2026)
