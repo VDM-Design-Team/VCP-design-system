@@ -41,17 +41,17 @@ The page names itself in `title` ("My Values", "Assigned Values", "Archived Valu
 ## The Development domain's cycle filter
 
 In the Development domain, **Manage** and **Assigned** also filter by cycle: pass `filters.cycle` (`FilterBar`'s own, a one-pick search of cycles) and set its `value` to the **current cycle**, so the page opens on it and nobody has to
-pick it. It stays a normal filter: the person can change it, and what **Reset** does is the page's (`onReset`), so it can put the cycle back on the current one. Other domains and the other pages do not pass it.
+pick it. It stays a normal filter: the person can change it, and what **Reset Filters** does is the page's (`onReset`), so it can put the cycle back on the current one. Other domains and the other pages do not pass it.
 
 ## The filters are inside the table's card
 
-The search, **Reset** and the **Filters** button, then the field row the button opens (Priority, Tags, Status, Date, and Assignee and Initiator on Manage), all sit **inside the table's
+The search, **Reset Filters** and the **Filters** button, then the field row the button opens (Priority, Tags, Status, Date, and Assignee and Initiator on Manage), all sit **inside the table's
 card, above the rows**: `TableCard`'s rule, as `AccountsTable` and `TaskLogTrail` do. Figma draws them on the grey canvas above the card; the system puts them in it so every table reads
 the same. Pass them as `filters` (a `FilterBar`'s props); leave it out and the table has none.
 
 ## An empty table says why
 
-With no rows the table is `TableEmpty`: "No added values yet." or, while a search is typed, "No added values match “…”." with a **Reset**. That Reset puts the filters back and then goes away,
+With no rows the table is `TableEmpty`: "No added values yet." or, while a search is typed, "No added values match “…”." with a **Reset Filters**. That Reset puts the filters back and then goes away,
 so focus is handed to the search box, which stays. Pass `table.empty` for other words.
 
 ## It is controlled and holds no data
@@ -89,6 +89,7 @@ goes to the table's select-all checkbox, found by the pattern, so the page does 
 
 - Figma's My Values frame draws an **ID** column; `AVTable` keeps the reference with the title, as on every other page.
 - The **Archive Backlog** frame draws the search, Reset and Filters mirrored left to right. That is a Figma slip and is not copied.
+- The reset button says **Reset Filters**, as the list pages draw it (My Values, Assigned, Drafts, Manage, the Archive tabs), on every filter row and under an empty table (design lead, 24 November 2026). The Planning list's frame still says Reset; Figma should follow.
 
 ## Accessibility
 

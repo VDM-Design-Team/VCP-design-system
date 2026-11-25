@@ -50,13 +50,14 @@ const meta = {
       description: {
         component:
           'The row of filters above a list: search, period, status, priority and tags, then ' +
-          'Reset and a Filters button that shows or hides the fields. Every filter is ' +
+          'Reset and a Filters button that shows or hides the fields (hidden at first). Every filter is ' +
           'controlled by the page; the bar draws the fields and reports changes. Leave a ' +
           'filter out and its field is not drawn.',
       },
     },
   },
-  args: { onReset: fn(), onSearchChange: fn() },
+  /* Most stories are about the fields, so they start open; StartsCollapsed shows the default. */
+  args: { onReset: fn(), onSearchChange: fn(), defaultFiltersOpen: true },
 } satisfies Meta<typeof FilterBar>;
 
 export default meta;
@@ -178,13 +179,34 @@ export const Default: Story = {
     await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveAccessibleName('Assignee Amy Lee');
 
     /* Reset clears every value the page holds. */
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
     await expect(canvas.queryByRole('button', { name: 'Remove VCP' })).toBeNull();
     await expect(canvas.getByRole('combobox', { name: /^Status/ })).toHaveTextContent('Select status');
     await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveTextContent('Select assignee');
     await expect(canvas.getByRole('button', { name: /^Cycle/ })).toHaveTextContent('Select cycle');
+  },
+};
+
+/**
+ * The default: on top of a table the bar starts collapsed — the search, Reset and Filters, and the
+ * table leads. Filters opens the fields.
+ */
+export const StartsCollapsed: Story = {
+  args: { defaultFiltersOpen: false },
+  render: (args) => <Page {...args} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const toggle = canvas.getByRole('button', { name: 'Filters' });
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(canvas.getByRole('searchbox')).toBeVisible();
+    await expect(canvas.getByRole('button', { name: 'Reset Filters' })).toBeVisible();
+    await expect(canvas.getByRole('combobox', { name: /^Status/, hidden: true })).not.toBeVisible();
+
+    await userEvent.click(toggle);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(canvas.getByRole('combobox', { name: /^Status/ })).toBeVisible();
   },
 };
 

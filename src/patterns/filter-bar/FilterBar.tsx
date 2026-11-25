@@ -17,8 +17,8 @@ import { useDateFormat } from '../../lib/format-date';
 
 /**
  * FilterBar — the row of filters above a list or table: a search field, the
- * filter fields (period, status, priority, tags), "Reset" and a "Filters"
- * button that shows or hides the fields.
+ * filter fields (period, status, priority, tags), "Reset Filters" and a "Filters"
+ * button that shows or hides the fields. The fields start hidden (`defaultFiltersOpen`).
  *
  * Built to Figma's Manage table (`940:167946`, decided 10 Nov 2026 for every list): the search field
  * at the left with Reset and Filters at the right, then the fields under them, **each with its label
@@ -50,7 +50,7 @@ import { useDateFormat } from '../../lib/format-date';
  * - **children** — more fields in the same row (an assignee picker, say),
  *   shown and hidden with the others.
  *
- * "Reset" and "Filters" are always there. `onReset` is what Reset does; the
+ * "Reset Filters" and "Filters" are always there. `onReset` is what Reset does; the
  * bar cannot clear values it does not hold.
  *
  * Every class below resolves to a design token from the VCP Figma variables.
@@ -135,11 +135,13 @@ export interface FilterBarProps extends React.HTMLAttributes<HTMLDivElement> {
   tags?: FilterBarMulti;
   /** People pickers, after tags: one field per entry. */
   users?: readonly FilterBarUser[];
-  /** Fires when "Reset" is pressed. The button is always shown. */
+  /** Fires when "Reset Filters" is pressed. The button is always shown. */
   onReset?: () => void;
   resetLabel?: string;
-  /** Whether the filter fields show. Uncontrolled (shown) when omitted. */
+  /** Whether the filter fields show. Controlled; omit it and the bar keeps its own, starting from `defaultFiltersOpen`. */
   filtersOpen?: boolean;
+  /** Uncontrolled: whether the fields show at first. Collapsed by default, so the table leads; pass `true` to start open. */
+  defaultFiltersOpen?: boolean;
   onFiltersOpenChange?: (open: boolean) => void;
   filtersLabel?: string;
   /** Extra fields, in the same row as the others. */
@@ -174,8 +176,9 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
     tags,
     users,
     onReset,
-    resetLabel = 'Reset',
+    resetLabel = 'Reset Filters',
     filtersOpen,
+    defaultFiltersOpen = false,
     onFiltersOpenChange,
     filtersLabel = 'Filters',
     children,
@@ -185,7 +188,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
 ) {
   const fieldsId = React.useId();
   const narrow = useNarrow();
-  const [openState, setOpenState] = React.useState(true);
+  const [openState, setOpenState] = React.useState(defaultFiltersOpen);
   const open = filtersOpen ?? openState;
   const [periodOpen, setPeriodOpen] = React.useState(false);
   /* dd/mm/yyyy, or the person's locale when the product sets one — the same as every date in the system. */

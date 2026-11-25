@@ -18,7 +18,7 @@ import { SearchSelect, type SearchSelectOption } from '../../components/search-s
  *   domain (Design and Development have different steps); priority defaults to Low, Normal, High, Urgent.
  *   Picking is immediate. They read **regular** weight (`emphasis="regular"`) — a filter sits quietly. The placeholders follow the system's: "Select status", "Select priority" (a picker says
  *   *Select*; only a search box says *Search*).
- * - **Reset** — a ghost button that hands the page `onReset`; the page clears its filters. The bar holds no
+ * - **Reset Filters** — a ghost button that hands the page `onReset`; the page clears its filters. The bar holds no
  *   state of its own: `value` in, `onChange` out.
  * - **View Cycle** — the filled button with the calendar glyph, `onViewCycle`. What it opens is the page's.
  *
@@ -69,7 +69,7 @@ export const PlanningFilters = React.forwardRef<HTMLDivElement, PlanningFiltersP
       statusPlaceholder = 'Select status',
       priorityPlaceholder = 'Select priority',
       searchPlaceholder = 'Search by title or ID',
-      resetLabel = 'Reset',
+      resetLabel = 'Reset Filters',
       viewCycleLabel = 'View Cycle',
       ...props
     },

@@ -115,7 +115,7 @@ export const OldGreyNewColoured: Story = {
 };
 
 /**
- * The whole page: a `FilterBar` inside the table's card, above it (as `AccountsTable` carries its search) — search, the period, and a select for which field changed. One **Reset** clears them all
+ * The whole page: a `FilterBar` inside the table's card, above it (as `AccountsTable` carries its search) — search, the period, and a select for which field changed. One **Reset Filters** clears them all
  * (Figma draws a dates-only "Clear dates"). There is no Source filter: every change is from VCP.
  */
 export const WithFilters: Story = {
@@ -172,6 +172,8 @@ export const WithFilters: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await expect(c.getAllByRole('row')).toHaveLength(1 + 7);
+    /* The fields start folded away; Filters opens them. */
+    await userEvent.click(c.getByRole('button', { name: 'Filters' }));
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), 'Workflow');
     await expect(c.getAllByRole('row')).toHaveLength(1 + 2);
     await userEvent.selectOptions(c.getByRole('combobox', { name: 'Change' }), 'Assignee');
@@ -183,7 +185,7 @@ export const WithFilters: Story = {
     await waitFor(() => expect(c.getAllByRole('row')).toHaveLength(1 + 4));
     await expect(c.getByRole('button', { name: /^Date, / })).toBeVisible();
     /* Reset puts everything back. */
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(c.getAllByRole('row')).toHaveLength(1 + 7);
     await userEvent.type(c.getByRole('searchbox', { name: 'Search by title or ID' }), 'zzz');
     await expect(await c.findByText('No changes match these filters.')).toBeVisible();

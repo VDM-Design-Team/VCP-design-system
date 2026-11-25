@@ -101,7 +101,7 @@ export const UsingIt: Story = {
     await userEvent.click(await canvas.findByRole('option', { name: 'Urgent' }));
     await expect(args.onChange).toHaveBeenLastCalledWith({ search: 'a', status: 'In Progress', priority: 'Urgent' });
 
-    await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(canvas.getByRole('button', { name: 'Reset Filters' }));
     await expect(args.onReset).toHaveBeenCalledTimes(1);
     await expect(canvas.getByRole('searchbox')).toHaveValue('');
 

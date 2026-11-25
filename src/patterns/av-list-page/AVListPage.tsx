@@ -21,14 +21,14 @@ import { FilterBar, type FilterBarProps } from '../filter-bar';
  * - **Manage Added Value** passes a `filters` with the Assignee and Initiator fields.
  * - **In the Development domain**, **Manage** and **Assigned** also pass a `cycle` filter, preselected to the current cycle so nobody has to pick it (it can still be changed).
  *
- * **The filters sit inside the table's card**, above the rows (`TableCard`'s rule, as `AccountsTable` and `TaskLogTrail` do): the search, **Reset** and **Filters** button, then the
+ * **The filters sit inside the table's card**, above the rows (`TableCard`'s rule, as `AccountsTable` and `TaskLogTrail` do): the search, **Reset Filters** and **Filters** button, then the
  * field row the button opens. Figma draws them on the canvas above the card; the system puts them in it, so every table reads the same.
  *
  * **Bulk actions** (Drafts and Manage): pass `bulk` (`BulkActionBar`'s props) along with `table.selectable`, and the bar is stuck to the bottom of the table, centred over it, while rows
  * are selected. The table's own **Delete Selected** is left out (`table.onDeleteSelected`): the bar's **Delete** replaces it. When the selection empties and the bar goes, focus goes to the table's
  * select-all checkbox, so it is never dropped. Opening the confirmation and doing the change are the page's: the bar only asks.
  *
- * **An empty table says why**, through `TableEmpty` ("No added values yet.", or "No added values match “…”." with **Reset** while a search is typed). Pass `table.empty` for other words.
+ * **An empty table says why**, through `TableEmpty` ("No added values yet.", or "No added values match “…”." with **Reset Filters** while a search is typed). Pass `table.empty` for other words.
  *
  * **It is controlled and holds no data.** The page owns the rows, the sort, the page, the search and which filters are open; this puts them in order, 16 apart and 32 in
  * from the sides.

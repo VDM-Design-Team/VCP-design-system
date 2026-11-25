@@ -125,13 +125,13 @@ export const Filtering: Story = {
     await userEvent.type(c.getByRole('searchbox', { name: 'Search by title or ID' }), 'Calendar');
     await expect(c.queryByText(/Billing export/)).toBeNull();
     await expect(c.getAllByText(/Calendar sync/).length).toBeGreaterThan(0);
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(c.getAllByText(/Billing export/).length).toBeGreaterThan(0);
     /* The status filter narrows them too: nothing in Cycle 27 is Completed. */
     await userEvent.click(c.getByRole('combobox', { name: /Status/ }));
     await userEvent.click(await screen.findByRole('option', { name: 'Completed' }));
     await expect(c.queryByText(/Billing export/)).toBeNull();
-    await userEvent.click(c.getByRole('button', { name: 'Reset' }));
+    await userEvent.click(c.getByRole('button', { name: 'Reset Filters' }));
     await expect(c.getAllByText(/Billing export/).length).toBeGreaterThan(0);
   },
 };

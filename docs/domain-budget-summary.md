@@ -54,7 +54,7 @@ Which quarter is the current one, its dates and its days left are the caller's: 
 | 75–99% | `warning` | Figma's bright yellow (`caution`, `accent.yellow.medium`) |
 | 100% and over | `over` | Figma's bright red (`alert`, `accent.critical.outline.border`); **the bar stops at full, the number does not** |
 
-**Over budget the label says the real figure.** 170 of 120 reads **142%**, not 100%: the bar can stop at full, but the number is not capped (`budgetUsagePercent`; the bar's `valueLabel` carries it, so a screen reader hears 142% too). With no allocation there is no percentage to give, so the bar's own capped value shows.
+**Over budget the label says the real figure.** 170 of 120 reads **142%**, not 100%. Figma's over-budget frame labels it 100%; the real figure stays, as decided in CDL's review (kept by the design lead, 20 November 2026): the bar can stop at full, but the number is not capped (`budgetUsagePercent`; the bar's `valueLabel` carries it, so a screen reader hears 142% too). With no allocation there is no percentage to give, so the bar's own capped value shows.
 
 With no allocation there is nothing to measure against: nothing consumed reads 0% and fine, anything consumed reads over.
 Remaining is green until it goes negative, then red. Figma draws it green at every level but over.

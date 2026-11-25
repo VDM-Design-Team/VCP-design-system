@@ -90,7 +90,7 @@ export interface TaskLogTrailProps
   /** Placeholder rows instead of `rows`, while the log loads. The headers stay. */
   loading?: boolean;
   /**
-   * The page's filters: pass a `FilterBar` (search, the period, a labelled select for the kind of change, **Reset**), drawn **inside the card, above the table** — as `AccountsTable` and
+   * The page's filters: pass a `FilterBar` (search, the period, a labelled select for the kind of change, **Reset Filters**), drawn **inside the card, above the table** — as `AccountsTable` and
    * `ContactsTable` carry their search.
    */
   filters?: React.ReactNode;
