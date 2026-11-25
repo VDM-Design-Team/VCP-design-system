@@ -22,7 +22,7 @@ export const BUDGET_QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;
  *
  * **What it leaves to the page:** the data and the save, **and the toasts**. On success show `toast(changesSaved())`, "Changes saved"; on failure a `critical` toast ("Changes not saved …
  * your changes are still here — try again"), unlock, and **keep what was typed** (`dirty` stays true) so Save can be tried again. With unsaved edits, a change of quarter or year,
- * or a move to another page in the app, is also the page's: it asks first ("Leave without saving?", Keep editing / Leave) and never carries the edits over (decided 10 Nov 2026).
+ * or a move to another page in the app, is also the page's: it asks first with the system's leave question (`ConfirmModal` with `confirmations.leavePage()`: "Are you sure you want to leave?", Cancel / Confirm) and never carries the edits over (decided 10 Nov 2026; the words decided 25 Nov 2026).
  *
  * **It is controlled and holds no data.** The page owns the rows, the period, `saving` and `dirty`; this puts them in order, 16 apart and 32 in from the sides.
  *
