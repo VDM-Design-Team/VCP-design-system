@@ -43,7 +43,7 @@ It is **controlled and holds no data**. The page owns the rows, the quarter, the
 | Save Changes pressed | `onSave`: start the save and set `saving` |
 | **Saved** | Clear `dirty`, and show a success `Toast`: `toast(changesSaved())`, "Changes saved" |
 | **The save fails** | Clear `saving`, **leave `dirty` on and keep what was typed**, and show a `critical` `Toast` ("Changes not saved … your changes are still here — try again"). Save stays available to try again |
-| The quarter or year changes | `onQuarterChange` / `onYearChange`. **With unsaved edits, ask first** (decided 10 Nov 2026; the design doesn't draw it): a `critical` `Modal`, "Leave without saving?", saying whose changes are lost ("Your changes to Q1 2026's budgets aren't saved. If you leave now, they're lost."), with **Keep editing** and **Leave**. Leave drops the edits and switches; Keep editing changes nothing. Never carry edits over to another quarter |
+| The quarter or year changes | `onQuarterChange` / `onYearChange`. **With unsaved edits, ask first** (decided 10 Nov 2026; the design doesn't draw it): the system's leave question, `ConfirmModal` with `confirmations.leavePage()`: "Are you sure you want to leave?", "You have unsaved changes which will be lost if you leave this page.", with **Cancel** and a red **Confirm** (the same question on every page, decided 25 Nov 2026). Confirm drops the edits and switches; Cancel changes nothing. Never carry edits over to another quarter |
 | Another page in the app is opened | The same dialog. The browser's prompt only fires when the tab closes or reloads, so the app's own navigation has to ask |
 | The budgets load | `table.loading` while they do |
 
@@ -75,7 +75,7 @@ The toasts are the page's because the app owns the toast viewport; the stories s
 
 - **Don't pair the quarter control at its default 48 with the year select at 36.** The page draws both at 36, as the dashboard does.
 - **Don't clear the table when a save fails.** Keep what was typed (`dirty` stays on), say so in the toast, and let Save be tried again.
-- **Don't rely on the browser's prompt alone.** Pass `dirty` for a closed or reloaded tab, and ask with the "Leave without saving?" dialog before the quarter, the year or the page changes with unsaved edits.
+- **Don't rely on the browser's prompt alone.** Pass `dirty` for a closed or reloaded tab, and ask with the leave question (`confirmations.leavePage()`) before the quarter, the year or the page changes with unsaved edits.
 - **Don't carry unsaved edits to another quarter.** They belong to the quarter they were typed for.
 - **Don't put Save in the table.** One button for the whole page.
 - **Don't say "cycle" for the period.** A budget is per quarter; a cycle is a planning fortnight.
