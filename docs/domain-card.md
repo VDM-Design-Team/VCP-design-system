@@ -45,7 +45,9 @@ crosses "Review").
   row up**; ↑ / ↓ move it; Space or Enter **drops it** (this is when `onReorder` fires); Escape, or
   tabbing away, cancels and puts it back. An arrow key on its own does nothing. Focus stays on the
   grip, and a polite live region announces each step ("In Progress moved to position 2 of 2").
-- **Pointer:** drag a draggable row onto another.
+- **Pointer:** drag a draggable row onto another. What follows the pointer is that row alone, lifted off the card
+  (the elevated surface, the radius and the menu shadow). Chrome's own snapshot took in the card below the row too,
+  so the card draws a copy of the row for it (`dragImageOfRow`, in `src/lib/drag-image.ts`).
 
 ## Accessibility
 

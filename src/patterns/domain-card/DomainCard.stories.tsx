@@ -1,6 +1,6 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 import { DomainCard, type DomainCardItem } from './DomainCard';
 
 const meta = {
@@ -123,5 +123,46 @@ export const ReorderingByKeyboard: Story = {
     await userEvent.keyboard(' {ArrowDown} ');
     await expect(canvas.getByRole('status')).toHaveTextContent('In Progress dropped at position 2 of 2');
     await expect(at('Design Review')).toBeLessThan(at('In Progress'));
+  },
+};
+
+/**
+ * Dragging a row with the pointer: the picture under the pointer is that row alone, lifted off the card (elevated
+ * surface, radius, menu shadow), not the card around and below it, which Chrome's own snapshot took in (decided
+ * 26 Nov 2026). The copy is drawn out of sight and removed once the browser has its picture.
+ */
+export const DragPreviewIsTheRow: Story = {
+  ...Status,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const row = canvas.getByRole('button', { name: 'Move In Progress' }).closest<HTMLElement>('[draggable="true"]')!;
+    const data = new DataTransfer();
+    let image: { el: Element; x: number; y: number } | null = null;
+    data.setDragImage = (el, x, y) => {
+      image = { el, x, y };
+    };
+    const box = row.getBoundingClientRect();
+    row.dispatchEvent(
+      new DragEvent('dragstart', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: data,
+        clientX: box.left + 12,
+        clientY: box.top + 10,
+      }),
+    );
+    await expect(image).not.toBeNull();
+    const { el, x, y } = image!;
+    /* A copy of the row (the same words, the same size), not the row itself and not the card. */
+    await expect(el).not.toBe(row);
+    await expect(el.textContent).toBe(row.textContent);
+    await expect(Math.round(el.getBoundingClientRect().height)).toBe(Math.round(box.height));
+    await expect(el).toHaveAttribute('aria-hidden', 'true');
+    await expect(el.querySelector('[id]')).toBeNull();
+    /* Held where the pointer took it. */
+    await expect([Math.round(x), Math.round(y)]).toEqual([12, 10]);
+    /* Gone once the browser has its picture. */
+    await waitFor(() => expect(el.isConnected).toBe(false));
+    row.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: data }));
   },
 };
