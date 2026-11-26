@@ -9,5 +9,5 @@ and in the expanded rail while the group is closed. Open inline, the sub-row sho
 stays plain.
 
 The current sub-row in an open group now wears the same fill as a selected top-level row
-(`surface.brand.subtle`) and steps up from regular to medium, as the flyout's current row steps up
-from medium to semibold. Before, only its text colour changed, which was too quiet to find.
+(`surface.brand.subtle`), keeping its regular weight as a selected top-level row keeps its own.
+Before, only its text colour changed, which was too quiet to find.

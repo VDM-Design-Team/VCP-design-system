@@ -108,18 +108,15 @@ const row = (selected: boolean, collapsed: boolean) =>
   );
 
 /* Sub-rows are 32 against the design's 33, and carry no glyph — the indent is
-   what says they belong to the row above. Regular weight (design review,
-   5 Oct 2026). The current one wears the same fill as a selected top-level row
-   and steps up to medium, as the flyout's current row steps up from medium to
-   semibold (25 Nov 2026, under review): brand colour alone, navy beside slate,
-   was too quiet to find. */
+   what says they belong to the row above. Regular weight, the current one
+   included (design review, 5 Oct 2026), as a top-level row keeps its weight when
+   selected. The current one wears the same fill as a selected top-level row
+   (25 Nov 2026): brand colour alone, navy beside slate, was too quiet to find. */
 const subRow = (selected: boolean) =>
   cn(
-    'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans transition-colors',
+    'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans text-body-sm-regular transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    selected
-      ? 'bg-surface-brand-subtle text-body-sm-medium text-text-brand-strong'
-      : 'text-body-sm-regular text-text-secondary hover:bg-surface-brand-faint',
+    selected ? 'bg-surface-brand-subtle text-text-brand-strong' : 'text-text-secondary hover:bg-surface-brand-faint',
   );
 
 /* The collapsed flyout — drawn exactly like `Menu` (Figma's `Menu_Dropdown`):

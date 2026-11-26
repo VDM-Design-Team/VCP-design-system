@@ -139,7 +139,7 @@ export const ParentHoldsSelected: Story = {
     await expect(planning).not.toHaveClass('bg-surface-brand-subtle');
     await expect(canvas.getByRole('link', { name: 'Gantt Chart' })).toHaveAttribute('aria-current', 'page');
     /* …with the same fill a selected top-level row wears. */
-    await expect(canvas.getByRole('link', { name: 'Gantt Chart' })).toHaveClass('bg-surface-brand-subtle', 'text-body-sm-medium');
+    await expect(canvas.getByRole('link', { name: 'Gantt Chart' })).toHaveClass('bg-surface-brand-subtle', 'text-body-sm-regular');
     await userEvent.click(planning);
     await expect(planning).toHaveAttribute('aria-current', 'true');
     /* Collapsed rail: the row is all there is to see, so it stays selected, flyout open or not. */

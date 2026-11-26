@@ -61,12 +61,11 @@ stay on white, which is the design's third Planning variant.
 
 Sub-rows are **32 against the design's 33**, carry no glyph, and are indented
 instead. The indent is what says they belong to the row above. They are
-**regular weight** (`body-sm-regular`) (design review, 5 Oct 2026). The current
+**regular weight** (`body-sm-regular`), the current one included (design review,
+5 Oct 2026), just as a top-level row keeps its weight when selected. The current
 one wears the **same fill as a selected top-level row**, `surface.brand.subtle`
-with `text.brand.strong`, and steps up to **medium** (`body-sm-medium`), as the
-flyout's current row steps up from medium to semibold (25 Nov 2026; the weight is
-under review), plus `aria-current`: the brand colour alone, navy beside slate, was
-too quiet to find.
+with `text.brand.strong` (25 Nov 2026), plus `aria-current`: the brand colour
+alone, navy beside slate, was too quiet to find.
 The parent row stays medium.
 
 ## A real control, not a clickable div
