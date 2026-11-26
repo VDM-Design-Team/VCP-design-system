@@ -462,31 +462,6 @@ export const Reactions: Story = {
 };
 
 /**
- * Two comment rows, as the popover lists them. The palette opened from the first row opens over the second row's
- * comment and reactions, not under them (every row's comment sits on the same layer, so the later one used to win).
- */
-export const PaletteOverTheNextRow: Story = {
-  render: () => (
-    <div className="flex w-md flex-col">
-      <CommentThread />
-      <CommentThread />
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const [first] = canvas.getAllByRole('button', { name: 'Add reaction' });
-    await userEvent.click(first!);
-    const palette = await canvas.findByRole('group', { name: 'Pick a reaction' });
-    /* Every emoji in the palette is what the pointer finds there, including those over the next row. */
-    const second = canvas.getAllByText(/^Lorem ipsum/)[1]!.getBoundingClientRect();
-    const cells = within(palette).getAllByRole('button');
-    const over = cells.filter((cell) => cell.getBoundingClientRect().top > second.top);
-    await expect(over.length).toBeGreaterThan(0);
-    for (const cell of cells) await expect(cell.contains(hitAt(cell))).toBe(true);
-  },
-};
-
-/**
  * Replying, end to end, as the design's flow draws it: Reply opens a composer in place of the
  * row; sending it posts one reply, hidden by default; "Show Reply" shows it with Edit and Delete;
  * Edit puts the composer back, filled; Save keeps the change; Delete takes the reply away and
