@@ -245,8 +245,8 @@ the canvas**: 81, 16 and 32 respectively, all exact.
 1. **What "due soon" means** — carried over from `docs/due-date-tag.md`.
 2. **`Pagination`'s three missing affordances**, listed above. They belong on
    that component, not here.
-3. **The filled Review tag opens the Review decision** (for Ali to confirm, 26 Nov 2026). In the live product, the
-   reviewer sees an AV in Review as the filled, button-style tag (`StatusTag actionable`, the library's second Review
+3. **The filled Review tag opens the handoff review** (for Ali to confirm, 26 Nov 2026). In the live product, the
+   reviewer sees an AV in Review (handed off, AV · 07) as the filled, button-style tag (`StatusTag actionable`, the library's second Review
    tag), and pressing it opens the Accept / Reject dialog (`ReviewAVModal`) over the table. Here it is only a tag:
    pressing it does nothing, and the decision is made on the AV's page or from the bulk bar (Status → Review →
    Accept / Reject). Not built until Ali confirms.
