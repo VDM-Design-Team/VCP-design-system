@@ -208,6 +208,10 @@ The component waits for that control to be on screen (the reply is the caller's 
 The preview sits above the row's link, so a click anywhere on it does **not** open the item.
 Only "Show more" / "Show less" respond. Everything else on the row is the target.
 
+While a panel is open from a row's comment (the emoji palette), that comment goes up a layer, so the panel opens
+over the next row's comment and reactions rather than under them. Every row's comment is otherwise on the same
+layer, and the later row would win.
+
 ## Don't
 
 - **Don't write the sentence yourself.** Add a `kind` here, so every list says it

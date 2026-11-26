@@ -361,8 +361,12 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         {preview && (
           /* Lifted above the row's stretched target (`z-10`), so a click on the comment does
              not open the item: the comment can be read and its text selected, and only "Show
-             more", the reply controls and the caller's `previewActions` respond. */
-          <div className="relative z-10 flex flex-col gap-3 pr-6 pl-13">
+             more", the reply controls and the caller's `previewActions` respond.
+             Every row's comment is lifted the same, so a later row's comment would paint over a
+             panel opened from this one (the emoji palette ran under the next comment and its
+             reactions). While something in it is open (`aria-expanded`), this one goes up a
+             step, above the rest. "Show less" and "Hide Reply" lift it too, which changes nothing. */
+          <div className="relative z-10 flex flex-col gap-3 pr-6 pl-13 has-[[aria-expanded=true]]:z-20">
             <div className="flex flex-col gap-1">
               <CommentPreview text={preview} />
 
