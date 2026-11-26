@@ -108,14 +108,18 @@ const row = (selected: boolean, collapsed: boolean) =>
   );
 
 /* Sub-rows are 32 against the design's 33, and carry no glyph — the indent is
-   what says they belong to the row above. Regular weight, selected or not
-   (design review, 5 Oct 2026): the current one is told apart by its brand
-   colour and `aria-current`, not by weight. */
+   what says they belong to the row above. Regular weight (design review,
+   5 Oct 2026). The current one wears the same fill as a selected top-level row
+   and steps up to medium, as the flyout's current row steps up from medium to
+   semibold (25 Nov 2026, under review): brand colour alone, navy beside slate,
+   was too quiet to find. */
 const subRow = (selected: boolean) =>
   cn(
-    'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans text-body-sm-regular transition-colors',
+    'flex h-8 w-full items-center rounded-md pl-10 pr-2 text-left font-sans transition-colors',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
-    selected ? 'text-text-brand-strong' : 'text-text-secondary hover:bg-surface-brand-faint',
+    selected
+      ? 'bg-surface-brand-subtle text-body-sm-medium text-text-brand-strong'
+      : 'text-body-sm-regular text-text-secondary hover:bg-surface-brand-faint',
   );
 
 /* The collapsed flyout — drawn exactly like `Menu` (Figma's `Menu_Dropdown`):
@@ -165,6 +169,11 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
     /* A collapsed disclosure opens a flyout beside the rail, not a list under
        the row — see the note above. */
     const asFlyout = !!collapsed && expandable;
+    /* A parent whose current page is one of its children wears the selected fill whenever that child is out
+       of sight: its group is closed, or its children live in the collapsed rail's flyout (where the row is
+       all there is to see, open or not). Open inline, the child shows itself, so the parent stays plain. */
+    const holdsSelected = expandable && !selected && !!items?.some((sub) => sub.selected);
+    const showsHeld = holdsSelected && (asFlyout || !isOpen);
 
     const rootRef = React.useRef<HTMLDivElement | null>(null);
     const triggerRef = React.useRef<HTMLButtonElement | null>(null);
@@ -220,7 +229,8 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
     const text = !collapsed && <span className="min-w-0 flex-1 truncate text-left">{label}</span>;
 
     const shared = {
-      'aria-current': selected ? ('page' as const) : undefined,
+      /* `page` is the page itself; a parent holding it is `true`, "the current item" of this rail. */
+      'aria-current': selected ? ('page' as const) : showsHeld ? ('true' as const) : undefined,
       'aria-label': collapsed ? label : undefined,
     };
 
@@ -250,7 +260,7 @@ export const SidebarItem = React.forwardRef<HTMLElement, SidebarItemProps>(
             aria-expanded={isOpen}
             aria-controls={listId}
             onClick={toggle}
-            className={row(!!selected, !!collapsed)}
+            className={row(!!selected || showsHeld, !!collapsed)}
             {...shared}
             {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
           >

@@ -61,9 +61,13 @@ stay on white, which is the design's third Planning variant.
 
 Sub-rows are **32 against the design's 33**, carry no glyph, and are indented
 instead. The indent is what says they belong to the row above. They are
-**regular weight** (`body-sm-regular`), the current one included (design review,
-5 Oct 2026): it is told apart by `text.brand.strong` and `aria-current`, not by
-weight. The parent row stays medium.
+**regular weight** (`body-sm-regular`) (design review, 5 Oct 2026). The current
+one wears the **same fill as a selected top-level row**, `surface.brand.subtle`
+with `text.brand.strong`, and steps up to **medium** (`body-sm-medium`), as the
+flyout's current row steps up from medium to semibold (25 Nov 2026; the weight is
+under review), plus `aria-current`: the brand colour alone, navy beside slate, was
+too quiet to find.
+The parent row stays medium.
 
 ## A real control, not a clickable div
 
@@ -90,6 +94,18 @@ The same split `Breadcrumb` makes, for the same reason.
 
 Colour alone would leave that fact visible only to people who can see it. The
 fill is the sighted half of a fact the markup carries anyway.
+
+**A parent holding the current page shows it while the page is out of sight**
+(decided 25 November 2026). When one of a disclosure's `items` is `selected`
+and the parent itself is not, the parent wears the same fill, with
+`aria-current="true"` ("the current item here", not the page itself):
+
+- in the expanded rail, while its group is **closed**. Opened, the child shows
+  itself and the parent goes plain, so the fill is never on two rows at once;
+- in the collapsed rail, **always**: the children live in the flyout, and the
+  row is all there is to see.
+
+Nothing to pass: the parent reads it from its `items`.
 
 ## Collapsed
 
@@ -159,7 +175,7 @@ porting, which is what `docs/figma-audit.md` says and what was skipped here.
   not a prop. Do not shrink it.
 - An expandable row is `aria-expanded` + `aria-controls` over a real list, so
   a screen reader is told it discloses rather than navigates.
-- `aria-current="page"` on the selected row.
+- `aria-current="page"` on the selected row, and `aria-current="true"` on a parent holding it while it is hidden.
 - `aria-label` carries the name when collapsed; the icon is decorative
   (`Icon` renders `aria-hidden` unless given a label).
 - The label truncates rather than wrapping, so a long name cannot push the

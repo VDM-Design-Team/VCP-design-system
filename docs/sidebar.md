@@ -123,6 +123,11 @@ not reflow. Two things keep the rail usable:
   noise, and the expanded rail already shows its labels. The promise its docs
   make is kept here.
 
+**A parent row shows when the current page is inside it.** With `active` on a
+sub-row, its parent wears the selected fill whenever the sub-row can't be seen:
+always in the collapsed rail (the sub-rows live in the flyout), and in the
+expanded rail while the group is closed (`SidebarItem` documents it).
+
 The collapse toggle straddles the rail's right edge and uses the design's
 **double** chevron (« »), not a single one. Omit `onToggleCollapse` and it
 does not render — a rail nobody can collapse should not draw the control.

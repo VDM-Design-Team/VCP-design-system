@@ -97,6 +97,62 @@ export const ExpandableSelected: Story = {
 };
 
 /**
+ * A parent holding the current page: its child is selected, the parent itself is not. While the child is out
+ * of sight the parent wears the selected fill (and `aria-current="true"`), so you can still tell where you are:
+ * with its group closed, and always in the collapsed rail, where the children live in a flyout. Open inline,
+ * the child shows itself and the parent goes plain.
+ */
+export const ParentHoldsSelected: Story = {
+  parameters: { ...SIDE_BY_SIDE },
+  render: () => (
+    <div className="flex items-start gap-6">
+      <Rail>
+        <SidebarItem
+          label="Planning"
+          icon="list-bullets"
+          items={[
+            { label: 'Planning List', href: '#' },
+            { label: 'Gantt Chart', href: '#', selected: true },
+            { label: 'Holiday Registry', href: '#' },
+          ]}
+        />
+      </Rail>
+      <Rail width="w-[76px]">
+        <SidebarItem
+          label="Archive"
+          icon="archive"
+          collapsed
+          items={[{ label: 'Completed', selected: true }, { label: 'Rejected' }, { label: 'Backlogs' }]}
+        />
+      </Rail>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* Expanded rail, group closed: the parent says the page is inside it. */
+    const planning = canvas.getByRole('button', { name: 'Planning' });
+    await expect(planning).toHaveAttribute('aria-current', 'true');
+    await expect(planning).toHaveClass('bg-surface-brand-subtle');
+    /* Opened, the child shows itself; the parent goes plain. */
+    await userEvent.click(planning);
+    await expect(planning).not.toHaveAttribute('aria-current');
+    await expect(planning).not.toHaveClass('bg-surface-brand-subtle');
+    await expect(canvas.getByRole('link', { name: 'Gantt Chart' })).toHaveAttribute('aria-current', 'page');
+    /* …with the same fill a selected top-level row wears. */
+    await expect(canvas.getByRole('link', { name: 'Gantt Chart' })).toHaveClass('bg-surface-brand-subtle', 'text-body-sm-medium');
+    await userEvent.click(planning);
+    await expect(planning).toHaveAttribute('aria-current', 'true');
+    /* Collapsed rail: the row is all there is to see, so it stays selected, flyout open or not. */
+    const archive = canvas.getByRole('button', { name: 'Archive' });
+    await expect(archive).toHaveAttribute('aria-current', 'true');
+    await expect(archive).toHaveClass('bg-surface-brand-subtle');
+    await userEvent.click(archive);
+    await expect(archive).toHaveAttribute('aria-current', 'true');
+    await userEvent.keyboard('{Escape}');
+  },
+};
+
+/**
  * The 76px rail. The label is hidden but survives as the accessible name, so
  * a screen reader still reads "Dashboard". Sighted users get it back from a
  * `Tooltip` — which `Sidebar` adds, not this component, because a tooltip on
