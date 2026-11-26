@@ -127,8 +127,8 @@ export const WithTooltips: Story = {
 
 /**
  * With each person's `domain`, the tooltips read as Figma's Manage table draws them (`2007:182516`): "Jack Morgan
- * (Development) — Assignee", and the `+N` chip lists the people it hides one to a line. Someone can hold two roles:
- * pass them as one string ("Initiator, Assignee").
+ * (Development) — Assignee", each on one line (the bubble is `wide`), and the `+N` chip lists the people it hides one
+ * to a line. Someone can hold two roles: pass them as one string ("Initiator, Assignee").
  */
 export const WithDomains: Story = {
   args: {
@@ -153,16 +153,24 @@ export const WithDomains: Story = {
     const stack = within(canvasElement).getByRole('img', {
       name: 'Members: Jack Morgan (Development) — Assignee, Ashley Reed (Development) — Assignee and 2 others',
     });
-    const body = within(document.body);
+    /* The role is set apart (so it can't break from its dash), so the line is found by the tooltip's whole text. */
+    const tip = (text: string) =>
+      [...document.querySelectorAll<HTMLElement>('[role="tooltip"]')].find((t) => t.textContent?.includes(text));
+    const line = (el: HTMLElement) => parseFloat(getComputedStyle(el).lineHeight);
     const avatars = stack.querySelectorAll('[data-tooltip]');
     await userEvent.hover(avatars[0] as HTMLElement);
-    await waitFor(() => expect(body.getByText('Jack Morgan (Development) — Assignee')).toBeVisible());
+    await waitFor(() => expect(tip('Jack Morgan (Development) — Assignee')).toBeVisible());
+    /* One line: "— Assignee" doesn't wrap under the name (it did in the 256 bubble, 26 Nov 2026). */
+    const jack = tip('Jack Morgan (Development) — Assignee')!;
+    await expect(jack.getBoundingClientRect().height).toBeLessThan(line(jack) * 1.5 + 16);
     await userEvent.unhover(avatars[0] as HTMLElement);
     /* The chip: one person to a line. */
     const chip = avatars[avatars.length - 1] as HTMLElement;
     await userEvent.hover(chip);
-    await waitFor(() => expect(body.getByText('Frank Ito (Design) — Initiator, Assignee')).toBeVisible());
-    await expect(body.getByText('Lena Novak (Development) — Initiator')).toBeVisible();
+    await waitFor(() => expect(tip('Frank Ito (Design) — Initiator, Assignee')).toBeVisible());
+    const hidden = tip('Frank Ito (Design) — Initiator, Assignee')!;
+    await expect(hidden).toHaveTextContent('Lena Novak (Development) — Initiator');
+    await expect(hidden.getBoundingClientRect().height).toBeLessThan(line(hidden) * 2.5 + 16);
   },
 };
 
