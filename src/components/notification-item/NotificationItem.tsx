@@ -361,15 +361,19 @@ export const NotificationItem = React.forwardRef<HTMLDivElement, NotificationIte
         {preview && (
           /* Lifted above the row's stretched target (`z-10`), so a click on the comment does
              not open the item: the comment can be read and its text selected, and only "Show
-             more", the reply controls and the caller's `previewActions` respond. */
-          <div className="relative z-10 flex flex-col gap-3 pr-6 pl-13">
-            <div className="flex flex-col gap-1">
+             more", the reply controls and the caller's `previewActions` respond. Only those
+             take the pointer (`*:pointer-events-auto`, and again a level down, where `!` beats
+             the parent's `*:`): the column under the avatar, the strip to the right and the
+             gaps between them fall through to the row, so a click there opens it, as a click
+             on the line above does. */
+          <div className="pointer-events-none relative z-10 flex flex-col gap-3 pr-6 pl-13 *:pointer-events-auto">
+            <div className="pointer-events-none! flex flex-col gap-1 *:pointer-events-auto">
               <CommentPreview text={preview} />
 
               {/* The row under the card. Gone while a composer is open, as the
                   design draws the Replying and Editing states. */}
               {mode === 'idle' && (onReply || reply || hasReactions) && (
-                <div className="flex items-center justify-between gap-4">
+                <div className="pointer-events-none! flex items-center justify-between gap-4 *:pointer-events-auto">
                   {reply ? (
                     <ReplyControl
                       ref={showButton}
