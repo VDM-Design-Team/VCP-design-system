@@ -132,6 +132,22 @@ export const BrokenImage: Story = {
 };
 
 /**
+ * No name, no initials, no photo: an unknown person, as Figma's `Profile_Empty` draws it. A solid silhouette in
+ * `surface.neutral.medium`, an eighth of the circle low so the circle cuts the shoulders, at every size. Create New
+ * User shows the `3xl` one before a photo is chosen.
+ */
+export const Unknown: Story = {
+  args: { name: '' },
+  render: (args) => (
+    <div className="flex items-center gap-3">
+      {(['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl'] as const).map((size) => (
+        <Avatar key={size} {...args} size={size} />
+      ))}
+    </div>
+  ),
+};
+
+/**
  * `ring` draws a 1 `surface.elevated` border inside the box (the circle stays its size), which is what separates
  * one avatar from the one it overlaps. `AvatarGroup` sets it for you.
  */
