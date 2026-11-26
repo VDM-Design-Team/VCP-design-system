@@ -166,7 +166,7 @@ export const Loading: Story = {
   },
 };
 
-/** The quarter and the year are the page's: choosing one tells it. With unsaved edits the page asks first ("Leave without saving?"); this story has none. */
+/** The quarter and the year are the page's: choosing one tells it. With unsaved edits the page asks first ("Are you sure you want to leave?", `confirmations.leavePage()`); this story has none. */
 export const ChoosingThePeriod: Story = {
   render: withToasts({}),
   play: async ({ canvasElement }) => {
