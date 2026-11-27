@@ -233,6 +233,33 @@ export const ScrollsWhenTooNarrow: Story = {
   },
 };
 
+/**
+ * A long date ("31/12/2026", as the prototype passes it) at every width from the side-by-side layout down to where it
+ * stacks. No figure is cut or runs into its divider: when the details don't fit beside the points at their own width,
+ * they wrap onto their own row. (Until November 2026 the date ran into the divider at 1080–1200 wide, and at 600.)
+ */
+export const LongDatesNeverClip: Story = {
+  args: { period: { kind: 'current', endsOn: '31/12/2026', daysLeft: 56, daysTotal: 92 } },
+  render: (args) => (
+    <div data-testid="frame" className="w-300 max-w-full">
+      <DomainBudgetSummary {...args} />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const frame = within(canvasElement).getByTestId('frame');
+    const card = within(canvasElement).getByRole('region', { name: 'Domain Budget' });
+    const figures = () => [...card.querySelectorAll<HTMLElement>('.whitespace-nowrap')];
+    for (const width of [1200, 1150, 1120, 1080, 1040, 1000, 900, 800, 700, 600]) {
+      frame.style.width = `${width}px`;
+      await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+      for (const figure of figures()) {
+        await expect(figure.scrollWidth, `${figure.textContent} at ${width}`).toBeLessThanOrEqual(figure.clientWidth + 1);
+      }
+      await expect(card.scrollWidth, `card at ${width}`).toBeLessThanOrEqual(card.clientWidth);
+    }
+  },
+};
+
 /** Tokens only, so dark comes for free. */
 export const DarkTheme: Story = { globals: { theme: 'dark' } };
 
