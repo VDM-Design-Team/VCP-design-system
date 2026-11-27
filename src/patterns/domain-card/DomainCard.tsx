@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '../../lib/cn';
+import { dragImageOfRow } from '../../lib/drag-image';
 import { Button } from '../../atoms/button';
 import { DomainItem, type DomainItemVariant } from '../../components/domain-item';
 
@@ -185,7 +186,15 @@ export const DomainCard = React.forwardRef<HTMLElement, DomainCardProps>(
                   dragging={dragId === item.id}
                   dropTarget={overId === item.id && dragId !== item.id}
                   draggable={canDrag && draggable.length > 1 && !grabId ? true : undefined}
-                  onDragStart={canDrag ? () => setDragId(item.id) : undefined}
+                  onDragStart={
+                    canDrag
+                      ? (event) => {
+                          /* The row alone follows the pointer, not the card below it (`dragImageOfRow`). */
+                          dragImageOfRow(event);
+                          setDragId(item.id);
+                        }
+                      : undefined
+                  }
                   onDragEnd={canDrag ? () => (setDragId(null), setOverId(null)) : undefined}
                   onDragOver={
                     dragId && canDrag
