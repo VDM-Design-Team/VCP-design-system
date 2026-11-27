@@ -87,6 +87,11 @@ export interface CommentReplyProps
 
   /** The thread line under the avatar. Default `none`. */
   thread?: CommentThreadLine;
+  /**
+   * Tinted with `surface.brand.subtle`, to show where a link or a notification landed. Set it back to `false` and the
+   * tint fades out over a second (at once with reduced motion). `CommentSection`'s `highlightId` drives it.
+   */
+  highlighted?: boolean;
 }
 
 /* The avatar of the design's `Profile_Initials`: the neutral avatar with the everyday border and the
@@ -121,6 +126,7 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
       onCancelEdit,
       editLoading,
       thread = 'none',
+      highlighted = false,
       ...props
     },
     ref,
@@ -144,8 +150,12 @@ export const CommentReply = React.forwardRef<HTMLElement, CommentReplyProps>(
           'flex flex-col gap-2 py-2 font-sans',
           /* Seen only when focus is put here (`CommentSection` does, after a delete). */
           'rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stroke-focused',
+          /* The tint reaches 8 past the avatar and the text, and the negative margin gives it back, so nothing moves. */
+          '-mx-2 px-2 transition-colors duration-1000 ease-out motion-reduce:transition-none',
+          highlighted && 'bg-surface-brand-subtle',
           className,
         )}
+        data-highlighted={highlighted || undefined}
         {...props}
       >
         <div className="flex items-start gap-4">

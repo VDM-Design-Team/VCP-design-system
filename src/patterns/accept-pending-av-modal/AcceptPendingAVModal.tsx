@@ -174,7 +174,8 @@ export function AcceptPendingAVModal({
                   </label>
                   {part.preview != null && (
                     <Button
-                      variant="tertiary"
+                      /* Grey, not the brand blue: it only shows or hides the set's text, it is not an action on the AV. */
+                      variant="neutral-tertiary"
                       size="sm"
                       aria-expanded={showing}
                       aria-controls={previewId}
