@@ -565,7 +565,8 @@ const onReply = fn().mockName('onReply');
 
 /**
  * A click on the comment does **not** open the item: the comment is content to read and select. The
- * row around it still opens, and "Show more" and the caller's `previewActions` respond as controls.
+ * row around it still opens, including the column under the avatar, the strip right of the comment and the
+ * gaps between the comment and its controls; "Show more" and the caller's `previewActions` respond as controls.
  */
 export const CommentDoesNotOpenTheItem: Story = {
   args: {
@@ -600,6 +601,18 @@ export const CommentDoesNotOpenTheItem: Story = {
     await userEvent.click(reply);
     await expect(onReply).toHaveBeenCalledTimes(1);
     await expect(args.onSelect).not.toHaveBeenCalled();
+    /* Around the comment is still the row: the column under the avatar, the strip on the comment's right, and the
+       gap between the comment and its Reply. A click there opens the item (decided 26 Nov 2026). */
+    const card = comment.closest('.rounded-md')!.getBoundingClientRect();
+    const replyBox = reply.getBoundingClientRect();
+    const middle = card.top + card.height / 2;
+    for (const [x, y] of [
+      [card.left - 24, middle],
+      [card.right + 12, middle],
+      [card.left + card.width / 2, (card.bottom + replyBox.top) / 2],
+    ] as const) {
+      await expect(document.elementFromPoint(x, y)).toBe(row);
+    }
     /* The row outside the comment still opens the item. */
     await userEvent.click(row);
     await expect(args.onSelect).toHaveBeenCalledTimes(1);

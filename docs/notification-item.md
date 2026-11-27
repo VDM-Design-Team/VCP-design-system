@@ -133,7 +133,8 @@ close; with no button the text keeps its 8.
   is in the name as text, not only as a dot.
 - **The comment preview is not part of that target.** A click on the comment card does **not** open the
   item: it is content to read and select. Only "Show more" / "Show less" and the controls in `previewActions` respond
-  there, and they stay in the tab order after the row and its mark-read button.
+  there, and they stay in the tab order after the row and its mark-read button. Around the card is still the row: the
+  column under the avatar, the strip to its right and the gaps between the card and its controls open the item.
 - **The mark-read button is a separate control**, named "Mark as read: *Title*" or "Mark as
   unread: *Title*" (so a list of them is not a list of identical names), reachable by Tab even when it is not visible. On an unread row it
   dissolves in where the dot was when the row is hovered or the button itself is
@@ -205,8 +206,14 @@ The component waits for that control to be on screen (the reply is the caller's 
 
 ## The comment preview
 
-The preview sits above the row's link, so a click anywhere on it does **not** open the item.
-Only "Show more" / "Show less" respond. Everything else on the row is the target.
+The preview sits above the row's link, so a click anywhere on the comment card does **not** open the item.
+Only "Show more" / "Show less" and the reply controls respond. Everything else on the row is the target,
+including the space around the card: the column under the avatar, the strip to its right, and the gaps
+between the card, its Reply and reactions row, and `previewActions` (until 26 Nov 2026 those were dead).
+
+While a panel is open from a row's comment (the emoji palette), that comment goes up a layer, so the panel opens
+over the next row's comment and reactions rather than under them. Every row's comment is otherwise on the same
+layer, and the later row would win.
 
 ## Don't
 

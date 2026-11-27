@@ -78,7 +78,7 @@ The rest:
 | Initials, `md` | `type.label-sm-medium` | `text-label-sm-medium` |
 | Initials, `lg` | `type.label-sm-medium` | `text-label-sm-medium` |
 | Initials, `xl` / `2xl` / `3xl` | `type.label-md-medium` | `text-label-md-medium` |
-| Placeholder glyph | inherits the tone's content token | `Icon name="user"` on `currentColor` |
+| Placeholder glyph | `surface.neutral.medium` | `Icon name="user-fill"`, an eighth of the circle low so the circle cuts the shoulders (Figma's `Profile_Empty`) |
 
 **Token gaps.** The export hashed onto six pastels; this system has four accent
 hue families, so the palette is four tones wide. Adding `accent.purple.*` and

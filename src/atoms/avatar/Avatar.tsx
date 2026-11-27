@@ -124,7 +124,10 @@ const avatar = cva(
   },
 );
 
-/* The unknown-person glyph fills the circle in Figma's `Profile_Empty`: the icon is the avatar's size, on Icon's own scale (10, 12, 16, 20, 24, 28, 32, 40, 48). */
+/* The unknown-person glyph fills the circle in Figma's `Profile_Empty`: the icon is the avatar's size, on Icon's own scale (10, 12, 16, 20, 24, 28, 32, 40, 48).
+   Figma draws it solid in slate-300 (`surface.neutral.medium`) and an eighth of the circle low (6 of 48), so the circle
+   cuts the shoulders. It was the outline glyph in the tone's dark content colour, centred, which read as blown out
+   (Create New User, 26 Nov 2026). */
 const PLACEHOLDER_ICON = { xs: 10, sm: 'sm', md: 'md', lg: 'lg', xl: 40, '2xl': 40, '3xl': 48 } as const;
 
 export interface AvatarProps
@@ -204,9 +207,10 @@ export const Avatar = React.forwardRef<HTMLSpanElement, AvatarProps>(
           /* No name, no initials, no photo — an unknown person, not an empty
              circle. `Icon` renders itself `aria-hidden` when given no label. */
           <Icon
-            name="user"
+            name="user-fill"
             /* The 16 `xs` avatar takes Icon's smallest size, 10. */
             size={PLACEHOLDER_ICON[size ?? 'md']}
+            className="translate-y-1/8 text-surface-neutral-medium"
           />
         )}
       </span>
