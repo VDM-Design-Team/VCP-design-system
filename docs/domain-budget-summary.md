@@ -81,6 +81,7 @@ The card is `surface.elevated`, `radius.md`, `space.24` all round, no outline â€
 | Point figure | `heading-xl-bold` | `text.primary`; Remaining `accent.success.outline.content`, or `accent.critical.outline.content` when negative |
 | "pts", quarter value, dates | 24 medium | `text.secondary` for the details; the figure's colour for "pts" |
 | Detail labels | `body-sm-medium` | `text.tertiary` |
+| Quarter and Year pickers | `Select` `size="sm"`, `emphasis="regular"`: `caption-md-regular` | Regular like every filter (`docs/select.md`), so they read the same as Value Cards' and Cycle Performance's |
 
 | Pair, on the card (`surface.elevated`) | Light | Dark |
 |---|---|---|

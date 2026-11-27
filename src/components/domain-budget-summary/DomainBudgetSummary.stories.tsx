@@ -153,6 +153,9 @@ export const Pickers: Story = {
     await expect(args.onQuarterChange).toHaveBeenCalledWith(3);
     await userEvent.selectOptions(canvas.getByRole('combobox', { name: 'Year' }), '2025');
     await expect(args.onYearChange).toHaveBeenCalledWith(2025);
+    /* Filters read regular, like every select in a card (Value Cards, Cycle Performance): not the form's medium. */
+    await expect(canvas.getByRole('combobox', { name: 'Quarter' })).toHaveClass('text-caption-md-regular');
+    await expect(canvas.getByRole('combobox', { name: 'Year' })).toHaveClass('text-caption-md-regular');
   },
 };
 
