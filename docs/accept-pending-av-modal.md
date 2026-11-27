@@ -53,7 +53,7 @@ Figma's "Accepting AV with Multipart + Custom Titles" (`1666:263661`): once **Mu
 **Rename Individual parts**, one per problem set, each with:
 
 - its label ("Problem Set 1"), the title field's name;
-- a **Preview** toggle (when the part has a `preview`) that shows the set's text, two lines at most; the first starts open, as drawn;
+- a **Preview** toggle (when the part has a `preview`) that shows the set's text, two lines at most; the first starts open, as drawn. It is the grey text button (`neutral-tertiary`), not the brand-blue one: it only shows or hides text, so it should not look like an action on the AV (decided 25 November 2026);
 - an optional title: "Enter a title, or leave blank for “Part (X/X) Parent Title”." The default is the page's to work out — it
   knows the count and the parent's title — so a blank title reaches `onConfirm` as `''`.
 
