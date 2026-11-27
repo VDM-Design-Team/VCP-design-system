@@ -69,8 +69,10 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onCl
   /**
    * When the edit and remove buttons show: `always` (default), or `hover` — they appear while the
    * pointer is over the chip or focus is inside it, and always on a touch screen, which has no hover.
+   * `overlay` shows them at the same moments but lays them over the end of the chip instead of widening
+   * it, so nothing around the chip moves (under review, see `docs/detail-card.md`).
    */
-  actions?: 'always' | 'hover';
+  actions?: 'always' | 'hover' | 'overlay';
   /** Makes the main region a real `<button>`. */
   onClick?: () => void;
   /**
@@ -249,7 +251,9 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
        padding uses `hover:` and `focus-within:`.) With the buttons showing, the edge after the last one is the same 6 as the avatar's left (`md`), and
        6 sits between the content and the buttons. With `actions="hover"` they are hidden at rest: the chip
        rests with the 12 of a chip without buttons, and tightens to 6 as they appear. */
-    const hover = actions === 'hover';
+    /* `overlay` rests exactly as `hover` does; only its buttons are drawn on top instead of in line. */
+    const overlay = actions === 'overlay';
+    const hover = actions === 'hover' || overlay;
     const rootRight =
       hover && size === 'md'
         ? 'pr-3 hover:pr-1.5 focus-within:pr-1.5 pointer-coarse:pr-1.5 transition-[color,background-color,border-color,padding] motion-reduce:transition-none'
@@ -266,6 +270,7 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
         className={cn(
           pill(!!click, !!selected, variant, size, tone, false),
           rootRight,
+          overlay && 'relative',
           className,
         )}
         {...props}
@@ -302,8 +307,13 @@ export const Chip = React.forwardRef<HTMLElement, ChipProps>(
             over the chip or focus is inside it (the buttons stay in the tab order, and focus
             reveals them), and always shown on a touch screen. */}
         <span
+          /* How much the chip grows when they show: a row that lays chips out by their widest can read it (`scrollWidth`, which counts the clipped buttons). */
+          data-chip-actions=""
           className={cn(
             'inline-flex shrink-0 items-center gap-0.5',
+            /* Over the chip's end, on the card's surface so the text under them does not show through. */
+            overlay &&
+              'absolute inset-y-0 right-0 rounded-r-full bg-surface-elevated pl-1 pr-1.5 opacity-0 transition-opacity motion-reduce:transition-none group-hover:opacity-100 group-focus-within:opacity-100 pointer-coarse:opacity-100',
             actions === 'hover' &&
               [
                 'max-w-0 overflow-hidden opacity-0 transition-[max-width,opacity] motion-reduce:transition-none',

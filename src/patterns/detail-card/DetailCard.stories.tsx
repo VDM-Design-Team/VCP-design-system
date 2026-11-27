@@ -466,3 +466,59 @@ export const LightAndDark: Story = {
     </div>
   ),
 };
+
+/**
+ * **Under review.** Editing, the Initiator and Assignee chips show their edit and remove buttons on hover, and
+ * today (`chipHover="grow"`) that widens the chip. When the widened chip no longer fits its line it wraps to the
+ * next one, out from under the pointer; there it collapses, fits again, jumps back under the pointer, widens,
+ * and so on, for as long as the pointer stays still. Hover **Jane Henderson** in the first card to see it.
+ * The other two are the candidate fixes: hover Jane, then Ana, in each.
+ */
+export const AssigneeHoverOptions: Story = {
+  args: {
+    type: 'editing',
+    viewerCount: undefined,
+    value: {
+      ...VIEWING,
+      assignees: [
+        { name: 'John Kestrel', description: 'Assignee', points: 5 },
+        { name: 'Jane Henderson', description: 'QA', points: 3 },
+        { name: 'Ana Lee', description: 'QA', points: 1 },
+        { name: 'Maximilian Oyelaran', description: 'Design', points: 2 },
+      ],
+    },
+  },
+  parameters: { layout: 'padded', ...SIDE_BY_SIDE },
+  render: (args) => (
+    <div className="flex flex-wrap items-start gap-8">
+      {([
+        ['Today: the chip widens, and wraps away at a line’s end', 'grow'],
+        ['Option 2: the buttons are laid over the chip’s end', 'overlay'],
+        ['Option 3: lines break as if the chip were already wide', 'wrap-early'],
+      ] as const).map(([title, mode]) => (
+        <section key={mode} aria-label={title} className="flex flex-col gap-3">
+          <p className="text-label-md-semibold text-text-primary">{title}</p>
+          <DetailCard {...args} chipHover={mode} />
+        </section>
+      ))}
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const top = (name: string, card: string) =>
+      within(within(canvasElement).getByRole('region', { name: card }))
+        .getByRole('button', { name: `Edit ${name}` })
+        .closest('.group')!
+        .getBoundingClientRect().top;
+    const early = 'Option 3: lines break as if the chip were already wide';
+    /* Option 3: Jane would not fit beside John once widened, so she starts the next line, with Ana beside her. */
+    await waitFor(() => expect(top('Jane Henderson', early)).toBeGreaterThan(top('John Kestrel', early)));
+    await expect(top('Ana Lee', early)).toBe(top('Jane Henderson', early));
+    /* Hovering Jane widens her into room her line already has: nothing changes line. */
+    const before = ['John Kestrel', 'Jane Henderson', 'Ana Lee', 'Maximilian Oyelaran'].map((n) => top(n, early));
+    const jane = within(within(canvasElement).getByRole('region', { name: early })).getByRole('button', { name: 'Edit Jane Henderson' });
+    await userEvent.hover(jane.closest('.group') as HTMLElement);
+    await new Promise((r) => setTimeout(r, 400));
+    await expect(['John Kestrel', 'Jane Henderson', 'Ana Lee', 'Maximilian Oyelaran'].map((n) => top(n, early))).toEqual(before);
+    await userEvent.unhover(jane.closest('.group') as HTMLElement);
+  },
+};
