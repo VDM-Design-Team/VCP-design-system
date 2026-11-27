@@ -92,7 +92,26 @@ export interface CommentSectionProps
   defaultRepliesOpen?: boolean;
   /** What shows under the box when there are no comments. Nothing, by default. */
   emptyState?: React.ReactNode;
+  /**
+   * The comment to land on, by id: what a notification or a copied link points at. The threads it sits in open, it
+   * scrolls to the middle of the screen, takes focus, and is tinted for two seconds, then the tint fades. Each new id
+   * lands again; the same one does not.
+   */
+  highlightId?: string;
 }
+
+/* How long a landed-on comment keeps its tint before it fades (the fade itself is `CommentReply`'s second). */
+const HIGHLIGHT_MS = 2000;
+
+/* The ids of the comments `id` is a reply to, outermost first; `null` when it is not in the list. */
+const pathTo = (list: readonly CommentData[], id: string, trail: string[] = []): string[] | null => {
+  for (const c of list) {
+    if (c.id === id) return trail;
+    const found = c.replies ? pathTo(c.replies, id, [...trail, c.id]) : null;
+    if (found) return found;
+  }
+  return null;
+};
 
 const byTime = (order: CommentSort) => (a: CommentData, b: CommentData) => {
   const x = Date.parse(a.createdAt ?? '');
@@ -120,6 +139,7 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
       onSortChange,
       defaultRepliesOpen = false,
       emptyState,
+      highlightId,
       ...props
     },
     ref,
@@ -146,6 +166,33 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
       const target = pending.next ? section.querySelector<HTMLElement>(`[data-comment-id="${pending.next}"]`) : null;
       (target ?? section.querySelector<HTMLElement>('[role="textbox"]'))?.focus();
     }, [comments]);
+
+    /* Landing on `highlightId`. Opening the threads it sits in takes a render, and the comments may arrive after the
+       id, so the scroll waits (in `landing`) until the comment is on the page. */
+    const [highlighted, setHighlighted] = React.useState<string | null>(null);
+    const landing = React.useRef<string | null>(null);
+    React.useEffect(() => {
+      landing.current = highlightId ?? null;
+      if (!highlightId) return;
+      const path = pathTo(comments, highlightId);
+      if (path?.length) setOpen((o) => ({ ...o, ...Object.fromEntries(path.map((id) => [id, true])) }));
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- a new id lands; new comments alone do not
+    }, [highlightId]);
+    React.useEffect(() => {
+      const id = landing.current;
+      const target = id ? root.current?.querySelector<HTMLElement>(`[data-comment-id="${CSS.escape(id)}"]`) : null;
+      if (!id || !target) return;
+      landing.current = null;
+      const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      target.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' });
+      target.focus({ preventScroll: true });
+      setHighlighted(id);
+    });
+    React.useEffect(() => {
+      if (!highlighted) return;
+      const timer = window.setTimeout(() => setHighlighted(null), HIGHLIGHT_MS);
+      return () => window.clearTimeout(timer);
+    }, [highlighted]);
 
     const isOpen = (id: string) => open[id] ?? defaultRepliesOpen;
     const toggle = (id: string) => setOpen((o) => ({ ...o, [id]: !(o[id] ?? defaultRepliesOpen) }));
@@ -175,6 +222,7 @@ export const CommentSection = React.forwardRef<HTMLElement, CommentSectionProps>
           key={comment.id}
           data-comment-id={comment.id}
           tabIndex={-1}
+          highlighted={highlighted === comment.id}
           author={comment.author}
           time={comment.time}
           dateTime={comment.createdAt}

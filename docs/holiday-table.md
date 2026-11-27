@@ -70,7 +70,7 @@ The columns need more room than a 1440 screen with the sidebar open gives them (
 
 ## Tokens
 
-None new. The day count and the date status are `Badge`s (pill, 12): the tonal fill with its own outline (info for the count and Upcoming, success for Today, neutral for Past), since the outline-only style falls under 4.5:1 in dark. **Edit and delete are 40** (`IconButton` `md`, the touch minimum): the delete is `critical-tonal`, so its hover and pressed fills and its glyph change in every state. All Day / Partial Day are `Tag`s at 12 (`sm`), as Figma's Medium. The Name column has a 184 floor (`minWidth`); Recurring is medium weight, like Added By.
+None new. The day count and the date status are `Badge`s (pill, 12): the tonal fill with its own outline (info for the count and Upcoming, success for Today, neutral for Past), since the outline-only style falls under 4.5:1 in dark. **Edit and delete are plain glyphs at 40** (`IconButton` `md`, the touch minimum): a brand pencil (`tertiary`) and a red bin (`critical-tertiary`), the same as the row buttons in Accounts, Contacts, Announcements and Planning. Figma's `Holiday_Registry_Row` draws them as filled discs at 32 (grey and red); in a row of 26–32 badges and avatars a filled disc was the heaviest thing on the line, so the tables follow each other rather than the frame (decided 25 November 2026). All Day / Partial Day are `Tag`s at 12 (`sm`), as Figma's Medium. The Name column has a 184 floor (`minWidth`); Recurring is medium weight, like Added By.
 
 ## Accessibility
 

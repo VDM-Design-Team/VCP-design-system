@@ -48,6 +48,7 @@ The reaction buttons in the actions row are an `EmojiReactionPicker`, passed in 
 | `editing` | `boolean` | `false` | The box takes the comment's place, filled with it |
 | `onSubmitEdit` / `onCancelEdit` / `editLoading` | | | Save sends the new segments. The box is yours to close |
 | `thread` | `none \| line` | `none` | The thread line under the avatar. `CommentReplyThread` sets it |
+| `highlighted` | `boolean` | `false` | Tinted `surface.brand.subtle`, to show where a link landed. Back to `false`, the tint fades over a second. `CommentSection`'s `highlightId` sets it |
 | `className`, `ref`, rest | | | On the `<article>` |
 
 **The mode is yours to control.** `replying` and `editing` are props, not internal state,

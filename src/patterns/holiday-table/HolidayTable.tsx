@@ -34,7 +34,7 @@ import { useDateFormat } from '../../lib/format-date';
  * - **Two empty messages**, under the headers (the filters and the paging stay): "No holidays have been added yet." when there are none, and **"No holidays match your filters."** with a **Reset Filters** (`onResetFilters`) when a filter is on and nothing matches.
  * - **Dates read as every date does** (`useDateFormat`: dd/mm/yyyy, or the person's locale). A range reads "01/05/2026 – 03/05/2026" with an en dash.
  * - **The Date column carries the status too** when the caller says what today is (`today`, ISO): **Upcoming** (info), **Today** (success) or **Past** (neutral), beside the date and its day-count pill, as Figma's `Date Status` badge.
- * - **Edit and delete are 40** (`IconButton` `md`, the touch minimum), the delete `critical-tonal`; the table only *asks*: confirming a delete (`ConfirmDeleteModal`) is the page's.
+ * - **Edit and delete are plain glyphs at 40** (`IconButton` `md`, the touch minimum): a brand pencil (`tertiary`) and a red bin (`critical-tertiary`), as every other table's row buttons are. Figma draws filled discs at 32; the tables agree with each other instead (decided 25 November 2026). The table only *asks*: confirming a delete (`ConfirmDeleteModal`) is the page's.
  * - **Each row button says whose holiday it is** ("Edit Annual leave, Jordan Lee", "… and 2 others"), so two people's "Annual leave" are told apart; a public holiday's name is enough.
  * - **Reset hands focus on.** It goes once the filters are back, so after calling `onResetFilters` the table moves focus to its first filter (Holiday type) rather than let it fall to the page.
  * - **Narrower than its columns, it scrolls inside itself**: the table's own wrapper scrolls sideways (Actions is reached by scrolling, or by tabbing to it) and the page does not.
@@ -278,9 +278,9 @@ export function HolidayTable({
         <span className="flex items-center gap-2">
           {/* The system's own entries can be removed but not changed. */}
           {row.addedBy !== 'system' && (
-            <IconButton icon="note-pencil" variant="tonal" size="md" shape="round" label={`Edit ${holidayRowName(row)}`} onClick={() => onEdit?.(row)} />
+            <IconButton icon="note-pencil" variant="tertiary" label={`Edit ${holidayRowName(row)}`} onClick={() => onEdit?.(row)} />
           )}
-          <IconButton icon="trash" variant="critical-tonal" size="md" shape="round" label={`Delete ${holidayRowName(row)}`} onClick={() => onDelete?.(row)} />
+          <IconButton icon="trash" variant="critical-tertiary" label={`Delete ${holidayRowName(row)}`} onClick={() => onDelete?.(row)} />
         </span>
       ),
     });
