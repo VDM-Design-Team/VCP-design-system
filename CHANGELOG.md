@@ -1,5 +1,73 @@
 # Changelog
 
+## 3.1.0 — 2026-11-27
+
+### `DomainCard` — dragging a row shows only the row (November 2026)
+
+Dragging a status in the Admin Panel, the picture under the pointer was the whole section below the row: Chrome
+took it from the screen, and inside the card's rounded, clipped box it took in the rest of the card. The card now
+hands the browser a copy of the row alone, lifted (elevated surface, radius, menu shadow), held where the pointer
+took it. The helper, `dragImageOfRow` in `src/lib/drag-image.ts`, is there for other draggable rows.
+
+### `Avatar` — the unknown person is a soft silhouette (November 2026)
+
+With no name, initials or photo, the avatar drew the outline person glyph in the tone's dark content colour, centred
+and as big as the circle, which looked blown out (Create New User, before a photo is chosen). It is now Figma's
+`Profile_Empty`: the solid glyph in `surface.neutral.medium` (slate-300), set an eighth of the circle low so the circle
+cuts the shoulders. Every size.
+
+### `AvatarGroup` — a member's tooltip stays on one line (November 2026)
+
+With a domain, "Eve Kestrel (Development) — Assignee" was wider than the 256 tooltip, so "— Assignee" wrapped under
+the name (the AV table's Members column). The tooltips are now `wide` (384), and the role never breaks away from its
+dash: a name too long even for that moves "— Assignee" down whole. The `+N` chip's list gets the same.
+
+### `DomainBudgetSummary` — the quarter details wrap instead of clipping (November 2026)
+
+The points and the quarter's details went side by side at a fixed card width (64rem) and squeezed the details to
+fit, so a long date ("31/12/2026") ran through its gap into the divider when the card was 1080–1200 wide (the
+prototype's Dashboard at a 1440 window) and at 600. Now each figure is at least as wide as its value, and the
+details wrap beneath the points whenever the two don't fit side by side; with room they share it 55:45 as before.
+
+### `NotificationItem` — the emoji palette opens over the next row (November 2026)
+
+In the notification popover, the palette opened from one comment ran under the next row's comment and reactions:
+every row's comment sits on the same layer, and the later one painted over it. While something in a row's comment
+is open, that comment now goes up a layer, so the palette sits on top of everything.
+
+### `CommentSection` / `CommentReply` / `NotificationItem` — opening a notification lands on its comment (November 2026)
+
+- **`CommentSection` takes `highlightId`**: the comment a notification or a copied link points at. The threads it
+  sits in open, it scrolls to the middle of the screen (it used to be left to the page, which stopped short at the
+  nearest edge), takes focus, and is tinted for two seconds before the tint fades. Reduced motion jumps and drops the
+  tint at once.
+- **`CommentReply` takes `highlighted`**, the tint itself (`surface.brand.subtle`), fading over a second when it goes.
+  The comment's box reaches 8 further each side so the tint has room; nothing in it moves.
+- **`NotificationItem`'s row is clickable around its comment.** The column under the avatar, the strip right of the
+  comment and the gaps between the comment and its controls opened nothing; they now open the item, as the line
+  above does. The comment card and its controls still don't.
+
+### `SidebarItem` / `Sidebar` — a parent row shows when the current page is inside it (November 2026)
+
+When the current page is a sub-row, its parent now wears the selected fill (and `aria-current="true"`)
+whenever the sub-row is out of sight: always in the collapsed rail, where the sub-rows live in the flyout,
+and in the expanded rail while the group is closed. Open inline, the sub-row shows itself and the parent
+stays plain.
+
+The current sub-row in an open group now wears the same fill as a selected top-level row
+(`surface.brand.subtle`), keeping its regular weight as a selected top-level row keeps its own.
+Before, only its text colour changed, which was too quiet to find.
+
+### `HolidayTable` — the row's edit and delete match the other tables (November 2026)
+
+The Actions column's edit and delete were filled discs (grey and red), the heaviest thing on the row. They are
+now plain glyphs at 40, a brand pencil and a red bin, as in Accounts, Contacts, Announcements and Planning.
+Figma's `Holiday_Registry_Row` still draws the discs.
+
+### `AcceptPendingAVModal` — the Preview toggle is grey (November 2026)
+
+In **Rename Individual parts**, each part's **Preview** toggle was the brand-blue text button. It only shows or hides the set's text, so it is now the grey text button (`neutral-tertiary`), and it no longer looks like an action on the AV.
+
 ## 3.0.1 — 2026-11-26
 
 ### `FilterBar` — picked values read regular (November 2026)
