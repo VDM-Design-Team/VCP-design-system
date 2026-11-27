@@ -122,7 +122,9 @@ const TAG_LABEL: Record<DomainBudgetPeriod['kind'], string> = {
 /* A label over a value, in the quarter details. */
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    /* `min-w-fit`: never narrower than its value. With `min-w-0` a date ("31/12/2026") ran through the gap into
+       the divider when the card was 1080–1200 wide; now the row wraps instead (see the card's layout). */
+    <div className="flex min-w-fit flex-1 flex-col gap-2">
       <span className="text-body-sm-medium text-text-tertiary">{label}</span>
       <span className={cn('flex items-baseline gap-1 whitespace-nowrap text-text-secondary', MEDIUM_24)}>{children}</span>
     </div>
@@ -142,7 +144,7 @@ function Points({
   toneClassName?: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2">
+    <div className="flex min-w-fit flex-1 flex-col gap-2">
       <div className="flex items-center gap-1.5">
         <span className="text-body-sm-medium text-text-secondary">{label}</span>
         <InfoHint label={label} content={hint} />
@@ -241,8 +243,12 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
           />
 
           <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 gap-3 @5xl:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
-              <div className="flex min-w-0 items-center gap-9 rounded-md border border-stroke-default px-6 py-3 @5xl:min-w-116">
+            {/* The points and the quarter's details side by side when both fit at their own width, sharing what is
+                left 55:45; when they don't, the details wrap onto their own row and both take the full width. Each
+                half is never narrower than its figures (`min-w-fit`), so nothing is cut or runs into a divider. It
+                was a grid that went to two columns at a fixed width, and squeezed the details below that. */}
+            <div className="flex flex-wrap gap-3">
+              <div className="flex min-w-fit flex-[55_1_auto] items-center gap-9 rounded-md border border-stroke-default px-6 py-3">
                 <Points label="Allocated" hint={HINTS.allocated} value={allocated} />
                 <Divider orientation="vertical" className="self-stretch" />
                 <Points label="Consumed" hint={HINTS.consumed} value={consumed} />
@@ -257,7 +263,7 @@ export const DomainBudgetSummary = React.forwardRef<HTMLElement, DomainBudgetSum
                 />
               </div>
 
-              <div className="flex min-w-0 items-center gap-9 px-4 py-3 @5xl:min-w-112">
+              <div className="flex min-w-fit flex-[45_1_auto] items-center gap-9 px-4 py-3">
                 <div className="flex min-w-fit flex-1 flex-col gap-2">
                   <Badge size="md" className="self-start">
                     {TAG_LABEL[period.kind]}

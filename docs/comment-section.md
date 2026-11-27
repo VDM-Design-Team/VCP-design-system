@@ -81,6 +81,7 @@ toast, a message) in your own handler. The box only promises not to lose the tex
 | `sort` / `defaultSort` / `onSortChange` | `newest \| oldest` | uncontrolled, `newest` | Controlled if you give `sort` |
 | `defaultRepliesOpen` | `boolean` | `false` | Whether threads start open |
 | `emptyState` | `ReactNode` | nothing | Under the box when there are no comments. The design has no empty state yet, so nothing is invented |
+| `highlightId` | `string` | none | The comment to land on, as a notification or a copied link does. The threads it sits in open, it scrolls to the middle of the screen, takes focus and is tinted (`surface.brand.subtle`) for two seconds, then the tint fades over one. A new id lands again; the same one does not. With reduced motion the scroll jumps and the tint goes at once |
 | `className`, `ref`, rest | | | On the `<section>` |
 
 ## Composed of

@@ -61,9 +61,12 @@ Remaining is green until it goes negative, then red. Figma draws it green at eve
 
 ## Layout
 
-A container query, so it follows the card, not the viewport. With room (64rem and up) the points box and the quarter details sit side
-by side, 55 / 45, as Figma draws them; narrower, the quarter details drop beneath the points. The quarter and year pickers and
-"Go to Current Quarter" wrap under the heading when the row runs out.
+It follows the card, not the viewport, and it wraps on what the figures need, not at a set width. When the points box and
+the quarter details both fit side by side at their own width, they do, sharing what is left 55 / 45, as Figma draws them;
+when they don't, the quarter details drop beneath the points and both take the full width. Every figure (and each
+half) is at least as wide as its value, so a long date ("31/12/2026") never runs into its divider. (Until November 2026
+it went side by side at a fixed 64rem and squeezed the details, so a date cut into the divider at 1080–1200 wide.) The
+quarter and year pickers and "Go to Current Quarter" wrap under the heading when the row runs out.
 
 **It is never squeezed past what its figures need.** The content has a minimum width of 32rem (512), which is what the three
 points and their dividers take. A card narrower than that plus its padding (560) doesn't truncate or overlap anything:

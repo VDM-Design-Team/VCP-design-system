@@ -111,6 +111,21 @@ const describe = (name: string, person: AvatarGroupPerson) => {
   if (domain) return role ? `${name} (${domain}) — ${role}` : `${name} (${domain})`;
   return role ? `${name} (${role})` : name;
 };
+/**
+ * The same words for a tooltip, where the role must not break away from its dash: with a domain, "— Assignee" stays
+ * together. The tooltips are `wide` (384), so the whole line fits; if a long name still makes it wrap, the role moves
+ * down whole rather than leaving the dash behind.
+ */
+const describeLine = (name: string, person: AvatarGroupPerson): React.ReactNode => {
+  const role = person.role?.trim();
+  const domain = person.domain?.trim();
+  if (!domain || !role) return describe(name, person);
+  return (
+    <>
+      {name} ({domain}) <span className="whitespace-nowrap">— {role}</span>
+    </>
+  );
+};
 const nameOf = (person: AvatarGroupPerson) => person.name?.trim() || person.initials?.trim() || '';
 
 export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
@@ -173,7 +188,8 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
             <Tooltip
               key={`${index}-${person.name ?? person.initials ?? ''}`}
               describe={false}
-              content={describe(text, person)}
+              wide
+              content={describeLine(text, person)}
               className={cn(index > 0 && overlap({ size }))}
               style={{ zIndex: shown.length - index }}
             >
@@ -197,13 +213,14 @@ export const AvatarGroup = React.forwardRef<HTMLSpanElement, AvatarGroupProps>(
               /* Furthest back — behind the last person shown. */
               <Tooltip
                 describe={false}
+                wide
                 /* A run of names, with commas: "Priya Nair (Designer), Sofia Almeida". With domains, one to a
                    line, as Figma's Manage table draws it. */
                 content={
                   hidden.some((person) => person.domain?.trim()) ? (
                     <span className="flex flex-col">
                       {hidden.map((person, i) => (
-                        <span key={i}>{describe(nameOf(person), person)}</span>
+                        <span key={i}>{describeLine(nameOf(person), person)}</span>
                       ))}
                     </span>
                   ) : (
