@@ -29,7 +29,7 @@ Generated from the real imports — `npm test` fails if this list drifts.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `people` | `Array<string \| { name, initials, src, tone, role, domain }>` | — | In reading order. A bare string is shorthand for `{ name }`. `role` ("Assignee", "Reviewer") shows after the name in a tooltip and is read after it in the label. With `domain` ("Development"), both read as Figma's Manage table: "Jack Morgan (Development) — Assignee" |
+| `people` | `Array<string \| { name, initials, src, tone, role, domain }>` | — | In reading order. A bare string is shorthand for `{ name }`. `role` ("Assignee", "Reviewer") shows after the name in a tooltip and is read after it in the label. With `domain` ("Development"), both read as Figma's Manage table: "Jack Morgan (Development) — Assignee", on one line (the tooltips are `wide`, 384; a name too long for that moves "— Assignee" down whole, never the dash alone) |
 | `max` | `number` | `4` | Avatars drawn before the rest collapse into `+N`. **The chip only appears for two or more people**: when `max` would leave exactly one out, that person is drawn too (so no `+1`) |
 | `size` | `xs \| sm \| md \| lg \| xl \| 2xl \| 3xl` | `md` | Passed straight down to every `Avatar`. 16 / 24 / 32 / 36 / 40 / 44 / 48 |
 | `label` | `string` | — | What the stack **is** — `"Assignees"`. Prefixed to the announced summary |
