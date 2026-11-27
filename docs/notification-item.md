@@ -211,6 +211,10 @@ Only "Show more" / "Show less" and the reply controls respond. Everything else o
 including the space around the card: the column under the avatar, the strip to its right, and the gaps
 between the card, its Reply and reactions row, and `previewActions` (until 26 Nov 2026 those were dead).
 
+While a panel is open from a row's comment (the emoji palette), that comment goes up a layer, so the panel opens
+over the next row's comment and reactions rather than under them. Every row's comment is otherwise on the same
+layer, and the later row would win.
+
 ## Don't
 
 - **Don't write the sentence yourself.** Add a `kind` here, so every list says it
