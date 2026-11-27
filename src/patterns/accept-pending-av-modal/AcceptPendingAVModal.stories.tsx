@@ -106,6 +106,9 @@ export const NamingPartsFlow: Story = {
     const first = screen.getByRole('textbox', { name: 'Problem Set 1' });
     const preview1 = screen.getByRole('button', { name: 'Preview Problem Set 1' });
     await expect(preview1).toHaveAttribute('aria-expanded', 'true');
+    /* The toggle is grey, not the brand blue: it shows text, it is not an action. */
+    await expect(preview1).toHaveClass('text-neutral-textual-content-default');
+    await expect(preview1).not.toHaveClass('text-action-tertiary-content-default');
     const preview2 = screen.getByRole('button', { name: 'Preview Problem Set 2' });
     await expect(preview2).toHaveAttribute('aria-expanded', 'false');
     await userEvent.click(preview2);

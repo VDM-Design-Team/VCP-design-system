@@ -335,3 +335,53 @@ export const FocusIsNeverDropped: Story = {
     await waitFor(() => expect(comment(JANES)).toHaveFocus());
   },
 };
+
+/**
+ * `highlightId` lands on one comment, as opening a notification or a copied link does: the threads it sits in open, it
+ * scrolls to the middle of the screen, takes focus, and is tinted for two seconds before the tint fades. John's
+ * "Thanks, Jane." is a reply to a reply, both closed until it lands.
+ */
+export const LandingOnAComment: Story = {
+  render: function Render(args) {
+    const demo = useDemo(SEED);
+    const [target, setTarget] = React.useState<string | undefined>();
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-2">
+          <button type="button" className="text-body-sm-medium text-text-brand-strong underline" onClick={() => setTarget('c3')}>
+            Land on John’s reply
+          </button>
+          <button type="button" className="text-body-sm-medium text-text-brand-strong underline" onClick={() => setTarget('c5')}>
+            Land on Jane’s comment
+          </button>
+        </div>
+        {/* Room above, so the scroll to the middle of the screen shows. */}
+        <div className="h-screen" aria-hidden="true" />
+        <CommentSection {...args} {...demo} highlightId={target} />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByText('Thanks, Jane.')).not.toBeInTheDocument();
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Land on John’s reply' }));
+    const reply = (await canvas.findByText('Thanks, Jane.')).closest('article')!;
+    await waitFor(() => expect(reply).toHaveFocus());
+    await expect(reply).toHaveAttribute('data-highlighted');
+    await expect(reply).toHaveClass('bg-surface-brand-subtle');
+    /* On screen, and near its middle rather than at an edge. */
+    await waitFor(() => {
+      const box = reply.getBoundingClientRect();
+      expect(Math.abs(box.top + box.height / 2 - window.innerHeight / 2)).toBeLessThan(window.innerHeight / 4);
+    });
+    /* The tint goes after two seconds. */
+    await waitFor(() => expect(reply).not.toHaveAttribute('data-highlighted'), { timeout: 4000 });
+
+    /* Another id lands again. */
+    await userEvent.click(canvas.getByRole('button', { name: 'Land on Jane’s comment' }));
+    const janes = canvas.getByText('Can we move the review to Thursday?').closest('article')!;
+    await waitFor(() => expect(janes).toHaveFocus());
+    await expect(janes).toHaveAttribute('data-highlighted');
+  },
+};

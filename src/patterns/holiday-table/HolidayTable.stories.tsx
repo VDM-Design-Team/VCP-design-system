@@ -155,7 +155,7 @@ export const StatusRule: Story = {
   },
 };
 
-/** A system-added row can be deleted but not edited, as Figma draws it; a person's has both. Both are 40 (the touch minimum), and the delete is `critical-tonal`: its hover and pressed fills and its glyph change in every state. */
+/** A system-added row can be deleted but not edited, as Figma draws it; a person's has both. Both are plain glyphs at 40 (the touch minimum), as in every other table: a brand pencil and a red bin, with no fill. */
 export const RowActions: Story = {
   play: async ({ canvasElement, args }) => {
     const c = within(canvasElement);
@@ -163,8 +163,10 @@ export const RowActions: Story = {
     const bin = c.getByRole('button', { name: 'Delete Labour Day' });
     await expect(Math.round(bin.getBoundingClientRect().height)).toBe(40);
     await expect(Math.round(c.getAllByRole('button', { name: 'Edit Some Holiday Name' })[0]!.getBoundingClientRect().width)).toBe(40);
-    await expect(bin.className).toContain('hover:bg-accent-critical-tonal-surface-hover');
-    await expect(bin.className).toContain('hover:text-accent-critical-tonal-content-hover');
+    /* No disc: the bin is the red glyph alone (`critical-tertiary`), the pencil the brand one (`tertiary`). */
+    await expect(bin).toHaveClass('text-accent-critical-outline-content-default', 'bg-transparent');
+    await expect(bin.className).not.toContain('bg-accent-critical-tonal-surface-default');
+    await expect(c.getAllByRole('button', { name: 'Edit Some Holiday Name' })[0]).not.toHaveClass('bg-neutral-tonal-surface-default');
     await userEvent.click(c.getByRole('button', { name: 'Delete Labour Day' }));
     await expect(args.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: '1' }));
     await userEvent.click(c.getAllByRole('button', { name: 'Edit Some Holiday Name' })[0]);
