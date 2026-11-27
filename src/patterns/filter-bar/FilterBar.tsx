@@ -268,7 +268,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
             labelled(
               ids.priority,
               'Priority',
-              <Select edge="neutral" placeholder="Select priority" {...priority} id={ids.priority} className="w-full min-w-0" />,
+              <Select edge="neutral" emphasis="regular" placeholder="Select priority" {...priority} id={ids.priority} className="w-full min-w-0" />,
             )}
           {tags &&
             labelled(
@@ -276,6 +276,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               'Tags',
               <SearchSelect
                 edge="neutral"
+                emphasis="regular"
                 multiple
                 display="tags"
                 searchPlaceholder="Search tags"
@@ -292,6 +293,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               'Status',
               <SearchSelect
                 edge="neutral"
+                emphasis="regular"
                 multiple
                 display="summary"
                 confirm
@@ -328,7 +330,8 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
                     <span
                       className={cn(
                         'min-w-0 flex-1 truncate',
-                        periodText ? 'text-body-sm-medium text-text-primary' : 'text-body-sm-regular text-text-subtle',
+                        /* Regular like the fields beside it: filters read regular (docs/select.md). */
+                        periodText ? 'text-body-sm-regular text-text-primary' : 'text-body-sm-regular text-text-subtle',
                       )}
                     >
                       {periodText ?? period.placeholder ?? 'Select period'}
@@ -363,6 +366,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               'Cycle',
               <SearchSelect
                 edge="neutral"
+                emphasis="regular"
                 id={ids.cycle}
                 placeholder={cycle.placeholder ?? 'Select cycle'}
                 searchPlaceholder="Search cycles"
@@ -397,6 +401,7 @@ export const FilterBar = React.forwardRef<HTMLDivElement, FilterBarProps>(functi
               label,
               <SearchSelect
                 edge="neutral"
+                emphasis="regular"
                 {...({
                   id: ids.user(i),
                   placeholder: placeholder ?? `Select ${label.toLowerCase()}`,

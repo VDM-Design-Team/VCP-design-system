@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.1 — 2026-11-26
+
+### `FilterBar` — picked values read regular (November 2026)
+
+The bar's fields (Priority, Tags, Status, Cycle, Assignee, Initiator) and its date showed a picked value in medium, the weight of a chosen value in a form. Filters read regular (`docs/select.md`), as every other filter row already does (the dashboard header, Planning, Holiday Registry, Task Log), so the bar now matches. The labels above the fields and the Reset Filters and Filters buttons are unchanged.
+
+### `DomainBudgetSummary` — the Quarter and Year pickers read regular (November 2026)
+
+The two pickers showed the picked quarter and year in medium, the weight a picked value has in a form. Filters read regular (`docs/select.md`), as the selects in Value Cards and Cycle Performance already do, so the dashboard's card filters now all match: 32 high, 12 regular.
+
 ## 3.0.0 — 2026-11-25
 
 ### `DomainBudgetEditPage` — the leave question is the system's (November 2026)

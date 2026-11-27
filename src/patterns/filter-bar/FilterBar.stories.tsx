@@ -246,6 +246,16 @@ export const Filled: Story = {
       }}
     />
   ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    /* A picked value reads regular, as every filter does; the label above keeps its medium. */
+    await expect(canvas.getByRole('combobox', { name: /^Priority/ })).toHaveClass('text-body-sm-regular');
+    await expect(canvas.getByRole('combobox', { name: /^Priority/ })).not.toHaveClass('text-body-sm-medium');
+    await expect(canvas.getByRole('combobox', { name: /^Status/ })).toHaveClass('text-body-sm-regular');
+    await expect(canvas.getByRole('button', { name: /^Assignee/ })).toHaveClass('text-body-sm-regular');
+    await expect(canvas.getByRole('button', { name: /^Date/ }).querySelector('span')).toHaveClass('text-body-sm-regular');
+    await expect(canvas.getByText('Priority', { selector: 'label' })).toHaveClass('text-label-sm-medium');
+  },
 };
 
 /** A `users` entry with `multiple`: several people, the panel stays open, the field counts them. */
